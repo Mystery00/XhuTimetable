@@ -38,6 +38,14 @@ android {
 
     buildTypes {
         debug {
+            applicationIdSuffix = ".debug"
+            resValue("string", "app_name", "西瓜课表-debug")
+            resValue("string", "app_version_code", gitVersionCode.toString())
+            resValue(
+                "string",
+                "app_version_name",
+                "${defaultConfig.versionName}.d$gitVersionCode.$gitVersionName"
+            )
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -46,6 +54,13 @@ android {
             versionNameSuffix = ".d$gitVersionCode.$gitVersionName"
         }
         release {
+            resValue("string", "app_name", "西瓜课表")
+            resValue("string", "app_version_code", gitVersionCode.toString())
+            resValue(
+                "string",
+                "app_version_name",
+                "${defaultConfig.versionName}.r$gitVersionCode.$gitVersionName"
+            )
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -94,5 +109,14 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
     implementation("androidx.activity:activity-compose:1.3.1")
+    implementation("androidx.core:core-splashscreen:1.0.0-alpha01")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
+    //koin
+    val koinVersion = "3.1.2"
+    implementation("io.insert-koin:koin-android:$koinVersion")
+    implementation("io.insert-koin:koin-android-compat:$koinVersion")
+//    implementation("io.insert-koin:koin-androidx-workmanager:$koinVersion")
+    implementation("io.insert-koin:koin-androidx-compose:$koinVersion")
+    //coil
+    implementation("io.coil-kt:coil-compose:1.3.2")
 }

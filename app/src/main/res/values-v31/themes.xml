@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="JetpackSplashTheme" parent="JetpackSplashBaseTheme">
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="android:windowSplashScreenBrandingImage">@mipmap/splash_image_bottom</item>
+    </style>
+</resources>
