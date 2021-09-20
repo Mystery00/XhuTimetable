@@ -119,4 +119,8 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose:$koinVersion")
     //coil
     implementation("io.coil-kt:coil-compose:1.3.2")
+    //retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
 }

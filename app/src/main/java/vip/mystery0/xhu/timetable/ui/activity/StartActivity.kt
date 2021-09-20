@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.os.Handler
 import android.os.Looper
@@ -55,7 +56,7 @@ class StartActivity : BaseComposeActivity() {
             object : ViewTreeObserver.OnPreDrawListener {
                 override fun onPreDraw(): Boolean {
                     // 准备好了描画放行，反之挂起
-                    return if (viewModel.isDataReady()) {
+                    return if (viewModel.readyState.value.loading) {
                         content.viewTreeObserver.removeOnPreDrawListener(this)
                         true
                     } else {
@@ -77,20 +78,19 @@ class StartActivity : BaseComposeActivity() {
         }
 
         splashScreen.setOnExitAnimationListener { splashScreenView ->
-            ObjectAnimator.ofFloat(
-                splashScreenView,
-                View.TRANSLATION_X,
-                0f,
-                splashScreenView.width.toFloat()
-            ).apply {
-                duration = 1000
-                // Call SplashScreenView.remove at the end of your custom animation.
-                doOnEnd {
-                    splashScreenView.remove()
-                }
-            }.also {
-                // Run your animation.
-                it.start()
+            val iconView = splashScreenView.iconView ?: return@setOnExitAnimationListener
+            AnimatorSet().apply {
+                playSequentially(
+                    ObjectAnimator.ofFloat(iconView, View.TRANSLATION_Y, 0f, 50f),
+                    ObjectAnimator.ofFloat(
+                        iconView,
+                        View.TRANSLATION_Y,
+                        50f,
+                        -splashScreenView.height.toFloat()
+                    ),
+                )
+                doOnEnd { splashScreenView.remove() }
+                start()
             }
         }
     }
