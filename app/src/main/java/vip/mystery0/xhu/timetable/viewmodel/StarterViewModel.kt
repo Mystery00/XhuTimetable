@@ -1,14 +1,29 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
-import android.os.SystemClock
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.model.response.InitResponse
+import vip.mystery0.xhu.timetable.module.repo
+import vip.mystery0.xhu.timetable.repository.StartRepo
 
-class StarterViewModel : ViewModel() {
-    companion object {
-        const val WORK_DURATION = 2000L
+class StarterViewModel : ComposeViewModel(), KoinComponent {
+    private val startRepo: StartRepo by repo()
+
+    private val _readyState = MutableStateFlow(ReadyState(loading = true))
+    val readyState: StateFlow<ReadyState> = _readyState
+
+    init {
+        viewModelScope.launch {
+            _readyState.value = ReadyState(response = startRepo.init())
+        }
     }
-
-    private val initTime = SystemClock.uptimeMillis()
-
-    fun isDataReady() = SystemClock.uptimeMillis() - initTime > WORK_DURATION
 }
+
+data class ReadyState(
+    val loading: Boolean = false,
+    val response: InitResponse? = null,
+)
