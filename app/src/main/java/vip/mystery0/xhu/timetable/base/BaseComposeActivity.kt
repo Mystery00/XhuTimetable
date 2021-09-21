@@ -11,6 +11,7 @@ import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
 import java.util.*
 import kotlin.reflect.KClass
@@ -18,7 +19,7 @@ import kotlin.reflect.KClass
 abstract class BaseComposeActivity(
     @LayoutRes val contentLayoutId: Int = 0
 ) :
-    ComponentActivity(contentLayoutId) {
+    ComponentActivity(contentLayoutId), KoinComponent {
     private var toast: Toast? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,9 +35,7 @@ abstract class BaseComposeActivity(
     @Composable
     open fun BuildContentWindow() {
         XhuTimetableTheme {
-            Surface(color = MaterialTheme.colors.background) {
-                BuildContent()
-            }
+            BuildContent()
         }
     }
 

@@ -27,7 +27,7 @@
     <style name="JetpackSplashBaseTheme" parent="Theme.SplashScreen">
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
         <item name="windowSplashScreenAnimationDuration">1000</item>
-        <item name="windowSplashScreenBackground">#2e85df</item>
+        <item name="windowSplashScreenBackground">@color/splashBackgroundColor</item>
 
         <!-- 需要配置postSplashScreenTheme属性，主题需要是AppCompat -->
         <!-- 否则会报异常：You need to use a Theme.AppCompat theme (or descendant) with this activity -->
@@ -35,4 +35,13 @@
     </style>
 
     <style name="JetpackSplashTheme" parent="JetpackSplashBaseTheme" />
+
+    <style name="JetpackSplashTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="JetpackSplashTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="JetpackSplashTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>
