@@ -2,78 +2,84 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.os.Handler
-import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.view.ViewTreeObserver
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.animation.doOnEnd
 import androidx.core.os.BuildCompat
 import coil.compose.rememberImagePainter
-import vip.mystery0.xhu.timetable.R
+import coil.request.CachePolicy
+import coil.size.Scale
+import com.google.accompanist.insets.ProvideWindowInsets
+import com.google.accompanist.insets.navigationBarsPadding
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
 import vip.mystery0.xhu.timetable.viewmodel.StarterViewModel
 
 class StartActivity : BaseComposeActivity() {
-    private val handler = Handler(Looper.getMainLooper())
     private val viewModel: StarterViewModel by viewModels()
-    private val jumpRunnable = { goToMainScreen() }
 
     @Composable
     override fun BuildContentWindow() {
         XhuTimetableTheme {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = colorResource(id = R.color.splashBackgroundColor)
-            ) {
-                Column {
-                    val readyState = viewModel.readyState.collectAsState()
-                    if (readyState.value.loading && readyState.value.splash.isNotEmpty()) {
-                        val showSplash = readyState.value.splash.random()
-                        Image(
-                            painter = rememberImagePainter(data = showSplash),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1F)
-                        )
-                    } else {
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1F)
-                        )
-                    }
-                    Row(
+            ProvideWindowInsets {
+                val readyState = viewModel.readyState.collectAsState()
+                val timerState = viewModel.timerState.collectAsState()
+                Log.i("TAG", "BuildContentWindow: check")
+                if (readyState.value.splash != null && timerState.value > 0) {
+                    val showSplash = readyState.value.splash
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .background(Color.White),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
+                            .fillMaxSize()
                     ) {
                         Image(
-                            modifier = Modifier,
-                            painter = painterResource(id = R.mipmap.share_launcher_round),
-                            contentDescription = null
+                            painter = rememberImagePainter(data = showSplash) {
+                                scale(Scale.FIT)
+                                diskCachePolicy(CachePolicy.DISABLED)
+                            },
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .matchParentSize()
                         )
-                        Image(
-                            painter = painterResource(id = R.mipmap.splash_image_bottom),
-                            contentDescription = null
-                        )
+                        Box(modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(36.dp)
+                            .navigationBarsPadding()
+                            .background(Color(0x80000000), shape = RoundedCornerShape(24.dp))
+                            .clickable {
+                                viewModel.skip()
+                            }) {
+                            Text(
+                                modifier = Modifier.padding(12.dp),
+                                text = "跳 过 ${timerState.value}",
+                                fontSize = 12.sp,
+                                color = Color.White,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    }
+                } else {
+                    Log.i("TAG", "BuildContentWindow: else")
+                    if (!readyState.value.loading) {
+                        goToMainScreen()
                     }
                 }
             }
@@ -87,28 +93,11 @@ class StartActivity : BaseComposeActivity() {
         customizeSplashScreenExit()
     }
 
-    // Ensure main screen not shown when tap home key during message queueing.
-    override fun onPause() {
-        super.onPause()
-        handler.removeCallbacksAndMessages(null)
-    }
-
-    // Ensure main screen jump logic can do again.
-    override fun onResume() {
-        super.onResume()
-        goToMainScreenDelayed()
-    }
-
-    private fun goToMainScreenDelayed() {
-        if (viewModel.readyState.value.loading) {
-            return
-        }
-        handler.postDelayed(jumpRunnable, 1500)
-    }
-
     private fun goToMainScreen() {
+        Log.i("TAG", "goToMainScreen: ")
+        intentTo(LoginActivity::class)
 //        intentTo(MainActivity::class)
-//        finish()
+        finish()
     }
 
     private fun keepSplashScreenLonger() {
@@ -118,7 +107,7 @@ class StartActivity : BaseComposeActivity() {
             object : ViewTreeObserver.OnPreDrawListener {
                 override fun onPreDraw(): Boolean {
                     // 准备好了描画放行，反之挂起
-                    return if (viewModel.readyState.value.loading) {
+                    return if (!viewModel.readyState.value.loading) {
                         content.viewTreeObserver.removeOnPreDrawListener(this)
                         true
                     } else {
@@ -131,13 +120,12 @@ class StartActivity : BaseComposeActivity() {
 
     @RequiresApi(31)
     private fun customizeSplashScreenExit() {
-        // Ensure working on S device or above .
         if (!BuildCompat.isAtLeastS()) {
             return
         }
 
-        splashScreen.setOnExitAnimationListener { splashScreenView ->
-            val iconView = splashScreenView.iconView ?: return@setOnExitAnimationListener
+        splashScreen.setOnExitAnimationListener { view ->
+            val iconView = view.iconView ?: return@setOnExitAnimationListener
             AnimatorSet().apply {
                 playSequentially(
                     ObjectAnimator.ofFloat(iconView, View.TRANSLATION_Y, 0f, 50f),
@@ -145,10 +133,10 @@ class StartActivity : BaseComposeActivity() {
                         iconView,
                         View.TRANSLATION_Y,
                         50f,
-                        -splashScreenView.height.toFloat()
+                        -view.height.toFloat()
                     ),
                 )
-                doOnEnd { splashScreenView.remove() }
+                doOnEnd { view.remove() }
                 start()
             }
         }

@@ -13,7 +13,7 @@ import java.time.Duration
 import java.time.Instant
 
 class StartRemoteRepo : StartRepo, KoinComponent {
-    private val serverApi by inject<ServerApi>()
+    private val serverApi: ServerApi by inject()
 
     private val local: StartRepo by localRepo()
 

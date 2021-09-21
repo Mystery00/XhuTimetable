@@ -101,18 +101,24 @@ android {
 }
 
 dependencies {
-    val composeVersion = rootProject.extra["compose_version"]
     implementation("androidx.core:core-ktx:1.7.0-beta01")
     implementation("androidx.appcompat:appcompat:1.3.1")
     implementation("com.google.android.material:material:1.4.0")
-    implementation("androidx.compose.ui:ui:$composeVersion")
-    implementation("androidx.compose.material:material:$composeVersion")
-    implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
     implementation("androidx.activity:activity-compose:1.3.1")
     implementation("androidx.core:core-splashscreen:1.0.0-alpha01")
-    implementation("com.google.accompanist:accompanist-flowlayout:0.18.0")
+    //compose
+    val composeVersion = rootProject.extra["compose_version"]
+    implementation("androidx.compose.ui:ui:$composeVersion")
+    implementation("androidx.compose.material:material:$composeVersion")
+    implementation("androidx.compose.material:material-icons-extended:$composeVersion")
+    implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
+    //accompanist
+    implementation("com.google.accompanist:accompanist-flowlayout:0.18.0")
+    implementation("com.google.accompanist:accompanist-insets:0.18.0")
+    //material dialog
+    implementation("com.afollestad.material-dialogs:core:3.3.0")
     //work manager
     implementation("androidx.work:work-runtime-ktx:2.7.0-beta01")
     //koin

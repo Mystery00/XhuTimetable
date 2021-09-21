@@ -1,12 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!--启动页背景色-->
+    <color name="splash_color_background">#2e85df</color>
 
-    <color name="splashBackgroundColor">#2e85df</color>
+    <!--登录页标签颜色-->
+    <color name="login_color_label">#cccccc</color>
+    <!--登录页文本颜色-->
+    <color name="login_color_text">#4ea5ff</color>
+
+    <!--所有界面需要是灰色的颜色 背景-->
+    <color name="colorGrayBackground">#fafafa</color>
+    <!--所有界面需要是白色的颜色 背景-->
+    <color name="colorWhiteBackground">#FFFFFF</color>
+    <!--所有界面需要是默认色的颜色 文本-->
+    <color name="colorGrayText">#8A000000</color>
+    <!--所有界面需要是黑色的颜色 文本-->
+    <color name="colorBlackText">#FF000000</color>
+    <!--无数据页面文本颜色-->
+    <color name="textColorNullDataView">#000000</color>
+
+    <!--主页面标题栏图标颜色-->
+    <color name="colorCustomToolbarTextIcon">#000000</color>
+    <!--主界面底部未选中颜色-->
+    <color name="colorUnSelectedText">#333333</color>
+    <!--所有界面分割线颜色-->
+    <color name="colorDivider">#dddddd</color>
+    <!--个人界面分割线颜色-->
+    <color name="colorDividerProfile">#f0f0f0</color>
+    <!--个人页面更多图标颜色-->
+    <color name="colorMoreProfile">#979797</color>
+    <!--个人页面每项背景色-->
+    <color name="colorItemBackgroundProfile">#eaeaea</color>
+    <!--意见反馈页面背景颜色-->
+    <color name="colorFeedBackBackground">#f2f2f2</color>
+    <!--设置页面图标颜色-->
+    <color name="colorPreferenceIcon">#000000</color>
+    <!--课程页面背景色-->
+    <color name="colorTableBackground">#00000000</color>
+    <!--今日课程页面卡片背景色-->
+    <color name="colorTodayBackground">#FFFFFF</color>
+    <!--考试查询选课课号文本颜色-->
+    <color name="colorSecondGrayText">#66000000</color>
+
+    <!--自定义课程和事项页面提示文本的背景颜色-->
+    <color name="customHintBackgroundColor">#00E676</color>
 </resources>

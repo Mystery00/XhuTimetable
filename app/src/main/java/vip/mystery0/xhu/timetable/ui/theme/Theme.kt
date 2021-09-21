@@ -5,10 +5,21 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
-private val DarkColorPalette = darkColors()
+private val DarkColorPalette = darkColors(
+    primary = Color(0xFF484848),
+    primaryVariant = Color(0xFF212121),
+    secondary = Color(0xFF484848),
+    secondaryVariant = Color(0xFF212121),
+)
 
-private val LightColorPalette = lightColors()
+private val LightColorPalette = lightColors(
+    primary = Color(0xFF2196F3),
+    primaryVariant = Color(0xFF0069C0),
+    secondary = Color(0xFF0069C0),
+    secondaryVariant = Color(0xFF0069C0),
+)
 
 @Composable
 fun XhuTimetableTheme(
