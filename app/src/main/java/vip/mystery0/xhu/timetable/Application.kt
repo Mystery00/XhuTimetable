@@ -8,6 +8,7 @@ import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 import vip.mystery0.xhu.timetable.module.moduleList
+import vip.mystery0.xhu.timetable.ui.notification.initChannelID
 
 class Application : Application() {
     override fun onCreate() {
@@ -20,6 +21,7 @@ class Application : Application() {
             workManagerFactory()
             modules(moduleList())
         }
+        initChannelID(this)
         MMKV.initialize(this)
     }
 }

@@ -30,3 +30,9 @@ fun isOnline(): Boolean {
 }
 
 val externalPictureDir: File by lazy { context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!! }
+val externalDownloadDir: File by lazy { context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!! }
+
+val screenWidth: Int
+    get() = context.resources.displayMetrics.widthPixels
+val screenHeight: Int
+    get() = context.resources.displayMetrics.heightPixels

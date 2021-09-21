@@ -1,14 +1,17 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.Config
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.externalPictureDir
 import vip.mystery0.xhu.timetable.module.repo
@@ -26,28 +29,48 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
     private val _readyState = MutableStateFlow(ReadyState(loading = true))
     val readyState: StateFlow<ReadyState> = _readyState
 
+    private val _timerState = MutableStateFlow(-1)
+    val timerState: StateFlow<Int> = _timerState
+
     init {
         viewModelScope.launch {
             val response = startRepo.init()
             DataHolder.version = response.version
             val dir = externalPictureDir
-            val splashList = response.splash
+            val splashList = Config.splashList
                 .map {
-                    File(dir, "${it.splashId.toString().sha1()}-${it.imageUrl.md5()}".sha256())
+                    File(
+                        dir,
+                        "${it.splashId.toString().sha1()}-${it.imageUrl.md5()}".sha256()
+                    ) to it.showTime
                 }
                 .filter {
-                    it.exists()
+                    it.first.exists()
                 }
             workManager.enqueue(
                 OneTimeWorkRequestBuilder<DownloadSplashWork>()
                     .build()
             )
-            _readyState.value = ReadyState(splash = splashList)
+            Log.i("ViewModel", splashList.joinToString())
+            val splash = splashList.randomOrNull()
+            val showTime = splash?.second ?: 0
+            _timerState.value = showTime
+            _readyState.value = ReadyState(splash = splash?.first)
+            (showTime - 1 downTo 0).forEach {
+                delay(1000L)
+                _timerState.value = it
+            }
+        }
+    }
+
+    fun skip() {
+        viewModelScope.launch {
+            _timerState.value = 0
         }
     }
 }
 
 data class ReadyState(
     val loading: Boolean = false,
-    val splash: List<File> = emptyList(),
+    val splash: File? = null,
 )

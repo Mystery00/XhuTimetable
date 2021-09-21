@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable.work
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
@@ -18,10 +19,17 @@ import java.io.FileOutputStream
 
 class DownloadSplashWork(appContext: Context, workerParams: WorkerParameters) :
     CoroutineWorker(appContext, workerParams), KoinComponent {
+    companion object {
+        private const val TAG = "DownloadSplashWork"
+    }
+
     private val fileApi: FileApi by inject()
 
     override suspend fun doWork(): Result {
-        val dir = externalPictureDir
+        val dir = File(externalPictureDir, "splash")
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
         val splashList = Config.splashList
             .map {
                 it.imageUrl to File(
@@ -44,6 +52,7 @@ class DownloadSplashWork(appContext: Context, workerParams: WorkerParameters) :
                     }
                 }
             }
+            Log.i(TAG, "save splash to ${it.second.absolutePath}")
         }
         return Result.success()
     }

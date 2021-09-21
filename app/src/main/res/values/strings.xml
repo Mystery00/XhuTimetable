@@ -3,6 +3,12 @@
     <string name="action_download_patch">下载增量包</string>
     <string name="action_download_cancel">忽略</string>
 
+    <string name="download_notification_title_get_url">正在获取下载地址……</string>
+    <string name="download_notification_title_download">正在下载：%1$s</string>
+    <string name="download_notification_title_download_progress">%1$s/%2$s</string>
+    <string name="download_notification_text">已下载%1$d%%</string>
+    <string name="download_notification_md5_matching">MD5校验中……</string>
+
     <string name="dialog_update_title">检测到新版本</string>
     <string name="dialog_update_text">新版本： %1$s\n当前版本： %2$s\n更新日志：\n %3$s</string>
 
