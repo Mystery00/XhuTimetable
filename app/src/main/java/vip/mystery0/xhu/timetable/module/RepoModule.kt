@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable.module
 
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 import org.koin.core.component.inject
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
@@ -29,4 +30,14 @@ inline fun <reified INTER : Any> KoinComponent.repo(): Lazy<INTER> =
         inject(named("$SCOPE_REMOTE${INTER::class.simpleName}"))
     } else {
         inject(named("$SCOPE_LOCAL${INTER::class.simpleName}"))
+    }
+
+inline fun <reified INTER : Any> KoinComponent.localRepo(): Lazy<INTER> =
+    inject(named("$SCOPE_LOCAL${INTER::class.simpleName}"))
+
+inline fun <reified INTER : Any> KoinComponent.getRepo(): INTER =
+    if (isOnline()) {
+        get(named("$SCOPE_REMOTE${INTER::class.simpleName}"))
+    } else {
+        get(named("$SCOPE_LOCAL${INTER::class.simpleName}"))
     }

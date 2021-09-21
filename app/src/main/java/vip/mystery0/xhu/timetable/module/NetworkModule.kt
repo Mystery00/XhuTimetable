@@ -6,10 +6,10 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import vip.mystery0.xhu.timetable.api.FileApi
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.config.interceptor.LogInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.ReLoginInterceptor
-import java.util.concurrent.TimeUnit
 
 const val HTTP_CLIENT = "client"
 const val RETROFIT = "retrofit"
@@ -18,7 +18,6 @@ val networkModule = module {
     single(named(HTTP_CLIENT)) {
         OkHttpClient.Builder()
             .retryOnConnectionFailure(true)
-            .connectTimeout(10, TimeUnit.SECONDS)
             .addInterceptor(LogInterceptor())
             .addInterceptor(ReLoginInterceptor())
             .build()
@@ -33,6 +32,7 @@ val networkModule = module {
     }
 
     api<ServerApi>()
+    api<FileApi>()
 }
 
 private inline fun <reified API> Module.api() {
