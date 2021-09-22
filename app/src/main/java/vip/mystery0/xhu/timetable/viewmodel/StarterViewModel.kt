@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +24,10 @@ import vip.mystery0.xhu.timetable.work.DownloadSplashWork
 import java.io.File
 
 class StarterViewModel : ComposeViewModel(), KoinComponent {
+    companion object {
+        private const val TAG = "StarterViewModel"
+    }
+
     private val startRepo: StartRepo by repo()
     private val workManager: WorkManager by inject()
 
@@ -33,7 +38,11 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
     val timerState: StateFlow<Int> = _timerState
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
+            Log.w(TAG, "init failed", throwable)
+            _readyState.value =
+                ReadyState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
+        }) {
             val response = startRepo.init()
             DataHolder.version = response.version
             val dir = externalPictureDir
@@ -51,7 +60,6 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
                 OneTimeWorkRequestBuilder<DownloadSplashWork>()
                     .build()
             )
-            Log.i("ViewModel", splashList.joinToString())
             val splash = splashList.randomOrNull()
             val showTime = splash?.second ?: 0
             _timerState.value = showTime
@@ -73,4 +81,5 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
 data class ReadyState(
     val loading: Boolean = false,
     val splash: File? = null,
+    val errorMessage: String = "",
 )

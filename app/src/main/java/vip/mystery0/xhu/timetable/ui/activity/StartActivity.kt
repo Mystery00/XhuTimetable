@@ -42,7 +42,8 @@ class StartActivity : BaseComposeActivity() {
             ProvideWindowInsets {
                 val readyState = viewModel.readyState.collectAsState()
                 val timerState = viewModel.timerState.collectAsState()
-                Log.i("TAG", "BuildContentWindow: check")
+                readyState.value.errorMessage.notBlankToast(true)
+
                 if (readyState.value.splash != null && timerState.value > 0) {
                     val showSplash = readyState.value.splash
                     Box(
@@ -77,7 +78,6 @@ class StartActivity : BaseComposeActivity() {
                         }
                     }
                 } else {
-                    Log.i("TAG", "BuildContentWindow: else")
                     if (!readyState.value.loading) {
                         goToMainScreen()
                     }

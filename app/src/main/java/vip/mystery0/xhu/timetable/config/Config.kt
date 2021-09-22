@@ -46,4 +46,23 @@ object Config {
                 Splash::class.java
             )
         ).fromJson(kv.decodeString("splashList", "[]")!!)!!
+
+    var userList: List<User>
+        set(value) {
+            kv.encode(
+                "userList",
+                moshi.adapter<List<User>>(
+                    Types.newParameterizedType(
+                        List::class.java,
+                        User::class.java
+                    )
+                ).toJson(value)
+            )
+        }
+        get() = moshi.adapter<List<User>>(
+            Types.newParameterizedType(
+                List::class.java,
+                User::class.java
+            )
+        ).fromJson(kv.decodeString("userList", "[]")!!)!!
 }
