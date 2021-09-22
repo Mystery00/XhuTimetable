@@ -9,7 +9,6 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import vip.mystery0.xhu.timetable.api.FileApi
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.config.interceptor.LogInterceptor
-import vip.mystery0.xhu.timetable.config.interceptor.ReLoginInterceptor
 
 const val HTTP_CLIENT = "client"
 const val RETROFIT = "retrofit"
@@ -19,7 +18,6 @@ val networkModule = module {
         OkHttpClient.Builder()
             .retryOnConnectionFailure(true)
             .addInterceptor(LogInterceptor())
-            .addInterceptor(ReLoginInterceptor())
             .build()
     }
 

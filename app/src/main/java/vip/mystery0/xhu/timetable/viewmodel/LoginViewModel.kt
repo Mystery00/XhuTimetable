@@ -11,12 +11,17 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.DataHolder
+import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.model.request.LoginRequest
 import java.security.KeyFactory
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
 
 class LoginViewModel : ComposeViewModel(), KoinComponent {
+    companion object {
+        private const val TAG = "LoginViewModel"
+    }
+
     private val serverApi: ServerApi by inject()
 
     private val _loginState = MutableStateFlow(LoginState())
@@ -26,7 +31,11 @@ class LoginViewModel : ComposeViewModel(), KoinComponent {
         username: String,
         password: String
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(serverExceptionHandler { throwable ->
+            Log.w(TAG, "login failed", throwable)
+            _loginState.value =
+                LoginState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
+        }) {
             _loginState.value = LoginState(loading = true)
             val publicKey = serverApi.publicKey().publicKey
             val decodedPublicKey = Base64.decode(publicKey, Base64.DEFAULT)
@@ -38,7 +47,7 @@ class LoginViewModel : ComposeViewModel(), KoinComponent {
                 Base64.encodeToString(cipher.doFinal(password.toByteArray()), Base64.DEFAULT)
             val loginRequest = LoginRequest(username, encryptPassword, publicKey)
             val loginResponse = serverApi.login(loginRequest)
-            Log.i("TAG", "login: ${loginResponse.token}")
+            Log.i(TAG, "login: ${loginResponse.token}")
             _loginState.value = LoginState(loading = false, success = true)
         }
     }
