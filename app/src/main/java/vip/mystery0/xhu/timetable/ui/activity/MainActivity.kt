@@ -20,11 +20,7 @@ import com.google.accompanist.pager.*
 import com.google.android.material.math.MathUtils.lerp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import vip.mystery0.xhu.timetable.appName
-import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
-import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.publicDeviceId
 import vip.mystery0.xhu.timetable.ui.theme.XhuStateIcons
 import vip.mystery0.xhu.timetable.ui.theme.stateOf
 import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
@@ -39,13 +35,21 @@ class MainActivity : BaseComposeActivity() {
 
     @ExperimentalPagerApi
     @ExperimentalAnimationApi
+    @ExperimentalMaterialApi
     @Composable
     override fun BuildContent() {
         val coroutineScope = rememberCoroutineScope()
         val pagerState = rememberPagerState(pageCount = 3)
         Scaffold(
             topBar = {
-
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(45.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    tabOf(pagerState.currentPage).title(this, viewModel)
+                }
             },
             bottomBar = {
                 BottomNavigation(
@@ -91,20 +95,10 @@ class MainActivity : BaseComposeActivity() {
                         }
                         .fillMaxSize()
                 ) {
-                    Row {
-                        Text("Page: $page")
-                    }
-                    Row {
-                        Text(publicDeviceId)
-                    }
-                    Row {
-                        Text(appName)
-                    }
-                    Row {
-                        Text(appVersionName)
-                    }
-                    Row {
-                        Text(SessionManager.mainUser.info.userName)
+                    when (page) {
+                        Tab.TODAY.index -> Tab.TODAY.content(this, viewModel)
+                        Tab.WEEK.index -> Tab.WEEK.content(this, viewModel)
+                        Tab.PROFILE.index -> Tab.PROFILE.content(this, viewModel)
                     }
                 }
             }
@@ -113,6 +107,7 @@ class MainActivity : BaseComposeActivity() {
 
     @ExperimentalPagerApi
     @ExperimentalAnimationApi
+    @ExperimentalMaterialApi
     @Composable
     private fun RowScope.DrawNavigationItem(
         state: PagerState,
@@ -162,8 +157,25 @@ class MainActivity : BaseComposeActivity() {
 private fun colorOf(checked: Boolean): Color =
     if (checked) MaterialTheme.colors.primary else Color.Black
 
-private enum class Tab(val index: Int, val label: String) {
-    TODAY(0, "今日"),
-    WEEK(1, "本周"),
-    PROFILE(2, "我的"),
+@ExperimentalMaterialApi
+private enum class Tab(
+    val index: Int,
+    val label: String,
+    val title: TabTitle,
+    val content: TabContent,
+) {
+    TODAY(0, "今日", todayCourseTitle, todayCourseContent),
+    WEEK(1, "本周", weekCourseTitle, weekCourseContent),
+    PROFILE(2, "我的", profileCourseTitle, profileCourseContent),
 }
+
+@ExperimentalMaterialApi
+private fun tabOf(index: Int): Tab = when (index) {
+    0 -> Tab.TODAY
+    1 -> Tab.WEEK
+    2 -> Tab.PROFILE
+    else -> throw NoSuchElementException()
+}
+
+typealias TabTitle = @Composable BoxScope.(MainViewModel) -> Unit
+typealias TabContent = @Composable ColumnScope.(MainViewModel) -> Unit

@@ -5,6 +5,9 @@ import com.squareup.moshi.Types
 import com.tencent.mmkv.MMKV
 import vip.mystery0.xhu.timetable.model.response.Splash
 import java.time.Instant
+import java.time.ZoneId
+
+val chinaZone = ZoneId.of("Asia/Shanghai")
 
 object Config {
     private val kv = MMKV.defaultMMKV()
@@ -65,4 +68,9 @@ object Config {
                 User::class.java
             )
         ).fromJson(kv.decodeString("userList", "[]")!!)!!
+    var poemsToken: String?
+        set(value) {
+            kv.encode("poemsToken", value)
+        }
+        get() = kv.decodeString("poemsToken")
 }
