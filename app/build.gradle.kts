@@ -82,7 +82,7 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = rootProject.extra["compose_version"] as String
-        kotlinCompilerVersion = "1.5.21"
+        kotlinCompilerVersion = "1.5.30"
     }
     packagingOptions {
         resources {
@@ -115,8 +115,10 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
     //accompanist
-    implementation("com.google.accompanist:accompanist-flowlayout:0.18.0")
-    implementation("com.google.accompanist:accompanist-insets:0.18.0")
+    val accompanistVersion = "0.18.0"
+    implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-pager:$accompanistVersion")
     //material dialog
     implementation("com.afollestad.material-dialogs:core:3.3.0")
     //work manager
