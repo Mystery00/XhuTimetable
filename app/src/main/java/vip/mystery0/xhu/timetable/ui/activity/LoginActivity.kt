@@ -175,6 +175,7 @@ class LoginActivity : BaseComposeActivity() {
         if (loginState.success) {
             "登录成功，欢迎使用${appName}！".toast(true)
             intentTo(MainActivity::class)
+            finish()
         }
         if (loginState.errorMessage.isNotBlank()) {
             loginState.errorMessage.toast(true)
