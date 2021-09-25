@@ -19,9 +19,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsPadding
 import vip.mystery0.xhu.timetable.R
+import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.model.response.Version
@@ -147,23 +149,32 @@ class LoginActivity : BaseComposeActivity() {
             Dialog(
                 onDismissRequest = {
                     "取消登录操作".toast()
-                }
+                },
+                DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
             ) {
                 Box(
                     modifier = Modifier
-                        .size(300.dp)
-                        .background(Color.White),
+                        .size(100.dp)
+                        .background(Color.White, shape = RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column {
-                        CircularProgressIndicator()
-                        Text("登录中 ing...")
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .padding(6.dp, 0.dp, 0.dp, 0.dp)
+                        )
+                        Text(
+                            text = "登录中 ing...",
+                            modifier = Modifier
+                                .padding(0.dp, 8.dp, 0.dp, 0.dp)
+                        )
                     }
                 }
             }
         }
         if (loginState.success) {
-            "登录成功，欢迎使用！".toast()
+            "登陆成功，欢迎使用${appVersionName}！".toast()
+            intentTo(MainActivity::class)
         }
         if (loginState.errorMessage.isNotBlank()) {
             loginState.errorMessage.toast(true)

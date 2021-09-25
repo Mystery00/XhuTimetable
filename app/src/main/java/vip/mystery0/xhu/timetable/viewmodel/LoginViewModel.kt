@@ -11,6 +11,7 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.DataHolder
+import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.model.request.LoginRequest
 import java.security.KeyFactory
@@ -47,7 +48,8 @@ class LoginViewModel : ComposeViewModel(), KoinComponent {
                 Base64.encodeToString(cipher.doFinal(password.toByteArray()), Base64.DEFAULT)
             val loginRequest = LoginRequest(username, encryptPassword, publicKey)
             val loginResponse = serverApi.login(loginRequest)
-            Log.i(TAG, "login: ${loginResponse.token}")
+            val userInfo = serverApi.userInfo(loginResponse.token)
+            SessionManager.login(username, password, loginResponse.token, userInfo)
             _loginState.value = LoginState(loading = false, success = true)
         }
     }
