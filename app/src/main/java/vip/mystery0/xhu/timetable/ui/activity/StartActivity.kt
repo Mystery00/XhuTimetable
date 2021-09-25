@@ -30,6 +30,7 @@ import coil.size.Scale
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsPadding
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
 import vip.mystery0.xhu.timetable.viewmodel.StarterViewModel
 
@@ -95,8 +96,11 @@ class StartActivity : BaseComposeActivity() {
 
     private fun goToMainScreen() {
         Log.i("TAG", "goToMainScreen: ")
-        intentTo(LoginActivity::class)
-//        intentTo(MainActivity::class)
+        if (SessionManager.isLogin()) {
+            intentTo(MainActivity::class)
+        } else {
+            intentTo(LoginActivity::class)
+        }
         finish()
     }
 
