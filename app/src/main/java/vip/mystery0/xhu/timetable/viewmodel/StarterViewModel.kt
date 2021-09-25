@@ -13,6 +13,7 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.Config
 import vip.mystery0.xhu.timetable.config.DataHolder
+import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.externalPictureDir
 import vip.mystery0.xhu.timetable.module.repo
@@ -43,6 +44,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
             _readyState.value =
                 ReadyState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
         }) {
+            SessionManager.readFromCache()
             val response = startRepo.init()
             DataHolder.version = response.version
             val dir = externalPictureDir

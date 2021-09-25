@@ -7,8 +7,10 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import vip.mystery0.xhu.timetable.R
+import vip.mystery0.xhu.timetable.appName
+import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.module.getRepo
 import vip.mystery0.xhu.timetable.publicDeviceId
 import vip.mystery0.xhu.timetable.repository.StartRepo
@@ -29,10 +31,13 @@ class MainActivity : BaseComposeActivity() {
                 Greeting(publicDeviceId)
             }
             Row {
-                Greeting(R.string.app_name.asString())
+                Greeting(appName)
             }
             Row {
-                Greeting(R.string.app_version_name.asString())
+                Greeting(appVersionName)
+            }
+            Row {
+                Greeting(SessionManager.mainUser.toString())
             }
             Row {
                 Button(onClick = {
