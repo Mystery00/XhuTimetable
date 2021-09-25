@@ -33,7 +33,7 @@ fun XhuTimetableTheme(
     }
 
     MaterialTheme(
-        colors = colors,
+        colors = LightColorPalette,
         content = content
     )
 }

@@ -62,7 +62,8 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
 
     private fun calculateWeek() {
         viewModelScope.launch {
-
+            val nowDate = LocalDate.now()
+            _week.value = nowDate.dayOfWeek.value
         }
     }
 

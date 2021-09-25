@@ -10,7 +10,7 @@ import vip.mystery0.xhu.timetable.config.SessionManager
 
 val weekCourseTitle: TabTitle = @Composable { viewModel ->
     val week = viewModel.week.collectAsState()
-    Text(text = "第${week}周")
+    Text(text = "第${week.value}周")
 }
 
 val weekCourseContent: TabContent = @Composable { viewModel ->
