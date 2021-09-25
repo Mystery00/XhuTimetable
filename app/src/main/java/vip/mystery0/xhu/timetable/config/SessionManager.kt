@@ -6,6 +6,9 @@ object SessionManager {
     //用户列表
     private val userMap = HashMap<String, User>(4)
 
+    val mainUser: User
+        get() = userMap.values.find { it.main }!!
+
     fun isLogin(): Boolean = userMap.isNotEmpty()
 
     fun getUser(studentId: String): User? {
@@ -23,13 +26,22 @@ object SessionManager {
         token: String,
         userInfo: UserInfo,
     ) {
-        userMap[studentId] = User(studentId, password, token, userInfo)
+        val main = userMap.values.find { it.main }
+        userMap[studentId] = User(studentId, password, token, userInfo, main == null)
         writeToCache()
     }
 
     fun logout(studentId: String) {
         userMap.remove(studentId)
         writeToCache()
+    }
+
+    fun changeMainUser(studentId: String): Boolean {
+        val user = userMap[studentId] ?: return false
+        mainUser.main = false
+        user.main = true
+        writeToCache()
+        return true
     }
 
     @Synchronized
@@ -56,5 +68,5 @@ data class User(
     //用户信息
     val info: UserInfo,
     //是否为主用户
-    val main: Boolean = false,
+    var main: Boolean = false,
 )

@@ -15,6 +15,10 @@ val publicDeviceId: String
     @SuppressLint("HardwareIds")
     get() = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
 
+//应用名称
+val appName: String
+    get() = context.getString(R.string.app_name)
+
 //版本名称
 val appVersionName: String by lazy { context.getString(R.string.app_version_name) }
 

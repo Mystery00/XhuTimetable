@@ -23,7 +23,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsPadding
 import vip.mystery0.xhu.timetable.R
-import vip.mystery0.xhu.timetable.appVersionName
+import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.model.response.Version
@@ -164,7 +164,7 @@ class LoginActivity : BaseComposeActivity() {
                                 .padding(6.dp, 0.dp, 0.dp, 0.dp)
                         )
                         Text(
-                            text = "登录中 ing...",
+                            text = "登录中……",
                             modifier = Modifier
                                 .padding(0.dp, 8.dp, 0.dp, 0.dp)
                         )
@@ -173,7 +173,7 @@ class LoginActivity : BaseComposeActivity() {
             }
         }
         if (loginState.success) {
-            "登陆成功，欢迎使用${appVersionName}！".toast()
+            "登录成功，欢迎使用${appName}！".toast(true)
             intentTo(MainActivity::class)
         }
         if (loginState.errorMessage.isNotBlank()) {
