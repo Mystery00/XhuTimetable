@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.AccountCircle
@@ -15,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,12 +62,15 @@ class LoginActivity : BaseComposeActivity() {
                             .height(62.dp)
                             .fillMaxWidth()
                     )
-                    TextField(
-                        modifier = Modifier.height(IntrinsicSize.Min),
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .height(IntrinsicSize.Min)
+                            .fillMaxWidth(),
                         value = username,
                         onValueChange = {
                             username = it
                         },
+                        shape = RoundedCornerShape(18.dp),
                         leadingIcon = {
                             Icon(Icons.TwoTone.AccountCircle, null)
                         },
@@ -75,16 +81,20 @@ class LoginActivity : BaseComposeActivity() {
                             textColor = MaterialTheme.colors.primary,
                             unfocusedLabelColor = XhuColor.loginLabel,
                             backgroundColor = Color.Transparent,
-                            disabledIndicatorColor = XhuColor.loginLabel,
                             leadingIconColor = MaterialTheme.colors.primary,
                         ),
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Next,
+                            keyboardType = KeyboardType.Number,
+                        ),
+                        maxLines = 1,
                     )
                     Spacer(
                         modifier = Modifier
                             .height(48.dp)
                             .fillMaxWidth()
                     )
-                    TextField(
+                    OutlinedTextField(
                         modifier = Modifier
                             .height(IntrinsicSize.Min)
                             .fillMaxWidth(),
@@ -92,6 +102,7 @@ class LoginActivity : BaseComposeActivity() {
                         onValueChange = {
                             password = it
                         },
+                        shape = RoundedCornerShape(18.dp),
                         leadingIcon = {
                             Icon(Icons.TwoTone.Lock, null)
                         },
@@ -102,20 +113,26 @@ class LoginActivity : BaseComposeActivity() {
                             textColor = MaterialTheme.colors.primary,
                             unfocusedLabelColor = XhuColor.loginLabel,
                             backgroundColor = Color.Transparent,
-                            disabledIndicatorColor = XhuColor.loginLabel,
                             leadingIconColor = MaterialTheme.colors.primary,
                         ),
-                        visualTransformation = PasswordVisualTransformation()
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Go,
+                            keyboardType = KeyboardType.Password,
+                        ),
+                        maxLines = 1,
                     )
                     Text(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
                         text = "* 密码为教育系统密码（默认为18位身份证号）",
                         color = XhuColor.loginLabel,
                         fontSize = 12.sp,
                     )
                     Spacer(
                         modifier = Modifier
-                            .height(62.dp)
+                            .height(60.dp)
                             .fillMaxWidth()
                     )
                     val loginState by viewModel.loginState.collectAsState()
