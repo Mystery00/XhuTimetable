@@ -3,6 +3,7 @@ package vip.mystery0.xhu.timetable.ui.activity
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -14,12 +15,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberImagePainter
+import coil.request.CachePolicy
+import coil.size.Scale
 import com.google.accompanist.pager.*
 import com.google.android.material.math.MathUtils.lerp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.ui.theme.XhuStateIcons
 import vip.mystery0.xhu.timetable.ui.theme.stateOf
@@ -77,28 +83,40 @@ class MainActivity : BaseComposeActivity() {
                 }
             }
         ) { paddingValues ->
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .padding(paddingValues),
-            ) { page ->
-                Column(
+            Box {
+                Image(
+                    painter = rememberImagePainter(data = R.mipmap.main_bg) {
+                        scale(Scale.FIT)
+                        diskCachePolicy(CachePolicy.DISABLED)
+                    },
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .graphicsLayer {
-                            val pageOffset = calculateCurrentOffsetForPage(page).absoluteValue
-                            lerp(0.85f, 1f, 1f - pageOffset.coerceIn(0f, 1f))
-                                .also { scale ->
-                                    scaleX = scale
-                                    scaleY = scale
-                                }
-                            alpha = lerp(0.5f, 1f, 1f - pageOffset.coerceIn(0f, 1f))
-                        }
                         .fillMaxSize()
-                ) {
-                    when (page) {
-                        Tab.TODAY.index -> Tab.TODAY.content(this, viewModel)
-                        Tab.WEEK.index -> Tab.WEEK.content(this, viewModel)
-                        Tab.PROFILE.index -> Tab.PROFILE.content(this, viewModel)
+                )
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
+                        .padding(paddingValues),
+                ) { page ->
+                    Column(
+                        modifier = Modifier
+                            .graphicsLayer {
+                                val pageOffset = calculateCurrentOffsetForPage(page).absoluteValue
+                                lerp(0.85f, 1f, 1f - pageOffset.coerceIn(0f, 1f))
+                                    .also { scale ->
+                                        scaleX = scale
+                                        scaleY = scale
+                                    }
+                                alpha = lerp(0.5f, 1f, 1f - pageOffset.coerceIn(0f, 1f))
+                            }
+                            .fillMaxSize()
+                    ) {
+                        when (page) {
+                            Tab.TODAY.index -> Tab.TODAY.content(this, viewModel)
+                            Tab.WEEK.index -> Tab.WEEK.content(this, viewModel)
+                            Tab.PROFILE.index -> Tab.PROFILE.content(this, viewModel)
+                        }
                     }
                 }
             }
