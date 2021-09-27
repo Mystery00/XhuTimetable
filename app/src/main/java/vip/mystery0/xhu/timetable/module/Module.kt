@@ -11,6 +11,7 @@ import org.koin.dsl.module
 fun moduleList(): List<Module> =
     listOf(
         appModule,
+        databaseModule,
         workModule,
         networkModule,
         repoModule,

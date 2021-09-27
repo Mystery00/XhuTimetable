@@ -1,6 +1,10 @@
 package vip.mystery0.xhu.timetable.config
 
-import vip.mystery0.xhu.timetable.model.entity.UserInfo
+import org.koin.java.KoinJavaComponent
+import vip.mystery0.xhu.timetable.api.ServerApi
+import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
+import vip.mystery0.xhu.timetable.model.UserInfo
+import vip.mystery0.xhu.timetable.repository.doLogin
 
 object SessionManager {
     //用户列表
@@ -56,6 +60,29 @@ object SessionManager {
             userMap[it.studentId] = it
         }
     }
+
+    private fun reLogin(
+        user: User,
+        newToken: String,
+        userInfo: UserInfo,
+    ) {
+        userMap.remove(user.studentId)
+        userMap[user.studentId] = User(user.studentId, user.password, newToken, userInfo, user.main)
+        writeToCache()
+    }
+
+    suspend fun <R> User.withAutoLogin(block: suspend (String) -> R): Pair<R, Boolean> =
+        try {
+            block(token) to false
+        } catch (exception: ServerNeedLoginException) {
+            //做一次登录
+            val loginResponse = doLogin(this)
+            //获取用户信息
+            val serverApi = KoinJavaComponent.get<ServerApi>(ServerApi::class.java)
+            val userInfo = serverApi.userInfo(loginResponse.token)
+            reLogin(this, loginResponse.token, userInfo)
+            block(token) to true
+        }
 }
 
 data class User(

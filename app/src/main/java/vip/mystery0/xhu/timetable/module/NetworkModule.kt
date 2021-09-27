@@ -11,6 +11,7 @@ import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.config.interceptor.LogInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.PoemsInterceptor
+import vip.mystery0.xhu.timetable.config.interceptor.ServerApiInterceptor
 
 const val HTTP_CLIENT = "client"
 const val HTTP_CLIENT_POEMS = "poemsClient"
@@ -22,6 +23,7 @@ val networkModule = module {
         OkHttpClient.Builder()
             .retryOnConnectionFailure(true)
             .addInterceptor(LogInterceptor())
+            .addInterceptor(ServerApiInterceptor())
             .build()
     }
     single(named(HTTP_CLIENT_POEMS)) {
