@@ -1,4 +1,4 @@
-package vip.mystery0.xhu.timetable.model.entity
+package vip.mystery0.xhu.timetable.model
 
 data class UserInfo(
     var studentId: String,

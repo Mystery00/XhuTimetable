@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
-import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,10 +12,7 @@ import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
-import vip.mystery0.xhu.timetable.model.request.LoginRequest
-import java.security.KeyFactory
-import java.security.spec.X509EncodedKeySpec
-import javax.crypto.Cipher
+import vip.mystery0.xhu.timetable.repository.doLogin
 
 class LoginViewModel : ComposeViewModel(), KoinComponent {
     companion object {
@@ -38,16 +34,7 @@ class LoginViewModel : ComposeViewModel(), KoinComponent {
                 LoginState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
         }) {
             _loginState.value = LoginState(loading = true)
-            val publicKey = serverApi.publicKey().publicKey
-            val decodedPublicKey = Base64.decode(publicKey, Base64.DEFAULT)
-            val key =
-                KeyFactory.getInstance("RSA").generatePublic(X509EncodedKeySpec(decodedPublicKey))
-            val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
-            cipher.init(Cipher.ENCRYPT_MODE, key)
-            val encryptPassword =
-                Base64.encodeToString(cipher.doFinal(password.toByteArray()), Base64.DEFAULT)
-            val loginRequest = LoginRequest(username, encryptPassword, publicKey)
-            val loginResponse = serverApi.login(loginRequest)
+            val loginResponse = doLogin(username, password)
             val userInfo = serverApi.userInfo(loginResponse.token)
             SessionManager.login(username, password, loginResponse.token, userInfo)
             _loginState.value = LoginState(loading = false, success = true)

@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -7,11 +8,12 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.PoemsApi
-import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.Config
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.model.response.Poems
+import vip.mystery0.xhu.timetable.module.repo
+import vip.mystery0.xhu.timetable.repository.CourseRepo
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -23,8 +25,9 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
         private const val TAG = "LoginViewModel"
     }
 
-    private val serverApi: ServerApi by inject()
     private val poemsApi: PoemsApi by inject()
+
+    private val courseRepo: CourseRepo by repo()
 
     private val _todayTitle = MutableStateFlow("")
     val todayTitle: StateFlow<String> = _todayTitle
@@ -39,6 +42,7 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
         calculateTodayTitle()
         calculateWeek()
         showPoems()
+        loadCourseList()
     }
 
     private fun calculateTodayTitle() {
@@ -74,6 +78,13 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                 Config.poemsToken = poemsApi.getToken().data
             }
             _poems.value = poemsApi.getSentence().data
+        }
+    }
+
+    fun loadCourseList() {
+        viewModelScope.launch {
+            val courseList = courseRepo.getCourseList()
+            Log.i(TAG, "loadCourseList: $courseList")
         }
     }
 }
