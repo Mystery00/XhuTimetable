@@ -15,6 +15,9 @@ object XhuIcons {
     val profile: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_profile)
+    val todayWaterMelon: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_today_course_watermelon)
 }
 
 @Composable

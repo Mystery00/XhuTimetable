@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.model.entity.CourseItem
 import vip.mystery0.xhu.timetable.model.entity.CourseSource
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
@@ -15,9 +16,44 @@ class CourseLocalRepo : CourseRepo, KoinComponent {
 
     override suspend fun getCourseList(
         year: String,
-        term: Int
-    ): List<CourseResponse> {
-        return ArrayList()
+        term: Int,
+    ): List<CourseResponse> = withContext(Dispatchers.IO) {
+        val list = courseDao.queryCourseList(SessionManager.mainUser.studentId, year, term)
+        val result = ArrayList<CourseResponse>(list.size)
+        val map = HashMap<String, CourseResponse>()
+        val weekMap = HashMap<String, ArrayList<Int>>()
+        list.forEach { item ->
+            val key =
+                "${item.courseName}!${item.teacherName}!${item.location}!${item.weekIndex}!${item.time}!${item.type}"
+            var courseItem = map[key]
+            if (courseItem == null) {
+                courseItem = CourseResponse(
+                    item.courseName,
+                    item.teacherName,
+                    item.location,
+                    arrayListOf(),
+                    item.time.split(",").map { it.toInt() },
+                    item.type,
+                    item.weekIndex,
+                )
+                map[key] = courseItem
+            }
+            weekMap[key] = weekMap[key] ?: arrayListOf(item.weekNum)
+        }
+        map.forEach { (key, courseResponse) ->
+            result.add(
+                CourseResponse(
+                    courseResponse.name,
+                    courseResponse.teacher,
+                    courseResponse.location,
+                    weekMap[key]!!,
+                    courseResponse.time,
+                    courseResponse.type,
+                    courseResponse.day,
+                )
+            )
+        }
+        result
     }
 
     override suspend fun saveCourseList(
