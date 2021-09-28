@@ -81,7 +81,7 @@ object SessionManager {
             val serverApi = KoinJavaComponent.get<ServerApi>(ServerApi::class.java)
             val userInfo = serverApi.userInfo(loginResponse.token)
             reLogin(this, loginResponse.token, userInfo)
-            block(token) to true
+            block(loginResponse.token) to true
         }
 }
 

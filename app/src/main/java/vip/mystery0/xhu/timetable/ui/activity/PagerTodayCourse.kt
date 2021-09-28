@@ -3,20 +3,21 @@ package vip.mystery0.xhu.timetable.ui.activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Card
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
+import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
 val todayCourseTitle: TabTitle = @Composable { viewModel ->
     val title = viewModel.todayTitle.collectAsState()
@@ -27,11 +28,13 @@ val todayCourseTitle: TabTitle = @Composable { viewModel ->
 val todayCourseContent: TabContent = @Composable { viewModel ->
     Box {
         DrawLine()
-        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+        Column {
             val poems = viewModel.poems.collectAsState()
             poems.value?.let { value ->
-                DrawCard(poems = value)
+                DrawPoemsCard(poems = value)
             }
+            val todayCourseList by viewModel.todayCourse.collectAsState()
+            todayCourseList.forEach { DrawCourseCard(course = it) }
         }
     }
 }
@@ -49,8 +52,11 @@ private fun DrawLine() {
 
 @ExperimentalMaterialApi
 @Composable
-private fun DrawCard(poems: Poems) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+private fun DrawPoemsCard(poems: Poems) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 6.dp)
+    ) {
         Surface(
             shape = CircleShape,
             modifier = Modifier
@@ -60,7 +66,7 @@ private fun DrawCard(poems: Poems) {
         ) {}
         Card(
             onClick = {
-
+                //TODO
             },
             modifier = Modifier
                 .padding(end = 8.dp)
@@ -69,7 +75,7 @@ private fun DrawCard(poems: Poems) {
             Column(
                 modifier = Modifier
                     .padding(8.dp)
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
             ) {
                 Text(
                     text = poems.content,
@@ -83,6 +89,83 @@ private fun DrawCard(poems: Poems) {
                     textAlign = TextAlign.End,
                     modifier = Modifier.fillMaxWidth(),
                 )
+            }
+        }
+    }
+}
+
+@ExperimentalMaterialApi
+@Composable
+private fun DrawCourseCard(course: Course) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 6.dp)
+    ) {
+        Surface(
+            shape = CircleShape,
+            modifier = Modifier
+                .padding(horizontal = 6.dp)
+                .size(5.dp),
+            color = course.color
+        ) {}
+        Card(
+            modifier = Modifier
+                .padding(end = 8.dp)
+                .fillMaxWidth(),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp, end = 8.dp),
+            ) {
+                Icon(
+                    painter = XhuIcons.todayWaterMelon,
+                    contentDescription = null,
+                    tint = course.color,
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .size(16.dp),
+                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(vertical = 1.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = course.courseName,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            modifier = Modifier.weight(1F),
+                        )
+                        Text(
+                            text = course.time,
+                            fontSize = 14.sp,
+                        )
+                    }
+                    Text(
+                        text = course.teacherName,
+                        fontSize = 12.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 1.dp),
+                    )
+                    Text(
+                        text = course.time,
+                        fontSize = 12.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 1.dp),
+                    )
+                    Text(
+                        text = course.location,
+                        fontSize = 12.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 1.dp),
+                    )
+                }
             }
         }
     }

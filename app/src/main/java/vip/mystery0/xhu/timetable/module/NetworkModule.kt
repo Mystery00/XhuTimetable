@@ -50,7 +50,7 @@ val networkModule = module {
     serverApi<ServerApi>()
     serverApi<FileApi>()
 
-    single<PoemsApi> { get<Retrofit>(named(RETROFIT_POEMS)).create(PoemsApi::class.java) }
+    single { get<Retrofit>(named(RETROFIT_POEMS)).create(PoemsApi::class.java) }
 }
 
 private inline fun <reified API> Module.serverApi() {

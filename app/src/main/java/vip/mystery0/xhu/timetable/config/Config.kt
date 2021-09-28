@@ -4,8 +4,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.tencent.mmkv.MMKV
 import vip.mystery0.xhu.timetable.model.response.Splash
-import java.time.Instant
-import java.time.ZoneId
+import java.time.*
 
 val chinaZone = ZoneId.of("Asia/Shanghai")
 
@@ -30,6 +29,40 @@ object Config {
             kv.encode("termStartTime", value.toEpochMilli())
         }
         get() = Instant.ofEpochMilli(kv.decodeLong("termStartTime", 0L))
+
+    var currentYear: String
+        set(value) {
+            kv.encode("currentYear", value)
+        }
+        get() {
+            val decodeString = kv.decodeString("currentYear", "")
+            if (!decodeString.isNullOrBlank()) {
+                return decodeString
+            }
+            val time = LocalDateTime.ofInstant(termStartTime, chinaZone)
+            return if (time.month < Month.JUNE) {
+                "${time.year - 1}-${time.year}"
+            } else {
+                "${time.year}-${time.year + 1}"
+            }
+        }
+
+    var currentTerm: Int
+        set(value) {
+            kv.encode("currentTerm", value)
+        }
+        get() {
+            val decode = kv.decodeInt("currentTerm", -1)
+            if (decode != -1) {
+                return decode
+            }
+            val time = LocalDateTime.ofInstant(termStartTime, chinaZone)
+            return if (time.month < Month.JUNE) {
+                2
+            } else {
+                1
+            }
+        }
 
     var splashList: List<Splash>
         set(value) {
@@ -73,4 +106,19 @@ object Config {
             kv.encode("poemsToken", value)
         }
         get() = kv.decodeString("poemsToken")
+    var lastSyncCourse: LocalDate
+        set(value) {
+            kv.encode(
+                "lastSyncCourse",
+                value.atStartOfDay().atZone(chinaZone).toInstant().toEpochMilli()
+            )
+        }
+        get() {
+            val decodeLong = kv.decodeLong("lastSyncCourse")
+            return if (decodeLong != 0L) {
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(decodeLong), chinaZone).toLocalDate()
+            } else {
+                LocalDate.MIN
+            }
+        }
 }
