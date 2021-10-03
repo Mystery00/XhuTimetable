@@ -3,20 +3,22 @@ package vip.mystery0.xhu.timetable.ui.activity
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
-import android.util.Log
 import android.widget.ImageView
 import androidx.activity.viewModels
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -36,6 +38,7 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuStateIcons
 import vip.mystery0.xhu.timetable.ui.theme.stateOf
 import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
 import kotlin.math.absoluteValue
+import kotlin.math.min
 
 class MainActivity : BaseComposeActivity() {
     companion object {
@@ -52,7 +55,9 @@ class MainActivity : BaseComposeActivity() {
         val coroutineScope = rememberCoroutineScope()
         val pagerState = rememberPagerState(pageCount = 3)
         val loading by viewModel.loading.collectAsState()
-        Log.i(TAG, "BuildContent: $loading")
+        val weekView by viewModel.weekView.collectAsState()
+        val showWeekView by viewModel.showWeekView.collectAsState()
+        val currentWeek by viewModel.week.collectAsState()
         Scaffold(
             topBar = {
                 Box(
@@ -77,7 +82,7 @@ class MainActivity : BaseComposeActivity() {
                                 ImageView(context)
                             },
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(18.dp)
                                 .align(Alignment.Center),
                         ) {
                             it.setImageResource(R.drawable.ic_sync)
@@ -171,6 +176,79 @@ class MainActivity : BaseComposeActivity() {
                         }
                     }
                 }
+                AnimatedVisibility(
+                    visible = showWeekView,
+                    enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
+                    exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
+                ) {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        modifier = Modifier
+                            .background(weekViewBackgroundColor)
+                            .fillMaxWidth(),
+                    ) {
+                        items(weekView.size) { index ->
+                            val week = weekView[index]
+                            val thisWeek = week.thisWeek
+                            val color = when {
+                                thisWeek -> weekViewThisWeekColor
+                                week.weekNum == currentWeek -> weekViewCurrentWeekColor
+                                else -> Color.Transparent
+                            }
+                            Column(
+                                modifier = Modifier
+                                    .background(
+                                        color = color,
+                                        shape = MaterialTheme.shapes.medium,
+                                    )
+                                    .padding(
+                                        horizontal = 4.dp,
+                                        vertical = 2.dp,
+                                    )
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = remember { MutableInteractionSource() },
+                                    ) {
+                                        viewModel.changeCurrentWeek(week.weekNum)
+                                    },
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Text(text = "第${week.weekNum}周", fontSize = 10.sp)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Canvas(
+                                    modifier = Modifier
+                                        .height(32.dp)
+                                        .width(28.dp)
+                                ) {
+                                    val canvasHeight = size.height
+                                    val canvasWidth = size.width
+                                    //每一项大小
+                                    val itemHeight = canvasHeight / 5F
+                                    val itemWidth = canvasWidth / 5F
+                                    //圆心位置
+                                    val itemCenterHeight = itemHeight / 2F
+                                    val itemCenterWidth = itemWidth / 2F
+                                    //半径
+                                    val radius = min(itemCenterHeight, itemCenterWidth) - 1F
+                                    for (day in 0 until 5) {
+                                        for (time in 0 until 5) {
+                                            val light = week.array[time][day]
+                                            drawCircle(
+                                                color = if (light) weekViewLightColor else weekViewGrayColor,
+                                                center = Offset(
+                                                    x = itemWidth * time + itemCenterWidth,
+                                                    y = itemHeight * day + itemCenterHeight,
+                                                ),
+                                                radius = radius,
+                                            )
+                                        }
+                                    }
+                                }
+                                Text(text = if (thisWeek) "本周" else "", fontSize = 8.sp)
+                            }
+                        }
+                    }
+                }
             }
         }
         val errorMessage by viewModel.errorMessage.collectAsState()
@@ -197,6 +275,7 @@ class MainActivity : BaseComposeActivity() {
                     onClick = {
                         coroutineScope.launch {
                             state.animateScrollToPage(tab.index)
+                            viewModel.dismissWeekView()
                         }
                     },
                     indication = null,
@@ -226,6 +305,12 @@ class MainActivity : BaseComposeActivity() {
         }
     }
 }
+
+private val weekViewBackgroundColor = Color(0xFFE2F7F6)
+private val weekViewThisWeekColor = Color(0xFFB7F5F2)
+private val weekViewCurrentWeekColor = Color(0xFFFFFFFF)
+private val weekViewLightColor = Color(0xFF3FCAB8)
+private val weekViewGrayColor = Color(0xFFCFDBDB)
 
 @Composable
 private fun colorOf(checked: Boolean): Color =
