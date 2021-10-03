@@ -4,12 +4,16 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.ArrowForwardIos
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -118,7 +122,12 @@ val profileCourseContent: TabContent = @Composable { viewModel ->
                 .height(6.dp)
                 .background(divider),
         )
-        BuildProfileItem(painter = XhuIcons.Profile.notice, title = "通知公告")
+        val hasUnReadNotice by viewModel.hasUnReadNotice.collectAsState()
+        BuildProfileItem(
+            painter = XhuIcons.Profile.notice,
+            title = "通知公告",
+            showBadge = hasUnReadNotice
+        )
         Divider(
             modifier = Modifier
                 .fillMaxWidth()
@@ -134,7 +143,12 @@ private val dividerSmall = Color(0xFFeaeaea)
 private val more = Color(0xFF979797)
 
 @Composable
-private fun BuildProfileItem(painter: Painter, title: String, click: () -> Unit = {}) {
+private fun BuildProfileItem(
+    painter: Painter,
+    title: String,
+    showBadge: Boolean = false,
+    click: () -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .height(48.dp)
@@ -157,11 +171,18 @@ private fun BuildProfileItem(painter: Painter, title: String, click: () -> Unit 
                 .weight(1F)
                 .padding(vertical = 12.dp),
         )
+        if (showBadge) {
+            Surface(
+                shape = CircleShape,
+                modifier = Modifier.size(6.dp),
+                color = Color.Red
+            ) {}
+        }
         Icon(
             imageVector = Icons.TwoTone.ArrowForwardIos,
             contentDescription = null,
             modifier = Modifier
-                .padding(horizontal = 12.dp)
+                .padding(end = 12.dp, start = if (showBadge) 10.dp else 12.dp)
                 .size(12.dp),
             tint = more,
         )

@@ -11,4 +11,5 @@ val databaseModule = module {
             .build()
     }
     single { get<DB>().courseDao() }
+    single { get<DB>().noticeDao() }
 }
