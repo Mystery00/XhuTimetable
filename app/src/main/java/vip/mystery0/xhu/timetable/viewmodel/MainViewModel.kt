@@ -167,7 +167,7 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                     it.type,
                     it.time,
                     timeString,
-                    timeString,
+                    it.time.formatTime(),
                     it.day,
                     thisWeek,
                     ColorPool.hash(it.name),
@@ -205,7 +205,7 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                     it.type,
                     it.time,
                     timeString,
-                    timeString,
+                    it.time.formatTime(),
                     it.day,
                     thisWeek,
                     ColorPool.hash(it.name),
@@ -357,6 +357,36 @@ private val notThisWeekBackgroundColor = Color(0xFFe5e5e5)
 
 fun List<Int>.formatTimeString(): String =
     if (size == 1) "第${this[0]}节" else "${first()}-${last()}节"
+
+private val startArray = arrayOf(
+    "08:00",
+    "08:55",
+    "10:00",
+    "10:55",
+    "14:00",
+    "14:55",
+    "16:00",
+    "16:00",
+    "19:00",
+    "19:55",
+    "20:50",
+)
+
+private val endArray = arrayOf(
+    "08:45",
+    "09:40",
+    "10:45",
+    "11:40",
+    "14:45",
+    "15:40",
+    "16:45",
+    "17:40",
+    "19:45",
+    "19:40",
+    "21:35",
+)
+
+fun List<Int>.formatTime(): String = "${startArray[first() - 1]} - ${endArray[last() - 1]}"
 
 data class CourseSheet(
     //显示标题

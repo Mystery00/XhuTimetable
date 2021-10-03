@@ -147,7 +147,7 @@ private fun DrawCourseCard(course: Course) {
                             modifier = Modifier.weight(1F),
                         )
                         Text(
-                            text = course.time,
+                            text = course.timeString,
                             fontSize = 14.sp,
                         )
                     }
