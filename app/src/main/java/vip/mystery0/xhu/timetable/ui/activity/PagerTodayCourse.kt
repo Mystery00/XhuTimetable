@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -186,34 +187,36 @@ fun ShowPoemsDialog(dialogState: MutableState<Poems?>) {
     }
     AlertDialog(onDismissRequest = dismiss,
         text = {
-            Column {
-                Text(
-                    text = "《${poems.title}》",
-                    fontSize = 12.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "[${poems.dynasty}] ${poems.author}",
-                    fontSize = 12.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = poems.content.joinToString("\n"),
-                    fontSize = 12.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                if (!poems.translate.isNullOrEmpty()) {
-                    Spacer(modifier = Modifier.height(6.dp))
+            SelectionContainer {
+                Column {
                     Text(
-                        text = poems.translate.joinToString("\n"),
+                        text = "《${poems.title}》",
                         fontSize = 12.sp,
+                        textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
                     )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "[${poems.dynasty}] ${poems.author}",
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = poems.content.joinToString("\n"),
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    if (!poems.translate.isNullOrEmpty()) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "诗词大意：${poems.translate.joinToString("\n")}",
+                            fontSize = 10.sp,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                 }
             }
         }, confirmButton = {

@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
 import vip.mystery0.xhu.timetable.R
+import vip.mystery0.xhu.timetable.config.Config
 import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
@@ -44,7 +45,7 @@ val profileCourseContent: TabContent = @Composable { viewModel ->
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Image(
-                rememberImagePainter(R.mipmap.ic_launcher),
+                rememberImagePainter(data = Config.profileImage ?: R.mipmap.ic_launcher),
                 contentDescription = null,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)

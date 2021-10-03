@@ -34,17 +34,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.config.Config
 import vip.mystery0.xhu.timetable.ui.theme.XhuStateIcons
 import vip.mystery0.xhu.timetable.ui.theme.stateOf
+import vip.mystery0.xhu.timetable.utils.isTwiceClick
 import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
 import kotlin.math.absoluteValue
 import kotlin.math.min
 
 class MainActivity : BaseComposeActivity() {
-    companion object {
-        private const val TAG = "MainActivity"
-    }
-
     private val viewModel: MainViewModel by viewModels()
 
     @ExperimentalPagerApi
@@ -142,7 +140,9 @@ class MainActivity : BaseComposeActivity() {
         ) { paddingValues ->
             Box {
                 Image(
-                    painter = rememberImagePainter(data = R.mipmap.main_bg) {
+                    painter = rememberImagePainter(
+                        data = Config.backgroundImage ?: R.mipmap.main_bg
+                    ) {
                         scale(Scale.FIT)
                         diskCachePolicy(CachePolicy.DISABLED)
                     },
@@ -303,6 +303,13 @@ class MainActivity : BaseComposeActivity() {
             }
             Spacer(Modifier.padding(bottom = 2.dp))
         }
+    }
+
+    override fun onBackPressed() {
+        if (isTwiceClick())
+            super.onBackPressed()
+        else
+            "再按一次退出西瓜课表".toast()
     }
 }
 
