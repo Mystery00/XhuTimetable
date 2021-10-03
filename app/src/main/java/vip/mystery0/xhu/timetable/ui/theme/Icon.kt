@@ -6,18 +6,15 @@ import androidx.compose.ui.res.painterResource
 import vip.mystery0.xhu.timetable.R
 
 object XhuIcons {
-    val todayCourse: Painter
-        @Composable
-        get() = painterResource(id = R.drawable.ic_today_course)
-    val weekCourse: Painter
-        @Composable
-        get() = painterResource(id = R.drawable.ic_week_course)
-    val profile: Painter
-        @Composable
-        get() = painterResource(id = R.drawable.ic_profile)
     val todayWaterMelon: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_today_course_watermelon)
+    val conflict: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_radius_cell)
+    val sync: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_sync)
 }
 
 @Composable

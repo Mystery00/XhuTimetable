@@ -1,5 +1,10 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import android.animation.Animator
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
+import android.util.Log
+import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -9,8 +14,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,6 +22,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.rememberImagePainter
 import coil.request.CachePolicy
 import coil.size.Scale
@@ -46,14 +51,61 @@ class MainActivity : BaseComposeActivity() {
     override fun BuildContent() {
         val coroutineScope = rememberCoroutineScope()
         val pagerState = rememberPagerState(pageCount = 3)
+        val loading by viewModel.loading.collectAsState()
+        Log.i(TAG, "BuildContent: $loading")
         Scaffold(
             topBar = {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(45.dp),
-                    contentAlignment = Alignment.Center,
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .padding(horizontal = 8.dp)
+                            .align(Alignment.CenterEnd)
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() },
+                            ) {
+                                viewModel.loadCourseList()
+                            },
+                    ) {
+                        AndroidView(
+                            factory = { context ->
+                                ImageView(context)
+                            },
+                            modifier = Modifier
+                                .size(24.dp)
+                                .align(Alignment.Center),
+                        ) {
+                            it.setImageResource(R.drawable.ic_sync)
+                            val animation = ObjectAnimator.ofFloat(it, "rotation", 0F, 360F).apply {
+                                duration = 1000L
+                                repeatCount = ValueAnimator.INFINITE
+                                addListener(object : Animator.AnimatorListener {
+                                    override fun onAnimationStart(p0: Animator?) {
+                                    }
+
+                                    override fun onAnimationEnd(p0: Animator?) {
+                                    }
+
+                                    override fun onAnimationCancel(p0: Animator?) {
+                                    }
+
+                                    override fun onAnimationRepeat(p0: Animator?) {
+                                        if (!loading) {
+                                            p0?.cancel()
+                                        }
+                                    }
+                                })
+                            }
+                            if (loading) {
+                                animation.start()
+                            }
+                        }
+                    }
                     tabOf(pagerState.currentPage).title(this, viewModel)
                 }
             },
@@ -120,6 +172,10 @@ class MainActivity : BaseComposeActivity() {
                     }
                 }
             }
+        }
+        val errorMessage by viewModel.errorMessage.collectAsState()
+        if (errorMessage.isNotBlank()) {
+            errorMessage.toast(true)
         }
     }
 

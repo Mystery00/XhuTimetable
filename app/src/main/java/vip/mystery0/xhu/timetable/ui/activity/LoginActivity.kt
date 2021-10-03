@@ -55,8 +55,8 @@ class LoginActivity : BaseComposeActivity() {
                         .navigationBarsPadding()
                         .fillMaxHeight()
                 ) {
-                    var username by remember { mutableStateOf("000020210922") }
-                    var password by remember { mutableStateOf("089fc9") }
+                    var username by remember { mutableStateOf("000020210930") }
+                    var password by remember { mutableStateOf("d7d6e5") }
                     Spacer(
                         modifier = Modifier
                             .height(62.dp)
