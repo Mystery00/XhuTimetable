@@ -4,6 +4,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.tencent.mmkv.MMKV
 import vip.mystery0.xhu.timetable.model.response.Splash
+import java.io.File
 import java.time.*
 
 val chinaZone = ZoneId.of("Asia/Shanghai")
@@ -120,5 +121,21 @@ object Config {
             } else {
                 LocalDate.MIN
             }
+        }
+    var backgroundImage: File?
+        set(value) {
+            kv.encode("backgroundImage", value!!.absolutePath)
+        }
+        get() {
+            val image = kv.decodeString("backgroundImage")
+            return if (image.isNullOrBlank()) null else File(image)
+        }
+    var profileImage: File?
+        set(value) {
+            kv.encode("profileImage", value!!.absolutePath)
+        }
+        get() {
+            val image = kv.decodeString("profileImage")
+            return if (image.isNullOrBlank()) null else File(image)
         }
 }

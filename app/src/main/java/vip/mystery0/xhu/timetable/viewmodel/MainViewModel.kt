@@ -66,8 +66,8 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
     private val _todayCourse = MutableStateFlow<List<Course>>(emptyList())
     val todayCourse: StateFlow<List<Course>> = _todayCourse
 
-    private val _tableCourse = MutableStateFlow<List<List<CourseSheet?>>>(emptyList())
-    val tableCourse: StateFlow<List<List<CourseSheet?>>> = _tableCourse
+    private val _tableCourse = MutableStateFlow<List<List<CourseSheet>>>(emptyList())
+    val tableCourse: StateFlow<List<List<CourseSheet>>> = _tableCourse
 
     private val _weekView = MutableStateFlow<List<WeekView>>(emptyList())
     val weekView: StateFlow<List<WeekView>> = _weekView
@@ -212,7 +212,7 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                 )
             }
             //过滤出本周的课程
-            val tableCourse = Array<ArrayList<CourseSheet?>>(7) { _ -> arrayListOf() }
+            val tableCourse = Array<ArrayList<CourseSheet>>(7) { arrayListOf() }
             val expandItemMap = HashMap<Pair<Int, Int>, ArrayList<Course>>()
             allCourseList.map { course ->
                 course.timeSet.forEach { time ->
@@ -267,17 +267,24 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                 if (lastSheet != thisSheet) {
                     //不相等，直接添加
                     //判断中间需不需要留空
-                    lastSheet?.let {
-                        val count = thisSheet.startIndex - it.startIndex - it.step
-                        for (i in count downTo 1) {
-                            tableCourse[day - 1].add(null)
-                        }
-                    }
                     if (thisSheet.day != lastSheet?.day) {
                         //两个不是同一天，说明换天了，此时需要计算空闲格子
                         val count = thisSheet.startIndex - 1
-                        for (i in count downTo 1) {
-                            tableCourse[day - 1].add(null)
+                        if (count > 0) {
+                            tableCourse[day - 1].add(CourseSheet.empty(count, 1, day))
+                        }
+                    } else {
+                        lastSheet?.let {
+                            val count = thisSheet.startIndex - it.startIndex - it.step
+                            if (count > 0) {
+                                tableCourse[day - 1].add(
+                                    CourseSheet.empty(
+                                        count,
+                                        it.startIndex + it.step,
+                                        day
+                                    )
+                                )
+                            }
                         }
                     }
                     tableCourse[day - 1].add(thisSheet)
@@ -412,6 +419,14 @@ data class CourseSheet(
     //文本颜色
     val textColor: Color,
 ) {
+    companion object {
+        fun empty(step: Int, startIndex: Int, day: Int): CourseSheet = CourseSheet(
+            "", step, startIndex, day, emptyList(), Color.Unspecified, Color.Unspecified
+        )
+    }
+
+    fun isEmpty(): Boolean = course.isEmpty()
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

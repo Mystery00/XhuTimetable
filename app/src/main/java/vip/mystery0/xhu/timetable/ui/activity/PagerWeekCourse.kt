@@ -116,7 +116,7 @@ val weekCourseContent: TabContent = @Composable { viewModel ->
                     for (index in 0 until 7) {
                         Column(modifier = Modifier.weight(1F)) {
                             tableCourse[index].forEach { sheet ->
-                                if (sheet != null) {
+                                if (!sheet.isEmpty()) {
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -152,7 +152,7 @@ val weekCourseContent: TabContent = @Composable { viewModel ->
                                     Spacer(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(itemHeight)
+                                            .height(itemHeight * sheet.step)
                                     )
                                 }
                             }
