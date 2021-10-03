@@ -8,14 +8,18 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.repository.CourseRepo
+import vip.mystery0.xhu.timetable.repository.NoticeRepo
 import vip.mystery0.xhu.timetable.repository.local.CourseLocalRepo
+import vip.mystery0.xhu.timetable.repository.local.NoticeLocalRepo
 import vip.mystery0.xhu.timetable.repository.local.StartLocalRepo
 import vip.mystery0.xhu.timetable.repository.remote.CourseRemoteRepo
+import vip.mystery0.xhu.timetable.repository.remote.NoticeRemoteRepo
 import vip.mystery0.xhu.timetable.repository.remote.StartRemoteRepo
 
 val repoModule = module {
     injectRepo(StartLocalRepo(), StartRemoteRepo())
     injectRepo<CourseRepo, CourseLocalRepo, CourseRemoteRepo>(CourseLocalRepo(), CourseRemoteRepo())
+    injectRepo<NoticeRepo, NoticeLocalRepo, NoticeRemoteRepo>(NoticeLocalRepo(), NoticeRemoteRepo())
 }
 
 const val SCOPE_LOCAL = "_Local"

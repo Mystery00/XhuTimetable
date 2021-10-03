@@ -1,18 +1,12 @@
 package vip.mystery0.xhu.timetable.api
 
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.POST
+import retrofit2.http.*
 import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
 import vip.mystery0.xhu.timetable.model.UserInfo
 import vip.mystery0.xhu.timetable.model.request.InitRequest
 import vip.mystery0.xhu.timetable.model.request.LoginRequest
-import vip.mystery0.xhu.timetable.model.response.CourseResponse
-import vip.mystery0.xhu.timetable.model.response.InitResponse
-import vip.mystery0.xhu.timetable.model.response.LoginResponse
-import vip.mystery0.xhu.timetable.model.response.PublicKeyResponse
+import vip.mystery0.xhu.timetable.model.response.*
 
 interface ServerApi {
     @POST("/api/rest/xhu-timetable/common/init")
@@ -29,6 +23,12 @@ interface ServerApi {
 
     @GET("/api/rest/xhu-timetable/server/course/list")
     suspend fun courseList(@Header("token") token: String): Response<List<CourseResponse>>
+
+    @GET("/api/rest/xhu-timetable/server/notice")
+    suspend fun noticeList(
+        @Header("token") token: String,
+        @Query("platform") platform: String = "Android"
+    ): Response<List<NoticeResponse>>
 }
 
 fun <T : Any> Response<T>.checkLogin(): T {

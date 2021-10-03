@@ -122,6 +122,21 @@ object Config {
                 LocalDate.MIN
             }
         }
+    var lastSyncNotice: LocalDate
+        set(value) {
+            kv.encode(
+                "lastSyncNotice",
+                value.atStartOfDay().atZone(chinaZone).toInstant().toEpochMilli()
+            )
+        }
+        get() {
+            val decodeLong = kv.decodeLong("lastSyncNotice")
+            return if (decodeLong != 0L) {
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(decodeLong), chinaZone).toLocalDate()
+            } else {
+                LocalDate.MIN
+            }
+        }
     var backgroundImage: File?
         set(value) {
             kv.encode("backgroundImage", value!!.absolutePath)

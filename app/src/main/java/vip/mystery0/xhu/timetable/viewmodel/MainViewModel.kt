@@ -20,6 +20,7 @@ import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.module.localRepo
 import vip.mystery0.xhu.timetable.module.repo
 import vip.mystery0.xhu.timetable.repository.CourseRepo
+import vip.mystery0.xhu.timetable.repository.NoticeRepo
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import java.time.DayOfWeek
 import java.time.Duration
@@ -33,7 +34,7 @@ import kotlin.collections.HashMap
 
 class MainViewModel : ComposeViewModel(), KoinComponent {
     companion object {
-        private const val TAG = "LoginViewModel"
+        private const val TAG = "MainViewModel"
     }
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -43,6 +44,8 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
     private val courseRepo: CourseRepo by repo()
 
     private val courseLocalRepo: CourseRepo by localRepo()
+
+    private val noticeRepo: NoticeRepo by repo()
 
     private val _errorMessage = MutableStateFlow("")
     val errorMessage: StateFlow<String> = _errorMessage
@@ -77,6 +80,9 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
 
     private val _showWeekView = MutableStateFlow(false)
     val showWeekView: StateFlow<Boolean> = _showWeekView
+
+    private val _hasUnReadNotice = MutableStateFlow(false)
+    val hasUnReadNotice: StateFlow<Boolean> = _hasUnReadNotice
 
     init {
         showPoems()
@@ -187,7 +193,6 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
     }
 
     private fun loadCourseToTable(currentWeek: Int) {
-        Log.i(TAG, "loadCourseToTable: $currentWeek")
         viewModelScope.launch {
             //获取所有的课程列表
             val courseList = courseLocalRepo.getCourseList()
@@ -332,6 +337,15 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
 
     fun changeCurrentWeek(currentWeek: Int) {
         _week.value = currentWeek
+    }
+
+    fun checkUnReadNotice() {
+        viewModelScope.launch(serverExceptionHandler { throwable ->
+            Log.w(TAG, "load notice list failed", throwable)
+            _errorMessage.value = throwable.message ?: throwable.javaClass.simpleName
+        }) {
+            _hasUnReadNotice.value = noticeRepo.hasUnReadNotice()
+        }
     }
 }
 

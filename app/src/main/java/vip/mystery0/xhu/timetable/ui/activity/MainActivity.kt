@@ -311,6 +311,11 @@ class MainActivity : BaseComposeActivity() {
         else
             "再按一次退出西瓜课表".toast()
     }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.checkUnReadNotice()
+    }
 }
 
 private val weekViewBackgroundColor = Color(0xFFE2F7F6)
