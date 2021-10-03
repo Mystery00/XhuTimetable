@@ -10,4 +10,6 @@ interface NoticeRepo : Repo {
     suspend fun hasUnReadNotice(): Boolean
 
     suspend fun saveList(noticeList: List<NoticeResponse>) {}
+
+    suspend fun markAllAsRead() {}
 }

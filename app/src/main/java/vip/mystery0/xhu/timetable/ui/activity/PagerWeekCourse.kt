@@ -38,7 +38,8 @@ import java.time.format.TextStyle
 import java.util.*
 
 @OptIn(ExperimentalAnimationApi::class)
-val weekCourseTitle: TabTitle = @Composable { viewModel ->
+val weekCourseTitle: TabTitle = @Composable { ext ->
+    val viewModel = ext.viewModel
     val week = viewModel.week.collectAsState()
     val showWeekView by viewModel.showWeekView.collectAsState()
     val rotationAngle by animateFloatAsState(
@@ -66,7 +67,8 @@ val weekCourseTitle: TabTitle = @Composable { viewModel ->
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
-val weekCourseContent: TabContent = @Composable { viewModel ->
+val weekCourseContent: TabContent = @Composable { ext ->
+    val viewModel = ext.viewModel
     val courseDialogState = remember { mutableStateOf<List<Course>>(emptyList()) }
     val tableCourse by viewModel.tableCourse.collectAsState()
     Box {
@@ -204,10 +206,7 @@ private fun BoxScope.ShowCourseDialog(dialogState: MutableState<List<Course>>) {
     if (showList.isNullOrEmpty()) return
     val first = showList.firstOrNull { it.thisWeek }
     val initPage = if (first == null) 0 else showList.indexOf(first)
-    val pagerState = rememberPagerState(
-        pageCount = showList.size,
-        initialPage = initPage,
-    )
+    val pagerState = rememberPagerState(initialPage = initPage)
     Dialog(onDismissRequest = {
         dialogState.value = emptyList()
     }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -217,6 +216,7 @@ private fun BoxScope.ShowCourseDialog(dialogState: MutableState<List<Course>>) {
                 .align(Alignment.Center)
         ) {
             HorizontalPager(
+                count = showList.size,
                 state = pagerState,
                 modifier = Modifier
                     .height(240.dp),

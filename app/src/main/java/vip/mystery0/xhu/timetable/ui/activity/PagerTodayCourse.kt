@@ -20,13 +20,15 @@ import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
-val todayCourseTitle: TabTitle = @Composable { viewModel ->
+val todayCourseTitle: TabTitle = @Composable { ext ->
+    val viewModel = ext.viewModel
     val title = viewModel.todayTitle.collectAsState()
     Text(text = title.value, modifier = Modifier.align(Alignment.Center))
 }
 
 @ExperimentalMaterialApi
-val todayCourseContent: TabContent = @Composable { viewModel ->
+val todayCourseContent: TabContent = @Composable { ext ->
+    val viewModel = ext.viewModel
     val poemsDialogState = remember { mutableStateOf<Poems?>(null) }
     val poems = viewModel.poems.collectAsState()
     val todayCourseList by viewModel.todayCourse.collectAsState()

@@ -45,13 +45,16 @@ import kotlin.math.min
 class MainActivity : BaseComposeActivity() {
     private val viewModel: MainViewModel by viewModels()
 
+    private val ext: MainActivityExt
+        get() = MainActivityExt(this, viewModel)
+
     @ExperimentalPagerApi
     @ExperimentalAnimationApi
     @ExperimentalMaterialApi
     @Composable
     override fun BuildContent() {
         val coroutineScope = rememberCoroutineScope()
-        val pagerState = rememberPagerState(pageCount = 3)
+        val pagerState = rememberPagerState(initialPage = 0)
         val loading by viewModel.loading.collectAsState()
         val weekView by viewModel.weekView.collectAsState()
         val showWeekView by viewModel.showWeekView.collectAsState()
@@ -109,7 +112,7 @@ class MainActivity : BaseComposeActivity() {
                             }
                         }
                     }
-                    tabOf(pagerState.currentPage).title(this, viewModel)
+                    tabOf(pagerState.currentPage).title(this, ext)
                 }
             },
             bottomBar = {
@@ -152,6 +155,7 @@ class MainActivity : BaseComposeActivity() {
                         .fillMaxSize()
                 )
                 HorizontalPager(
+                    count = 3,
                     state = pagerState,
                     modifier = Modifier
                         .padding(paddingValues),
@@ -170,9 +174,9 @@ class MainActivity : BaseComposeActivity() {
                             .fillMaxSize()
                     ) {
                         when (page) {
-                            Tab.TODAY.index -> Tab.TODAY.content(this, viewModel)
-                            Tab.WEEK.index -> Tab.WEEK.content(this, viewModel)
-                            Tab.PROFILE.index -> Tab.PROFILE.content(this, viewModel)
+                            Tab.TODAY.index -> Tab.TODAY.content(this, ext)
+                            Tab.WEEK.index -> Tab.WEEK.content(this, ext)
+                            Tab.PROFILE.index -> Tab.PROFILE.content(this, ext)
                         }
                     }
                 }
@@ -348,5 +352,10 @@ private fun tabOf(index: Int): Tab = when (index) {
     else -> throw NoSuchElementException()
 }
 
-typealias TabTitle = @Composable BoxScope.(MainViewModel) -> Unit
-typealias TabContent = @Composable ColumnScope.(MainViewModel) -> Unit
+data class MainActivityExt(
+    val activity: MainActivity,
+    val viewModel: MainViewModel,
+)
+
+typealias TabTitle = @Composable BoxScope.(MainActivityExt) -> Unit
+typealias TabContent = @Composable ColumnScope.(MainActivityExt) -> Unit

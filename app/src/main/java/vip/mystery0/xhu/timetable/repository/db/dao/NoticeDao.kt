@@ -1,15 +1,15 @@
 package vip.mystery0.xhu.timetable.repository.db.dao
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 import vip.mystery0.xhu.timetable.model.entity.Notice
 
 @Dao
 interface NoticeDao {
     @Insert
     fun saveNotice(notice: Notice)
+
+    @Update
+    fun updateNotice(notice: Notice)
 
     @Delete
     fun deleteNotice(notice: Notice)
