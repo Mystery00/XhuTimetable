@@ -15,6 +15,33 @@ object XhuIcons {
     val sync: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_sync)
+
+    object Profile {
+        val exam: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_exam)
+        val score: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_score)
+        val classroom: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_classroom)
+        val accountSettings: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_account_settings)
+        val classSettings: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_class_settings)
+        val settings: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_settings)
+        val notice: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_notice)
+        val share: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_share)
+    }
 }
 
 @Composable

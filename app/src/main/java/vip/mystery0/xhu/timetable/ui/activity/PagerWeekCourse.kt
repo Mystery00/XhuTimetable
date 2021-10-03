@@ -258,7 +258,7 @@ private fun BoxScope.ShowCourseDialog(dialogState: MutableState<List<Course>>) {
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Text(
-                        text = course.timeString,
+                        text = course.time,
                         color = Color.White,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
