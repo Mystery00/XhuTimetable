@@ -38,7 +38,9 @@ class CourseLocalRepo : CourseRepo, KoinComponent {
                 )
                 map[key] = courseItem
             }
-            weekMap[key] = weekMap[key] ?: arrayListOf(item.weekNum)
+            val list = weekMap[key] ?: arrayListOf()
+            list.add(item.weekNum)
+            weekMap[key] = list
         }
         map.forEach { (key, courseResponse) ->
             result.add(

@@ -2,14 +2,14 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -21,21 +21,30 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
 val todayCourseTitle: TabTitle = @Composable { viewModel ->
     val title = viewModel.todayTitle.collectAsState()
-    Text(text = title.value)
+    Text(text = title.value, modifier = Modifier.align(Alignment.Center))
 }
 
 @ExperimentalMaterialApi
 val todayCourseContent: TabContent = @Composable { viewModel ->
+    val poemsDialogState = remember { mutableStateOf<Poems?>(null) }
+    val poems = viewModel.poems.collectAsState()
+    val todayCourseList by viewModel.todayCourse.collectAsState()
     Box {
         DrawLine()
-        Column {
-            val poems = viewModel.poems.collectAsState()
+        LazyColumn(
+            contentPadding = PaddingValues(vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             poems.value?.let { value ->
-                DrawPoemsCard(poems = value)
+                item {
+                    DrawPoemsCard(poemsDialogState, poems = value)
+                }
             }
-            val todayCourseList by viewModel.todayCourse.collectAsState()
-            todayCourseList.forEach { DrawCourseCard(course = it) }
+            items(todayCourseList.size) { index ->
+                DrawCourseCard(course = todayCourseList[index])
+            }
         }
+        ShowPoemsDialog(dialogState = poemsDialogState)
     }
 }
 
@@ -52,10 +61,9 @@ private fun DrawLine() {
 
 @ExperimentalMaterialApi
 @Composable
-private fun DrawPoemsCard(poems: Poems) {
+private fun DrawPoemsCard(dialogState: MutableState<Poems?>, poems: Poems) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(vertical = 6.dp)
     ) {
         Surface(
             shape = CircleShape,
@@ -66,7 +74,7 @@ private fun DrawPoemsCard(poems: Poems) {
         ) {}
         Card(
             onClick = {
-                //TODO
+                dialogState.value = poems
             },
             modifier = Modifier
                 .padding(end = 8.dp)
@@ -99,7 +107,6 @@ private fun DrawPoemsCard(poems: Poems) {
 private fun DrawCourseCard(course: Course) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(vertical = 6.dp)
     ) {
         Surface(
             shape = CircleShape,
@@ -169,4 +176,49 @@ private fun DrawCourseCard(course: Course) {
             }
         }
     }
+}
+
+@Composable
+fun ShowPoemsDialog(dialogState: MutableState<Poems?>) {
+    val poems = dialogState.value?.origin ?: return
+    val dismiss = {
+        dialogState.value = null
+    }
+    AlertDialog(onDismissRequest = dismiss,
+        text = {
+            Column {
+                Text(
+                    text = "《${poems.title}》",
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "[${poems.dynasty}] ${poems.author}",
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = poems.content.joinToString("\n"),
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                if (!poems.translate.isNullOrEmpty()) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = poems.translate.joinToString("\n"),
+                        fontSize = 12.sp,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+        }, confirmButton = {
+            TextButton(onClick = dismiss) {
+                Text(text = stringResource(id = android.R.string.ok))
+            }
+        })
 }
