@@ -259,6 +259,7 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                         if (show.thisWeek) showTitle else "[非本周]\n${showTitle}",
                         1,
                         show.timeSet.first(),
+                        day,
                         list.distinct().sortedBy { it.weekSet.first() },
                         if (show.thisWeek) ColorPool.hash(show.courseName) else notThisWeekBackgroundColor,
                         if (show.thisWeek) Color.White else Color.Gray,
@@ -268,6 +269,13 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                     //判断中间需不需要留空
                     lastSheet?.let {
                         val count = thisSheet.startIndex - it.startIndex - it.step
+                        for (i in count downTo 1) {
+                            tableCourse[day - 1].add(null)
+                        }
+                    }
+                    if (thisSheet.day != lastSheet?.day) {
+                        //两个不是同一天，说明换天了，此时需要计算空闲格子
+                        val count = thisSheet.startIndex - 1
                         for (i in count downTo 1) {
                             tableCourse[day - 1].add(null)
                         }
@@ -395,6 +403,8 @@ data class CourseSheet(
     var step: Int,
     //开始节次序号
     val startIndex: Int,
+    //周几
+    val day: Int,
     //当前格子的课程列表
     val course: List<Course>,
     //颜色
