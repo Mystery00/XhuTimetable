@@ -2,9 +2,10 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,21 +31,20 @@ val todayCourseTitle: TabTitle = @Composable { ext ->
 val todayCourseContent: TabContent = @Composable { ext ->
     val viewModel = ext.viewModel
     val poemsDialogState = remember { mutableStateOf<Poems?>(null) }
-    val poems = viewModel.poems.collectAsState()
+    val poems by viewModel.poems.collectAsState()
     val todayCourseList by viewModel.todayCourse.collectAsState()
     Box {
         DrawLine()
-        LazyColumn(
-            contentPadding = PaddingValues(vertical = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
         ) {
-            poems.value?.let { value ->
-                item {
-                    DrawPoemsCard(poemsDialogState, poems = value)
-                }
+            poems?.let { value ->
+                DrawPoemsCard(poemsDialogState, poems = value)
             }
-            items(todayCourseList.size) { index ->
-                DrawCourseCard(course = todayCourseList[index])
+            todayCourseList.forEach {
+                DrawCourseCard(course = it)
             }
         }
         ShowPoemsDialog(dialogState = poemsDialogState)
@@ -67,13 +67,14 @@ private fun DrawLine() {
 private fun DrawPoemsCard(dialogState: MutableState<Poems?>, poems: Poems) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 4.dp)
     ) {
         Surface(
             shape = CircleShape,
             modifier = Modifier
                 .padding(horizontal = 6.dp)
                 .size(5.dp),
-            color = ColorPool.hash(poems.content)
+            color = ColorPool.random
         ) {}
         Card(
             onClick = {
@@ -110,6 +111,7 @@ private fun DrawPoemsCard(dialogState: MutableState<Poems?>, poems: Poems) {
 private fun DrawCourseCard(course: Course) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 4.dp)
     ) {
         Surface(
             shape = CircleShape,
