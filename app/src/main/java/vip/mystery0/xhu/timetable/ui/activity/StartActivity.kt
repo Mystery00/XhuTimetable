@@ -34,7 +34,7 @@ import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
 import vip.mystery0.xhu.timetable.viewmodel.StarterViewModel
 
-class StartActivity : BaseComposeActivity() {
+class StartActivity : BaseComposeActivity(setSystemUiColor = false) {
     private val viewModel: StarterViewModel by viewModels()
 
     @Composable

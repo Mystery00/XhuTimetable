@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--启动页背景色-->
-    <color name="splash_color_background">#2e85df</color>
+    <color name="splash_color_background">#2196F3</color>
 
     <!--登录页标签颜色-->
     <color name="login_color_label">#cccccc</color>
@@ -18,30 +18,4 @@
     <color name="colorBlackText">#FF000000</color>
     <!--无数据页面文本颜色-->
     <color name="textColorNullDataView">#000000</color>
-
-    <!--主页面标题栏图标颜色-->
-    <color name="colorCustomToolbarTextIcon">#000000</color>
-    <!--主界面底部未选中颜色-->
-    <color name="colorUnSelectedText">#333333</color>
-    <!--所有界面分割线颜色-->
-    <color name="colorDivider">#dddddd</color>
-    <!--个人界面分割线颜色-->
-    <color name="colorDividerProfile">#f0f0f0</color>
-    <!--个人页面更多图标颜色-->
-    <color name="colorMoreProfile">#979797</color>
-    <!--个人页面每项背景色-->
-    <color name="colorItemBackgroundProfile">#eaeaea</color>
-    <!--意见反馈页面背景颜色-->
-    <color name="colorFeedBackBackground">#f2f2f2</color>
-    <!--设置页面图标颜色-->
-    <color name="colorPreferenceIcon">#000000</color>
-    <!--课程页面背景色-->
-    <color name="colorTableBackground">#00000000</color>
-    <!--今日课程页面卡片背景色-->
-    <color name="colorTodayBackground">#FFFFFF</color>
-    <!--考试查询选课课号文本颜色-->
-    <color name="colorSecondGrayText">#66000000</color>
-
-    <!--自定义课程和事项页面提示文本的背景颜色-->
-    <color name="customHintBackgroundColor">#00E676</color>
 </resources>

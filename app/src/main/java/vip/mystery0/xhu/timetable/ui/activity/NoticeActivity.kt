@@ -5,6 +5,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.ArrowBack
@@ -150,19 +151,21 @@ class NoticeActivity : BaseComposeActivity() {
             }
         }
 
-        ClickableText(
-            modifier = modifier,
-            text = annotatedText,
-            onClick = { offset ->
-                annotatedText.getStringAnnotations(
-                    tag = "URL",
-                    start = offset,
-                    end = offset,
-                ).firstOrNull()?.let { annotation ->
-                    Log.d("Clicked URL", annotation.item)
-                    loadInBrowser(annotation.item)
+        SelectionContainer {
+            ClickableText(
+                modifier = modifier,
+                text = annotatedText,
+                onClick = { offset ->
+                    annotatedText.getStringAnnotations(
+                        tag = "URL",
+                        start = offset,
+                        end = offset,
+                    ).firstOrNull()?.let { annotation ->
+                        Log.d("Clicked URL", annotation.item)
+                        loadInBrowser(annotation.item)
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 }

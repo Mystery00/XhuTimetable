@@ -11,12 +11,14 @@ import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
 import java.util.*
 import kotlin.reflect.KClass
 
 abstract class BaseComposeActivity(
+    private val setSystemUiColor: Boolean = true,
     @LayoutRes val contentLayoutId: Int = 0
 ) :
     ComponentActivity(contentLayoutId), KoinComponent {
@@ -35,6 +37,14 @@ abstract class BaseComposeActivity(
     @Composable
     open fun BuildContentWindow() {
         XhuTimetableTheme {
+            if (setSystemUiColor) {
+                val systemUiController = rememberSystemUiController()
+                val systemBarColor = MaterialTheme.colors.primary
+                SideEffect {
+                    systemUiController.setSystemBarsColor(systemBarColor, darkIcons = false)
+                    systemUiController.setNavigationBarColor(systemBarColor, darkIcons = false)
+                }
+            }
             BuildContent()
         }
     }
