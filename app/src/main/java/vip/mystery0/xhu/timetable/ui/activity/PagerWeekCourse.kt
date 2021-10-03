@@ -1,9 +1,7 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -17,7 +15,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.ArrowDropUp
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -43,20 +40,18 @@ import java.util.*
 @OptIn(ExperimentalAnimationApi::class)
 val weekCourseTitle: TabTitle = @Composable { viewModel ->
     val week = viewModel.week.collectAsState()
-    val weekViewState = rememberSaveable { mutableStateOf(false) }
+    val showWeekView by viewModel.showWeekView.collectAsState()
     val rotationAngle by animateFloatAsState(
-        targetValue = if (weekViewState.value) 180F else 0F,
-        animationSpec = tween(easing = FastOutLinearInEasing),
+        targetValue = if (showWeekView) 180F else 0F,
     )
     Row(
         modifier = Modifier
             .align(Alignment.Center)
-            .fillMaxSize()
             .clickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() },
             ) {
-                weekViewState.value = !weekViewState.value
+                viewModel.animeWeekView()
             },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -207,7 +202,12 @@ private fun BuildTimeItem(time: Int) {
 private fun BoxScope.ShowCourseDialog(dialogState: MutableState<List<Course>>) {
     val showList = dialogState.value
     if (showList.isNullOrEmpty()) return
-    val pagerState = rememberPagerState(pageCount = showList.size)
+    val first = showList.firstOrNull { it.thisWeek }
+    val initPage = if (first == null) 0 else showList.indexOf(first)
+    val pagerState = rememberPagerState(
+        pageCount = showList.size,
+        initialPage = initPage,
+    )
     Dialog(onDismissRequest = {
         dialogState.value = emptyList()
     }, properties = DialogProperties(usePlatformDefaultWidth = false)) {

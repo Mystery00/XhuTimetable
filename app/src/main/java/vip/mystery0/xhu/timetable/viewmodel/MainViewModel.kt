@@ -16,7 +16,6 @@ import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.entity.CourseType
-import vip.mystery0.xhu.timetable.model.response.CourseResponse
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.module.localRepo
 import vip.mystery0.xhu.timetable.module.repo
@@ -26,6 +25,7 @@ import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.*
@@ -35,6 +35,8 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
     companion object {
         private const val TAG = "LoginViewModel"
     }
+
+    private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
     private val poemsApi: PoemsApi by inject()
 
@@ -61,16 +63,20 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
     private val _poems = MutableStateFlow<Poems?>(null)
     val poems: StateFlow<Poems?> = _poems
 
-    //所有课程列表
-    private val allCourse = MutableStateFlow<List<CourseResponse>>(emptyList())
-
     private val _todayCourse = MutableStateFlow<List<Course>>(emptyList())
     val todayCourse: StateFlow<List<Course>> = _todayCourse
 
     private val _tableCourse = MutableStateFlow<List<List<CourseSheet?>>>(emptyList())
     val tableCourse: StateFlow<List<List<CourseSheet?>>> = _tableCourse
+
+    private val _weekView = MutableStateFlow<List<WeekView>>(emptyList())
+    val weekView: StateFlow<List<WeekView>> = _weekView
+
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
+
+    private val _showWeekView = MutableStateFlow(false)
+    val showWeekView: StateFlow<Boolean> = _showWeekView
 
     init {
         showPoems()
@@ -174,6 +180,9 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
             //设置数据
             _todayCourse.value = todayCourse
             loadCourseToTable(currentWeek)
+            if (loadFromCloud) {
+                _errorMessage.emit("${LocalDateTime.now().format(dateTimeFormatter)} 数据同步成功！")
+            }
         }
     }
 
@@ -271,10 +280,43 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                 }
             }
             val tableCourseList = tableCourse.map { it }
+            //计算周课程视图
+            val startDate = LocalDateTime.ofInstant(Config.termStartTime, chinaZone).toLocalDate()
+            val days =
+                Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay()).toDays()
+            val thisWeek = ((days / 7) + 1).toInt()
+            val weekViewArray = Array(20) { index ->
+                WeekView(index + 1, thisWeek == index + 1, Array(5) { Array(5) { false } })
+            }
+            expandItemMap.forEach { (pair, list) ->
+                if (pair.second > 10 || pair.first > 5) {
+                    //丢弃第11节次的数据
+                    return@forEach
+                }
+                val day = pair.first - 1
+                val time = (pair.second - 1) / 2
+                val weekSet = list.map { it.weekSet }.flatten().toSet()
+                weekSet.forEach {
+                    weekViewArray[it - 1].array[day][time] = true
+                }
+            }
             //设置数据
-            _loading.value = false
+            _weekView.value = weekViewArray.toList()
             _tableCourse.value = tableCourseList
+            _loading.value = false
         }
+    }
+
+    fun animeWeekView() {
+        _showWeekView.value = !_showWeekView.value
+    }
+
+    fun dismissWeekView() {
+        _showWeekView.value = false
+    }
+
+    fun changeCurrentWeek(currentWeek: Int) {
+        _week.value = currentWeek
     }
 }
 
@@ -348,3 +390,9 @@ data class CourseSheet(
         return result
     }
 }
+
+class WeekView(
+    val weekNum: Int,
+    val thisWeek: Boolean,
+    val array: Array<Array<Boolean>>
+)
