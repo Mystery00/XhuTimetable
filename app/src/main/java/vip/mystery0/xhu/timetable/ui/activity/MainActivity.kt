@@ -29,6 +29,7 @@ import coil.compose.rememberImagePainter
 import coil.request.CachePolicy
 import coil.size.Scale
 import com.google.accompanist.pager.*
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.material.math.MathUtils.lerp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -42,7 +43,7 @@ import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
 import kotlin.math.absoluteValue
 import kotlin.math.min
 
-class MainActivity : BaseComposeActivity() {
+class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
     private val viewModel: MainViewModel by viewModels()
 
     private val ext: MainActivityExt
@@ -53,6 +54,12 @@ class MainActivity : BaseComposeActivity() {
     @ExperimentalMaterialApi
     @Composable
     override fun BuildContent() {
+        val systemUiController = rememberSystemUiController()
+        val useDarkIcons = MaterialTheme.colors.isLight
+        SideEffect {
+            systemUiController.setSystemBarsColor(Color.White, darkIcons = useDarkIcons)
+            systemUiController.setNavigationBarColor(Color.White, darkIcons = useDarkIcons)
+        }
         val coroutineScope = rememberCoroutineScope()
         val pagerState = rememberPagerState(initialPage = 0)
         val loading by viewModel.loading.collectAsState()

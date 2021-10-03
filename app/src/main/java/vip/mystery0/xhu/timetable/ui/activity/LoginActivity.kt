@@ -33,7 +33,7 @@ import vip.mystery0.xhu.timetable.model.response.Version
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.viewmodel.LoginViewModel
 
-class LoginActivity : BaseComposeActivity() {
+class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
     private val viewModel: LoginViewModel by viewModels()
 
     private val version: Version
@@ -78,10 +78,10 @@ class LoginActivity : BaseComposeActivity() {
                             Text(text = "学号")
                         },
                         colors = TextFieldDefaults.textFieldColors(
-                            textColor = MaterialTheme.colors.primary,
+                            textColor = MaterialTheme.colors.secondary,
                             unfocusedLabelColor = XhuColor.loginLabel,
                             backgroundColor = Color.Transparent,
-                            leadingIconColor = MaterialTheme.colors.primary,
+                            leadingIconColor = MaterialTheme.colors.secondary,
                         ),
                         keyboardOptions = KeyboardOptions(
                             imeAction = ImeAction.Next,
@@ -110,10 +110,10 @@ class LoginActivity : BaseComposeActivity() {
                             Text(text = "密码")
                         },
                         colors = TextFieldDefaults.textFieldColors(
-                            textColor = MaterialTheme.colors.primary,
+                            textColor = MaterialTheme.colors.secondary,
                             unfocusedLabelColor = XhuColor.loginLabel,
                             backgroundColor = Color.Transparent,
-                            leadingIconColor = MaterialTheme.colors.primary,
+                            leadingIconColor = MaterialTheme.colors.secondary,
                         ),
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(
@@ -141,7 +141,7 @@ class LoginActivity : BaseComposeActivity() {
                         modifier = Modifier
                             .fillMaxWidth(),
                         colors = ButtonDefaults.textButtonColors(
-                            backgroundColor = XhuColor.loginText,
+                            backgroundColor = MaterialTheme.colors.secondary,
                             contentColor = Color.White,
                         ),
                         shape = RoundedCornerShape(36.dp),

@@ -7,9 +7,6 @@ import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.utils.md5
 
 object XhuColor {
-    val splashBackground: Color
-        @Composable
-        get() = colorResource(id = R.color.splash_color_background)
     val loginLabel: Color
         @Composable
         get() = colorResource(id = R.color.login_color_label)

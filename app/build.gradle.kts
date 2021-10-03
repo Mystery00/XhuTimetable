@@ -133,6 +133,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-swiperefresh:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-placeholder-material:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
     //room
     val roomVersion = "2.3.0"
     implementation("androidx.room:room-runtime:$roomVersion")
