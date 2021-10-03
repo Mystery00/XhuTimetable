@@ -27,11 +27,15 @@
         <activity
             android:name=".ui.activity.LoginActivity"
             android:exported="true"
-            android:label="@string/title_activity_ad"
             android:theme="@style/Theme.XhuTimetable.NoActionBar.Immersive" />
         <activity
             android:name=".ui.activity.MainActivity"
             android:label="@string/app_name"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar" />
+        <activity
+            android:name=".ui.activity.NoticeActivity"
+            android:exported="true"
+            android:label="@string/title_activity_notice"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
 
         <provider

@@ -38,4 +38,12 @@ class NoticeLocalRepo : NoticeRepo, KoinComponent {
                 noticeDao.saveNotice(it)
             }
         }
+
+    override suspend fun markAllAsRead(): Unit =
+        withContext(Dispatchers.IO) {
+            noticeDao.queryNoticeList(read = false).forEach {
+                it.read = true
+                noticeDao.updateNotice(it)
+            }
+        }
 }

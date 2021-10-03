@@ -31,7 +31,9 @@ val profileCourseTitle: TabTitle = @Composable {
     Text(text = "我的", modifier = Modifier.align(Alignment.Center))
 }
 
-val profileCourseContent: TabContent = @Composable { viewModel ->
+val profileCourseContent: TabContent = @Composable { ext ->
+    val activity = ext.activity
+    val viewModel = ext.viewModel
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -126,7 +128,10 @@ val profileCourseContent: TabContent = @Composable { viewModel ->
         BuildProfileItem(
             painter = XhuIcons.Profile.notice,
             title = "通知公告",
-            showBadge = hasUnReadNotice
+            showBadge = hasUnReadNotice,
+            click = {
+                activity.intentTo(NoticeActivity::class)
+            }
         )
         Divider(
             modifier = Modifier

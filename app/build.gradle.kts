@@ -91,7 +91,7 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = rootProject.extra["compose_version"] as String
-        kotlinCompilerVersion = "1.5.30"
+        kotlinCompilerVersion = "1.5.31"
     }
     packagingOptions {
         resources {
@@ -116,6 +116,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
     implementation("androidx.activity:activity-compose:1.3.1")
     implementation("androidx.core:core-splashscreen:1.0.0-alpha01")
+    implementation("androidx.browser:browser:1.3.0")
     //compose
     val composeVersion = rootProject.extra["compose_version"]
     implementation("androidx.compose.ui:ui:$composeVersion")
@@ -123,12 +124,15 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:$composeVersion")
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
     //accompanist
-    val accompanistVersion = "0.18.0"
+    val accompanistVersion = "0.19.0"
     implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-pager:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-swiperefresh:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-placeholder-material:$accompanistVersion")
     //room
     val roomVersion = "2.3.0"
     implementation("androidx.room:room-runtime:$roomVersion")
@@ -137,7 +141,7 @@ dependencies {
     //material dialog
     implementation("com.afollestad.material-dialogs:core:3.3.0")
     //work manager
-    implementation("androidx.work:work-runtime-ktx:2.7.0-beta01")
+    implementation("androidx.work:work-runtime-ktx:2.7.0-rc01")
     //koin
     val koinVersion = "3.1.2"
     implementation("io.insert-koin:koin-android:$koinVersion")

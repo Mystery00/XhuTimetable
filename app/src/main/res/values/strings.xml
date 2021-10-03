@@ -12,5 +12,5 @@
     <string name="dialog_update_title">检测到新版本</string>
     <string name="dialog_update_text">新版本： %1$s\n当前版本： %2$s\n更新日志：\n %3$s</string>
 
-    <string name="title_activity_ad">AdActivity</string>
+    <string name="title_activity_notice">通知公告</string>
 </resources>

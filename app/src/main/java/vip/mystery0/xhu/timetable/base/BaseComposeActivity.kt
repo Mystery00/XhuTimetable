@@ -43,11 +43,11 @@ abstract class BaseComposeActivity(
     open fun BuildContent() {
     }
 
-    protected fun <T : Activity> intentTo(clazz: KClass<T>) {
+    fun <T : Activity> intentTo(clazz: KClass<T>) {
         startActivity(Intent(this, clazz.java))
     }
 
-    protected fun String.toast(showLong: Boolean = false) =
+    fun String.toast(showLong: Boolean = false) =
         newToast(
             this@BaseComposeActivity,
             this,
