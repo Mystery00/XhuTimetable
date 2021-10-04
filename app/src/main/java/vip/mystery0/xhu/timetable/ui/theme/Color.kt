@@ -10,9 +10,27 @@ object XhuColor {
     val loginLabel: Color
         @Composable
         get() = colorResource(id = R.color.login_color_label)
-    val loginText: Color
-        @Composable
-        get() = colorResource(id = R.color.login_color_text)
+
+    object Common {
+        val divider: Color
+            @Composable
+            get() = colorResource(id = R.color.colorDivider)
+        val grayBackground: Color
+            @Composable
+            get() = colorResource(id = R.color.colorGrayBackground)
+        val whiteBackground: Color
+            @Composable
+            get() = colorResource(id = R.color.colorWhiteBackground)
+        val grayText: Color
+            @Composable
+            get() = colorResource(id = R.color.colorGrayText)
+        val blackText: Color
+            @Composable
+            get() = colorResource(id = R.color.colorBlackText)
+        val nullDataColor: Color
+            @Composable
+            get() = colorResource(id = R.color.textColorNullDataView)
+    }
 }
 
 object ColorPool {

@@ -3,6 +3,7 @@ package vip.mystery0.xhu.timetable.ui.theme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import coil.compose.rememberImagePainter
 import vip.mystery0.xhu.timetable.R
 
 object XhuIcons {
@@ -15,6 +16,9 @@ object XhuIcons {
     val sync: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_sync)
+    val back: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_back)
 
     object Profile {
         val exam: Painter
@@ -52,4 +56,13 @@ object XhuStateIcons {
     val todayCourse = R.drawable.ic_today_course to R.drawable.ic_today_course_unchecked
     val weekCourse = R.drawable.ic_week_course to R.drawable.ic_week_course_unchecked
     val profile = R.drawable.ic_profile to R.drawable.ic_profile_unchecked
+}
+
+object XhuImages {
+    val noData: Painter
+        @Composable
+        get() = rememberImagePainter(R.drawable.ic_no_data)
+    val noCourse: Painter
+        @Composable
+        get() = rememberImagePainter(R.drawable.ic_no_course)
 }

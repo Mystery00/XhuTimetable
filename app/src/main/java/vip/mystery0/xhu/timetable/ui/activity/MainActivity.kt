@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.Config
+import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuStateIcons
 import vip.mystery0.xhu.timetable.ui.theme.stateOf
 import vip.mystery0.xhu.timetable.utils.isTwiceClick
@@ -120,31 +121,46 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
                         }
                     }
                     tabOf(pagerState.currentPage).title(this, ext)
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(0.33.dp)
+                            .background(XhuColor.Common.divider)
+                            .align(Alignment.BottomCenter),
+                    )
                 }
             },
             bottomBar = {
-                BottomNavigation(
-                    backgroundColor = Color.White,
-                    elevation = 0.dp,
-                ) {
-                    DrawNavigationItem(
-                        state = pagerState,
-                        tab = Tab.TODAY,
-                        icon = XhuStateIcons.todayCourse,
-                        coroutineScope = coroutineScope,
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(0.33.dp)
+                            .background(XhuColor.Common.divider),
                     )
-                    DrawNavigationItem(
-                        state = pagerState,
-                        tab = Tab.WEEK,
-                        icon = XhuStateIcons.weekCourse,
-                        coroutineScope = coroutineScope,
-                    )
-                    DrawNavigationItem(
-                        state = pagerState,
-                        tab = Tab.PROFILE,
-                        icon = XhuStateIcons.profile,
-                        coroutineScope = coroutineScope,
-                    )
+                    BottomNavigation(
+                        backgroundColor = Color.White,
+                        elevation = 0.dp,
+                    ) {
+                        DrawNavigationItem(
+                            state = pagerState,
+                            tab = Tab.TODAY,
+                            icon = XhuStateIcons.todayCourse,
+                            coroutineScope = coroutineScope,
+                        )
+                        DrawNavigationItem(
+                            state = pagerState,
+                            tab = Tab.WEEK,
+                            icon = XhuStateIcons.weekCourse,
+                            coroutineScope = coroutineScope,
+                        )
+                        DrawNavigationItem(
+                            state = pagerState,
+                            tab = Tab.PROFILE,
+                            icon = XhuStateIcons.profile,
+                            coroutineScope = coroutineScope,
+                        )
+                    }
                 }
             }
         ) { paddingValues ->

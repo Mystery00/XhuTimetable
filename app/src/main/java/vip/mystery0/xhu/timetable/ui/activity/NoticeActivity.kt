@@ -2,13 +2,12 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import android.util.Log
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,9 +26,14 @@ import com.google.accompanist.placeholder.material.shimmer
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.loadInBrowser
+import vip.mystery0.xhu.timetable.ui.theme.XhuColor
+import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.NoticeViewModel
 import java.time.Instant
+import java.time.LocalDateTime
 
 class NoticeActivity : BaseComposeActivity() {
     private val viewModel: NoticeViewModel by viewModels()
@@ -49,7 +53,7 @@ class NoticeActivity : BaseComposeActivity() {
                         IconButton(onClick = {
                             finish()
                         }) {
-                            Icon(Icons.TwoTone.ArrowBack, "")
+                            Icon(XhuIcons.back, "")
                         }
                     },
                 )
@@ -65,56 +69,77 @@ class NoticeActivity : BaseComposeActivity() {
                 val list = noticeListState.noticeList
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxSize(),
+                        .fillMaxSize()
+                        .background(XhuColor.Common.grayBackground),
                     contentPadding = PaddingValues(4.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     if (noticeListState.loading) {
                         items(3) {
-                            Column(
+                            Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
                                     .placeholder(
                                         visible = noticeListState.loading,
                                         highlight = PlaceholderHighlight.shimmer(),
                                     )
                             ) {
-                                Text(
-                                    text = "占位符标题",
-                                )
-                                Text(
-                                    text = "公告内容，\n总共\n三行",
-                                )
-                                Text(
-                                    text = "2021-10-01",
-                                    fontSize = 12.sp,
-                                )
+                                Column(
+                                    modifier = Modifier.padding(4.dp)
+                                ) {
+                                    Text(
+                                        text = "占位符标题",
+                                    )
+                                    Text(
+                                        text = "公告内容，\n总共\n三行",
+                                    )
+                                    Text(
+                                        text = "2021-10-01",
+                                        fontSize = 12.sp,
+                                    )
+                                }
                             }
                         }
                     } else {
-                        items(list.size) { index ->
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = list[index].title,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
-                                )
-                                AnnotatedClickableText(
-                                    text = list[index].content,
-                                )
-                                Text(
-                                    text = Instant.ofEpochMilli(list[index].createTime).toString(),
-                                    fontSize = 12.sp,
+                        if (list.isNotEmpty()) {
+                            items(list.size) { index ->
+                                Card(
                                     modifier = Modifier
-                                        .fillMaxWidth(),
-                                    textAlign = TextAlign.End,
-                                )
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(8.dp)
+                                    ) {
+                                        Text(
+                                            text = list[index].title,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 16.sp,
+                                        )
+                                        AnnotatedClickableText(
+                                            text = list[index].content,
+                                        )
+                                        Text(
+                                            text = "发布于 ${
+                                                LocalDateTime.ofInstant(
+                                                    Instant.ofEpochMilli(list[index].createTime),
+                                                    chinaZone
+                                                ).format(chinaDateTimeFormatter)
+                                            }",
+                                            fontSize = 12.sp,
+                                            modifier = Modifier
+                                                .fillMaxWidth(),
+                                            textAlign = TextAlign.End,
+                                            color = XhuColor.Common.grayText,
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
+                }
+                if (!noticeListState.loading && list.isEmpty()) {
+                    BuildNoDataLayout()
                 }
             }
         }
@@ -169,3 +194,5 @@ class NoticeActivity : BaseComposeActivity() {
         }
     }
 }
+
+private val divider = Color(0xFFf0f0f0)
