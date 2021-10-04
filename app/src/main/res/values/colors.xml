@@ -8,6 +8,8 @@
     <!--登录页文本颜色-->
     <color name="login_color_text">#4ea5ff</color>
 
+    <!--所有界面分割线颜色-->
+    <color name="colorDivider">#dddddd</color>
     <!--所有界面需要是灰色的颜色 背景-->
     <color name="colorGrayBackground">#fafafa</color>
     <!--所有界面需要是白色的颜色 背景-->

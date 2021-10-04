@@ -23,6 +23,7 @@ class NoticeRemoteRepo : NoticeRepo, KoinComponent {
         }
         val noticeList = response.first
         local.saveList(noticeList)
+        Config.lastSyncNotice = LocalDate.now()
     }
 
     override suspend fun queryAllNotice(): List<Notice> {

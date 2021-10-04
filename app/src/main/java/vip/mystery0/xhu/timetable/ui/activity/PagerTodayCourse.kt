@@ -29,22 +29,27 @@ val todayCourseTitle: TabTitle = @Composable { ext ->
 
 @ExperimentalMaterialApi
 val todayCourseContent: TabContent = @Composable { ext ->
+    val activity = ext.activity
     val viewModel = ext.viewModel
     val poemsDialogState = remember { mutableStateOf<Poems?>(null) }
     val poems by viewModel.poems.collectAsState()
     val todayCourseList by viewModel.todayCourse.collectAsState()
     Box {
-        DrawLine()
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-        ) {
-            poems?.let { value ->
-                DrawPoemsCard(poemsDialogState, poems = value)
-            }
-            todayCourseList.forEach {
-                DrawCourseCard(course = it)
+        if (poems == null && todayCourseList.isEmpty()) {
+            activity.BuildNoCourseLayout()
+        } else {
+            DrawLine()
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                poems?.let { value ->
+                    DrawPoemsCard(poemsDialogState, poems = value)
+                }
+                todayCourseList.forEach {
+                    DrawCourseCard(course = it)
+                }
             }
         }
         ShowPoemsDialog(dialogState = poemsDialogState)
@@ -189,14 +194,17 @@ fun ShowPoemsDialog(dialogState: MutableState<Poems?>) {
     val dismiss = {
         dialogState.value = null
     }
-    AlertDialog(onDismissRequest = dismiss,
+    AlertDialog(
+        onDismissRequest = dismiss,
+        title = {},
         text = {
             SelectionContainer {
                 Column {
                     Text(
                         text = "《${poems.title}》",
-                        fontSize = 12.sp,
+                        fontSize = 14.sp,
                         textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Spacer(modifier = Modifier.height(6.dp))
@@ -216,8 +224,8 @@ fun ShowPoemsDialog(dialogState: MutableState<Poems?>) {
                     if (!poems.translate.isNullOrEmpty()) {
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "诗词大意：${poems.translate.joinToString("\n")}",
-                            fontSize = 10.sp,
+                            text = "诗词大意：${poems.translate.joinToString("")}",
+                            fontSize = 11.sp,
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }

@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -39,12 +40,6 @@ val profileCourseContent: TabContent = @Composable { ext ->
             .fillMaxSize()
             .background(Color.White),
     ) {
-        Divider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(0.33.dp)
-                .background(dividerSmall),
-        )
         Row(
             modifier = Modifier
                 .height(96.dp),
@@ -139,13 +134,30 @@ val profileCourseContent: TabContent = @Composable { ext ->
                 .height(dividerHeight)
                 .background(dividerSmall),
         )
-        BuildProfileItem(painter = XhuIcons.Profile.share, title = "分享应用")
+        BuildProfileItem(painter = XhuIcons.Profile.share, title = "分享应用", click = {
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                putExtra(Intent.EXTRA_TEXT, shareText.random())
+                type = "text/plain"
+            }
+            activity.startActivity(Intent.createChooser(shareIntent, "分享西瓜课表到"))
+        })
+        Divider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp)
+                .background(divider),
+        )
     }
 }
 
 private val divider = Color(0xFFf0f0f0)
 private val dividerSmall = Color(0xFFeaeaea)
 private val more = Color(0xFF979797)
+
+private val shareText = arrayListOf(
+    "查课查课表，我就用西瓜课表~ 下载链接：https://xgkb.mystery0.vip",
+    "西瓜子都在用的课表~ 下载链接：https://xgkb.mystery0.vip"
+)
 
 @Composable
 private fun BuildProfileItem(
