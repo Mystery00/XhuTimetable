@@ -157,4 +157,6 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
     //mmkv
     implementation("com.tencent:mmkv-static:1.2.10")
+    //eventbus
+    implementation("org.greenrobot:eventbus:3.2.0")
 }

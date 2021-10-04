@@ -37,6 +37,11 @@
             android:exported="true"
             android:label="@string/title_activity_notice"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
+        <activity
+            android:name=".ui.activity.AccountSettingsActivity"
+            android:exported="true"
+            android:label="@string/title_activity_account_management"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"

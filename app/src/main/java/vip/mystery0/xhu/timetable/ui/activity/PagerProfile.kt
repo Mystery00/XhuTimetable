@@ -98,7 +98,9 @@ val profileCourseContent: TabContent = @Composable { ext ->
                 .height(6.dp)
                 .background(divider),
         )
-        BuildProfileItem(painter = XhuIcons.Profile.accountSettings, title = "账号管理")
+        BuildProfileItem(painter = XhuIcons.Profile.accountSettings, title = "账号管理", click = {
+            activity.intentTo(AccountSettingsActivity::class)
+        })
         Divider(
             modifier = Modifier
                 .fillMaxWidth()

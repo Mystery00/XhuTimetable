@@ -19,7 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
@@ -28,12 +30,18 @@ import kotlin.reflect.KClass
 
 abstract class BaseComposeActivity(
     private val setSystemUiColor: Boolean = true,
+    private val registerEventBus: Boolean = false,
     @LayoutRes val contentLayoutId: Int = 0
 ) :
     ComponentActivity(contentLayoutId), KoinComponent {
+    private val eventBus: EventBus by inject()
+
     private var toast: Toast? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (registerEventBus) {
+            eventBus.register(this)
+        }
         super.onCreate(savedInstanceState)
         initIntent()
         setContent {
@@ -62,8 +70,11 @@ abstract class BaseComposeActivity(
     open fun BuildContent() {
     }
 
-    fun <T : Activity> intentTo(clazz: KClass<T>) {
-        startActivity(Intent(this, clazz.java))
+    fun <T : Activity> intentTo(
+        clazz: KClass<T>,
+        block: (Intent) -> Unit = {},
+    ) {
+        startActivity(Intent(this, clazz.java).apply(block))
     }
 
     fun String.toast(showLong: Boolean = false) =
@@ -120,5 +131,12 @@ abstract class BaseComposeActivity(
                 Text(text = text, color = XhuColor.Common.nullDataColor)
             }
         }
+    }
+
+    override fun onDestroy() {
+        if (registerEventBus) {
+            eventBus.unregister(this)
+        }
+        super.onDestroy()
     }
 }

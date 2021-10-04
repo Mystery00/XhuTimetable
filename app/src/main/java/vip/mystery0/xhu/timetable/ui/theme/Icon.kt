@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import coil.compose.rememberImagePainter
 import vip.mystery0.xhu.timetable.R
+import vip.mystery0.xhu.timetable.utils.md5
 
 object XhuIcons {
     val todayWaterMelon: Painter
@@ -65,4 +66,31 @@ object XhuImages {
     val noCourse: Painter
         @Composable
         get() = rememberImagePainter(R.drawable.ic_no_course)
+}
+
+object ProfileImages {
+    private val boyPool = listOf(
+        R.drawable.ic_boy_01,
+        R.drawable.ic_boy_02,
+        R.drawable.ic_boy_03,
+        R.drawable.ic_boy_04,
+        R.drawable.ic_boy_05,
+    )
+    private val girlPool = listOf(
+        R.drawable.ic_girl_01,
+        R.drawable.ic_girl_02,
+        R.drawable.ic_girl_03,
+        R.drawable.ic_girl_04,
+        R.drawable.ic_girl_05,
+    )
+
+    @Composable
+    fun hash(
+        userName: String,
+        boy: Boolean
+    ): Painter {
+        val md5Int = userName.md5().substring(0, 2).toInt(16)
+        val pool = if (boy) boyPool else girlPool
+        return painterResource(pool[md5Int % pool.size])
+    }
 }

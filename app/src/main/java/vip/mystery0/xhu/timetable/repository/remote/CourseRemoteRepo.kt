@@ -22,7 +22,7 @@ class CourseRemoteRepo : CourseRepo, KoinComponent {
         term: Int,
     ): List<CourseResponse> {
         val response = SessionManager.mainUser.withAutoLogin {
-            serverApi.courseList(it).checkLogin()
+            serverApi.courseList(it, Config.currentYear, Config.currentTerm).checkLogin()
         }
         val courseList = response.first
         val mainUser = SessionManager.mainUser
