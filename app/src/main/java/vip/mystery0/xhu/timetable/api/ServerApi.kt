@@ -22,7 +22,11 @@ interface ServerApi {
     suspend fun userInfo(@Header("token") token: String): UserInfo
 
     @GET("/api/rest/xhu-timetable/server/course/list")
-    suspend fun courseList(@Header("token") token: String): Response<List<CourseResponse>>
+    suspend fun courseList(
+        @Header("token") token: String,
+        @Query("year") year: String,
+        @Query("term") term: Int,
+    ): Response<List<CourseResponse>>
 
     @GET("/api/rest/xhu-timetable/server/notice")
     suspend fun noticeList(

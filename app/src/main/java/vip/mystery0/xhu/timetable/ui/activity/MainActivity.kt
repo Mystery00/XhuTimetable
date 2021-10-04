@@ -33,9 +33,14 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.material.math.MathUtils.lerp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.Config
+import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.model.event.EventType
+import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuStateIcons
 import vip.mystery0.xhu.timetable.ui.theme.stateOf
@@ -44,7 +49,7 @@ import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
 import kotlin.math.absoluteValue
 import kotlin.math.min
 
-class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
+class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEventBus = true) {
     private val viewModel: MainViewModel by viewModels()
 
     private val ext: MainActivityExt
@@ -282,6 +287,15 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
         if (errorMessage.isNotBlank()) {
             errorMessage.toast(true)
         }
+        val checkMainUser by viewModel.checkMainUser.collectAsState()
+        if (checkMainUser) {
+            if (!SessionManager.isLogin()) {
+                intentTo(LoginActivity::class) {
+                    it.putExtra(AccountSettingsActivity.INTENT_EXTRA, true)
+                }
+            }
+            viewModel.checkMainUser.value = false
+        }
     }
 
     @ExperimentalPagerApi
@@ -342,6 +356,15 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
     override fun onResume() {
         super.onResume()
         viewModel.checkUnReadNotice()
+    }
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN_ORDERED)
+    fun updateUIFromConfig(uiEvent: UIEvent) {
+        when (uiEvent.eventType) {
+            EventType.CHANGE_MAIN_USER -> viewModel.loadCourseList(true)
+            EventType.MAIN_USER_LOGOUT -> viewModel.checkMainUser.value = true
+        }
     }
 }
 

@@ -84,6 +84,8 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
     private val _hasUnReadNotice = MutableStateFlow(false)
     val hasUnReadNotice: StateFlow<Boolean> = _hasUnReadNotice
 
+    val checkMainUser = MutableStateFlow(false)
+
     init {
         showPoems()
         calculateTodayTitle()

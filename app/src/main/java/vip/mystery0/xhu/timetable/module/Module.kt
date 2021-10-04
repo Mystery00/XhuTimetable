@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.content.ClipboardManager
 import android.content.Context
 import androidx.work.WorkManager
+import org.greenrobot.eventbus.EventBus
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -21,4 +22,5 @@ private val appModule = module {
     single { WorkManager.getInstance(androidContext()) }
     single { androidContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
     single { androidContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
+    single { EventBus.getDefault() }
 }

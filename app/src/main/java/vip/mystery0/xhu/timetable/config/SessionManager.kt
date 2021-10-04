@@ -11,7 +11,7 @@ object SessionManager {
     private val userMap = HashMap<String, User>(4)
 
     val mainUser: User
-        get() = userMap.values.find { it.main }!!
+        get() = userMap.values.find { it.main } ?: userMap.values.first()
 
     fun isLogin(): Boolean = userMap.isNotEmpty()
 
@@ -35,9 +35,17 @@ object SessionManager {
         writeToCache()
     }
 
-    fun logout(studentId: String) {
-        userMap.remove(studentId)
+    fun logout(studentId: String): Boolean {
+        var result = false
+        val user = userMap.remove(studentId)
+        user?.let {
+            if (it.main) {
+                userMap.values.firstOrNull()?.main = true
+                result = true
+            }
+        }
         writeToCache()
+        return result
     }
 
     fun changeMainUser(studentId: String): Boolean {
@@ -46,6 +54,11 @@ object SessionManager {
         user.main = true
         writeToCache()
         return true
+    }
+
+    fun loggedUserList(): List<User> {
+        readFromCache()
+        return userMap.values.sortedBy { !it.main }.toList()
     }
 
     @Synchronized

@@ -190,8 +190,10 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
             }
         }
         if (loginState.success) {
-            "登录成功，欢迎使用${appName}！".toast(true)
-            intentTo(MainActivity::class)
+            "登录成功，欢迎使用${appName}！".toast()
+            if (!intent.getBooleanExtra(AccountSettingsActivity.INTENT_EXTRA, false)) {
+                intentTo(MainActivity::class)
+            }
             finish()
         }
         if (loginState.errorMessage.isNotBlank()) {
