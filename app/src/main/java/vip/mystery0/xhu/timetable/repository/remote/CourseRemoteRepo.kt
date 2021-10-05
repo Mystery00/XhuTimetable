@@ -26,6 +26,7 @@ class CourseRemoteRepo : CourseRepo, KoinComponent {
             serverApi.courseList(it, Config.currentYear, Config.currentTerm).checkLogin()
         }
         val courseList = response.first
+        courseList.forEach { it.user = user }
         local.saveCourseList(year, term, user.studentId, courseList)
         Config.lastSyncCourse = LocalDate.now()
         return courseList

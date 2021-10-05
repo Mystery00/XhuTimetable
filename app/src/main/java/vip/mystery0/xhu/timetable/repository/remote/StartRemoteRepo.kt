@@ -18,7 +18,7 @@ class StartRemoteRepo : StartRepo, KoinComponent {
     private val local: StartRepo by localRepo()
 
     override suspend fun init(): InitResponse {
-        val response = withTimeoutOrNull(Duration.ofSeconds(2).toMillis()) {
+        val response = withTimeoutOrNull(Duration.ofSeconds(5).toMillis()) {
             serverApi.initRequest(InitRequest(checkBeta = true))
         } ?: return local.init()
         Config.termStartTime = Instant.ofEpochMilli(response.startTime)
