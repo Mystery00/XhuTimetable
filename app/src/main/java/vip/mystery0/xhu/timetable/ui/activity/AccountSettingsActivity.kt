@@ -13,12 +13,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.alorma.settings.composables.SettingsCheckbox
+import com.alorma.settings.storage.rememberBooleanSettingState
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.config.Config
 import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
-import vip.mystery0.xhu.timetable.ui.theme.XhuImages
 import vip.mystery0.xhu.timetable.viewmodel.AccountManagementViewModel
 
 class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
@@ -68,6 +70,14 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                SettingsCheckbox(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    state = rememberBooleanSettingState(Config.multiAccountMode),
+                    icon = { Icon(painter = XhuIcons.multiAccount, contentDescription = null) },
+                    title = { Text(text = "启用多用户模式") },
+                    subtitle = { Text(text = "注意：如果多个用户的课表存在冲突的情况，表格可能会变得很乱，请确定您开启这个模式的意义！") },
+                    onCheckedChange = { newValue -> viewModel.changeMultiAccountMode(newValue) },
+                )
                 Text(
                     text = if (editMode.value) "清除账号登陆记录" else "轻触头像以切换账号",
                     modifier = Modifier
@@ -90,7 +100,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                 }
                 if (!editMode.value) {
                     BuildItem(
-                        painter = XhuImages.noData,
+                        painter = XhuIcons.add,
                         text = "登陆其他账号",
                         onClick = {
                             intentTo(LoginActivity::class) {

@@ -8,6 +8,7 @@ import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.Config
 import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
@@ -53,6 +54,16 @@ class AccountManagementViewModel : ComposeViewModel(), KoinComponent {
                 eventBus.post(UIEvent(EventType.MAIN_USER_LOGOUT))
             }
             loadLoggedUserList()
+        }
+    }
+
+    fun changeMultiAccountMode(enable: Boolean) {
+        viewModelScope.launch {
+            if (Config.multiAccountMode == enable) {
+                return@launch
+            }
+            Config.multiAccountMode = enable
+            eventBus.post(UIEvent(EventType.CHANGE_MAIN_USER))
         }
     }
 }

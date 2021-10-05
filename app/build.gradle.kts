@@ -110,12 +110,12 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.7.0-beta01")
+    implementation("androidx.core:core-ktx:1.7.0-beta02")
     implementation("androidx.appcompat:appcompat:1.3.1")
     implementation("com.google.android.material:material:1.4.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
     implementation("androidx.activity:activity-compose:1.3.1")
-    implementation("androidx.core:core-splashscreen:1.0.0-alpha01")
+    implementation("androidx.core:core-splashscreen:1.0.0-alpha02")
     implementation("androidx.browser:browser:1.3.0")
     //compose
     val composeVersion = rootProject.extra["compose_version"]
@@ -159,4 +159,6 @@ dependencies {
     implementation("com.tencent:mmkv-static:1.2.10")
     //eventbus
     implementation("org.greenrobot:eventbus:3.2.0")
+    //preference
+    implementation("com.github.alorma:compose-settings-ui:0.6.0")
 }

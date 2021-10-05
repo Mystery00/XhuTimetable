@@ -153,4 +153,9 @@ object Config {
             val image = kv.decodeString("profileImage")
             return if (image.isNullOrBlank()) null else File(image)
         }
+    var multiAccountMode: Boolean
+        set(value) {
+            kv.encode("multiAccountMode", value)
+        }
+        get() = kv.decodeBool("multiAccountMode", false)
 }

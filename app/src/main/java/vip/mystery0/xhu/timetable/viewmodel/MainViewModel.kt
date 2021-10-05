@@ -12,10 +12,12 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.Config
+import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.entity.CourseType
+import vip.mystery0.xhu.timetable.model.response.CourseResponse
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.module.localRepo
 import vip.mystery0.xhu.timetable.module.repo
@@ -30,6 +32,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 class MainViewModel : ComposeViewModel(), KoinComponent {
@@ -131,8 +134,35 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                 Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay()).toDays()
             val currentWeek = ((days / 7) + 1).toInt()
             _week.value = currentWeek
-            _week.collect { loadCourseToTable(it) }
+            _week.collect {
+                loadCourseToTable(it)
+                _loading.value = false
+            }
         }
+    }
+
+    private suspend fun getAllCourseList(loadFromCloud: Boolean): List<CourseResponse> {
+        val courseList: List<CourseResponse> =
+            if (Config.multiAccountMode) {
+                val list = ArrayList<CourseResponse>()
+                SessionManager.loggedUserList().forEach {
+                    list.addAll(
+                        if (loadFromCloud) {
+                            courseRepo.getCourseList(it)
+                        } else {
+                            courseLocalRepo.getCourseList(it)
+                        }
+                    )
+                }
+                list
+            } else {
+                if (loadFromCloud) {
+                    courseRepo.getCourseList()
+                } else {
+                    courseLocalRepo.getCourseList()
+                }
+            }
+        return courseList
     }
 
     fun loadCourseList(forceUpdate: Boolean = true) {
@@ -142,18 +172,44 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
             _tableCourse.value = emptyList()
             _errorMessage.value = throwable.message ?: throwable.javaClass.simpleName
         }) {
+            fun convertCourseList(courseList: List<CourseResponse>, currentWeek: Int) =
+                courseList.map {
+                    val thisWeek = it.week.contains(currentWeek)
+                    val weekString = it.week.formatWeekString()
+                    val timeString = it.time.formatTimeString()
+                    Course(
+                        it.name,
+                        it.teacher,
+                        it.location,
+                        it.week,
+                        weekString,
+                        it.type,
+                        it.time,
+                        timeString,
+                        it.time.formatTime(),
+                        it.day,
+                        thisWeek,
+                        ColorPool.hash(it.name),
+                    )
+                }
+
+            fun loadData(courseList: List<CourseResponse>, currentWeek: Int, weekIndex: Int) {
+                //转换对象
+                val allCourseList = convertCourseList(courseList, currentWeek)
+
+                //过滤出今日的课程
+                val todayCourse = allCourseList.filter { it.thisWeek && it.day == weekIndex }
+                    .sortedBy { it.timeString }
+                //设置数据
+                _todayCourse.value = todayCourse
+                loadCourseToTable(currentWeek)
+            }
+
             _loading.value = true
             var loadFromCloud = forceUpdate
             if (!loadFromCloud) {
                 loadFromCloud = Config.lastSyncCourse.isBefore(LocalDate.now())
             }
-            //获取所有的课程列表
-            val courseList = if (loadFromCloud) {
-                courseRepo.getCourseList()
-            } else {
-                courseLocalRepo.getCourseList()
-            }
-
             //计算当前周
             val startDate = LocalDateTime.ofInstant(Config.termStartTime, chinaZone).toLocalDate()
             val days =
@@ -161,43 +217,23 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
             val currentWeek = ((days / 7) + 1).toInt()
             _week.value = currentWeek
             val weekIndex = LocalDate.now().dayOfWeek.value
-            //转换对象
-            val allCourseList = courseList.map {
-                val thisWeek = it.week.contains(currentWeek)
-                val weekString = it.week.formatWeekString()
-                val timeString = it.time.formatTimeString()
-                Course(
-                    it.name,
-                    it.teacher,
-                    it.location,
-                    it.week,
-                    weekString,
-                    it.type,
-                    it.time,
-                    timeString,
-                    it.time.formatTime(),
-                    it.day,
-                    thisWeek,
-                    ColorPool.hash(it.name),
-                )
-            }
+            //获取所有的课程列表
 
-            //过滤出今日的课程
-            val todayCourse = allCourseList.filter { it.thisWeek && it.day == weekIndex }
-                .sortedBy { it.timeString }
-            //设置数据
-            _todayCourse.value = todayCourse
-            loadCourseToTable(currentWeek)
+            loadData(getAllCourseList(false), currentWeek, weekIndex)
+
+            //加载网络数据
             if (loadFromCloud) {
+                loadData(getAllCourseList(true), currentWeek, weekIndex)
                 _errorMessage.emit("${LocalDateTime.now().format(dateTimeFormatter)} 数据同步成功！")
             }
+            _loading.value = false
         }
     }
 
     private fun loadCourseToTable(currentWeek: Int) {
         viewModelScope.launch {
             //获取所有的课程列表
-            val courseList = courseLocalRepo.getCourseList()
+            val courseList = getAllCourseList(false)
             //转换对象
             val allCourseList = courseList.map {
                 val thisWeek = it.week.contains(currentWeek)
@@ -325,7 +361,6 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
             //设置数据
             _weekView.value = weekViewArray.toList()
             _tableCourse.value = tableCourseList
-            _loading.value = false
         }
     }
 

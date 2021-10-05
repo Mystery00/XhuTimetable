@@ -362,7 +362,8 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
     @Subscribe(threadMode = ThreadMode.MAIN_ORDERED)
     fun updateUIFromConfig(uiEvent: UIEvent) {
         when (uiEvent.eventType) {
-            EventType.CHANGE_MAIN_USER -> viewModel.loadCourseList(true)
+            EventType.CHANGE_MAIN_USER, EventType.MULTI_MODE_CHANGED ->
+                viewModel.loadCourseList(true)
             EventType.MAIN_USER_LOGOUT -> viewModel.checkMainUser.value = true
         }
     }
