@@ -4,7 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.User
 import vip.mystery0.xhu.timetable.model.entity.CourseItem
 import vip.mystery0.xhu.timetable.model.entity.CourseSource
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
@@ -15,10 +15,11 @@ class CourseLocalRepo : CourseRepo, KoinComponent {
     private val courseDao: CourseDao by inject()
 
     override suspend fun getCourseList(
+        user: User,
         year: String,
         term: Int,
     ): List<CourseResponse> = withContext(Dispatchers.IO) {
-        val list = courseDao.queryCourseList(SessionManager.mainUser.studentId, year, term)
+        val list = courseDao.queryCourseList(user.studentId, year, term)
         val result = ArrayList<CourseResponse>(list.size)
         val map = HashMap<String, CourseResponse>()
         val weekMap = HashMap<String, ArrayList<Int>>()

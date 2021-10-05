@@ -1,9 +1,7 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import android.content.Intent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Divider
@@ -38,7 +36,8 @@ val profileCourseContent: TabContent = @Composable { ext ->
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(Color.White)
+            .verticalScroll(rememberScrollState()),
     ) {
         Row(
             modifier = Modifier

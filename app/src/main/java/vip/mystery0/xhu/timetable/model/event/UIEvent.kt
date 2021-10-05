@@ -14,4 +14,5 @@ data class UIEvent(val eventType: EventType)
 enum class EventType {
     CHANGE_MAIN_USER,
     MAIN_USER_LOGOUT,
+    MULTI_MODE_CHANGED,
 }

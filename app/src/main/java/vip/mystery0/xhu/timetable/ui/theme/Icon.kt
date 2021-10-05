@@ -20,6 +20,12 @@ object XhuIcons {
     val back: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_back)
+    val add: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_add)
+    val multiAccount: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_multi_account)
 
     object Profile {
         val exam: Painter
