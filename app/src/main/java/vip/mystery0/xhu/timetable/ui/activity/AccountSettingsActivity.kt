@@ -33,7 +33,6 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
     @Composable
     override fun BuildContent() {
         val errorMessage by viewModel.errorMessage.collectAsState()
-        val loading by viewModel.loading.collectAsState()
         val loggedUserList by viewModel.loggedUserList.collectAsState()
         val editMode = remember { mutableStateOf(false) }
         Scaffold(

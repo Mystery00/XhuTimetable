@@ -19,9 +19,6 @@ class AccountManagementViewModel : ComposeViewModel(), KoinComponent {
     private val _errorMessage = MutableStateFlow("")
     val errorMessage: StateFlow<String> = _errorMessage
 
-    private val _loading = MutableStateFlow(false)
-    val loading: StateFlow<Boolean> = _loading
-
     private val _loggedUserList = MutableStateFlow<List<UserItem>>(emptyList())
     val loggedUserList: StateFlow<List<UserItem>> = _loggedUserList
 
@@ -31,11 +28,9 @@ class AccountManagementViewModel : ComposeViewModel(), KoinComponent {
 
     fun loadLoggedUserList() {
         viewModelScope.launch {
-            _loading.value = true
             val loggedList = SessionManager.loggedUserList()
             _loggedUserList.value =
                 loggedList.map { UserItem(it.studentId, it.info.userName, it.info.sex, it.main) }
-            _loading.value = false
         }
     }
 

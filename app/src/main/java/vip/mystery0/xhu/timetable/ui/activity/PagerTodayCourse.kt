@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -34,6 +35,7 @@ val todayCourseContent: TabContent = @Composable { ext ->
     val poemsDialogState = remember { mutableStateOf<Poems?>(null) }
     val poems by viewModel.poems.collectAsState()
     val todayCourseList by viewModel.todayCourse.collectAsState()
+    val multiAccountMode by viewModel.multiAccountMode.collectAsState()
     Box {
         if (poems == null && todayCourseList.isEmpty()) {
             activity.BuildNoCourseLayout()
@@ -48,7 +50,7 @@ val todayCourseContent: TabContent = @Composable { ext ->
                     DrawPoemsCard(poemsDialogState, poems = value)
                 }
                 todayCourseList.forEach {
-                    DrawCourseCard(course = it)
+                    DrawCourseCard(course = it, multiAccountMode = multiAccountMode)
                 }
             }
         }
@@ -113,7 +115,7 @@ private fun DrawPoemsCard(dialogState: MutableState<Poems?>, poems: Poems) {
 
 @ExperimentalMaterialApi
 @Composable
-private fun DrawCourseCard(course: Course) {
+private fun DrawCourseCard(course: Course, multiAccountMode: Boolean) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(vertical = 4.dp)
@@ -130,58 +132,78 @@ private fun DrawCourseCard(course: Course) {
                 .padding(end = 8.dp)
                 .fillMaxWidth(),
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp, end = 8.dp),
-            ) {
-                Icon(
-                    painter = XhuIcons.todayWaterMelon,
-                    contentDescription = null,
-                    tint = course.color,
-                    modifier = Modifier
-                        .padding(6.dp)
-                        .size(16.dp),
-                )
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
+            Box {
+                if (multiAccountMode) {
+                    Text(
+                        text = "${course.studentId}(${course.userName})",
+                        fontSize = 8.sp,
+                        color = MaterialTheme.colors.onSecondary,
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colors.secondary,
+                                shape = RoundedCornerShape(bottomStart = 4.dp),
+                            )
+                            .padding(1.dp)
+                            .align(Alignment.TopEnd),
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(
+                        top = if (multiAccountMode) 16.dp else 8.dp,
+                        bottom = 8.dp,
+                        end = 8.dp
+                    ),
                 ) {
-                    Row(
-                        modifier = Modifier.padding(vertical = 1.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                    Icon(
+                        painter = XhuIcons.todayWaterMelon,
+                        contentDescription = null,
+                        tint = course.color,
+                        modifier = Modifier
+                            .padding(6.dp)
+                            .size(16.dp),
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
                     ) {
+                        Row(
+                            modifier = Modifier.padding(vertical = 1.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = course.courseName,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp,
+                                modifier = Modifier.weight(1F),
+                            )
+                            Text(
+                                text = course.timeString,
+                                fontSize = 14.sp,
+                            )
+                        }
                         Text(
-                            text = course.courseName,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
-                            modifier = Modifier.weight(1F),
+                            text = course.teacherName,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 1.dp),
                         )
                         Text(
-                            text = course.timeString,
-                            fontSize = 14.sp,
+                            text = course.time,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 1.dp),
+                        )
+                        Text(
+                            text = course.location,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 1.dp),
                         )
                     }
-                    Text(
-                        text = course.teacherName,
-                        fontSize = 12.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 1.dp),
-                    )
-                    Text(
-                        text = course.time,
-                        fontSize = 12.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 1.dp),
-                    )
-                    Text(
-                        text = course.location,
-                        fontSize = 12.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 1.dp),
-                    )
                 }
             }
         }

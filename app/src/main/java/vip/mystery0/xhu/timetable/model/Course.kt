@@ -16,4 +16,6 @@ data class Course(
     val day: Int,
     val thisWeek: Boolean,
     val color: Color,
+    val studentId: String,
+    val userName: String,
 )

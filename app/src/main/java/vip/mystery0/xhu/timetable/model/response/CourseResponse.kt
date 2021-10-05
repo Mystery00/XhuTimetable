@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.model.response
 
+import vip.mystery0.xhu.timetable.config.User
 import vip.mystery0.xhu.timetable.model.entity.CourseType
 
 data class CourseResponse(
@@ -10,4 +11,7 @@ data class CourseResponse(
     var time: List<Int>,
     var type: CourseType,
     var day: Int,
-)
+) {
+    @Transient
+    lateinit var user: User
+}

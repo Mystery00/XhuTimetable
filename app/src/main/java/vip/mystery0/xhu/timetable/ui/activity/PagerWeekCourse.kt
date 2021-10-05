@@ -71,6 +71,7 @@ val weekCourseContent: TabContent = @Composable { ext ->
     val viewModel = ext.viewModel
     val courseDialogState = remember { mutableStateOf<List<Course>>(emptyList()) }
     val tableCourse by viewModel.tableCourse.collectAsState()
+    val multiAccountMode by viewModel.multiAccountMode.collectAsState()
     Box {
         Column(modifier = Modifier.fillMaxSize()) {
             //顶部日期栏
@@ -163,7 +164,7 @@ val weekCourseContent: TabContent = @Composable { ext ->
                 }
             }
         }
-        ShowCourseDialog(dialogState = courseDialogState)
+        ShowCourseDialog(dialogState = courseDialogState, multiAccountMode = multiAccountMode)
     }
 }
 
@@ -201,7 +202,10 @@ private fun BuildTimeItem(time: Int) {
 @ExperimentalComposeUiApi
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-private fun BoxScope.ShowCourseDialog(dialogState: MutableState<List<Course>>) {
+private fun BoxScope.ShowCourseDialog(
+    dialogState: MutableState<List<Course>>,
+    multiAccountMode: Boolean,
+) {
     val showList = dialogState.value
     if (showList.isNullOrEmpty()) return
     val first = showList.firstOrNull { it.thisWeek }
@@ -236,33 +240,36 @@ private fun BoxScope.ShowCourseDialog(dialogState: MutableState<List<Course>>) {
                         fontSize = 18.sp,
                         overflow = TextOverflow.Ellipsis,
                         color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
                     )
                     Text(
                         text = course.teacherName,
                         color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
                     )
                     Text(
                         text = course.location,
                         color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
                     )
                     Text(
                         text = course.weekString,
                         color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
                     )
                     Text(
                         text = course.time,
                         color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
                     )
+                    if (multiAccountMode) {
+                        Text(
+                            text = "${course.studentId}(${course.userName})",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colors.onSecondary,
+                            modifier = Modifier
+                                .background(
+                                    color = MaterialTheme.colors.secondary,
+                                    shape = RoundedCornerShape(4.dp),
+                                )
+                                .padding(2.dp),
+                        )
+                    }
                 }
             }
             HorizontalPagerIndicator(

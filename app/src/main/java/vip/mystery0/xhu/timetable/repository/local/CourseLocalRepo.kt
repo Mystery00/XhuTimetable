@@ -19,11 +19,11 @@ class CourseLocalRepo : CourseRepo, KoinComponent {
         year: String,
         term: Int,
     ): List<CourseResponse> = withContext(Dispatchers.IO) {
-        val list = courseDao.queryCourseList(user.studentId, year, term)
-        val result = ArrayList<CourseResponse>(list.size)
+        val courseList = courseDao.queryCourseList(user.studentId, year, term)
+        val result = ArrayList<CourseResponse>(courseList.size)
         val map = HashMap<String, CourseResponse>()
         val weekMap = HashMap<String, ArrayList<Int>>()
-        list.forEach { item ->
+        courseList.forEach { item ->
             val key =
                 "${item.courseName}!${item.teacherName}!${item.location}!${item.weekIndex}!${item.time}!${item.type}"
             var courseItem = map[key]
@@ -56,6 +56,7 @@ class CourseLocalRepo : CourseRepo, KoinComponent {
                 )
             )
         }
+        result.forEach { it.user = user }
         result
     }
 

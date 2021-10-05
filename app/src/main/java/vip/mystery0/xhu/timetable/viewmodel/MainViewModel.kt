@@ -11,10 +11,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.Config
-import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.chinaZone
-import vip.mystery0.xhu.timetable.config.serverExceptionHandler
+import vip.mystery0.xhu.timetable.config.*
 import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.entity.CourseType
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
@@ -88,6 +85,9 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
     val hasUnReadNotice: StateFlow<Boolean> = _hasUnReadNotice
 
     val checkMainUser = MutableStateFlow(false)
+
+    private val _multiAccountMode = MutableStateFlow(Config.multiAccountMode)
+    val multiAccountMode: StateFlow<Boolean> = _multiAccountMode
 
     init {
         showPoems()
@@ -190,6 +190,8 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                         it.day,
                         thisWeek,
                         ColorPool.hash(it.name),
+                        it.user.studentId,
+                        it.user.info.userName,
                     )
                 }
 
@@ -205,6 +207,7 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                 loadCourseToTable(currentWeek)
             }
 
+            _multiAccountMode.value = Config.multiAccountMode
             _loading.value = true
             var loadFromCloud = forceUpdate
             if (!loadFromCloud) {
@@ -252,6 +255,8 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                     it.day,
                     thisWeek,
                     ColorPool.hash(it.name),
+                    it.user.studentId,
+                    it.user.info.userName,
                 )
             }
             //过滤出本周的课程
