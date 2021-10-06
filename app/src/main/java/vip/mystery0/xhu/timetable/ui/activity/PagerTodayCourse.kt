@@ -17,10 +17,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.viewmodel.TodayCourseSheet
 
 val todayCourseTitle: TabTitle = @Composable { ext ->
     val viewModel = ext.viewModel
@@ -115,7 +115,7 @@ private fun DrawPoemsCard(dialogState: MutableState<Poems?>, poems: Poems) {
 
 @ExperimentalMaterialApi
 @Composable
-private fun DrawCourseCard(course: Course, multiAccountMode: Boolean) {
+private fun DrawCourseCard(course: TodayCourseSheet, multiAccountMode: Boolean) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(vertical = 4.dp)
