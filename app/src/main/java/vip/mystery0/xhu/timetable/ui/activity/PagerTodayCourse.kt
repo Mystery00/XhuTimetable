@@ -203,6 +203,13 @@ private fun DrawCourseCard(course: TodayCourseSheet, multiAccountMode: Boolean) 
                                 .fillMaxWidth()
                                 .padding(vertical = 1.dp),
                         )
+                        Text(
+                            text = course.courseStatus.name,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 1.dp),
+                        )
                     }
                 }
             }
