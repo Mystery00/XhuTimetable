@@ -66,8 +66,8 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
     private val _poems = MutableStateFlow<Poems?>(null)
     val poems: StateFlow<Poems?> = _poems
 
-    private val _todayCourse = MutableStateFlow<List<Course>>(emptyList())
-    val todayCourse: StateFlow<List<Course>> = _todayCourse
+    private val _todayCourse = MutableStateFlow<List<TodayCourseSheet>>(emptyList())
+    val todayCourse: StateFlow<List<TodayCourseSheet>> = _todayCourse
 
     private val _tableCourse = MutableStateFlow<List<List<CourseSheet>>>(emptyList())
     val tableCourse: StateFlow<List<List<CourseSheet>>> = _tableCourse
@@ -201,9 +201,35 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
 
                 //过滤出今日的课程
                 val todayCourse = allCourseList.filter { it.thisWeek && it.day == weekIndex }
-                    .sortedBy { it.timeString }
+                    .sortedBy { it.timeSet.first() }
+                    .groupBy { it.studentId }
+                //合并相同的课程
+                val resultCourse = ArrayList<TodayCourseSheet>(todayCourse.size)
+                todayCourse.forEach { (studentId, list) ->
+                    val resultMap = HashMap<String, TodayCourseSheet>()
+                    list.forEach {
+                        val key =
+                            "${studentId}:${it.courseName}:${it.teacherName}:${it.location}:${it.type}"
+                        var course = resultMap[key]
+                        if (course == null) {
+                            course = TodayCourseSheet(
+                                it.courseName,
+                                it.teacherName,
+                                TreeSet(it.timeSet),
+                                it.location,
+                                it.studentId,
+                                it.userName,
+                                it.color,
+                            )
+                            resultMap[key] = course
+                        } else {
+                            course.timeSet.addAll(it.timeSet)
+                        }
+                    }
+                    resultCourse.addAll(resultMap.values)
+                }
                 //设置数据
-                _todayCourse.value = todayCourse
+                _todayCourse.value = resultCourse.sortedBy { it.timeSet.first() }.map { it.calc() }
                 loadCourseToTable(currentWeek)
             }
 
@@ -499,6 +525,26 @@ data class CourseSheet(
         var result = showTitle.hashCode()
         result = 31 * result + course.hashCode()
         return result
+    }
+}
+
+data class TodayCourseSheet(
+    val courseName: String,
+    val teacherName: String,
+    val timeSet: TreeSet<Int>,
+    val location: String,
+    val studentId: String,
+    val userName: String,
+    val color: Color,
+) {
+    lateinit var time: String
+    lateinit var timeString: String
+
+    fun calc(): TodayCourseSheet {
+        val list = timeSet.toList()
+        time = list.formatTime()
+        timeString = list.formatTimeString()
+        return this
     }
 }
 
