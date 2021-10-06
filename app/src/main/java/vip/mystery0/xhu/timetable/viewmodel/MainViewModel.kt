@@ -21,10 +21,7 @@ import vip.mystery0.xhu.timetable.module.repo
 import vip.mystery0.xhu.timetable.repository.CourseRepo
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
-import java.time.DayOfWeek
-import java.time.Duration
-import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
@@ -220,6 +217,7 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                                 it.studentId,
                                 it.userName,
                                 it.color,
+                                LocalDate.now(),
                             )
                             resultMap[key] = course
                         } else {
@@ -229,7 +227,9 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                     resultCourse.addAll(resultMap.values)
                 }
                 //设置数据
-                _todayCourse.value = resultCourse.sortedBy { it.timeSet.first() }.map { it.calc() }
+                val now = LocalDateTime.now()
+                _todayCourse.value =
+                    resultCourse.sortedBy { it.timeSet.first() }.map { it.calc(now) }
                 loadCourseToTable(currentWeek)
             }
 
@@ -528,6 +528,8 @@ data class CourseSheet(
     }
 }
 
+private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+
 data class TodayCourseSheet(
     val courseName: String,
     val teacherName: String,
@@ -536,16 +538,29 @@ data class TodayCourseSheet(
     val studentId: String,
     val userName: String,
     val color: Color,
+    val date: LocalDate,
 ) {
     lateinit var time: String
     lateinit var timeString: String
+    lateinit var courseStatus: CourseStatus
 
-    fun calc(): TodayCourseSheet {
+    fun calc(now: LocalDateTime): TodayCourseSheet {
         val list = timeSet.toList()
         time = list.formatTime()
         timeString = list.formatTimeString()
+        val startTime = LocalTime.parse(startArray[list.first() - 1], timeFormatter).atDate(date)
+        val endTime = LocalTime.parse(endArray[list.last() - 1], timeFormatter).atDate(date)
+        courseStatus = when {
+            now.isBefore(startTime) -> CourseStatus.BEFORE
+            now.isAfter(endTime) -> CourseStatus.AFTER
+            else -> CourseStatus.IN
+        }
         return this
     }
+}
+
+enum class CourseStatus {
+    BEFORE, IN, AFTER,
 }
 
 class WeekView(
