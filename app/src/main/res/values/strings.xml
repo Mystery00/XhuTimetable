@@ -14,4 +14,5 @@
 
     <string name="title_activity_notice">通知公告</string>
     <string name="title_activity_account_management">账号管理</string>
+    <string name="title_activity_exam">考试查询</string>
 </resources>

@@ -21,6 +21,7 @@ import vip.mystery0.xhu.timetable.module.repo
 import vip.mystery0.xhu.timetable.repository.CourseRepo
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
+import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -562,21 +563,14 @@ data class TodayCourseSheet(
     }
 }
 
-private val beforeColor = Color(0xFF4CAF50)
-private val beforeBackgroundColor = Color(0xFFC8E6C9)
-private val inColor = Color(0xFFFF9800)
-private val inBackgroundColor = Color(0xFFFFE0B2)
-private val afterColor = Color(0xFFC6C6C6)
-private val afterBackgroundColor = Color(0xFFF5F5F5)
-
 enum class CourseStatus(
     val title: String,
     val color: Color,
     val backgroundColor: Color,
 ) {
-    BEFORE("未开始", beforeColor, beforeBackgroundColor),
-    IN("开课中", inColor, inBackgroundColor),
-    AFTER("已结束", afterColor, afterBackgroundColor),
+    BEFORE("未开始", XhuColor.Status.beforeColor, XhuColor.Status.beforeBackgroundColor),
+    IN("开课中", XhuColor.Status.inColor, XhuColor.Status.inBackgroundColor),
+    AFTER("已结束", XhuColor.Status.afterColor, XhuColor.Status.afterBackgroundColor),
 }
 
 class WeekView(
