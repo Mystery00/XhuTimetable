@@ -158,4 +158,9 @@ object Config {
             kv.encode("multiAccountMode", value)
         }
         get() = kv.decodeBool("multiAccountMode", false)
+    var showStatus: Boolean
+        set(value) {
+            kv.encode("showStatus", value)
+        }
+        get() = kv.decodeBool("showStatus", true)
 }

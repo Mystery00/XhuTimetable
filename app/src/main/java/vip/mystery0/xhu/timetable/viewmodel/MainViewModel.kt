@@ -86,6 +86,9 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
     private val _multiAccountMode = MutableStateFlow(Config.multiAccountMode)
     val multiAccountMode: StateFlow<Boolean> = _multiAccountMode
 
+    private val _showStatus = MutableStateFlow(Config.showStatus)
+    val showStatus: StateFlow<Boolean> = _showStatus
+
     init {
         showPoems()
         calculateTodayTitle()
@@ -559,8 +562,21 @@ data class TodayCourseSheet(
     }
 }
 
-enum class CourseStatus {
-    BEFORE, IN, AFTER,
+private val beforeColor = Color(0xFF4CAF50)
+private val beforeBackgroundColor = Color(0xFFC8E6C9)
+private val inColor = Color(0xFFFF9800)
+private val inBackgroundColor = Color(0xFFFFE0B2)
+private val afterColor = Color(0xFFC6C6C6)
+private val afterBackgroundColor = Color(0xFFF5F5F5)
+
+enum class CourseStatus(
+    val title: String,
+    val color: Color,
+    val backgroundColor: Color,
+) {
+    BEFORE("未开始", beforeColor, beforeBackgroundColor),
+    IN("开课中", inColor, inBackgroundColor),
+    AFTER("已结束", afterColor, afterBackgroundColor),
 }
 
 class WeekView(

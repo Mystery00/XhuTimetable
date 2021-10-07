@@ -36,6 +36,7 @@ val todayCourseContent: TabContent = @Composable { ext ->
     val poems by viewModel.poems.collectAsState()
     val todayCourseList by viewModel.todayCourse.collectAsState()
     val multiAccountMode by viewModel.multiAccountMode.collectAsState()
+    val showStatus by viewModel.showStatus.collectAsState()
     Box {
         if (poems == null && todayCourseList.isEmpty()) {
             activity.BuildNoCourseLayout()
@@ -50,7 +51,11 @@ val todayCourseContent: TabContent = @Composable { ext ->
                     DrawPoemsCard(poemsDialogState, poems = value)
                 }
                 todayCourseList.forEach {
-                    DrawCourseCard(course = it, multiAccountMode = multiAccountMode)
+                    DrawCourseCard(
+                        course = it,
+                        multiAccountMode = multiAccountMode,
+                        showStatus = showStatus
+                    )
                 }
             }
         }
@@ -115,7 +120,11 @@ private fun DrawPoemsCard(dialogState: MutableState<Poems?>, poems: Poems) {
 
 @ExperimentalMaterialApi
 @Composable
-private fun DrawCourseCard(course: TodayCourseSheet, multiAccountMode: Boolean) {
+private fun DrawCourseCard(
+    course: TodayCourseSheet,
+    multiAccountMode: Boolean,
+    showStatus: Boolean,
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(vertical = 4.dp)
@@ -151,7 +160,7 @@ private fun DrawCourseCard(course: TodayCourseSheet, multiAccountMode: Boolean) 
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(
                         top = if (multiAccountMode) 16.dp else 8.dp,
-                        bottom = 8.dp,
+                        bottom = if (showStatus) 24.dp else 8.dp,
                         end = 8.dp
                     ),
                 ) {
@@ -203,14 +212,21 @@ private fun DrawCourseCard(course: TodayCourseSheet, multiAccountMode: Boolean) 
                                 .fillMaxWidth()
                                 .padding(vertical = 1.dp),
                         )
-                        Text(
-                            text = course.courseStatus.name,
-                            fontSize = 12.sp,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 1.dp),
-                        )
                     }
+                }
+                if (showStatus) {
+                    Text(
+                        text = course.courseStatus.title,
+                        fontSize = 12.sp,
+                        color = course.courseStatus.color,
+                        modifier = Modifier
+                            .background(
+                                color = course.courseStatus.backgroundColor,
+                                shape = RoundedCornerShape(topStart = 4.dp),
+                            )
+                            .padding(2.dp)
+                            .align(Alignment.BottomEnd),
+                    )
                 }
             }
         }
