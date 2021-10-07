@@ -24,7 +24,7 @@ fun serverExceptionHandler(
         if (exception is HttpException) {
             val response = exception.response()?.errorBody()?.string()
             if (response != null) {
-                errorMessageMoshi.fromJson(response)?.let {
+                parseServerError(response)?.let {
                     val result = messageHandler(it)
                     if (result) {
                         return@CoroutineExceptionHandler
@@ -35,3 +35,5 @@ fun serverExceptionHandler(
         }
         handler(exception)
     }
+
+fun parseServerError(response: String): ErrorMessage? = errorMessageMoshi.fromJson(response)
