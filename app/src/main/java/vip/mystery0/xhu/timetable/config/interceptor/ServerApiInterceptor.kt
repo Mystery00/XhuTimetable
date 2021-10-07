@@ -28,8 +28,7 @@ class ServerApiInterceptor : Interceptor {
         map["method"] = request.method.uppercase()
         map["url"] = request.url.encodedPath
         map["body"] = body
-        map["content-type"] =
-            requestBody?.contentType()?.let { "${it.type}/${it.subtype}" } ?: "empty"
+        map["content-type"] = requestBody?.contentType()?.toString() ?: "empty"
         map["content-length"] = (requestBody?.contentLength() ?: 0L).toString()
         map["signTime"] = signTime.toEpochMilli().toString()
 
