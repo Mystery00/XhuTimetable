@@ -31,6 +31,15 @@ object XhuColor {
             @Composable
             get() = colorResource(id = R.color.textColorNullDataView)
     }
+
+    object Status {
+        val beforeColor = Color(0xFF4CAF50)
+        val beforeBackgroundColor = Color(0xFFC8E6C9)
+        val inColor = Color(0xFFFF9800)
+        val inBackgroundColor = Color(0xFFFFE0B2)
+        val afterColor = Color(0xFFC6C6C6)
+        val afterBackgroundColor = Color(0xFFF5F5F5)
+    }
 }
 
 object ColorPool {
