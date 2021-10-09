@@ -2,7 +2,6 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.viewModels
 import androidx.compose.foundation.*
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -45,18 +44,23 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                         IconButton(onClick = {
                             finish()
                         }) {
-                            Icon(XhuIcons.back, "")
+                            Icon(
+                                painter = XhuIcons.back,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
                         }
                     },
                     actions = {
-                        Text(
-                            text = if (editMode.value) "取消" else "管理",
-                            modifier = Modifier.clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() },
-                            ) {
-                                editMode.value = !editMode.value
-                            })
+                        IconButton(onClick = {
+                            editMode.value = !editMode.value
+                        }) {
+                            Icon(
+                                painter = if (editMode.value) XhuIcons.Action.done else XhuIcons.Action.manage,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
                     }
                 )
             },
@@ -78,7 +82,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                     onCheckedChange = { newValue -> viewModel.changeMultiAccountMode(newValue) },
                 )
                 Text(
-                    text = if (editMode.value) "清除账号登陆记录" else "轻触头像以切换账号",
+                    text = if (editMode.value) "清除账号登录记录" else "轻触头像以切换账号",
                     modifier = Modifier
                         .padding(vertical = 36.dp),
                     fontSize = 18.sp,
@@ -100,7 +104,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                 if (!editMode.value) {
                     BuildItem(
                         painter = XhuIcons.add,
-                        text = "登陆其他账号",
+                        text = "登录其他账号",
                         onClick = {
                             intentTo(LoginActivity::class) {
                                 it.putExtra(INTENT_EXTRA, true)

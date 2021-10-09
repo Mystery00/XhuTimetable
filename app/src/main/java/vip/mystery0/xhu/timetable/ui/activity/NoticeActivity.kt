@@ -53,7 +53,11 @@ class NoticeActivity : BaseComposeActivity() {
                         IconButton(onClick = {
                             finish()
                         }) {
-                            Icon(XhuIcons.back, "")
+                            Icon(
+                                painter = XhuIcons.back,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
                         }
                     },
                 )
