@@ -7,6 +7,7 @@ import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import vip.mystery0.xhu.timetable.api.FileApi
+import vip.mystery0.xhu.timetable.api.JwcApi
 import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.config.interceptor.LogInterceptor
@@ -48,6 +49,7 @@ val networkModule = module {
     }
 
     serverApi<ServerApi>()
+    serverApi<JwcApi>()
     serverApi<FileApi>()
 
     single { get<Retrofit>(named(RETROFIT_POEMS)).create(PoemsApi::class.java) }

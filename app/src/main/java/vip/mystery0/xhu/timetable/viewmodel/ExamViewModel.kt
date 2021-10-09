@@ -25,7 +25,10 @@ class ExamViewModel : ComposeViewModel(), KoinComponent {
         private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     }
 
-    val selectUser = MutableStateFlow(SessionManager.mainUser)
+    private val _userSelect = MutableStateFlow(SessionManager.loggedUserList().map {
+        UserSelect(it.studentId, it.info.userName, it.main)
+    })
+    val userSelect: StateFlow<List<UserSelect>> = _userSelect
 
     private val _examListState = MutableStateFlow(ExamListState())
     val examListState: StateFlow<ExamListState> = _examListState
@@ -41,7 +44,9 @@ class ExamViewModel : ComposeViewModel(), KoinComponent {
                 ExamListState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
         }) {
             _examListState.value = ExamListState(loading = true)
-            val response = getExamList(selectUser.value)
+            val selectUser =
+                SessionManager.getUser(_userSelect.value.first { it.selected }.studentId)!!
+            val response = getExamList(selectUser)
             val now = LocalDateTime.now()
             val examList = response.list.map {
                 val date = LocalDate.parse(it.date, dateFormatter)
@@ -71,7 +76,25 @@ class ExamViewModel : ComposeViewModel(), KoinComponent {
                 ExamListState(examList = examList, examHtml = response.html)
         }
     }
+
+    fun selectUser(studentId: String) {
+        viewModelScope.launch {
+            if (_userSelect.value.first { it.selected }.studentId == studentId) {
+                return@launch
+            }
+            _userSelect.value = SessionManager.loggedUserList().map {
+                UserSelect(it.studentId, it.info.userName, it.studentId == studentId)
+            }
+            loadExamList()
+        }
+    }
 }
+
+data class UserSelect(
+    val studentId: String,
+    val userName: String,
+    val selected: Boolean,
+)
 
 data class ExamListState(
     val loading: Boolean = false,

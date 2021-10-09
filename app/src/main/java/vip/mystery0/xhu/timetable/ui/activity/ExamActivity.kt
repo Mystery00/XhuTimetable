@@ -1,6 +1,9 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,10 +11,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -31,8 +32,9 @@ class ExamActivity : BaseComposeActivity() {
 
     @Composable
     override fun BuildContent() {
-        val selectUser by viewModel.selectUser.collectAsState()
+        val userSelect by viewModel.userSelect.collectAsState()
         val examListState by viewModel.examListState.collectAsState()
+        val showUserSelect = remember { mutableStateOf(false) }
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -43,128 +45,171 @@ class ExamActivity : BaseComposeActivity() {
                         IconButton(onClick = {
                             finish()
                         }) {
-                            Icon(XhuIcons.back, "")
+                            Icon(
+                                painter = XhuIcons.back,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
                         }
                     },
                     actions = {
-                        Text(
-                            text = "切换用户",
-                            modifier = Modifier.clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() },
-                            ) {
-
-                            })
+                        if (examListState.examHtml.isNotBlank()) {
+                            Text(
+                                text = "显示原始网页",
+                                modifier = Modifier.clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                ) {
+                                    examListState.examHtml.toast()
+                                })
+                        }
+                        IconButton(onClick = {
+                            showUserSelect.value = !showUserSelect.value
+                        }) {
+                            Icon(
+                                painter = XhuIcons.Action.more,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
                     }
                 )
             },
         ) { paddingValues ->
-            SwipeRefresh(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
-                state = rememberSwipeRefreshState(examListState.loading),
-                onRefresh = { viewModel.loadExamList() },
-            ) {
-                val list = examListState.examList
-                LazyColumn(
+            Box {
+                SwipeRefresh(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(XhuColor.Common.grayBackground),
-                    contentPadding = PaddingValues(4.dp),
+                        .padding(paddingValues)
+                        .fillMaxSize(),
+                    state = rememberSwipeRefreshState(examListState.loading),
+                    onRefresh = { viewModel.loadExamList() },
                 ) {
-                    if (examListState.loading) {
-                        items(3) {
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                                    .placeholder(
-                                        visible = examListState.loading,
-                                        highlight = PlaceholderHighlight.shimmer(),
-                                    )
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(4.dp)
-                                ) {
-                                    Text(
-                                        text = "课程名称",
-                                        fontSize = 16.sp,
-                                    )
-                                    Text(
-                                        text = "考试日期",
-                                        fontSize = 14.sp,
-                                    )
-                                    Text(
-                                        text = "考试时间",
-                                        fontSize = 14.sp,
-                                    )
-                                    Text(
-                                        text = "考试地点",
-                                        fontSize = 14.sp,
-                                    )
-                                    Text(
-                                        text = "座位号",
-                                        fontSize = 14.sp,
-                                    )
-                                    Text(
-                                        text = "考试类型",
-                                        fontSize = 14.sp,
-                                    )
-                                }
-                            }
-                        }
-                    } else {
-                        if (list.isNotEmpty()) {
-                            items(list.size) { index ->
-                                val item = list[index]
+                    val list = examListState.examList
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(XhuColor.Common.grayBackground),
+                        contentPadding = PaddingValues(4.dp),
+                    ) {
+                        if (examListState.loading) {
+                            items(3) {
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                                    border = BorderStroke(1.dp, color = item.examStatus.color),
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                        .placeholder(
+                                            visible = examListState.loading,
+                                            highlight = PlaceholderHighlight.shimmer(),
+                                        )
                                 ) {
                                     Column(
-                                        modifier = Modifier.padding(8.dp)
+                                        modifier = Modifier.padding(4.dp)
                                     ) {
                                         Text(
-                                            text = item.courseName,
-                                            fontWeight = FontWeight.Bold,
+                                            text = "课程名称",
                                             fontSize = 16.sp,
                                         )
                                         Text(
-                                            text = "考试日期：${item.dateString}",
-                                            color = XhuColor.Common.grayText,
+                                            text = "考试日期",
                                             fontSize = 14.sp,
                                         )
                                         Text(
-                                            text = "考试时间：${item.time}",
-                                            color = XhuColor.Common.grayText,
+                                            text = "考试时间",
                                             fontSize = 14.sp,
                                         )
                                         Text(
-                                            text = "考试地点：${item.location}",
-                                            color = XhuColor.Common.grayText,
+                                            text = "考试地点",
                                             fontSize = 14.sp,
                                         )
                                         Text(
-                                            text = "座位号：${item.examNumber}",
-                                            color = XhuColor.Common.grayText,
+                                            text = "座位号",
                                             fontSize = 14.sp,
                                         )
                                         Text(
-                                            text = "考试类型：${item.type}",
-                                            color = XhuColor.Common.grayText,
+                                            text = "考试类型",
                                             fontSize = 14.sp,
                                         )
                                     }
                                 }
                             }
+                        } else {
+                            if (list.isNotEmpty()) {
+                                items(list.size) { index ->
+                                    val item = list[index]
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                                        border = BorderStroke(1.dp, color = item.examStatus.color),
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.padding(8.dp)
+                                        ) {
+                                            Text(
+                                                text = item.courseName,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 16.sp,
+                                            )
+                                            Text(
+                                                text = "考试日期：${item.dateString}",
+                                                color = XhuColor.Common.grayText,
+                                                fontSize = 14.sp,
+                                            )
+                                            Text(
+                                                text = "考试时间：${item.time}",
+                                                color = XhuColor.Common.grayText,
+                                                fontSize = 14.sp,
+                                            )
+                                            Text(
+                                                text = "考试地点：${item.location}",
+                                                color = XhuColor.Common.grayText,
+                                                fontSize = 14.sp,
+                                            )
+                                            Text(
+                                                text = "座位号：${item.examNumber}",
+                                                color = XhuColor.Common.grayText,
+                                                fontSize = 14.sp,
+                                            )
+                                            Text(
+                                                text = "考试类型：${item.type}",
+                                                color = XhuColor.Common.grayText,
+                                                fontSize = 14.sp,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
+                    if (!examListState.loading && list.isEmpty()) {
+                        BuildNoDataLayout()
+                    }
                 }
-                if (!examListState.loading && list.isEmpty()) {
-                    BuildNoDataLayout()
+                AnimatedVisibility(
+                    modifier = Modifier.align(Alignment.TopEnd),
+                    visible = showUserSelect.value,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .padding(4.dp),
+                        elevation = 4.dp,
+                    ) {
+                        Column {
+                            userSelect.forEach { userSelect ->
+                                Row(modifier = Modifier
+                                    .padding(8.dp)
+                                    .clickable {
+                                        viewModel.selectUser(userSelect.studentId)
+                                        showUserSelect.value = false
+                                    }) {
+                                    RadioButton(selected = userSelect.selected, onClick = null)
+                                    Text(text = "${userSelect.userName}(${userSelect.studentId})")
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

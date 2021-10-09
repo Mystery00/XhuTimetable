@@ -8,7 +8,10 @@ import vip.mystery0.xhu.timetable.config.parseServerError
 import vip.mystery0.xhu.timetable.model.UserInfo
 import vip.mystery0.xhu.timetable.model.request.InitRequest
 import vip.mystery0.xhu.timetable.model.request.LoginRequest
-import vip.mystery0.xhu.timetable.model.response.*
+import vip.mystery0.xhu.timetable.model.response.InitResponse
+import vip.mystery0.xhu.timetable.model.response.LoginResponse
+import vip.mystery0.xhu.timetable.model.response.NoticeResponse
+import vip.mystery0.xhu.timetable.model.response.PublicKeyResponse
 
 interface ServerApi {
     @POST("/api/rest/xhu-timetable/common/init")
@@ -23,21 +26,11 @@ interface ServerApi {
     @GET("/api/rest/xhu-timetable/server/user")
     suspend fun userInfo(@Header("token") token: String): UserInfo
 
-    @GET("/api/rest/xhu-timetable/server/course/list")
-    suspend fun courseList(
-        @Header("token") token: String,
-        @Query("year") year: String,
-        @Query("term") term: Int,
-    ): Response<List<CourseResponse>>
-
     @GET("/api/rest/xhu-timetable/server/notice")
     suspend fun noticeList(
         @Header("token") token: String,
         @Query("platform") platform: String = "Android"
     ): Response<List<NoticeResponse>>
-
-    @GET("/api/rest/xhu-timetable/server/exam/list")
-    suspend fun examList(@Header("token") token: String): Response<ExamResponse>
 }
 
 fun <T : Any> Response<T>.checkLogin(): T {

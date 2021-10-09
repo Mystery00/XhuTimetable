@@ -53,6 +53,18 @@ object XhuIcons {
             @Composable
             get() = painterResource(id = R.drawable.ic_share)
     }
+
+    object Action {
+        val manage: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_action_manage)
+        val done: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_action_done)
+        val more: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_action_more)
+    }
 }
 
 @Composable
