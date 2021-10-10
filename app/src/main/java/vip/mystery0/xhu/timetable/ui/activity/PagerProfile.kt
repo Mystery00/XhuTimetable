@@ -88,7 +88,12 @@ val profileCourseContent: TabContent = @Composable { ext ->
                 .height(dividerHeight)
                 .background(dividerSmall),
         )
-        BuildProfileItem(painter = XhuIcons.Profile.score, title = "成绩查询")
+        BuildProfileItem(
+            painter = XhuIcons.Profile.score,
+            title = "成绩查询",
+            click = {
+                activity.intentTo(ScoreActivity::class)
+            })
         Divider(
             modifier = Modifier
                 .fillMaxWidth()

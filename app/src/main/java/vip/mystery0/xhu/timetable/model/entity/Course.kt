@@ -12,6 +12,8 @@ data class CourseItem(
     val teacherName: String,
     //上课地点
     val location: String,
+    //上课周显示的字符串
+    val weekString: String,
     //上课周
     val weekNum: Int,
     //节次[列表]

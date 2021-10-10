@@ -47,6 +47,11 @@
             android:exported="true"
             android:label="@string/title_activity_exam"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
+        <activity
+            android:name=".ui.activity.ScoreActivity"
+            android:exported="true"
+            android:label="@string/title_activity_score"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"
