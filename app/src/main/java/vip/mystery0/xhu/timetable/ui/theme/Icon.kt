@@ -64,6 +64,9 @@ object XhuIcons {
         val more: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_action_more)
+        val view: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_action_view)
     }
 }
 

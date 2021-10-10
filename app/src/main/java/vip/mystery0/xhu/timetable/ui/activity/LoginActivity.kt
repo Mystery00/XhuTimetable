@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.AccountCircle
+import androidx.compose.material.icons.twotone.Clear
 import androidx.compose.material.icons.twotone.Lock
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -55,8 +56,8 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                         .navigationBarsPadding()
                         .fillMaxHeight()
                 ) {
-                    var username by remember { mutableStateOf("000020211009") }
-                    var password by remember { mutableStateOf("d7f7ab") }
+                    var username by remember { mutableStateOf("") }
+                    var password by remember { mutableStateOf("") }
                     Spacer(
                         modifier = Modifier
                             .height(62.dp)
@@ -74,6 +75,13 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                         leadingIcon = {
                             Icon(Icons.TwoTone.AccountCircle, null)
                         },
+                        trailingIcon = {
+                            if (username.isNotBlank()) {
+                                IconButton(onClick = { username = "" }) {
+                                    Icon(Icons.TwoTone.Clear, null)
+                                }
+                            }
+                        },
                         label = {
                             Text(text = "学号")
                         },
@@ -88,6 +96,7 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                             keyboardType = KeyboardType.Number,
                         ),
                         maxLines = 1,
+                        isError = username.isBlank(),
                     )
                     Spacer(
                         modifier = Modifier
@@ -106,6 +115,13 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                         leadingIcon = {
                             Icon(Icons.TwoTone.Lock, null)
                         },
+                        trailingIcon = {
+                            if (password.isNotBlank()) {
+                                IconButton(onClick = { password = "" }) {
+                                    Icon(Icons.TwoTone.Clear, null)
+                                }
+                            }
+                        },
                         label = {
                             Text(text = "密码")
                         },
@@ -117,10 +133,11 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                         ),
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Go,
+                            imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Password,
                         ),
                         maxLines = 1,
+                        isError = password.isBlank(),
                     )
                     Text(
                         modifier = Modifier
@@ -146,7 +163,11 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                         ),
                         shape = RoundedCornerShape(36.dp),
                         onClick = {
-                            viewModel.login(username, password)
+                            when {
+                                username.isBlank() -> "用户名不能为空".toast()
+                                password.isBlank() -> "密码不能为空".toast()
+                                else -> viewModel.login(username, password)
+                            }
                         }) {
                         Text(
                             text = "登 录",

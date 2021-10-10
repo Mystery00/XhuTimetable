@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.model
 
 import androidx.compose.ui.graphics.Color
 import vip.mystery0.xhu.timetable.model.entity.CourseType
+import vip.mystery0.xhu.timetable.utils.sha512
 
 data class Course(
     val courseName: String,
@@ -18,4 +19,11 @@ data class Course(
     val color: Color,
     val studentId: String,
     val userName: String,
-)
+) {
+    var key = ""
+
+    fun generateKey() {
+        key =
+            "${courseName}!${teacherName}!${location}!${weekString}!${type}!${timeString}!${day}".sha512()
+    }
+}

@@ -11,9 +11,11 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.*
+import vip.mystery0.xhu.timetable.config.Config
+import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.chinaZone
+import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.model.Course
-import vip.mystery0.xhu.timetable.model.entity.CourseType
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.module.localRepo
@@ -176,14 +178,13 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
             fun convertCourseList(courseList: List<CourseResponse>, currentWeek: Int) =
                 courseList.map {
                     val thisWeek = it.week.contains(currentWeek)
-                    val weekString = it.week.formatWeekString()
                     val timeString = it.time.formatTimeString()
                     Course(
                         it.name,
                         it.teacher,
                         it.location,
                         it.week,
-                        weekString,
+                        it.weekString,
                         it.type,
                         it.time,
                         timeString,
@@ -270,14 +271,13 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
             //转换对象
             val allCourseList = courseList.map {
                 val thisWeek = it.week.contains(currentWeek)
-                val weekString = it.week.formatWeekString()
                 val timeString = it.time.formatTimeString()
                 Course(
                     it.name,
                     it.teacher,
                     it.location,
                     it.week,
-                    weekString,
+                    it.weekString,
                     it.type,
                     it.time,
                     timeString,
@@ -289,90 +289,73 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                     it.user.info.userName,
                 )
             }
-            //过滤出本周的课程
-            val tableCourse = Array<ArrayList<CourseSheet>>(7) { arrayListOf() }
-            val expandItemMap = HashMap<Pair<Int, Int>, ArrayList<Course>>()
-            allCourseList.map { course ->
-                course.timeSet.forEach { time ->
-                    course.weekSet.forEach { week ->
-                        val add = when (course.type) {
-                            //所有周都有，那么添加
-                            CourseType.ALL -> true
-                            //单周才有，判断单周
-                            CourseType.SINGLE -> week % 2 == 1
-                            //双周才有，判断双周
-                            CourseType.DOUBLE -> week % 2 == 0
-                        }
-                        if (add) {
-                            val key = course.day to time
-                            val list = expandItemMap.getOrDefault(key, arrayListOf())
-                            list.add(course)
-                            expandItemMap[key] = list
-                        }
-                    }
+            //组建表格的数据结构
+            val expandTableCourse = Array(7) { day ->
+                Array(11) { index ->
+                    CourseSheet.empty(1, index + 1, day + 1)
                 }
             }
-            var lastSheet: CourseSheet? = null
-            expandItemMap.entries.sortedWith { o1, o2 ->
-                val key1 = o1.key
-                val key2 = o2.key
-                if (key1.first == key2.first) {
-                    key1.second.compareTo(key2.second)
-                } else {
-                    key1.first.compareTo(key2.first)
+            //展开的列表，key为 当前课程的唯一标识，用于合并，value为课程信息，用于后续生成格子信息
+            val expandItemMap = HashMap<String, Course>(allCourseList.size)
+            //生成key
+            allCourseList.forEach {
+                it.generateKey()
+                expandItemMap[it.key] = it
+            }
+            //平铺课程
+            allCourseList.forEach { course ->
+                course.timeSet.forEach { time ->
+                    //填充表格
+                    expandTableCourse[course.day - 1][time - 1].course.add(course)
                 }
-            }.forEach { (key, list) ->
-                val day = key.first
-                list.sortWith { o1, o2 ->
-                    if (o1.thisWeek == o2.thisWeek) {
-                        o1.weekSet.first().compareTo(o2.weekSet.first())
+            }
+            //合并相同的格子
+            val tableCourse = Array<ArrayList<CourseSheet>>(7) { ArrayList(11) }
+            expandTableCourse.forEachIndexed { index, dayArray ->
+                val first = dayArray.first()
+                var lastKey = first.course.joinToString { it.key }
+                var lastSheet = first
+                for (i in 1 until dayArray.size) {
+                    val thisSheet = dayArray[i]
+                    val thisKey = thisSheet.course.joinToString { it.key }
+                    if (lastKey != thisKey) {
+                        //键不相等，那么添加这个sheet
+                        tableCourse[index].add(lastSheet)
+                        lastKey = thisKey
+                        lastSheet = thisSheet
                     } else {
-                        o2.thisWeek.compareTo(o1.thisWeek)
+                        //键相等，合并
+                        lastSheet.step++
                     }
                 }
-                val show = list.first()
-                val showTitle = "${show.courseName}@${show.location}"
-                val thisSheet =
-                    CourseSheet(
-                        if (show.thisWeek) showTitle else "[非本周]\n${showTitle}",
-                        1,
-                        show.timeSet.first(),
-                        day,
-                        list.distinct().sortedBy { it.weekSet.first() },
-                        if (show.thisWeek) ColorPool.hash(show.courseName) else notThisWeekBackgroundColor,
-                        if (show.thisWeek) Color.White else Color.Gray,
-                    )
-                if (lastSheet != thisSheet) {
-                    //不相等，直接添加
-                    //判断中间需不需要留空
-                    if (thisSheet.day != lastSheet?.day) {
-                        //两个不是同一天，说明换天了，此时需要计算空闲格子
-                        val count = thisSheet.startIndex - 1
-                        if (count > 0) {
-                            tableCourse[day - 1].add(CourseSheet.empty(count, 1, day))
-                        }
-                    } else {
-                        lastSheet?.let {
-                            val count = thisSheet.startIndex - it.startIndex - it.step
-                            if (count > 0) {
-                                tableCourse[day - 1].add(
-                                    CourseSheet.empty(
-                                        count,
-                                        it.startIndex + it.step,
-                                        day
-                                    )
-                                )
+                if (tableCourse[index].lastOrNull() != lastSheet) {
+                    tableCourse[index].add(lastSheet)
+                }
+            }
+            //填充显示的信息
+            val tableCourseList = tableCourse.map { array ->
+                array.map { courseSheet ->
+                    if (courseSheet.course.isNotEmpty()) {
+                        val list = courseSheet.course.sortedWith { o1, o2 ->
+                            if (o1.thisWeek == o2.thisWeek) {
+                                o1.weekSet.first().compareTo(o2.weekSet.first())
+                            } else {
+                                o2.thisWeek.compareTo(o1.thisWeek)
                             }
                         }
+                        val show = list.first()
+                        val showTitle = "${show.courseName}@${show.location}"
+                        courseSheet.showTitle =
+                            if (show.thisWeek) showTitle else "[非本周]\n${showTitle}"
+                        courseSheet.course =
+                            ArrayList(courseSheet.course.distinct().sortedBy { it.weekSet.first() })
+                        courseSheet.color =
+                            if (show.thisWeek) ColorPool.hash(show.courseName) else notThisWeekBackgroundColor
+                        courseSheet.textColor = if (show.thisWeek) Color.White else Color.Gray
                     }
-                    tableCourse[day - 1].add(thisSheet)
-                    lastSheet = thisSheet
-                } else {
-                    //相等，合并
-                    lastSheet!!.step++
+                    courseSheet
                 }
             }
-            val tableCourseList = tableCourse.map { it }
             //计算周课程视图
             val startDate = LocalDateTime.ofInstant(Config.termStartTime, chinaZone).toLocalDate()
             val days =
@@ -381,16 +364,14 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
             val weekViewArray = Array(20) { index ->
                 WeekView(index + 1, thisWeek == index + 1, Array(5) { Array(5) { false } })
             }
-            expandItemMap.forEach { (pair, list) ->
-                if (pair.second > 10 || pair.first > 5) {
-                    //丢弃第11节次的数据
-                    return@forEach
-                }
-                val day = pair.first - 1
-                val time = (pair.second - 1) / 2
-                val weekSet = list.map { it.weekSet }.flatten().toSet()
-                weekSet.forEach {
-                    weekViewArray[it - 1].array[day][time] = true
+            for (dayIndex in 0 until 5) {
+                val dayArray = expandTableCourse[dayIndex]
+                for (itemIndex in 0 until 10) {
+                    val courseSheet = dayArray[itemIndex]
+                    val weekSet = courseSheet.course.map { it.weekSet }.flatten().toSet()
+                    weekSet.forEach { week ->
+                        weekViewArray[week - 1].array[dayIndex][itemIndex / 2] = true
+                    }
                 }
             }
             //设置数据
@@ -419,39 +400,6 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
             _hasUnReadNotice.value = noticeRepo.hasUnReadNotice()
         }
     }
-}
-
-fun List<Int>.formatWeekString(): String {
-    var start = -1
-    var temp = -1
-    val stringBuilder = StringBuilder()
-    this.forEach {
-        if (it == temp + 1) {
-            //连续数字
-            temp = it
-            return@forEach
-        }
-        //非连续数字
-        if (start == -1) {
-            //第一次循环
-            start = it
-            temp = it
-            return@forEach
-        }
-        //非第一次循环
-        stringBuilder.append(start)
-        if (temp != start) {
-            stringBuilder.append("-").append(temp)
-        }
-        stringBuilder.append("、")
-        start = it
-        temp = it
-    }
-    stringBuilder.append(start)
-    if (temp != start) {
-        stringBuilder.append("-").append(temp)
-    }
-    return stringBuilder.append("周").toString()
 }
 
 private val notThisWeekBackgroundColor = Color(0xFFe5e5e5)
@@ -491,7 +439,7 @@ fun List<Int>.formatTime(): String = "${startArray[first() - 1]} - ${endArray[la
 
 data class CourseSheet(
     //显示标题
-    val showTitle: String,
+    var showTitle: String,
     //步长
     var step: Int,
     //开始节次序号
@@ -499,15 +447,15 @@ data class CourseSheet(
     //周几
     val day: Int,
     //当前格子的课程列表
-    val course: List<Course>,
+    var course: ArrayList<Course>,
     //颜色
-    val color: Color,
+    var color: Color,
     //文本颜色
-    val textColor: Color,
+    var textColor: Color,
 ) {
     companion object {
         fun empty(step: Int, startIndex: Int, day: Int): CourseSheet = CourseSheet(
-            "", step, startIndex, day, emptyList(), Color.Unspecified, Color.Unspecified
+            "", step, startIndex, day, arrayListOf(), Color.Unspecified, Color.Unspecified
         )
     }
 

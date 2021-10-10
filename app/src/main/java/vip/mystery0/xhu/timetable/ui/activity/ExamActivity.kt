@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -34,7 +35,16 @@ class ExamActivity : BaseComposeActivity() {
     override fun BuildContent() {
         val userSelect by viewModel.userSelect.collectAsState()
         val examListState by viewModel.examListState.collectAsState()
-        val showUserSelect = remember { mutableStateOf(false) }
+        var showUserSelect by remember { mutableStateOf(false) }
+
+        fun onBack() {
+            if (showUserSelect) {
+                showUserSelect = false
+                return
+            }
+            finish()
+        }
+
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -43,7 +53,7 @@ class ExamActivity : BaseComposeActivity() {
                     contentColor = MaterialTheme.colors.onPrimary,
                     navigationIcon = {
                         IconButton(onClick = {
-                            finish()
+                            onBack()
                         }) {
                             Icon(
                                 painter = XhuIcons.back,
@@ -64,7 +74,7 @@ class ExamActivity : BaseComposeActivity() {
                                 })
                         }
                         IconButton(onClick = {
-                            showUserSelect.value = !showUserSelect.value
+                            showUserSelect = !showUserSelect
                         }) {
                             Icon(
                                 painter = XhuIcons.Action.more,
@@ -187,7 +197,7 @@ class ExamActivity : BaseComposeActivity() {
                 }
                 AnimatedVisibility(
                     modifier = Modifier.align(Alignment.TopEnd),
-                    visible = showUserSelect.value,
+                    visible = showUserSelect,
                     enter = fadeIn(),
                     exit = fadeOut(),
                 ) {
@@ -196,16 +206,17 @@ class ExamActivity : BaseComposeActivity() {
                             .padding(4.dp),
                         elevation = 4.dp,
                     ) {
-                        Column {
-                            userSelect.forEach { userSelect ->
+                        LazyColumn {
+                            items(userSelect.size) { index ->
+                                val user = userSelect[index]
                                 Row(modifier = Modifier
                                     .padding(8.dp)
                                     .clickable {
-                                        viewModel.selectUser(userSelect.studentId)
-                                        showUserSelect.value = false
+                                        viewModel.selectUser(user.studentId)
+                                        showUserSelect = false
                                     }) {
-                                    RadioButton(selected = userSelect.selected, onClick = null)
-                                    Text(text = "${userSelect.userName}(${userSelect.studentId})")
+                                    RadioButton(selected = user.selected, onClick = null)
+                                    Text(text = "${user.userName}(${user.studentId})")
                                 }
                             }
                         }
@@ -216,5 +227,11 @@ class ExamActivity : BaseComposeActivity() {
         if (examListState.errorMessage.isNotBlank()) {
             examListState.errorMessage.toast(true)
         }
+        BackHandler(
+            enabled = showUserSelect,
+            onBack = {
+                onBack()
+            }
+        )
     }
 }
