@@ -188,6 +188,15 @@ class ScoreActivity : BaseComposeActivity() {
                                 .background(XhuColor.Common.grayBackground),
                             contentPadding = PaddingValues(4.dp),
                         ) {
+                            stickyHeader {
+                                Text(
+                                    text = "通过课程列表",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(XhuColor.Common.whiteBackground)
+                                        .padding(12.dp),
+                                )
+                            }
                             if (scoreListState.loading) {
                                 items(3) {
                                     BuildItem(
@@ -199,30 +208,33 @@ class ScoreActivity : BaseComposeActivity() {
                                     )
                                 }
                             } else {
-                                stickyHeader {
-                                    Text(
-                                        text = "通过课程列表",
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .background(XhuColor.Common.whiteBackground)
-                                            .padding(12.dp),
-                                    )
-                                }
                                 items(scoreList.size) { index ->
                                     val item = scoreList[index]
                                     BuildItem(item, showGpa, showCredit, showCourseType)
                                 }
-                                stickyHeader {
-                                    Text(
-                                        text = "未通过课程列表",
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .background(XhuColor.Common.whiteBackground)
-                                            .padding(12.dp),
+                            }
+                            stickyHeader {
+                                Text(
+                                    text = "未通过课程列表",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(XhuColor.Common.whiteBackground)
+                                        .padding(12.dp),
+                                )
+                            }
+                            if (scoreListState.loading) {
+                                item {
+                                    BuildItem(
+                                        ScoreItem("课程名称", "成绩", "绩点", "学分", "课程类型"),
+                                        showGpa,
+                                        showCredit,
+                                        showCourseType,
+                                        true,
                                     )
                                 }
-                                items(scoreList.size) { index ->
-                                    val item = scoreList[index]
+                            } else {
+                                items(failedScoreList.size) { index ->
+                                    val item = failedScoreList[index]
                                     BuildItem(item, showGpa, showCredit, showCourseType)
                                 }
                             }
@@ -310,6 +322,7 @@ class ScoreActivity : BaseComposeActivity() {
                             val item = userSelect[index]
                             Row(
                                 modifier = Modifier
+                                    .fillMaxWidth()
                                     .padding(vertical = 8.dp)
                                     .clickable(
                                         indication = null,
@@ -371,6 +384,7 @@ class ScoreActivity : BaseComposeActivity() {
                                 val item = yearSelect[index]
                                 Row(
                                     modifier = Modifier
+                                        .fillMaxWidth()
                                         .padding(vertical = 8.dp)
                                         .clickable(
                                             indication = null,
@@ -431,6 +445,7 @@ class ScoreActivity : BaseComposeActivity() {
                             val item = termSelect[index]
                             Row(
                                 modifier = Modifier
+                                    .fillMaxWidth()
                                     .padding(vertical = 8.dp)
                                     .clickable(
                                         indication = null,
