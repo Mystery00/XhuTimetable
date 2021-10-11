@@ -1,13 +1,20 @@
 package vip.mystery0.xhu.timetable.config
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.tencent.mmkv.MMKV
 import vip.mystery0.xhu.timetable.model.response.Splash
 import java.io.File
 import java.time.*
+import java.time.format.DateTimeFormatter
+import kotlin.reflect.KMutableProperty0
 
-val chinaZone = ZoneId.of("Asia/Shanghai")
+val chinaZone: ZoneId = ZoneId.of("Asia/Shanghai")
+private val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
 
 object Config {
     private val kv = MMKV.defaultMMKV()
@@ -26,6 +33,11 @@ object Config {
         get() = kv.decodeLong("lastVersionCode")
 
     var termStartTime: Instant
+        set(value) {
+            kv.encode("termStartTime", value.toEpochMilli())
+        }
+        get() = Instant.ofEpochMilli(kv.decodeLong("termStartTime", 0L))
+    var customTermStartTime: Instant
         set(value) {
             kv.encode("termStartTime", value.toEpochMilli())
         }
@@ -163,4 +175,19 @@ object Config {
             kv.encode("showStatus", value)
         }
         get() = kv.decodeBool("showStatus", true)
+    var showNotThisWeek: Boolean
+        set(value) {
+            kv.encode("showNotThisWeek", value)
+        }
+        get() = kv.decodeBool("showNotThisWeek", true)
+    var showTomorrowCourseTime: LocalTime?
+        set(value) {
+            kv.encode("showTomorrowCourseTime", value?.format(timeFormatter))
+        }
+        get() = kv.decodeString("showTomorrowCourseTime")
+            ?.let { LocalTime.parse(it, timeFormatter) }
 }
+
+@Composable
+fun <T> rememberConfigState(property: KMutableProperty0<T>): MutableState<T> =
+    remember { mutableStateOf(property()) }

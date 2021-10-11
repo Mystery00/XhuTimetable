@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import vip.mystery0.xhu.timetable.R
+import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.Config
 import vip.mystery0.xhu.timetable.config.SessionManager
@@ -96,7 +97,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                                 ImageView(context)
                             },
                             modifier = Modifier
-                                .size(18.dp)
+                                .size(24.dp)
                                 .align(Alignment.Center),
                         ) {
                             it.setImageResource(R.drawable.ic_sync)
@@ -350,7 +351,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         if (isTwiceClick())
             super.onBackPressed()
         else
-            "再按一次退出西瓜课表".toast()
+            "再按一次退出${appName}".toast()
     }
 
     override fun onResume() {

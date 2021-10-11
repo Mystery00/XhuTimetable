@@ -100,30 +100,48 @@ val profileCourseContent: TabContent = @Composable { ext ->
                 .height(dividerHeight)
                 .background(dividerSmall),
         )
-        BuildProfileItem(painter = XhuIcons.Profile.classroom, title = "空闲教室")
+        BuildProfileItem(
+            painter = XhuIcons.Profile.classroom,
+            title = "空闲教室",
+            click = {
+                activity.toastString("暂不支持")
+            })
         Divider(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp)
                 .background(divider),
         )
-        BuildProfileItem(painter = XhuIcons.Profile.accountSettings, title = "账号管理", click = {
-            activity.intentTo(AccountSettingsActivity::class)
-        })
+        BuildProfileItem(
+            painter = XhuIcons.Profile.accountSettings,
+            title = "账号管理",
+            click = {
+                activity.intentTo(AccountSettingsActivity::class)
+            })
         Divider(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(dividerHeight)
                 .background(dividerSmall),
         )
-        BuildProfileItem(painter = XhuIcons.Profile.classSettings, title = "课程设置")
+        BuildProfileItem(
+            painter = XhuIcons.Profile.classSettings,
+            title = "课程设置",
+            click = {
+                activity.intentTo(ClassSettingsActivity::class)
+            })
         Divider(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(dividerHeight)
                 .background(dividerSmall),
         )
-        BuildProfileItem(painter = XhuIcons.Profile.settings, title = "软件设置")
+        BuildProfileItem(
+            painter = XhuIcons.Profile.settings,
+            title = "软件设置",
+            click = {
+
+            })
         Divider(
             modifier = Modifier
                 .fillMaxWidth()
@@ -189,7 +207,6 @@ private fun BuildProfileItem(
             tint = Color.Unspecified,
             modifier = Modifier
                 .padding(horizontal = 12.dp)
-                .size(24.dp)
         )
         Text(
             text = title,
