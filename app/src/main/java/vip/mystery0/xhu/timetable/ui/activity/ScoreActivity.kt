@@ -84,7 +84,6 @@ class ScoreActivity : BaseComposeActivity() {
                             Icon(
                                 painter = XhuIcons.back,
                                 contentDescription = null,
-                                modifier = Modifier.size(24.dp),
                             )
                         }
                     },

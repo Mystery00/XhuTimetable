@@ -79,7 +79,6 @@ class ExamActivity : BaseComposeActivity() {
                             Icon(
                                 painter = XhuIcons.Action.more,
                                 contentDescription = null,
-                                modifier = Modifier.size(24.dp),
                             )
                         }
                     }

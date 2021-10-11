@@ -26,6 +26,9 @@ object XhuIcons {
     val multiAccount: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_multi_account)
+    val showNotThisWeek: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_show_not_this_week)
 
     object Profile {
         val exam: Painter

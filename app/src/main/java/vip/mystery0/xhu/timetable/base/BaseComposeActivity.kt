@@ -84,6 +84,13 @@ abstract class BaseComposeActivity(
             if (showLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
         )
 
+    fun toastString(message: String, showLong: Boolean = false) =
+        newToast(
+            this@BaseComposeActivity,
+            message,
+            if (showLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
+        )
+
     protected fun String.notBlankToast(showLong: Boolean = false) {
         if (this.isNotBlank()) {
             newToast(
