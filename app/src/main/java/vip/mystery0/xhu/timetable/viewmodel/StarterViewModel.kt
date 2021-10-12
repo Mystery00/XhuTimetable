@@ -11,10 +11,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.Config
-import vip.mystery0.xhu.timetable.config.DataHolder
-import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.serverExceptionHandler
+import vip.mystery0.xhu.timetable.config.*
 import vip.mystery0.xhu.timetable.externalPictureDir
 import vip.mystery0.xhu.timetable.module.repo
 import vip.mystery0.xhu.timetable.repository.StartRepo
@@ -46,29 +43,31 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
         }) {
             SessionManager.readFromCache()
             val response = startRepo.init()
-            DataHolder.version = response.version
-            val dir = externalPictureDir
-            val splashList = Config.splashList
-                .map {
-                    File(
-                        dir,
-                        "${it.splashId.toString().sha1()}-${it.imageUrl.md5()}".sha256()
-                    ) to it.showTime
+            runOnCpu {
+                DataHolder.version = response.version
+                val dir = externalPictureDir
+                val splashList = getConfig { splashList }
+                    .map {
+                        File(
+                            dir,
+                            "${it.splashId.toString().sha1()}-${it.imageUrl.md5()}".sha256()
+                        ) to it.showTime
+                    }
+                    .filter {
+                        it.first.exists()
+                    }
+                workManager.enqueue(
+                    OneTimeWorkRequestBuilder<DownloadSplashWork>()
+                        .build()
+                )
+                val splash = splashList.randomOrNull()
+                val showTime = splash?.second ?: 0
+                _timerState.emit(showTime)
+                _readyState.emit(ReadyState(splash = splash?.first))
+                (showTime - 1 downTo 0).forEach {
+                    delay(1000L)
+                    _timerState.emit(it)
                 }
-                .filter {
-                    it.first.exists()
-                }
-            workManager.enqueue(
-                OneTimeWorkRequestBuilder<DownloadSplashWork>()
-                    .build()
-            )
-            val splash = splashList.randomOrNull()
-            val showTime = splash?.second ?: 0
-            _timerState.value = showTime
-            _readyState.value = ReadyState(splash = splash?.first)
-            (showTime - 1 downTo 0).forEach {
-                delay(1000L)
-                _timerState.value = it
             }
         }
     }

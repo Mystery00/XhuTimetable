@@ -36,4 +36,6 @@ fun serverExceptionHandler(
         handler(exception)
     }
 
+class CoroutineStopException(override val message: String) : RuntimeException(message)
+
 fun parseServerError(response: String): ErrorMessage? = errorMessageMoshi.fromJson(response)

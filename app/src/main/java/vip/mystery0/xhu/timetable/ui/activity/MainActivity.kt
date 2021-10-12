@@ -38,8 +38,6 @@ import org.greenrobot.eventbus.ThreadMode
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
-import vip.mystery0.xhu.timetable.config.Config
-import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
@@ -70,9 +68,6 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         val coroutineScope = rememberCoroutineScope()
         val pagerState = rememberPagerState(initialPage = 0)
         val loading by viewModel.loading.collectAsState()
-        val weekView by viewModel.weekView.collectAsState()
-        val showWeekView by viewModel.showWeekView.collectAsState()
-        val currentWeek by viewModel.week.collectAsState()
         Scaffold(
             topBar = {
                 Box(
@@ -171,18 +166,19 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             }
         ) { paddingValues ->
             Box {
-                Image(
-                    painter = rememberImagePainter(
-                        data = Config.backgroundImage ?: R.mipmap.main_bg
-                    ) {
-                        scale(Scale.FIT)
-                        diskCachePolicy(CachePolicy.DISABLED)
-                    },
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                )
+                val backgroundImage by viewModel.backgroundImage.collectAsState()
+                if (backgroundImage != Unit) {
+                    Image(
+                        painter = rememberImagePainter(data = backgroundImage) {
+                            scale(Scale.FIT)
+                            diskCachePolicy(CachePolicy.DISABLED)
+                        },
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                    )
+                }
                 HorizontalPager(
                     count = 3,
                     state = pagerState,
@@ -209,11 +205,14 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                         }
                     }
                 }
+                val showWeekView by viewModel.showWeekView.collectAsState()
+                val weekView by viewModel.weekView.collectAsState()
                 AnimatedVisibility(
                     visible = showWeekView,
                     enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
                     exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
                 ) {
+                    val currentWeek by viewModel.week.collectAsState()
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(2.dp),
                         modifier = Modifier
@@ -288,14 +287,11 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         if (errorMessage.isNotBlank()) {
             errorMessage.toast(true)
         }
-        val checkMainUser by viewModel.checkMainUser.collectAsState()
-        if (checkMainUser) {
-            if (!SessionManager.isLogin()) {
-                intentTo(LoginActivity::class) {
-                    it.putExtra(AccountSettingsActivity.INTENT_EXTRA, true)
-                }
+        val emptyUser by viewModel.emptyUser.collectAsState()
+        if (emptyUser) {
+            intentTo(LoginActivity::class) {
+                it.putExtra(AccountSettingsActivity.INTENT_EXTRA, true)
             }
-            viewModel.checkMainUser.value = false
         }
     }
 
@@ -363,9 +359,15 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
     @Subscribe(threadMode = ThreadMode.MAIN_ORDERED)
     fun updateUIFromConfig(uiEvent: UIEvent) {
         when (uiEvent.eventType) {
-            EventType.CHANGE_MAIN_USER, EventType.MULTI_MODE_CHANGED ->
+            EventType.CHANGE_MAIN_USER,
+            EventType.MULTI_MODE_CHANGED,
+            EventType.CHANGE_CURRENT_YEAR_AND_TERM ->
                 viewModel.loadCourseList(true)
-            EventType.MAIN_USER_LOGOUT -> viewModel.checkMainUser.value = true
+            EventType.MAIN_USER_LOGOUT -> viewModel.checkMainUser()
+            EventType.CHANGE_AUTO_SHOW_TOMORROW_COURSE,
+            EventType.CHANGE_SHOW_NOT_THIS_WEEK -> viewModel.loadCourseList(false)
+            else -> {
+            }
         }
     }
 }

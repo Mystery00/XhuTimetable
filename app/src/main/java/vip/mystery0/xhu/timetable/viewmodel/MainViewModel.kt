@@ -7,14 +7,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.Config
-import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.chinaZone
-import vip.mystery0.xhu.timetable.config.serverExceptionHandler
+import vip.mystery0.xhu.timetable.config.*
 import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
 import vip.mystery0.xhu.timetable.model.response.Poems
@@ -24,6 +20,7 @@ import vip.mystery0.xhu.timetable.repository.CourseRepo
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
+import vip.mystery0.xhu.timetable.ui.theme.XhuImages
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -32,7 +29,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-class MainViewModel : ComposeViewModel(), KoinComponent {
+class MainViewModel : ComposeViewModel() {
     companion object {
         private const val TAG = "MainViewModel"
     }
@@ -84,26 +81,50 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
     private val _hasUnReadNotice = MutableStateFlow(false)
     val hasUnReadNotice: StateFlow<Boolean> = _hasUnReadNotice
 
-    val checkMainUser = MutableStateFlow(false)
-
-    private val _multiAccountMode = MutableStateFlow(Config.multiAccountMode)
+    private val _multiAccountMode = MutableStateFlow(false)
     val multiAccountMode: StateFlow<Boolean> = _multiAccountMode
 
-    private val _showStatus = MutableStateFlow(Config.showStatus)
+    private val _showStatus = MutableStateFlow(false)
     val showStatus: StateFlow<Boolean> = _showStatus
 
+    private val _backgroundImage = MutableStateFlow<Any>(Unit)
+    val backgroundImage: StateFlow<Any> = _backgroundImage
+
+    private val _emptyUser = MutableStateFlow(false)
+    val emptyUser: StateFlow<Boolean> = _emptyUser
+
+    private val _mainUser = MutableStateFlow<User?>(null)
+    val mainUser: StateFlow<User?> = _mainUser
+
     init {
+        viewModelScope.launch {
+            _multiAccountMode.value = getConfig { multiAccountMode }
+            _showStatus.value = getConfig { showStatus }
+            _backgroundImage.value =
+                getConfig { backgroundImage } ?: XhuImages.defaultBackgroundImage
+            val mainUser = SessionManager.mainUserOrNull()
+            _mainUser.value = mainUser
+            _emptyUser.value = mainUser == null
+        }
         showPoems()
         calculateTodayTitle()
         calculateWeek()
         loadCourseList(forceUpdate = false)
     }
 
+    fun checkMainUser() {
+        viewModelScope.launch {
+            val mainUser = SessionManager.mainUserOrNull()
+            _mainUser.value = mainUser
+            _emptyUser.value = mainUser == null
+        }
+    }
+
     private fun showPoems() {
         viewModelScope.launch {
-            val token = Config.poemsToken
+            val token = getConfig { poemsToken }
             if (token == null) {
-                Config.poemsToken = poemsApi.getToken().data
+                setConfig { this.poemsToken = poemsApi.getToken().data }
             }
             _poems.value = poemsApi.getSentence().data
         }
@@ -112,31 +133,40 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
     private fun calculateTodayTitle() {
         viewModelScope.launch {
             val nowDate = LocalDate.now()
-            val todayWeekIndex = nowDate.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.CHINESE)
-            val startDate = LocalDateTime.ofInstant(Config.termStartTime, chinaZone).toLocalDate()
-            if (nowDate.isBefore(startDate)) {
-                //开学之前，那么计算剩余时间
-                val remainDays =
-                    Duration.between(nowDate.atStartOfDay(), startDate.atStartOfDay()).toDays()
-                _todayTitle.value = "距离开学还有${remainDays}天 $todayWeekIndex"
-            } else {
-                val days =
-                    Duration.between(startDate.atStartOfDay(), nowDate.atStartOfDay()).toDays()
-                val week = (days / 7) + 1
-                _todayTitle.value = "第${week}周 $todayWeekIndex"
+            _todayTitle.value = runOnCpu {
+                val todayWeekIndex =
+                    nowDate.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.CHINESE)
+                val startDate =
+                    LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone).toLocalDate()
+                if (nowDate.isBefore(startDate)) {
+                    //开学之前，那么计算剩余时间
+                    val remainDays =
+                        Duration.between(nowDate.atStartOfDay(), startDate.atStartOfDay()).toDays()
+                    "距离开学还有${remainDays}天 $todayWeekIndex"
+                } else {
+                    val days =
+                        Duration.between(startDate.atStartOfDay(), nowDate.atStartOfDay()).toDays()
+                    val week = (days / 7) + 1
+                    "第${week}周 $todayWeekIndex"
+                }
             }
-            val field = WeekFields.of(DayOfWeek.MONDAY, 1).dayOfWeek()
-            _dateStart.value = nowDate.with(field, 1)
+
+            _dateStart.value = runOnCpu {
+                nowDate.with(WeekFields.of(DayOfWeek.MONDAY, 1).dayOfWeek(), 1)
+            }
         }
     }
 
     private fun calculateWeek() {
         viewModelScope.launch {
-            val startDate = LocalDateTime.ofInstant(Config.termStartTime, chinaZone).toLocalDate()
-            val days =
-                Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay()).toDays()
-            val currentWeek = ((days / 7) + 1).toInt()
-            _week.value = currentWeek
+            _week.value = runOnCpu {
+                val startDate =
+                    LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone).toLocalDate()
+                val days =
+                    Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay())
+                        .toDays()
+                ((days / 7) + 1).toInt()
+            }
             _week.collect {
                 loadCourseToTable(it)
                 _loading.value = false
@@ -145,24 +175,27 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
     }
 
     private suspend fun getAllCourseList(loadFromCloud: Boolean): List<CourseResponse> {
+        val currentYear = getConfig { currentYear }
+        val currentTerm = getConfig { currentTerm }
         val courseList: List<CourseResponse> =
-            if (Config.multiAccountMode) {
+            if (getConfig { multiAccountMode }) {
                 val list = ArrayList<CourseResponse>()
-                SessionManager.loggedUserList().forEach {
+                SessionManager.loggedUserList().forEach { user ->
                     list.addAll(
                         if (loadFromCloud) {
-                            courseRepo.getCourseList(it)
+                            courseRepo.getCourseList(user, currentYear, currentTerm)
                         } else {
-                            courseLocalRepo.getCourseList(it)
+                            courseLocalRepo.getCourseList(user, currentYear, currentTerm)
                         }
                     )
                 }
                 list
             } else {
+                val user = SessionManager.mainUser()
                 if (loadFromCloud) {
-                    courseRepo.getCourseList()
+                    courseRepo.getCourseList(user, currentYear, currentTerm)
                 } else {
-                    courseLocalRepo.getCourseList()
+                    courseLocalRepo.getCourseList(user, currentYear, currentTerm)
                 }
             }
         return courseList
@@ -197,58 +230,68 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                     )
                 }
 
-            fun loadData(courseList: List<CourseResponse>, currentWeek: Int, weekIndex: Int) {
-                //转换对象
-                val allCourseList = convertCourseList(courseList, currentWeek)
+            suspend fun loadData(
+                courseList: List<CourseResponse>,
+                currentWeek: Int,
+                weekIndex: Int
+            ) {
+                _todayCourse.value = runOnCpu {
+                    //转换对象
+                    val allCourseList = convertCourseList(courseList, currentWeek)
 
-                //过滤出今日的课程
-                val todayCourse = allCourseList.filter { it.thisWeek && it.day == weekIndex }
-                    .sortedBy { it.timeSet.first() }
-                    .groupBy { it.studentId }
-                //合并相同的课程
-                val resultCourse = ArrayList<TodayCourseSheet>(todayCourse.size)
-                todayCourse.forEach { (studentId, list) ->
-                    val resultMap = HashMap<String, TodayCourseSheet>()
-                    list.forEach {
-                        val key =
-                            "${studentId}:${it.courseName}:${it.teacherName}:${it.location}:${it.type}"
-                        var course = resultMap[key]
-                        if (course == null) {
-                            course = TodayCourseSheet(
-                                it.courseName,
-                                it.teacherName,
-                                TreeSet(it.timeSet),
-                                it.location,
-                                it.studentId,
-                                it.userName,
-                                it.color,
-                                LocalDate.now(),
-                            )
-                            resultMap[key] = course
-                        } else {
-                            course.timeSet.addAll(it.timeSet)
+                    //过滤出今日的课程
+                    val todayCourse = allCourseList.filter { it.thisWeek && it.day == weekIndex }
+                        .sortedBy { it.timeSet.first() }
+                        .groupBy { it.studentId }
+                    //合并相同的课程
+                    val resultCourse = ArrayList<TodayCourseSheet>(todayCourse.size)
+                    todayCourse.forEach { (studentId, list) ->
+                        val resultMap = HashMap<String, TodayCourseSheet>()
+                        list.forEach {
+                            val key =
+                                "${studentId}:${it.courseName}:${it.teacherName}:${it.location}:${it.type}"
+                            var course = resultMap[key]
+                            if (course == null) {
+                                course = TodayCourseSheet(
+                                    it.courseName,
+                                    it.teacherName,
+                                    TreeSet(it.timeSet),
+                                    it.location,
+                                    it.studentId,
+                                    it.userName,
+                                    it.color,
+                                    LocalDate.now(),
+                                )
+                                resultMap[key] = course
+                            } else {
+                                course.timeSet.addAll(it.timeSet)
+                            }
                         }
+                        resultCourse.addAll(resultMap.values)
                     }
-                    resultCourse.addAll(resultMap.values)
-                }
-                //设置数据
-                val now = LocalDateTime.now()
-                _todayCourse.value =
+                    //设置数据
+                    val now = LocalDateTime.now()
                     resultCourse.sortedBy { it.timeSet.first() }.map { it.calc(now) }
+                }
+
                 loadCourseToTable(currentWeek)
             }
 
-            _multiAccountMode.value = Config.multiAccountMode
+            _multiAccountMode.value = getConfig { multiAccountMode }
             _loading.value = true
             var loadFromCloud = forceUpdate
             if (!loadFromCloud) {
-                loadFromCloud = Config.lastSyncCourse.isBefore(LocalDate.now())
+                loadFromCloud = getConfig { lastSyncCourse }.isBefore(LocalDate.now())
             }
-            //计算当前周
-            val startDate = LocalDateTime.ofInstant(Config.termStartTime, chinaZone).toLocalDate()
-            val days =
-                Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay()).toDays()
-            val currentWeek = ((days / 7) + 1).toInt()
+            val currentWeek = runOnCpu {
+                //计算当前周
+                val startDate =
+                    LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone).toLocalDate()
+                val days =
+                    Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay())
+                        .toDays()
+                ((days / 7) + 1).toInt()
+            }
             _week.value = currentWeek
             val weekIndex = LocalDate.now().dayOfWeek.value
             //获取所有的课程列表
@@ -264,11 +307,11 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
         }
     }
 
-    private fun loadCourseToTable(currentWeek: Int) {
-        viewModelScope.launch {
-            //获取所有的课程列表
-            val courseList = getAllCourseList(false)
-            //转换对象
+    private suspend fun loadCourseToTable(currentWeek: Int) {
+        //获取所有的课程列表
+        val courseList = getAllCourseList(false)
+        //转换对象
+        runOnCpu {
             val allCourseList = courseList.map {
                 val thisWeek = it.week.contains(currentWeek)
                 val timeString = it.time.formatTimeString()
@@ -357,7 +400,8 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                 }
             }
             //计算周课程视图
-            val startDate = LocalDateTime.ofInstant(Config.termStartTime, chinaZone).toLocalDate()
+            val startDate =
+                LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone).toLocalDate()
             val days =
                 Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay()).toDays()
             val thisWeek = ((days / 7) + 1).toInt()
@@ -375,8 +419,8 @@ class MainViewModel : ComposeViewModel(), KoinComponent {
                 }
             }
             //设置数据
-            _weekView.value = weekViewArray.toList()
-            _tableCourse.value = tableCourseList
+            _weekView.emit(weekViewArray.toList())
+            _tableCourse.emit(tableCourseList)
         }
     }
 

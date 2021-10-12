@@ -5,16 +5,21 @@ import androidx.compose.ui.Modifier
 import com.alorma.settings.composables.SettingsCheckbox
 import com.alorma.settings.composables.SettingsMenuLink
 import com.alorma.settings.storage.rememberBooleanSettingState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlin.reflect.KMutableProperty0
 
 @Composable
 fun ConfigSettingsCheckbox(
     modifier: Modifier = Modifier,
     config: KMutableProperty0<Boolean>,
+    scope: CoroutineScope = rememberCoroutineScope(),
     icon: @Composable (() -> Unit)? = null,
     title: @Composable () -> Unit,
     subtitle: @Composable (() -> Unit)? = null,
-    onCheckedChange: (Boolean) -> Unit = config::set,
+    onCheckedChange: suspend (Boolean) -> Unit = { newValue ->
+        config.set(newValue)
+    },
 ) {
     SettingsCheckbox(
         modifier = modifier,
@@ -22,7 +27,7 @@ fun ConfigSettingsCheckbox(
         icon = icon,
         title = title,
         subtitle = subtitle,
-        onCheckedChange = onCheckedChange,
+        onCheckedChange = { newValue -> scope.launch { onCheckedChange(newValue) } },
     )
 }
 
@@ -32,16 +37,17 @@ typealias ConfigSetter<T> = (T) -> Unit
 fun <T> ConfigSettingsMenuLink(
     modifier: Modifier = Modifier,
     config: KMutableProperty0<T>,
+    scope: CoroutineScope = rememberCoroutineScope(),
     icon: (@Composable (T) -> Unit)? = null,
     title: @Composable (T) -> Unit,
     subtitle: (@Composable (T) -> Unit)? = null,
     action: (@Composable (T, ConfigSetter<T>) -> Unit)? = null,
-    onClick: (T, ConfigSetter<T>) -> Unit = { _, _ -> },
+    onClick: suspend (T, ConfigSetter<T>) -> Unit = { _, _ -> },
 ) {
     var value by remember { mutableStateOf(config.get()) }
-    val setter: ConfigSetter<T> = {
-        config.set(it)
-        value = it
+    val setter: ConfigSetter<T> = { newValue ->
+        scope.launch { config.set(newValue) }
+        value = newValue
     }
     SettingsMenuLink(
         modifier = modifier,
@@ -64,7 +70,7 @@ fun <T> ConfigSettingsMenuLink(
             }
         },
         onClick = {
-            onClick(value, setter)
-        },
+            scope.launch { onClick(value, setter) }
+        }
     )
 }

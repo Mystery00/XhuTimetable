@@ -41,10 +41,6 @@ import java.util.*
 val weekCourseTitle: TabTitle = @Composable { ext ->
     val viewModel = ext.viewModel
     val week = viewModel.week.collectAsState()
-    val showWeekView by viewModel.showWeekView.collectAsState()
-    val rotationAngle by animateFloatAsState(
-        targetValue = if (showWeekView) 180F else 0F,
-    )
     Row(
         modifier = Modifier
             .align(Alignment.Center)
@@ -58,6 +54,10 @@ val weekCourseTitle: TabTitle = @Composable { ext ->
         horizontalArrangement = Arrangement.Center,
     ) {
         Text(text = "第${week.value}周")
+        val showWeekView by viewModel.showWeekView.collectAsState()
+        val rotationAngle by animateFloatAsState(
+            targetValue = if (showWeekView) 180F else 0F,
+        )
         Icon(
             imageVector = Icons.TwoTone.ArrowDropUp,
             contentDescription = null,

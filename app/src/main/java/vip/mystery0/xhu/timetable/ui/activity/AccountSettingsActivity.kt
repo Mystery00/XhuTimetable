@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
-import vip.mystery0.xhu.timetable.config.Config
+import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
@@ -31,7 +31,6 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
     @Composable
     override fun BuildContent() {
         val errorMessage by viewModel.errorMessage.collectAsState()
-        val loggedUserList by viewModel.loggedUserList.collectAsState()
         val editMode = remember { mutableStateOf(false) }
         Scaffold(
             topBar = {
@@ -73,7 +72,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
             ) {
                 ConfigSettingsCheckbox(
                     modifier = Modifier.padding(vertical = 8.dp),
-                    config = Config::multiAccountMode,
+                    config = GlobalConfig::multiAccountMode,
                     icon = { Icon(painter = XhuIcons.multiAccount, contentDescription = null) },
                     title = { Text(text = "启用多用户模式") },
                     subtitle = { Text(text = "注意：如果多个用户的课表存在冲突的情况，表格可能会变得很乱，请确定您开启这个模式的意义！") },
@@ -85,6 +84,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                         .padding(vertical = 36.dp),
                     fontSize = 18.sp,
                 )
+                val loggedUserList by viewModel.loggedUserList.collectAsState()
                 loggedUserList.forEach { userItem ->
                     BuildItem(
                         painter = ProfileImages.hash(userItem.userName, userItem.sex == "男"),

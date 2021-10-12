@@ -7,14 +7,13 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.api.FileApi
 import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.config.DataHolder
+import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.externalDownloadDir
 import vip.mystery0.xhu.timetable.ui.activity.DownloadUpdateState
@@ -54,7 +53,7 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
         }
         startDownload()
         val response = fileApi.download(version.apkMd5)
-        withContext(Dispatchers.IO) {
+        runOnIo {
             response.byteStream().use { input ->
                 FileOutputStream(file).use { output ->
                     input.copyTo(output)

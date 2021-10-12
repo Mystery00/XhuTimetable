@@ -32,16 +32,16 @@ val todayCourseTitle: TabTitle = @Composable { ext ->
 val todayCourseContent: TabContent = @Composable { ext ->
     val activity = ext.activity
     val viewModel = ext.viewModel
-    val poemsDialogState = remember { mutableStateOf<Poems?>(null) }
-    val poems by viewModel.poems.collectAsState()
-    val todayCourseList by viewModel.todayCourse.collectAsState()
-    val multiAccountMode by viewModel.multiAccountMode.collectAsState()
-    val showStatus by viewModel.showStatus.collectAsState()
     Box {
+        val poemsDialogState = remember { mutableStateOf<Poems?>(null) }
+        val poems by viewModel.poems.collectAsState()
+        val todayCourseList by viewModel.todayCourse.collectAsState()
         if (poems == null && todayCourseList.isEmpty()) {
             activity.BuildNoCourseLayout()
         } else {
             DrawLine()
+            val multiAccountMode by viewModel.multiAccountMode.collectAsState()
+            val showStatus by viewModel.showStatus.collectAsState()
             Column(
                 modifier = Modifier
                     .fillMaxSize()

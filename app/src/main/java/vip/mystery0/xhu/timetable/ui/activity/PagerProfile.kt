@@ -21,10 +21,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
-import vip.mystery0.xhu.timetable.R
-import vip.mystery0.xhu.timetable.config.Config
-import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.ui.theme.XhuImages
 
 val profileCourseTitle: TabTitle = @Composable {
     Text(text = "我的", modifier = Modifier.align(Alignment.Center))
@@ -44,8 +43,12 @@ val profileCourseContent: TabContent = @Composable { ext ->
                 .height(96.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            val mainUser by viewModel.mainUser.collectAsState()
+            val profileImage = mainUser?.let {
+                it.profileImage ?: ProfileImages.hash(it.info.userName, it.info.sex == "男")
+            } ?: XhuImages.defaultProfileImage
             Image(
-                rememberImagePainter(data = Config.profileImage ?: R.mipmap.ic_launcher),
+                painter = if (profileImage is Painter) profileImage else rememberImagePainter(data = profileImage),
                 contentDescription = null,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
@@ -53,12 +56,12 @@ val profileCourseContent: TabContent = @Composable { ext ->
             )
             Column(modifier = Modifier.weight(1F)) {
                 Text(
-                    SessionManager.mainUser.info.userName,
+                    mainUser?.info?.userName ?: "账号未登录",
                     fontSize = 17.sp,
                     color = Color.Black,
                     fontWeight = FontWeight.Bold,
                 )
-                Text(SessionManager.mainUser.info.className, fontSize = 14.sp, color = Color.Gray)
+                Text(mainUser?.info?.className ?: "", fontSize = 14.sp, color = Color.Gray)
             }
             Icon(
                 imageVector = Icons.TwoTone.ArrowForwardIos,

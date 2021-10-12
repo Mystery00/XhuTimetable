@@ -10,12 +10,15 @@ object SessionManager {
     //用户列表
     private val userMap = HashMap<String, User>(4)
 
-    val mainUser: User
-        get() = userMap.values.find { it.main } ?: userMap.values.first()
+    suspend fun mainUserOrNull(): User? = runOnCpu {
+        userMap.values.find { it.main } ?: userMap.values.firstOrNull()
+    }
+
+    suspend fun mainUser(): User = mainUserOrNull()!!
 
     fun isLogin(): Boolean = userMap.isNotEmpty()
 
-    fun getUser(studentId: String): User? {
+    suspend fun getUser(studentId: String): User? {
         val user = userMap[studentId]
         if (user == null) {
             logout(studentId)
@@ -24,63 +27,79 @@ object SessionManager {
         return user
     }
 
-    fun login(
+    suspend fun user(studentId: String): User = getUser(studentId)!!
+
+    suspend fun login(
         studentId: String,
         password: String,
         token: String,
         userInfo: UserInfo,
     ) {
-        val main = userMap.values.find { it.main }
-        userMap[studentId] = User(studentId, password, token, userInfo, main == null)
+        runOnCpu {
+            val main = userMap.values.find { it.main }
+            userMap[studentId] = User(studentId, password, token, userInfo, main == null, null)
+        }
         writeToCache()
     }
 
-    fun logout(studentId: String): Boolean {
+    suspend fun logout(studentId: String): Boolean {
         var result = false
-        val user = userMap.remove(studentId)
-        user?.let {
-            if (it.main) {
-                userMap.values.firstOrNull()?.main = true
-                result = true
+        runOnCpu {
+            val user = userMap.remove(studentId)
+            user?.let {
+                if (it.main) {
+                    userMap.values.firstOrNull()?.main = true
+                    result = true
+                }
             }
         }
         writeToCache()
         return result
     }
 
-    fun changeMainUser(studentId: String): Boolean {
+    suspend fun changeMainUser(studentId: String): Boolean {
         val user = userMap[studentId] ?: return false
-        mainUser.main = false
+        mainUser().main = false
         user.main = true
         writeToCache()
         return true
     }
 
-    fun loggedUserList(): List<User> {
+    suspend fun loggedUserList(): List<User> {
         readFromCache()
-        return userMap.values.sortedBy { !it.main }.toList()
+        return runOnCpu { userMap.values.sortedBy { !it.main }.toList() }
     }
 
     @Synchronized
-    private fun writeToCache() {
-        Config.userList = ArrayList(userMap.values)
+    private suspend fun writeToCache() {
+        setConfig { userList = ArrayList(userMap.values) }
     }
 
     @Synchronized
-    fun readFromCache() {
+    suspend fun readFromCache() {
         userMap.clear()
-        Config.userList.forEach {
+        getConfig { userList }.forEach {
             userMap[it.studentId] = it
         }
     }
 
-    private fun reLogin(
+    private suspend fun reLogin(
         user: User,
         newToken: String,
         userInfo: UserInfo,
     ) {
-        userMap.remove(user.studentId)
-        userMap[user.studentId] = User(user.studentId, user.password, newToken, userInfo, user.main)
+        runOnCpu {
+            userMap.remove(user.studentId)
+            userMap[user.studentId] =
+                User(
+                    user.studentId,
+                    user.password,
+                    newToken,
+                    userInfo,
+                    user.main,
+                    user.profileImage
+                )
+        }
         writeToCache()
     }
 
@@ -109,4 +128,6 @@ data class User(
     val info: UserInfo,
     //是否为主用户
     var main: Boolean = false,
+    //头像
+    var profileImage: String?,
 )

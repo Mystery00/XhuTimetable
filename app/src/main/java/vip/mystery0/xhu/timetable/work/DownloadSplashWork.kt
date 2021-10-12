@@ -4,12 +4,11 @@ import android.content.Context
 import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.FileApi
-import vip.mystery0.xhu.timetable.config.Config
+import vip.mystery0.xhu.timetable.config.getConfig
+import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.externalPictureDir
 import vip.mystery0.xhu.timetable.utils.md5
 import vip.mystery0.xhu.timetable.utils.sha1
@@ -30,7 +29,7 @@ class DownloadSplashWork(appContext: Context, workerParams: WorkerParameters) :
         if (!dir.exists()) {
             dir.mkdirs()
         }
-        val splashList = Config.splashList
+        val splashList = getConfig { splashList }
             .map {
                 it.imageUrl to File(
                     dir,
@@ -45,7 +44,7 @@ class DownloadSplashWork(appContext: Context, workerParams: WorkerParameters) :
         }
         splashList.forEach {
             val response = fileApi.download(it.first)
-            withContext(Dispatchers.IO) {
+            runOnIo {
                 response.byteStream().use { input ->
                     FileOutputStream(it.second).use { output ->
                         input.copyTo(output)

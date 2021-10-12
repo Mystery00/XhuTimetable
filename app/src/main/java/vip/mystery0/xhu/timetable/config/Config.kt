@@ -16,7 +16,13 @@ import kotlin.reflect.KMutableProperty0
 val chinaZone: ZoneId = ZoneId.of("Asia/Shanghai")
 private val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
 
-object Config {
+private val instance = Config()
+val GlobalConfig = instance
+
+suspend fun <T> getConfig(block: Config.() -> T) = runOnIo { block(instance) }
+suspend fun setConfig(block: suspend Config.() -> Unit) = runOnIo { block(instance) }
+
+class Config internal constructor() {
     private val kv = MMKV.defaultMMKV()
     private val moshi = Moshi.Builder().build()
 
@@ -32,50 +38,63 @@ object Config {
         }
         get() = kv.decodeLong("lastVersionCode")
 
-    var termStartTime: Instant
+    var customTermStartTime: Pair<Instant, Boolean>
         set(value) {
-            kv.encode("termStartTime", value.toEpochMilli())
-        }
-        get() = Instant.ofEpochMilli(kv.decodeLong("termStartTime", 0L))
-    var customTermStartTime: Instant
-        set(value) {
-            kv.encode("termStartTime", value.toEpochMilli())
-        }
-        get() = Instant.ofEpochMilli(kv.decodeLong("termStartTime", 0L))
-
-    var currentYear: String
-        set(value) {
-            kv.encode("currentYear", value)
+            kv.encode(
+                if (value.second) "customTermStartTime" else "termStartTime",
+                value.first.toEpochMilli(),
+            )
         }
         get() {
-            val decodeString = kv.decodeString("currentYear", "")
-            if (!decodeString.isNullOrBlank()) {
-                return decodeString
+            val customTime = kv.decodeLong("customTermStartTime", 0L)
+            if (customTime != 0L) {
+                return Instant.ofEpochMilli(customTime) to true
+            }
+            val time = kv.decodeLong("termStartTime", 0L)
+            return Instant.ofEpochMilli(time) to false
+        }
+    val termStartTime: Instant
+        get() = customTermStartTime.first
+
+    var currentYearData: Pair<String, Boolean>
+        set(value) {
+            kv.encode("currentYear", if (value.second) value.first else "")
+        }
+        get() {
+            val customYear = kv.decodeString("currentYear", "")
+            if (!customYear.isNullOrBlank()) {
+                return customYear to true
             }
             val time = LocalDateTime.ofInstant(termStartTime, chinaZone)
-            return if (time.month < Month.JUNE) {
+            val year = if (time.month < Month.JUNE) {
                 "${time.year - 1}-${time.year}"
             } else {
                 "${time.year}-${time.year + 1}"
             }
+            return year to false
         }
+    val currentYear: String
+        get() = currentYearData.first
 
-    var currentTerm: Int
+    var currentTermData: Pair<Int, Boolean>
         set(value) {
-            kv.encode("currentTerm", value)
+            kv.encode("currentTerm", if (value.second) value.first else -1)
         }
         get() {
-            val decode = kv.decodeInt("currentTerm", -1)
-            if (decode != -1) {
-                return decode
+            val customTerm = kv.decodeInt("currentTerm", -1)
+            if (customTerm != -1) {
+                return customTerm to true
             }
             val time = LocalDateTime.ofInstant(termStartTime, chinaZone)
-            return if (time.month < Month.JUNE) {
+            val term = if (time.month < Month.JUNE) {
                 2
             } else {
                 1
             }
+            return term to false
         }
+    val currentTerm: Int
+        get() = currentTermData.first
 
     var splashList: List<Splash>
         set(value) {

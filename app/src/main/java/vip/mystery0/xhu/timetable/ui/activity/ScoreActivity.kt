@@ -29,9 +29,6 @@ import vip.mystery0.xhu.timetable.model.response.ScoreItem
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.ScoreViewModel
-import vip.mystery0.xhu.timetable.viewmodel.TermSelect
-import vip.mystery0.xhu.timetable.viewmodel.UserSelect
-import vip.mystery0.xhu.timetable.viewmodel.YearSelect
 
 class ScoreActivity : BaseComposeActivity() {
     private val viewModel: ScoreViewModel by viewModels()
@@ -40,18 +37,12 @@ class ScoreActivity : BaseComposeActivity() {
     @ExperimentalFoundationApi
     @Composable
     override fun BuildContent() {
-        val userSelect by viewModel.userSelect.collectAsState()
-        val yearSelect by viewModel.yearSelect.collectAsState()
-        val termSelect by viewModel.termSelect.collectAsState()
         val scoreListState by viewModel.scoreListState.collectAsState()
 
         val showSelect = rememberModalBottomSheetState(ModalBottomSheetValue.Expanded)
         val scope = rememberCoroutineScope()
 
         var showOption by remember { mutableStateOf(false) }
-        var showGpa by remember { mutableStateOf(false) }
-        var showCredit by remember { mutableStateOf(false) }
-        var showCourseType by remember { mutableStateOf(true) }
 
         val userDialog = remember { mutableStateOf(false) }
         val yearDialog = remember { mutableStateOf(false) }
@@ -122,6 +113,9 @@ class ScoreActivity : BaseComposeActivity() {
             },
         ) { paddingValues ->
             Box {
+                var showGpa by remember { mutableStateOf(false) }
+                var showCredit by remember { mutableStateOf(false) }
+                var showCourseType by remember { mutableStateOf(true) }
                 ModalBottomSheetLayout(
                     sheetState = showSelect,
                     sheetContent = {
@@ -139,8 +133,11 @@ class ScoreActivity : BaseComposeActivity() {
                                 onClick = {
                                     userDialog.value = true
                                 }) {
-                                val selected = userSelect.first { it.selected }
-                                Text(text = "查询用户：${selected.userName}(${selected.studentId})")
+                                val userSelect by viewModel.userSelect.collectAsState()
+                                val selected = userSelect.firstOrNull { it.selected }
+                                val userString =
+                                    selected?.let { "${it.userName}(${it.studentId})" } ?: "查询中"
+                                Text(text = "查询用户：$userString")
                             }
                             OutlinedButton(
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
@@ -148,7 +145,11 @@ class ScoreActivity : BaseComposeActivity() {
                                 onClick = {
                                     yearDialog.value = true
                                 }) {
-                                Text(text = "${yearSelect.first { it.selected }.year}学年")
+                                val yearSelect by viewModel.yearSelect.collectAsState()
+                                val yearString =
+                                    yearSelect.firstOrNull { it.selected }?.let { "${it.year}学年" }
+                                        ?: "查询中"
+                                Text(text = yearString)
                             }
                             OutlinedButton(
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
@@ -156,7 +157,11 @@ class ScoreActivity : BaseComposeActivity() {
                                 onClick = {
                                     termDialog.value = true
                                 }) {
-                                Text(text = "第${termSelect.first { it.selected }.term}学期")
+                                val termSelect by viewModel.termSelect.collectAsState()
+                                val termString =
+                                    termSelect.firstOrNull { it.selected }?.let { "第${it.term}学期" }
+                                        ?: "查询中"
+                                Text(text = termString)
                             }
                             Button(
                                 modifier = Modifier.fillMaxWidth(),
@@ -287,9 +292,9 @@ class ScoreActivity : BaseComposeActivity() {
                 }
             }
         }
-        ShowUserDialog(show = userDialog, userSelect = userSelect)
-        ShowYearDialog(show = yearDialog, yearSelect = yearSelect)
-        ShowTermDialog(show = termDialog, termSelect = termSelect)
+        ShowUserDialog(show = userDialog)
+        ShowYearDialog(show = yearDialog)
+        ShowTermDialog(show = termDialog)
         if (scoreListState.errorMessage.isNotBlank()) {
             scoreListState.errorMessage.toast(true)
         }
@@ -304,9 +309,10 @@ class ScoreActivity : BaseComposeActivity() {
     @Composable
     private fun ShowUserDialog(
         show: MutableState<Boolean>,
-        userSelect: List<UserSelect>,
     ) {
-        var selected by remember { mutableStateOf(userSelect.first { it.selected }) }
+        val userSelect by viewModel.userSelect.collectAsState()
+        var selected by remember { mutableStateOf(userSelect.firstOrNull { it.selected }) }
+        val selectedUser = selected ?: return
         if (show.value) {
             AlertDialog(
                 onDismissRequest = {
@@ -341,7 +347,7 @@ class ScoreActivity : BaseComposeActivity() {
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            viewModel.selectUser(selected.studentId)
+                            viewModel.selectUser(selectedUser.studentId)
                             show.value = false
                         },
                     ) {
@@ -365,10 +371,11 @@ class ScoreActivity : BaseComposeActivity() {
     @Composable
     private fun ShowYearDialog(
         show: MutableState<Boolean>,
-        yearSelect: List<YearSelect>,
     ) {
+        val yearSelect by viewModel.yearSelect.collectAsState()
+        var selected by remember { mutableStateOf(yearSelect.firstOrNull { it.selected }) }
+        val selectedYear = selected ?: return
         if (show.value) {
-            var selected by remember { mutableStateOf(yearSelect.first { it.selected }) }
             AlertDialog(
                 onDismissRequest = {
                     show.value = false
@@ -404,7 +411,7 @@ class ScoreActivity : BaseComposeActivity() {
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            viewModel.selectYear(selected.year)
+                            viewModel.selectYear(selectedYear.year)
                             show.value = false
                         },
                     ) {
@@ -427,9 +434,10 @@ class ScoreActivity : BaseComposeActivity() {
     @Composable
     private fun ShowTermDialog(
         show: MutableState<Boolean>,
-        termSelect: List<TermSelect>,
     ) {
-        var selected by remember { mutableStateOf(termSelect.first { it.selected }) }
+        val termSelect by viewModel.termSelect.collectAsState()
+        var selected by remember { mutableStateOf(termSelect.firstOrNull { it.selected }) }
+        val selectedTerm = selected ?: return
         if (show.value) {
             AlertDialog(
                 onDismissRequest = {
@@ -464,7 +472,7 @@ class ScoreActivity : BaseComposeActivity() {
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            viewModel.selectTerm(selected.term)
+                            viewModel.selectTerm(selectedTerm.term)
                             show.value = false
                         },
                     ) {
