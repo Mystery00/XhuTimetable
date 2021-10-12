@@ -285,7 +285,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         }
         val errorMessage by viewModel.errorMessage.collectAsState()
         if (errorMessage.isNotBlank()) {
-            errorMessage.toast(true)
+            errorMessage.toast()
         }
         val emptyUser by viewModel.emptyUser.collectAsState()
         if (emptyUser) {
@@ -330,7 +330,9 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                 contentDescription = null
             )
             Spacer(Modifier.padding(top = 2.dp))
-            Text(text = tab.label, fontSize = 12.sp, color = colorOf(checked = checked))
+            val showTomorrowCourse by viewModel.showTomorrowCourse.collectAsState()
+            val label = if (showTomorrowCourse) tab.otherLabel else tab.label
+            Text(text = label, fontSize = 12.sp, color = colorOf(checked = checked))
             Spacer(Modifier.padding(top = 2.dp))
             AnimatedVisibility(visible = checked) {
                 Surface(
@@ -358,14 +360,23 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
 
     @Subscribe(threadMode = ThreadMode.MAIN_ORDERED)
     fun updateUIFromConfig(uiEvent: UIEvent) {
+        viewModel.loadConfig()
         when (uiEvent.eventType) {
             EventType.CHANGE_MAIN_USER,
             EventType.MULTI_MODE_CHANGED,
-            EventType.CHANGE_CURRENT_YEAR_AND_TERM ->
+            EventType.CHANGE_CURRENT_YEAR_AND_TERM -> {
                 viewModel.loadCourseList(true)
-            EventType.MAIN_USER_LOGOUT -> viewModel.checkMainUser()
-            EventType.CHANGE_AUTO_SHOW_TOMORROW_COURSE,
-            EventType.CHANGE_SHOW_NOT_THIS_WEEK -> viewModel.loadCourseList(false)
+            }
+            EventType.MAIN_USER_LOGOUT -> {
+                viewModel.checkMainUser()
+            }
+            EventType.CHANGE_AUTO_SHOW_TOMORROW_COURSE -> {
+                viewModel.loadCourseList(false)
+                viewModel.calculateTodayTitle()
+            }
+            EventType.CHANGE_SHOW_NOT_THIS_WEEK -> {
+                viewModel.loadCourseList(false)
+            }
             else -> {
             }
         }
@@ -386,12 +397,29 @@ private fun colorOf(checked: Boolean): Color =
 private enum class Tab(
     val index: Int,
     val label: String,
+    val otherLabel: String = label,
     val title: TabTitle,
     val content: TabContent,
 ) {
-    TODAY(0, "今日", todayCourseTitle, todayCourseContent),
-    WEEK(1, "本周", weekCourseTitle, weekCourseContent),
-    PROFILE(2, "我的", profileCourseTitle, profileCourseContent),
+    TODAY(
+        index = 0,
+        label = "今日",
+        otherLabel = "明日",
+        title = todayCourseTitle,
+        content = todayCourseContent,
+    ),
+    WEEK(
+        index = 1,
+        label = "本周",
+        title = weekCourseTitle,
+        content = weekCourseContent,
+    ),
+    PROFILE(
+        index = 2,
+        label = "我的",
+        title = profileCourseTitle,
+        content = profileCourseContent,
+    ),
 }
 
 @ExperimentalMaterialApi
