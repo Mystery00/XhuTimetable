@@ -4,9 +4,11 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.JwcApi
 import vip.mystery0.xhu.timetable.api.checkLogin
-import vip.mystery0.xhu.timetable.config.Config
 import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
 import vip.mystery0.xhu.timetable.config.User
+import vip.mystery0.xhu.timetable.config.getConfig
+import vip.mystery0.xhu.timetable.config.runOnCpu
+import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
 import vip.mystery0.xhu.timetable.module.localRepo
 import vip.mystery0.xhu.timetable.repository.CourseRepo
@@ -21,14 +23,14 @@ class CourseRemoteRepo : CourseRepo, KoinComponent {
         user: User,
         year: String,
         term: Int,
-    ): List<CourseResponse> {
+    ): List<CourseResponse> = runOnCpu {
         val response = user.withAutoLogin {
-            jwcApi.courseList(it, Config.currentYear, Config.currentTerm).checkLogin()
+            jwcApi.courseList(it, getConfig { currentYear }, getConfig { currentTerm }).checkLogin()
         }
         val courseList = response.first
         courseList.forEach { it.user = user }
         local.saveCourseList(year, term, user.studentId, courseList)
-        Config.lastSyncCourse = LocalDate.now()
-        return courseList
+        setConfig { lastSyncCourse = LocalDate.now() }
+        courseList
     }
 }

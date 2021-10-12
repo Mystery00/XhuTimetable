@@ -6,10 +6,10 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.config.chinaZone
+import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.repository.getExamList
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
@@ -18,22 +18,28 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class ExamViewModel : ComposeViewModel(), KoinComponent {
+class ExamViewModel : ComposeViewModel() {
     companion object {
         private const val TAG = "ExamViewModel"
         private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     }
 
-    private val _userSelect = MutableStateFlow(SessionManager.loggedUserList().map {
-        UserSelect(it.studentId, it.info.userName, it.main)
-    })
+    private val _userSelect = MutableStateFlow<List<UserSelect>>(emptyList())
     val userSelect: StateFlow<List<UserSelect>> = _userSelect
 
     private val _examListState = MutableStateFlow(ExamListState())
     val examListState: StateFlow<ExamListState> = _examListState
 
     init {
+        viewModelScope.launch {
+            val list = runOnCpu {
+                SessionManager.loggedUserList().map {
+                    UserSelect(it.studentId, it.info.userName, it.main)
+                }
+            }
+            _userSelect.value = list
+        }
         loadExamList()
     }
 
@@ -44,34 +50,43 @@ class ExamViewModel : ComposeViewModel(), KoinComponent {
                 ExamListState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
         }) {
             _examListState.value = ExamListState(loading = true)
-            val selectUser =
-                SessionManager.getUser(_userSelect.value.first { it.selected }.studentId)!!
-            val response = getExamList(selectUser)
-            val now = LocalDateTime.now()
-            val examList = response.list.map {
-                val date = LocalDate.parse(it.date, dateFormatter)
-                val startTime =
-                    LocalDateTime.ofInstant(Instant.ofEpochMilli(it.startTime), chinaZone)
-                val endTime =
-                    LocalDateTime.ofInstant(Instant.ofEpochMilli(it.endTime), chinaZone)
-                val examStatus = when {
-                    now.isBefore(startTime) -> ExamStatus.BEFORE
-                    now.isAfter(endTime) -> ExamStatus.AFTER
-                    else -> ExamStatus.IN
+            val selectUser = runOnCpu {
+                if (_userSelect.value.isEmpty()) {
+                    SessionManager.mainUser()
+                } else {
+                    val studentId = _userSelect.value.first { it.selected }.studentId
+                    SessionManager.user(studentId)
                 }
-                val time = "${timeFormatter.format(startTime)} - ${timeFormatter.format(endTime)}"
-                Exam(
-                    date,
-                    it.date,
-                    it.examNumber,
-                    it.courseName,
-                    it.type,
-                    it.location,
-                    time,
-                    it.region,
-                    examStatus,
-                )
-            }.sortedBy { it.examStatus.index }
+            }
+            val response = getExamList(selectUser)
+            val examList = runOnCpu {
+                val now = LocalDateTime.now()
+                response.list.map {
+                    val date = LocalDate.parse(it.date, dateFormatter)
+                    val startTime =
+                        LocalDateTime.ofInstant(Instant.ofEpochMilli(it.startTime), chinaZone)
+                    val endTime =
+                        LocalDateTime.ofInstant(Instant.ofEpochMilli(it.endTime), chinaZone)
+                    val examStatus = when {
+                        now.isBefore(startTime) -> ExamStatus.BEFORE
+                        now.isAfter(endTime) -> ExamStatus.AFTER
+                        else -> ExamStatus.IN
+                    }
+                    val time =
+                        "${timeFormatter.format(startTime)} - ${timeFormatter.format(endTime)}"
+                    Exam(
+                        date,
+                        it.date,
+                        it.examNumber,
+                        it.courseName,
+                        it.type,
+                        it.location,
+                        time,
+                        it.region,
+                        examStatus,
+                    )
+                }.sortedBy { it.examStatus.index }
+            }
             _examListState.value =
                 ExamListState(examList = examList, examHtml = response.html)
         }
@@ -79,11 +94,16 @@ class ExamViewModel : ComposeViewModel(), KoinComponent {
 
     fun selectUser(studentId: String) {
         viewModelScope.launch {
-            if (_userSelect.value.first { it.selected }.studentId == studentId) {
+            val selected = runOnCpu {
+                _userSelect.value.first { it.selected }.studentId
+            }
+            if (selected == studentId) {
                 return@launch
             }
-            _userSelect.value = SessionManager.loggedUserList().map {
-                UserSelect(it.studentId, it.info.userName, it.studentId == studentId)
+            _userSelect.value = runOnCpu {
+                SessionManager.loggedUserList().map {
+                    UserSelect(it.studentId, it.info.userName, it.studentId == studentId)
+                }
             }
             loadExamList()
         }

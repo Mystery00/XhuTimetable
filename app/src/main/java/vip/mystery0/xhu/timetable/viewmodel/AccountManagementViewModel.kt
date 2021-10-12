@@ -5,15 +5,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.Config
 import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.getConfig
+import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 
-class AccountManagementViewModel : ComposeViewModel(), KoinComponent {
+class AccountManagementViewModel : ComposeViewModel() {
     private val eventBus: EventBus by inject()
 
     private val _errorMessage = MutableStateFlow("")
@@ -54,10 +54,11 @@ class AccountManagementViewModel : ComposeViewModel(), KoinComponent {
 
     fun changeMultiAccountMode(enable: Boolean) {
         viewModelScope.launch {
-            if (Config.multiAccountMode == enable) {
+            val multiAccountMode = getConfig { multiAccountMode }
+            if (multiAccountMode == enable) {
                 return@launch
             }
-            Config.multiAccountMode = enable
+            setConfig { this.multiAccountMode = enable }
             eventBus.post(UIEvent(EventType.CHANGE_MAIN_USER))
         }
     }

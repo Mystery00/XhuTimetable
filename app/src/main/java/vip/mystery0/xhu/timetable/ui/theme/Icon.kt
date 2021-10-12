@@ -84,6 +84,10 @@ object XhuStateIcons {
 }
 
 object XhuImages {
+    val defaultBackgroundImage: Int
+        get() = R.mipmap.main_bg
+    val defaultProfileImage: Int
+        get() = R.mipmap.ic_launcher
     val noData: Painter
         @Composable
         get() = rememberImagePainter(R.drawable.ic_no_data)

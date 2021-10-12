@@ -34,7 +34,7 @@ abstract class BaseComposeActivity(
     @LayoutRes val contentLayoutId: Int = 0
 ) :
     ComponentActivity(contentLayoutId), KoinComponent {
-    private val eventBus: EventBus by inject()
+    val eventBus: EventBus by inject()
 
     private var toast: Toast? = null
 

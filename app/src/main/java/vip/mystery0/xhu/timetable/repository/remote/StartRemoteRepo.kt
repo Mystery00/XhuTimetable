@@ -4,7 +4,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.ServerApi
-import vip.mystery0.xhu.timetable.config.Config
+import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.request.InitRequest
 import vip.mystery0.xhu.timetable.model.response.InitResponse
 import vip.mystery0.xhu.timetable.module.localRepo
@@ -21,8 +21,10 @@ class StartRemoteRepo : StartRepo, KoinComponent {
         val response = withTimeoutOrNull(Duration.ofSeconds(5).toMillis()) {
             serverApi.initRequest(InitRequest(checkBeta = true))
         } ?: return local.init()
-        Config.termStartTime = Instant.ofEpochMilli(response.startTime)
-        Config.splashList = response.splash
+        setConfig {
+            customTermStartTime = Instant.ofEpochMilli(response.startTime) to false
+            splashList = response.splash
+        }
         return response
     }
 }

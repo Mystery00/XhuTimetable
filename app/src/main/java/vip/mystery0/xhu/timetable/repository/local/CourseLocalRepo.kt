@@ -1,10 +1,9 @@
 package vip.mystery0.xhu.timetable.repository.local
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.config.User
+import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.model.entity.CourseItem
 import vip.mystery0.xhu.timetable.model.entity.CourseSource
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
@@ -18,7 +17,7 @@ class CourseLocalRepo : CourseRepo, KoinComponent {
         user: User,
         year: String,
         term: Int,
-    ): List<CourseResponse> = withContext(Dispatchers.IO) {
+    ): List<CourseResponse> = runOnIo {
         val courseList = courseDao.queryCourseList(user.studentId, year, term)
         val result = ArrayList<CourseResponse>(courseList.size)
         val map = HashMap<String, CourseResponse>()
@@ -67,7 +66,7 @@ class CourseLocalRepo : CourseRepo, KoinComponent {
         term: Int,
         studentId: String,
         list: List<CourseResponse>
-    ) = withContext(Dispatchers.IO) {
+    ) = runOnIo {
         //删除旧数据
         courseDao.queryCourseList(studentId, year, term).forEach {
             courseDao.deleteCourseItem(it)

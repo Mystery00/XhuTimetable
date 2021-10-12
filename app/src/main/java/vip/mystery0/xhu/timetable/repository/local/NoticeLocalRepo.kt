@@ -1,9 +1,8 @@
 package vip.mystery0.xhu.timetable.repository.local
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.model.entity.Notice
 import vip.mystery0.xhu.timetable.model.response.NoticeResponse
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
@@ -13,13 +12,13 @@ class NoticeLocalRepo : NoticeRepo, KoinComponent {
     private val noticeDao: NoticeDao by inject()
 
     override suspend fun queryAllNotice(): List<Notice> =
-        withContext(Dispatchers.IO) { noticeDao.queryAllNoticeList() }
+        runOnIo { noticeDao.queryAllNoticeList() }
 
     override suspend fun hasUnReadNotice(): Boolean =
-        withContext(Dispatchers.IO) { noticeDao.queryNoticeList().isNotEmpty() }
+        runOnIo { noticeDao.queryNoticeList().isNotEmpty() }
 
     override suspend fun saveList(noticeList: List<NoticeResponse>): Unit =
-        withContext(Dispatchers.IO) {
+        runOnIo {
             val save = HashMap<String, Notice>()
             val saveList = queryAllNotice()
             saveList.forEach {
@@ -40,7 +39,7 @@ class NoticeLocalRepo : NoticeRepo, KoinComponent {
         }
 
     override suspend fun markAllAsRead(): Unit =
-        withContext(Dispatchers.IO) {
+        runOnIo {
             noticeDao.queryNoticeList(read = false).forEach {
                 it.read = true
                 noticeDao.updateNotice(it)
