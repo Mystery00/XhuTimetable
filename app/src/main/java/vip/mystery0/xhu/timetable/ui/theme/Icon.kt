@@ -23,12 +23,27 @@ object XhuIcons {
     val add: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_add)
-    val multiAccount: Painter
+    val multiUser: Painter
         @Composable
-        get() = painterResource(id = R.drawable.ic_multi_account)
+        get() = painterResource(id = R.drawable.ic_action_multi_user)
     val showNotThisWeek: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_show_not_this_week)
+    val showCourseStatus: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_show_status)
+    val customYearTerm: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_custom_year_term)
+    val customStartTime: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_custom_start_time)
+    val customCourseColor: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_custom_course_color)
+    val schoolCalendar: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_school_calendar)
 
     object Profile {
         val exam: Painter

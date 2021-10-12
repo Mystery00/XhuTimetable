@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.alorma.settings.composables.SettingsGroup
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.GlobalConfig
@@ -68,50 +69,57 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                     .padding(paddingValues)
                     .background(XhuColor.Common.grayBackground)
                     .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                ConfigSettingsCheckbox(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    config = GlobalConfig::multiAccountMode,
-                    icon = { Icon(painter = XhuIcons.multiAccount, contentDescription = null) },
-                    title = { Text(text = "启用多用户模式") },
-                    subtitle = { Text(text = "注意：如果多个用户的课表存在冲突的情况，表格可能会变得很乱，请确定您开启这个模式的意义！") },
-                    onCheckedChange = { newValue -> viewModel.changeMultiAccountMode(newValue) },
-                )
-                Text(
-                    text = if (editMode.value) "清除账号登录记录" else "轻触头像以切换账号",
-                    modifier = Modifier
-                        .padding(vertical = 36.dp),
-                    fontSize = 18.sp,
-                )
-                val loggedUserList by viewModel.loggedUserList.collectAsState()
-                loggedUserList.forEach { userItem ->
-                    BuildItem(
-                        painter = ProfileImages.hash(userItem.userName, userItem.sex == "男"),
-                        text = "${userItem.studentId}(${userItem.userName})",
-                        onClick = {
-                            viewModel.changeMainUser(userItem.studentId)
+                SettingsGroup(title = {
+                    Text(text = "多账号设置")
+                }) {
+                    ConfigSettingsCheckbox(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        config = GlobalConfig::multiAccountMode,
+                        icon = {
+                            Icon(
+                                painter = XhuIcons.multiUser,
+                                contentDescription = null,
+                                tint = XhuColor.Common.blackText,
+                            )
                         },
-                        onButtonClick = {
-                            viewModel.logoutUser(userItem.studentId)
-                        },
-                        mainUser = userItem.main,
-                        showButton = editMode.value,
+                        title = { Text(text = "启用情侣模式") },
+                        subtitle = { Text(text = "注意：如果多个用户的课表存在冲突的情况，表格可能会变得很乱，请确定您开启这个模式的意义！") },
+                        onCheckedChange = { newValue -> viewModel.changeMultiAccountMode(newValue) },
                     )
                 }
-                if (!editMode.value) {
-                    BuildItem(
-                        painter = XhuIcons.add,
-                        text = "登录其他账号",
-                        onClick = {
-                            intentTo(LoginActivity::class) {
-                                it.putExtra(INTENT_EXTRA, true)
-                            }
-                        },
-                        onButtonClick = {},
-                        mainUser = false,
-                        showButton = false,
-                    )
+                SettingsGroup(title = {
+                    Text(text = "账号管理")
+                }) {
+                    val loggedUserList by viewModel.loggedUserList.collectAsState()
+                    loggedUserList.forEach { userItem ->
+                        BuildItem(
+                            painter = ProfileImages.hash(userItem.userName, userItem.sex == "男"),
+                            text = "${userItem.studentId}(${userItem.userName})",
+                            onClick = {
+                                viewModel.changeMainUser(userItem.studentId)
+                            },
+                            onButtonClick = {
+                                viewModel.logoutUser(userItem.studentId)
+                            },
+                            mainUser = userItem.main,
+                            showButton = editMode.value,
+                        )
+                    }
+                    if (!editMode.value) {
+                        BuildItem(
+                            painter = XhuIcons.add,
+                            text = "登录其他账号",
+                            onClick = {
+                                intentTo(LoginActivity::class) {
+                                    it.putExtra(INTENT_EXTRA, true)
+                                }
+                            },
+                            onButtonClick = {},
+                            mainUser = false,
+                            showButton = false,
+                        )
+                    }
                 }
             }
         }
