@@ -8,14 +8,14 @@ import vip.mystery0.xhu.timetable.config.parseServerError
 import vip.mystery0.xhu.timetable.model.UserInfo
 import vip.mystery0.xhu.timetable.model.request.InitRequest
 import vip.mystery0.xhu.timetable.model.request.LoginRequest
-import vip.mystery0.xhu.timetable.model.response.InitResponse
-import vip.mystery0.xhu.timetable.model.response.LoginResponse
-import vip.mystery0.xhu.timetable.model.response.NoticeResponse
-import vip.mystery0.xhu.timetable.model.response.PublicKeyResponse
+import vip.mystery0.xhu.timetable.model.response.*
 
 interface ServerApi {
     @POST("/api/rest/xhu-timetable/common/init")
     suspend fun initRequest(@Body initRequest: InitRequest): InitResponse
+
+    @GET("/api/rest/xhu-timetable/common/version/url")
+    suspend fun versionUrl(@Query("versionId") versionId: Long): VersionUrl
 
     @GET("/api/rest/xhu-timetable/server/publicKey")
     suspend fun publicKey(): PublicKeyResponse
