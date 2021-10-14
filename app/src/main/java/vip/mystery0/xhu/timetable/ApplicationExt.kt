@@ -24,6 +24,10 @@ val publicDeviceId: String
 val appName: String
     get() = context.getString(R.string.app_name)
 
+//应用包名
+val packageName: String
+    get() = BuildConfig.APPLICATION_ID
+
 //版本名称
 val appVersionName: String by lazy { context.getString(R.string.app_version_name) }
 

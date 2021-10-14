@@ -3,6 +3,8 @@ package vip.mystery0.xhu.timetable.viewmodel
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -21,6 +23,8 @@ import vip.mystery0.xhu.timetable.repository.NoticeRepo
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
+import vip.mystery0.xhu.timetable.work.DownloadApkWork
+import vip.mystery0.xhu.timetable.work.DownloadPatchWork
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -43,6 +47,10 @@ class MainViewModel : ComposeViewModel() {
     private val courseLocalRepo: CourseRepo by localRepo()
 
     private val noticeRepo: NoticeRepo by repo()
+
+    private val workManager: WorkManager by inject()
+
+    val version = MutableStateFlow(DataHolder.version)
 
     private val _errorMessage = MutableStateFlow("")
     val errorMessage: StateFlow<String> = _errorMessage
@@ -485,6 +493,24 @@ class MainViewModel : ComposeViewModel() {
             _errorMessage.value = throwable.message ?: throwable.javaClass.simpleName
         }) {
             _hasUnReadNotice.value = noticeRepo.hasUnReadNotice()
+        }
+    }
+
+    fun downloadApk() {
+        viewModelScope.launch {
+            workManager.enqueue(
+                OneTimeWorkRequestBuilder<DownloadApkWork>()
+                    .build()
+            )
+        }
+    }
+
+    fun downloadPatch() {
+        viewModelScope.launch {
+            workManager.enqueue(
+                OneTimeWorkRequestBuilder<DownloadPatchWork>()
+                    .build()
+            )
         }
     }
 }

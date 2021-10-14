@@ -37,6 +37,7 @@ import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
+import vip.mystery0.xhu.timetable.appVersionCodeNumber
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
@@ -65,6 +66,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             systemUiController.setSystemBarsColor(Color.White, darkIcons = useDarkIcons)
             systemUiController.setNavigationBarColor(Color.White, darkIcons = useDarkIcons)
         }
+        ShowCheckUpdateDialog()
         val coroutineScope = rememberCoroutineScope()
         val pagerState = rememberPagerState(initialPage = 0)
         val loading by viewModel.loading.collectAsState()
@@ -293,6 +295,29 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                 it.putExtra(AccountSettingsActivity.INTENT_EXTRA, true)
             }
         }
+    }
+
+    @Composable
+    private fun ShowCheckUpdateDialog() {
+        val version by viewModel.version.collectAsState()
+        val newVersion = version ?: return
+        if (newVersion.versionCode <= appVersionCodeNumber) return
+        //需要提示版本更新
+        CheckUpdate(
+            version = newVersion,
+            onDownload = {
+                if (it) {
+                    viewModel.downloadApk()
+                } else {
+                    viewModel.downloadPatch()
+                }
+            },
+            onIgnore = {
+                if (!newVersion.forceUpdate) {
+                    //TODO 忽略
+                }
+            }
+        )
     }
 
     @ExperimentalPagerApi
