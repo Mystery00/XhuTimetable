@@ -34,6 +34,11 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        externalNativeBuild {
+            cmake {
+                cppFlags += ""
+            }
+        }
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments += mapOf(
@@ -105,6 +110,12 @@ android {
             storePassword = SignConfig.signKeyStorePassword
             keyAlias = SignConfig.signKeyAlias
             keyPassword = SignConfig.signKeyPassword
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/jni/CMakeLists.txt")
+            version = "3.10.2"
         }
     }
 }
