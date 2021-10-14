@@ -212,7 +212,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                                 append(currentTermStartTime.first)
                                 if (!currentTermStartTime.second) {
                                     appendLine()
-                                    append("【根据当前时间自动计算所得】")
+                                    append("【从云端自动获取】")
                                 }
                             }
                             Text(text = text)
