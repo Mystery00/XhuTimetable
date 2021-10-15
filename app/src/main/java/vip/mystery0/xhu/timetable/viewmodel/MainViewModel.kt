@@ -161,10 +161,10 @@ class MainViewModel : ComposeViewModel() {
             val showTomorrow = getConfig { showTomorrowCourseTime }?.let {
                 LocalTime.now().isAfter(it)
             } ?: false
-            val nowDate = LocalDate.now()
             _todayTitle.value = runOnCpu {
                 val startDate =
                     LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone).toLocalDate()
+                val nowDate = LocalDate.now()
                 if (nowDate.isBefore(startDate)) {
                     //开学之前，那么计算剩余时间
                     val todayWeekIndex =
@@ -181,18 +181,15 @@ class MainViewModel : ComposeViewModel() {
                     "第${week}周 $weekIndex"
                 }
             }
-
-            _dateStart.value = runOnCpu {
-                nowDate.with(WeekFields.of(DayOfWeek.MONDAY, 1).dayOfWeek(), 1)
-            }
         }
     }
 
     private fun calculateWeek() {
         viewModelScope.launch {
+            val startDate = runOnCpu {
+                LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone).toLocalDate()
+            }
             _week.value = runOnCpu {
-                val startDate =
-                    LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone).toLocalDate()
                 val days =
                     Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay())
                         .toDays()
@@ -201,6 +198,10 @@ class MainViewModel : ComposeViewModel() {
             _week.collect {
                 loadCourseToTable(it)
                 _loading.value = false
+                _dateStart.value = runOnCpu {
+                    val date = startDate.plusWeeks(it.toLong() - 1)
+                    date.with(WeekFields.of(DayOfWeek.MONDAY, 1).dayOfWeek(), 1)
+                }
             }
         }
     }
