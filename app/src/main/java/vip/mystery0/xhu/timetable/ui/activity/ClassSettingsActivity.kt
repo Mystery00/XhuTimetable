@@ -11,7 +11,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import com.alorma.settings.composables.SettingsGroup
 import com.alorma.settings.composables.SettingsMenuLink
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -22,6 +21,7 @@ import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsMenuLink
+import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.timeFormatter
@@ -35,7 +35,6 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
     @Composable
     override fun BuildContent() {
         val scope = rememberCoroutineScope()
-        val errorMessage by viewModel.errorMessage.collectAsState()
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -62,7 +61,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                     .background(XhuColor.Common.grayBackground)
                     .verticalScroll(rememberScrollState()),
             ) {
-                SettingsGroup(title = {
+                XhuSettingsGroup(title = {
                     Text(text = "显示设置")
                 }) {
                     ConfigSettingsCheckbox(
@@ -137,7 +136,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                         }
                     )
                 }
-                SettingsGroup(title = {
+                XhuSettingsGroup(title = {
                     Text(text = "时间设置")
                 }) {
                     val currentYear by viewModel.currentYearData.collectAsState()
@@ -224,7 +223,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                         }
                     )
                 }
-                SettingsGroup(title = {
+                XhuSettingsGroup(title = {
                     Text(text = "自定义设置")
                 }) {
                     SettingsMenuLink(
@@ -243,7 +242,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                         }
                     )
                 }
-                SettingsGroup(title = {
+                XhuSettingsGroup(title = {
                     Text(text = "额外功能")
                 }) {
                     SettingsMenuLink(
@@ -264,6 +263,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                 }
             }
         }
+        val errorMessage by viewModel.errorMessage.collectAsState()
         if (errorMessage.isNotBlank()) {
             errorMessage.toast(true)
         }

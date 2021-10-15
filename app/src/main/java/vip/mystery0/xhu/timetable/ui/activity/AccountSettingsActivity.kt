@@ -12,11 +12,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.alorma.settings.composables.SettingsGroup
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
+import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
@@ -70,7 +70,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                     .background(XhuColor.Common.grayBackground)
                     .verticalScroll(rememberScrollState()),
             ) {
-                SettingsGroup(title = {
+                XhuSettingsGroup(title = {
                     Text(text = "多账号设置")
                 }) {
                     ConfigSettingsCheckbox(
@@ -88,7 +88,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                         onCheckedChange = { newValue -> viewModel.changeMultiAccountMode(newValue) },
                     )
                 }
-                SettingsGroup(title = {
+                XhuSettingsGroup(title = {
                     Text(text = "账号管理")
                 }) {
                     val loggedUserList by viewModel.loggedUserList.collectAsState()
