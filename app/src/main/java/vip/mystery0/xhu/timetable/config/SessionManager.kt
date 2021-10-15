@@ -77,8 +77,9 @@ object SessionManager {
 
     @Synchronized
     suspend fun readFromCache() {
+        val list = getConfig { userList }
         userMap.clear()
-        getConfig { userList }.forEach {
+        list.forEach {
             userMap[it.studentId] = it
         }
     }
