@@ -44,6 +44,30 @@ object XhuIcons {
     val schoolCalendar: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_school_calendar)
+    val nightMode: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_night_mode)
+    val pageEffect: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_page_effect)
+    val notifyCourse: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_notify_course)
+    val notifyExam: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_notify_exam)
+    val notifyTime: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_notify_time)
+    val checkUpdate: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_check_update)
+    val qqGroup: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_qq_group)
+    val poems: Painter
+        @Composable
+        get() = painterResource(R.mipmap.ic_poems)
 
     object Profile {
         val exam: Painter
@@ -85,6 +109,24 @@ object XhuIcons {
         val view: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_action_view)
+    }
+
+    object Team {
+        val yue: Painter
+            @Composable
+            get() = painterResource(id = R.mipmap.img_yue)
+        val pan: Painter
+            @Composable
+            get() = painterResource(id = R.mipmap.img_pan)
+        val johnny: Painter
+            @Composable
+            get() = painterResource(id = R.mipmap.img_johnny)
+        val quinn: Painter
+            @Composable
+            get() = painterResource(id = R.mipmap.img_quinn)
+        val mystery0: Painter
+            @Composable
+            get() = painterResource(id = R.mipmap.img_mystery0)
     }
 }
 

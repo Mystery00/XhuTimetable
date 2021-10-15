@@ -143,7 +143,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
             painter = XhuIcons.Profile.settings,
             title = "软件设置",
             click = {
-
+                activity.intentTo(SettingsActivity::class)
             })
         Divider(
             modifier = Modifier

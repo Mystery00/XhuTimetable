@@ -214,6 +214,37 @@ class Config internal constructor() {
         }
         get() = kv.decodeString("showTomorrowCourseTime")
             ?.let { LocalTime.parse(it, timeFormatter) }
+    var enablePageEffect: Boolean
+        set(value) {
+            kv.encode("enablePageEffect", value)
+        }
+        get() = kv.decodeBool("enablePageEffect", true)
+    var notifyCourse: Boolean
+        set(value) {
+            kv.encode("notifyCourse", value)
+        }
+        get() = kv.decodeBool("notifyCourse", true)
+    var notifyExam: Boolean
+        set(value) {
+            kv.encode("notifyExam", value)
+        }
+        get() = kv.decodeBool("notifyExam", true)
+    var notifyTime: LocalTime?
+        set(value) {
+            kv.encode("notifyTime", value?.format(timeFormatter))
+        }
+        get() = kv.decodeString("notifyTime")
+            ?.let { LocalTime.parse(it, timeFormatter) }
+    var disablePoems: Boolean
+        set(value) {
+            kv.encode("disablePoems", value)
+        }
+        get() = kv.decodeBool("disablePoems", false)
+    var showPoemsTranslate: Boolean
+        set(value) {
+            kv.encode("showPoemsTranslate", value)
+        }
+        get() = kv.decodeBool("showPoemsTranslate", true)
 }
 
 @Composable
