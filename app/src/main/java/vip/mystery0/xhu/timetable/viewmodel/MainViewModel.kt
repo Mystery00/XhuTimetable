@@ -16,6 +16,7 @@ import vip.mystery0.xhu.timetable.config.*
 import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
 import vip.mystery0.xhu.timetable.model.response.Poems
+import vip.mystery0.xhu.timetable.model.response.Version
 import vip.mystery0.xhu.timetable.module.localRepo
 import vip.mystery0.xhu.timetable.module.repo
 import vip.mystery0.xhu.timetable.repository.CourseRepo
@@ -511,6 +512,14 @@ class MainViewModel : ComposeViewModel() {
                 OneTimeWorkRequestBuilder<DownloadPatchWork>()
                     .build()
             )
+        }
+    }
+
+    fun ignoreVersion(version: Version) {
+        viewModelScope.launch {
+            val ignore = getConfig { ignoreVersionList }
+            ignore.add("${version.versionName}-${version.versionCode}")
+            setConfig { ignoreVersionList = ignore }
         }
     }
 }

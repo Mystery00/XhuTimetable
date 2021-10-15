@@ -102,11 +102,13 @@ fun CheckUpdate(
                 }
             }
         }, dismissButton = {
-            TextButton(onClick = {
-                onIgnore()
-                onCloseListener()
-            }) {
-                Text(text = "忽略")
+            if (!version.forceUpdate) {
+                TextButton(onClick = {
+                    onIgnore()
+                    onCloseListener()
+                }) {
+                    Text(text = "忽略")
+                }
             }
         })
 }
