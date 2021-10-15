@@ -44,7 +44,11 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
             SessionManager.readFromCache()
             val response = startRepo.init()
             runOnCpu {
-                DataHolder.version = response.version
+                var version = response.version
+                if (getConfig { ignoreVersionList }.contains("${version?.versionName}-${version?.versionCode}")) {
+                    version = null
+                }
+                DataHolder.version = version
                 val dir = externalPictureDir
                 val splashList = getConfig { splashList }
                     .map {

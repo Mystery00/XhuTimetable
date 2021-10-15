@@ -38,6 +38,15 @@ class Config internal constructor() {
         }
         get() = kv.decodeLong("lastVersionCode")
 
+    var ignoreVersionList: HashSet<String>
+        set(value) {
+            kv.encode("ignoreVersionList", value)
+        }
+        get() {
+            val set = kv.decodeStringSet("ignoreVersionList") ?: emptySet()
+            return HashSet(set)
+        }
+
     var customTermStartTime: Pair<Instant, Boolean>
         set(value) {
             kv.encode(

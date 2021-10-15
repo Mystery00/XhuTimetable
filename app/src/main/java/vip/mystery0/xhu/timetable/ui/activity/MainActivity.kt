@@ -314,7 +314,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             },
             onIgnore = {
                 if (!newVersion.forceUpdate) {
-                    //TODO 忽略
+                    viewModel.ignoreVersion(newVersion)
                 }
             }
         )
