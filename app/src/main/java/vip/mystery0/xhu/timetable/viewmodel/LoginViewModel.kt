@@ -9,7 +9,10 @@ import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.*
+import vip.mystery0.xhu.timetable.config.CoroutineStopException
+import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.runOnCpu
+import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.repository.doLogin
@@ -51,19 +54,6 @@ class LoginViewModel : ComposeViewModel() {
             }
             _loginState.value = LoginState(loading = false, success = true)
         }
-    }
-
-    private val _updateDialogState = MutableStateFlow(false)
-    val updateDialogState: StateFlow<Boolean> = _updateDialogState
-
-    init {
-        val newVersionCode = DataHolder.version?.versionCode ?: 0L
-//            _updateDialogState.value = newVersionCode <= appVersionCodeNumber
-        _updateDialogState.value = true
-    }
-
-    fun closeUpdateDialog() {
-        _updateDialogState.value = false
     }
 }
 

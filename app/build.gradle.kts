@@ -60,7 +60,7 @@ android {
                 "app_version_name",
                 "${defaultConfig.versionName}.d$gitVersionCode.$gitVersionName"
             )
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -89,14 +89,12 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
-        useIR = true
     }
     buildFeatures {
         compose = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = rootProject.extra["compose_version"] as String
-        kotlinCompilerVersion = "1.5.31"
     }
     packagingOptions {
         resources {
@@ -121,7 +119,7 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.7.0-beta02")
+    implementation("androidx.core:core-ktx:1.7.0-rc01")
     implementation("androidx.appcompat:appcompat:1.3.1")
     implementation("com.google.android.material:material:1.4.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
@@ -137,7 +135,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
     //accompanist
-    val accompanistVersion = "0.19.0"
+    val accompanistVersion = "0.20.0"
     implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-pager:$accompanistVersion")
@@ -153,7 +151,7 @@ dependencies {
     //material dialog
     implementation("com.afollestad.material-dialogs:core:3.3.0")
     //work manager
-    implementation("androidx.work:work-runtime-ktx:2.7.0-rc01")
+    implementation("androidx.work:work-runtime-ktx:2.7.0")
     //koin
     val koinVersion = "3.1.2"
     implementation("io.insert-koin:koin-android:$koinVersion")

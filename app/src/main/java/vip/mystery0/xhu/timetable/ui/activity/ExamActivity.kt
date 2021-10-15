@@ -3,9 +3,11 @@ package vip.mystery0.xhu.timetable.ui.activity
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -31,6 +33,9 @@ import vip.mystery0.xhu.timetable.viewmodel.ExamViewModel
 class ExamActivity : BaseComposeActivity() {
     private val viewModel: ExamViewModel by viewModels()
 
+    @ExperimentalMaterialApi
+    @ExperimentalFoundationApi
+    @ExperimentalAnimationApi
     @Composable
     override fun BuildContent() {
         val userSelect by viewModel.userSelect.collectAsState()
