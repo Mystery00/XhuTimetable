@@ -34,6 +34,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        setProperty("archivesBaseName", "XhuTimetable-${versionName}")
         externalNativeBuild {
             cmake {
                 cppFlags += ""
