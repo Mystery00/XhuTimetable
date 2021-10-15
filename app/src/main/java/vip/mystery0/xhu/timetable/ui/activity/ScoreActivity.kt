@@ -3,6 +3,7 @@ package vip.mystery0.xhu.timetable.ui.activity
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -35,6 +36,7 @@ class ScoreActivity : BaseComposeActivity() {
 
     @ExperimentalMaterialApi
     @ExperimentalFoundationApi
+    @ExperimentalAnimationApi
     @Composable
     override fun BuildContent() {
         val scoreListState by viewModel.scoreListState.collectAsState()
