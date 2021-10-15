@@ -166,13 +166,30 @@ val profileCourseContent: TabContent = @Composable { ext ->
                 .height(dividerHeight)
                 .background(dividerSmall),
         )
-        BuildProfileItem(painter = XhuIcons.Profile.share, title = "分享应用", click = {
-            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                putExtra(Intent.EXTRA_TEXT, shareText.random())
-                type = "text/plain"
+        BuildProfileItem(
+            painter = XhuIcons.Profile.feedback,
+            title = "意见反馈",
+            click = {
+                activity.toastString("暂不支持")
             }
-            activity.startActivity(Intent.createChooser(shareIntent, "分享西瓜课表到"))
-        })
+        )
+        Divider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dividerHeight)
+                .background(dividerSmall),
+        )
+        BuildProfileItem(
+            painter = XhuIcons.Profile.share,
+            title = "分享应用",
+            click = {
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    putExtra(Intent.EXTRA_TEXT, shareText.random())
+                    type = "text/plain"
+                }
+                activity.startActivity(Intent.createChooser(shareIntent, "分享西瓜课表到"))
+            },
+        )
         Divider(
             modifier = Modifier
                 .fillMaxWidth()

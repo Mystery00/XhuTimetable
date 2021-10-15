@@ -91,6 +91,9 @@ object XhuIcons {
         val notice: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_notice)
+        val feedback: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_feedback)
         val share: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_share)
