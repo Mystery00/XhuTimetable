@@ -60,7 +60,7 @@ android {
                 "app_version_name",
                 "${defaultConfig.versionName}.d$gitVersionCode.$gitVersionName"
             )
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
