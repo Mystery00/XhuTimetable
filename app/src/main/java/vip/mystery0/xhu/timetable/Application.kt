@@ -9,6 +9,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 import vip.mystery0.xhu.timetable.module.moduleList
 import vip.mystery0.xhu.timetable.ui.notification.initChannelID
+import vip.mystery0.xhu.timetable.utils.registerActivityLifecycle
 
 class Application : Application() {
     override fun onCreate() {
@@ -21,6 +22,7 @@ class Application : Application() {
             workManagerFactory()
             modules(moduleList())
         }
+        registerActivityLifecycle()
         initChannelID(this)
         MMKV.initialize(this)
     }

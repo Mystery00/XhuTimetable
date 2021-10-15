@@ -29,16 +29,13 @@ import com.google.accompanist.insets.navigationBarsPadding
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
-import vip.mystery0.xhu.timetable.config.DataHolder
-import vip.mystery0.xhu.timetable.model.response.Version
+import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
+import vip.mystery0.xhu.timetable.utils.finishAllActivity
 import vip.mystery0.xhu.timetable.viewmodel.LoginViewModel
 
 class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
     private val viewModel: LoginViewModel by viewModels()
-
-    private val version: Version
-        get() = DataHolder.version!!
 
     @Composable
     override fun BuildContent() {
@@ -56,8 +53,8 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                         .navigationBarsPadding()
                         .fillMaxHeight()
                 ) {
-                    var username by remember { mutableStateOf("") }
-                    var password by remember { mutableStateOf("") }
+                    var username by remember { mutableStateOf("000020211015") }
+                    var password by remember { mutableStateOf("95fd9c") }
                     Spacer(
                         modifier = Modifier
                             .height(62.dp)
@@ -219,6 +216,13 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
         }
         if (loginState.errorMessage.isNotBlank()) {
             loginState.errorMessage.toast(true)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (!SessionManager.isLogin()) {
+            finishAllActivity()
         }
     }
 }
