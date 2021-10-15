@@ -313,9 +313,9 @@ class ScoreActivity : BaseComposeActivity() {
         show: MutableState<Boolean>,
     ) {
         val userSelect by viewModel.userSelect.collectAsState()
-        var selected by remember { mutableStateOf(userSelect.firstOrNull { it.selected }) }
-        val selectedUser = selected ?: return
+        val selectedUser = userSelect.firstOrNull { it.selected } ?: return
         if (show.value) {
+            var selected by remember { mutableStateOf(selectedUser) }
             AlertDialog(
                 onDismissRequest = {
                     show.value = false
@@ -349,7 +349,7 @@ class ScoreActivity : BaseComposeActivity() {
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            viewModel.selectUser(selectedUser.studentId)
+                            viewModel.selectUser(selected.studentId)
                             show.value = false
                         },
                     ) {
@@ -375,9 +375,9 @@ class ScoreActivity : BaseComposeActivity() {
         show: MutableState<Boolean>,
     ) {
         val yearSelect by viewModel.yearSelect.collectAsState()
-        var selected by remember { mutableStateOf(yearSelect.firstOrNull { it.selected }) }
-        val selectedYear = selected ?: return
+        val selectedYear = yearSelect.firstOrNull { it.selected } ?: return
         if (show.value) {
+            var selected by remember { mutableStateOf(selectedYear) }
             AlertDialog(
                 onDismissRequest = {
                     show.value = false
@@ -413,7 +413,7 @@ class ScoreActivity : BaseComposeActivity() {
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            viewModel.selectYear(selectedYear.year)
+                            viewModel.selectYear(selected.year)
                             show.value = false
                         },
                     ) {
@@ -438,9 +438,9 @@ class ScoreActivity : BaseComposeActivity() {
         show: MutableState<Boolean>,
     ) {
         val termSelect by viewModel.termSelect.collectAsState()
-        var selected by remember { mutableStateOf(termSelect.firstOrNull { it.selected }) }
-        val selectedTerm = selected ?: return
+        val selectedTerm = termSelect.firstOrNull { it.selected } ?: return
         if (show.value) {
+            var selected by remember { mutableStateOf(selectedTerm) }
             AlertDialog(
                 onDismissRequest = {
                     show.value = false
@@ -474,7 +474,7 @@ class ScoreActivity : BaseComposeActivity() {
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            viewModel.selectTerm(selectedTerm.term)
+                            viewModel.selectTerm(selected.term)
                             show.value = false
                         },
                     ) {
