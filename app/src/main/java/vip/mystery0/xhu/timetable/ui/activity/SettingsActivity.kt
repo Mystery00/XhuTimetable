@@ -396,7 +396,7 @@ class SettingsActivity : BaseComposeActivity() {
                                 }
                             },
                         )
-                        val splashList = viewModel.splashList.collectAsState()
+                        val splashList by viewModel.splashList.collectAsState()
                         SettingsMenuLink(
                             title = { Text(text = "启动页信息") },
                             subtitle = {

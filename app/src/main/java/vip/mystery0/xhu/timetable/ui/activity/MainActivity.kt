@@ -302,7 +302,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
     private fun ShowCheckUpdateDialog() {
         val version by viewModel.version.collectAsState()
         val newVersion = version ?: return
-        var show = newVersion.versionCode <= appVersionCodeNumber
+        var show = newVersion.versionCode > appVersionCodeNumber
         if (GlobalConfig.debugMode && GlobalConfig.alwaysShowNewVersion) {
             show = true
         }
