@@ -250,4 +250,9 @@ class Config internal constructor() {
             kv.encode("debugMode", value)
         }
         get() = kv.decodeBool("debugMode", false)
+    var alwaysShowNewVersion: Boolean
+        set(value) {
+            kv.encode("alwaysShowNewVersion", value)
+        }
+        get() = kv.decodeBool("alwaysShowNewVersion", false)
 }
