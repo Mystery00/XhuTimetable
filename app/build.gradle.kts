@@ -35,6 +35,11 @@ android {
             useSupportLibrary = true
         }
         setProperty("archivesBaseName", "XhuTimetable-${versionName}")
+        ndk {
+            moduleName = "bspatch"
+            abiFilters.add("armeabi-v7a")
+            abiFilters.add("arm64-v8a")
+        }
         externalNativeBuild {
             cmake {
                 cppFlags += ""
@@ -149,8 +154,6 @@ dependencies {
     implementation("androidx.room:room-runtime:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
-    //material dialog
-    implementation("com.afollestad.material-dialogs:core:3.3.0")
     //work manager
     implementation("androidx.work:work-runtime-ktx:2.7.0")
     //koin
