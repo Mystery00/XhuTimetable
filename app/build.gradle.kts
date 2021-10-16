@@ -171,4 +171,8 @@ dependencies {
     implementation("org.greenrobot:eventbus:3.2.0")
     //preference
     implementation("com.github.alorma:compose-settings-ui:0.6.0")
+    //AppCenter
+    val appCenterSdkVersion = "4.3.1"
+    implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
+    implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
 }
