@@ -17,10 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import com.alorma.settings.composables.SettingsMenuLink
+import com.microsoft.appcenter.crashes.model.TestCrashException
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.appVersionCode
 import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.loadInBrowser
@@ -28,6 +30,7 @@ import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsMenuLink
+import vip.mystery0.xhu.timetable.ui.preference.XhuFoldSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
@@ -228,6 +231,37 @@ class SettingsActivity : BaseComposeActivity() {
                             }
                         }
                     )
+                    ConfigSettingsCheckbox(
+                        icon = {
+                            Icon(
+                                painter = XhuIcons.allowUploadCrash,
+                                contentDescription = null,
+                                tint = XhuColor.Common.blackText,
+                            )
+                        },
+                        config = GlobalConfig::allowSendCrashReport,
+                        scope = scope,
+                        title = { Text(text = "发送错误报告") },
+                        subtitle = {
+                            Text(text = "这将帮助我们更快的发现并解决问题")
+                        },
+                        onCheckedChange = {
+                            setConfig { allowSendCrashReport = it }
+                        }
+                    )
+                    SettingsMenuLink(
+                        title = { },
+                        subtitle = {
+                            Text(
+                                text = """
+                              我们使用Visual Studio App Center （由Microsoft提供）。
+                              
+                              设备唯一标识符使用SSAID，在 Android 8.0（API 级别 26）及更高版本中，SSAID 提供了一个在由同一开发者签名密钥签名的应用之间通用的标识符。
+                          """.trimIndent()
+                            )
+                        },
+                        onClick = {},
+                    )
                     SettingsMenuLink(
                         icon = {
                             Icon(
@@ -298,6 +332,10 @@ class SettingsActivity : BaseComposeActivity() {
                             Text(text = appVersionCode)
                         },
                         onClick = {
+                            if (viewModel.clickVersion(3000L)) {
+                                viewModel.enableDebugMode()
+                                toastString("开发者模式已启用！")
+                            }
                         }
                     )
                 }
@@ -329,6 +367,67 @@ class SettingsActivity : BaseComposeActivity() {
                         title = "Android端开发",
                         subTitle = "@Mystery0",
                     )
+                }
+                val debugMode by viewModel.debugMode.collectAsState()
+                if (debugMode) {
+                    XhuFoldSettingsGroup(
+                        title = {
+                            Text(text = "开发者选项")
+                        },
+                    ) {
+                        SettingsMenuLink(
+                            title = { Text(text = "启用开发者模式") },
+                            action = {
+                                Checkbox(
+                                    checked = debugMode,
+                                    onCheckedChange = {
+                                        viewModel.disableDebugMode()
+                                    },
+                                    enabled = debugMode,
+                                )
+                            },
+                            onClick = {},
+                        )
+                        SettingsMenuLink(
+                            title = { Text(text = "测试崩溃") },
+                            onClick = {
+                                scope.launch {
+                                    throw TestCrashException()
+                                }
+                            },
+                        )
+                        val version = DataHolder.version
+                        SettingsMenuLink(
+                            title = { Text(text = "新版本信息") },
+                            subtitle = {
+                                Text(text = version?.toString() ?: "无版本")
+                            },
+                            onClick = {
+                            },
+                        )
+                        SettingsMenuLink(
+                            title = { Text(text = "测试下载最新安装包") },
+                            subtitle = {
+                                Text(text = version?.apkSize?.formatFileSize() ?: "无版本")
+                            },
+                            onClick = {
+                                if (version != null) {
+                                    viewModel.downloadApk()
+                                }
+                            },
+                        )
+                        SettingsMenuLink(
+                            title = { Text(text = "测试下载最新增量包") },
+                            subtitle = {
+                                Text(text = version?.patchSize?.formatFileSize() ?: "无版本")
+                            },
+                            onClick = {
+                                if (version != null) {
+                                    viewModel.downloadPatch()
+                                }
+                            },
+                        )
+                    }
                 }
             }
         }

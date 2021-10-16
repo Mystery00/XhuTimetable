@@ -30,12 +30,9 @@ import coil.request.CachePolicy
 import coil.size.Scale
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsPadding
-import com.microsoft.appcenter.AppCenter
-import com.microsoft.appcenter.analytics.Analytics
-import com.microsoft.appcenter.crashes.Crashes
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.publicDeviceId
+import vip.mystery0.xhu.timetable.registerAppCenter
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
 import vip.mystery0.xhu.timetable.viewmodel.StarterViewModel
 
@@ -44,15 +41,7 @@ class StartActivity : BaseComposeActivity(setSystemUiColor = false) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (!AppCenter.isConfigured()) {
-            AppCenter.start(
-                application,
-                "463eb268-c114-49de-880c-c596cf5be561",
-                Analytics::class.java,
-                Crashes::class.java
-            )
-            AppCenter.setUserId(publicDeviceId)
-        }
+        registerAppCenter(application)
     }
 
     @Composable

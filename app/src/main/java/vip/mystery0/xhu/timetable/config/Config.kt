@@ -1,9 +1,5 @@
 package vip.mystery0.xhu.timetable.config
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.tencent.mmkv.MMKV
@@ -11,7 +7,6 @@ import vip.mystery0.xhu.timetable.model.response.Splash
 import java.io.File
 import java.time.*
 import java.time.format.DateTimeFormatter
-import kotlin.reflect.KMutableProperty0
 
 val chinaZone: ZoneId = ZoneId.of("Asia/Shanghai")
 private val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
@@ -245,8 +240,14 @@ class Config internal constructor() {
             kv.encode("showPoemsTranslate", value)
         }
         get() = kv.decodeBool("showPoemsTranslate", true)
+    var allowSendCrashReport: Boolean
+        set(value) {
+            kv.encode("allowSendCrashReport", value)
+        }
+        get() = kv.decodeBool("allowSendCrashReport", true)
+    var debugMode: Boolean
+        set(value) {
+            kv.encode("debugMode", value)
+        }
+        get() = kv.decodeBool("debugMode", false)
 }
-
-@Composable
-fun <T> rememberConfigState(property: KMutableProperty0<T>): MutableState<T> =
-    remember { mutableStateOf(property()) }

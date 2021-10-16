@@ -62,6 +62,9 @@ object XhuIcons {
     val checkUpdate: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_check_update)
+    val allowUploadCrash: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_allow_upload_crash)
     val qqGroup: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_qq_group)
