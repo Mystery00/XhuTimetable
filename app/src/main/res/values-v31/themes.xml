@@ -2,7 +2,7 @@
 <resources>
 
     <style name="JetpackSplashTheme" parent="JetpackSplashBaseTheme">
-        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
         <item name="android:windowSplashScreenBrandingImage">@mipmap/splash_image_bottom</item>
     </style>
 </resources>
