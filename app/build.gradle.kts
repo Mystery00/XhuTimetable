@@ -55,7 +55,14 @@ android {
             }
         }
     }
-
+    signingConfigs {
+        create("release") {
+            storeFile = file(SignConfig.signKeyStoreFile)
+            storePassword = SignConfig.signKeyStorePassword
+            keyAlias = SignConfig.signKeyAlias
+            keyPassword = SignConfig.signKeyPassword
+        }
+    }
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
@@ -87,6 +94,7 @@ android {
                 "proguard-rules.pro"
             )
             versionNameSuffix = ".r$gitVersionCode.$gitVersionName"
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -106,14 +114,6 @@ android {
         resources {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-    signingConfigs {
-        create("release") {
-            storeFile = file(SignConfig.signKeyStoreFile)
-            storePassword = SignConfig.signKeyStorePassword
-            keyAlias = SignConfig.signKeyAlias
-            keyPassword = SignConfig.signKeyPassword
         }
     }
     externalNativeBuild {
