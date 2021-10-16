@@ -6,6 +6,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.flow.MutableStateFlow
+import vip.mystery0.xhu.timetable.appVersionCodeNumber
 import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.model.response.Version
 import java.text.DecimalFormat
@@ -21,16 +22,16 @@ data class DownloadUpdateState(
         get() = (downloaded * 100 / totalSize).toInt()
 }
 
-typealias DownloadObserver = (DownloadUpdateState) -> Unit
+typealias DownloadObserver = suspend (DownloadUpdateState) -> Unit
 
 private val downloadStateFlow = MutableStateFlow(DownloadUpdateState())
 
 private val apkDownloadObserver = TreeMap<Long, DownloadObserver>()
 private val patchDownloadObserver = TreeMap<Long, DownloadObserver>()
 
-fun addDownloadObserver(
+suspend fun addDownloadObserver(
     patchObserver: Boolean = true,
-    listener: (DownloadUpdateState) -> Unit
+    listener: suspend (DownloadUpdateState) -> Unit
 ): Long =
     if (patchObserver) {
         val lastKey = if (patchDownloadObserver.isEmpty()) 0L else patchDownloadObserver.lastKey()
@@ -88,11 +89,13 @@ fun CheckUpdate(
             )
         }, confirmButton = {
             FlowRow {
-                TextButton(onClick = {
-                    onDownload(false)
-                    onCloseListener()
-                }) {
-                    Text(text = "下载增量包(${version.patchSize.formatFileSize()})")
+                if (version.lastVersionCode == appVersionCodeNumber) {
+                    TextButton(onClick = {
+                        onDownload(false)
+                        onCloseListener()
+                    }) {
+                        Text(text = "下载增量包(${version.patchSize.formatFileSize()})")
+                    }
                 }
                 TextButton(onClick = {
                     onDownload(true)

@@ -405,6 +405,14 @@ class SettingsActivity : BaseComposeActivity() {
                             onClick = {
                             },
                         )
+                        ConfigSettingsCheckbox(
+                            config = GlobalConfig::alwaysShowNewVersion,
+                            scope = scope,
+                            title = { Text(text = "始终显示新版本弹窗") },
+                            onCheckedChange = {
+                                setConfig { alwaysShowNewVersion = it }
+                            }
+                        )
                         SettingsMenuLink(
                             title = { Text(text = "测试下载最新安装包") },
                             subtitle = {

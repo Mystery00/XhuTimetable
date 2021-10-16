@@ -39,6 +39,7 @@ import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.appVersionCodeNumber
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
@@ -301,7 +302,11 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
     private fun ShowCheckUpdateDialog() {
         val version by viewModel.version.collectAsState()
         val newVersion = version ?: return
-        if (newVersion.versionCode <= appVersionCodeNumber) return
+        var show = newVersion.versionCode <= appVersionCodeNumber
+        if (GlobalConfig.debugMode && GlobalConfig.alwaysShowNewVersion) {
+            show = true
+        }
+        if (!show) return
         //需要提示版本更新
         CheckUpdate(
             version = newVersion,

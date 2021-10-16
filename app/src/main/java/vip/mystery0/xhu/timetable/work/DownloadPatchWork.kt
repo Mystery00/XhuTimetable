@@ -1,23 +1,22 @@
 package vip.mystery0.xhu.timetable.work
 
-import android.app.Notification
-import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
 import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.api.FileApi
 import vip.mystery0.xhu.timetable.api.ServerApi
-import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.externalDownloadDir
+import vip.mystery0.xhu.timetable.model.response.Version
 import vip.mystery0.xhu.timetable.packageName
 import vip.mystery0.xhu.timetable.ui.activity.DownloadUpdateState
 import vip.mystery0.xhu.timetable.ui.activity.addDownloadObserver
@@ -34,19 +33,16 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
     CoroutineWorker(appContext, workerParams), KoinComponent {
     companion object {
         private const val TAG = "DownloadPatchWork"
-        private const val NOTIFICATION_TAG = "DownloadNotification"
         private val NOTIFICATION_ID = NotificationId.DOWNLOAD.id
     }
 
-    private val notificationManager: NotificationManager by inject()
     private val serverApi: ServerApi by inject()
     private val fileApi: FileApi by inject()
-    private var versionName: String = appVersionName
 
     override suspend fun doWork(): Result {
         val version = DataHolder.version ?: return Result.success()
         val observerId = addDownloadObserver(patchObserver = false) {
-            updateProgress(it)
+            setForeground(updateProgress(it))
         }
         val dir = File(externalDownloadDir, "patch")
         if (!dir.exists()) {
@@ -56,7 +52,7 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
         if (file.exists()) {
             file.delete()
         }
-        startDownload()
+        setForeground(startDownload(version))
         //获取下载地址
         val versionUrl = serverApi.versionUrl(version.versionId)
         val response = fileApi.download(versionUrl.patchUrl)
@@ -70,10 +66,11 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
         removeDownloadObserver(patchObserver = false, observerId)
         Log.i(TAG, "save patch to ${file.absolutePath}")
         //检查md5
-        md5Checking()
+        setForeground(md5Checking())
         val md5 = file.md5()
-        if (md5 == versionUrl.apkMd5) {
+        return if (md5 == versionUrl.apkMd5) {
             //md5校验通过，合并安装包
+            setForeground(patching())
             val apkDir = File(externalDownloadDir, "apk")
             val apkFile = File(apkDir, "${version.versionName}-${version.versionCode}.apk")
             BsPatch.patch(
@@ -87,10 +84,11 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
             val uri = FileProvider.getUriForFile(appContext, packageName, apkFile)
             installIntent.setDataAndType(uri, "application/vnd.android.package-archive")
             appContext.startActivity(installIntent)
+            Result.success()
         } else {
-            md5Failed()
+            setForeground(md5Failed())
+            Result.failure()
         }
-        return Result.success()
     }
 
     private val notificationBuilder: NotificationCompat.Builder
@@ -100,41 +98,68 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
             .setSmallIcon(R.drawable.ic_file_download)
             .setOngoing(true)
             .setAutoCancel(true)
-            .setContentTitle("正在下载：${versionName}")
             .setContentText("正在获取下载地址……")
 
-    private fun startDownload() =
-        notificationBuilder
-            .build()
-            .show()
+    private fun startDownload(version: Version): ForegroundInfo =
+        ForegroundInfo(
+            NOTIFICATION_ID,
+            notificationBuilder
+                .setContentTitle("正在下载：${version.versionName}")
+                .build()
+        )
 
-    private fun updateProgress(downloadUpdateState: DownloadUpdateState) =
-        notificationBuilder
-            .setProgress(100, 0, false)
-            .setContentText("${downloadUpdateState.downloaded.formatFileSize()}/${downloadUpdateState.totalSize.formatFileSize()}")
-            .setSubText("已下载${downloadUpdateState.progress}%")
-            .build()
-            .show()
 
-    private fun md5Checking() =
-        notificationBuilder
-            .setProgress(0, 0, false)
-            .setContentTitle("MD5校验中……")
-            .setContentText(null)
-            .setOngoing(false)
-            .build()
-            .show()
+    private fun updateProgress(downloadUpdateState: DownloadUpdateState): ForegroundInfo =
+        ForegroundInfo(
+            NOTIFICATION_ID,
+            notificationBuilder
+                .setProgress(100, 0, false)
+                .setContentText("${downloadUpdateState.downloaded.formatFileSize()}/${downloadUpdateState.totalSize.formatFileSize()}")
+                .setSubText("已下载${downloadUpdateState.progress}%")
+                .build()
+        )
 
-    private fun md5Failed() =
-        notificationBuilder
-            .setProgress(0, 0, false)
-            .setContentTitle("MD5校验失败，请重新下载")
-            .setContentText(null)
-            .setOngoing(false)
-            .build()
-            .show()
+    private fun md5Checking(): ForegroundInfo =
+        ForegroundInfo(
+            NOTIFICATION_ID,
+            notificationBuilder
+                .setProgress(0, 0, false)
+                .setContentTitle("MD5校验中……")
+                .setContentText(null)
+                .setOngoing(false)
+                .build()
+        )
 
-    private fun Notification.show() {
-        notificationManager.notify(NOTIFICATION_TAG, NOTIFICATION_ID, this)
-    }
+    private fun md5Failed(): ForegroundInfo =
+        ForegroundInfo(
+            NOTIFICATION_ID,
+            notificationBuilder
+                .setProgress(0, 0, false)
+                .setContentTitle("MD5校验失败，请重新下载")
+                .setContentText(null)
+                .setOngoing(false)
+                .build()
+        )
+
+    private fun patching(): ForegroundInfo =
+        ForegroundInfo(
+            NOTIFICATION_ID,
+            notificationBuilder
+                .setProgress(0, 0, false)
+                .setContentTitle("正在合成安装包")
+                .setContentText(null)
+                .setOngoing(false)
+                .build()
+        )
+
+    private fun downloadFailed(): ForegroundInfo =
+        ForegroundInfo(
+            NOTIFICATION_ID,
+            notificationBuilder
+                .setProgress(0, 0, false)
+                .setContentTitle("下载失败")
+                .setContentText(null)
+                .setOngoing(false)
+                .build()
+        )
 }
