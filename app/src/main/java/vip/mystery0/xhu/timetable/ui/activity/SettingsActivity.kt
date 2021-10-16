@@ -396,6 +396,15 @@ class SettingsActivity : BaseComposeActivity() {
                                 }
                             },
                         )
+                        val splashList = viewModel.splashList.collectAsState()
+                        SettingsMenuLink(
+                            title = { Text(text = "启动页信息") },
+                            subtitle = {
+                                Text(text = splashList.toString())
+                            },
+                            onClick = {
+                            },
+                        )
                         val version = DataHolder.version
                         SettingsMenuLink(
                             title = { Text(text = "新版本信息") },

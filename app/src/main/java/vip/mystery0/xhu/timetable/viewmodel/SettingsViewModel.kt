@@ -11,6 +11,7 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.setConfig
+import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.work.DownloadApkWork
 import vip.mystery0.xhu.timetable.work.DownloadPatchWork
 
@@ -26,9 +27,13 @@ class SettingsViewModel : ComposeViewModel() {
 
     val debugMode = MutableStateFlow(false)
 
+    private val _splashList = MutableStateFlow<List<Splash>>(emptyList())
+    val splashList: StateFlow<List<Splash>> = _splashList
+
     init {
         viewModelScope.launch {
             debugMode.value = getConfig { debugMode }
+            _splashList.value = getConfig { splashList }
         }
     }
 
