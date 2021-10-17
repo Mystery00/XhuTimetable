@@ -10,6 +10,7 @@ import vip.mystery0.xhu.timetable.api.FileApi
 import vip.mystery0.xhu.timetable.api.JwcApi
 import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.api.ServerApi
+import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.LogInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.PoemsInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.ServerApiInterceptor
@@ -51,6 +52,7 @@ val networkModule = module {
     }
     single(named(RETROFIT_FILE)) {
         val client = OkHttpClient.Builder()
+            .addInterceptor(DownloadProgressInterceptor())
             .retryOnConnectionFailure(true)
             .connectTimeout(15, TimeUnit.SECONDS)
             .build()
