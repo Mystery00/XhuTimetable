@@ -71,7 +71,6 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
             val response =
                 fileApi.download(versionUrl.patchUrl, DownloadProgressInterceptor.buildTag(true))
             Log.i(TAG, "save patch to ${file.absolutePath}")
-            updateStatus(status = "文件处理中", downloading = false, patch = true, progress = 100)
             response.byteStream().use { input ->
                 FileOutputStream(file).use { output ->
                     input.copyTo(output)
@@ -81,6 +80,7 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
             setForeground(md5Checking())
             file.md5()
         }
+        updateStatus(status = "文件处理中", patch = true, progress = 100)
         if (!md5.equals(versionUrl.patchMd5, ignoreCase = true)) {
             throw DownloadError.MD5CheckFailed()
         }

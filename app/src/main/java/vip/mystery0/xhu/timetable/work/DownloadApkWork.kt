@@ -70,7 +70,6 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
             val response =
                 fileApi.download(versionUrl.apkUrl, DownloadProgressInterceptor.buildTag(false))
             Log.i(TAG, "save apk to ${file.absolutePath}")
-            updateStatus(status = "文件处理中", downloading = false, patch = false, progress = 100)
             response.byteStream().use { input ->
                 FileOutputStream(file).use { output ->
                     input.copyTo(output)
@@ -80,6 +79,7 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
             setForeground(md5Checking())
             file.md5()
         }
+        updateStatus(status = "文件处理中", patch = false, progress = 100)
         if (!md5.equals(versionUrl.apkMd5, ignoreCase = true)) {
             throw DownloadError.MD5CheckFailed()
         }

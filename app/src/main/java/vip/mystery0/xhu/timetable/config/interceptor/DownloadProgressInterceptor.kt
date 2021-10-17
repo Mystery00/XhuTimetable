@@ -66,7 +66,7 @@ class DownloadProgressResponseBody(
                     totalSize = totalSize,
                     patch = patch,
                     progress = progress,
-                    status = "已下载${progress}%",
+                    status = "${progress}%",
                 )
                 updateProgress(state)
                 return bytesRead

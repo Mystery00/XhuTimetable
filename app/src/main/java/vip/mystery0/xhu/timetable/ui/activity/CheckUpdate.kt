@@ -1,19 +1,24 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.appVersionCodeNumber
-import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.model.response.Version
+import vip.mystery0.xhu.timetable.utils.finishAllActivity
 import java.text.DecimalFormat
 import java.util.*
 
@@ -73,21 +78,19 @@ fun updateProgress(state: DownloadUpdateState) {
     }
 }
 
-fun updateStatus(
+suspend fun updateStatus(
     status: String,
-    downloading: Boolean = false,
     patch: Boolean = false,
     progress: Int = 0,
 ) {
-    coroutineScope.launch {
-        val state = DownloadUpdateState(
-            downloading = downloading,
+    downloadStateFlow.emit(
+        DownloadUpdateState(
+            downloading = true,
             patch = patch,
             progress = progress,
             status = status,
         )
-        downloadStateFlow.emit(state)
-    }
+    )
 }
 
 
@@ -101,24 +104,39 @@ fun CheckUpdate(
         return
     }
     var dialogState by remember { mutableStateOf(true) }
+    val downloadProgress by downloadStateFlow.collectAsState()
     val onCloseListener = {
-        dialogState = false
+        if (!version.forceUpdate) {
+            dialogState = false
+        }
     }
     if (!dialogState) return
-    val downloadProgress by downloadStateFlow.collectAsState()
     AlertDialog(onDismissRequest = onCloseListener,
         title = {
-            Text(text = "检测到新版本")
+            Text(
+                text = "检测到新版本 ${version.versionName}",
+                fontWeight = FontWeight.W700,
+                style = MaterialTheme.typography.h6,
+            )
         }, text = {
-            Column {
-                if (downloadProgress.downloading) {
-                    Text(text = downloadProgress.status)
-                    LinearProgressIndicator(progress = downloadProgress.progress.toFloat())
-                }
-                Text(text = "新版本：${version.versionName}")
-                Text(text = "当前版本：${appVersionName}")
-                Text(text = "更新日志：")
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Text(text = version.updateLog)
+                Row(
+                    modifier = Modifier.height(48.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (downloadProgress.downloading) {
+                        LinearProgressIndicator(
+                            progress = downloadProgress.progress / 100F,
+                            modifier = Modifier.weight(1F),
+                        )
+                        Text(
+                            text = downloadProgress.status,
+                            modifier = Modifier.weight(0.2F),
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                }
             }
         }, confirmButton = {
             FlowRow {
@@ -138,7 +156,13 @@ fun CheckUpdate(
                 }
             }
         }, dismissButton = {
-            if (!version.forceUpdate) {
+            if (version.forceUpdate) {
+                TextButton(onClick = {
+                    finishAllActivity()
+                }) {
+                    Text(text = "退出应用")
+                }
+            } else {
                 TextButton(onClick = {
                     onIgnore()
                     onCloseListener()
