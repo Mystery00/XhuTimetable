@@ -2,13 +2,13 @@ package vip.mystery0.xhu.timetable.viewmodel
 
 import android.os.SystemClock
 import androidx.lifecycle.viewModelScope
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.base.startUniqueWork
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.response.Splash
@@ -63,19 +63,13 @@ class SettingsViewModel : ComposeViewModel() {
 
     fun downloadApk() {
         viewModelScope.launch {
-            workManager.enqueue(
-                OneTimeWorkRequestBuilder<DownloadApkWork>()
-                    .build()
-            )
+            workManager.startUniqueWork<DownloadApkWork>()
         }
     }
 
     fun downloadPatch() {
         viewModelScope.launch {
-            workManager.enqueue(
-                OneTimeWorkRequestBuilder<DownloadPatchWork>()
-                    .build()
-            )
+            workManager.startUniqueWork<DownloadPatchWork>()
         }
     }
 }

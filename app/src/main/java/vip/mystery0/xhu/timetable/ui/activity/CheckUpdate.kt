@@ -1,11 +1,16 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.AlertDialog
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import com.google.accompanist.flowlayout.FlowRow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.appVersionCodeNumber
 import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.model.response.Version
@@ -17,10 +22,9 @@ data class DownloadUpdateState(
     val totalSize: Long = 0L,
     val downloaded: Long = 0L,
     val patch: Boolean = false,
-) {
-    val progress: Int
-        get() = (downloaded * 100 / totalSize).toInt()
-}
+    val progress: Int = 0,
+    val status: String = "",
+)
 
 typealias DownloadObserver = suspend (DownloadUpdateState) -> Unit
 
@@ -29,7 +33,9 @@ private val downloadStateFlow = MutableStateFlow(DownloadUpdateState())
 private val apkDownloadObserver = TreeMap<Long, DownloadObserver>()
 private val patchDownloadObserver = TreeMap<Long, DownloadObserver>()
 
-suspend fun addDownloadObserver(
+private val coroutineScope = CoroutineScope(Dispatchers.Default)
+
+fun addDownloadObserver(
     patchObserver: Boolean = true,
     listener: suspend (DownloadUpdateState) -> Unit
 ): Long =
@@ -56,8 +62,32 @@ fun removeDownloadObserver(
     }
 }
 
-suspend fun updateProgress(state: DownloadUpdateState) {
-    downloadStateFlow.emit(state)
+fun updateProgress(state: DownloadUpdateState) {
+    coroutineScope.launch {
+        downloadStateFlow.emit(state)
+        if (state.patch) {
+            patchDownloadObserver.values.forEach { it(state) }
+        } else {
+            apkDownloadObserver.values.forEach { it(state) }
+        }
+    }
+}
+
+fun updateStatus(
+    status: String,
+    downloading: Boolean = false,
+    patch: Boolean = false,
+    progress: Int = 0,
+) {
+    coroutineScope.launch {
+        val state = DownloadUpdateState(
+            downloading = downloading,
+            patch = patch,
+            progress = progress,
+            status = status,
+        )
+        downloadStateFlow.emit(state)
+    }
 }
 
 
@@ -75,18 +105,21 @@ fun CheckUpdate(
         dialogState = false
     }
     if (!dialogState) return
+    val downloadProgress by downloadStateFlow.collectAsState()
     AlertDialog(onDismissRequest = onCloseListener,
         title = {
             Text(text = "检测到新版本")
         }, text = {
-            Text(
-                text = """
-                新版本：${version.versionName}
-                当前版本：${appVersionName}
-                更新日志：
-                ${version.updateLog}
-            """.trimIndent()
-            )
+            Column {
+                if (downloadProgress.downloading) {
+                    Text(text = downloadProgress.status)
+                    LinearProgressIndicator(progress = downloadProgress.progress.toFloat())
+                }
+                Text(text = "新版本：${version.versionName}")
+                Text(text = "当前版本：${appVersionName}")
+                Text(text = "更新日志：")
+                Text(text = version.updateLog)
+            }
         }, confirmButton = {
             FlowRow {
                 if (version.lastVersionCode == appVersionCodeNumber) {
