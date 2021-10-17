@@ -16,10 +16,10 @@ const val NOTIFICATION_CHANNEL_ID_TOMORROW = "XhuTimetable-Tomorrow"
 private const val NOTIFICATION_CHANNEL_NAME_TOMORROW = "课程提醒"
 private const val NOTIFICATION_CHANNEL_DESCRIPTION_TOMORROW = "每日提醒课程、考试、自定义事项等"
 
-
 enum class NotificationId(val id: Int) {
     CHECK_UPDATE(1001),
     DOWNLOAD(1002),
+    DOWNLOAD_FAILED(1003),
 }
 
 fun initChannelID(applicationContext: Context) {

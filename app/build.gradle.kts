@@ -132,6 +132,7 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.3.1")
     implementation("androidx.core:core-splashscreen:1.0.0-alpha02")
     implementation("androidx.browser:browser:1.3.0")
+    implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
     //compose
     val composeVersion = rootProject.extra["compose_version"]
     implementation("androidx.compose.ui:ui:$composeVersion")

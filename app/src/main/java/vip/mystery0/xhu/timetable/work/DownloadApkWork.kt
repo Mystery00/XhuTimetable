@@ -1,11 +1,12 @@
 package vip.mystery0.xhu.timetable.work
 
+import android.app.Notification
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
-import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import org.koin.core.component.KoinComponent
@@ -13,6 +14,8 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.api.FileApi
 import vip.mystery0.xhu.timetable.api.ServerApi
+import vip.mystery0.xhu.timetable.base.BaseCoroutineWorker
+import vip.mystery0.xhu.timetable.base.DownloadError
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.externalDownloadDir
@@ -29,12 +32,14 @@ import java.io.File
 import java.io.FileOutputStream
 
 class DownloadApkWork(private val appContext: Context, workerParams: WorkerParameters) :
-    CoroutineWorker(appContext, workerParams), KoinComponent {
+    BaseCoroutineWorker(appContext, workerParams), KoinComponent {
     companion object {
         private const val TAG = "DownloadApkWork"
+        private const val NOTIFICATION_TAG = "DownloadApkWork"
         private val NOTIFICATION_ID = NotificationId.DOWNLOAD.id
     }
 
+    private val notificationManager: NotificationManager by inject()
     private val serverApi: ServerApi by inject()
     private val fileApi: FileApi by inject()
 
@@ -67,19 +72,29 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
         //检查md5
         setForeground(md5Checking())
         val md5 = file.md5()
-        return if (md5 == versionUrl.apkMd5) {
-            //md5校验通过，安装应用
-            val installIntent = Intent(Intent.ACTION_VIEW)
-            installIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            installIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-            val uri = FileProvider.getUriForFile(appContext, packageName, file)
-            installIntent.setDataAndType(uri, "application/vnd.android.package-archive")
-            appContext.startActivity(installIntent)
-            Result.success()
-        } else {
-            setForeground(md5Failed())
-            Result.failure()
+        if (md5 != versionUrl.apkMd5) {
+            throw DownloadError.MD5CheckFailed()
         }
+        //md5校验通过，安装应用
+        val installIntent = Intent(Intent.ACTION_VIEW)
+        installIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        installIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        val uri = FileProvider.getUriForFile(appContext, packageName, file)
+        installIntent.setDataAndType(uri, "application/vnd.android.package-archive")
+        appContext.startActivity(installIntent)
+        return Result.success()
+    }
+
+    override suspend fun whenError(t: Throwable) {
+        super.whenError(t)
+        val notification = when (t) {
+            is DownloadError.MD5CheckFailed -> md5Failed()
+            else -> {
+                Log.w(TAG, "download apk failed", t)
+                downloadFailed()
+            }
+        }
+        notification.notify()
     }
 
     private val notificationBuilder: NotificationCompat.Builder
@@ -90,6 +105,15 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
             .setOngoing(true)
             .setAutoCancel(true)
             .setContentText("正在获取下载地址……")
+
+    private val failedNotificationBuilder: NotificationCompat.Builder
+        get() = NotificationCompat.Builder(appContext, NOTIFICATION_CHANNEL_ID_DOWNLOAD)
+            .setSound(null)
+            .setVibrate(null)
+            .setSmallIcon(R.drawable.ic_file_download_failed)
+            .setOngoing(false)
+            .setAutoCancel(true)
+            .setContentText(null)
 
     private fun startDownload(version: Version): ForegroundInfo =
         ForegroundInfo(
@@ -121,25 +145,17 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
                 .build()
         )
 
-    private fun md5Failed(): ForegroundInfo =
-        ForegroundInfo(
-            NOTIFICATION_ID,
-            notificationBuilder
-                .setProgress(0, 0, false)
-                .setContentTitle("MD5校验失败，请重新下载")
-                .setContentText(null)
-                .setOngoing(false)
-                .build()
-        )
+    private fun md5Failed(): Notification =
+        failedNotificationBuilder
+            .setContentTitle("MD5校验失败，请重新下载")
+            .build()
 
-    private fun downloadFailed(): ForegroundInfo =
-        ForegroundInfo(
-            NOTIFICATION_ID,
-            notificationBuilder
-                .setProgress(0, 0, false)
-                .setContentTitle("下载失败")
-                .setContentText(null)
-                .setOngoing(false)
-                .build()
-        )
+    private fun downloadFailed() =
+        failedNotificationBuilder
+            .setContentTitle("下载失败")
+            .build()
+
+    private fun Notification.notify() {
+        notificationManager.notify(NOTIFICATION_TAG, NOTIFICATION_ID, this)
+    }
 }
