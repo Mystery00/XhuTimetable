@@ -13,11 +13,13 @@ import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.config.interceptor.LogInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.PoemsInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.ServerApiInterceptor
+import java.util.concurrent.TimeUnit
 
 const val HTTP_CLIENT = "client"
 const val HTTP_CLIENT_POEMS = "poemsClient"
 const val RETROFIT = "retrofit"
 const val RETROFIT_POEMS = "poemsRetrofit"
+const val RETROFIT_FILE = "fileRetrofit"
 
 val networkModule = module {
     single(named(HTTP_CLIENT)) {
@@ -47,12 +49,22 @@ val networkModule = module {
             .addConverterFactory(MoshiConverterFactory.create())
             .build()
     }
+    single(named(RETROFIT_FILE)) {
+        val client = OkHttpClient.Builder()
+            .retryOnConnectionFailure(true)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .build()
+        Retrofit.Builder()
+            .baseUrl("https://example.com/")
+            .client(client)
+            .build()
+    }
 
     serverApi<ServerApi>()
     serverApi<JwcApi>()
-    serverApi<FileApi>()
 
     single { get<Retrofit>(named(RETROFIT_POEMS)).create(PoemsApi::class.java) }
+    single { get<Retrofit>(named(RETROFIT_FILE)).create(FileApi::class.java) }
 }
 
 private inline fun <reified API> Module.serverApi() {
