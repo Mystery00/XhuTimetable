@@ -34,15 +34,14 @@ val appName: String
     get() = context.getString(R.string.app_name)
 
 //应用包名
-val packageName: String
-    get() = BuildConfig.APPLICATION_ID
+const val packageName: String = BuildConfig.APPLICATION_ID
 
 //版本名称
-val appVersionName: String by lazy { context.getString(R.string.app_version_name) }
+const val appVersionName: String = BuildConfig.VERSION_NAME
 
 //版本号
-val appVersionCode: String by lazy { context.getString(R.string.app_version_code) }
-val appVersionCodeNumber: Long by lazy { appVersionCode.toLong() }
+const val appVersionCode: String = BuildConfig.VERSION_CODE.toString()
+const val appVersionCodeNumber: Long = BuildConfig.VERSION_CODE.toLong()
 
 @SuppressLint("deprecation")
 fun isOnline(): Boolean {
