@@ -50,9 +50,12 @@ fun isOnline(): Boolean {
     return networkInfo?.isConnected == true
 }
 
-val externalPictureDir: File by lazy { context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!! }
-val externalDownloadDir: File by lazy { context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!! }
-val externalDocumentsDir: File by lazy { context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)!! }
+val externalPictureDir: File
+    get() = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+val externalDownloadDir: File
+    get() = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
+val externalDocumentsDir: File
+    get() = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)!!
 
 fun BaseComposeActivity.toCustomTabs(url: String) {
     try {

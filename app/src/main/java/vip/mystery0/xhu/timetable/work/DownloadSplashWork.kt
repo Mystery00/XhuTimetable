@@ -31,9 +31,11 @@ class DownloadSplashWork(appContext: Context, workerParams: WorkerParameters) :
         }
         val splashList = getConfig { splashList }
             .map {
+                val extension = it.imageUrl.substringAfterLast(".")
+                val name = "${it.splashId.toString().sha1()}-${it.imageUrl.md5()}"
                 it.imageUrl to File(
                     dir,
-                    "${it.splashId.toString().sha1()}-${it.imageUrl.md5()}".sha256()
+                    "${name.sha256()}.${extension}"
                 )
             }
             .filter {

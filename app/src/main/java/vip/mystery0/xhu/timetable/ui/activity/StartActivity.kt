@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -25,9 +26,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.animation.doOnEnd
 import androidx.core.os.BuildCompat
+import coil.ImageLoader
 import coil.compose.rememberImagePainter
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import coil.request.CachePolicy
-import coil.size.Scale
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsPadding
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
@@ -38,6 +41,16 @@ import vip.mystery0.xhu.timetable.viewmodel.StarterViewModel
 
 class StartActivity : BaseComposeActivity(setSystemUiColor = false) {
     private val viewModel: StarterViewModel by viewModels()
+    private val loader: ImageLoader by lazy {
+        ImageLoader.invoke(this).newBuilder()
+            .componentRegistry {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    add(ImageDecoderDecoder(this@StartActivity))
+                } else {
+                    add(GifDecoder())
+                }
+            }.build()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,12 +72,15 @@ class StartActivity : BaseComposeActivity(setSystemUiColor = false) {
                             .fillMaxSize()
                     ) {
                         Image(
-                            painter = rememberImagePainter(data = showSplash) {
-                                scale(Scale.FIT)
+                            painter = rememberImagePainter(
+                                data = showSplash,
+                                imageLoader = loader,
+                            ) {
+                                crossfade(true)
                                 diskCachePolicy(CachePolicy.DISABLED)
                             },
                             contentDescription = null,
-                            contentScale = ContentScale.Crop,
+                            contentScale = ContentScale.FillWidth,
                             modifier = Modifier
                                 .matchParentSize()
                         )
