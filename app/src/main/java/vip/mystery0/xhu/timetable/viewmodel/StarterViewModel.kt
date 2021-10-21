@@ -20,6 +20,7 @@ import vip.mystery0.xhu.timetable.utils.sha1
 import vip.mystery0.xhu.timetable.utils.sha256
 import vip.mystery0.xhu.timetable.work.DownloadSplashWork
 import java.io.File
+import java.time.Instant
 
 class StarterViewModel : ComposeViewModel(), KoinComponent {
     companion object {
@@ -49,12 +50,16 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
                     version = null
                 }
                 DataHolder.version = version
-                val dir = externalPictureDir
+                val dir = File(externalPictureDir, "splash")
+                val now = Instant.now().toEpochMilli()
                 val splashList = getConfig { splashList }
+                    .filter { now >= it.startShowTime && now <= it.endShowTime }
                     .map {
+                        val extension = it.imageUrl.substringAfterLast(".")
+                        val name = "${it.splashId.toString().sha1()}-${it.imageUrl.md5()}"
                         File(
                             dir,
-                            "${it.splashId.toString().sha1()}-${it.imageUrl.md5()}".sha256()
+                            "${name.sha256()}.${extension}"
                         ) to it.showTime
                     }
                     .filter {
