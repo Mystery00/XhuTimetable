@@ -29,18 +29,19 @@ class DownloadSplashWork(appContext: Context, workerParams: WorkerParameters) :
         if (!dir.exists()) {
             dir.mkdirs()
         }
+        val files = dir.listFiles()!!.toMutableSet()
         val splashList = getConfig { splashList }
-            .map {
-                val extension = it.imageUrl.substringAfterLast(".")
-                val name = "${it.splashId.toString().sha1()}-${it.imageUrl.md5()}"
-                it.imageUrl to File(
-                    dir,
-                    "${name.sha256()}.${extension}"
-                )
+            .map { splash ->
+                val extension = splash.imageUrl.substringAfterLast(".")
+                val name = "${splash.splashId.toString().sha1()}-${splash.imageUrl.md5()}"
+                val file = File(dir, "${name.sha256()}.${extension}")
+                files.removeIf { it.absolutePath == file.absolutePath }
+                splash.imageUrl to file
             }
             .filter {
                 !it.second.exists()
             }
+        files.forEach { it.delete() }
         if (splashList.isEmpty()) {
             return Result.success()
         }
