@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import com.alorma.settings.composables.SettingsMenuLink
+import com.alorma.compose.settings.ui.SettingsMenuLink
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
@@ -27,7 +30,6 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.timeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.ClassSettingsViewModel
 import java.time.LocalTime
-import java.util.*
 
 class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
     private val viewModel: ClassSettingsViewModel by viewModels()

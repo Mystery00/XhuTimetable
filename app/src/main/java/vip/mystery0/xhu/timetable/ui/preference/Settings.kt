@@ -2,9 +2,9 @@ package vip.mystery0.xhu.timetable.ui.preference
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import com.alorma.settings.composables.SettingsCheckbox
-import com.alorma.settings.composables.SettingsMenuLink
-import com.alorma.settings.storage.rememberBooleanSettingState
+import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
+import com.alorma.compose.settings.ui.SettingsCheckbox
+import com.alorma.compose.settings.ui.SettingsMenuLink
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.reflect.KMutableProperty0
