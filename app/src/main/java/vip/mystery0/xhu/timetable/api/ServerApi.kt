@@ -34,13 +34,14 @@ interface ServerApi {
 }
 
 fun <T : Any> Response<T>.checkLogin(): T {
-    if (code() == 401) {
+    val httpCode = code()
+    if (httpCode == 401) {
         throw ServerNeedLoginException()
     }
-    if (code() >= 400) {
+    if (httpCode >= 400) {
         val response = errorBody()?.string()
         if (response != null) {
-            parseServerError(response)?.let {
+            parseServerError(httpCode, response)?.let {
                 throw ServerError(it.message)
             }
         }
