@@ -21,6 +21,7 @@ import vip.mystery0.xhu.timetable.module.localRepo
 import vip.mystery0.xhu.timetable.module.repo
 import vip.mystery0.xhu.timetable.repository.CourseRepo
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
+import vip.mystery0.xhu.timetable.repository.getRawCourseColorList
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
@@ -31,8 +32,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class MainViewModel : ComposeViewModel() {
     companion object {
@@ -242,6 +241,7 @@ class MainViewModel : ComposeViewModel() {
         }) {
             fun convertCourseList(
                 courseList: List<CourseResponse>,
+                colorMap: Map<String, Color>,
                 currentWeek: Int,
                 today: LocalDate,
             ) = courseList.map {
@@ -267,7 +267,7 @@ class MainViewModel : ComposeViewModel() {
                     thisWeek,
                     isToday,
                     isTomorrow,
-                    ColorPool.hash(it.name),
+                    colorMap[it.name] ?: ColorPool.hash(it.name),
                     it.user.studentId,
                     it.user.info.userName,
                 )
@@ -275,13 +275,14 @@ class MainViewModel : ComposeViewModel() {
 
             suspend fun loadData(
                 courseList: List<CourseResponse>,
+                colorMap: Map<String, Color>,
                 currentWeek: Int,
             ) {
                 _todayCourse.value = runOnCpu {
                     val today = LocalDate.now()
                     val nowTime = LocalTime.now()
                     //转换对象
-                    val allCourseList = convertCourseList(courseList, currentWeek, today)
+                    val allCourseList = convertCourseList(courseList, colorMap, currentWeek, today)
 
                     //过滤出今日或者明日的课程
                     val showTomorrowCourse = getConfig { showTomorrowCourseTime }?.let {
@@ -341,13 +342,16 @@ class MainViewModel : ComposeViewModel() {
                 ((days / 7) + 1).toInt()
             }
             _week.value = currentWeek
-            //获取所有的课程列表
 
-            loadData(getAllCourseList(false), currentWeek)
+            //获取自定义颜色列表
+            val colorMap = getRawCourseColorList()
+
+            //获取所有的课程列表
+            loadData(getAllCourseList(false), colorMap, currentWeek)
 
             //加载网络数据
             if (loadFromCloud) {
-                loadData(getAllCourseList(true), currentWeek)
+                loadData(getAllCourseList(true), colorMap, currentWeek)
                 _errorMessage.emit("${LocalDateTime.now().format(dateTimeFormatter)} 数据同步成功！")
             }
             _loading.value = false
@@ -355,6 +359,8 @@ class MainViewModel : ComposeViewModel() {
     }
 
     private suspend fun loadCourseToTable(currentWeek: Int) {
+        //获取自定义颜色列表
+        val colorMap = getRawCourseColorList()
         //获取所有的课程列表
         val courseList = getAllCourseList(false)
         //转换对象
@@ -376,7 +382,7 @@ class MainViewModel : ComposeViewModel() {
                     thisWeek = thisWeek,
                     today = false,
                     tomorrow = false,
-                    color = ColorPool.hash(it.name),
+                    color = colorMap[it.name] ?: ColorPool.hash(it.name),
                     studentId = it.user.studentId,
                     userName = it.user.info.userName,
                 )
@@ -446,7 +452,8 @@ class MainViewModel : ComposeViewModel() {
                         courseSheet.course =
                             ArrayList(courseSheet.course.distinct().sortedBy { it.weekSet.first() })
                         courseSheet.color =
-                            if (show.thisWeek) ColorPool.hash(show.courseName) else notThisWeekBackgroundColor
+                            if (show.thisWeek) colorMap[show.courseName]
+                                ?: ColorPool.hash(show.courseName) else notThisWeekBackgroundColor
                         courseSheet.textColor = if (show.thisWeek) Color.White else Color.Gray
                     }
                     courseSheet

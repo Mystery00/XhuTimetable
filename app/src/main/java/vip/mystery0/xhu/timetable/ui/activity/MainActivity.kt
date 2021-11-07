@@ -486,7 +486,9 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                 viewModel.loadCourseList(false)
                 viewModel.calculateTodayTitle()
             }
-            EventType.CHANGE_SHOW_NOT_THIS_WEEK -> {
+            EventType.CHANGE_SHOW_NOT_THIS_WEEK,
+            EventType.CHANGE_TERM_START_TIME,
+            EventType.CHANGE_COURSE_COLOR -> {
                 viewModel.loadCourseList(false)
             }
             else -> {
