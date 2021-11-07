@@ -28,7 +28,7 @@ android {
         minSdk = 26
         targetSdk = 31
         versionCode = gitVersionCode
-        versionName = "1.0.0-alpha2"
+        versionName = "1.0.0-alpha3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
