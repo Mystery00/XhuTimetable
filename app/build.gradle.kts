@@ -138,7 +138,6 @@ dependencies {
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.material:material:$composeVersion")
     implementation("androidx.compose.material:material-icons-extended:$composeVersion")
-    implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
     //accompanist
@@ -150,6 +149,11 @@ dependencies {
     implementation("com.google.accompanist:accompanist-swiperefresh:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-placeholder-material:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
+    //compose-material-dialogs
+    val composeMaterialDialogsVersion = "0.6.1"
+    implementation("io.github.vanpra.compose-material-dialogs:core:$composeMaterialDialogsVersion")
+    implementation("io.github.vanpra.compose-material-dialogs:datetime:$composeMaterialDialogsVersion")
+    implementation("io.github.vanpra.compose-material-dialogs:color:$composeMaterialDialogsVersion")
     //room
     val roomVersion = "2.3.0"
     implementation("androidx.room:room-runtime:$roomVersion")
