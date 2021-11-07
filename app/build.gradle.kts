@@ -125,13 +125,13 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.7.0-rc01")
+    implementation("androidx.core:core-ktx:1.7.0")
     implementation("androidx.appcompat:appcompat:1.3.1")
     implementation("com.google.android.material:material:1.4.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
-    implementation("androidx.activity:activity-compose:1.3.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
+    implementation("androidx.activity:activity-compose:1.4.0")
     implementation("androidx.core:core-splashscreen:1.0.0-alpha02")
-    implementation("androidx.browser:browser:1.3.0")
+    implementation("androidx.browser:browser:1.4.0")
     implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
     //compose
     val composeVersion = rootProject.extra["compose_version"]
@@ -158,7 +158,7 @@ dependencies {
     //work manager
     implementation("androidx.work:work-runtime-ktx:2.7.0")
     //koin
-    val koinVersion = "3.1.2"
+    val koinVersion = "3.1.3"
     implementation("io.insert-koin:koin-android:$koinVersion")
     implementation("io.insert-koin:koin-android-compat:$koinVersion")
     implementation("io.insert-koin:koin-androidx-workmanager:$koinVersion")
@@ -171,11 +171,11 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
     //mmkv
-    implementation("com.tencent:mmkv-static:1.2.10")
+    implementation("com.tencent:mmkv-static:1.2.11")
     //eventbus
     implementation("org.greenrobot:eventbus:3.2.0")
     //preference
-    implementation("com.github.alorma:compose-settings-ui:0.6.0")
+    implementation("com.github.alorma:compose-settings-ui:0.7.2")
     //AppCenter
     val appCenterSdkVersion = "4.3.1"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
