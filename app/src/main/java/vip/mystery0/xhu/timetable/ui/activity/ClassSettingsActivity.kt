@@ -15,6 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.alorma.compose.settings.ui.SettingsMenuLink
+import com.vanpra.composematerialdialogs.*
+import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
@@ -27,8 +29,10 @@ import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsMenuLink
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.utils.dateFormatter
 import vip.mystery0.xhu.timetable.utils.timeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.ClassSettingsViewModel
+import java.time.LocalDate
 import java.time.LocalTime
 
 class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
@@ -37,6 +41,11 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
     @Composable
     override fun BuildContent() {
         val scope = rememberCoroutineScope()
+        val currentYear by viewModel.currentYearData.collectAsState()
+        val currentTerm by viewModel.currentTermData.collectAsState()
+        val currentTermStartTime by viewModel.currentTermStartTime.collectAsState()
+        val yearAndTermState = rememberMaterialDialogState()
+        val termStartTimeState = rememberMaterialDialogState()
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -141,8 +150,6 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                 XhuSettingsGroup(title = {
                     Text(text = "时间设置")
                 }) {
-                    val currentYear by viewModel.currentYearData.collectAsState()
-                    val currentTerm by viewModel.currentTermData.collectAsState()
                     SettingsMenuLink(
                         icon = {
                             Icon(
@@ -166,38 +173,9 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             Text(text = text)
                         },
                         onClick = {
-                            scope.launch {
-                                val selectArray = viewModel.buildSelect()
-                                val currentString = "${currentYear.first}学年 第${currentTerm.first}学期"
-                                var selectedIndex =
-                                    if (currentYear.second || currentTerm.second)
-                                        selectArray.indexOf(currentString)
-                                    else
-                                        0
-                                androidx.appcompat.app.AlertDialog.Builder(this@ClassSettingsActivity)
-                                    .setTitle("更改当前学期")
-                                    .setSingleChoiceItems(
-                                        selectArray,
-                                        selectedIndex
-                                    ) { _, checkItem ->
-                                        selectedIndex = checkItem
-                                    }
-                                    .setPositiveButton("确定") { _, _ ->
-                                        if (selectedIndex == 0) {
-                                            viewModel.updateCurrentYearTerm()
-                                        } else {
-                                            val select = selectArray[selectedIndex]
-                                            val year = select.substring(0, 9)
-                                            val term = select.substring(13, 14)
-                                            viewModel.updateCurrentYearTerm(year, term.toInt())
-                                        }
-                                    }
-                                    .setNegativeButton("取消", null)
-                                    .show()
-                            }
+                            yearAndTermState.show()
                         }
                     )
-                    val currentTermStartTime by viewModel.currentTermStartTime.collectAsState()
                     SettingsMenuLink(
                         icon = {
                             Icon(
@@ -210,7 +188,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                         subtitle = {
                             val text = buildString {
                                 append("当前开学时间：")
-                                append(currentTermStartTime.first)
+                                append(currentTermStartTime.first.format(dateFormatter))
                                 if (!currentTermStartTime.second) {
                                     appendLine()
                                     append("【从云端自动获取】")
@@ -219,9 +197,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             Text(text = text)
                         },
                         onClick = {
-                            scope.launch {
-                                "暂未实现".toast()
-                            }
+                            termStartTimeState.show()
                         }
                     )
                 }
@@ -265,9 +241,85 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                 }
             }
         }
+        val selectList by viewModel.selectYearAndTermList.collectAsState()
+        BuildYearAndTermSelector(
+            dialogState = yearAndTermState,
+            selectList = selectList,
+            currentYear = currentYear,
+            currentTerm = currentTerm,
+        )
+        BuildTermStartTimeSelector(
+            dialogState = termStartTimeState,
+            initDate = currentTermStartTime.first,
+        )
         val errorMessage by viewModel.errorMessage.collectAsState()
         if (errorMessage.isNotBlank()) {
             errorMessage.toast(true)
+        }
+    }
+
+    @Composable
+    private fun BuildYearAndTermSelector(
+        dialogState: MaterialDialogState,
+        selectList: List<String>,
+        currentYear: Pair<String, Boolean>,
+        currentTerm: Pair<Int, Boolean>,
+    ) {
+        val currentString = "${currentYear.first}学年 第${currentTerm.first}学期"
+        var selectedIndex =
+            if (currentYear.second || currentTerm.second)
+                selectList.indexOf(currentString)
+            else
+                0
+        MaterialDialog(
+            dialogState = dialogState,
+            buttons = {
+                positiveButton("确定") {
+                    if (selectedIndex == 0) {
+                        viewModel.updateCurrentYearTerm()
+                    } else {
+                        val select = selectList[selectedIndex]
+                        val year = select.substring(0, 9)
+                        val term = select.substring(13, 14)
+                        viewModel.updateCurrentYearTerm(year, term.toInt())
+                    }
+                }
+                negativeButton("取消")
+            }) {
+            title("更改当前学期")
+            listItemsSingleChoice(
+                list = selectList,
+                initialSelection = selectedIndex
+            ) {
+                selectedIndex = it
+            }
+        }
+    }
+
+    @Composable
+    private fun BuildTermStartTimeSelector(
+        dialogState: MaterialDialogState,
+        initDate: LocalDate,
+    ) {
+        var selectedDate = initDate
+        MaterialDialog(
+            dialogState = dialogState,
+            buttons = {
+                positiveButton("确定") {
+                    viewModel.updateTermStartTime(selectedDate)
+                }
+                negativeButton("自动获取") {
+                    viewModel.updateTermStartTime(LocalDate.MIN)
+                }
+
+            }) {
+            datepicker(
+                title = "更改开学时间",
+                initialDate = initDate,
+                yearRange = 2015..LocalDate.now().year
+            ) {
+                selectedDate = it
+            }
         }
     }
 }
