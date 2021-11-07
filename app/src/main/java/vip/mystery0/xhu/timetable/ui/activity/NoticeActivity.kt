@@ -197,5 +197,3 @@ class NoticeActivity : BaseComposeActivity() {
         }
     }
 }
-
-private val divider = Color(0xFFf0f0f0)

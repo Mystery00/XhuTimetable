@@ -22,4 +22,7 @@ interface CourseDao {
         term: Int,
         courseSource: CourseSource = CourseSource.JWC,
     ): List<CourseItem>
+
+    @Query("select * from tb_course_item group by courseName")
+    suspend fun queryDistinctCourseByUsernameAndTerm(): List<CourseItem>
 }

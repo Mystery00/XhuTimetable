@@ -59,6 +59,11 @@
             android:label="@string/title_activity_settings_class"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
         <activity
+            android:name=".ui.activity.CustomCourseColorActivity"
+            android:exported="true"
+            android:label="@string/title_activity_settings_course_color"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar" />
+        <activity
             android:name=".ui.activity.SettingsActivity"
             android:exported="true"
             android:label="@string/title_activity_settings"

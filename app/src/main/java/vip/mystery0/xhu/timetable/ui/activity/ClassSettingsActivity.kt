@@ -214,9 +214,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                         },
                         title = { Text(text = "自定义课程颜色") },
                         onClick = {
-                            scope.launch {
-                                "暂未实现".toast()
-                            }
+                            intentTo(CustomCourseColorActivity::class)
                         }
                     )
                 }

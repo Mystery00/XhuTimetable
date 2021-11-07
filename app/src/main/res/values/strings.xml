@@ -4,5 +4,6 @@
     <string name="title_activity_score">课程成绩查询</string>
     <string name="title_activity_settings_account_management">账号管理</string>
     <string name="title_activity_settings_class">课程设置</string>
+    <string name="title_activity_settings_course_color">自定义课程颜色</string>
     <string name="title_activity_settings">设置</string>
 </resources>
