@@ -14,6 +14,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +24,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -32,6 +36,7 @@ import com.google.accompanist.pager.*
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.material.math.MathUtils.lerp
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -50,11 +55,13 @@ import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
 import kotlin.math.absoluteValue
 import kotlin.math.min
 
+@OptIn(ExperimentalMaterialApi::class)
 class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEventBus = true) {
     private val viewModel: MainViewModel by viewModels()
+    private lateinit var modalBottomSheetState: ModalBottomSheetState
 
     private val ext: MainActivityExt
-        get() = MainActivityExt(this, viewModel)
+        get() = MainActivityExt(this, viewModel, modalBottomSheetState)
 
     @ExperimentalPagerApi
     @ExperimentalAnimationApi
@@ -71,215 +78,291 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         val coroutineScope = rememberCoroutineScope()
         val pagerState = rememberPagerState(initialPage = 0)
         val loading by viewModel.loading.collectAsState()
-        Scaffold(
-            topBar = {
+        val poems by viewModel.poems.collectAsState()
+
+        modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+
+        LaunchedEffect(pagerState) {
+            snapshotFlow { pagerState.currentPage }.collect {
+                viewModel.dismissWeekView()
+            }
+        }
+
+        ModalBottomSheetLayout(
+            sheetState = modalBottomSheetState,
+            sheetShape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp),
+            sheetContent = {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(45.dp),
+                        .defaultMinSize(minHeight = 1.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .padding(horizontal = 8.dp)
-                            .align(Alignment.CenterEnd)
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() },
-                            ) {
-                                viewModel.loadCourseList()
-                            },
-                    ) {
-                        AndroidView(
-                            factory = { context ->
-                                ImageView(context)
-                            },
-                            modifier = Modifier
-                                .size(24.dp)
-                                .align(Alignment.Center),
-                        ) {
-                            it.setImageResource(R.drawable.ic_sync)
-                            val animation = ObjectAnimator.ofFloat(it, "rotation", 0F, 360F).apply {
-                                duration = 1000L
-                                repeatCount = ValueAnimator.INFINITE
-                                addListener(object : Animator.AnimatorListener {
-                                    override fun onAnimationStart(p0: Animator?) {
-                                    }
-
-                                    override fun onAnimationEnd(p0: Animator?) {
-                                    }
-
-                                    override fun onAnimationCancel(p0: Animator?) {
-                                    }
-
-                                    override fun onAnimationRepeat(p0: Animator?) {
-                                        if (!loading) {
-                                            p0?.cancel()
-                                        }
-                                    }
-                                })
-                            }
-                            if (loading) {
-                                animation.start()
-                            }
+                    Column {
+                        TextButton(
+                            modifier = Modifier.align(Alignment.End),
+                            onClick = {
+                                coroutineScope.launch {
+                                    modalBottomSheetState.hide()
+                                }
+                            }) {
+                            Text(text = "收起")
                         }
-                    }
-                    tabOf(pagerState.currentPage).title(this, ext)
-                    Divider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(0.33.dp)
-                            .background(XhuColor.Common.divider)
-                            .align(Alignment.BottomCenter),
-                    )
-                }
-            },
-            bottomBar = {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Divider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(0.33.dp)
-                            .background(XhuColor.Common.divider),
-                    )
-                    BottomNavigation(
-                        backgroundColor = Color.White,
-                        elevation = 0.dp,
-                    ) {
-                        DrawNavigationItem(
-                            state = pagerState,
-                            tab = Tab.TODAY,
-                            icon = XhuStateIcons.todayCourse,
-                            coroutineScope = coroutineScope,
-                        )
-                        DrawNavigationItem(
-                            state = pagerState,
-                            tab = Tab.WEEK,
-                            icon = XhuStateIcons.weekCourse,
-                            coroutineScope = coroutineScope,
-                        )
-                        DrawNavigationItem(
-                            state = pagerState,
-                            tab = Tab.PROFILE,
-                            icon = XhuStateIcons.profile,
-                            coroutineScope = coroutineScope,
-                        )
-                    }
-                }
-            }
-        ) { paddingValues ->
-            Box {
-                val backgroundImage by viewModel.backgroundImage.collectAsState()
-                if (backgroundImage != Unit) {
-                    Image(
-                        painter = rememberImagePainter(data = backgroundImage) {
-                            scale(Scale.FIT)
-                            diskCachePolicy(CachePolicy.DISABLED)
-                        },
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize()
-                    )
-                }
-                HorizontalPager(
-                    count = 3,
-                    state = pagerState,
-                    modifier = Modifier
-                        .padding(paddingValues),
-                ) { page ->
-                    Column(
-                        modifier = Modifier
-                            .graphicsLayer {
-                                val pageOffset = calculateCurrentOffsetForPage(page).absoluteValue
-                                lerp(0.85f, 1f, 1f - pageOffset.coerceIn(0f, 1f))
-                                    .also { scale ->
-                                        scaleX = scale
-                                        scaleY = scale
-                                    }
-                                alpha = lerp(0.5f, 1f, 1f - pageOffset.coerceIn(0f, 1f))
-                            }
-                            .fillMaxSize()
-                    ) {
-                        when (page) {
-                            Tab.TODAY.index -> Tab.TODAY.content(this, ext)
-                            Tab.WEEK.index -> Tab.WEEK.content(this, ext)
-                            Tab.PROFILE.index -> Tab.PROFILE.content(this, ext)
-                        }
-                    }
-                }
-                val showWeekView by viewModel.showWeekView.collectAsState()
-                val weekView by viewModel.weekView.collectAsState()
-                AnimatedVisibility(
-                    visible = showWeekView,
-                    enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
-                    exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
-                ) {
-                    val currentWeek by viewModel.week.collectAsState()
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        modifier = Modifier
-                            .background(weekViewBackgroundColor)
-                            .fillMaxWidth(),
-                    ) {
-                        items(weekView.size) { index ->
-                            val week = weekView[index]
-                            val thisWeek = week.thisWeek
-                            val color = when {
-                                thisWeek -> weekViewThisWeekColor
-                                week.weekNum == currentWeek -> weekViewCurrentWeekColor
-                                else -> Color.Transparent
-                            }
-                            Column(
-                                modifier = Modifier
-                                    .background(
-                                        color = color,
-                                        shape = MaterialTheme.shapes.medium,
-                                    )
-                                    .padding(
-                                        horizontal = 4.dp,
-                                        vertical = 2.dp,
-                                    )
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                    ) {
-                                        viewModel.changeCurrentWeek(week.weekNum)
-                                    },
-                                horizontalAlignment = Alignment.CenterHorizontally,
+                        poems?.origin?.let { poemsDetail ->
+                            SelectionContainer(
+                                modifier = Modifier.padding(
+                                    top = 8.dp,
+                                    start = 32.dp,
+                                    end = 32.dp,
+                                    bottom = 32.dp,
+                                ),
                             ) {
-                                Text(text = "第${week.weekNum}周", fontSize = 10.sp)
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Canvas(
-                                    modifier = Modifier
-                                        .height(32.dp)
-                                        .width(28.dp)
-                                ) {
-                                    val canvasHeight = size.height
-                                    val canvasWidth = size.width
-                                    //每一项大小
-                                    val itemHeight = canvasHeight / 5F
-                                    val itemWidth = canvasWidth / 5F
-                                    //圆心位置
-                                    val itemCenterHeight = itemHeight / 2F
-                                    val itemCenterWidth = itemWidth / 2F
-                                    //半径
-                                    val radius = min(itemCenterHeight, itemCenterWidth) - 1F
-                                    for (day in 0 until 5) {
-                                        for (time in 0 until 5) {
-                                            val light = week.array[time][day]
-                                            drawCircle(
-                                                color = if (light) weekViewLightColor else weekViewGrayColor,
-                                                center = Offset(
-                                                    x = itemWidth * time + itemCenterWidth,
-                                                    y = itemHeight * day + itemCenterHeight,
-                                                ),
-                                                radius = radius,
-                                            )
-                                        }
+                                Column {
+                                    Text(
+                                        text = "《${poemsDetail.title}》",
+                                        fontSize = 14.sp,
+                                        textAlign = TextAlign.Center,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = "[${poemsDetail.dynasty}] ${poemsDetail.author}",
+                                        fontSize = 12.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = poemsDetail.content.joinToString("\n"),
+                                        fontSize = 12.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
+                                    if (!poemsDetail.translate.isNullOrEmpty()) {
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            text = "诗词大意：${poemsDetail.translate.joinToString("")}",
+                                            fontSize = 11.sp,
+                                            modifier = Modifier.fillMaxWidth(),
+                                        )
                                     }
                                 }
-                                Text(text = if (thisWeek) "本周" else "", fontSize = 8.sp)
+                            }
+                        }
+                    }
+                }
+            }) {
+            Scaffold(
+                topBar = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(45.dp),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(horizontal = 8.dp)
+                                .align(Alignment.CenterEnd)
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                ) {
+                                    viewModel.loadCourseList()
+                                },
+                        ) {
+                            AndroidView(
+                                factory = { context ->
+                                    ImageView(context)
+                                },
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .align(Alignment.Center),
+                            ) {
+                                it.setImageResource(R.drawable.ic_sync)
+                                val animation =
+                                    ObjectAnimator.ofFloat(it, "rotation", 0F, 360F).apply {
+                                        duration = 1000L
+                                        repeatCount = ValueAnimator.INFINITE
+                                        addListener(object : Animator.AnimatorListener {
+                                            override fun onAnimationStart(p0: Animator?) {
+                                            }
+
+                                            override fun onAnimationEnd(p0: Animator?) {
+                                            }
+
+                                            override fun onAnimationCancel(p0: Animator?) {
+                                            }
+
+                                            override fun onAnimationRepeat(p0: Animator?) {
+                                                if (!loading) {
+                                                    p0?.cancel()
+                                                }
+                                            }
+                                        })
+                                    }
+                                if (loading) {
+                                    animation.start()
+                                }
+                            }
+                        }
+                        tabOf(pagerState.currentPage).title(this, ext)
+                        Divider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(0.33.dp)
+                                .background(XhuColor.Common.divider)
+                                .align(Alignment.BottomCenter),
+                        )
+                    }
+                },
+                bottomBar = {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Divider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(0.33.dp)
+                                .background(XhuColor.Common.divider),
+                        )
+                        BottomNavigation(
+                            backgroundColor = Color.White,
+                            elevation = 0.dp,
+                        ) {
+                            DrawNavigationItem(
+                                state = pagerState,
+                                tab = Tab.TODAY,
+                                icon = XhuStateIcons.todayCourse,
+                                coroutineScope = coroutineScope,
+                            )
+                            DrawNavigationItem(
+                                state = pagerState,
+                                tab = Tab.WEEK,
+                                icon = XhuStateIcons.weekCourse,
+                                coroutineScope = coroutineScope,
+                            )
+                            DrawNavigationItem(
+                                state = pagerState,
+                                tab = Tab.PROFILE,
+                                icon = XhuStateIcons.profile,
+                                coroutineScope = coroutineScope,
+                            )
+                        }
+                    }
+                }
+            ) { paddingValues ->
+                Box {
+                    val backgroundImage by viewModel.backgroundImage.collectAsState()
+                    if (backgroundImage != Unit) {
+                        Image(
+                            painter = rememberImagePainter(data = backgroundImage) {
+                                scale(Scale.FIT)
+                                diskCachePolicy(CachePolicy.DISABLED)
+                            },
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                        )
+                    }
+                    HorizontalPager(
+                        count = 3,
+                        state = pagerState,
+                        modifier = Modifier
+                            .padding(paddingValues),
+                    ) { page ->
+                        Column(
+                            modifier = Modifier
+                                .graphicsLayer {
+                                    val pageOffset =
+                                        calculateCurrentOffsetForPage(page).absoluteValue
+                                    lerp(0.85f, 1f, 1f - pageOffset.coerceIn(0f, 1f))
+                                        .also { scale ->
+                                            scaleX = scale
+                                            scaleY = scale
+                                        }
+                                    alpha = lerp(0.5f, 1f, 1f - pageOffset.coerceIn(0f, 1f))
+                                }
+                                .fillMaxSize()
+                        ) {
+                            when (page) {
+                                Tab.TODAY.index -> Tab.TODAY.content(this, ext)
+                                Tab.WEEK.index -> Tab.WEEK.content(this, ext)
+                                Tab.PROFILE.index -> Tab.PROFILE.content(this, ext)
+                            }
+                        }
+                    }
+                    val showWeekView by viewModel.showWeekView.collectAsState()
+                    val weekView by viewModel.weekView.collectAsState()
+                    AnimatedVisibility(
+                        visible = showWeekView,
+                        enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
+                        exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
+                    ) {
+                        val currentWeek by viewModel.week.collectAsState()
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                            modifier = Modifier
+                                .background(weekViewBackgroundColor)
+                                .fillMaxWidth(),
+                        ) {
+                            items(weekView.size) { index ->
+                                val week = weekView[index]
+                                val thisWeek = week.thisWeek
+                                val color = when {
+                                    thisWeek -> weekViewThisWeekColor
+                                    week.weekNum == currentWeek -> weekViewCurrentWeekColor
+                                    else -> Color.Transparent
+                                }
+                                Column(
+                                    modifier = Modifier
+                                        .background(
+                                            color = color,
+                                            shape = MaterialTheme.shapes.medium,
+                                        )
+                                        .padding(
+                                            horizontal = 4.dp,
+                                            vertical = 2.dp,
+                                        )
+                                        .clickable(
+                                            indication = null,
+                                            interactionSource = remember { MutableInteractionSource() },
+                                        ) {
+                                            viewModel.changeCurrentWeek(week.weekNum)
+                                        },
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ) {
+                                    Text(text = "第${week.weekNum}周", fontSize = 10.sp)
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Canvas(
+                                        modifier = Modifier
+                                            .height(32.dp)
+                                            .width(28.dp)
+                                    ) {
+                                        val canvasHeight = size.height
+                                        val canvasWidth = size.width
+                                        //每一项大小
+                                        val itemHeight = canvasHeight / 5F
+                                        val itemWidth = canvasWidth / 5F
+                                        //圆心位置
+                                        val itemCenterHeight = itemHeight / 2F
+                                        val itemCenterWidth = itemWidth / 2F
+                                        //半径
+                                        val radius = min(itemCenterHeight, itemCenterWidth) - 1F
+                                        for (day in 0 until 5) {
+                                            for (time in 0 until 5) {
+                                                val light = week.array[time][day]
+                                                drawCircle(
+                                                    color = if (light) weekViewLightColor else weekViewGrayColor,
+                                                    center = Offset(
+                                                        x = itemWidth * time + itemCenterWidth,
+                                                        y = itemHeight * day + itemCenterHeight,
+                                                    ),
+                                                    radius = radius,
+                                                )
+                                            }
+                                        }
+                                    }
+                                    Text(text = if (thisWeek) "本周" else "", fontSize = 8.sp)
+                                }
                             }
                         }
                     }
@@ -343,7 +426,6 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                     onClick = {
                         coroutineScope.launch {
                             state.animateScrollToPage(tab.index)
-                            viewModel.dismissWeekView()
                         }
                     },
                     indication = null,
@@ -460,9 +542,11 @@ private fun tabOf(index: Int): Tab = when (index) {
     else -> throw NoSuchElementException()
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 data class MainActivityExt(
     val activity: MainActivity,
     val viewModel: MainViewModel,
+    val modalBottomSheetState: ModalBottomSheetState,
 )
 
 typealias TabTitle = @Composable BoxScope.(MainActivityExt) -> Unit

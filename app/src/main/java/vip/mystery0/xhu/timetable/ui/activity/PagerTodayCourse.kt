@@ -5,18 +5,21 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
@@ -32,10 +35,13 @@ val todayCourseTitle: TabTitle = @Composable { ext ->
 val todayCourseContent: TabContent = @Composable { ext ->
     val activity = ext.activity
     val viewModel = ext.viewModel
+    val modalBottomSheetState = ext.modalBottomSheetState
+
     Box {
-        val poemsDialogState = remember { mutableStateOf<Poems?>(null) }
         val poems by viewModel.poems.collectAsState()
         val todayCourseList by viewModel.todayCourse.collectAsState()
+        val scope = rememberCoroutineScope()
+
         if (poems == null && todayCourseList.isEmpty()) {
             activity.BuildNoCourseLayout()
         } else {
@@ -48,7 +54,7 @@ val todayCourseContent: TabContent = @Composable { ext ->
                     .verticalScroll(rememberScrollState()),
             ) {
                 poems?.let { value ->
-                    DrawPoemsCard(poemsDialogState, poems = value)
+                    DrawPoemsCard(modalBottomSheetState, scope, poems = value)
                 }
                 todayCourseList.forEach {
                     DrawCourseCard(
@@ -59,7 +65,6 @@ val todayCourseContent: TabContent = @Composable { ext ->
                 }
             }
         }
-        ShowPoemsDialog(dialogState = poemsDialogState)
     }
 }
 
@@ -76,7 +81,7 @@ private fun DrawLine() {
 
 @ExperimentalMaterialApi
 @Composable
-private fun DrawPoemsCard(dialogState: MutableState<Poems?>, poems: Poems) {
+private fun DrawPoemsCard(dialogState: ModalBottomSheetState, scope: CoroutineScope, poems: Poems) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(vertical = 4.dp)
@@ -90,7 +95,9 @@ private fun DrawPoemsCard(dialogState: MutableState<Poems?>, poems: Poems) {
         ) {}
         Card(
             onClick = {
-                dialogState.value = poems
+                scope.launch {
+                    dialogState.show()
+                }
             },
             modifier = Modifier
                 .padding(end = 8.dp)
@@ -231,54 +238,4 @@ private fun DrawCourseCard(
             }
         }
     }
-}
-
-@Composable
-fun ShowPoemsDialog(dialogState: MutableState<Poems?>) {
-    val poems = dialogState.value?.origin ?: return
-    val dismiss = {
-        dialogState.value = null
-    }
-    AlertDialog(
-        onDismissRequest = dismiss,
-        title = {},
-        text = {
-            SelectionContainer {
-                Column {
-                    Text(
-                        text = "《${poems.title}》",
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = "[${poems.dynasty}] ${poems.author}",
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = poems.content.joinToString("\n"),
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    if (!poems.translate.isNullOrEmpty()) {
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "诗词大意：${poems.translate.joinToString("")}",
-                            fontSize = 11.sp,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                }
-            }
-        }, confirmButton = {
-            TextButton(onClick = dismiss) {
-                Text(text = stringResource(id = android.R.string.ok))
-            }
-        })
 }
