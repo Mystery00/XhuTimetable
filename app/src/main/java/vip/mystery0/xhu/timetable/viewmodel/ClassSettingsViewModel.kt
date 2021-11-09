@@ -10,10 +10,7 @@ import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.*
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Month
+import java.time.*
 
 class ClassSettingsViewModel : ComposeViewModel() {
     private val eventBus: EventBus by inject()
@@ -28,12 +25,15 @@ class ClassSettingsViewModel : ComposeViewModel() {
     val currentYearData: StateFlow<Pair<String, Boolean>> = _currentYearData
     private val _currentTermData = MutableStateFlow(GlobalConfig.currentTermData)
     val currentTermData: StateFlow<Pair<Int, Boolean>> = _currentTermData
+    private val _showTomorrowCourseTimeData = MutableStateFlow<LocalTime?>(null)
+    val showTomorrowCourseTimeData: StateFlow<LocalTime?> = _showTomorrowCourseTimeData
     private val _currentTermStartTime =
         MutableStateFlow(Pair<LocalDate, Boolean>(LocalDate.now(), false))
     val currentTermStartTime: StateFlow<Pair<LocalDate, Boolean>> = _currentTermStartTime
 
     init {
         viewModelScope.launch {
+            _showTomorrowCourseTimeData.value = getConfig { showTomorrowCourseTime }
             val customTermStartTime = getConfig { customTermStartTime }
             _currentTermStartTime.value =
                 Pair(
@@ -55,6 +55,16 @@ class ClassSettingsViewModel : ComposeViewModel() {
                 tempArrayList.add(0, "自动获取")
                 tempArrayList
             }
+        }
+    }
+
+    fun updateShowTomorrowCourseTime(time: LocalTime?) {
+        viewModelScope.launch {
+            setConfig {
+                showTomorrowCourseTime = time
+            }
+            _showTomorrowCourseTimeData.value = getConfig { showTomorrowCourseTime }
+            eventBus.post(UIEvent(EventType.CHANGE_AUTO_SHOW_TOMORROW_COURSE))
         }
     }
 
