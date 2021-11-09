@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
-import android.app.TimePickerDialog
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -17,6 +16,7 @@ import androidx.compose.ui.Modifier
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.vanpra.composematerialdialogs.*
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
+import com.vanpra.composematerialdialogs.datetime.time.timepicker
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
@@ -25,7 +25,6 @@ import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
-import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsMenuLink
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
@@ -43,7 +42,9 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
         val scope = rememberCoroutineScope()
         val currentYear by viewModel.currentYearData.collectAsState()
         val currentTerm by viewModel.currentTermData.collectAsState()
+        val showTomorrowCourseTime by viewModel.showTomorrowCourseTimeData.collectAsState()
         val currentTermStartTime by viewModel.currentTermStartTime.collectAsState()
+        val showTomorrowCourseTimeState = rememberMaterialDialogState()
         val yearAndTermState = rememberMaterialDialogState()
         val termStartTimeState = rememberMaterialDialogState()
         Scaffold(
@@ -107,43 +108,27 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             eventBus.post(UIEvent(EventType.CHANGE_SHOW_STATUS))
                         }
                     )
-                    ConfigSettingsMenuLink(
-                        config = GlobalConfig::showTomorrowCourseTime,
-                        scope = scope,
+                    SettingsMenuLink(
                         title = { Text(text = "自动显示明日课程") },
-                        subtitle = { value ->
+                        subtitle = {
                             Text(
-                                text = if (value != null)
-                                    "在每天的 ${value.format(timeFormatter)} 后今日课程页面显示明日的课表"
+                                text = if (showTomorrowCourseTime != null)
+                                    "在每天的 ${showTomorrowCourseTime!!.format(timeFormatter)} 后今日课程页面显示明日的课表"
                                 else
                                     "此功能已禁用，今日课程页面只会显示今日的课表"
                             )
                         },
-                        action = { value, setter ->
+                        action = {
                             Checkbox(
-                                checked = value != null,
+                                checked = showTomorrowCourseTime != null,
                                 onCheckedChange = {
-                                    setter(null)
-                                    eventBus.post(UIEvent(EventType.CHANGE_AUTO_SHOW_TOMORROW_COURSE))
+                                    viewModel.updateShowTomorrowCourseTime(null)
                                 },
-                                enabled = value != null,
+                                enabled = showTomorrowCourseTime != null,
                             )
                         },
-                        onClick = { value, setter ->
-                            val time = value ?: LocalTime.now()
-                            TimePickerDialog(
-                                this@ClassSettingsActivity,
-                                { _, hourOfDay, minute ->
-                                    scope.launch {
-                                        val newTime = LocalTime.of(hourOfDay, minute, 0)
-                                        setter(newTime)
-                                        eventBus.post(UIEvent(EventType.CHANGE_AUTO_SHOW_TOMORROW_COURSE))
-                                    }
-                                },
-                                time.hour,
-                                time.minute,
-                                true
-                            ).show()
+                        onClick = {
+                            showTomorrowCourseTimeState.show()
                         }
                     )
                 }
@@ -239,6 +224,10 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                 }
             }
         }
+        BuildTimeSelector(
+            dialogState = showTomorrowCourseTimeState,
+            initTime = showTomorrowCourseTime ?: LocalTime.now(),
+        )
         val selectList by viewModel.selectYearAndTermList.collectAsState()
         BuildYearAndTermSelector(
             dialogState = yearAndTermState,
@@ -253,6 +242,30 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
         val errorMessage by viewModel.errorMessage.collectAsState()
         if (errorMessage.isNotBlank()) {
             errorMessage.toast(true)
+        }
+    }
+
+    @Composable
+    private fun BuildTimeSelector(
+        dialogState: MaterialDialogState,
+        initTime: LocalTime,
+    ) {
+        var selectedTime = initTime
+        MaterialDialog(
+            dialogState = dialogState,
+            buttons = {
+                positiveButton("确定") {
+                    viewModel.updateShowTomorrowCourseTime(selectedTime)
+                }
+                negativeButton("取消")
+            }) {
+            timepicker(
+                title = "请选择时间",
+                initialTime = selectedTime,
+                is24HourClock = true,
+            ) {
+                selectedTime = it
+            }
         }
     }
 
@@ -309,7 +322,6 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                 negativeButton("自动获取") {
                     viewModel.updateTermStartTime(LocalDate.MIN)
                 }
-
             }) {
             datepicker(
                 title = "更改开学时间",
