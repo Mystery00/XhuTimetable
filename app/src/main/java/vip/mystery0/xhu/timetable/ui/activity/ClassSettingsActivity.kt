@@ -300,7 +300,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
             title("更改当前学期")
             listItemsSingleChoice(
                 list = selectList,
-                initialSelection = selectedIndex
+                initialSelection = selectedIndex,
             ) {
                 selectedIndex = it
             }
