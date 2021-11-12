@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
-import android.app.TimePickerDialog
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -18,6 +17,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.microsoft.appcenter.crashes.model.TestCrashException
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.MaterialDialogState
+import com.vanpra.composematerialdialogs.datetime.time.timepicker
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.appVersionCode
 import vip.mystery0.xhu.timetable.appVersionName
@@ -29,7 +32,6 @@ import vip.mystery0.xhu.timetable.loadInBrowser
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
-import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsMenuLink
 import vip.mystery0.xhu.timetable.ui.preference.XhuFoldSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
@@ -43,7 +45,11 @@ class SettingsActivity : BaseComposeActivity() {
 
     @Composable
     override fun BuildContent() {
+        val notifyTime by viewModel.notifyTimeData.collectAsState()
         val scope = rememberCoroutineScope()
+
+        val showNotifyTimeState = rememberMaterialDialogState()
+
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -158,8 +164,8 @@ class SettingsActivity : BaseComposeActivity() {
                             setConfig { notifyExam = it }
                         }
                     )
-                    ConfigSettingsMenuLink(
-                        config = GlobalConfig::notifyTime,
+                    SettingsMenuLink(
+                        title = { Text(text = "提醒时间") },
                         icon = {
                             Icon(
                                 painter = XhuIcons.notifyTime,
@@ -167,29 +173,25 @@ class SettingsActivity : BaseComposeActivity() {
                                 tint = XhuColor.Common.blackText,
                             )
                         },
-                        title = { Text(text = "提醒时间") },
-                        subtitle = { value ->
+                        subtitle = {
                             Text(
-                                text = if (value != null)
-                                    "将会在每天的 ${value.format(timeFormatter)} 提醒"
+                                text = if (notifyTime != null)
+                                    "将会在每天的 ${notifyTime!!.format(timeFormatter)} 提醒"
                                 else
                                     "提醒功能已禁用"
                             )
                         },
-                        onClick = { value, setter ->
-                            val time = value ?: LocalTime.now()
-                            TimePickerDialog(
-                                this@SettingsActivity,
-                                { _, hourOfDay, minute ->
-                                    scope.launch {
-                                        val newTime = LocalTime.of(hourOfDay, minute, 0)
-                                        setter(newTime)
-                                    }
+                        action = {
+                            Checkbox(
+                                checked = notifyTime != null,
+                                onCheckedChange = {
+                                    viewModel.updateNotifyTime(null)
                                 },
-                                time.hour,
-                                time.minute,
-                                true
-                            ).show()
+                                enabled = notifyTime != null,
+                            )
+                        },
+                        onClick = {
+                            showNotifyTimeState.show()
                         }
                     )
                 }
@@ -202,6 +204,7 @@ class SettingsActivity : BaseComposeActivity() {
                         title = { Text(text = "禁用今日诗词") },
                         onCheckedChange = {
                             setConfig { disablePoems = it }
+                            "重启应用后生效".toast()
                         }
                     )
                     ConfigSettingsCheckbox(
@@ -210,6 +213,7 @@ class SettingsActivity : BaseComposeActivity() {
                         title = { Text(text = "显示诗词大意") },
                         onCheckedChange = {
                             setConfig { showPoemsTranslate = it }
+                            "重启应用后生效".toast()
                         }
                     )
                 }
@@ -363,6 +367,11 @@ class SettingsActivity : BaseComposeActivity() {
                         subTitle = "@Quinn",
                     )
                     TeamItem(
+                        painter = XhuIcons.Team.chen,
+                        title = "iOS端开发",
+                        subTitle = "@Chen",
+                    )
+                    TeamItem(
                         painter = XhuIcons.Team.mystery0,
                         title = "Android端开发",
                         subTitle = "@Mystery0",
@@ -451,6 +460,34 @@ class SettingsActivity : BaseComposeActivity() {
         val errorMessage by viewModel.errorMessage.collectAsState()
         if (errorMessage.isNotBlank()) {
             errorMessage.toast(true)
+        }
+        BuildTimeSelector(
+            dialogState = showNotifyTimeState,
+            initTime = notifyTime ?: LocalTime.now(),
+        )
+    }
+
+    @Composable
+    private fun BuildTimeSelector(
+        dialogState: MaterialDialogState,
+        initTime: LocalTime,
+    ) {
+        var selectedTime = initTime
+        MaterialDialog(
+            dialogState = dialogState,
+            buttons = {
+                positiveButton("确定") {
+                    viewModel.updateNotifyTime(selectedTime)
+                }
+                negativeButton("取消")
+            }) {
+            timepicker(
+                title = "请选择时间",
+                initialTime = selectedTime,
+                is24HourClock = true,
+            ) {
+                selectedTime = it
+            }
         }
     }
 }

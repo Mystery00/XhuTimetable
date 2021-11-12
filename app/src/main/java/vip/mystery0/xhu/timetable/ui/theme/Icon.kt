@@ -130,6 +130,9 @@ object XhuIcons {
         val quinn: Painter
             @Composable
             get() = painterResource(id = R.mipmap.img_quinn)
+        val chen: Painter
+            @Composable
+            get() = painterResource(id = R.mipmap.img_chen)
         val mystery0: Painter
             @Composable
             get() = painterResource(id = R.mipmap.img_mystery0)
