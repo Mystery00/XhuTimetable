@@ -14,6 +14,7 @@ import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.work.DownloadApkWork
 import vip.mystery0.xhu.timetable.work.DownloadPatchWork
+import java.time.LocalTime
 
 class SettingsViewModel : ComposeViewModel() {
     companion object {
@@ -25,6 +26,8 @@ class SettingsViewModel : ComposeViewModel() {
     private val _errorMessage = MutableStateFlow("")
     val errorMessage: StateFlow<String> = _errorMessage
 
+    private val _notifyTimeData = MutableStateFlow<LocalTime?>(null)
+    val notifyTimeData: StateFlow<LocalTime?> = _notifyTimeData
     val debugMode = MutableStateFlow(false)
 
     private val _splashList = MutableStateFlow<List<Splash>>(emptyList())
@@ -32,8 +35,18 @@ class SettingsViewModel : ComposeViewModel() {
 
     init {
         viewModelScope.launch {
+            _notifyTimeData.value = getConfig { notifyTime }
             debugMode.value = getConfig { debugMode }
             _splashList.value = getConfig { splashList }
+        }
+    }
+
+    fun updateNotifyTime(time: LocalTime?) {
+        viewModelScope.launch {
+            setConfig {
+                notifyTime = time
+            }
+            _notifyTimeData.value = getConfig { notifyTime }
         }
     }
 

@@ -147,11 +147,20 @@ class MainViewModel : ComposeViewModel() {
 
     private fun showPoems() {
         viewModelScope.launch {
+            val disablePoems = getConfig { disablePoems }
+            if (disablePoems) {
+                return@launch
+            }
             val token = getConfig { poemsToken }
             if (token == null) {
                 setConfig { this.poemsToken = poemsApi.getToken().data }
             }
-            _poems.value = poemsApi.getSentence().data
+            val poems = poemsApi.getSentence().data
+            val showPoemsTranslate = getConfig { showPoemsTranslate }
+            if (!showPoemsTranslate) {
+                poems.origin.translate = null
+            }
+            _poems.value = poems
         }
     }
 

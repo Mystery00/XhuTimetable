@@ -140,7 +140,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                                     if (!poemsDetail.translate.isNullOrEmpty()) {
                                         Spacer(modifier = Modifier.height(6.dp))
                                         Text(
-                                            text = "诗词大意：${poemsDetail.translate.joinToString("")}",
+                                            text = "诗词大意：${poemsDetail.translate!!.joinToString("")}",
                                             fontSize = 11.sp,
                                             modifier = Modifier.fillMaxWidth(),
                                         )

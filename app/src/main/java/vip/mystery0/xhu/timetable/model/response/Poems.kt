@@ -18,5 +18,5 @@ data class PoemsDetail(
     val dynasty: String,
     val author: String,
     val content: List<String>,
-    val translate: List<String>? = null
+    var translate: List<String>? = null
 )
