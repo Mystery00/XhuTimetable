@@ -13,13 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
-import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
+import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
 
@@ -239,13 +238,13 @@ val profileCourseContent: TabContent = @Composable { ext ->
 
 private val divider: Color
     @Composable
-    get() = colorResource(id = R.color.colorDividerProfile)
+    get() = XhuColor.Profile.divider
 private val dividerSmall: Color
     @Composable
-    get() = colorResource(id = R.color.colorItemBackgroundProfile)
+    get() = XhuColor.Profile.dividerSmall
 private val more: Color
     @Composable
-    get() = colorResource(id = R.color.colorMoreProfile)
+    get() = XhuColor.Profile.more
 
 private val shareText = arrayListOf(
     "查课查课表，我就用西瓜课表~ 下载链接：https://xgkb.mystery0.vip",

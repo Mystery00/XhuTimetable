@@ -11,7 +11,9 @@ import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.startUniqueWork
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.setConfig
+import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.response.Splash
+import vip.mystery0.xhu.timetable.ui.theme.Theme
 import vip.mystery0.xhu.timetable.work.DownloadApkWork
 import vip.mystery0.xhu.timetable.work.DownloadPatchWork
 import java.time.LocalTime
@@ -26,6 +28,8 @@ class SettingsViewModel : ComposeViewModel() {
     private val _errorMessage = MutableStateFlow("")
     val errorMessage: StateFlow<String> = _errorMessage
 
+    val nightMode: StateFlow<NightMode> = Theme.nightMode
+
     private val _notifyTimeData = MutableStateFlow<LocalTime?>(null)
     val notifyTimeData: StateFlow<LocalTime?> = _notifyTimeData
     val debugMode = MutableStateFlow(false)
@@ -35,9 +39,19 @@ class SettingsViewModel : ComposeViewModel() {
 
     init {
         viewModelScope.launch {
+            Theme.nightMode.value = getConfig { nightMode }
             _notifyTimeData.value = getConfig { notifyTime }
             debugMode.value = getConfig { debugMode }
             _splashList.value = getConfig { splashList }
+        }
+    }
+
+    fun updateNightMode(nightMode: NightMode) {
+        viewModelScope.launch {
+            setConfig {
+                this.nightMode = nightMode
+            }
+            Theme.nightMode.value = getConfig { nightMode }
         }
     }
 

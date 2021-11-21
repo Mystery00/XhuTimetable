@@ -3,13 +3,11 @@ package vip.mystery0.xhu.timetable.ui.activity
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
+import android.content.res.ColorStateList
 import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.compose.animation.*
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -173,6 +171,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                                     viewModel.loadCourseList()
                                 },
                         ) {
+                            val isDark = isSystemInDarkTheme()
                             AndroidView(
                                 factory = { context ->
                                     ImageView(context)
@@ -181,6 +180,8 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                                     .size(24.dp)
                                     .align(Alignment.Center),
                             ) {
+                                it.imageTintList =
+                                    ColorStateList.valueOf(if (isDark) android.graphics.Color.WHITE else android.graphics.Color.BLACK)
                                 it.setImageResource(R.drawable.ic_sync)
                                 val animation =
                                     ObjectAnimator.ofFloat(it, "rotation", 0F, 360F).apply {
@@ -426,7 +427,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
     private fun RowScope.DrawNavigationItem(
         state: PagerState,
         tab: Tab,
-        icon: Pair<Int, Int>,
+        icon: Pair<Pair<Int, Int>, Pair<Int, Int>>,
         coroutineScope: CoroutineScope,
     ) {
         Column(
@@ -447,7 +448,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         ) {
             val checked = state.currentPage == tab.index
             Icon(
-                painter = stateOf(checked = checked, icon = icon),
+                painter = stateOf(checked = checked, pair = icon),
                 tint = Color.Unspecified,
                 modifier = Modifier.size(24.dp),
                 contentDescription = null
