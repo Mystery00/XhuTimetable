@@ -11,9 +11,14 @@ import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
@@ -25,7 +30,6 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
-import java.util.*
 import kotlin.reflect.KClass
 
 abstract class BaseComposeActivity(
@@ -57,9 +61,10 @@ abstract class BaseComposeActivity(
             if (setSystemUiColor) {
                 val systemUiController = rememberSystemUiController()
                 val systemBarColor = MaterialTheme.colors.primary
+                val isLight = MaterialTheme.colors.isLight
                 SideEffect {
-                    systemUiController.setSystemBarsColor(systemBarColor, darkIcons = false)
-                    systemUiController.setNavigationBarColor(systemBarColor, darkIcons = false)
+                    systemUiController.setSystemBarsColor(systemBarColor, darkIcons = isLight)
+                    systemUiController.setNavigationBarColor(systemBarColor, darkIcons = isLight)
                 }
             }
             BuildContent()

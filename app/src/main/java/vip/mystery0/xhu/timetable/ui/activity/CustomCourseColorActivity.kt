@@ -65,7 +65,8 @@ class CustomCourseColorActivity : BaseComposeActivity() {
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                            backgroundColor = XhuColor.cardBackground,
                         ) {
                             Row(
                                 modifier = Modifier.padding(8.dp),

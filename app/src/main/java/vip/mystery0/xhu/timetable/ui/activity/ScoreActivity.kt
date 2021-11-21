@@ -511,6 +511,7 @@ private fun BuildItem(
                 visible = placeHolder,
                 highlight = PlaceholderHighlight.shimmer(),
             ),
+        backgroundColor = XhuColor.cardBackground,
     ) {
         Column(
             modifier = Modifier.padding(8.dp)

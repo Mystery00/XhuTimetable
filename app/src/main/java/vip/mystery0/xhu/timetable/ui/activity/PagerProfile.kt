@@ -1,26 +1,24 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import android.content.Intent
+import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.ArrowForwardIos
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
+import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
@@ -29,48 +27,88 @@ val profileCourseTitle: TabTitle = @Composable {
     Text(text = "我的", modifier = Modifier.align(Alignment.Center))
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 val profileCourseContent: TabContent = @Composable { ext ->
     val activity = ext.activity
     val viewModel = ext.viewModel
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colors.background)
             .verticalScroll(rememberScrollState()),
     ) {
-        Row(
-            modifier = Modifier
-                .height(96.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            val mainUser by viewModel.mainUser.collectAsState()
-            val profileImage = mainUser?.let {
-                it.profileImage ?: ProfileImages.hash(it.info.userName, it.info.sex == "男")
-            } ?: XhuImages.defaultProfileImage
-            Image(
-                painter = if (profileImage is Painter) profileImage else rememberImagePainter(data = profileImage),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .size(60.dp),
-            )
-            Column(modifier = Modifier.weight(1F)) {
-                Text(
-                    mainUser?.info?.userName ?: "账号未登录",
-                    fontSize = 17.sp,
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(mainUser?.info?.className ?: "", fontSize = 14.sp, color = Color.Gray)
+        var profileExpanded by remember { mutableStateOf(false) }
+        val mainUser by viewModel.mainUser.collectAsState()
+        AnimatedContent(
+            targetState = profileExpanded,
+            transitionSpec = {
+                fadeIn() with fadeOut()
             }
-            Icon(
-                imageVector = Icons.TwoTone.ArrowForwardIos,
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .size(12.dp),
-                tint = more,
-            )
+        ) { targetExpanded ->
+            Column {
+                Row(
+                    modifier = Modifier
+                        .height(96.dp)
+                        .clickable {
+                            profileExpanded = if (mainUser == null) false else !targetExpanded
+                        },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val profileImage = mainUser?.let {
+                        it.profileImage ?: ProfileImages.hash(it.info.userName, it.info.sex == "男")
+                    } ?: XhuImages.defaultProfileImage
+                    Image(
+                        painter = if (profileImage is Painter) profileImage else rememberImagePainter(
+                            data = profileImage
+                        ),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .size(60.dp),
+                    )
+                    Column(modifier = Modifier.weight(1F)) {
+                        var text = "账号未登录"
+                        mainUser?.info?.let {
+                            text = if (targetExpanded) {
+                                "${it.userName}(${it.studentId})"
+                            } else {
+                                it.userName
+                            }
+                        }
+                        Text(
+                            text,
+                            fontSize = 17.sp,
+                            color = MaterialTheme.colors.onBackground,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(mainUser?.info?.className ?: "", fontSize = 14.sp, color = Color.Gray)
+                    }
+                    Icon(
+                        imageVector = Icons.TwoTone.ArrowForwardIos,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .size(12.dp),
+                        tint = more,
+                    )
+                }
+                if (targetExpanded) {
+                    mainUser?.info?.let { userInfo ->
+                        Text(
+                            buildString {
+                                if (userInfo.sex.isNotBlank()) appendLine("性别：${userInfo.sex}")
+                                if (userInfo.grade.isNotBlank()) appendLine("年级：${userInfo.grade}")
+                                if (userInfo.profession.isNotBlank()) appendLine("专业：${userInfo.profession}")
+                                if (userInfo.institute.isNotBlank()) appendLine("学院：${userInfo.institute}")
+                                if (userInfo.direction.isNotBlank()) appendLine("专业方向：${userInfo.direction}")
+                            },
+                            fontSize = 14.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(horizontal = 48.dp),
+                        )
+                    }
+                }
+            }
         }
         Divider(
             modifier = Modifier
@@ -199,9 +237,15 @@ val profileCourseContent: TabContent = @Composable { ext ->
     }
 }
 
-private val divider = Color(0xFFf0f0f0)
-private val dividerSmall = Color(0xFFeaeaea)
-private val more = Color(0xFF979797)
+private val divider: Color
+    @Composable
+    get() = colorResource(id = R.color.colorDividerProfile)
+private val dividerSmall: Color
+    @Composable
+    get() = colorResource(id = R.color.colorItemBackgroundProfile)
+private val more: Color
+    @Composable
+    get() = colorResource(id = R.color.colorMoreProfile)
 
 private val shareText = arrayListOf(
     "查课查课表，我就用西瓜课表~ 下载链接：https://xgkb.mystery0.vip",
@@ -230,7 +274,7 @@ private fun BuildProfileItem(
         )
         Text(
             text = title,
-            color = Color.Black,
+            color = MaterialTheme.colors.onBackground,
             fontSize = 14.sp,
             modifier = Modifier
                 .weight(1F)
