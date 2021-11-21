@@ -109,7 +109,8 @@ class NoticeActivity : BaseComposeActivity() {
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                                    backgroundColor = XhuColor.cardBackground,
                                 ) {
                                     Column(
                                         modifier = Modifier.padding(8.dp)
@@ -160,7 +161,11 @@ class NoticeActivity : BaseComposeActivity() {
         val split = text.split(regex)
         val annotatedText = buildAnnotatedString {
             split.forEachIndexed { index, s ->
-                append(s)
+                withStyle(
+                    style = SpanStyle(color = MaterialTheme.colors.onBackground),
+                ) {
+                    append(s)
+                }
                 if (result.size > index) {
                     pushStringAnnotation(
                         tag = "URL",

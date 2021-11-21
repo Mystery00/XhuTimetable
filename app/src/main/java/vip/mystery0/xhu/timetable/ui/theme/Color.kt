@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
@@ -7,9 +8,18 @@ import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.utils.md5
 
 object XhuColor {
+    val cardBackground: Color
+        @Composable
+        get() = if (isSystemInDarkTheme()) Color(0xFF484848) else Color.White
     val loginLabel: Color
         @Composable
         get() = colorResource(id = R.color.login_color_label)
+    val mainBarColorBackground: Color
+        @Composable
+        get() = colorResource(id = R.color.main_bar_color_background)
+    val iconChecked: Color
+        @Composable
+        get() = colorResource(id = R.color.iconCheckedColor)
 
     object Common {
         val divider: Color

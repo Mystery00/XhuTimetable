@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--主页面导航栏背景颜色-->
+    <color name="main_bar_color_background">#004D40</color>
+
+    <!--所有界面需要是灰色的颜色 背景-->
+    <color name="colorGrayBackground">#212121</color>
+    <!--所有界面需要是白色的颜色 背景-->
+    <color name="colorWhiteBackground">#242424</color>
+    <!--所有界面需要是默认色的颜色 文本-->
+    <color name="colorGrayText">#8AFFFFFF</color>
+    <!--所有界面需要是黑色的颜色 文本-->
+    <color name="colorBlackText">#FFFFFF</color>
+    <!--无数据页面文本颜色-->
+    <color name="textColorNullDataView">#FFFFFF</color>
+
+    <!--图标阴影颜色-->
+    <color name="iconShadowColor">#00E9F1FF</color>
+    <!--图标阴影未选中的颜色-->
+    <color name="iconShadowUnCheckedColor">#00DCDCDC</color>
+    <!--图标选中时颜色-->
+    <color name="iconCheckedColor">#2196F3</color>
+
+    <!--个人界面分割线颜色-->
+    <color name="colorDividerProfile">#363636</color>
+    <!--个人页面更多图标颜色-->
+    <color name="colorMoreProfile">#FFFFFF</color>
+    <!--个人页面每项背景色-->
+    <color name="colorItemBackgroundProfile">#242424</color>
+</resources>

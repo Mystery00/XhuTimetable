@@ -70,9 +70,10 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
     override fun BuildContent() {
         val systemUiController = rememberSystemUiController()
         val useDarkIcons = MaterialTheme.colors.isLight
+        val barColor = XhuColor.mainBarColorBackground
         SideEffect {
-            systemUiController.setSystemBarsColor(Color.White, darkIcons = useDarkIcons)
-            systemUiController.setNavigationBarColor(Color.White, darkIcons = useDarkIcons)
+            systemUiController.setSystemBarsColor(barColor, darkIcons = useDarkIcons)
+            systemUiController.setNavigationBarColor(barColor, darkIcons = useDarkIcons)
         }
         ShowCheckUpdateDialog()
         val coroutineScope = rememberCoroutineScope()
@@ -91,6 +92,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         ModalBottomSheetLayout(
             sheetState = modalBottomSheetState,
             sheetShape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp),
+            scrimColor = Color.Black.copy(alpha = 0.32f),
             sheetContent = {
                 Box(
                     modifier = Modifier
@@ -156,6 +158,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .background(barColor)
                             .height(45.dp),
                     ) {
                         Box(
@@ -224,7 +227,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                                 .background(XhuColor.Common.divider),
                         )
                         BottomNavigation(
-                            backgroundColor = Color.White,
+                            backgroundColor = barColor,
                             elevation = 0.dp,
                         ) {
                             DrawNavigationItem(
@@ -330,7 +333,11 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                                         },
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                 ) {
-                                    Text(text = "第${week.weekNum}周", fontSize = 10.sp)
+                                    Text(
+                                        text = "第${week.weekNum}周",
+                                        fontSize = 10.sp,
+                                        color = Color.Black,
+                                    )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Canvas(
                                         modifier = Modifier
@@ -361,7 +368,11 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                                             }
                                         }
                                     }
-                                    Text(text = if (thisWeek) "本周" else "", fontSize = 8.sp)
+                                    Text(
+                                        text = if (thisWeek) "本周" else "",
+                                        fontSize = 8.sp,
+                                        color = Color.Black,
+                                    )
                                 }
                             }
                         }
@@ -450,7 +461,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                 Surface(
                     shape = CircleShape,
                     modifier = Modifier.size(5.dp),
-                    color = MaterialTheme.colors.primary
+                    color = XhuColor.iconChecked
                 ) {}
             }
             Spacer(Modifier.padding(bottom = 2.dp))
@@ -474,8 +485,11 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
     fun updateUIFromConfig(uiEvent: UIEvent) {
         viewModel.loadConfig()
         when (uiEvent.eventType) {
-            EventType.CHANGE_MAIN_USER,
             EventType.MULTI_MODE_CHANGED,
+            EventType.CHANGE_MAIN_USER -> {
+                viewModel.checkMainUser()
+                viewModel.loadCourseList(true)
+            }
             EventType.CHANGE_CURRENT_YEAR_AND_TERM -> {
                 viewModel.loadCourseList(true)
             }
@@ -505,7 +519,7 @@ private val weekViewGrayColor = Color(0xFFCFDBDB)
 
 @Composable
 private fun colorOf(checked: Boolean): Color =
-    if (checked) MaterialTheme.colors.primary else Color.Black
+    if (checked) XhuColor.iconChecked else MaterialTheme.colors.onSurface
 
 @ExperimentalMaterialApi
 private enum class Tab(

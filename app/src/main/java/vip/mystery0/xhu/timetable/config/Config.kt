@@ -3,6 +3,7 @@ package vip.mystery0.xhu.timetable.config
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.tencent.mmkv.MMKV
+import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.response.Splash
 import java.io.File
 import java.time.*
@@ -32,6 +33,15 @@ class Config internal constructor() {
             kv.encode("lastVersionCode", value)
         }
         get() = kv.decodeLong("lastVersionCode")
+
+    var nightMode: NightMode
+        set(value) {
+            kv.encode("nightMode", value.value)
+        }
+        get() {
+            val value = kv.decodeInt("nightMode", NightMode.AUTO.value)
+            return NightMode.values().firstOrNull() { it.value == value } ?: NightMode.AUTO
+        }
 
     var ignoreVersionList: HashSet<String>
         set(value) {
@@ -178,14 +188,6 @@ class Config internal constructor() {
         }
         get() {
             val image = kv.decodeString("backgroundImage")
-            return if (image.isNullOrBlank()) null else File(image)
-        }
-    var profileImage: File?
-        set(value) {
-            kv.encode("profileImage", value!!.absolutePath)
-        }
-        get() {
-            val image = kv.decodeString("profileImage")
             return if (image.isNullOrBlank()) null else File(image)
         }
     var multiAccountMode: Boolean
