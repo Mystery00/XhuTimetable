@@ -40,7 +40,7 @@ class Config internal constructor() {
         }
         get() {
             val value = kv.decodeInt("nightMode", NightMode.AUTO.value)
-            return NightMode.values().firstOrNull() { it.value == value } ?: NightMode.AUTO
+            return NightMode.values().first { it.value == value }
         }
 
     var ignoreVersionList: HashSet<String>

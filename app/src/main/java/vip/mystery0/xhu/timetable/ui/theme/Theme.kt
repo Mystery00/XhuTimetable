@@ -1,12 +1,16 @@
 package vip.mystery0.xhu.timetable.ui.theme
 
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
-import vip.mystery0.xhu.timetable.config.DataHolder
+import kotlinx.coroutines.flow.MutableStateFlow
+import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 
 private val DarkColorPalette = darkColors()
@@ -19,22 +23,31 @@ private val LightColorPalette = lightColors(
 )
 
 @Composable
+fun isDarkMode(
+    mode: NightMode = GlobalConfig.nightMode,
+): Boolean {
+    val dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    return when (mode) {
+        NightMode.AUTO -> isSystemInDarkTheme()
+        NightMode.ON -> true
+        NightMode.OFF -> false
+        NightMode.MATERIAL_YOU -> dynamicColor
+    }
+}
+
+@Composable
 fun XhuTimetableTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colors = when (DataHolder.nightMode) {
-        NightMode.AUTO -> if (darkTheme) {
-            DarkColorPalette
-        } else {
-            LightColorPalette
-        }
-        NightMode.ON -> DarkColorPalette
-        NightMode.OFF -> LightColorPalette
-    }
+    val mode by Theme.nightMode.collectAsState()
+    val colors = if (isDarkMode(mode)) DarkColorPalette else LightColorPalette
 
     MaterialTheme(
         colors = colors,
         content = content
     )
+}
+
+object Theme {
+    val nightMode = MutableStateFlow(GlobalConfig.nightMode)
 }

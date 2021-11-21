@@ -17,10 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.microsoft.appcenter.crashes.model.TestCrashException
-import com.vanpra.composematerialdialogs.MaterialDialog
-import com.vanpra.composematerialdialogs.MaterialDialogState
+import com.vanpra.composematerialdialogs.*
 import com.vanpra.composematerialdialogs.datetime.time.timepicker
-import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.appVersionCode
 import vip.mystery0.xhu.timetable.appVersionName
@@ -29,6 +27,8 @@ import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.loadInBrowser
+import vip.mystery0.xhu.timetable.model.entity.NightMode
+import vip.mystery0.xhu.timetable.model.entity.nightModeSelectList
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
@@ -48,6 +48,9 @@ class SettingsActivity : BaseComposeActivity() {
         val notifyTime by viewModel.notifyTimeData.collectAsState()
         val scope = rememberCoroutineScope()
 
+        val nightMode by viewModel.nightMode.collectAsState()
+
+        val showNightModeState = rememberMaterialDialogState()
         val showNotifyTimeState = rememberMaterialDialogState()
 
         Scaffold(
@@ -97,9 +100,7 @@ class SettingsActivity : BaseComposeActivity() {
                         },
                         title = { Text(text = "夜间模式") },
                         onClick = {
-                            scope.launch {
-                                "暂未实现".toast()
-                            }
+                            showNightModeState.show()
                         }
                     )
                     ConfigSettingsCheckbox(
@@ -461,10 +462,39 @@ class SettingsActivity : BaseComposeActivity() {
         if (errorMessage.isNotBlank()) {
             errorMessage.toast(true)
         }
+        BuildNightModeSelector(
+            dialogState = showNightModeState,
+            initNightMode = nightMode,
+        )
         BuildTimeSelector(
             dialogState = showNotifyTimeState,
             initTime = notifyTime ?: LocalTime.now(),
         )
+    }
+
+    @Composable
+    private fun BuildNightModeSelector(
+        dialogState: MaterialDialogState,
+        initNightMode: NightMode,
+    ) {
+        val list = nightModeSelectList()
+        var selectedMode = list.indexOf(initNightMode)
+        MaterialDialog(
+            dialogState = dialogState,
+            buttons = {
+                positiveButton("确定") {
+                    viewModel.updateNightMode(list[selectedMode])
+                }
+                negativeButton("取消")
+            }) {
+            title("更改主题")
+            listItemsSingleChoice(
+                list = list.map { it.title },
+                initialSelection = selectedMode,
+            ) {
+                selectedMode = it
+            }
+        }
     }
 
     @Composable

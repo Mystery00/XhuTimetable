@@ -1,45 +1,60 @@
 package vip.mystery0.xhu.timetable.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.utils.md5
 
+@Composable
+private fun colorOf(pair: Pair<Color, Color>): Color =
+    if (isDarkMode()) pair.first else pair.second
+
 object XhuColor {
     val cardBackground: Color
         @Composable
-        get() = if (isSystemInDarkTheme()) Color(0xFF484848) else Color.White
+        get() = colorOf(pair = Color(0xFF484848) to Color.White)
     val loginLabel: Color
         @Composable
-        get() = colorResource(id = R.color.login_color_label)
+        get() = Color(0xFFCCCCCC)
     val mainBarColorBackground: Color
         @Composable
-        get() = colorResource(id = R.color.main_bar_color_background)
+        get() = colorOf(pair = Color(0xFF004D40) to Color.White)
     val iconChecked: Color
         @Composable
-        get() = colorResource(id = R.color.iconCheckedColor)
+        get() = Color(0xFF2196F3)
+
+    object Profile {
+        val divider: Color
+            @Composable
+            get() = colorOf(pair = Color(0xFF363636) to Color(0xFFF0F0F0))
+        val dividerSmall: Color
+            @Composable
+            get() = colorOf(pair = Color.White to Color(0xFF979797))
+        val more: Color
+            @Composable
+            get() = colorOf(pair = Color(0xFF242424) to Color(0xFFEAEAEA))
+    }
 
     object Common {
         val divider: Color
             @Composable
-            get() = colorResource(id = R.color.colorDivider)
+            get() = Color(0xFFDDDDDD)
         val grayBackground: Color
             @Composable
-            get() = colorResource(id = R.color.colorGrayBackground)
+            get() = colorOf(pair = Color(0xFF212121) to Color(0xFFFAFAFA))
         val whiteBackground: Color
             @Composable
-            get() = colorResource(id = R.color.colorWhiteBackground)
+            get() = colorOf(pair = Color(0xFF242424) to Color.White)
         val grayText: Color
             @Composable
-            get() = colorResource(id = R.color.colorGrayText)
+            get() = colorOf(pair = Color(0x8A000000) to Color(0x8AFFFFFF))
         val blackText: Color
             @Composable
             get() = colorResource(id = R.color.colorBlackText)
         val nullDataColor: Color
             @Composable
-            get() = colorResource(id = R.color.textColorNullDataView)
+            get() = colorOf(pair = Color.Black to Color.White)
     }
 
     object Status {

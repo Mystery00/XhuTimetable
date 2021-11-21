@@ -7,6 +7,10 @@ import coil.compose.rememberImagePainter
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.utils.md5
 
+@Composable
+private fun iconOf(pair: Pair<Painter, Painter>): Painter =
+    if (isDarkMode()) pair.first else pair.second
+
 object XhuIcons {
     val todayWaterMelon: Painter
         @Composable
@@ -75,31 +79,67 @@ object XhuIcons {
     object Profile {
         val exam: Painter
             @Composable
-            get() = painterResource(id = R.drawable.ic_exam)
+            get() = iconOf(
+                pair = painterResource(id = R.drawable.ic_exam_night) to painterResource(
+                    id = R.drawable.ic_exam
+                )
+            )
         val score: Painter
             @Composable
-            get() = painterResource(id = R.drawable.ic_score)
+            get() = iconOf(
+                pair = painterResource(id = R.drawable.ic_score_night) to painterResource(
+                    id = R.drawable.ic_score
+                )
+            )
         val classroom: Painter
             @Composable
-            get() = painterResource(id = R.drawable.ic_classroom)
+            get() = iconOf(
+                pair = painterResource(id = R.drawable.ic_classroom_night) to painterResource(
+                    id = R.drawable.ic_classroom
+                )
+            )
         val accountSettings: Painter
             @Composable
-            get() = painterResource(id = R.drawable.ic_account_settings)
+            get() = iconOf(
+                pair = painterResource(id = R.drawable.ic_account_settings_night) to painterResource(
+                    id = R.drawable.ic_account_settings
+                )
+            )
         val classSettings: Painter
             @Composable
-            get() = painterResource(id = R.drawable.ic_class_settings)
+            get() = iconOf(
+                pair = painterResource(id = R.drawable.ic_class_settings_night) to painterResource(
+                    id = R.drawable.ic_class_settings
+                )
+            )
         val settings: Painter
             @Composable
-            get() = painterResource(id = R.drawable.ic_settings)
+            get() = iconOf(
+                pair = painterResource(id = R.drawable.ic_settings_night) to painterResource(
+                    id = R.drawable.ic_settings
+                )
+            )
         val notice: Painter
             @Composable
-            get() = painterResource(id = R.drawable.ic_notice)
+            get() = iconOf(
+                pair = painterResource(id = R.drawable.ic_notice_night) to painterResource(
+                    id = R.drawable.ic_notice
+                )
+            )
         val feedback: Painter
             @Composable
-            get() = painterResource(id = R.drawable.ic_feedback)
+            get() = iconOf(
+                pair = painterResource(id = R.drawable.ic_feedback_night) to painterResource(
+                    id = R.drawable.ic_feedback
+                )
+            )
         val share: Painter
             @Composable
-            get() = painterResource(id = R.drawable.ic_share)
+            get() = iconOf(
+                pair = painterResource(id = R.drawable.ic_share_night) to painterResource(
+                    id = R.drawable.ic_share
+                )
+            )
     }
 
     object Action {
@@ -140,13 +180,20 @@ object XhuIcons {
 }
 
 @Composable
-fun stateOf(checked: Boolean, icon: Pair<Int, Int>): Painter =
-    if (checked) painterResource(id = icon.first) else painterResource(id = icon.second)
+fun stateOf(checked: Boolean, pair: Pair<Pair<Int, Int>, Pair<Int, Int>>): Painter {
+    val icon = if (isDarkMode()) pair.first else pair.second
+    return if (checked) painterResource(id = icon.first) else painterResource(id = icon.second)
+}
 
 object XhuStateIcons {
-    val todayCourse = R.drawable.ic_today_course to R.drawable.ic_today_course_unchecked
-    val weekCourse = R.drawable.ic_week_course to R.drawable.ic_week_course_unchecked
-    val profile = R.drawable.ic_profile to R.drawable.ic_profile_unchecked
+    val todayCourse =
+        (R.drawable.ic_today_course_night to R.drawable.ic_today_course_unchecked_night) to
+                (R.drawable.ic_today_course to R.drawable.ic_today_course_unchecked)
+    val weekCourse =
+        (R.drawable.ic_week_course_night to R.drawable.ic_week_course_unchecked_night) to
+                (R.drawable.ic_week_course to R.drawable.ic_week_course_unchecked)
+    val profile = (R.drawable.ic_profile_night to R.drawable.ic_profile_unchecked_night) to
+            (R.drawable.ic_profile to R.drawable.ic_profile_unchecked)
 }
 
 object XhuImages {
