@@ -479,6 +479,7 @@ class SettingsActivity : BaseComposeActivity() {
     ) {
         val list = nightModeSelectList()
         var selectedMode = list.indexOf(initNightMode)
+        if (selectedMode == -1) selectedMode = 0
         MaterialDialog(
             dialogState = dialogState,
             buttons = {

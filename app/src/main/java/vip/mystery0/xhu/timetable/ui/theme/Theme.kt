@@ -23,15 +23,14 @@ private val LightColorPalette = lightColors(
 )
 
 @Composable
-fun isDarkMode(
-    mode: NightMode = GlobalConfig.nightMode,
-): Boolean {
+fun isDarkMode(): Boolean {
+    val mode by Theme.nightMode.collectAsState()
     val dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     return when (mode) {
         NightMode.AUTO -> isSystemInDarkTheme()
         NightMode.ON -> true
         NightMode.OFF -> false
-        NightMode.MATERIAL_YOU -> dynamicColor
+        NightMode.MATERIAL_YOU -> isSystemInDarkTheme()
     }
 }
 
@@ -39,8 +38,7 @@ fun isDarkMode(
 fun XhuTimetableTheme(
     content: @Composable () -> Unit
 ) {
-    val mode by Theme.nightMode.collectAsState()
-    val colors = if (isDarkMode(mode)) DarkColorPalette else LightColorPalette
+    val colors = if (isDarkMode()) DarkColorPalette else LightColorPalette
 
     MaterialTheme(
         colors = colors,
