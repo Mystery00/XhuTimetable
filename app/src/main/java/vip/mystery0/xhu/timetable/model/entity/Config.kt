@@ -1,7 +1,5 @@
 package vip.mystery0.xhu.timetable.model.entity
 
-import android.os.Build
-
 enum class NightMode(
     val value: Int,
     val title: String
@@ -14,8 +12,8 @@ enum class NightMode(
 
 fun nightModeSelectList(): List<NightMode> {
     val list = NightMode.values().sortedBy { it.value }.toMutableList()
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-        list.remove(NightMode.MATERIAL_YOU)
-    }
+//    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+    list.remove(NightMode.MATERIAL_YOU)
+//    }
     return list
 }
