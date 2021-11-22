@@ -19,7 +19,10 @@ private const val NOTIFICATION_CHANNEL_DESCRIPTION_TOMORROW = "每日提醒课�
 enum class NotificationId(val id: Int) {
     CHECK_UPDATE(1001),
     DOWNLOAD(1002),
-    DOWNLOAD_FAILED(1003),
+    NOTIFY_TOMORROW_CUSTOM_THING(1003),
+    NOTIFY_TOMORROW_COURSE(1004),
+    NOTIFY_TOMORROW_TEST(1005),
+    NOTIFY_TOMORROW_DEBUG(1006),
 }
 
 fun initChannelID(applicationContext: Context) {

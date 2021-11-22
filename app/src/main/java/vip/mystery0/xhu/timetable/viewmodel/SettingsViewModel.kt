@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
+import android.app.AlarmManager
 import android.os.SystemClock
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkManager
@@ -13,6 +14,7 @@ import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.response.Splash
+import vip.mystery0.xhu.timetable.setTrigger
 import vip.mystery0.xhu.timetable.ui.theme.Theme
 import vip.mystery0.xhu.timetable.work.DownloadApkWork
 import vip.mystery0.xhu.timetable.work.DownloadPatchWork
@@ -24,6 +26,7 @@ class SettingsViewModel : ComposeViewModel() {
     }
 
     private val workManager: WorkManager by inject()
+    private val alarmManager: AlarmManager by inject()
 
     private val _errorMessage = MutableStateFlow("")
     val errorMessage: StateFlow<String> = _errorMessage
@@ -61,6 +64,7 @@ class SettingsViewModel : ComposeViewModel() {
                 notifyTime = time
             }
             _notifyTimeData.value = getConfig { notifyTime }
+            setTrigger(alarmManager)
         }
     }
 
