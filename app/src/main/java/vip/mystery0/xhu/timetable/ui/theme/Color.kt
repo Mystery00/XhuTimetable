@@ -31,7 +31,7 @@ object XhuColor {
             get() = colorOf(pair = Color.White to Color(0xFF979797))
         val more: Color
             @Composable
-            get() = colorOf(pair = Color(0xFF242424) to Color(0xFFEAEAEA))
+            get() = colorOf(pair = Color(0xFF363636) to Color(0xFFEAEAEA))
     }
 
     object Common {
