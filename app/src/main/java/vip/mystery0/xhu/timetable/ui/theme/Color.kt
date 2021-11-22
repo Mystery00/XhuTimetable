@@ -78,6 +78,8 @@ object ColorPool {
     val random: Color
         get() = pool.random()
 
+    fun safeGet(index: Int): Color = pool[index % pool.size]
+
     fun hash(text: String): Color {
         val md5Int = text.md5().substring(0, 2).toInt(16)
         return pool[md5Int % pool.size]

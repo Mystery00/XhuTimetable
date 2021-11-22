@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
+import android.app.AlarmManager
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder
@@ -15,6 +16,7 @@ import vip.mystery0.xhu.timetable.config.*
 import vip.mystery0.xhu.timetable.externalPictureDir
 import vip.mystery0.xhu.timetable.module.repo
 import vip.mystery0.xhu.timetable.repository.StartRepo
+import vip.mystery0.xhu.timetable.setTrigger
 import vip.mystery0.xhu.timetable.utils.md5
 import vip.mystery0.xhu.timetable.utils.sha1
 import vip.mystery0.xhu.timetable.utils.sha256
@@ -29,6 +31,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
 
     private val startRepo: StartRepo by repo()
     private val workManager: WorkManager by inject()
+    private val alarmManager: AlarmManager by inject()
 
     private val _readyState = MutableStateFlow(ReadyState(loading = true))
     val readyState: StateFlow<ReadyState> = _readyState
@@ -43,6 +46,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
                 ReadyState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
         }) {
             SessionManager.readFromCache()
+            setTrigger(alarmManager)
             val response = startRepo.init()
             runOnCpu {
                 var version = response.version

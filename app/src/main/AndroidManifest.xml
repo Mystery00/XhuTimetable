@@ -15,6 +15,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/JetpackSplashTheme">
+        <service
+            android:name=".work.NotifyService"
+            android:enabled="true"
+            android:exported="true"></service>
+
         <activity
             android:name=".ui.activity.StartActivity"
             android:exported="true"
