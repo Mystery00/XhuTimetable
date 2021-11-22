@@ -2,8 +2,6 @@ package vip.mystery0.xhu.timetable.ui.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
-import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.utils.md5
 
 @Composable
@@ -48,13 +46,10 @@ object XhuColor {
             get() = colorOf(pair = Color(0xFF242424) to Color.White)
         val grayText: Color
             @Composable
-            get() = colorOf(pair = Color(0x8A000000) to Color(0x8AFFFFFF))
+            get() = colorOf(pair = Color(0x8AFFFFFF) to Color(0x8A000000))
         val blackText: Color
             @Composable
-            get() = colorResource(id = R.color.colorBlackText)
-        val nullDataColor: Color
-            @Composable
-            get() = colorOf(pair = Color.Black to Color.White)
+            get() = colorOf(pair = Color.White to Color.Black)
     }
 
     object Status {

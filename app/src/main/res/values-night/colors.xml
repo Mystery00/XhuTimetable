@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <!--所有界面需要是黑色的颜色 文本-->
-    <color name="colorBlackText">#FFFFFF</color>
-
-</resources>

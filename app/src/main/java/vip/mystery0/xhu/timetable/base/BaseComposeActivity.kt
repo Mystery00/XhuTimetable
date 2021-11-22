@@ -27,7 +27,6 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
 import kotlin.reflect.KClass
@@ -140,7 +139,7 @@ abstract class BaseComposeActivity(
                     contentDescription = null,
                     modifier = Modifier.width(256.dp)
                 )
-                Text(text = text, color = XhuColor.Common.nullDataColor)
+                Text(text = text, color = MaterialTheme.colors.onSurface)
             }
         }
     }
