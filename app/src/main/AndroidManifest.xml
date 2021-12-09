@@ -18,7 +18,7 @@
         <service
             android:name=".work.NotifyService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <activity
             android:name=".ui.activity.StartActivity"
@@ -73,6 +73,12 @@
             android:exported="true"
             android:label="@string/title_activity_settings"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
+        <activity
+            android:name=".ui.activity.FeedbackActivity"
+            android:exported="true"
+            android:label="@string/title_activity_feedback"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar"
+            android:windowSoftInputMode="adjustResize" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"
