@@ -207,9 +207,8 @@ val profileCourseContent: TabContent = @Composable { ext ->
             painter = XhuIcons.Profile.feedback,
             title = "意见反馈",
             click = {
-                activity.toastString("暂不支持")
-            }
-        )
+                activity.intentTo(FeedbackActivity::class)
+            })
         Divider(
             modifier = Modifier
                 .fillMaxWidth()

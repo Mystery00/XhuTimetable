@@ -6,3 +6,6 @@ val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 val dateFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日")
 val timeFormatter = DateTimeFormatter.ofPattern("HH时mm分")
 val chinaDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH时mm分ss秒")
+
+val enDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+val enTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
