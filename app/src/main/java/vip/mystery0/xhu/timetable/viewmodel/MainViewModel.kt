@@ -510,6 +510,7 @@ class MainViewModel : ComposeViewModel() {
             Log.w(TAG, "load notice list failed", throwable)
             _errorMessage.value = throwable.message ?: throwable.javaClass.simpleName
         }) {
+            if (SessionManager.mainUserOrNull() == null) return@launch
             _hasUnReadNotice.value = noticeRepo.hasUnReadNotice()
         }
     }
