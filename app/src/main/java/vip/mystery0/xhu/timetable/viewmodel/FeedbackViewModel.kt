@@ -31,10 +31,10 @@ class FeedbackViewModel : ComposeViewModel() {
         viewModelScope.launch {
             initWebSocket()
         }
-        loadLast20Message()
+        loadLastMessage(20)
     }
 
-    fun loadLast20Message() {
+    fun loadLastMessage(size: Int) {
         viewModelScope.launch {
             _loading.value = LoadingState(loading = true)
             val mainUser = SessionManager.mainUserOrNull()
@@ -43,7 +43,7 @@ class FeedbackViewModel : ComposeViewModel() {
                 return@launch
             }
             val lastId = messageState.messages.lastOrNull()?.id ?: Long.MAX_VALUE
-            val pullMessage = feedbackApi.pullMessage(mainUser.token, lastId, 10)
+            val pullMessage = feedbackApi.pullMessage(mainUser.token, lastId, size)
             pullMessage.forEach {
                 it.generate(mainUser)
             }
