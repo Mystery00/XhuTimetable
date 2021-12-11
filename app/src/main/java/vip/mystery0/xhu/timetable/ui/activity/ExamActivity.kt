@@ -154,7 +154,10 @@ class ExamActivity : BaseComposeActivity() {
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(horizontal = 8.dp, vertical = 4.dp),
-                                        border = BorderStroke(1.dp, color = item.examStatus.color),
+                                        border = BorderStroke(
+                                            item.examStatus.strokeWidth.dp,
+                                            color = item.examStatus.color
+                                        ),
                                     ) {
                                         Column(
                                             modifier = Modifier.padding(8.dp)

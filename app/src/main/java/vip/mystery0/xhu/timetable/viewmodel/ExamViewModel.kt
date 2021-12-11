@@ -85,7 +85,14 @@ class ExamViewModel : ComposeViewModel() {
                         it.region,
                         examStatus,
                     )
-                }.sortedBy { it.examStatus.index }
+                }.sortedWith(object : Comparator<Exam> {
+                    override fun compare(o1: Exam, o2: Exam): Int {
+                        if (o1.examStatus == o2.examStatus) {
+                            return o1.date.compareTo(o2.date)
+                        }
+                        return o1.examStatus.compareTo(o2.examStatus)
+                    }
+                })
             }
             _examListState.value =
                 ExamListState(examList = examList, examHtml = response.html)
@@ -139,8 +146,9 @@ enum class ExamStatus(
     val index: Int,
     val title: String,
     val color: Color,
+    val strokeWidth: Int,
 ) {
-    BEFORE(1, "未开始", XhuColor.Status.beforeColor),
-    IN(2, "进行中", XhuColor.Status.inColor),
-    AFTER(0, "已结束", XhuColor.Status.afterColor),
+    BEFORE(1, "未开始", XhuColor.Status.beforeColor, 2),
+    IN(0, "进行中", XhuColor.Status.inColor, 3),
+    AFTER(2, "已结束", XhuColor.Status.afterColor, 1),
 }
