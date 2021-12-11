@@ -88,7 +88,7 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                     .padding(paddingValues)
                     .fillMaxSize(),
                 state = rememberSwipeRefreshState(loading.loading),
-                onRefresh = { viewModel.loadLast20Message() },
+                onRefresh = { viewModel.loadLastMessage(10) },
             ) {
                 Column(
                     modifier = Modifier
