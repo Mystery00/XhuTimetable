@@ -6,10 +6,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import vip.mystery0.xhu.timetable.api.FileApi
-import vip.mystery0.xhu.timetable.api.JwcApi
-import vip.mystery0.xhu.timetable.api.PoemsApi
-import vip.mystery0.xhu.timetable.api.ServerApi
+import vip.mystery0.xhu.timetable.api.*
 import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.LogInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.PoemsInterceptor
@@ -21,6 +18,7 @@ const val HTTP_CLIENT_POEMS = "poemsClient"
 const val RETROFIT = "retrofit"
 const val RETROFIT_POEMS = "poemsRetrofit"
 const val RETROFIT_FILE = "fileRetrofit"
+const val RETROFIT_WS = "wsRetrofit"
 
 val networkModule = module {
     single(named(HTTP_CLIENT)) {
@@ -50,6 +48,13 @@ val networkModule = module {
             .addConverterFactory(MoshiConverterFactory.create())
             .build()
     }
+    single(named(RETROFIT_WS)) {
+        Retrofit.Builder()
+            .baseUrl("https://ws.api.mystery0.vip")
+            .client(get(named(HTTP_CLIENT)))
+            .addConverterFactory(MoshiConverterFactory.create())
+            .build()
+    }
     single(named(RETROFIT_FILE)) {
         val client = OkHttpClient.Builder()
             .addInterceptor(DownloadProgressInterceptor())
@@ -67,6 +72,7 @@ val networkModule = module {
 
     single { get<Retrofit>(named(RETROFIT_POEMS)).create(PoemsApi::class.java) }
     single { get<Retrofit>(named(RETROFIT_FILE)).create(FileApi::class.java) }
+    single { get<Retrofit>(named(RETROFIT_WS)).create(FeedbackApi::class.java) }
 }
 
 private inline fun <reified API> Module.serverApi() {
