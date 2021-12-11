@@ -232,43 +232,48 @@ private fun BoxScope.ShowCourseDialog(
                         .padding(horizontal = 36.dp, vertical = 8.dp)
                         .background(course.color.copy(0.8F), RoundedCornerShape(12.dp)),
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text(
-                        text = course.courseName,
-                        maxLines = 2,
-                        fontSize = 18.sp,
-                        overflow = TextOverflow.Ellipsis,
-                        color = Color.White,
-                    )
-                    Text(
-                        text = course.teacherName,
-                        color = Color.White,
-                    )
-                    Text(
-                        text = course.location,
-                        color = Color.White,
-                    )
-                    Text(
-                        text = course.weekString,
-                        color = Color.White,
-                    )
-                    Text(
-                        text = course.time,
-                        color = Color.White,
-                    )
-                    if (multiAccountMode) {
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
                         Text(
-                            text = "${course.studentId}(${course.userName})",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colors.onSecondary,
-                            modifier = Modifier
-                                .background(
-                                    color = MaterialTheme.colors.secondary,
-                                    shape = RoundedCornerShape(4.dp),
-                                )
-                                .padding(2.dp),
+                            text = course.courseName,
+                            maxLines = 2,
+                            fontSize = 18.sp,
+                            overflow = TextOverflow.Ellipsis,
+                            color = Color.White,
                         )
+                        Text(
+                            text = course.teacherName,
+                            color = Color.White,
+                        )
+                        Text(
+                            text = course.location,
+                            color = Color.White,
+                        )
+                        Text(
+                            text = course.weekString,
+                            color = Color.White,
+                        )
+                        Text(
+                            text = course.time,
+                            color = Color.White,
+                        )
+                        if (multiAccountMode) {
+                            Text(
+                                text = "${course.studentId}(${course.userName})",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colors.onSecondary,
+                                modifier = Modifier
+                                    .background(
+                                        color = MaterialTheme.colors.secondary,
+                                        shape = RoundedCornerShape(4.dp),
+                                    )
+                                    .padding(2.dp),
+                            )
+                        }
                     }
                 }
             }
