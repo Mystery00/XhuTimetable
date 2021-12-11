@@ -102,7 +102,7 @@ class FeedbackViewModel : ComposeViewModel() {
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 super.onFailure(webSocket, t, response)
-                _wsStatus.value = WebSocketState(WebSocketStatus.FAILED, t.message)
+                _wsStatus.value = WebSocketState(WebSocketStatus.FAILED, t.message ?: "异常断开，请重新连接")
             }
         })
     }
@@ -136,7 +136,7 @@ class MessageState(
 
 data class WebSocketState(
     val status: WebSocketStatus,
-    val errorMessage: String? = "",
+    val errorMessage: String = "",
 )
 
 enum class WebSocketStatus {
