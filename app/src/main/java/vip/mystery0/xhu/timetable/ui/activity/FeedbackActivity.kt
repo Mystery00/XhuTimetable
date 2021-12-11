@@ -153,6 +153,12 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                     )
                 }
             }
+            if (loading.errorMessage.isNotBlank()) {
+                loading.errorMessage.toast(true)
+            }
+            if (wsState.errorMessage.isNotBlank()) {
+                wsState.errorMessage.toast(true)
+            }
         }
     }
 }
