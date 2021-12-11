@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -74,9 +75,16 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                                 WebSocketStatus.DISCONNECTED -> XhuIcons.WsState.disconnected
                                 WebSocketStatus.FAILED -> XhuIcons.WsState.failed
                             }
+                            val tint = when (wsState.status) {
+                                WebSocketStatus.CONNECTED, WebSocketStatus.CONNECTING -> LocalContentColor.current.copy(
+                                    alpha = LocalContentAlpha.current
+                                )
+                                WebSocketStatus.DISCONNECTED, WebSocketStatus.FAILED -> Color.Unspecified
+                            }
                             Icon(
                                 painter = icon,
                                 contentDescription = null,
+                                tint = tint,
                             )
                         }
                     }
