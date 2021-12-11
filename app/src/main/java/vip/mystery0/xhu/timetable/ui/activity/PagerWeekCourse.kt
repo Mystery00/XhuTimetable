@@ -20,6 +20,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -231,11 +232,12 @@ private fun BoxScope.ShowCourseDialog(
                         .fillMaxSize()
                         .padding(horizontal = 36.dp, vertical = 8.dp)
                         .background(course.color.copy(0.8F), RoundedCornerShape(12.dp)),
-                    verticalArrangement = Arrangement.Center,
                 ) {
                     Column(
                         modifier = Modifier
-                            .padding(horizontal = 24.dp),
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
@@ -244,6 +246,10 @@ private fun BoxScope.ShowCourseDialog(
                             fontSize = 18.sp,
                             overflow = TextOverflow.Ellipsis,
                             color = Color.White,
+                            textAlign = TextAlign.Center,
+                            style = androidx.compose.ui.text.TextStyle(
+                                fontWeight = FontWeight.Bold,
+                            ),
                         )
                         Text(
                             text = course.teacherName,
