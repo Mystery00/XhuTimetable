@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.chinaZone
+import vip.mystery0.xhu.timetable.model.response.Message
 import vip.mystery0.xhu.timetable.ui.activity.feedback.SymbolAnnotationType
 import vip.mystery0.xhu.timetable.ui.activity.feedback.UserInput
 import vip.mystery0.xhu.timetable.ui.activity.feedback.messageFormatter
@@ -32,7 +33,7 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.enDateFormatter
 import vip.mystery0.xhu.timetable.utils.enTimeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.FeedbackViewModel
-import vip.mystery0.xhu.timetable.viewmodel.Message
+import vip.mystery0.xhu.timetable.viewmodel.WebSocketStatus
 import java.time.Duration
 import java.time.Instant
 
@@ -44,6 +45,8 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
         val loading by viewModel.loading.collectAsState()
         val lazyListState = rememberLazyListState()
         val scope = rememberCoroutineScope()
+
+        val wsState by viewModel.wsStatus.collectAsState()
 
         Scaffold(
             topBar = {
@@ -61,6 +64,22 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                             )
                         }
                     },
+                    actions = {
+                        IconButton(onClick = {
+                            viewModel.connectWebSocket()
+                        }) {
+                            val icon = when (wsState.status) {
+                                WebSocketStatus.CONNECTED -> XhuIcons.WsState.connected
+                                WebSocketStatus.CONNECTING -> XhuIcons.WsState.connecting
+                                WebSocketStatus.DISCONNECTED -> XhuIcons.WsState.disconnected
+                                WebSocketStatus.FAILED -> XhuIcons.WsState.failed
+                            }
+                            Icon(
+                                painter = icon,
+                                contentDescription = null,
+                            )
+                        }
+                    }
                 )
             },
         ) { paddingValues ->
@@ -68,7 +87,7 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                 modifier = Modifier
                     .padding(paddingValues)
                     .fillMaxSize(),
-                state = rememberSwipeRefreshState(loading),
+                state = rememberSwipeRefreshState(loading.loading),
                 onRefresh = { viewModel.loadLast20Message() },
             ) {
                 Column(
@@ -92,9 +111,10 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
 
                             val isFirstMessage = lastMsg?.isMe != msg.isMe
                             val isLastMessage = nextMsg?.isMe != msg.isMe
-                            val nextTime = nextMsg?.time ?: Instant.ofEpochMilli(0L)
+                            val nextTime = nextMsg?.sendTime ?: Instant.ofEpochMilli(0L)
+                            val thisTime = msg.sendTime
                             val nextDate = nextTime.atZone(chinaZone).toLocalDate()
-                            val thisDate = msg.time.atZone(chinaZone).toLocalDate()
+                            val thisDate = thisTime.atZone(chinaZone).toLocalDate()
 
                             item {
                                 Message(
@@ -108,10 +128,10 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                                 item {
                                     DayHeader(dayString = thisDate.format(enDateFormatter))
                                 }
-                            } else if (Duration.between(nextTime, msg.time).toMinutes() > 5) {
+                            } else if (Duration.between(nextTime, thisTime).toMinutes() > 5) {
                                 item {
                                     DayHeader(
-                                        dayString = msg.time.atZone(chinaZone)
+                                        dayString = thisTime.atZone(chinaZone)
                                             .format(enTimeFormatter)
                                     )
                                 }
@@ -180,7 +200,7 @@ fun TextMessage(
 }
 
 private val ReceiveChatBubbleShape = RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
-private val SendChatBubbleShape = RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp)
+private val SendChatBubbleShape = RoundedCornerShape(20.dp, 20.dp, 4.dp, 20.dp)
 
 @Composable
 fun DayHeader(dayString: String) {

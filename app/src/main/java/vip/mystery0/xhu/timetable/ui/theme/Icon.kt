@@ -18,9 +18,6 @@ object XhuIcons {
     val conflict: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_radius_cell)
-    val sync: Painter
-        @Composable
-        get() = painterResource(id = R.drawable.ic_sync)
     val back: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_back)
@@ -155,6 +152,21 @@ object XhuIcons {
         val view: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_action_view)
+    }
+
+    object WsState {
+        val connected: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_ws_state_connected)
+        val connecting: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_ws_state_connecting)
+        val disconnected: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_ws_state_disconnected)
+        val failed: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_ws_state_failed)
     }
 
     object Team {
