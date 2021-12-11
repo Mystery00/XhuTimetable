@@ -1,6 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    val compose_version by extra("1.1.0-beta03")
+    val compose_version by extra("1.1.0-alpha06")
     repositories {
         //如果拉取太慢，请注释掉该行
         maven("https://nexus3.mystery0.vip/repository/maven-public/")

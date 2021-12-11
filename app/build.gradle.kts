@@ -141,7 +141,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
     //accompanist
-    val accompanistVersion = "0.21.3-beta"
+    val accompanistVersion = "0.20.0"
     implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-pager:$accompanistVersion")
@@ -162,7 +162,7 @@ dependencies {
     //work manager
     implementation("androidx.work:work-runtime-ktx:2.7.1")
     //koin
-    val koinVersion = "3.1.3"
+    val koinVersion = "3.1.4"
     implementation("io.insert-koin:koin-android:$koinVersion")
     implementation("io.insert-koin:koin-android-compat:$koinVersion")
     implementation("io.insert-koin:koin-androidx-workmanager:$koinVersion")
@@ -177,7 +177,7 @@ dependencies {
     //mmkv
     implementation("com.tencent:mmkv-static:1.2.11")
     //eventbus
-    implementation("org.greenrobot:eventbus:3.2.0")
+    implementation("org.greenrobot:eventbus:3.3.1")
     //preference
     implementation("com.github.alorma:compose-settings-ui:0.7.2")
     //AppCenter
