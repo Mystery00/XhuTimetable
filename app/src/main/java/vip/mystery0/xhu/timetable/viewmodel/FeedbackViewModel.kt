@@ -3,6 +3,7 @@ package vip.mystery0.xhu.timetable.viewmodel
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.viewModelScope
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -15,7 +16,8 @@ import vip.mystery0.xhu.timetable.model.response.Message
 import java.util.concurrent.TimeUnit
 
 class FeedbackViewModel : ComposeViewModel() {
-    private val jsonAdapter = Moshi.Builder().build().adapter(Message::class.java)
+    private val jsonAdapter =
+        Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build().adapter(Message::class.java)
     private var webSocket: WebSocket? = null
     private val feedbackApi: FeedbackApi by inject()
 
