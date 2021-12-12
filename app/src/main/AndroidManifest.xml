@@ -79,6 +79,11 @@
             android:label="@string/title_activity_feedback"
             android:theme="@style/Theme.XhuTimetable.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.activity.SchoolCalendarActivity"
+            android:exported="true"
+            android:label="@string/title_activity_school_calendar"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"

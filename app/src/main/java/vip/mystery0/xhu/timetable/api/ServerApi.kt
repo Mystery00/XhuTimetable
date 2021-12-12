@@ -31,6 +31,15 @@ interface ServerApi {
         @Header("token") token: String,
         @Query("platform") platform: String = "Android"
     ): Response<List<NoticeResponse>>
+
+    @GET("/api/rest/xhu-timetable/server/schoolCalendar")
+    suspend fun schoolCalendarList(@Header("token") token: String): Response<List<SchoolCalendarResponse>>
+
+    @GET("/api/rest/xhu-timetable/server/schoolCalendarUrl")
+    suspend fun schoolCalendarUrl(
+        @Header("token") token: String,
+        @Query("resourceId") resourceId: Long,
+    ): Response<SchoolCalendarUrlResponse>
 }
 
 fun <T : Any> Response<T>.checkLogin(): T {

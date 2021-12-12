@@ -216,9 +216,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                         },
                         title = { Text(text = "查看校历") },
                         onClick = {
-                            scope.launch {
-                                "暂未实现".toast()
-                            }
+                            intentTo(SchoolCalendarActivity::class)
                         }
                     )
                     SettingsMenuLink(

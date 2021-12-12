@@ -13,7 +13,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.InsertPhoto
 import androidx.compose.material.icons.outlined.Mood
-import androidx.compose.material.icons.rounded.Send
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -37,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
+import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
 enum class InputSelector {
     NONE,
@@ -237,7 +237,7 @@ private fun UserInputSelector(
             contentPadding = PaddingValues(0.dp)
         ) {
             Icon(
-                imageVector = Icons.Rounded.Send,
+                painter = XhuIcons.Action.send,
                 contentDescription = "发送",
                 modifier = Modifier.padding(horizontal = 16.dp),
             )
