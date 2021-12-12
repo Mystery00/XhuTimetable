@@ -1,5 +1,7 @@
 package vip.mystery0.xhu.timetable.module
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
@@ -38,21 +40,33 @@ val networkModule = module {
         Retrofit.Builder()
             .baseUrl("https://xgkb.api.mystery0.vip")
             .client(get(named(HTTP_CLIENT)))
-            .addConverterFactory(MoshiConverterFactory.create())
+            .addConverterFactory(
+                MoshiConverterFactory.create(
+                    Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
+                )
+            )
             .build()
     }
     single(named(RETROFIT_POEMS)) {
         Retrofit.Builder()
             .baseUrl("https://v2.jinrishici.com")
             .client(get(named(HTTP_CLIENT_POEMS)))
-            .addConverterFactory(MoshiConverterFactory.create())
+            .addConverterFactory(
+                MoshiConverterFactory.create(
+                    Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
+                )
+            )
             .build()
     }
     single(named(RETROFIT_WS)) {
         Retrofit.Builder()
             .baseUrl("https://ws.api.mystery0.vip")
             .client(get(named(HTTP_CLIENT)))
-            .addConverterFactory(MoshiConverterFactory.create())
+            .addConverterFactory(
+                MoshiConverterFactory.create(
+                    Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
+                )
+            )
             .build()
     }
     single(named(RETROFIT_FILE)) {

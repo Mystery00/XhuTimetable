@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.config
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tencent.mmkv.MMKV
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.response.Splash
@@ -20,7 +21,7 @@ suspend fun setConfig(block: suspend Config.() -> Unit) = runOnIo { block(instan
 
 class Config internal constructor() {
     private val kv = MMKV.defaultMMKV()
-    private val moshi = Moshi.Builder().build()
+    private val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
 
     var firstEnter: Boolean
         set(value) {

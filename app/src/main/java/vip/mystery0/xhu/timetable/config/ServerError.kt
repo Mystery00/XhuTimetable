@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.config
 
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineExceptionHandler
 import retrofit2.HttpException
 
@@ -13,7 +14,7 @@ data class ErrorMessage(
 class ServerError(override val message: String) : RuntimeException(message)
 
 private val errorMessageMoshi: JsonAdapter<ErrorMessage> =
-    Moshi.Builder().build().adapter(ErrorMessage::class.java)
+    Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build().adapter(ErrorMessage::class.java)
 
 fun serverExceptionHandler(
     messageHandler: (ErrorMessage) -> Boolean = { false },
