@@ -7,10 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.AccountCircle
-import androidx.compose.material.icons.twotone.Clear
-import androidx.compose.material.icons.twotone.Lock
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +26,7 @@ import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.utils.finishAllActivity
 import vip.mystery0.xhu.timetable.viewmodel.LoginViewModel
@@ -70,12 +67,12 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                         },
                         shape = RoundedCornerShape(18.dp),
                         leadingIcon = {
-                            Icon(Icons.TwoTone.AccountCircle, null)
+                            Icon(MaterialIcons.TwoTone.AccountCircle, null)
                         },
                         trailingIcon = {
                             if (username.isNotBlank()) {
                                 IconButton(onClick = { username = "" }) {
-                                    Icon(Icons.TwoTone.Clear, null)
+                                    Icon(MaterialIcons.TwoTone.Clear, null)
                                 }
                             }
                         },
@@ -110,12 +107,12 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                         },
                         shape = RoundedCornerShape(18.dp),
                         leadingIcon = {
-                            Icon(Icons.TwoTone.Lock, null)
+                            Icon(MaterialIcons.TwoTone.Lock, null)
                         },
                         trailingIcon = {
                             if (password.isNotBlank()) {
                                 IconButton(onClick = { password = "" }) {
-                                    Icon(Icons.TwoTone.Clear, null)
+                                    Icon(MaterialIcons.TwoTone.Clear, null)
                                 }
                             }
                         },

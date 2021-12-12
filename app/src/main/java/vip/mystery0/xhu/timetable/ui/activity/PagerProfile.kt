@@ -6,8 +6,6 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.ArrowForwardIos
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,10 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
-import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
-import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
-import vip.mystery0.xhu.timetable.ui.theme.XhuImages
+import vip.mystery0.xhu.timetable.ui.theme.*
 
 val profileCourseTitle: TabTitle = @Composable {
     Text(text = "我的", modifier = Modifier.align(Alignment.Center))
@@ -83,7 +78,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
                         Text(mainUser?.info?.className ?: "", fontSize = 14.sp, color = Color.Gray)
                     }
                     Icon(
-                        imageVector = Icons.TwoTone.ArrowForwardIos,
+                        imageVector = MaterialIcons.TwoTone.ArrowForwardIos,
                         contentDescription = null,
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
@@ -286,7 +281,7 @@ private fun BuildProfileItem(
             ) {}
         }
         Icon(
-            imageVector = Icons.TwoTone.ArrowForwardIos,
+            imageVector = MaterialIcons.TwoTone.ArrowForwardIos,
             contentDescription = null,
             modifier = Modifier
                 .padding(end = 12.dp, start = if (showBadge) 10.dp else 12.dp)

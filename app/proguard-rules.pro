@@ -74,6 +74,9 @@
     public static <fields>;
 }
 
+#不混淆项目代码
+-keep class vip.mystery0.xhu.timetable.** { *; }
+
 #### Missing
 -dontwarn org.bouncycastle.jsse.BCSSLParameters
 -dontwarn org.bouncycastle.jsse.BCSSLSocket
