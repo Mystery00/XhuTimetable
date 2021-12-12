@@ -13,7 +13,6 @@ import android.os.Build
 import android.os.Environment
 import android.provider.Settings
 import android.util.Log
-import android.widget.Toast
 import androidx.browser.customtabs.CustomTabsIntent
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
@@ -158,5 +157,4 @@ suspend fun setTrigger(alarmManager: AlarmManager) {
         triggerAtTime.atZone(chinaZone).toInstant().toEpochMilli(),
         pendingIntent
     )
-    Toast.makeText(context, "setTrigger: 设置成功", Toast.LENGTH_SHORT).show()
 }

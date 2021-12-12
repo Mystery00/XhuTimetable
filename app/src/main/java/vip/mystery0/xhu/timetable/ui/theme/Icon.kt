@@ -45,6 +45,12 @@ object XhuIcons {
     val schoolCalendar: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_school_calendar)
+    val customCourse: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_custom_course)
+    val customThing: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_custom_thing)
     val nightMode: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_night_mode)
