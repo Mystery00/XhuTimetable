@@ -7,4 +7,5 @@
     <string name="title_activity_settings_course_color">自定义课程颜色</string>
     <string name="title_activity_settings">设置</string>
     <string name="title_activity_feedback">意见反馈</string>
+    <string name="title_activity_school_calendar">校历</string>
 </resources>

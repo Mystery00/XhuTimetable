@@ -158,6 +158,12 @@ object XhuIcons {
         val view: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_action_view)
+        val send: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_action_send)
+        val download: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_action_download)
     }
 
     object WsState {
