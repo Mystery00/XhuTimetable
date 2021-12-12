@@ -12,8 +12,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.ArrowDropUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -32,6 +30,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
 import vip.mystery0.xhu.timetable.model.Course
+import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import java.text.DecimalFormat
 import java.time.LocalDate
@@ -60,7 +59,7 @@ val weekCourseTitle: TabTitle = @Composable { ext ->
             targetValue = if (showWeekView) 180F else 0F,
         )
         Icon(
-            imageVector = Icons.TwoTone.ArrowDropUp,
+            imageVector = MaterialIcons.TwoTone.ArrowDropUp,
             contentDescription = null,
             modifier = Modifier.rotate(rotationAngle),
         )

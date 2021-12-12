@@ -54,6 +54,8 @@ android {
                 )
             }
         }
+        resourceConfigurations.add("en")
+        resourceConfigurations.add("zh")
     }
     signingConfigs {
         create("release") {
@@ -137,7 +139,6 @@ dependencies {
     val composeVersion = rootProject.extra["compose_version"]
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.material:material:$composeVersion")
-    implementation("androidx.compose.material:material-icons-extended:$composeVersion")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
     //accompanist
