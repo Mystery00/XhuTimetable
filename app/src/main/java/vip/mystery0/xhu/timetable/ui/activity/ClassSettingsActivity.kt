@@ -221,6 +221,36 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             }
                         }
                     )
+                    SettingsMenuLink(
+                        icon = {
+                            Icon(
+                                painter = XhuIcons.customCourse,
+                                contentDescription = null,
+                                tint = XhuColor.Common.blackText,
+                            )
+                        },
+                        title = { Text(text = "自定义课程") },
+                        onClick = {
+                            scope.launch {
+                                "暂未实现".toast()
+                            }
+                        }
+                    )
+                    SettingsMenuLink(
+                        icon = {
+                            Icon(
+                                painter = XhuIcons.customThing,
+                                contentDescription = null,
+                                tint = XhuColor.Common.blackText,
+                            )
+                        },
+                        title = { Text(text = "自定义事项") },
+                        onClick = {
+                            scope.launch {
+                                "暂未实现".toast()
+                            }
+                        }
+                    )
                 }
             }
         }
