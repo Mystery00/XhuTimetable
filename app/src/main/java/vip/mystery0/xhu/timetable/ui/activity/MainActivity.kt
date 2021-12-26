@@ -61,9 +61,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
     private val ext: MainActivityExt
         get() = MainActivityExt(this, viewModel, modalBottomSheetState)
 
-    @ExperimentalPagerApi
-    @ExperimentalAnimationApi
-    @ExperimentalMaterialApi
+    @OptIn(ExperimentalPagerApi::class)
     @Composable
     override fun BuildContent() {
         val systemUiController = rememberSystemUiController()
@@ -420,9 +418,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         )
     }
 
-    @ExperimentalPagerApi
-    @ExperimentalAnimationApi
-    @ExperimentalMaterialApi
+    @OptIn(ExperimentalPagerApi::class)
     @Composable
     private fun RowScope.DrawNavigationItem(
         state: PagerState,
