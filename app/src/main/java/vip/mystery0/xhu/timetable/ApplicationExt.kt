@@ -50,7 +50,7 @@ const val appVersionName: String = BuildConfig.VERSION_NAME
 const val appVersionCode: String = BuildConfig.VERSION_CODE.toString()
 const val appVersionCodeNumber: Long = BuildConfig.VERSION_CODE.toLong()
 
-@SuppressLint("deprecation")
+@Suppress("DEPRECATION")
 fun isOnline(): Boolean {
     val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val networkInfo = connMgr.activeNetworkInfo
