@@ -151,12 +151,12 @@ dependencies {
     implementation("com.google.accompanist:accompanist-placeholder-material:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
     //compose-material-dialogs
-    val composeMaterialDialogsVersion = "0.6.1"
+    val composeMaterialDialogsVersion = "0.6.2"
     implementation("io.github.vanpra.compose-material-dialogs:core:$composeMaterialDialogsVersion")
     implementation("io.github.vanpra.compose-material-dialogs:datetime:$composeMaterialDialogsVersion")
     implementation("io.github.vanpra.compose-material-dialogs:color:$composeMaterialDialogsVersion")
     //room
-    val roomVersion = "2.3.0"
+    val roomVersion = "2.4.0"
     implementation("androidx.room:room-runtime:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
@@ -185,7 +185,11 @@ dependencies {
     //preference
     implementation("com.github.alorma:compose-settings-ui:0.7.2")
     //AppCenter
-    val appCenterSdkVersion = "4.3.1"
+    val appCenterSdkVersion = "4.4.2"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
 }

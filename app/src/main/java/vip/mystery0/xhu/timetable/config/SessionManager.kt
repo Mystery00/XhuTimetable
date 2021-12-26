@@ -70,12 +70,10 @@ object SessionManager {
         return runOnCpu { userMap.values.sortedBy { !it.main }.toList() }
     }
 
-    @Synchronized
     private suspend fun writeToCache() {
         setConfig { userList = ArrayList(userMap.values) }
     }
 
-    @Synchronized
     suspend fun readFromCache() {
         val list = getConfig { userList }
         userMap.clear()
