@@ -229,9 +229,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                         },
                         title = { Text(text = "自定义课程") },
                         onClick = {
-                            scope.launch {
-                                "暂未实现".toast()
-                            }
+                            intentTo(CustomCourseActivity::class)
                         }
                     )
                     SettingsMenuLink(

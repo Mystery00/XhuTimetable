@@ -5,7 +5,9 @@ import retrofit2.http.*
 import vip.mystery0.xhu.timetable.config.ServerError
 import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
 import vip.mystery0.xhu.timetable.config.parseServerError
+import vip.mystery0.xhu.timetable.model.CustomCourse
 import vip.mystery0.xhu.timetable.model.UserInfo
+import vip.mystery0.xhu.timetable.model.request.CustomCourseRequest
 import vip.mystery0.xhu.timetable.model.request.InitRequest
 import vip.mystery0.xhu.timetable.model.request.LoginRequest
 import vip.mystery0.xhu.timetable.model.response.*
@@ -40,6 +42,26 @@ interface ServerApi {
         @Header("token") token: String,
         @Query("resourceId") resourceId: Long,
     ): Response<SchoolCalendarUrlResponse>
+
+    @GET("/api/rest/xhu-timetable/server/customCourse")
+    suspend fun customCourseList(
+        @Header("token") token: String,
+        @Query("year") year: String,
+        @Query("term") term: Int,
+    ): Response<List<CustomCourse>>
+
+    @POST("/api/rest/xhu-timetable/server/customCourse")
+    suspend fun createCustomCourse(
+        @Header("token") token: String,
+        @Body customCourseRequest: CustomCourseRequest
+    ): Response<Boolean>
+
+    @PUT("/api/rest/xhu-timetable/server/customCourse")
+    suspend fun updateCustomCourse(
+        @Header("token") token: String,
+        @Query("id") id: Long,
+        @Body customCourseRequest: CustomCourseRequest
+    ): Response<Boolean>
 }
 
 fun <T : Any> Response<T>.checkLogin(): T {
