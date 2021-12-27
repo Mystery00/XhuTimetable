@@ -235,18 +235,16 @@ object XhuImages {
 
 object ProfileImages {
     private val boyPool = listOf(
-        R.drawable.ic_boy_01,
-        R.drawable.ic_boy_02,
-        R.drawable.ic_boy_03,
-        R.drawable.ic_boy_04,
-        R.drawable.ic_boy_05,
+        R.drawable.img_boy1,
+        R.drawable.img_boy2,
+        R.drawable.img_boy3,
+        R.drawable.img_boy4,
     )
     private val girlPool = listOf(
-        R.drawable.ic_girl_01,
-        R.drawable.ic_girl_02,
-        R.drawable.ic_girl_03,
-        R.drawable.ic_girl_04,
-        R.drawable.ic_girl_05,
+        R.drawable.img_girl1,
+        R.drawable.img_girl2,
+        R.drawable.img_girl3,
+        R.drawable.img_girl4,
     )
 
     @Composable

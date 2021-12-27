@@ -9,6 +9,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
@@ -58,7 +59,8 @@ val profileCourseContent: TabContent = @Composable { ext ->
                         contentDescription = null,
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
-                            .size(60.dp),
+                            .size(60.dp)
+                            .clip(CircleShape)
                     )
                     Column(modifier = Modifier.weight(1F)) {
                         var text = "账号未登录"
