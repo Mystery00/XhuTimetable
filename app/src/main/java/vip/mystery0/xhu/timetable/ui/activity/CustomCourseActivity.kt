@@ -2,10 +2,8 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,9 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.material.shimmer
@@ -26,7 +22,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
-import vip.mystery0.xhu.timetable.model.response.ScoreItem
+import vip.mystery0.xhu.timetable.model.CustomCourse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.CustomCourseViewModel
@@ -40,31 +36,43 @@ class CustomCourseActivity : BaseComposeActivity() {
     override fun BuildContent() {
         val customCourseListState by viewModel.customCourseListState.collectAsState()
 
-        val showSelect = rememberModalBottomSheetState(ModalBottomSheetValue.Expanded)
+        val showSelect = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+        val scaffoldState: BackdropScaffoldState =
+            rememberBackdropScaffoldState(initialValue = BackdropValue.Revealed)
         val scope = rememberCoroutineScope()
-
-        var showOption by remember { mutableStateOf(false) }
 
         val userDialog = remember { mutableStateOf(false) }
         val yearDialog = remember { mutableStateOf(false) }
         val termDialog = remember { mutableStateOf(false) }
 
+        var customCourse by remember { mutableStateOf(CustomCourse.EMPTY) }
+
         fun onBack() {
+            if (scaffoldState.isRevealed) {
+                scope.launch {
+                    scaffoldState.conceal()
+                }
+                return
+            }
             if (showSelect.isVisible) {
                 scope.launch {
                     showSelect.hide()
                 }
                 return
             }
-            if (showOption) {
-                showOption = false
-                return
-            }
             finish()
         }
 
-        Scaffold(
-            topBar = {
+        BackHandler(
+            onBack = {
+                onBack()
+            }
+        )
+
+        BackdropScaffold(
+            modifier = Modifier,
+            scaffoldState = scaffoldState,
+            appBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
                     backgroundColor = MaterialTheme.colors.primary,
@@ -82,25 +90,9 @@ class CustomCourseActivity : BaseComposeActivity() {
                     actions = {
                         IconButton(onClick = {
                             scope.launch {
-                                showOption = false
-                                if (showSelect.isVisible) {
-                                    showSelect.hide()
-                                } else {
-                                    showSelect.show()
-                                }
-                            }
-                        }) {
-                            Icon(
-                                painter = XhuIcons.Action.more,
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        }
-                        IconButton(onClick = {
-                            scope.launch {
-                                if (!showSelect.isVisible) {
-                                    showOption = !showOption
-                                }
+//                                if (!showSelect.isVisible) {
+//                                    showOption = !showOption
+//                                }
                             }
                         }) {
                             Icon(
@@ -111,166 +103,188 @@ class CustomCourseActivity : BaseComposeActivity() {
                         }
                     }
                 )
-            },
-        ) { paddingValues ->
-            Box {
-                var showGpa by remember { mutableStateOf(false) }
-                var showCredit by remember { mutableStateOf(false) }
-                var showCourseType by remember { mutableStateOf(true) }
+            }, backLayerContent = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                            modifier = Modifier.weight(1F),
+                            onClick = {
+                                userDialog.value = true
+                            }) {
+                            val userSelect by viewModel.userSelect.collectAsState()
+                            val selected = userSelect.firstOrNull { it.selected }
+                            val userString =
+                                selected?.let { "${it.userName}(${it.studentId})" } ?: "查询中"
+                            Text(text = "查询用户：$userString")
+                        }
+                        OutlinedButton(
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                            onClick = {
+                                viewModel.loadCustomCourseList()
+                                scope.launch {
+                                    scaffoldState.conceal()
+                                }
+                            }) {
+                            Icon(painter = XhuIcons.CustomCourse.pull, contentDescription = null)
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                            modifier = Modifier.weight(1F),
+                            onClick = {
+                                yearDialog.value = true
+                            }) {
+                            val yearSelect by viewModel.yearSelect.collectAsState()
+                            val yearString =
+                                yearSelect.firstOrNull { it.selected }?.let { "${it.year}学年" }
+                                    ?: "查询中"
+                            Text(text = yearString)
+                        }
+                        OutlinedButton(
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                            modifier = Modifier.weight(1F),
+                            onClick = {
+                                termDialog.value = true
+                            }) {
+                            val termSelect by viewModel.termSelect.collectAsState()
+                            val termString =
+                                termSelect.firstOrNull { it.selected }?.let { "第${it.term}学期" }
+                                    ?: "查询中"
+                            Text(text = termString)
+                        }
+                    }
+                }
+            }, frontLayerContent = {
                 ModalBottomSheetLayout(
                     sheetState = showSelect,
                     scrimColor = Color.Black.copy(alpha = 0.32f),
                     sheetContent = {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
+                        var courseName by remember { mutableStateOf("") }
+                        var teacherName by remember { mutableStateOf("") }
+                        val weekList = customCourse.week
+                        var location by remember { mutableStateOf("") }
+                        var courseIndex = customCourse.courseIndex
+                        var day by remember { mutableStateOf(1) }
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            Row(
+                                modifier = Modifier
+                                    .padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Image(
+                                    modifier = Modifier
+                                        .padding(12.dp)
+                                        .clickable {
+                                            scope.launch {
+                                                showSelect.hide()
+                                            }
+                                        },
+                                    painter = XhuIcons.CustomCourse.close,
+                                    contentDescription = null,
+                                )
+                                Spacer(modifier = Modifier.weight(1F))
+                                TextButton(
+                                    onClick = {
+                                        scope.launch {
+                                            showSelect.hide()
+                                        }
+                                    }) {
+                                    Text(text = "保存")
+                                }
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Image(
+                                    modifier = Modifier.padding(12.dp),
+                                    painter = XhuIcons.CustomCourse.title,
+                                    contentDescription = null
+                                )
+                                TextField(
+                                    modifier = Modifier.weight(1F),
+                                    value = courseName,
+                                    onValueChange = { courseName = it })
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Image(
+                                    modifier = Modifier.padding(12.dp),
+                                    painter = XhuIcons.CustomCourse.teacher,
+                                    contentDescription = null
+                                )
+                                TextField(
+                                    modifier = Modifier.weight(1F),
+                                    value = teacherName,
+                                    onValueChange = { teacherName = it })
+                            }
+                            Spacer(modifier = Modifier.weight(1F))
+                        }
+                    }) {
+                    Box {
+                        SwipeRefresh(
+                            modifier = Modifier.fillMaxSize(),
+                            state = rememberSwipeRefreshState(customCourseListState.loading),
+                            onRefresh = { },
+                            swipeEnabled = false,
                         ) {
-                            Text(text = "请选择需要查询的信息")
-                            OutlinedButton(
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = {
-                                    userDialog.value = true
-                                }) {
-                                val userSelect by viewModel.userSelect.collectAsState()
-                                val selected = userSelect.firstOrNull { it.selected }
-                                val userString =
-                                    selected?.let { "${it.userName}(${it.studentId})" } ?: "查询中"
-                                Text(text = "查询用户：$userString")
-                            }
-                            OutlinedButton(
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = {
-                                    yearDialog.value = true
-                                }) {
-                                val yearSelect by viewModel.yearSelect.collectAsState()
-                                val yearString =
-                                    yearSelect.firstOrNull { it.selected }?.let { "${it.year}学年" }
-                                        ?: "查询中"
-                                Text(text = yearString)
-                            }
-                            OutlinedButton(
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = {
-                                    termDialog.value = true
-                                }) {
-                                val termSelect by viewModel.termSelect.collectAsState()
-                                val termString =
-                                    termSelect.firstOrNull { it.selected }?.let { "第${it.term}学期" }
-                                        ?: "查询中"
-                                Text(text = termString)
-                            }
-                            Button(
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = {
-                                    viewModel.loadCustomCourseList()
-                                    scope.launch {
-                                        showSelect.hide()
+                            val list = customCourseListState.customCourseList
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(XhuColor.Common.grayBackground),
+                                contentPadding = PaddingValues(4.dp),
+                            ) {
+                                if (customCourseListState.loading) {
+                                    items(3) {
+                                        BuildItem(
+                                            CustomCourse.PLACEHOLDER,
+                                            true,
+                                        )
                                     }
-                                }) {
-                                Text(text = "查询")
+                                } else {
+                                    items(list.size) { index ->
+                                        val item = list[index]
+                                        BuildItem(item)
+                                    }
+                                }
+                            }
+                            if (!customCourseListState.loading && list.isEmpty()) {
+                                BuildNoDataLayout()
                             }
                         }
-                    }
-                ) {
-                    SwipeRefresh(
-                        modifier = Modifier
-                            .padding(paddingValues)
-                            .fillMaxSize(),
-                        state = rememberSwipeRefreshState(customCourseListState.loading),
-                        onRefresh = { },
-                        swipeEnabled = false,
-                    ) {
-                        val list = customCourseListState.customCourseList
-                        LazyColumn(
+                        FloatingActionButton(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .background(XhuColor.Common.grayBackground),
-                            contentPadding = PaddingValues(4.dp),
-                        ) {
-                            if (customCourseListState.loading) {
-                                items(3) {
-                                    BuildItem(
-                                        ScoreItem("课程名称", "成绩", "绩点", "学分", "课程类型"),
-                                        showGpa,
-                                        showCredit,
-                                        showCourseType,
-                                        true,
-                                    )
+                                .align(Alignment.BottomEnd)
+                                .padding(24.dp)
+                                .size(64.dp),
+                            onClick = {
+                                scope.launch {
+                                    showSelect.show()
                                 }
-                            } else {
-                                items(list.size) { index ->
-                                    val item = list[index]
-//                                    BuildItem(item, showGpa, showCredit, showCourseType)
-                                }
-                            }
-                        }
-                        if (!customCourseListState.loading && list.isEmpty()) {
-                            BuildNoDataLayout()
+                            }) {
+                            Icon(XhuIcons.CustomCourse.add, contentDescription = null)
                         }
                     }
                 }
-                AnimatedVisibility(
-                    modifier = Modifier.align(Alignment.TopEnd),
-                    visible = showOption,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                ) {
-                    Card(
-                        modifier = Modifier
-                            .padding(4.dp),
-                        elevation = 4.dp,
-                    ) {
-                        Column {
-                            Row(modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    showGpa = !showGpa
-                                    showOption = false
-                                }) {
-                                Checkbox(checked = showGpa, onCheckedChange = null)
-                                Text(text = "显示绩点")
-                            }
-                            Row(modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    showCredit = !showCredit
-                                    showOption = false
-                                }) {
-                                Checkbox(checked = showCredit, onCheckedChange = null)
-                                Text(text = "显示学分")
-                            }
-                            Row(modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    showCourseType = !showCourseType
-                                    showOption = false
-                                }) {
-                                Checkbox(checked = showCourseType, onCheckedChange = null)
-                                Text(text = "显示课程类型")
-                            }
-                        }
-                    }
-                }
-            }
-        }
+            })
         ShowUserDialog(show = userDialog)
         ShowYearDialog(show = yearDialog)
         ShowTermDialog(show = termDialog)
         if (customCourseListState.errorMessage.isNotBlank()) {
             customCourseListState.errorMessage.toast(true)
         }
-        BackHandler(
-            enabled = showSelect.isVisible || showOption,
-            onBack = {
-                onBack()
-            }
-        )
     }
 
     @Composable
@@ -462,10 +476,7 @@ class CustomCourseActivity : BaseComposeActivity() {
 
 @Composable
 private fun BuildItem(
-    item: ScoreItem,
-    showGpa: Boolean,
-    showCredit: Boolean,
-    showCourseType: Boolean,
+    item: CustomCourse,
     placeHolder: Boolean = false,
 ) {
     Card(
@@ -479,37 +490,37 @@ private fun BuildItem(
         backgroundColor = XhuColor.cardBackground,
     ) {
         Column(
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1F)) {
-                    Text(
-                        text = item.courseName,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = XhuColor.Common.blackText,
-                    )
-                    if (showCourseType) {
-                        Text(
-                            text = item.courseType,
-                            color = XhuColor.Common.grayText,
-                        )
-                    }
-                }
-                Text(
-                    text = buildString {
-                        if (showCredit) {
-                            append(item.credit)
-                            append("/")
-                        }
-                        if (showGpa) {
-                            append(item.gpa)
-                            append("/")
-                        }
-                        append(item.score)
-                    },
-                    color = XhuColor.Common.blackText,
-                )
+            Text(modifier = Modifier.fillMaxWidth(), text = item.courseName)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Image(painter = XhuIcons.CustomCourse.teacher, contentDescription = null)
+                Text(text = item.teacherName)
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Image(painter = XhuIcons.CustomCourse.week, contentDescription = null)
+                Text(text = "${item.weekString} ${item.day}")
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Image(painter = XhuIcons.CustomCourse.location, contentDescription = null)
+                Text(text = item.location)
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Image(painter = XhuIcons.CustomCourse.time, contentDescription = null)
+                Text(text = item.courseIndex.joinToString())
             }
         }
     }

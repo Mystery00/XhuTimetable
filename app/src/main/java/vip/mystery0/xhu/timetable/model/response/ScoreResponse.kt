@@ -11,4 +11,8 @@ data class ScoreItem(
     val gpa: String,
     val credit: String,
     val courseType: String,
-)
+) {
+    companion object {
+        val PLACEHOLDER = ScoreItem("课程名称", "成绩", "绩点", "学分", "课程类型")
+    }
+}

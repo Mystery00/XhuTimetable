@@ -14,6 +14,7 @@ interface JwcApi {
         @Header("token") token: String,
         @Query("year") year: String,
         @Query("term") term: Int,
+        @Query("showCustomCourse") showCustomCourse: Boolean,
     ): Response<List<CourseResponse>>
 
     @GET("/api/rest/xhu-timetable/server/jwc/exam")

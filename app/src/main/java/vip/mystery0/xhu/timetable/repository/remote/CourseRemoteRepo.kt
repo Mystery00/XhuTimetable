@@ -25,7 +25,12 @@ class CourseRemoteRepo : CourseRepo, KoinComponent {
         term: Int,
     ): List<CourseResponse> = runOnCpu {
         val response = user.withAutoLogin {
-            jwcApi.courseList(it, getConfig { currentYear }, getConfig { currentTerm }).checkLogin()
+            jwcApi.courseList(
+                it,
+                getConfig { currentYear },
+                getConfig { currentTerm },
+                getConfig { showCustomCourseOnWeek },
+            ).checkLogin()
         }
         val courseList = response.first
         courseList.forEach { it.user = user }

@@ -44,6 +44,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
         val currentTerm by viewModel.currentTermData.collectAsState()
         val showTomorrowCourseTime by viewModel.showTomorrowCourseTimeData.collectAsState()
         val currentTermStartTime by viewModel.currentTermStartTime.collectAsState()
+        val showCustomCourse by viewModel.showCustomCourseData.collectAsState()
         val showTomorrowCourseTimeState = rememberMaterialDialogState()
         val yearAndTermState = rememberMaterialDialogState()
         val termStartTimeState = rememberMaterialDialogState()
@@ -228,6 +229,14 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             )
                         },
                         title = { Text(text = "自定义课程") },
+                        action = {
+                            Checkbox(
+                                checked = showCustomCourse,
+                                onCheckedChange = {
+                                    viewModel.updateShowCustomCourse(it)
+                                },
+                            )
+                        },
                         onClick = {
                             intentTo(CustomCourseActivity::class)
                         }

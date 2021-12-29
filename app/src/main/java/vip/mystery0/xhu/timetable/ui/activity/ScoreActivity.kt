@@ -206,7 +206,7 @@ class ScoreActivity : BaseComposeActivity() {
                                 }
                                 items(3) {
                                     BuildItem(
-                                        ScoreItem("课程名称", "成绩", "绩点", "学分", "课程类型"),
+                                        ScoreItem.PLACEHOLDER,
                                         showGpa,
                                         showCredit,
                                         showCourseType,
@@ -242,7 +242,7 @@ class ScoreActivity : BaseComposeActivity() {
                                 }
                                 item {
                                     BuildItem(
-                                        ScoreItem("课程名称", "成绩", "绩点", "学分", "课程类型"),
+                                        ScoreItem.PLACEHOLDER,
                                         showGpa,
                                         showCredit,
                                         showCourseType,
