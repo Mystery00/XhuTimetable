@@ -10,4 +10,11 @@ data class CustomCourse(
     var courseIndex: List<Int>,
     var day: Int,
     var extraData: String,
-)
+) {
+    companion object {
+        val PLACEHOLDER =
+            CustomCourse(0, "课程名称", "教师名称", "第1周", listOf(1), "上课地点", listOf(1, 1), 1, "")
+        val EMPTY =
+            CustomCourse(0, "", "", "", listOf(1), "", listOf(1, 1), 1, "")
+    }
+}

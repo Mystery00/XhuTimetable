@@ -79,6 +79,33 @@ object XhuIcons {
         @Composable
         get() = painterResource(R.mipmap.ic_poems)
 
+    object CustomCourse {
+        val title: Painter
+            @Composable
+            get() = painterResource(R.drawable.ic_custom_course_title)
+        val teacher: Painter
+            @Composable
+            get() = painterResource(R.drawable.ic_custom_course_teacher)
+        val week: Painter
+            @Composable
+            get() = painterResource(R.drawable.ic_custom_course_week)
+        val time: Painter
+            @Composable
+            get() = painterResource(R.drawable.ic_custom_course_time)
+        val location: Painter
+            @Composable
+            get() = painterResource(R.drawable.ic_custom_course_location)
+        val add: Painter
+            @Composable
+            get() = painterResource(R.drawable.ic_custom_course_add)
+        val close: Painter
+            @Composable
+            get() = painterResource(R.drawable.ic_custom_course_close)
+        val pull: Painter
+            @Composable
+            get() = painterResource(R.drawable.ic_custom_course_pull)
+    }
+
     object Profile {
         val exam: Painter
             @Composable

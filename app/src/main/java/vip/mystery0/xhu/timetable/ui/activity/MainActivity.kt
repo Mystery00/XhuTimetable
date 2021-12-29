@@ -487,7 +487,8 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                 viewModel.checkMainUser()
                 viewModel.loadCourseList(true)
             }
-            EventType.CHANGE_CURRENT_YEAR_AND_TERM -> {
+            EventType.CHANGE_CURRENT_YEAR_AND_TERM,
+            EventType.CHANGE_SHOW_CUSTOM_COURSE -> {
                 viewModel.loadCourseList(true)
             }
             EventType.MAIN_USER_LOGOUT -> {
