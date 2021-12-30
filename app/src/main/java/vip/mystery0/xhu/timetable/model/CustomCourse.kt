@@ -1,5 +1,7 @@
 package vip.mystery0.xhu.timetable.model
 
+import java.time.LocalDate
+
 data class CustomCourse(
     var courseId: Long,
     var courseName: String,
@@ -15,6 +17,16 @@ data class CustomCourse(
         val PLACEHOLDER =
             CustomCourse(0, "课程名称", "教师名称", "第1周", listOf(1), "上课地点", listOf(1, 1), 1, "")
         val EMPTY =
-            CustomCourse(0, "", "", "", listOf(1), "", listOf(1, 1), 1, "")
+            CustomCourse(
+                0,
+                "",
+                "",
+                "",
+                listOf(),
+                "",
+                listOf(1, 1),
+                LocalDate.now().dayOfWeek.value,
+                ""
+            )
     }
 }
