@@ -21,6 +21,9 @@ object XhuColor {
     val iconChecked: Color
         @Composable
         get() = Color(0xFF2196F3)
+    val customCourseWeekColorBackground: Color
+        @Composable
+        get() = Color(0xFFE5E5E5)
 
     object Profile {
         val divider: Color

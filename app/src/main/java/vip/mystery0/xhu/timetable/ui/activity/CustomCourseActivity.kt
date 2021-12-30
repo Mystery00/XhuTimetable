@@ -9,6 +9,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,7 +27,11 @@ import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.model.CustomCourse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.utils.formatWeekString
 import vip.mystery0.xhu.timetable.viewmodel.CustomCourseViewModel
+import java.time.DayOfWeek
+import java.time.format.TextStyle
+import java.util.*
 
 @OptIn(ExperimentalMaterialApi::class)
 class CustomCourseActivity : BaseComposeActivity() {
@@ -44,8 +50,13 @@ class CustomCourseActivity : BaseComposeActivity() {
         val userDialog = remember { mutableStateOf(false) }
         val yearDialog = remember { mutableStateOf(false) }
         val termDialog = remember { mutableStateOf(false) }
+        val courseIndex1Dialog = remember { mutableStateOf(false) }
+        val courseIndex2Dialog = remember { mutableStateOf(false) }
+        val weekDialog = remember { mutableStateOf(false) }
 
         var customCourse by remember { mutableStateOf(CustomCourse.EMPTY) }
+        val courseIndex = remember { mutableStateOf(customCourse.courseIndex) }
+        val day = remember { mutableStateOf(customCourse.day) }
 
         fun onBack() {
             if (scaffoldState.isRevealed) {
@@ -166,12 +177,10 @@ class CustomCourseActivity : BaseComposeActivity() {
                     sheetState = showSelect,
                     scrimColor = Color.Black.copy(alpha = 0.32f),
                     sheetContent = {
-                        var courseName by remember { mutableStateOf("") }
-                        var teacherName by remember { mutableStateOf("") }
-                        val weekList = customCourse.week
-                        var location by remember { mutableStateOf("") }
-                        var courseIndex = customCourse.courseIndex
-                        var day by remember { mutableStateOf(1) }
+                        var courseName by remember { mutableStateOf(customCourse.courseName) }
+                        var teacherName by remember { mutableStateOf(customCourse.teacherName) }
+                        var weekList by remember { mutableStateOf(customCourse.week) }
+                        var location by remember { mutableStateOf(customCourse.location) }
                         Column(modifier = Modifier.fillMaxSize()) {
                             Row(
                                 modifier = Modifier
@@ -212,6 +221,9 @@ class CustomCourseActivity : BaseComposeActivity() {
                                 TextField(
                                     modifier = Modifier.weight(1F),
                                     value = courseName,
+                                    placeholder = {
+                                        Text(text = "课程名称（必填）")
+                                    },
                                     onValueChange = { courseName = it })
                             }
                             Row(
@@ -227,7 +239,119 @@ class CustomCourseActivity : BaseComposeActivity() {
                                 TextField(
                                     modifier = Modifier.weight(1F),
                                     value = teacherName,
+                                    placeholder = {
+                                        Text(text = "任课教师（选填）")
+                                    },
                                     onValueChange = { teacherName = it })
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Image(
+                                    modifier = Modifier.padding(12.dp),
+                                    painter = XhuIcons.CustomCourse.week,
+                                    contentDescription = null
+                                )
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text(text = "上课周数（不能为空）${weekList.formatWeekString()}")
+                                    LazyRow(content = {
+                                        items(20) { index ->
+                                            Box(
+                                                modifier = Modifier.padding(1.dp),
+                                                contentAlignment = Alignment.Center,
+                                            ) {
+                                                val item = index + 1
+                                                val inList = item in weekList
+                                                val color =
+                                                    if (inList) MaterialTheme.colors.primary else XhuColor.customCourseWeekColorBackground
+                                                val textColor =
+                                                    if (inList) MaterialTheme.colors.onPrimary else XhuColor.Common.blackText
+                                                Surface(
+                                                    shape = CircleShape,
+                                                    modifier = Modifier
+                                                        .padding(horizontal = 6.dp)
+                                                        .size(36.dp)
+                                                        .clickable(
+                                                            onClick = {
+                                                                weekList = if (inList) {
+                                                                    val newList =
+                                                                        weekList.toMutableList()
+                                                                    newList.remove(item)
+                                                                    newList
+                                                                } else {
+                                                                    val newList =
+                                                                        weekList.toMutableList()
+                                                                    newList.add(item)
+                                                                    newList
+                                                                }
+                                                            },
+                                                            indication = null,
+                                                            interactionSource = MutableInteractionSource(),
+                                                        ),
+                                                    color = color
+                                                ) {}
+                                                Text(text = "$item", color = textColor)
+                                            }
+                                        }
+                                    })
+                                }
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Image(
+                                    modifier = Modifier.padding(12.dp),
+                                    painter = XhuIcons.CustomCourse.location,
+                                    contentDescription = null
+                                )
+                                TextField(
+                                    modifier = Modifier.weight(1F),
+                                    value = location,
+                                    placeholder = {
+                                        Text(text = "上课地点（选填）")
+                                    },
+                                    onValueChange = { location = it })
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Image(
+                                    modifier = Modifier.padding(12.dp),
+                                    painter = XhuIcons.CustomCourse.location,
+                                    contentDescription = null
+                                )
+                                Text(
+                                    modifier = Modifier
+                                        .weight(1F)
+                                        .clickable(
+                                            onClick = {
+                                                courseIndex1Dialog.value = true
+                                                courseIndex2Dialog.value = true
+                                            },
+                                            indication = null,
+                                            interactionSource = MutableInteractionSource(),
+                                        ),
+                                    text = "第 ${courseIndex.value[0]}-${courseIndex.value[1]} 节",
+                                )
+                                Text(
+                                    modifier = Modifier
+                                        .weight(1F)
+                                        .clickable(
+                                            onClick = {
+                                                weekDialog.value = true
+                                            },
+                                            indication = null,
+                                            interactionSource = MutableInteractionSource(),
+                                        ),
+                                    text = DayOfWeek.of(day.value)
+                                        .getDisplayName(TextStyle.SHORT, Locale.CHINA),
+                                )
                             }
                             Spacer(modifier = Modifier.weight(1F))
                         }
@@ -267,11 +391,10 @@ class CustomCourseActivity : BaseComposeActivity() {
                         FloatingActionButton(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
-                                .padding(24.dp)
-                                .size(64.dp),
+                                .padding(24.dp),
                             onClick = {
                                 scope.launch {
-                                    showSelect.show()
+                                    showSelect.animateTo(targetValue = ModalBottomSheetValue.Expanded)
                                 }
                             }) {
                             Icon(XhuIcons.CustomCourse.add, contentDescription = null)
@@ -282,6 +405,12 @@ class CustomCourseActivity : BaseComposeActivity() {
         ShowUserDialog(show = userDialog)
         ShowYearDialog(show = yearDialog)
         ShowTermDialog(show = termDialog)
+        ShowCourseIndexDialog(
+            courseIndex = courseIndex,
+            first = courseIndex1Dialog,
+            second = courseIndex2Dialog
+        )
+        ShowWeekDialog(week = day, show = weekDialog)
         if (customCourseListState.errorMessage.isNotBlank()) {
             customCourseListState.errorMessage.toast(true)
         }
@@ -454,6 +583,188 @@ class CustomCourseActivity : BaseComposeActivity() {
                     TextButton(
                         onClick = {
                             viewModel.selectTerm(selected.term)
+                            show.value = false
+                        },
+                    ) {
+                        Text("确认")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            show.value = false
+                        }
+                    ) {
+                        Text("取消")
+                    }
+                }
+            )
+        }
+    }
+
+    @Composable
+    private fun ShowCourseIndexDialog(
+        courseIndex: MutableState<List<Int>>,
+        first: MutableState<Boolean>,
+        second: MutableState<Boolean>,
+    ) {
+        var saveData by remember { mutableStateOf(courseIndex.value) }
+        if (first.value) {
+            var selected by remember { mutableStateOf(1) }
+            AlertDialog(
+                onDismissRequest = {
+                    first.value = false
+                },
+                title = {
+                    Text(text = "请选择开始上课的节次")
+                },
+                text = {
+                    LazyColumn {
+                        items(11) { index ->
+                            val item = index + 1
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = remember { MutableInteractionSource() },
+                                    ) {
+                                        selected = item
+                                    },
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                RadioButton(selected = selected == item, onClick = null)
+                                Text(text = "第 $item 节")
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            saveData = listOf(selected, courseIndex.value[1])
+                            first.value = false
+                        },
+                    ) {
+                        Text("确认")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            saveData = courseIndex.value
+                            first.value = false
+                            second.value = false
+                        }
+                    ) {
+                        Text("取消")
+                    }
+                }
+            )
+        } else if (second.value) {
+            var selected by remember { mutableStateOf(saveData[0]) }
+            AlertDialog(
+                onDismissRequest = {
+                    second.value = false
+                },
+                title = {
+                    Text(text = "请选择结束上课的节次")
+                },
+                text = {
+                    LazyColumn {
+                        items(12 - saveData[0]) { index ->
+                            val item = index + saveData[0]
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = remember { MutableInteractionSource() },
+                                    ) {
+                                        selected = item
+                                    },
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                RadioButton(selected = selected == item, onClick = null)
+                                Text(text = "第 $item 节")
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            saveData = listOf(saveData[0], selected)
+                            second.value = false
+                        },
+                    ) {
+                        Text("确认")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            saveData = courseIndex.value
+                            first.value = false
+                            second.value = false
+                        }
+                    ) {
+                        Text("取消")
+                    }
+                }
+            )
+        } else {
+            courseIndex.value = saveData
+        }
+    }
+
+    @Composable
+    private fun ShowWeekDialog(
+        week: MutableState<Int>,
+        show: MutableState<Boolean>,
+    ) {
+        val array = arrayOf("周一", "周二", "周三", "周四", "周五", "周六", "周日")
+        val selectedWeek = week.value
+        if (show.value) {
+            var selected by remember { mutableStateOf(selectedWeek) }
+            AlertDialog(
+                onDismissRequest = {
+                    show.value = false
+                },
+                title = {
+                    Text(text = "请选择上课星期")
+                },
+                text = {
+                    LazyColumn {
+                        items(array.size) { index ->
+                            val item = index + 1
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = remember { MutableInteractionSource() },
+                                    ) {
+                                        selected = item
+                                    },
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                RadioButton(selected = selected == item, onClick = null)
+                                Text(text = array[index])
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            week.value = selected
                             show.value = false
                         },
                     ) {
