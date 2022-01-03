@@ -12,11 +12,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.material.shimmer
@@ -41,10 +45,19 @@ class CustomCourseActivity : BaseComposeActivity() {
     @Composable
     override fun BuildContent() {
         val customCourseListState by viewModel.customCourseListState.collectAsState()
+        val saveCustomCourseState by viewModel.saveCustomCourseState.collectAsState()
 
-        val showSelect = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+        val showSelect = rememberModalBottomSheetState(
+            initialValue = ModalBottomSheetValue.Hidden,
+            confirmStateChange = {
+                !customCourseListState.loading && !saveCustomCourseState.loading
+            })
         val scaffoldState: BackdropScaffoldState =
-            rememberBackdropScaffoldState(initialValue = BackdropValue.Revealed)
+            rememberBackdropScaffoldState(
+                initialValue = BackdropValue.Revealed,
+                confirmStateChange = {
+                    !showSelect.isVisible && !customCourseListState.loading && !saveCustomCourseState.loading
+                })
         val scope = rememberCoroutineScope()
 
         val userDialog = remember { mutableStateOf(false) }
@@ -55,8 +68,22 @@ class CustomCourseActivity : BaseComposeActivity() {
         val weekDialog = remember { mutableStateOf(false) }
 
         var customCourse by remember { mutableStateOf(CustomCourse.EMPTY) }
+        var courseName by remember { mutableStateOf(customCourse.courseName) }
+        var teacherName by remember { mutableStateOf(customCourse.teacherName) }
+        var weekList by remember { mutableStateOf(customCourse.week) }
+        var location by remember { mutableStateOf(customCourse.location) }
         val courseIndex = remember { mutableStateOf(customCourse.courseIndex) }
         val day = remember { mutableStateOf(customCourse.day) }
+
+        fun updateCustomCourse(data: CustomCourse) {
+            customCourse = data
+            courseName = data.courseName
+            teacherName = data.teacherName
+            weekList = data.week
+            location = data.location
+            courseIndex.value = data.courseIndex
+            day.value = data.day
+        }
 
         fun onBack() {
             if (scaffoldState.isRevealed) {
@@ -101,9 +128,15 @@ class CustomCourseActivity : BaseComposeActivity() {
                     actions = {
                         IconButton(onClick = {
                             scope.launch {
-//                                if (!showSelect.isVisible) {
-//                                    showOption = !showOption
-//                                }
+                                if (showSelect.isVisible) {
+                                    showSelect.hide()
+                                    return@launch
+                                }
+                                if (scaffoldState.isRevealed) {
+                                    scaffoldState.conceal()
+                                } else {
+                                    scaffoldState.reveal()
+                                }
                             }
                         }) {
                             Icon(
@@ -177,10 +210,6 @@ class CustomCourseActivity : BaseComposeActivity() {
                     sheetState = showSelect,
                     scrimColor = Color.Black.copy(alpha = 0.32f),
                     sheetContent = {
-                        var courseName by remember { mutableStateOf(customCourse.courseName) }
-                        var teacherName by remember { mutableStateOf(customCourse.teacherName) }
-                        var weekList by remember { mutableStateOf(customCourse.week) }
-                        var location by remember { mutableStateOf(customCourse.location) }
                         Column(modifier = Modifier.fillMaxSize()) {
                             Row(
                                 modifier = Modifier
@@ -201,9 +230,15 @@ class CustomCourseActivity : BaseComposeActivity() {
                                 Spacer(modifier = Modifier.weight(1F))
                                 TextButton(
                                     onClick = {
-                                        scope.launch {
-                                            showSelect.hide()
-                                        }
+                                        viewModel.saveCustomCourse(
+                                            customCourse.courseId,
+                                            courseName,
+                                            teacherName,
+                                            weekList,
+                                            location,
+                                            courseIndex.value,
+                                            day.value,
+                                        )
                                     }) {
                                     Text(text = "保存")
                                 }
@@ -267,7 +302,7 @@ class CustomCourseActivity : BaseComposeActivity() {
                                                 val color =
                                                     if (inList) MaterialTheme.colors.primary else XhuColor.customCourseWeekColorBackground
                                                 val textColor =
-                                                    if (inList) MaterialTheme.colors.onPrimary else XhuColor.Common.blackText
+                                                    if (inList) MaterialTheme.colors.onPrimary else Color.Black
                                                 Surface(
                                                     shape = CircleShape,
                                                     modifier = Modifier
@@ -323,7 +358,7 @@ class CustomCourseActivity : BaseComposeActivity() {
                             ) {
                                 Image(
                                     modifier = Modifier.padding(12.dp),
-                                    painter = XhuIcons.CustomCourse.location,
+                                    painter = XhuIcons.CustomCourse.time,
                                     contentDescription = null
                                 )
                                 Text(
@@ -360,7 +395,8 @@ class CustomCourseActivity : BaseComposeActivity() {
                         SwipeRefresh(
                             modifier = Modifier.fillMaxSize(),
                             state = rememberSwipeRefreshState(customCourseListState.loading),
-                            onRefresh = { },
+                            onRefresh = {
+                            },
                             swipeEnabled = false,
                         ) {
                             val list = customCourseListState.customCourseList
@@ -371,16 +407,26 @@ class CustomCourseActivity : BaseComposeActivity() {
                                 contentPadding = PaddingValues(4.dp),
                             ) {
                                 if (customCourseListState.loading) {
+                                    scope.launch {
+                                        showSelect.hide()
+                                    }
                                     items(3) {
                                         BuildItem(
                                             CustomCourse.PLACEHOLDER,
                                             true,
-                                        )
+                                        ) {}
                                     }
                                 } else {
                                     items(list.size) { index ->
                                         val item = list[index]
-                                        BuildItem(item)
+                                        BuildItem(item) {
+                                            if (!customCourseListState.loading) {
+                                                updateCustomCourse(item)
+                                                scope.launch {
+                                                    showSelect.animateTo(targetValue = ModalBottomSheetValue.Expanded)
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -393,11 +439,14 @@ class CustomCourseActivity : BaseComposeActivity() {
                                 .align(Alignment.BottomEnd)
                                 .padding(24.dp),
                             onClick = {
-                                scope.launch {
-                                    showSelect.animateTo(targetValue = ModalBottomSheetValue.Expanded)
+                                if (!customCourseListState.loading) {
+                                    updateCustomCourse(CustomCourse.EMPTY)
+                                    scope.launch {
+                                        showSelect.animateTo(targetValue = ModalBottomSheetValue.Expanded)
+                                    }
                                 }
                             }) {
-                            Icon(XhuIcons.CustomCourse.add, contentDescription = null)
+                            Icon(Icons.Rounded.Add, contentDescription = null)
                         }
                     }
                 }
@@ -411,8 +460,9 @@ class CustomCourseActivity : BaseComposeActivity() {
             second = courseIndex2Dialog
         )
         ShowWeekDialog(week = day, show = weekDialog)
-        if (customCourseListState.errorMessage.isNotBlank()) {
-            customCourseListState.errorMessage.toast(true)
+        val errorMessage by viewModel.errorMessage.collectAsState()
+        if (errorMessage.second.isNotBlank()) {
+            errorMessage.second.toast(true)
         }
     }
 
@@ -789,6 +839,7 @@ class CustomCourseActivity : BaseComposeActivity() {
 private fun BuildItem(
     item: CustomCourse,
     placeHolder: Boolean = false,
+    onClick: () -> Unit,
 ) {
     Card(
         modifier = Modifier
@@ -797,6 +848,11 @@ private fun BuildItem(
             .placeholder(
                 visible = placeHolder,
                 highlight = PlaceholderHighlight.shimmer(),
+            )
+            .clickable(
+                onClick = onClick,
+                indication = null,
+                interactionSource = MutableInteractionSource(),
             ),
         backgroundColor = XhuColor.cardBackground,
     ) {
@@ -804,34 +860,48 @@ private fun BuildItem(
             modifier = Modifier.padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Text(modifier = Modifier.fillMaxWidth(), text = item.courseName)
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = item.courseName,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Image(painter = XhuIcons.CustomCourse.teacher, contentDescription = null)
-                Text(text = item.teacherName)
+                Text(text = "教师名称：${item.teacherName}")
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Image(painter = XhuIcons.CustomCourse.week, contentDescription = null)
-                Text(text = "${item.weekString} ${item.day}")
+                Text(
+                    text = "上课星期：第${item.weekString} 每周${
+                        DayOfWeek.of(item.day).getDisplayName(TextStyle.SHORT, Locale.CHINA)
+                    }"
+                )
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Image(painter = XhuIcons.CustomCourse.location, contentDescription = null)
-                Text(text = item.location)
+                Text(text = "上课地点：${item.location}")
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Image(painter = XhuIcons.CustomCourse.time, contentDescription = null)
-                Text(text = item.courseIndex.joinToString())
+                var courseIndex = item.courseIndex
+                if (courseIndex.size == 1) {
+                    courseIndex = listOf(courseIndex[0], courseIndex[0])
+                }
+                Text(text = "上课时间：第 ${courseIndex[0]}-${courseIndex[1]} 节")
             }
         }
     }

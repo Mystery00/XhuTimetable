@@ -82,93 +82,102 @@ object XhuIcons {
     object CustomCourse {
         val title: Painter
             @Composable
-            get() = painterResource(R.drawable.ic_custom_course_title)
+            get() = iconOf(
+                painterResource(R.drawable.ic_custom_course_title_night) to
+                        painterResource(R.drawable.ic_custom_course_title)
+            )
         val teacher: Painter
             @Composable
-            get() = painterResource(R.drawable.ic_custom_course_teacher)
+            get() = iconOf(
+                painterResource(R.drawable.ic_custom_course_teacher_night) to
+                        painterResource(R.drawable.ic_custom_course_teacher)
+            )
         val week: Painter
             @Composable
-            get() = painterResource(R.drawable.ic_custom_course_week)
+            get() = iconOf(
+                painterResource(R.drawable.ic_custom_course_week_night) to
+                        painterResource(R.drawable.ic_custom_course_week)
+            )
         val time: Painter
             @Composable
-            get() = painterResource(R.drawable.ic_custom_course_time)
+            get() = iconOf(
+                painterResource(R.drawable.ic_custom_course_time_night) to
+                        painterResource(R.drawable.ic_custom_course_time)
+            )
         val location: Painter
             @Composable
-            get() = painterResource(R.drawable.ic_custom_course_location)
-        val add: Painter
-            @Composable
-            get() = painterResource(R.drawable.ic_custom_course_add)
+            get() = iconOf(
+                painterResource(R.drawable.ic_custom_course_location_night) to
+                        painterResource(R.drawable.ic_custom_course_location)
+            )
         val close: Painter
             @Composable
-            get() = painterResource(R.drawable.ic_custom_course_close)
+            get() = iconOf(
+                painterResource(R.drawable.ic_custom_course_close_night) to
+                        painterResource(R.drawable.ic_custom_course_close)
+            )
         val pull: Painter
             @Composable
-            get() = painterResource(R.drawable.ic_custom_course_pull)
+            get() = iconOf(
+                painterResource(R.drawable.ic_custom_course_pull_night) to
+                        painterResource(R.drawable.ic_custom_course_pull)
+            )
     }
 
     object Profile {
         val exam: Painter
             @Composable
             get() = iconOf(
-                pair = painterResource(id = R.drawable.ic_exam_night) to painterResource(
-                    id = R.drawable.ic_exam
-                )
+                painterResource(id = R.drawable.ic_exam_night) to
+                        painterResource(id = R.drawable.ic_exam)
             )
         val score: Painter
             @Composable
             get() = iconOf(
-                pair = painterResource(id = R.drawable.ic_score_night) to painterResource(
-                    id = R.drawable.ic_score
-                )
+                painterResource(id = R.drawable.ic_score_night) to
+                        painterResource(id = R.drawable.ic_score)
             )
         val classroom: Painter
             @Composable
             get() = iconOf(
-                pair = painterResource(id = R.drawable.ic_classroom_night) to painterResource(
-                    id = R.drawable.ic_classroom
-                )
+                painterResource(id = R.drawable.ic_classroom_night) to
+                        painterResource(id = R.drawable.ic_classroom)
             )
         val accountSettings: Painter
             @Composable
             get() = iconOf(
-                pair = painterResource(id = R.drawable.ic_account_settings_night) to painterResource(
-                    id = R.drawable.ic_account_settings
-                )
+                painterResource(id = R.drawable.ic_account_settings_night) to
+                        painterResource(id = R.drawable.ic_account_settings)
             )
         val classSettings: Painter
             @Composable
             get() = iconOf(
-                pair = painterResource(id = R.drawable.ic_class_settings_night) to painterResource(
-                    id = R.drawable.ic_class_settings
-                )
+                painterResource(id = R.drawable.ic_class_settings_night) to
+                        painterResource(id = R.drawable.ic_class_settings)
             )
         val settings: Painter
             @Composable
             get() = iconOf(
-                pair = painterResource(id = R.drawable.ic_settings_night) to painterResource(
-                    id = R.drawable.ic_settings
-                )
+                painterResource(id = R.drawable.ic_settings_night) to
+                        painterResource(id = R.drawable.ic_settings)
             )
         val notice: Painter
             @Composable
             get() = iconOf(
-                pair = painterResource(id = R.drawable.ic_notice_night) to painterResource(
-                    id = R.drawable.ic_notice
-                )
+                painterResource(id = R.drawable.ic_notice_night) to
+                        painterResource(id = R.drawable.ic_notice)
             )
         val feedback: Painter
             @Composable
             get() = iconOf(
-                pair = painterResource(id = R.drawable.ic_feedback_night) to painterResource(
-                    id = R.drawable.ic_feedback
-                )
+                painterResource(id = R.drawable.ic_feedback_night) to
+                        painterResource(id = R.drawable.ic_feedback)
             )
         val share: Painter
             @Composable
             get() = iconOf(
-                pair = painterResource(id = R.drawable.ic_share_night) to painterResource(
-                    id = R.drawable.ic_share
-                )
+                painterResource(id = R.drawable.ic_share_night) to
+                        painterResource(id = R.drawable.ic_share)
             )
     }
 
