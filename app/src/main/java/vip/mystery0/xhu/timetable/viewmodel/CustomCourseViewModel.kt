@@ -20,6 +20,8 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
         private const val TAG = "CustomCourseViewModel"
     }
 
+    var changeCustomCourse = false
+
     private val _errorMessage = MutableStateFlow(Pair(System.currentTimeMillis(), ""))
     val errorMessage: StateFlow<Pair<Long, String>> = _errorMessage
 
@@ -129,6 +131,7 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
             }
             _saveCustomCourseState.value = SaveCustomCourseState()
             toastMessage("《$courseName》保存成功")
+            changeCustomCourse = true
             loadCustomCourseList()
         }
     }

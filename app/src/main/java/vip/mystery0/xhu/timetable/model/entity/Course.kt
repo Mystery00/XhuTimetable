@@ -42,6 +42,9 @@ enum class CourseType(val type: Int) {
 
     //双周
     DOUBLE(2),
+
+    //自定义课程
+    CUSTOM_COURSE(3),
 }
 
 enum class CourseSource(val source: Int) {

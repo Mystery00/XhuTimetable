@@ -29,6 +29,8 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.model.CustomCourse
+import vip.mystery0.xhu.timetable.model.event.EventType
+import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.formatWeekString
@@ -97,6 +99,9 @@ class CustomCourseActivity : BaseComposeActivity() {
                     showSelect.hide()
                 }
                 return
+            }
+            if (viewModel.changeCustomCourse) {
+                eventBus.post(UIEvent(EventType.CHANGE_SHOW_CUSTOM_COURSE))
             }
             finish()
         }
