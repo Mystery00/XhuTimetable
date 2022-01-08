@@ -10,6 +10,7 @@ import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.*
 import vip.mystery0.xhu.timetable.model.CustomCourse
 import vip.mystery0.xhu.timetable.repository.createCustomCourse
+import vip.mystery0.xhu.timetable.repository.deleteCustomCourse
 import vip.mystery0.xhu.timetable.repository.getCustomCourseList
 import vip.mystery0.xhu.timetable.repository.updateCustomCourse
 import java.time.LocalDateTime
@@ -32,6 +33,10 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
     private val _termSelect = MutableStateFlow<List<TermSelect>>(emptyList())
     val termSelect: StateFlow<List<TermSelect>> = _termSelect
 
+    private lateinit var currentUser: User
+    private lateinit var currentYear: String
+    private var currentTerm: Int = 1
+
     private val _customCourseListState = MutableStateFlow(CustomCourseListState())
     val customCourseListState: StateFlow<CustomCourseListState> = _customCourseListState
 
@@ -46,8 +51,13 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
                     UserSelect(it.studentId, it.info.userName, it.main)
                 }
             }
-            _yearSelect.value = buildYearSelect(getConfig { currentYear })
-            _termSelect.value = buildTermSelect(getConfig { currentTerm })
+            currentUser = loggedUserList.find { it.main }!!
+            currentYear = getConfig { currentYear }
+            currentTerm = getConfig { currentTerm }
+
+            _yearSelect.value = buildYearSelect(currentYear)
+            _termSelect.value = buildTermSelect(currentTerm)
+
         }
     }
 
@@ -81,11 +91,15 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
         }) {
             _customCourseListState.value = CustomCourseListState(loading = true)
             val selected = runOnCpu { _userSelect.value.first { it.selected }.studentId }
-            val selectUser =
-                SessionManager.user(selected)
+            val selectUser = SessionManager.user(selected)
             val year = runOnCpu { yearSelect.value.first { it.selected }.year }
             val term = runOnCpu { termSelect.value.first { it.selected }.term }
-            val response = getCustomCourseList(selectUser, year, term)
+
+            currentUser = selectUser
+            currentYear = year
+            currentTerm = term
+
+            val response = getCustomCourseList(currentUser, currentYear, currentTerm)
             _customCourseListState.value = CustomCourseListState(
                 customCourseList = response,
                 loading = false
@@ -109,10 +123,7 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
             toastMessage(throwable.message ?: throwable.javaClass.simpleName)
         }) {
             _saveCustomCourseState.value = SaveCustomCourseState(loading = true)
-            val selected = runOnCpu { _userSelect.value.first { it.selected }.studentId }
-            val selectUser = SessionManager.user(selected)
-            val year = runOnCpu { yearSelect.value.first { it.selected }.year }
-            val term = runOnCpu { termSelect.value.first { it.selected }.term }
+
             val customCourse = CustomCourse(
                 courseId,
                 courseName,
@@ -125,12 +136,29 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
                 "",
             )
             if (courseId == 0L) {
-                createCustomCourse(selectUser, year, term, customCourse)
+                createCustomCourse(currentUser, currentYear, currentTerm, customCourse)
             } else {
-                updateCustomCourse(selectUser, year, term, customCourse)
+                updateCustomCourse(currentUser, currentYear, currentTerm, customCourse)
             }
             _saveCustomCourseState.value = SaveCustomCourseState()
             toastMessage("《$courseName》保存成功")
+            changeCustomCourse = true
+            loadCustomCourseList()
+        }
+    }
+
+    fun delete(courseId: Long) {
+        viewModelScope.launch(serverExceptionHandler { throwable ->
+            Log.w(TAG, "delete custom course failed", throwable)
+            _saveCustomCourseState.value =
+                SaveCustomCourseState()
+            toastMessage(throwable.message ?: throwable.javaClass.simpleName)
+        }) {
+            _saveCustomCourseState.value = SaveCustomCourseState(loading = true)
+
+            deleteCustomCourse(currentUser, currentYear, currentTerm, courseId)
+            _saveCustomCourseState.value = SaveCustomCourseState()
+            toastMessage("删除成功")
             changeCustomCourse = true
             loadCustomCourseList()
         }

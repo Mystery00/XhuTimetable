@@ -233,6 +233,14 @@ class CustomCourseActivity : BaseComposeActivity() {
                                     contentDescription = null,
                                 )
                                 Spacer(modifier = Modifier.weight(1F))
+                                if (customCourse.courseId != 0L) {
+                                    TextButton(
+                                        onClick = {
+                                            viewModel.delete(customCourse.courseId)
+                                        }) {
+                                        Text(text = "删除", color = Color.Red)
+                                    }
+                                }
                                 TextButton(
                                     onClick = {
                                         viewModel.saveCustomCourse(

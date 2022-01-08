@@ -75,6 +75,21 @@ suspend fun updateCustomCourse(
         serverApi.updateCustomCourse(it, customCourse.courseId, request).checkLogin()
     }
     if (!response.first) {
-        throw ServerError("创建自定义课程失败")
+        throw ServerError("更新自定义课程失败")
+    }
+}
+
+suspend fun deleteCustomCourse(
+    user: User,
+    year: String,
+    term: Int,
+    courseId: Long,
+) {
+    val serverApi = KoinJavaComponent.get<ServerApi>(ServerApi::class.java)
+    val response = user.withAutoLogin {
+        serverApi.deleteCustomCourse(it, courseId).checkLogin()
+    }
+    if (!response.first) {
+        throw ServerError("删除自定义课程失败")
     }
 }
