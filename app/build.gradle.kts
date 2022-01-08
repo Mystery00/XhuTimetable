@@ -142,7 +142,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
     //accompanist
-    val accompanistVersion = "0.20.0"
+    val accompanistVersion = "0.22.0-rc"
     implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-pager:$accompanistVersion")
@@ -165,7 +165,6 @@ dependencies {
     //koin
     val koinVersion = "3.1.4"
     implementation("io.insert-koin:koin-android:$koinVersion")
-    implementation("io.insert-koin:koin-android-compat:$koinVersion")
     implementation("io.insert-koin:koin-androidx-workmanager:$koinVersion")
     implementation("io.insert-koin:koin-androidx-compose:$koinVersion")
     //coil
