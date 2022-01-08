@@ -62,6 +62,12 @@ interface ServerApi {
         @Query("id") id: Long,
         @Body customCourseRequest: CustomCourseRequest
     ): Response<Boolean>
+
+    @DELETE("/api/rest/xhu-timetable/server/customCourse")
+    suspend fun deleteCustomCourse(
+        @Header("token") token: String,
+        @Query("id") id: Long,
+    ): Response<Boolean>
 }
 
 fun <T : Any> Response<T>.checkLogin(): T {
