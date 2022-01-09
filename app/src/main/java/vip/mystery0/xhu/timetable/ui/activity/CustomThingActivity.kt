@@ -30,6 +30,8 @@ import com.vanpra.composematerialdialogs.MaterialDialogState
 import com.vanpra.composematerialdialogs.color.ARGBPickerState
 import com.vanpra.composematerialdialogs.color.ColorPalette
 import com.vanpra.composematerialdialogs.color.colorChooser
+import com.vanpra.composematerialdialogs.datetime.date.datepicker
+import com.vanpra.composematerialdialogs.datetime.time.timepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import com.vanpra.composematerialdialogs.title
 import kotlinx.coroutines.launch
@@ -43,6 +45,8 @@ import vip.mystery0.xhu.timetable.utils.dateWithWeekFormatter
 import vip.mystery0.xhu.timetable.utils.enTimeFormatter
 import vip.mystery0.xhu.timetable.utils.thingDateTimeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.CustomThingViewModel
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterialApi::class)
 class CustomThingActivity : BaseComposeActivity() {
@@ -71,17 +75,20 @@ class CustomThingActivity : BaseComposeActivity() {
         val userDialog = remember { mutableStateOf(false) }
         val yearDialog = remember { mutableStateOf(false) }
         val termDialog = remember { mutableStateOf(false) }
-        val startDateDialog = remember { mutableStateOf(false) }
-        val endDateDialog = remember { mutableStateOf(false) }
-        val startTimeDialog = remember { mutableStateOf(false) }
-        val endTimeDialog = remember { mutableStateOf(false) }
+        val startDateDialog = rememberMaterialDialogState()
+        val endDateDialog = rememberMaterialDialogState()
+        val startTimeDialog = rememberMaterialDialogState()
+        val endTimeDialog = rememberMaterialDialogState()
+
+        val dateDialogState = rememberMaterialDialogState()
+        val timeDialogState = rememberMaterialDialogState()
 
         var customThing by remember { mutableStateOf(CustomThing.EMPTY) }
         var thingTitle by remember { mutableStateOf(customThing.title) }
         var location by remember { mutableStateOf(customThing.location) }
         var allDay by remember { mutableStateOf(customThing.allDay) }
-        var startTime by remember { mutableStateOf(customThing.startTime) }
-        var endTime by remember { mutableStateOf(customThing.endTime) }
+        val startTime = remember { mutableStateOf(customThing.startTime) }
+        val endTime = remember { mutableStateOf(customThing.endTime) }
         var remark by remember { mutableStateOf(customThing.remark) }
         val color = remember { mutableStateOf(customThing.color) }
 
@@ -90,8 +97,8 @@ class CustomThingActivity : BaseComposeActivity() {
             thingTitle = data.title
             location = data.location
             allDay = data.allDay
-            startTime = data.startTime
-            endTime = data.endTime
+            startTime.value = data.startTime
+            endTime.value = data.endTime
             remark = data.remark
             color.value = data.color
         }
@@ -252,13 +259,17 @@ class CustomThingActivity : BaseComposeActivity() {
                                 }
                                 TextButton(
                                     onClick = {
+                                        if (startTime.value.isAfter(endTime.value)) {
+                                            "开始时间不能晚于结束时间".toast(true)
+                                            return@TextButton
+                                        }
                                         viewModel.saveCustomThing(
                                             customThing.thingId,
                                             thingTitle,
                                             location,
                                             allDay,
-                                            startTime,
-                                            endTime,
+                                            startTime.value,
+                                            endTime.value,
                                             remark,
                                             color.value,
                                         )
@@ -320,57 +331,67 @@ class CustomThingActivity : BaseComposeActivity() {
                                             onCheckedChange = { allDay = it },
                                         )
                                     }
-                                    Row(modifier = Modifier.fillMaxWidth()) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(36.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
                                         Text(
                                             modifier = Modifier
                                                 .weight(1F)
                                                 .clickable(
                                                     onClick = {
-                                                        startDateDialog.value = true
+                                                        startDateDialog.show()
                                                     },
                                                     indication = null,
                                                     interactionSource = MutableInteractionSource(),
                                                 ),
-                                            text = startTime.format(dateWithWeekFormatter),
+                                            text = startTime.value.format(dateWithWeekFormatter),
                                         )
                                         if (!allDay) {
                                             Text(
                                                 modifier = Modifier
                                                     .clickable(
                                                         onClick = {
-                                                            startTimeDialog.value = true
+                                                            startTimeDialog.show()
                                                         },
                                                         indication = null,
                                                         interactionSource = MutableInteractionSource(),
                                                     ),
-                                                text = startTime.format(enTimeFormatter),
+                                                text = startTime.value.format(enTimeFormatter),
                                             )
                                         }
                                     }
-                                    Row(modifier = Modifier.fillMaxWidth()) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(36.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
                                         Text(
                                             modifier = Modifier
                                                 .weight(1F)
                                                 .clickable(
                                                     onClick = {
-                                                        endDateDialog.value = true
+                                                        endDateDialog.show()
                                                     },
                                                     indication = null,
                                                     interactionSource = MutableInteractionSource(),
                                                 ),
-                                            text = endTime.format(dateWithWeekFormatter),
+                                            text = endTime.value.format(dateWithWeekFormatter),
                                         )
                                         if (!allDay) {
                                             Text(
                                                 modifier = Modifier
                                                     .clickable(
                                                         onClick = {
-                                                            endTimeDialog.value = true
+                                                            endTimeDialog.show()
                                                         },
                                                         indication = null,
                                                         interactionSource = MutableInteractionSource(),
                                                     ),
-                                                text = endTime.format(enTimeFormatter),
+                                                text = endTime.value.format(enTimeFormatter),
                                             )
                                         }
                                     }
@@ -528,6 +549,10 @@ class CustomThingActivity : BaseComposeActivity() {
         ShowUserDialog(show = userDialog)
         ShowYearDialog(show = yearDialog)
         ShowTermDialog(show = termDialog)
+        BuildDateSelector(dialogState = startDateDialog, data = startTime)
+        BuildTimeSelector(dialogState = startTimeDialog, data = startTime)
+        BuildDateSelector(dialogState = endDateDialog, data = endTime)
+        BuildTimeSelector(dialogState = endTimeDialog, data = endTime)
         BuildColorSelector(
             dialogState = dialogState,
             currentColor = color,
@@ -730,6 +755,56 @@ class CustomThingActivity : BaseComposeActivity() {
                     }
                 }
             )
+        }
+    }
+
+    @Composable
+    private fun BuildDateSelector(
+        dialogState: MaterialDialogState,
+        data: MutableState<LocalDateTime>,
+    ) {
+        val date = data.value.toLocalDate()
+        var selectedDate = date
+        MaterialDialog(
+            dialogState = dialogState,
+            buttons = {
+                positiveButton("确定") {
+                    data.value = LocalDateTime.of(selectedDate, data.value.toLocalTime())
+                }
+                negativeButton("取消")
+            }) {
+            datepicker(
+                title = "请选择日期",
+                initialDate = selectedDate,
+                yearRange = 2020..LocalDate.now().plusYears(1).year
+            ) {
+                selectedDate = it
+            }
+        }
+    }
+
+    @Composable
+    private fun BuildTimeSelector(
+        dialogState: MaterialDialogState,
+        data: MutableState<LocalDateTime>,
+    ) {
+        val time = data.value.toLocalTime()
+        var selectedTime = time
+        MaterialDialog(
+            dialogState = dialogState,
+            buttons = {
+                positiveButton("确定") {
+                    data.value = LocalDateTime.of(data.value.toLocalDate(), selectedTime)
+                }
+                negativeButton("取消")
+            }) {
+            timepicker(
+                title = "请选择时间",
+                initialTime = selectedTime,
+                is24HourClock = true,
+            ) {
+                selectedTime = it
+            }
         }
     }
 
