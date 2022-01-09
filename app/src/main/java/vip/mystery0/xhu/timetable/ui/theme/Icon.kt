@@ -122,6 +122,12 @@ object XhuIcons {
                 painterResource(R.drawable.ic_custom_course_pull_night) to
                         painterResource(R.drawable.ic_custom_course_pull)
             )
+        val remark: Painter
+            @Composable
+            get() = iconOf(
+                painterResource(R.drawable.ic_custom_course_remark_night) to
+                        painterResource(R.drawable.ic_custom_course_remark)
+            )
     }
 
     object Profile {

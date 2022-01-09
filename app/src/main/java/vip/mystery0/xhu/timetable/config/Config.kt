@@ -268,4 +268,9 @@ class Config internal constructor() {
             kv.encode("showCustomCourseOnWeek", value)
         }
         get() = kv.decodeBool("showCustomCourseOnWeek", true)
+    var showCustomThing: Boolean
+        set(value) {
+            kv.encode("showCustomThing", value)
+        }
+        get() = kv.decodeBool("showCustomThing", true)
 }

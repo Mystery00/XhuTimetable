@@ -89,6 +89,11 @@
             android:exported="true"
             android:label="@string/title_activity_custom_course"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
+        <activity
+            android:name=".ui.activity.CustomThingActivity"
+            android:exported="true"
+            android:label="@string/title_activity_custom_thing"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"

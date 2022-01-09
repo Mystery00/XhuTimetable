@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
 import android.util.Log
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -8,20 +9,20 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.*
-import vip.mystery0.xhu.timetable.model.CustomCourse
-import vip.mystery0.xhu.timetable.repository.createCustomCourse
-import vip.mystery0.xhu.timetable.repository.deleteCustomCourse
-import vip.mystery0.xhu.timetable.repository.getCustomCourseList
-import vip.mystery0.xhu.timetable.repository.updateCustomCourse
+import vip.mystery0.xhu.timetable.model.CustomThing
+import vip.mystery0.xhu.timetable.module.remoteRepo
+import vip.mystery0.xhu.timetable.repository.CustomThingRepo
 import java.time.LocalDateTime
 import java.time.Month
 
-class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
+class CustomThingViewModel : ComposeViewModel(), KoinComponent {
     companion object {
-        private const val TAG = "CustomCourseViewModel"
+        private const val TAG = "CustomThingViewModel"
     }
 
-    var changeCustomCourse = false
+    private val customThingRemoteRepo: CustomThingRepo by remoteRepo()
+
+    var changeCustomThing = false
 
     private val _errorMessage = MutableStateFlow(Pair(System.currentTimeMillis(), ""))
     val errorMessage: StateFlow<Pair<Long, String>> = _errorMessage
@@ -40,11 +41,11 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
     private lateinit var currentYear: String
     private var currentTerm: Int = 1
 
-    private val _customCourseListState = MutableStateFlow(CustomCourseListState())
-    val customCourseListState: StateFlow<CustomCourseListState> = _customCourseListState
+    private val _customThingListState = MutableStateFlow(CustomThingListState())
+    val customThingListState: StateFlow<CustomThingListState> = _customThingListState
 
-    private val _saveCustomCourseState = MutableStateFlow(SaveCustomCourseState())
-    val saveCustomCourseState: StateFlow<SaveCustomCourseState> = _saveCustomCourseState
+    private val _saveCustomThingState = MutableStateFlow(SaveCustomThingState())
+    val saveCustomThingState: StateFlow<SaveCustomThingState> = _saveCustomThingState
 
     init {
         viewModelScope.launch {
@@ -86,13 +87,13 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
         }.toList()
     }
 
-    fun loadCustomCourseList() {
+    fun loadCustomThingList() {
         viewModelScope.launch(serverExceptionHandler { throwable ->
-            Log.w(TAG, "load custom course list failed", throwable)
-            _customCourseListState.value = CustomCourseListState()
+            Log.w(TAG, "load custom thing list failed", throwable)
+            _customThingListState.value = CustomThingListState()
             toastMessage(throwable.message ?: throwable.javaClass.simpleName)
         }) {
-            _customCourseListState.value = CustomCourseListState(loading = true)
+            _customThingListState.value = CustomThingListState(loading = true)
             val selected = runOnCpu { _userSelect.value.first { it.selected }.studentId }
             val selectUser = SessionManager.user(selected)
             val year = runOnCpu { yearSelect.value.first { it.selected }.year }
@@ -102,68 +103,96 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
             currentYear = year
             currentTerm = term
 
-            val response = getCustomCourseList(currentUser, currentYear, currentTerm)
-            _customCourseListState.value = CustomCourseListState(
-                customCourseList = response,
+            val response =
+                customThingRemoteRepo.getCustomThingList(currentUser, currentYear, currentTerm)
+            _customThingListState.value = CustomThingListState(
+                customThingList = response,
                 loading = false
             )
         }
     }
 
-    fun saveCustomCourse(
-        courseId: Long,
-        courseName: String,
-        teacherName: String,
-        week: List<Int>,
+    fun saveCustomThing(
+        thingId: Long,
+        title: String,
         location: String,
-        courseIndex: List<Int>,
-        day: Int,
+        allDay: Boolean,
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
+        remark: String,
+        color: Color,
     ) {
         viewModelScope.launch(serverExceptionHandler { throwable ->
-            Log.w(TAG, "save custom course failed", throwable)
-            _saveCustomCourseState.value =
-                SaveCustomCourseState()
+            Log.w(TAG, "save custom thing failed", throwable)
+            _saveCustomThingState.value =
+                SaveCustomThingState()
             toastMessage(throwable.message ?: throwable.javaClass.simpleName)
         }) {
-            _saveCustomCourseState.value = SaveCustomCourseState(loading = true)
+            _saveCustomThingState.value = SaveCustomThingState(loading = true)
 
-            val customCourse = CustomCourse(
-                courseId,
-                courseName,
-                teacherName,
-                "",
-                week,
+            val start = if (allDay) {
+                startTime.toLocalDate().atStartOfDay()
+            } else {
+                startTime
+            }
+            val end = if (allDay) {
+                endTime.toLocalDate().atStartOfDay()
+            } else {
+                endTime
+            }
+            val customThing = CustomThing(
+                thingId,
+                title,
                 location,
-                courseIndex,
-                day,
+                allDay,
+                start,
+                end,
+                remark,
+                "",
+                color,
                 "",
             )
-            if (courseId == 0L) {
-                createCustomCourse(currentUser, currentYear, currentTerm, customCourse)
+            if (thingId == 0L) {
+                customThingRemoteRepo.createCustomThing(
+                    currentUser,
+                    currentYear,
+                    currentTerm,
+                    customThing
+                )
             } else {
-                updateCustomCourse(currentUser, currentYear, currentTerm, customCourse)
+                customThingRemoteRepo.updateCustomThing(
+                    currentUser,
+                    currentYear,
+                    currentTerm,
+                    customThing
+                )
             }
-            _saveCustomCourseState.value = SaveCustomCourseState()
-            toastMessage("《$courseName》保存成功")
-            changeCustomCourse = true
-            loadCustomCourseList()
+            _saveCustomThingState.value = SaveCustomThingState()
+            toastMessage("《$title》保存成功")
+            changeCustomThing = true
+            loadCustomThingList()
         }
     }
 
-    fun delete(courseId: Long) {
+    fun delete(thingId: Long) {
         viewModelScope.launch(serverExceptionHandler { throwable ->
-            Log.w(TAG, "delete custom course failed", throwable)
-            _saveCustomCourseState.value =
-                SaveCustomCourseState()
+            Log.w(TAG, "delete custom thing failed", throwable)
+            _saveCustomThingState.value =
+                SaveCustomThingState()
             toastMessage(throwable.message ?: throwable.javaClass.simpleName)
         }) {
-            _saveCustomCourseState.value = SaveCustomCourseState(loading = true)
+            _saveCustomThingState.value = SaveCustomThingState(loading = true)
 
-            deleteCustomCourse(currentUser, currentYear, currentTerm, courseId)
-            _saveCustomCourseState.value = SaveCustomCourseState()
+            customThingRemoteRepo.deleteCustomThing(
+                currentUser,
+                currentYear,
+                currentTerm,
+                thingId
+            )
+            _saveCustomThingState.value = SaveCustomThingState()
             toastMessage("删除成功")
-            changeCustomCourse = true
-            loadCustomCourseList()
+            changeCustomThing = true
+            loadCustomThingList()
         }
     }
 
@@ -199,11 +228,11 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
     }
 }
 
-data class CustomCourseListState(
+data class CustomThingListState(
     val loading: Boolean = false,
-    val customCourseList: List<CustomCourse> = emptyList(),
+    val customThingList: List<CustomThing> = emptyList(),
 )
 
-data class SaveCustomCourseState(
+data class SaveCustomThingState(
     val loading: Boolean = false,
 )
