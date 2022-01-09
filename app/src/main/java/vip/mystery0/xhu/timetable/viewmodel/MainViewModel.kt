@@ -14,12 +14,14 @@ import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.*
 import vip.mystery0.xhu.timetable.model.Course
+import vip.mystery0.xhu.timetable.model.CustomThing
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.model.response.Version
 import vip.mystery0.xhu.timetable.module.localRepo
 import vip.mystery0.xhu.timetable.module.repo
 import vip.mystery0.xhu.timetable.repository.CourseRepo
+import vip.mystery0.xhu.timetable.repository.CustomThingRepo
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
 import vip.mystery0.xhu.timetable.repository.getRawCourseColorList
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
@@ -46,6 +48,10 @@ class MainViewModel : ComposeViewModel() {
 
     private val courseLocalRepo: CourseRepo by localRepo()
 
+    private val customThingRepo: CustomThingRepo by repo()
+
+    private val customThingLocalRepo: CustomThingRepo by localRepo()
+
     private val noticeRepo: NoticeRepo by repo()
 
     private val workManager: WorkManager by inject()
@@ -70,6 +76,10 @@ class MainViewModel : ComposeViewModel() {
     //今日诗词
     private val _poems = MutableStateFlow<Poems?>(null)
     val poems: StateFlow<Poems?> = _poems
+
+    //今日事项列表
+    private val _todayThing = MutableStateFlow<List<CustomThingSheet>>(emptyList())
+    val todayThing: StateFlow<List<CustomThingSheet>> = _todayThing
 
     private val _todayCourse = MutableStateFlow<List<TodayCourseSheet>>(emptyList())
     val todayCourse: StateFlow<List<TodayCourseSheet>> = _todayCourse
@@ -241,6 +251,64 @@ class MainViewModel : ComposeViewModel() {
         return courseList
     }
 
+    private suspend fun getAllThingList(loadFromCloud: Boolean): List<CustomThingSheet> {
+        if (!getConfig { showCustomThing }) {
+            return emptyList()
+        }
+        val currentYear = getConfig { currentYear }
+        val currentTerm = getConfig { currentTerm }
+        val thingList: List<CustomThingSheet> =
+            if (getConfig { multiAccountMode }) {
+                val list = ArrayList<CustomThingSheet>()
+                SessionManager.loggedUserList().forEach { user ->
+                    val result = if (loadFromCloud) {
+                        customThingRepo.getCustomThingList(user, currentYear, currentTerm)
+                    } else {
+                        customThingLocalRepo.getCustomThingList(user, currentYear, currentTerm)
+                    }
+                    list.addAll(result.map {
+                        CustomThingSheet(
+                            user.studentId,
+                            user.info.userName,
+                            it
+                        )
+                    })
+                }
+                list
+            } else {
+                val user = SessionManager.mainUser()
+                val result = if (loadFromCloud) {
+                    customThingRepo.getCustomThingList(user, currentYear, currentTerm)
+                } else {
+                    customThingLocalRepo.getCustomThingList(user, currentYear, currentTerm)
+                }
+                result.map { CustomThingSheet(user.studentId, user.info.userName, it) }
+            }
+        return thingList
+    }
+
+    private suspend fun loadTodayThing(customThingList: List<CustomThingSheet>) {
+        _todayThing.value = runOnCpu {
+            val today = LocalDate.now()
+            val tomorrow = today.plusDays(1)
+            val nowTime = LocalTime.now()
+
+            //过滤出今日或者明日的课程
+            val showTomorrowCourse = getConfig { showTomorrowCourseTime }?.let {
+                nowTime.isAfter(it)
+            } ?: false
+            customThingList.filter {
+                val thing = it.thing
+                if (showTomorrowCourse)
+                    !thing.startTime.toLocalDate().isAfter(tomorrow) && !thing.endTime.toLocalDate()
+                        .isBefore(tomorrow)
+                else
+                    !thing.startTime.toLocalDate().isAfter(today) && !thing.endTime.toLocalDate()
+                        .isBefore(today)
+            }.sortedBy { it.thing.startTime }
+        }
+    }
+
     fun loadCourseList(forceUpdate: Boolean = true) {
         viewModelScope.launch(serverExceptionHandler { throwable ->
             Log.w(TAG, "load course list failed", throwable)
@@ -357,13 +425,35 @@ class MainViewModel : ComposeViewModel() {
 
             //获取所有的课程列表
             loadData(getAllCourseList(false), colorMap, currentWeek)
+            //加载自定义事项
+            loadTodayThing(getAllThingList(false))
 
             //加载网络数据
             if (loadFromCloud) {
                 loadData(getAllCourseList(true), colorMap, currentWeek)
+                //加载自定义事项
+                loadTodayThing(getAllThingList(true))
                 _errorMessage.emit("${LocalDateTime.now().format(dateTimeFormatter)} 数据同步成功！")
             }
             _loading.value = false
+        }
+    }
+
+    fun loadThingList(forceUpdate: Boolean = true) {
+        viewModelScope.launch(serverExceptionHandler { throwable ->
+            Log.w(TAG, "load thing list failed", throwable)
+            _loading.value = false
+            _todayThing.value = emptyList()
+            _errorMessage.value = throwable.message ?: throwable.javaClass.simpleName
+        }) {
+            //加载自定义事项
+            loadTodayThing(getAllThingList(false))
+
+            //加载网络数据
+            if (forceUpdate) {
+                //加载自定义事项
+                loadTodayThing(getAllThingList(true))
+            }
         }
     }
 
@@ -576,6 +666,12 @@ private val endArray = arrayOf(
 )
 
 fun List<Int>.formatTime(): String = "${startArray[first() - 1]} - ${endArray[last() - 1]}"
+
+data class CustomThingSheet(
+    val studentId: String,
+    val userName: String,
+    val thing: CustomThing,
+)
 
 data class CourseSheet(
     //显示标题

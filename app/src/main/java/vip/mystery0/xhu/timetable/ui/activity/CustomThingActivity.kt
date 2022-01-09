@@ -41,6 +41,7 @@ import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.utils.dateFormatter
 import vip.mystery0.xhu.timetable.utils.dateWithWeekFormatter
 import vip.mystery0.xhu.timetable.utils.enTimeFormatter
 import vip.mystery0.xhu.timetable.utils.thingDateTimeFormatter
@@ -879,12 +880,12 @@ private fun BuildItem(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Image(painter = XhuIcons.CustomCourse.time, contentDescription = null)
+                val startText =
+                    item.startTime.format(if (item.allDay) dateFormatter else thingDateTimeFormatter)
+                val endText =
+                    item.endTime.format(if (item.allDay) dateFormatter else thingDateTimeFormatter)
                 Text(
-                    text = "时间：${item.startTime.format(thingDateTimeFormatter)} - ${
-                        item.endTime.format(
-                            thingDateTimeFormatter
-                        )
-                    }"
+                    text = "时间：$startText - $endText"
                 )
             }
             Row(

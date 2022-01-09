@@ -503,6 +503,9 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             EventType.CHANGE_COURSE_COLOR -> {
                 viewModel.loadCourseList(false)
             }
+            EventType.CHANGE_SHOW_CUSTOM_THING -> {
+                viewModel.loadThingList(true)
+            }
             else -> {
             }
         }

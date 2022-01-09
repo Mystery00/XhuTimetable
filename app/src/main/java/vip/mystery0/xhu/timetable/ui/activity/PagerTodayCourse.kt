@@ -14,6 +14,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -23,6 +24,9 @@ import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.utils.dateFormatter
+import vip.mystery0.xhu.timetable.utils.thingDateTimeFormatter
+import vip.mystery0.xhu.timetable.viewmodel.CustomThingSheet
 import vip.mystery0.xhu.timetable.viewmodel.TodayCourseSheet
 
 val todayCourseTitle: TabTitle = @Composable { ext ->
@@ -39,6 +43,7 @@ val todayCourseContent: TabContent = @Composable { ext ->
 
     Box {
         val poems by viewModel.poems.collectAsState()
+        val todayThingList by viewModel.todayThing.collectAsState()
         val todayCourseList by viewModel.todayCourse.collectAsState()
         val scope = rememberCoroutineScope()
 
@@ -55,6 +60,9 @@ val todayCourseContent: TabContent = @Composable { ext ->
             ) {
                 poems?.let { value ->
                     DrawPoemsCard(modalBottomSheetState, scope, poems = value)
+                }
+                todayThingList.forEach {
+                    DrawThingCard(customThingSheet = it, multiAccountMode = multiAccountMode)
                 }
                 todayCourseList.forEach {
                     DrawCourseCard(
@@ -120,6 +128,105 @@ private fun DrawPoemsCard(dialogState: ModalBottomSheetState, scope: CoroutineSc
                     textAlign = TextAlign.End,
                     modifier = Modifier.fillMaxWidth(),
                 )
+            }
+        }
+    }
+}
+
+@ExperimentalMaterialApi
+@Composable
+private fun DrawThingCard(
+    customThingSheet: CustomThingSheet,
+    multiAccountMode: Boolean,
+) {
+    val thing = customThingSheet.thing
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 4.dp)
+    ) {
+        Surface(
+            shape = CircleShape,
+            modifier = Modifier
+                .padding(horizontal = 6.dp)
+                .size(5.dp),
+            color = thing.color,
+        ) {}
+        Card(
+            modifier = Modifier
+                .padding(end = 8.dp)
+                .fillMaxWidth(),
+        ) {
+            Box {
+                if (multiAccountMode) {
+                    Text(
+                        text = "${customThingSheet.studentId}(${customThingSheet.userName})",
+                        fontSize = 8.sp,
+                        color = MaterialTheme.colors.onSecondary,
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colors.secondary,
+                                shape = RoundedCornerShape(bottomStart = 4.dp),
+                            )
+                            .padding(1.dp)
+                            .align(Alignment.TopEnd),
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(
+                        top = if (multiAccountMode) 16.dp else 8.dp,
+                        bottom = 8.dp,
+                        end = 8.dp
+                    ),
+                ) {
+                    Icon(
+                        painter = XhuIcons.todayWaterMelon,
+                        contentDescription = null,
+                        tint = thing.color,
+                        modifier = Modifier
+                            .padding(6.dp)
+                            .size(16.dp),
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            text = thing.title,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 1.dp),
+                        )
+                        val startText =
+                            thing.startTime.format(if (thing.allDay) dateFormatter else thingDateTimeFormatter)
+                        val endText =
+                            thing.endTime.format(if (thing.allDay) dateFormatter else thingDateTimeFormatter)
+                        Text(
+                            text = "$startText - $endText",
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 1.dp),
+                        )
+                        Text(
+                            text = thing.location,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 1.dp),
+                        )
+                        Text(
+                            text = thing.remark,
+                            fontSize = 12.sp,
+                            fontStyle = FontStyle.Italic,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 1.dp),
+                        )
+                    }
+                }
             }
         }
     }
