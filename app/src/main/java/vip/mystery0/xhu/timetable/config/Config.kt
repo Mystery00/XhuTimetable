@@ -4,6 +4,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tencent.mmkv.MMKV
+import vip.mystery0.xhu.timetable.BuildConfig
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.response.Splash
 import java.io.File
@@ -247,7 +248,7 @@ class Config internal constructor() {
         set(value) {
             kv.encode("allowSendCrashReport", value)
         }
-        get() = kv.decodeBool("allowSendCrashReport", true)
+        get() = kv.decodeBool("allowSendCrashReport", !BuildConfig.DEBUG)
     var debugMode: Boolean
         set(value) {
             kv.encode("debugMode", value)
