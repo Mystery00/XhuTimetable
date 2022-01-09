@@ -81,9 +81,6 @@ class CustomThingActivity : BaseComposeActivity() {
         val startTimeDialog = rememberMaterialDialogState()
         val endTimeDialog = rememberMaterialDialogState()
 
-        val dateDialogState = rememberMaterialDialogState()
-        val timeDialogState = rememberMaterialDialogState()
-
         var customThing by remember { mutableStateOf(CustomThing.EMPTY) }
         var thingTitle by remember { mutableStateOf(customThing.title) }
         var location by remember { mutableStateOf(customThing.location) }
@@ -250,7 +247,7 @@ class CustomThingActivity : BaseComposeActivity() {
                                     contentDescription = null,
                                 )
                                 Spacer(modifier = Modifier.weight(1F))
-                                if (customThing.thingId != 0L) {
+                                if (customThing.thingId != 0L && !saveCustomThingState.loading) {
                                     TextButton(
                                         onClick = {
                                             viewModel.delete(customThing.thingId)
@@ -258,24 +255,34 @@ class CustomThingActivity : BaseComposeActivity() {
                                         Text(text = "删除", color = Color.Red)
                                     }
                                 }
-                                TextButton(
-                                    onClick = {
-                                        if (startTime.value.isAfter(endTime.value)) {
-                                            "开始时间不能晚于结束时间".toast(true)
-                                            return@TextButton
-                                        }
-                                        viewModel.saveCustomThing(
-                                            customThing.thingId,
-                                            thingTitle,
-                                            location,
-                                            allDay,
-                                            startTime.value,
-                                            endTime.value,
-                                            remark,
-                                            color.value,
-                                        )
-                                    }) {
-                                    Text(text = "保存")
+                                if (!saveCustomThingState.loading) {
+                                    TextButton(
+                                        onClick = {
+                                            if (startTime.value.isAfter(endTime.value)) {
+                                                "开始时间不能晚于结束时间".toast(true)
+                                                return@TextButton
+                                            }
+                                            viewModel.saveCustomThing(
+                                                customThing.thingId,
+                                                thingTitle,
+                                                location,
+                                                allDay,
+                                                startTime.value,
+                                                endTime.value,
+                                                remark,
+                                                color.value,
+                                            )
+                                        }) {
+                                        Text(text = "保存")
+                                    }
+                                }
+                                if (saveCustomThingState.loading) {
+                                    TextButton(
+                                        enabled = !saveCustomThingState.loading,
+                                        onClick = {
+                                        }) {
+                                        Text(text = "保存操作中...")
+                                    }
                                 }
                             }
                             Row(

@@ -233,27 +233,43 @@ class CustomCourseActivity : BaseComposeActivity() {
                                     contentDescription = null,
                                 )
                                 Spacer(modifier = Modifier.weight(1F))
-                                if (customCourse.courseId != 0L) {
+                                if (customCourse.courseId != 0L && !saveCustomCourseState.loading) {
                                     TextButton(
+                                        enabled = !saveCustomCourseState.loading,
                                         onClick = {
-                                            viewModel.delete(customCourse.courseId)
+                                            if (!saveCustomCourseState.loading) {
+                                                viewModel.delete(customCourse.courseId)
+                                            }
                                         }) {
                                         Text(text = "删除", color = Color.Red)
                                     }
                                 }
-                                TextButton(
-                                    onClick = {
-                                        viewModel.saveCustomCourse(
-                                            customCourse.courseId,
-                                            courseName,
-                                            teacherName,
-                                            weekList,
-                                            location,
-                                            courseIndex.value,
-                                            day.value,
-                                        )
-                                    }) {
-                                    Text(text = "保存")
+                                if (!saveCustomCourseState.loading) {
+                                    TextButton(
+                                        enabled = !saveCustomCourseState.loading,
+                                        onClick = {
+                                            if (!saveCustomCourseState.loading) {
+                                                viewModel.saveCustomCourse(
+                                                    customCourse.courseId,
+                                                    courseName,
+                                                    teacherName,
+                                                    weekList,
+                                                    location,
+                                                    courseIndex.value,
+                                                    day.value,
+                                                )
+                                            }
+                                        }) {
+                                        Text(text = "保存")
+                                    }
+                                }
+                                if (saveCustomCourseState.loading) {
+                                    TextButton(
+                                        enabled = !saveCustomCourseState.loading,
+                                        onClick = {
+                                        }) {
+                                        Text(text = "保存操作中...")
+                                    }
                                 }
                             }
                             Row(
