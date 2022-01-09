@@ -85,6 +85,6 @@ object ColorPool {
 
     fun hash(text: String): Color {
         val md5Int = text.md5().substring(0, 2).toInt(16)
-        return pool[md5Int % pool.size]
+        return safeGet(md5Int)
     }
 }

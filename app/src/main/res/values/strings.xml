@@ -9,4 +9,5 @@
     <string name="title_activity_feedback">意见反馈</string>
     <string name="title_activity_school_calendar">校历</string>
     <string name="title_activity_custom_course">自定义课程</string>
+    <string name="title_activity_custom_thing">自定义事项</string>
 </resources>

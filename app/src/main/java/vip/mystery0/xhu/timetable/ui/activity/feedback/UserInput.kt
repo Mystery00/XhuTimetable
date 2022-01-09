@@ -290,13 +290,12 @@ private fun UserInputText(
     onMessageSent: () -> Unit,
     focusState: Boolean
 ) {
-    val a11ylabel = "stringResource(id = R.string.textfield_desc)"
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(64.dp)
             .semantics {
-                contentDescription = a11ylabel
+                contentDescription = ""
                 keyboardShownProperty = keyboardShown
             },
         horizontalArrangement = Arrangement.End

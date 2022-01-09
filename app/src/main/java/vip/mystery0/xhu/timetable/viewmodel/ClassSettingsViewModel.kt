@@ -32,6 +32,8 @@ class ClassSettingsViewModel : ComposeViewModel() {
     val currentTermStartTime: StateFlow<Pair<LocalDate, Boolean>> = _currentTermStartTime
     private val _showCustomCourseData = MutableStateFlow(false)
     val showCustomCourseData: StateFlow<Boolean> = _showCustomCourseData
+    private val _showCustomThingData = MutableStateFlow(false)
+    val showCustomThingData: StateFlow<Boolean> = _showCustomThingData
 
     init {
         viewModelScope.launch {
@@ -43,6 +45,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
                     customTermStartTime.second
                 )
             _showCustomCourseData.value = getConfig { showCustomCourseOnWeek }
+            _showCustomThingData.value = getConfig { showCustomThing }
 
             val loggedUserList = SessionManager.loggedUserList()
             _selectYearAndTermList.value = runOnCpu {
@@ -110,6 +113,16 @@ class ClassSettingsViewModel : ComposeViewModel() {
             }
             _showCustomCourseData.value = getConfig { showCustomCourseOnWeek }
             eventBus.post(UIEvent(EventType.CHANGE_SHOW_CUSTOM_COURSE))
+        }
+    }
+
+    fun updateShowCustomThing(showCustomThingData: Boolean) {
+        viewModelScope.launch {
+            setConfig {
+                showCustomThing = showCustomThingData
+            }
+            _showCustomThingData.value = getConfig { showCustomThing }
+            eventBus.post(UIEvent(EventType.CHANGE_SHOW_CUSTOM_THING))
         }
     }
 }

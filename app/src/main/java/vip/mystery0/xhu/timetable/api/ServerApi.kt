@@ -8,6 +8,7 @@ import vip.mystery0.xhu.timetable.config.parseServerError
 import vip.mystery0.xhu.timetable.model.CustomCourse
 import vip.mystery0.xhu.timetable.model.UserInfo
 import vip.mystery0.xhu.timetable.model.request.CustomCourseRequest
+import vip.mystery0.xhu.timetable.model.request.CustomThingRequest
 import vip.mystery0.xhu.timetable.model.request.InitRequest
 import vip.mystery0.xhu.timetable.model.request.LoginRequest
 import vip.mystery0.xhu.timetable.model.response.*
@@ -65,6 +66,32 @@ interface ServerApi {
 
     @DELETE("/api/rest/xhu-timetable/server/customCourse")
     suspend fun deleteCustomCourse(
+        @Header("token") token: String,
+        @Query("id") id: Long,
+    ): Response<Boolean>
+
+    @GET("/api/rest/xhu-timetable/server/customThing")
+    suspend fun customThingList(
+        @Header("token") token: String,
+        @Query("year") year: String,
+        @Query("term") term: Int,
+    ): Response<List<CustomThingResponse>>
+
+    @POST("/api/rest/xhu-timetable/server/customThing")
+    suspend fun createCustomThing(
+        @Header("token") token: String,
+        @Body customThingRequest: CustomThingRequest
+    ): Response<Boolean>
+
+    @PUT("/api/rest/xhu-timetable/server/customThing")
+    suspend fun updateCustomThing(
+        @Header("token") token: String,
+        @Query("id") id: Long,
+        @Body customThingRequest: CustomThingRequest
+    ): Response<Boolean>
+
+    @DELETE("/api/rest/xhu-timetable/server/customThing")
+    suspend fun deleteCustomThing(
         @Header("token") token: String,
         @Query("id") id: Long,
     ): Response<Boolean>
