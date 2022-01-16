@@ -475,6 +475,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
     override fun onResume() {
         super.onResume()
         viewModel.checkUnReadNotice()
+        viewModel.checkUnReadFeedback()
     }
 
 
