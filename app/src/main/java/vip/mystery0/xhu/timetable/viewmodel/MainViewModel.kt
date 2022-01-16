@@ -10,9 +10,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.core.component.inject
+import vip.mystery0.xhu.timetable.api.FeedbackApi
 import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.*
+import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
 import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.CustomThing
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
@@ -43,6 +45,8 @@ class MainViewModel : ComposeViewModel() {
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
     private val poemsApi: PoemsApi by inject()
+
+    private val feedbackApi: FeedbackApi by inject()
 
     private val courseRepo: CourseRepo by repo()
 
@@ -98,6 +102,9 @@ class MainViewModel : ComposeViewModel() {
 
     private val _hasUnReadNotice = MutableStateFlow(false)
     val hasUnReadNotice: StateFlow<Boolean> = _hasUnReadNotice
+
+    private val _hasUnReadFeedback = MutableStateFlow(false)
+    val hasUnReadFeedback: StateFlow<Boolean> = _hasUnReadFeedback
 
     private val _multiAccountMode = MutableStateFlow(false)
     val multiAccountMode: StateFlow<Boolean> = _multiAccountMode
@@ -602,6 +609,19 @@ class MainViewModel : ComposeViewModel() {
         }) {
             if (SessionManager.mainUserOrNull() == null) return@launch
             _hasUnReadNotice.value = noticeRepo.hasUnReadNotice()
+        }
+    }
+
+    fun checkUnReadFeedback() {
+        viewModelScope.launch(serverExceptionHandler { throwable ->
+            Log.w(TAG, "check unread feedback failed", throwable)
+        }) {
+            if (SessionManager.mainUserOrNull() == null) return@launch
+            val firstFeedbackMessageId = getConfig { firstFeedbackMessageId }
+            val response = SessionManager.mainUser().withAutoLogin {
+                feedbackApi.checkMessage(it, firstFeedbackMessageId)
+            }
+            _hasUnReadFeedback.value = response.first.newResult
         }
     }
 

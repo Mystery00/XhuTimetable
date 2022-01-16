@@ -274,4 +274,9 @@ class Config internal constructor() {
             kv.encode("showCustomThing", value)
         }
         get() = kv.decodeBool("showCustomThing", true)
+    var firstFeedbackMessageId: Long
+        set(value) {
+            kv.encode("firstFeedbackMessageId", value)
+        }
+        get() = kv.decodeLong("firstFeedbackMessageId", 0L)
 }

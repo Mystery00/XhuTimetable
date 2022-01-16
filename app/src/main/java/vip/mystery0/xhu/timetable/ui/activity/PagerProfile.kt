@@ -200,9 +200,11 @@ val profileCourseContent: TabContent = @Composable { ext ->
                 .height(dividerHeight)
                 .background(dividerSmall),
         )
+        val hasUnReadFeedback by viewModel.hasUnReadFeedback.collectAsState()
         BuildProfileItem(
             painter = XhuIcons.Profile.feedback,
             title = "意见反馈",
+            showBadge = hasUnReadFeedback,
             click = {
                 activity.intentTo(FeedbackActivity::class)
             })

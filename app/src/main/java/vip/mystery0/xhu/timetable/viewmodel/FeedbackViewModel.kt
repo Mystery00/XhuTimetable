@@ -12,6 +12,7 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.FeedbackApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.response.Message
 import java.util.concurrent.TimeUnit
 
@@ -49,7 +50,13 @@ class FeedbackViewModel : ComposeViewModel() {
             pullMessage.forEach {
                 it.generate(mainUser)
             }
-            messageState.loadMessage(pullMessage.reversed())
+            val result = pullMessage.reversed()
+            messageState.loadMessage(result)
+            if (result.isNotEmpty()) {
+                setConfig {
+                    firstFeedbackMessageId = result.maxOf { it.id }
+                }
+            }
             _loading.value = LoadingState()
         }
     }
