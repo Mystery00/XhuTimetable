@@ -546,7 +546,11 @@ class MainViewModel : ComposeViewModel() {
                     if (courseSheet.course.isNotEmpty()) {
                         val list = courseSheet.course.sortedWith { o1, o2 ->
                             if (o1.thisWeek == o2.thisWeek) {
-                                o1.weekSet.first().compareTo(o2.weekSet.first())
+                                if (o1.type != o2.type) {
+                                    o2.type.type.compareTo(o1.type.type)
+                                } else {
+                                    o1.weekSet.first().compareTo(o2.weekSet.first())
+                                }
                             } else {
                                 o2.thisWeek.compareTo(o1.thisWeek)
                             }
