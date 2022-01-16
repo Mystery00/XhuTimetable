@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.viewModelScope
 import com.squareup.moshi.Moshi
@@ -12,11 +13,16 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.FeedbackApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.response.Message
 import java.util.concurrent.TimeUnit
 
 class FeedbackViewModel : ComposeViewModel() {
+    companion object {
+        private const val TAG = "FeedbackViewModel"
+    }
+
     private val jsonAdapter =
         Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build().adapter(Message::class.java)
     private var webSocket: WebSocket? = null
@@ -38,7 +44,13 @@ class FeedbackViewModel : ComposeViewModel() {
     }
 
     fun loadLastMessage(size: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(serverExceptionHandler { throwable ->
+            Log.w(TAG, "load message list failed", throwable)
+            _loading.value = LoadingState(
+                loading = false,
+                errorMessage = throwable.message ?: throwable.javaClass.simpleName,
+            )
+        }) {
             _loading.value = LoadingState(loading = true)
             val mainUser = SessionManager.mainUserOrNull()
             if (mainUser == null) {
