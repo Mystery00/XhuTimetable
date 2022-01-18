@@ -7,10 +7,7 @@ import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
 import vip.mystery0.xhu.timetable.config.parseServerError
 import vip.mystery0.xhu.timetable.model.CustomCourse
 import vip.mystery0.xhu.timetable.model.UserInfo
-import vip.mystery0.xhu.timetable.model.request.CustomCourseRequest
-import vip.mystery0.xhu.timetable.model.request.CustomThingRequest
-import vip.mystery0.xhu.timetable.model.request.InitRequest
-import vip.mystery0.xhu.timetable.model.request.LoginRequest
+import vip.mystery0.xhu.timetable.model.request.*
 import vip.mystery0.xhu.timetable.model.response.*
 
 interface ServerApi {
@@ -95,6 +92,12 @@ interface ServerApi {
         @Header("token") token: String,
         @Query("id") id: Long,
     ): Response<Boolean>
+
+    @POST("/api/rest/xhu-timetable/server/allCourse")
+    suspend fun selectAllCourse(
+        @Header("token") token: String,
+        @Body allCourseRequest: AllCourseRequest,
+    ): Response<List<AllCourseResponse>>
 }
 
 fun <T : Any> Response<T>.checkLogin(): T {

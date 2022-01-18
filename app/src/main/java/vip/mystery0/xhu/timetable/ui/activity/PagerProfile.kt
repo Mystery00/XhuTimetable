@@ -141,7 +141,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
             painter = XhuIcons.Profile.classroom,
             title = "空闲教室",
             click = {
-                activity.toastString("暂不支持")
+                activity.intentTo(CourseRoomActivity::class)
             })
         Divider(
             modifier = Modifier
