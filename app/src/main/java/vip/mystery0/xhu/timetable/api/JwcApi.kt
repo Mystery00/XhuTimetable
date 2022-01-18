@@ -1,10 +1,10 @@
 package vip.mystery0.xhu.timetable.api
 
 import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Query
+import retrofit2.http.*
+import vip.mystery0.xhu.timetable.model.request.CourseRoomRequest
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
+import vip.mystery0.xhu.timetable.model.response.CourseRoomResponse
 import vip.mystery0.xhu.timetable.model.response.ExamResponse
 import vip.mystery0.xhu.timetable.model.response.ScoreResponse
 
@@ -26,4 +26,10 @@ interface JwcApi {
         @Query("year") year: String,
         @Query("term") term: Int,
     ): Response<ScoreResponse>
+
+    @POST("/api/rest/xhu-timetable/server/jwc/course/room/free")
+    suspend fun courseRoomList(
+        @Header("token") token: String,
+        @Body request: CourseRoomRequest,
+    ): Response<List<CourseRoomResponse>>
 }
