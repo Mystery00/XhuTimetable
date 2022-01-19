@@ -15,13 +15,13 @@ class CourseRoomViewModel : ComposeViewModel() {
         private const val TAG = "CourseRoomViewModel"
     }
 
-    private val _areaSelect = MutableStateFlow(buildAreaSelect("四教"))
+    private val _areaSelect = MutableStateFlow(buildAreaSelect(""))
     val areaSelect: StateFlow<List<AreaSelect>> = _areaSelect
-    private val _week = MutableStateFlow<List<Int>>(listOf(5))
+    private val _week = MutableStateFlow<List<Int>>(emptyList())
     val week: StateFlow<List<Int>> = _week
-    private val _day = MutableStateFlow<List<Int>>(listOf(5))
+    private val _day = MutableStateFlow<List<Int>>(emptyList())
     val day: StateFlow<List<Int>> = _day
-    private val _time = MutableStateFlow<List<Int>>(listOf(5))
+    private val _time = MutableStateFlow<List<Int>>(emptyList())
     val time: StateFlow<List<Int>> = _time
 
     private val _courseRoomListState = MutableStateFlow(CourseRoomListState())
@@ -95,8 +95,8 @@ class CourseRoomViewModel : ComposeViewModel() {
         }
     }
 
-    private fun buildAreaSelect(selectedArea: String): List<AreaSelect> =
-        listOf(
+    private fun buildAreaSelect(selectedArea: String): List<AreaSelect> {
+        val list = listOf(
             AreaSelect("一教").check(selectedArea),
             AreaSelect("二教").check(selectedArea),
             AreaSelect("三教").check(selectedArea),
@@ -109,6 +109,11 @@ class CourseRoomViewModel : ComposeViewModel() {
             AreaSelect("人南校区").check(selectedArea),
             AreaSelect("宜宾").check(selectedArea),
         )
+        if (selectedArea == "") {
+            list.first().selected = true
+        }
+        return list
+    }
 }
 
 data class AreaSelect(

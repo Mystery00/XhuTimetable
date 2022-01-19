@@ -601,7 +601,6 @@ class CustomCourseActivity : BaseComposeActivity() {
         }
     }
 
-
     @Composable
     private fun ShowYearDialog(
         show: MutableState<Boolean>,
