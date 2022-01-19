@@ -150,14 +150,11 @@ class CourseRoomActivity : BaseComposeActivity() {
                             if (time.isEmpty()) "请选择要查询的节次" else "查询节次：第${time.joinToString(",")}节"
                         Text(text = text)
                     }
-                    OutlinedButton(
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                    Button(
+                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             viewModel.search()
-                            scope.launch {
-                                scaffoldState.conceal()
-                            }
                         }) {
                         Text(text = "查询")
                     }
