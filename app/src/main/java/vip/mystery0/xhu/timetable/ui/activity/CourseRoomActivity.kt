@@ -4,10 +4,13 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.placeholder.PlaceholderHighlight
@@ -104,7 +107,7 @@ class CourseRoomActivity : BaseComposeActivity() {
                         }) {
                         val select by viewModel.areaSelect.collectAsState()
                         val selected = select.firstOrNull { it.selected }
-                        val text = selected?.let { "查询区域：${it})" } ?: "请选择要查询的区域"
+                        val text = selected?.let { "查询区域：${it.area}" } ?: "请选择要查询的区域"
                         Text(text = text)
                     }
                     OutlinedButton(
@@ -192,8 +195,178 @@ class CourseRoomActivity : BaseComposeActivity() {
                     }
                 }
             })
+        ShowAreaDialog(show = areaDialog)
+        val week by viewModel.week.collectAsState()
+        ShowListDialog(
+            show = weekDialog,
+            list = week,
+            title = "请选择要查询的周次",
+            itemSize = 20,
+            block = { item -> "第${item}周" },
+            onConfirm = {
+                viewModel.changeWeek(it)
+            })
+        val day by viewModel.day.collectAsState()
+        ShowListDialog(
+            show = dayDialog,
+            list = day,
+            title = "请选择要查询的星期",
+            itemSize = 7,
+            block = { item -> DayOfWeek.of(item).getDisplayName(TextStyle.FULL, Locale.CHINA) },
+            onConfirm = {
+                viewModel.changeDay(it)
+            })
+        val time by viewModel.time.collectAsState()
+        ShowListDialog(
+            show = timeDialog,
+            list = time,
+            title = "请选择要查询的节次",
+            itemSize = 11,
+            block = { item -> "第${item}节" },
+            onConfirm = {
+                viewModel.changeTime(it)
+            })
         if (courseRoomListState.errorMessage.isNotBlank()) {
             courseRoomListState.errorMessage.toast(true)
+        }
+    }
+
+    @Composable
+    private fun ShowAreaDialog(
+        show: MutableState<Boolean>,
+    ) {
+        val areaSelect by viewModel.areaSelect.collectAsState()
+        val selectedArea = areaSelect.firstOrNull { it.selected } ?: return
+        if (show.value) {
+            var selected by remember { mutableStateOf(selectedArea) }
+            AlertDialog(
+                onDismissRequest = {
+                    show.value = false
+                },
+                title = {
+                    Text(text = "请选择要查询的区域")
+                },
+                text = {
+                    Column {
+                        LazyColumn {
+                            items(areaSelect.size) { index ->
+                                val item = areaSelect[index]
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                        .clickable(
+                                            indication = null,
+                                            interactionSource = remember { MutableInteractionSource() },
+                                        ) {
+                                            selected = item
+                                        },
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    RadioButton(selected = selected == item, onClick = null)
+                                    Text(text = item.area)
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            viewModel.changeArea(selected.area)
+                            show.value = false
+                        },
+                    ) {
+                        Text("确认")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            show.value = false
+                        }
+                    ) {
+                        Text("取消")
+                    }
+                }
+            )
+        }
+    }
+
+    @Composable
+    private fun ShowListDialog(
+        show: MutableState<Boolean>,
+        list: List<Int>,
+        title: String,
+        itemSize: Int,
+        block: (Int) -> String,
+        onConfirm: (List<Int>) -> Unit,
+    ) {
+        val array = Array(itemSize) { i -> list.contains(i + 1) }
+        if (show.value) {
+            AlertDialog(
+                onDismissRequest = {
+                    show.value = false
+                },
+                title = {
+                    Text(text = title)
+                },
+                text = {
+                    Column {
+                        LazyColumn {
+                            val line = if (itemSize > 12) itemSize / 2 else itemSize
+                            val panelSize = if (itemSize > 12) 2 else 1
+                            items(line) { index ->
+                                Row {
+                                    for (i in 0 until panelSize) {
+                                        val item = index * panelSize + i
+                                        if (item < itemSize) {
+                                            var selected by remember { mutableStateOf(array[item]) }
+                                            Row(
+                                                modifier = Modifier
+                                                    .weight(1F)
+                                                    .padding(vertical = 8.dp),
+                                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                            ) {
+                                                Checkbox(
+                                                    checked = selected,
+                                                    onCheckedChange = {
+                                                        selected = it
+                                                        array[item] = it
+                                                    },
+                                                )
+                                                Text(text = block(item + 1))
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            onConfirm(array.mapIndexed { index, b -> if (b) index + 1 else null }
+                                .filterNotNull())
+                            show.value = false
+                        },
+                    ) {
+                        Text("确认")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            show.value = false
+                        }
+                    ) {
+                        Text("取消")
+                    }
+                }
+            )
         }
     }
 }
@@ -222,7 +395,7 @@ private fun BuildItem(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Image(painter = XhuIcons.CustomCourse.teacher, contentDescription = null)
+                    Image(painter = XhuIcons.CourseRoom.no, contentDescription = null)
                     Text(text = "教室编号：${item.roomNo}")
                 }
             }
@@ -231,7 +404,7 @@ private fun BuildItem(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Image(painter = XhuIcons.CustomCourse.teacher, contentDescription = null)
+                    Image(painter = XhuIcons.CourseRoom.name, contentDescription = null)
                     Text(text = "教室名称：${item.roomName}")
                 }
             }
@@ -240,7 +413,7 @@ private fun BuildItem(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Image(painter = XhuIcons.CustomCourse.week, contentDescription = null)
+                    Image(painter = XhuIcons.CourseRoom.seat, contentDescription = null)
                     Text(
                         text = "座位数：${item.seat}"
                     )
@@ -251,7 +424,7 @@ private fun BuildItem(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Image(painter = XhuIcons.CustomCourse.location, contentDescription = null)
+                    Image(painter = XhuIcons.CourseRoom.region, contentDescription = null)
                     Text(text = "所在地区：${item.region}")
                 }
             }
@@ -260,7 +433,7 @@ private fun BuildItem(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Image(painter = XhuIcons.CustomCourse.location, contentDescription = null)
+                    Image(painter = XhuIcons.CourseRoom.type, contentDescription = null)
                     Text(text = "教室类型：${item.type}")
                 }
             }
