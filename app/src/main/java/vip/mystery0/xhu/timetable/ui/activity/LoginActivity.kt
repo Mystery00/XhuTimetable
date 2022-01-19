@@ -37,7 +37,11 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
     @Composable
     override fun BuildContent() {
         ProvideWindowInsets {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(XhuColor.Common.whiteBackground)
+            ) {
                 Image(
                     modifier = Modifier.fillMaxWidth(),
                     painter = painterResource(id = R.mipmap.login_header),
