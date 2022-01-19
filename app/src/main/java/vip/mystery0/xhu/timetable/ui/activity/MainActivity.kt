@@ -7,7 +7,10 @@ import android.content.res.ColorStateList
 import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.compose.animation.*
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -47,6 +50,7 @@ import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuStateIcons
+import vip.mystery0.xhu.timetable.ui.theme.isDarkMode
 import vip.mystery0.xhu.timetable.ui.theme.stateOf
 import vip.mystery0.xhu.timetable.utils.isTwiceClick
 import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
@@ -169,7 +173,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                                     viewModel.loadCourseList()
                                 },
                         ) {
-                            val isDark = isSystemInDarkTheme()
+                            val isDark = isDarkMode()
                             AndroidView(
                                 factory = { context ->
                                     ImageView(context)
