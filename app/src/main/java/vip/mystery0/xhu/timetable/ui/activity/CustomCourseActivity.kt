@@ -172,8 +172,8 @@ class CustomCourseActivity : BaseComposeActivity() {
                                 selected?.let { "${it.userName}(${it.studentId})" } ?: "查询中"
                             Text(text = "查询用户：$userString")
                         }
-                        OutlinedButton(
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                        Button(
+                            colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
                             onClick = {
                                 viewModel.loadCustomCourseList()
                                 scope.launch {
@@ -533,9 +533,6 @@ class CustomCourseActivity : BaseComposeActivity() {
         if (init) {
             LaunchedEffect(key1 = "init", block = {
                 viewModel.loadCustomCourseList()
-                scope.launch {
-                    scaffoldState.conceal()
-                }
             })
         }
     }
