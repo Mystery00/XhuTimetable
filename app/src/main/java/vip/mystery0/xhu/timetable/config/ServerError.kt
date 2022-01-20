@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.config
 
+import android.util.Log
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -26,6 +27,7 @@ fun serverExceptionHandler(
             val response = exception.response()?.errorBody()?.string()
             if (response != null) {
                 parseServerError(exception.code(), response)?.let {
+                    Log.d("serverExceptionHandler", it.toString())
                     val result = messageHandler(it)
                     if (result) {
                         return@CoroutineExceptionHandler

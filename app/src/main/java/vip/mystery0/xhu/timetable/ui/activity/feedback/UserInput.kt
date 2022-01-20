@@ -170,11 +170,11 @@ fun FunctionalityNotAvailablePanel() {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = "stringResource(id = R.string.not_available)",
+                text = "暂不支持",
                 style = MaterialTheme.typography.caption
             )
             Text(
-                text = "stringResource(id = R.string.not_available_subtitle)",
+                text = "暂不支持",
                 modifier = Modifier.paddingFrom(FirstBaseline, before = 32.dp),
                 style = MaterialTheme.typography.body2,
                 color = XhuColor.Common.grayText
@@ -293,7 +293,7 @@ private fun UserInputText(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(64.dp)
+            .defaultMinSize(minHeight = 64.dp)
             .semantics {
                 contentDescription = ""
                 keyboardShownProperty = keyboardShown
@@ -303,7 +303,8 @@ private fun UserInputText(
         Surface {
             Box(
                 modifier = Modifier
-                    .height(64.dp)
+                    .defaultMinSize(minHeight = 64.dp)
+                    .fillMaxWidth()
                     .weight(1f)
                     .align(Alignment.Bottom)
             ) {
@@ -313,7 +314,7 @@ private fun UserInputText(
                     onValueChange = { onTextChanged(it) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 32.dp)
+                        .padding(horizontal = 32.dp, vertical = 16.dp)
                         .align(Alignment.CenterStart)
                         .onFocusChanged { state ->
                             if (lastFocusState != state.isFocused) {
@@ -328,7 +329,7 @@ private fun UserInputText(
                     keyboardActions = KeyboardActions {
                         onMessageSent()
                     },
-                    maxLines = 1,
+                    maxLines = 9,
                     cursorBrush = SolidColor(LocalContentColor.current),
                     textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current)
                 )
