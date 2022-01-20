@@ -39,6 +39,7 @@ import java.time.Instant
 
 class FeedbackActivity : BaseComposeActivity(), KoinComponent {
     private val viewModel: FeedbackViewModel by viewModels()
+    private val regex = Regex("!!!([\\d]+)!!!([a-zA-Z0-9]+)!!!")
 
     @Composable
     override fun BuildContent() {
@@ -147,7 +148,14 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                     }
                     UserInput(
                         onMessageSent = { content ->
-                            viewModel.sendMessage(content)
+                            val result = regex.matchEntire(content)
+                            if (result != null) {
+                                val targetUserId = result.groupValues[1]
+                                val token = result.groupValues[2]
+                                viewModel.changeToken(token, targetUserId)
+                            } else {
+                                viewModel.sendMessage(content)
+                            }
                         },
                         resetScroll = {
                             scope.launch {

@@ -34,12 +34,28 @@ class FeedbackViewModel : ComposeViewModel() {
     private val _wsStatus = MutableStateFlow(WebSocketState(WebSocketStatus.DISCONNECTED))
     val wsStatus: StateFlow<WebSocketState> = _wsStatus
 
+    private var adminMode = false
+    private var token = ""
+    private var targetUserId = ""
+
     val messageState = MessageState(emptyList())
 
     init {
         viewModelScope.launch {
             initWebSocket()
         }
+        loadLastMessage(20)
+    }
+
+    fun changeToken(token: String, targetUserId: String) {
+        Log.i(TAG, "changeToken: admin mode enabled")
+        this.adminMode = true
+        this.token = token
+        this.targetUserId = targetUserId
+        viewModelScope.launch {
+            initWebSocket()
+        }
+        messageState.clearMessage()
         loadLastMessage(20)
     }
 
@@ -57,10 +73,16 @@ class FeedbackViewModel : ComposeViewModel() {
                 _loading.value = LoadingState(loading = false, errorMessage = "用户未登录")
                 return@launch
             }
+            if (token.isEmpty()) {
+                token = mainUser.token
+            }
             val lastId = messageState.messages.lastOrNull()?.id ?: Long.MAX_VALUE
-            val pullMessage = feedbackApi.pullMessage(mainUser.token, lastId, size)
+            val pullMessage = if (adminMode)
+                feedbackApi.pullAdminMessage(token, lastId, size, targetUserId)
+            else
+                feedbackApi.pullMessage(token, lastId, size)
             pullMessage.forEach {
-                it.generate(mainUser)
+                it.generate(if (adminMode) "System" else mainUser.studentId)
             }
             val result = pullMessage.reversed()
             messageState.loadMessage(result)
@@ -95,9 +117,14 @@ class FeedbackViewModel : ComposeViewModel() {
             _wsStatus.value = WebSocketState(WebSocketStatus.DISCONNECTED, "用户未登录")
             return
         }
+        webSocket?.close(1000, "管理员登录")
         _wsStatus.value = WebSocketState(WebSocketStatus.CONNECTING)
+        val url = if (adminMode)
+            "wss://ws.api.mystery0.vip/admin/ws?token=${token}&receiveUserId=${targetUserId}"
+        else
+            "wss://ws.api.mystery0.vip/ws?token=${token}"
         val request = Request.Builder()
-            .url("wss://ws.api.mystery0.vip/ws?token=${mainUser.token}")
+            .url(url)
             .build()
         val webSocketClient = OkHttpClient.Builder()
             .pingInterval(10, TimeUnit.SECONDS)
@@ -111,7 +138,7 @@ class FeedbackViewModel : ComposeViewModel() {
             override fun onMessage(webSocket: WebSocket, text: String) {
                 super.onMessage(webSocket, text)
                 jsonAdapter.fromJson(text)?.let {
-                    it.generate(mainUser)
+                    it.generate(if (adminMode) "System" else mainUser.studentId)
                     messageState.addMessage(it)
                 }
             }
@@ -123,7 +150,9 @@ class FeedbackViewModel : ComposeViewModel() {
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 super.onFailure(webSocket, t, response)
-                _wsStatus.value = WebSocketState(WebSocketStatus.FAILED, t.message ?: "异常断开，请重新连接")
+                Log.e(TAG, "onFailure: ", t)
+                _wsStatus.value =
+                    WebSocketState(WebSocketStatus.FAILED, t.message ?: "异常断开，请重新连接")
             }
         })
     }
@@ -145,6 +174,10 @@ class MessageState(
     private val _messages: MutableList<Message> =
         mutableStateListOf(*initialMessages.toTypedArray())
     val messages: List<Message> = _messages
+
+    fun clearMessage() {
+        _messages.clear()
+    }
 
     fun loadMessage(msgList: List<Message>) {
         _messages.addAll(msgList)

@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.model.response
 
-import vip.mystery0.xhu.timetable.config.User
 import java.time.Instant
 
 data class Message(
@@ -17,8 +16,8 @@ data class Message(
     @Transient
     var sendTime: Instant = Instant.now()
 
-    fun generate(mainUser: User) {
-        isMe = mainUser.studentId == fromUserId
+    fun generate(studentId: String) {
+        isMe = studentId == fromUserId
         sendTime = Instant.ofEpochMilli(time)
     }
 }

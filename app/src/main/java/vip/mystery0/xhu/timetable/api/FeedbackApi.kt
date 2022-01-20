@@ -13,9 +13,17 @@ interface FeedbackApi {
         @Query("size") size: Int,
     ): List<Message>
 
+    @GET("/api/rest/access/external/admin/pull")
+    suspend fun pullAdminMessage(
+        @Query("token") token: String,
+        @Query("lastId") lastId: Long,
+        @Query("size") size: Int,
+        @Query("targetUserId") targetUserId: String,
+    ): List<Message>
+
     @GET("/api/rest/access/external/check")
     suspend fun checkMessage(
         @Query("token") token: String,
-        @Query("lastId") lastId: Long,
+        @Query("firstId") firstId: Long,
     ): MessageCheckResult
 }
