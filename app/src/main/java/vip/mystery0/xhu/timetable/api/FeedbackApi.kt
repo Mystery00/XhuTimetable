@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.api
 
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 import vip.mystery0.xhu.timetable.model.response.Message
@@ -11,7 +12,7 @@ interface FeedbackApi {
         @Query("token") token: String,
         @Query("lastId") lastId: Long,
         @Query("size") size: Int,
-    ): List<Message>
+    ): Response<List<Message>>
 
     @GET("/api/rest/access/external/admin/pull")
     suspend fun pullAdminMessage(
@@ -25,5 +26,5 @@ interface FeedbackApi {
     suspend fun checkMessage(
         @Query("token") token: String,
         @Query("firstId") firstId: Long,
-    ): MessageCheckResult
+    ): Response<MessageCheckResult>
 }
