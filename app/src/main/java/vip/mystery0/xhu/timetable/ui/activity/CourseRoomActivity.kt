@@ -322,8 +322,7 @@ class CourseRoomActivity : BaseComposeActivity() {
                                             var selected by remember { mutableStateOf(array[item]) }
                                             Row(
                                                 modifier = Modifier
-                                                    .weight(1F)
-                                                    .padding(vertical = 8.dp),
+                                                    .weight(1F),
                                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                                                 verticalAlignment = Alignment.CenterVertically,
                                             ) {

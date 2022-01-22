@@ -11,8 +11,10 @@ import kotlinx.coroutines.launch
 import okhttp3.*
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.FeedbackApi
+import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.response.Message
@@ -77,10 +79,13 @@ class FeedbackViewModel : ComposeViewModel() {
                 token = mainUser.token
             }
             val lastId = messageState.messages.lastOrNull()?.id ?: Long.MAX_VALUE
-            val pullMessage = if (adminMode)
-                feedbackApi.pullAdminMessage(token, lastId, size, targetUserId)
-            else
-                feedbackApi.pullMessage(token, lastId, size)
+            val pullMessage =
+                if (adminMode)
+                    feedbackApi.pullAdminMessage(token, lastId, size, targetUserId)
+                else
+                    SessionManager.mainUser().withAutoLogin {
+                        feedbackApi.pullMessage(it, lastId, size).checkLogin()
+                    }.first
             pullMessage.forEach {
                 it.generate(if (adminMode) "System" else mainUser.studentId)
             }

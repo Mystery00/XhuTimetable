@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.FeedbackApi
 import vip.mystery0.xhu.timetable.api.PoemsApi
+import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.*
 import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
@@ -623,7 +624,7 @@ class MainViewModel : ComposeViewModel() {
             if (SessionManager.mainUserOrNull() == null) return@launch
             val firstFeedbackMessageId = getConfig { firstFeedbackMessageId }
             val response = SessionManager.mainUser().withAutoLogin {
-                feedbackApi.checkMessage(it, firstFeedbackMessageId)
+                feedbackApi.checkMessage(it, firstFeedbackMessageId).checkLogin()
             }
             _hasUnReadFeedback.value = response.first.newResult
         }
