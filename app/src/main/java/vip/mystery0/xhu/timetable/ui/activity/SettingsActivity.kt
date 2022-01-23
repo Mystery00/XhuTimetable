@@ -83,6 +83,13 @@ class SettingsActivity : BaseComposeActivity() {
                     Text(text = "界面设置")
                 }) {
                     SettingsMenuLink(
+                        icon = {
+                            Icon(
+                                painter = XhuIcons.customBackground,
+                                contentDescription = null,
+                                tint = XhuColor.Common.blackText,
+                            )
+                        },
                         title = { Text(text = "自定义背景图片") },
                         onClick = {
                             intentTo(BackgroundActivity::class)
@@ -91,6 +98,13 @@ class SettingsActivity : BaseComposeActivity() {
                     ConfigSettingsCheckbox(
                         config = GlobalConfig::disableBackgroundWhenNight,
                         scope = scope,
+                        icon = {
+                            Icon(
+                                painter = XhuIcons.disableBackgroundWhenNight,
+                                contentDescription = null,
+                                tint = XhuColor.Common.blackText,
+                            )
+                        },
                         title = { Text(text = "夜间模式时自动禁用背景图") },
                         subtitle = {
                             Text(text = "当夜间模式开启时，自动禁用背景图片")
