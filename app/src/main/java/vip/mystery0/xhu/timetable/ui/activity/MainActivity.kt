@@ -54,6 +54,8 @@ import vip.mystery0.xhu.timetable.ui.theme.isDarkMode
 import vip.mystery0.xhu.timetable.ui.theme.stateOf
 import vip.mystery0.xhu.timetable.utils.isTwiceClick
 import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
+import java.time.Duration
+import java.time.Instant
 import kotlin.math.absoluteValue
 import kotlin.math.min
 
@@ -61,6 +63,7 @@ import kotlin.math.min
 class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEventBus = true) {
     private val viewModel: MainViewModel by viewModels()
     private lateinit var modalBottomSheetState: ModalBottomSheetState
+    private var lastCheckUnreadTime = Instant.MIN
 
     private val ext: MainActivityExt
         get() = MainActivityExt(this, viewModel, modalBottomSheetState)
@@ -478,8 +481,12 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
 
     override fun onResume() {
         super.onResume()
-        viewModel.checkUnReadNotice()
-        viewModel.checkUnReadFeedback()
+        val now = Instant.now()
+        if (Duration.between(lastCheckUnreadTime, now) > Duration.ofMinutes(1)) {
+            viewModel.checkUnReadNotice()
+            viewModel.checkUnReadFeedback()
+            lastCheckUnreadTime = now
+        }
     }
 
 
