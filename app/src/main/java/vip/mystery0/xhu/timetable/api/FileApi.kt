@@ -14,4 +14,10 @@ interface FileApi {
         @Url url: String,
         @Tag tag: DownloadProgressInterceptor.Tag = DownloadProgressInterceptor.emptyTag(),
     ): ResponseBody
+
+    @Streaming
+    @GET
+    suspend fun downloadFile(
+        @Url url: String,
+    ): ResponseBody
 }

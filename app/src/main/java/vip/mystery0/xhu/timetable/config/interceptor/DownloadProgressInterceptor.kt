@@ -1,10 +1,8 @@
 package vip.mystery0.xhu.timetable.config.interceptor
 
 import okhttp3.Interceptor
-import okhttp3.MediaType
 import okhttp3.Response
 import okhttp3.ResponseBody
-import okio.*
 import vip.mystery0.xhu.timetable.ui.activity.DownloadUpdateState
 import vip.mystery0.xhu.timetable.ui.activity.updateProgress
 
@@ -42,35 +40,14 @@ class DownloadProgressInterceptor : Interceptor {
 class DownloadProgressResponseBody(
     private val responseBody: ResponseBody,
     private val patch: Boolean,
-) : ResponseBody() {
-    private val bufferedSource: BufferedSource by lazy { source(responseBody.source()).buffer() }
-
-    override fun contentType(): MediaType? = responseBody.contentType()
-
-    override fun contentLength(): Long = responseBody.contentLength()
-
-    override fun source(): BufferedSource = bufferedSource
-
-    private fun source(source: Source): Source {
-        return object : ForwardingSource(source) {
-            var totalBytesRead = 0L
-            val totalSize = responseBody.contentLength()
-
-            override fun read(sink: Buffer, byteCount: Long): Long {
-                val bytesRead = super.read(sink, byteCount)
-                totalBytesRead += if (bytesRead != -1L) bytesRead else 0
-                val progress = (totalBytesRead * 100 / totalSize).toInt()
-                val state = DownloadUpdateState(
-                    downloading = true,
-                    downloaded = totalBytesRead,
-                    totalSize = totalSize,
-                    patch = patch,
-                    progress = progress,
-                    status = "${progress}%",
-                )
-                updateProgress(state)
-                return bytesRead
-            }
-        }
-    }
-}
+) : FileDownloadProgressResponseBody(responseBody, { progress ->
+    val state = DownloadUpdateState(
+        downloading = true,
+        downloaded = progress.received,
+        totalSize = progress.total,
+        patch = patch,
+        progress = progress.progress.toInt(),
+        status = "${progress}%",
+    )
+    updateProgress(state)
+})

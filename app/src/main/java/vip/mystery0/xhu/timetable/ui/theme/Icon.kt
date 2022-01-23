@@ -78,6 +78,12 @@ object XhuIcons {
     val poems: Painter
         @Composable
         get() = painterResource(R.mipmap.ic_poems)
+    val checked: Painter
+        @Composable
+        get() = painterResource(R.drawable.ic_checked)
+    val reset: Painter
+        @Composable
+        get() = painterResource(R.drawable.ic_round_settings_backup_restore)
 
     object CustomCourse {
         val title: Painter
