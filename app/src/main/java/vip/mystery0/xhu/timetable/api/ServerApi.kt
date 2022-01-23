@@ -39,7 +39,7 @@ interface ServerApi {
     suspend fun schoolCalendarUrl(
         @Header("token") token: String,
         @Query("resourceId") resourceId: Long,
-    ): Response<SchoolCalendarUrlResponse>
+    ): Response<ResourceUrlResponse>
 
     @GET("/api/rest/xhu-timetable/server/customCourse")
     suspend fun customCourseList(
@@ -98,6 +98,17 @@ interface ServerApi {
         @Header("token") token: String,
         @Body allCourseRequest: AllCourseRequest,
     ): Response<List<AllCourseResponse>>
+
+    @GET("/api/rest/xhu-timetable/server/background")
+    suspend fun selectAllBackground(
+        @Header("token") token: String,
+    ): Response<List<BackgroundResponse>>
+
+    @GET("/api/rest/xhu-timetable/server/background/url")
+    suspend fun getBackgroundUrl(
+        @Header("token") token: String,
+        @Query("resourceId") resourceId: Long,
+    ): Response<ResourceUrlResponse>
 }
 
 fun <T : Any> Response<T>.checkLogin(): T {

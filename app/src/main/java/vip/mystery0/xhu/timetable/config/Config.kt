@@ -186,7 +186,11 @@ class Config internal constructor() {
         }
     var backgroundImage: File?
         set(value) {
-            kv.encode("backgroundImage", value!!.absolutePath)
+            if (value != null) {
+                kv.encode("backgroundImage", value.absolutePath)
+            } else {
+                kv.remove("backgroundImage")
+            }
         }
         get() {
             val image = kv.decodeString("backgroundImage")
@@ -279,4 +283,9 @@ class Config internal constructor() {
             kv.encode("firstFeedbackMessageId", value)
         }
         get() = kv.decodeLong("firstFeedbackMessageId", 0L)
+    var disableBackgroundWhenNight: Boolean
+        set(value) {
+            kv.encode("disableBackgroundWhenNight", value)
+        }
+        get() = kv.decodeBool("disableBackgroundWhenNight", false)
 }

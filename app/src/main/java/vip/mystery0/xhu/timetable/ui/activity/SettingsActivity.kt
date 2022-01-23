@@ -85,9 +85,26 @@ class SettingsActivity : BaseComposeActivity() {
                     SettingsMenuLink(
                         title = { Text(text = "自定义背景图片") },
                         onClick = {
-                            scope.launch {
-                                "暂未实现".toast()
-                            }
+                            intentTo(BackgroundActivity::class)
+                        }
+                    )
+                    ConfigSettingsCheckbox(
+                        config = GlobalConfig::disableBackgroundWhenNight,
+                        scope = scope,
+                        icon = {
+                            Icon(
+                                painter = XhuIcons.pageEffect,
+                                contentDescription = null,
+                                tint = XhuColor.Common.blackText,
+                            )
+                        },
+                        title = { Text(text = "夜间模式时自动禁用背景图") },
+                        subtitle = {
+                            Text(text = "当夜间模式开启时，自动禁用背景图片")
+                        },
+                        onCheckedChange = {
+                            setConfig { disableBackgroundWhenNight = it }
+                            eventBus.post(UIEvent(EventType.CHANGE_MAIN_BACKGROUND))
                         }
                     )
                     SettingsMenuLink(
@@ -117,18 +134,6 @@ class SettingsActivity : BaseComposeActivity() {
                         onCheckedChange = {
                             setConfig { enablePageEffect = it }
                             eventBus.post(UIEvent(EventType.CHANGE_PAGE_EFFECT))
-                        }
-                    )
-                }
-                XhuSettingsGroup(title = {
-                    Text(text = "重置设置")
-                }) {
-                    SettingsMenuLink(
-                        title = { Text(text = "重置背景图片") },
-                        onClick = {
-                            scope.launch {
-                                "暂未实现".toast()
-                            }
                         }
                     )
                 }
@@ -279,6 +284,19 @@ class SettingsActivity : BaseComposeActivity() {
                         onClick = {
                             scope.launch {
                                 "暂未实现".toast()
+                            }
+                        }
+                    )
+                }
+                XhuSettingsGroup(title = {
+                    Text(text = "重置设置")
+                }) {
+                    SettingsMenuLink(
+                        title = { Text(text = "重置背景图片") },
+                        onClick = {
+                            scope.launch {
+                                setConfig { backgroundImage = null }
+                                "背景图已重置".toast()
                             }
                         }
                     )

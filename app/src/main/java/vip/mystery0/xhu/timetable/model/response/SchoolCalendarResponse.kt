@@ -5,6 +5,6 @@ data class SchoolCalendarResponse(
     val resourceId: Long,
 )
 
-data class SchoolCalendarUrlResponse(
+data class ResourceUrlResponse(
     val url: String,
 )

@@ -99,6 +99,11 @@
             android:exported="true"
             android:label="@string/title_activity_course_room"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
+        <activity
+            android:name=".ui.activity.BackgroundActivity"
+            android:exported="true"
+            android:label="@string/title_activity_background"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"

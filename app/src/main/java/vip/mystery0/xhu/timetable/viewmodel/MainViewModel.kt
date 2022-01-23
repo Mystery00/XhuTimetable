@@ -45,6 +45,8 @@ class MainViewModel : ComposeViewModel() {
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
+    private var lastCheckUnreadTime = Instant.MIN
+
     private val poemsApi: PoemsApi by inject()
 
     private val feedbackApi: FeedbackApi by inject()
@@ -62,6 +64,8 @@ class MainViewModel : ComposeViewModel() {
     private val workManager: WorkManager by inject()
 
     val version = MutableStateFlow(DataHolder.version)
+
+    private val isDarkMode = MutableStateFlow(false)
 
     private val _errorMessage = MutableStateFlow("")
     val errorMessage: StateFlow<String> = _errorMessage
@@ -141,8 +145,6 @@ class MainViewModel : ComposeViewModel() {
     private suspend fun loadFromConfig() {
         _multiAccountMode.value = getConfig { multiAccountMode }
         _showStatus.value = getConfig { showStatus }
-        _backgroundImage.value =
-            getConfig { backgroundImage } ?: XhuImages.defaultBackgroundImage
         val time = getConfig { showTomorrowCourseTime }
         _showTomorrowCourse.value = time?.let {
             LocalTime.now().isAfter(it)
@@ -152,6 +154,29 @@ class MainViewModel : ComposeViewModel() {
     fun loadConfig() {
         viewModelScope.launch {
             loadFromConfig()
+        }
+    }
+
+    fun loadBackground(isDarkModeValue: Boolean = isDarkMode.value) {
+        viewModelScope.launch {
+            isDarkMode.value = isDarkModeValue
+            val disable = getConfig { disableBackgroundWhenNight }
+            val isNight = isDarkMode.value
+            if (disable && isNight) {
+                _backgroundImage.value = Unit
+                return@launch
+            } else {
+                _backgroundImage.value =
+                    getConfig { backgroundImage } ?: XhuImages.defaultBackgroundImage
+            }
+        }
+    }
+
+    fun checkUnRead(block: () -> Unit) {
+        val now = Instant.now()
+        if (Duration.between(lastCheckUnreadTime, now) > Duration.ofMinutes(1)) {
+            block()
+            lastCheckUnreadTime = now
         }
     }
 
