@@ -91,13 +91,6 @@ class SettingsActivity : BaseComposeActivity() {
                     ConfigSettingsCheckbox(
                         config = GlobalConfig::disableBackgroundWhenNight,
                         scope = scope,
-                        icon = {
-                            Icon(
-                                painter = XhuIcons.pageEffect,
-                                contentDescription = null,
-                                tint = XhuColor.Common.blackText,
-                            )
-                        },
                         title = { Text(text = "夜间模式时自动禁用背景图") },
                         subtitle = {
                             Text(text = "当夜间模式开启时，自动禁用背景图片")
