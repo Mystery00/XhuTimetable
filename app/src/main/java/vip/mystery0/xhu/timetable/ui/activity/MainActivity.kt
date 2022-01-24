@@ -220,9 +220,9 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                         Divider(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(0.33.dp)
-                                .background(XhuColor.Common.divider)
                                 .align(Alignment.BottomCenter),
+                            thickness = 0.33.dp,
+                            color = XhuColor.Common.divider,
                         )
                     }
                 },
@@ -230,9 +230,9 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Divider(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(0.33.dp)
-                                .background(XhuColor.Common.divider),
+                                .fillMaxWidth(),
+                            thickness = 0.33.dp,
+                            color = XhuColor.Common.divider,
                         )
                         BottomNavigation(
                             backgroundColor = barColor,

@@ -2,15 +2,13 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -35,6 +33,7 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.formatWeekString
 import vip.mystery0.xhu.timetable.viewmodel.CustomCourseViewModel
+import vip.mystery0.xhu.timetable.viewmodel.SearchCourse
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.*
@@ -62,6 +61,8 @@ class CustomCourseActivity : BaseComposeActivity() {
                 })
         val scope = rememberCoroutineScope()
 
+        var createType by remember { mutableStateOf(CreateType.INPUT) }
+
         val userDialog = remember { mutableStateOf(false) }
         val yearDialog = remember { mutableStateOf(false) }
         val termDialog = remember { mutableStateOf(false) }
@@ -76,6 +77,8 @@ class CustomCourseActivity : BaseComposeActivity() {
         var location by remember { mutableStateOf(customCourse.location) }
         val courseIndex = remember { mutableStateOf(customCourse.courseIndex) }
         val day = remember { mutableStateOf(customCourse.day) }
+
+        var searchCourse by remember { mutableStateOf(SearchCourse.EMPTY) }
 
         fun updateCustomCourse(data: CustomCourse) {
             customCourse = data
@@ -233,7 +236,7 @@ class CustomCourseActivity : BaseComposeActivity() {
                                     contentDescription = null,
                                 )
                                 Spacer(modifier = Modifier.weight(1F))
-                                if (customCourse.courseId != 0L && !saveCustomCourseState.loading) {
+                                if (customCourse.courseId != 0L && !saveCustomCourseState.loading && createType == CreateType.INPUT) {
                                     TextButton(
                                         enabled = !saveCustomCourseState.loading,
                                         onClick = {
@@ -249,15 +252,30 @@ class CustomCourseActivity : BaseComposeActivity() {
                                         enabled = !saveCustomCourseState.loading,
                                         onClick = {
                                             if (!saveCustomCourseState.loading) {
-                                                viewModel.saveCustomCourse(
-                                                    customCourse.courseId,
-                                                    courseName,
-                                                    teacherName,
-                                                    weekList,
-                                                    location,
-                                                    courseIndex.value,
-                                                    day.value,
-                                                )
+                                                if (createType == CreateType.INPUT) {
+                                                    viewModel.saveCustomCourse(
+                                                        customCourse.courseId,
+                                                        courseName,
+                                                        teacherName,
+                                                        weekList,
+                                                        location,
+                                                        courseIndex.value,
+                                                        day.value,
+                                                    )
+                                                } else {
+                                                    viewModel.saveCustomCourse(
+                                                        0L,
+                                                        searchCourse.name,
+                                                        searchCourse.teacher,
+                                                        searchCourse.week,
+                                                        searchCourse.location,
+                                                        listOf(
+                                                            searchCourse.time.first(),
+                                                            searchCourse.time.last()
+                                                        ),
+                                                        searchCourse.day,
+                                                    )
+                                                }
                                             }
                                         }) {
                                         Text(text = "保存")
@@ -272,184 +290,409 @@ class CustomCourseActivity : BaseComposeActivity() {
                                     }
                                 }
                             }
-                            Row(
-                                modifier = Modifier
-                                    .defaultMinSize(minHeight = 48.dp)
-                                    .padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                TextField(
-                                    modifier = Modifier.weight(1F),
-                                    value = courseName,
-                                    placeholder = {
-                                        Text(text = "（必填）")
-                                    },
-                                    label = {
-                                        Text(text = "课程名称")
-                                    },
-                                    leadingIcon = {
-                                        Image(
-                                            painter = XhuIcons.CustomCourse.title,
-                                            contentDescription = null
-                                        )
-                                    },
-                                    onValueChange = { courseName = it },
-                                    colors = TextFieldDefaults.textFieldColors(
-                                        backgroundColor = Color.Transparent,
-                                        unfocusedIndicatorColor = Color.Transparent,
-                                    )
-                                )
+                            if (customCourse.courseId == 0L) {
+                                Row(
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                        .align(Alignment.CenterHorizontally),
+                                ) {
+                                    val selectedContentColor = Color.White
+                                    val selectedBackgroundColor = MaterialTheme.colors.primary
+                                    val contentColor = MaterialTheme.colors.primary
+                                    val backgroundColor = XhuColor.Common.whiteBackground
+                                    OutlinedButton(
+                                        shape = RoundedCornerShape(
+                                            topStart = 8.dp,
+                                            bottomStart = 8.dp
+                                        ),
+                                        colors = ButtonDefaults.outlinedButtonColors(
+                                            contentColor = if (createType == CreateType.INPUT) selectedContentColor else contentColor,
+                                            backgroundColor = if (createType == CreateType.INPUT) selectedBackgroundColor else backgroundColor,
+                                        ),
+                                        onClick = {
+                                            createType = CreateType.INPUT
+                                        }) {
+                                        Text(text = "手动输入")
+                                    }
+                                    OutlinedButton(
+                                        shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp),
+                                        colors = ButtonDefaults.outlinedButtonColors(
+                                            contentColor = if (createType == CreateType.SELECT) selectedContentColor else contentColor,
+                                            backgroundColor = if (createType == CreateType.SELECT) selectedBackgroundColor else backgroundColor,
+                                        ),
+                                        onClick = {
+                                            createType = CreateType.SELECT
+                                        }) {
+                                        Text(text = "蹭课选择")
+                                    }
+                                }
+                            } else {
+                                createType = CreateType.INPUT
                             }
-                            Row(
-                                modifier = Modifier
-                                    .defaultMinSize(minHeight = 48.dp)
-                                    .padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                TextField(
-                                    modifier = Modifier.weight(1F),
-                                    value = teacherName,
-                                    placeholder = {
-                                        Text(text = "（选填）")
-                                    },
-                                    label = {
-                                        Text(text = "任课教师")
-                                    },
-                                    leadingIcon = {
-                                        Image(
-                                            painter = XhuIcons.CustomCourse.teacher,
-                                            contentDescription = null
-                                        )
-                                    },
-                                    onValueChange = { teacherName = it },
-                                    colors = TextFieldDefaults.textFieldColors(
-                                        backgroundColor = Color.Transparent,
-                                        unfocusedIndicatorColor = Color.Transparent,
-                                    )
-                                )
-                            }
-                            Row(
-                                modifier = Modifier
-                                    .defaultMinSize(minHeight = 48.dp)
-                                    .padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Image(
-                                    modifier = Modifier.padding(12.dp),
-                                    painter = XhuIcons.CustomCourse.week,
-                                    contentDescription = null
-                                )
-                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    Text(text = "上课周数${if (weekList.isEmpty()) "（不能为空）" else ""} ${weekList.formatWeekString()}")
-                                    LazyRow(content = {
-                                        items(20) { index ->
-                                            Box(
-                                                modifier = Modifier.padding(1.dp),
-                                                contentAlignment = Alignment.Center,
-                                            ) {
-                                                val item = index + 1
-                                                val inList = item in weekList
-                                                val color =
-                                                    if (inList) MaterialTheme.colors.primary else XhuColor.customCourseWeekColorBackground
-                                                val textColor =
-                                                    if (inList) MaterialTheme.colors.onPrimary else Color.Black
-                                                Surface(
-                                                    shape = CircleShape,
-                                                    modifier = Modifier
-                                                        .padding(horizontal = 6.dp)
-                                                        .size(36.dp)
-                                                        .clickable(
-                                                            onClick = {
-                                                                weekList = if (inList) {
-                                                                    val newList =
-                                                                        weekList.toMutableList()
-                                                                    newList.remove(item)
-                                                                    newList
-                                                                } else {
-                                                                    val newList =
-                                                                        weekList.toMutableList()
-                                                                    newList.add(item)
-                                                                    newList
-                                                                }
-                                                            },
-                                                            indication = null,
-                                                            interactionSource = MutableInteractionSource(),
-                                                        ),
-                                                    color = color
-                                                ) {}
-                                                Text(text = "$item", color = textColor)
+                            when (createType) {
+                                CreateType.INPUT -> {
+                                    Column {
+                                        Row(
+                                            modifier = Modifier
+                                                .defaultMinSize(minHeight = 48.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            TextField(
+                                                modifier = Modifier.weight(1F),
+                                                value = courseName,
+                                                placeholder = {
+                                                    Text(text = "（必填）")
+                                                },
+                                                label = {
+                                                    Text(text = "课程名称")
+                                                },
+                                                leadingIcon = {
+                                                    Image(
+                                                        painter = XhuIcons.CustomCourse.title,
+                                                        contentDescription = null
+                                                    )
+                                                },
+                                                onValueChange = { courseName = it },
+                                                colors = TextFieldDefaults.textFieldColors(
+                                                    backgroundColor = Color.Transparent,
+                                                    unfocusedIndicatorColor = Color.Transparent,
+                                                )
+                                            )
+                                        }
+                                        Row(
+                                            modifier = Modifier
+                                                .defaultMinSize(minHeight = 48.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            TextField(
+                                                modifier = Modifier.weight(1F),
+                                                value = teacherName,
+                                                placeholder = {
+                                                    Text(text = "（选填）")
+                                                },
+                                                label = {
+                                                    Text(text = "任课教师")
+                                                },
+                                                leadingIcon = {
+                                                    Image(
+                                                        painter = XhuIcons.CustomCourse.teacher,
+                                                        contentDescription = null
+                                                    )
+                                                },
+                                                onValueChange = { teacherName = it },
+                                                colors = TextFieldDefaults.textFieldColors(
+                                                    backgroundColor = Color.Transparent,
+                                                    unfocusedIndicatorColor = Color.Transparent,
+                                                )
+                                            )
+                                        }
+                                        Row(
+                                            modifier = Modifier
+                                                .defaultMinSize(minHeight = 48.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            TextField(
+                                                modifier = Modifier.weight(1F),
+                                                value = location,
+                                                placeholder = {
+                                                    Text(text = "（选填）")
+                                                },
+                                                label = {
+                                                    Text(text = "上课地点")
+                                                },
+                                                leadingIcon = {
+                                                    Image(
+                                                        painter = XhuIcons.CustomCourse.location,
+                                                        contentDescription = null
+                                                    )
+                                                },
+                                                onValueChange = { location = it },
+                                                colors = TextFieldDefaults.textFieldColors(
+                                                    backgroundColor = Color.Transparent,
+                                                    unfocusedIndicatorColor = Color.Transparent,
+                                                )
+                                            )
+                                        }
+                                        Row(
+                                            modifier = Modifier
+                                                .defaultMinSize(minHeight = 48.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Image(
+                                                modifier = Modifier.padding(12.dp),
+                                                painter = XhuIcons.CustomCourse.week,
+                                                contentDescription = null
+                                            )
+                                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                Text(text = "上课周数${if (weekList.isEmpty()) "（不能为空）" else ""} ${weekList.formatWeekString()}")
+                                                LazyRow(content = {
+                                                    items(20) { index ->
+                                                        Box(
+                                                            modifier = Modifier.padding(1.dp),
+                                                            contentAlignment = Alignment.Center,
+                                                        ) {
+                                                            val item = index + 1
+                                                            val inList = item in weekList
+                                                            val color =
+                                                                if (inList) MaterialTheme.colors.primary else XhuColor.customCourseWeekColorBackground
+                                                            val textColor =
+                                                                if (inList) MaterialTheme.colors.onPrimary else Color.Black
+                                                            Surface(
+                                                                shape = CircleShape,
+                                                                modifier = Modifier
+                                                                    .padding(horizontal = 6.dp)
+                                                                    .size(36.dp)
+                                                                    .clickable(
+                                                                        onClick = {
+                                                                            weekList = if (inList) {
+                                                                                val newList =
+                                                                                    weekList.toMutableList()
+                                                                                newList.remove(item)
+                                                                                newList
+                                                                            } else {
+                                                                                val newList =
+                                                                                    weekList.toMutableList()
+                                                                                newList.add(item)
+                                                                                newList
+                                                                            }
+                                                                        },
+                                                                        indication = null,
+                                                                        interactionSource = MutableInteractionSource(),
+                                                                    ),
+                                                                color = color
+                                                            ) {}
+                                                            Text(text = "$item", color = textColor)
+                                                        }
+                                                    }
+                                                })
                                             }
                                         }
-                                    })
+                                        Row(
+                                            modifier = Modifier
+                                                .defaultMinSize(minHeight = 48.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Image(
+                                                modifier = Modifier.padding(12.dp),
+                                                painter = XhuIcons.CustomCourse.time,
+                                                contentDescription = null
+                                            )
+                                            Text(
+                                                modifier = Modifier
+                                                    .weight(1F)
+                                                    .clickable(
+                                                        onClick = {
+                                                            courseIndex1Dialog.value = true
+                                                            courseIndex2Dialog.value = true
+                                                        },
+                                                        indication = null,
+                                                        interactionSource = MutableInteractionSource(),
+                                                    ),
+                                                text = "第 ${courseIndex.value[0]}-${courseIndex.value[1]} 节",
+                                            )
+                                            Text(
+                                                modifier = Modifier
+                                                    .weight(1F)
+                                                    .clickable(
+                                                        onClick = {
+                                                            weekDialog.value = true
+                                                        },
+                                                        indication = null,
+                                                        interactionSource = MutableInteractionSource(),
+                                                    ),
+                                                text = DayOfWeek.of(day.value)
+                                                    .getDisplayName(TextStyle.SHORT, Locale.CHINA),
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.weight(1F))
+                                }
+                                CreateType.SELECT -> {
+                                    var searchCourseName by remember { mutableStateOf("") }
+                                    var searchTeacherName by remember { mutableStateOf("") }
+                                    val searchCourseIndex = remember { mutableStateOf(0) }
+                                    val searchDay = remember { mutableStateOf(0) }
+
+                                    val searchWeekDialog = remember { mutableStateOf(false) }
+                                    val searchCourseIndexDialog = remember { mutableStateOf(false) }
+
+                                    val searchCourseListState by viewModel.searchCourseListState.collectAsState()
+
+                                    Column {
+                                        Row(
+                                            modifier = Modifier
+                                                .defaultMinSize(minHeight = 48.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            TextField(
+                                                modifier = Modifier.weight(1F),
+                                                value = searchCourseName,
+                                                placeholder = {
+                                                    Text(text = "请输入需要搜索的课程名称")
+                                                },
+                                                label = {
+                                                    Text(text = "课程名称")
+                                                },
+                                                leadingIcon = {
+                                                    Image(
+                                                        painter = XhuIcons.CustomCourse.title,
+                                                        contentDescription = null
+                                                    )
+                                                },
+                                                onValueChange = { searchCourseName = it },
+                                                colors = TextFieldDefaults.textFieldColors(
+                                                    backgroundColor = Color.Transparent,
+                                                    unfocusedIndicatorColor = Color.Transparent,
+                                                )
+                                            )
+                                        }
+                                        Row(
+                                            modifier = Modifier
+                                                .defaultMinSize(minHeight = 48.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            TextField(
+                                                modifier = Modifier.weight(1F),
+                                                value = searchTeacherName,
+                                                placeholder = {
+                                                    Text(text = "请输入需要搜索的教师名称")
+                                                },
+                                                label = {
+                                                    Text(text = "任课教师")
+                                                },
+                                                leadingIcon = {
+                                                    Image(
+                                                        painter = XhuIcons.CustomCourse.teacher,
+                                                        contentDescription = null
+                                                    )
+                                                },
+                                                onValueChange = { searchTeacherName = it },
+                                                colors = TextFieldDefaults.textFieldColors(
+                                                    backgroundColor = Color.Transparent,
+                                                    unfocusedIndicatorColor = Color.Transparent,
+                                                )
+                                            )
+                                        }
+                                        Row(
+                                            modifier = Modifier
+                                                .defaultMinSize(minHeight = 48.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Image(
+                                                modifier = Modifier.padding(12.dp),
+                                                painter = XhuIcons.CustomCourse.time,
+                                                contentDescription = null
+                                            )
+                                            val courseIndexText =
+                                                if (searchCourseIndex.value == 0) "选择节次" else "第 ${searchCourseIndex.value} 节"
+                                            Text(
+                                                modifier = Modifier
+                                                    .weight(1F)
+                                                    .clickable(
+                                                        onClick = {
+                                                            searchCourseIndexDialog.value = true
+                                                        },
+                                                        indication = null,
+                                                        interactionSource = MutableInteractionSource(),
+                                                    ),
+                                                text = courseIndexText,
+                                            )
+                                            val dayText =
+                                                if (searchDay.value == 0) "选择星期" else DayOfWeek.of(
+                                                    searchDay.value
+                                                )
+                                                    .getDisplayName(TextStyle.SHORT, Locale.CHINA)
+                                            Text(
+                                                modifier = Modifier
+                                                    .weight(1F)
+                                                    .clickable(
+                                                        onClick = {
+                                                            searchWeekDialog.value = true
+                                                        },
+                                                        indication = null,
+                                                        interactionSource = MutableInteractionSource(),
+                                                    ),
+                                                text = dayText,
+                                            )
+                                        }
+                                        Row(
+                                            modifier = Modifier
+                                                .defaultMinSize(minHeight = 48.dp)
+                                                .padding(horizontal = 8.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Text(
+                                                modifier = Modifier.weight(1F),
+                                                text = "从下面的列表中选择需要添加的课程\n当前结果数量：${searchCourseListState.searchCourseList.size}",
+                                            )
+                                            OutlinedButton(
+                                                enabled = !searchCourseListState.loading,
+                                                onClick = {
+                                                    searchCourse = SearchCourse.EMPTY
+                                                    val selectedCourseIndex =
+                                                        if (searchCourseIndex.value == 0) null else searchCourseIndex.value
+                                                    val selectedDay =
+                                                        if (searchDay.value == 0) null else searchDay.value
+                                                    viewModel.loadSearchCourseList(
+                                                        searchCourseName,
+                                                        searchTeacherName,
+                                                        selectedCourseIndex,
+                                                        selectedDay,
+                                                    )
+                                                }) {
+                                                Text(text = "查询")
+                                            }
+                                        }
+                                    }
+                                    Divider(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 8.dp, bottom = 4.dp),
+                                        color = XhuColor.Common.divider,
+                                    )
+                                    SwipeRefresh(
+                                        modifier = Modifier
+                                            .weight(1F)
+                                            .defaultMinSize(minHeight = 180.dp)
+                                            .fillMaxWidth()
+                                            .background(XhuColor.Common.grayBackground),
+                                        state = rememberSwipeRefreshState(searchCourseListState.loading),
+                                        onRefresh = {
+                                        },
+                                        swipeEnabled = false,
+                                    ) {
+                                        LazyColumn(
+                                            contentPadding = PaddingValues(4.dp),
+                                        ) {
+                                            if (searchCourseListState.loading) {
+                                                items(3) {
+                                                    BuildSearchResultItem(
+                                                        item = SearchCourse.PLACEHOLDER,
+                                                        placeHolder = true,
+                                                        checked = false,
+                                                    ) {}
+                                                }
+                                            } else {
+                                                val list = searchCourseListState.searchCourseList
+                                                items(list.size) { index ->
+                                                    val item = list[index]
+                                                    BuildSearchResultItem(
+                                                        item,
+                                                        checked = item == searchCourse
+                                                    ) {
+                                                        searchCourse = item
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    ShowWeekDialog(week = searchDay, show = searchWeekDialog)
+                                    ShowSearchCourseIndexDialog(
+                                        courseIndex = searchCourseIndex,
+                                        show = searchCourseIndexDialog
+                                    )
                                 }
                             }
-                            Row(
-                                modifier = Modifier
-                                    .defaultMinSize(minHeight = 48.dp)
-                                    .padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                TextField(
-                                    modifier = Modifier.weight(1F),
-                                    value = location,
-                                    placeholder = {
-                                        Text(text = "（选填）")
-                                    },
-                                    label = {
-                                        Text(text = "上课地点")
-                                    },
-                                    leadingIcon = {
-                                        Image(
-                                            painter = XhuIcons.CustomCourse.location,
-                                            contentDescription = null
-                                        )
-                                    },
-                                    onValueChange = { location = it },
-                                    colors = TextFieldDefaults.textFieldColors(
-                                        backgroundColor = Color.Transparent,
-                                        unfocusedIndicatorColor = Color.Transparent,
-                                    )
-                                )
-                            }
-                            Row(
-                                modifier = Modifier
-                                    .defaultMinSize(minHeight = 48.dp)
-                                    .padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Image(
-                                    modifier = Modifier.padding(12.dp),
-                                    painter = XhuIcons.CustomCourse.time,
-                                    contentDescription = null
-                                )
-                                Text(
-                                    modifier = Modifier
-                                        .weight(1F)
-                                        .clickable(
-                                            onClick = {
-                                                courseIndex1Dialog.value = true
-                                                courseIndex2Dialog.value = true
-                                            },
-                                            indication = null,
-                                            interactionSource = MutableInteractionSource(),
-                                        ),
-                                    text = "第 ${courseIndex.value[0]}-${courseIndex.value[1]} 节",
-                                )
-                                Text(
-                                    modifier = Modifier
-                                        .weight(1F)
-                                        .clickable(
-                                            onClick = {
-                                                weekDialog.value = true
-                                            },
-                                            indication = null,
-                                            interactionSource = MutableInteractionSource(),
-                                        ),
-                                    text = DayOfWeek.of(day.value)
-                                        .getDisplayName(TextStyle.SHORT, Locale.CHINA),
-                                )
-                            }
-                            Spacer(modifier = Modifier.weight(1F))
                         }
                     }) {
                     Box {
@@ -843,6 +1086,67 @@ class CustomCourseActivity : BaseComposeActivity() {
     }
 
     @Composable
+    private fun ShowSearchCourseIndexDialog(
+        courseIndex: MutableState<Int>,
+        show: MutableState<Boolean>,
+    ) {
+        if (!show.value) {
+            return
+        }
+        var selected by remember { mutableStateOf(courseIndex.value) }
+        AlertDialog(
+            onDismissRequest = {
+                show.value = false
+            },
+            title = {
+                Text(text = "请选择需要搜索的节次")
+            },
+            text = {
+                LazyColumn {
+                    items(11) { index ->
+                        val item = index + 1
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                ) {
+                                    selected = item
+                                },
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(selected = selected == item, onClick = null)
+                            Text(text = "第 $item 节")
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        courseIndex.value = selected
+                        show.value = false
+                    },
+                ) {
+                    Text("确认")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        show.value = false
+                    }
+                ) {
+                    Text("取消")
+                }
+            }
+        )
+    }
+
+    @Composable
     private fun ShowWeekDialog(
         week: MutableState<Int>,
         show: MutableState<Boolean>,
@@ -979,4 +1283,90 @@ private fun BuildItem(
             }
         }
     }
+}
+
+@Composable
+private fun BuildSearchResultItem(
+    item: SearchCourse,
+    placeHolder: Boolean = false,
+    checked: Boolean,
+    onClick: () -> Unit,
+) {
+    val border =
+        if (checked) BorderStroke(width = 1.dp, color = MaterialTheme.colors.primary) else null
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp, vertical = 2.dp)
+            .placeholder(
+                visible = placeHolder,
+                highlight = PlaceholderHighlight.shimmer(),
+            )
+            .clickable(
+                onClick = onClick,
+                indication = null,
+                interactionSource = MutableInteractionSource(),
+            ),
+        backgroundColor = XhuColor.cardBackground,
+        border = border,
+    ) {
+        Column(
+            modifier = Modifier.padding(4.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = item.name,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            if (item.teacher.isNotBlank()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Image(painter = XhuIcons.CustomCourse.teacher, contentDescription = null)
+                    Text(text = "教师名称：${item.teacher}")
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Image(painter = XhuIcons.CustomCourse.week, contentDescription = null)
+                Text(
+                    text = "上课星期：第${item.weekString} 每周${
+                        DayOfWeek.of(item.day).getDisplayName(TextStyle.SHORT, Locale.CHINA)
+                    }"
+                )
+            }
+            if (item.location.isNotBlank()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Image(painter = XhuIcons.CustomCourse.location, contentDescription = null)
+                    Text(text = "上课地点：${item.location}")
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Image(painter = XhuIcons.CustomCourse.time, contentDescription = null)
+                val courseIndex: String = if (item.time.size == 1) {
+                    "${item.time[0]}"
+                } else {
+                    "${item.time.first()}-${item.time.last()}"
+                }
+                Text(text = "上课时间：第 $courseIndex 节")
+            }
+        }
+    }
+}
+
+enum class CreateType {
+    INPUT,
+    SELECT,
 }

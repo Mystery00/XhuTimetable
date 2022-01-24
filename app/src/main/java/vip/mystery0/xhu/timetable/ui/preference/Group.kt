@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.ui.preference
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
@@ -24,9 +23,9 @@ fun XhuSettingsGroup(
         ) {
             Divider(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(0.33.dp)
-                    .background(XhuColor.Common.divider),
+                    .fillMaxWidth(),
+                thickness = 0.33.dp,
+                color = XhuColor.Common.divider,
             )
             Spacer(
                 modifier = Modifier
