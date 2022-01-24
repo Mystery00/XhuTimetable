@@ -1,7 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.preference
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -37,9 +36,9 @@ fun XhuFoldSettingsGroup(
         ) {
             Divider(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(0.33.dp)
-                    .background(XhuColor.Common.divider),
+                    .fillMaxWidth(),
+                thickness = 0.33.dp,
+                color = XhuColor.Common.divider,
             )
             Spacer(
                 modifier = Modifier

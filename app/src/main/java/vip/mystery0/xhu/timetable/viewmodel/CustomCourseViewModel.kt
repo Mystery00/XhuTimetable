@@ -6,13 +6,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import vip.mystery0.xhu.timetable.api.ServerApi
+import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.*
+import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
 import vip.mystery0.xhu.timetable.model.CustomCourse
+import vip.mystery0.xhu.timetable.model.request.AllCourseRequest
 import vip.mystery0.xhu.timetable.repository.createCustomCourse
 import vip.mystery0.xhu.timetable.repository.deleteCustomCourse
 import vip.mystery0.xhu.timetable.repository.getCustomCourseList
 import vip.mystery0.xhu.timetable.repository.updateCustomCourse
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
 
@@ -20,6 +26,8 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
     companion object {
         private const val TAG = "CustomCourseViewModel"
     }
+
+    private val serverApi: ServerApi by inject()
 
     var changeCustomCourse = false
 
@@ -45,6 +53,9 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
 
     private val _saveCustomCourseState = MutableStateFlow(SaveCustomCourseState())
     val saveCustomCourseState: StateFlow<SaveCustomCourseState> = _saveCustomCourseState
+
+    private val _searchCourseListState = MutableStateFlow(SearchCourseListState())
+    val searchCourseListState: StateFlow<SearchCourseListState> = _searchCourseListState
 
     init {
         viewModelScope.launch {
@@ -105,6 +116,49 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
             val response = getCustomCourseList(currentUser, currentYear, currentTerm)
             _customCourseListState.value = CustomCourseListState(
                 customCourseList = response,
+                loading = false
+            )
+        }
+    }
+
+    fun loadSearchCourseList(
+        courseName: String?,
+        teacherName: String?,
+        courseIndex: Int?,
+        day: Int?
+    ) {
+        viewModelScope.launch(serverExceptionHandler { throwable ->
+            Log.w(TAG, "load search course list failed", throwable)
+            _searchCourseListState.value = SearchCourseListState()
+            toastMessage(throwable.message ?: throwable.javaClass.simpleName)
+        }) {
+            _searchCourseListState.value = SearchCourseListState(loading = true)
+            val currentYear = getConfig { currentYear }
+            val currentTerm = getConfig { currentTerm }
+            val request = AllCourseRequest(
+                currentYear,
+                currentTerm,
+                courseName,
+                teacherName,
+                courseIndex,
+                day,
+            )
+            val list = SessionManager.mainUser().withAutoLogin {
+                serverApi.selectAllCourse(it, request).checkLogin()
+            }.first
+            val result = list.map {
+                SearchCourse(
+                    it.name,
+                    it.teacher,
+                    it.location,
+                    it.weekString,
+                    it.week,
+                    it.time,
+                    it.day,
+                )
+            }
+            _searchCourseListState.value = SearchCourseListState(
+                searchCourseList = result,
                 loading = false
             )
         }
@@ -207,3 +261,33 @@ data class CustomCourseListState(
 data class SaveCustomCourseState(
     val loading: Boolean = false,
 )
+
+data class SearchCourseListState(
+    val loading: Boolean = false,
+    val searchCourseList: List<SearchCourse> = emptyList(),
+)
+
+data class SearchCourse(
+    var name: String,
+    var teacher: String,
+    var location: String,
+    var weekString: String,
+    var week: List<Int>,
+    var time: List<Int>,
+    var day: Int,
+) {
+    companion object {
+        val PLACEHOLDER =
+            SearchCourse("课程名称", "教师名称", "上课地点", "第1周", listOf(1), listOf(1, 1), 1)
+        val EMPTY =
+            SearchCourse(
+                "",
+                "",
+                "",
+                "",
+                listOf(),
+                listOf(1, 1),
+                LocalDate.now().dayOfWeek.value,
+            )
+    }
+}
