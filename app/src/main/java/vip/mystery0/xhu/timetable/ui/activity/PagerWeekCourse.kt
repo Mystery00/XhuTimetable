@@ -78,7 +78,7 @@ val weekCourseContent: TabContent = @Composable { ext ->
             Row(
                 modifier = Modifier
                     .padding(vertical = 2.dp)
-                    .background(Color.Black.copy(0.1F))
+                    .background(Color.Black.copy(0.2F))
             ) {
                 val firstDay by viewModel.dateStart.collectAsState()
                 Text(
@@ -169,7 +169,7 @@ val weekCourseContent: TabContent = @Composable { ext ->
 }
 
 private val twoFormat = DecimalFormat("00")
-private val dateBackgroundColor = Color(0x0F000000)
+private val dateBackgroundColor = Color(0x2E000000)
 private val highlightDateBackgroundColor = Color(0x80000000)
 private val itemHeight = 72.dp
 
