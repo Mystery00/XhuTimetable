@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable
 
 import android.app.Application
+import com.glance.guolindev.Glance
 import com.tencent.mmkv.MMKV
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -15,6 +16,7 @@ class Application : Application() {
     override fun onCreate() {
         super.onCreate()
         context = this
+        Glance.initialize(this)
         //配置Koin
         startKoin {
             androidLogger(Level.ERROR)
