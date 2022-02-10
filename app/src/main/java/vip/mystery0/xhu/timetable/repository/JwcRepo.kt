@@ -5,6 +5,7 @@ import vip.mystery0.xhu.timetable.api.JwcApi
 import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
 import vip.mystery0.xhu.timetable.config.User
+import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.model.request.CourseRoomRequest
 import vip.mystery0.xhu.timetable.model.response.CourseRoomResponse
 import vip.mystery0.xhu.timetable.model.response.ExamResponse
@@ -12,8 +13,10 @@ import vip.mystery0.xhu.timetable.model.response.ScoreResponse
 
 suspend fun getExamList(user: User): ExamResponse {
     val jwcApi = KoinJavaComponent.get<JwcApi>(JwcApi::class.java)
+    val year = getConfig { currentYear }
+    val term = getConfig { currentTerm }
     val response = user.withAutoLogin {
-        jwcApi.examList(it).checkLogin()
+        jwcApi.examList(it, year, term).checkLogin()
     }
     return response.first
 }
