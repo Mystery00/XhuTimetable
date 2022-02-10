@@ -519,10 +519,6 @@ class MainViewModel : ComposeViewModel() {
                     userName = it.user.info.userName,
                 )
             }
-            val showNotThisWeek = getConfig { showNotThisWeek }
-            if (!showNotThisWeek) {
-                allCourseList = allCourseList.filter { it.thisWeek }
-            }
             //组建表格的数据结构
             val expandTableCourse = Array(7) { day ->
                 Array(11) { index ->
@@ -616,6 +612,14 @@ class MainViewModel : ComposeViewModel() {
             }
             //设置数据
             _weekView.emit(weekViewArray.toList())
+            val showNotThisWeek = getConfig { showNotThisWeek }
+            if (!showNotThisWeek) {
+                tableCourseList.forEach { array ->
+                    array.forEach { sheet ->
+                        sheet.course.removeIf { !it.thisWeek }
+                    }
+                }
+            }
             _tableCourse.emit(tableCourseList)
         }
     }
