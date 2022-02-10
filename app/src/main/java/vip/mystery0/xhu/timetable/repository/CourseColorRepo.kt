@@ -68,3 +68,13 @@ suspend fun deleteAllCourseColor() {
         }
     }
 }
+
+suspend fun getCourseColorByName(courseName: String): Color {
+    val saved = courseColorDao.selectCourseColor(courseName)
+    return if (saved != null) {
+        val color = android.graphics.Color.parseColor(saved.color)
+        Color(color)
+    } else {
+        ColorPool.hash(courseName)
+    }
+}
