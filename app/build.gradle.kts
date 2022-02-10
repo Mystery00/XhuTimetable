@@ -139,6 +139,7 @@ dependencies {
     val composeVersion = rootProject.extra["compose_version"]
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.material:material:$composeVersion")
+    implementation("androidx.glance:glance:1.0.0-alpha02")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
     //accompanist
