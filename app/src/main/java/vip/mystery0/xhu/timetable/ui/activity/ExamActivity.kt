@@ -195,6 +195,7 @@ private fun BuildItem(
                     text = text,
                     color = Color.White,
                     fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
                 )
             }
             Column(
@@ -227,11 +228,12 @@ private fun BuildItem(
                 modifier = Modifier
                     .fillMaxHeight()
                     .width(72.dp)
-                    .background(item.examStatus.color),
+                    .background(item.courseColor),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = "座位号\n${item.examNumber}",
+                    color = Color.White,
                     fontSize = 16.sp,
                     textAlign = TextAlign.Center,
                 )
