@@ -11,8 +11,10 @@ import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
+import vip.mystery0.xhu.timetable.repository.getCourseColorByName
 import vip.mystery0.xhu.timetable.repository.getExamList
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -74,9 +76,12 @@ class ExamViewModel : ComposeViewModel() {
                     }
                     val time =
                         "${timeFormatter.format(startTime)} - ${timeFormatter.format(endTime)}"
+                    val expireDays = Duration.between(now, startTime).toDays()
                     Exam(
+                        getCourseColorByName(it.courseName),
                         date,
                         it.date,
+                        expireDays,
                         it.examNumber,
                         it.courseName,
                         it.type,
@@ -131,8 +136,10 @@ data class ExamListState(
 )
 
 data class Exam(
+    val courseColor: Color,
     val date: LocalDate,
     val dateString: String,
+    val days: Long,
     val examNumber: String,
     val courseName: String,
     val type: String,
@@ -140,7 +147,23 @@ data class Exam(
     val time: String,
     val region: String,
     val examStatus: ExamStatus,
-)
+) {
+    companion object {
+        val EMPTY = Exam(
+            courseColor = Color.White,
+            date = LocalDate.MIN,
+            dateString = "",
+            days = 0L,
+            examNumber = "座位号",
+            courseName = "课程名称",
+            type = "考试类型",
+            location = "考试地点",
+            time = "考试日期",
+            region = "地区",
+            examStatus = ExamStatus.BEFORE
+        )
+    }
+}
 
 enum class ExamStatus(
     val index: Int,

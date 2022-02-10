@@ -15,7 +15,9 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.placeholder.PlaceholderHighlight
@@ -26,6 +28,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.viewmodel.Exam
 import vip.mystery0.xhu.timetable.viewmodel.ExamViewModel
 
 class ExamActivity : BaseComposeActivity() {
@@ -102,93 +105,12 @@ class ExamActivity : BaseComposeActivity() {
                     ) {
                         if (examListState.loading) {
                             items(3) {
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                                        .placeholder(
-                                            visible = examListState.loading,
-                                            highlight = PlaceholderHighlight.shimmer(),
-                                        )
-                                ) {
-                                    Column(
-                                        modifier = Modifier.padding(4.dp)
-                                    ) {
-                                        Text(
-                                            text = "课程名称",
-                                            fontSize = 16.sp,
-                                        )
-                                        Text(
-                                            text = "考试日期",
-                                            fontSize = 14.sp,
-                                        )
-                                        Text(
-                                            text = "考试时间",
-                                            fontSize = 14.sp,
-                                        )
-                                        Text(
-                                            text = "考试地点",
-                                            fontSize = 14.sp,
-                                        )
-                                        Text(
-                                            text = "座位号",
-                                            fontSize = 14.sp,
-                                        )
-                                        Text(
-                                            text = "考试类型",
-                                            fontSize = 14.sp,
-                                        )
-                                    }
-                                }
+                                BuildItem(item = Exam.EMPTY, placeholder = true)
                             }
                         } else {
                             if (list.isNotEmpty()) {
                                 items(list.size) { index ->
-                                    val item = list[index]
-                                    Card(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                                        border = BorderStroke(
-                                            item.examStatus.strokeWidth.dp,
-                                            color = item.examStatus.color
-                                        ),
-                                    ) {
-                                        Column(
-                                            modifier = Modifier.padding(8.dp)
-                                        ) {
-                                            Text(
-                                                text = item.courseName,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 16.sp,
-                                            )
-                                            Text(
-                                                text = "考试日期：${item.dateString}",
-                                                color = XhuColor.Common.grayText,
-                                                fontSize = 14.sp,
-                                            )
-                                            Text(
-                                                text = "考试时间：${item.time}",
-                                                color = XhuColor.Common.grayText,
-                                                fontSize = 14.sp,
-                                            )
-                                            Text(
-                                                text = "考试地点：${item.location}",
-                                                color = XhuColor.Common.grayText,
-                                                fontSize = 14.sp,
-                                            )
-                                            Text(
-                                                text = "座位号：${item.examNumber}",
-                                                color = XhuColor.Common.grayText,
-                                                fontSize = 14.sp,
-                                            )
-                                            Text(
-                                                text = "考试类型：${item.type}",
-                                                color = XhuColor.Common.grayText,
-                                                fontSize = 14.sp,
-                                            )
-                                        }
-                                    }
+                                    BuildItem(item = list[index])
                                 }
                             }
                         }
@@ -235,5 +157,85 @@ class ExamActivity : BaseComposeActivity() {
                 onBack()
             }
         )
+    }
+}
+
+@Composable
+private fun BuildItem(
+    item: Exam,
+    placeholder: Boolean = false,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .placeholder(
+                visible = placeholder,
+                highlight = PlaceholderHighlight.shimmer(),
+            ),
+        border = BorderStroke(
+            item.examStatus.strokeWidth.dp,
+            color = item.examStatus.color
+        ),
+    ) {
+        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(72.dp)
+                    .background(item.courseColor),
+                contentAlignment = Alignment.Center,
+            ) {
+                val text = when {
+                    item.days > 0 -> "${item.days}\n天"
+                    item.days < 0 -> "已结束"
+                    else -> "今天"
+                }
+                Text(
+                    text = text,
+                    color = Color.White,
+                    fontSize = 16.sp,
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .weight(1F),
+            ) {
+                Text(
+                    text = item.courseName,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                )
+                Text(
+                    text = "考试时间：${item.dateString} ${item.time}",
+                    color = XhuColor.Common.grayText,
+                    fontSize = 14.sp,
+                )
+                Text(
+                    text = "考试地点：${item.location}",
+                    color = XhuColor.Common.grayText,
+                    fontSize = 14.sp,
+                )
+                Text(
+                    text = "考试类型：${item.type}",
+                    color = XhuColor.Common.grayText,
+                    fontSize = 14.sp,
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(72.dp)
+                    .background(item.examStatus.color),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "座位号\n${item.examNumber}",
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
     }
 }
