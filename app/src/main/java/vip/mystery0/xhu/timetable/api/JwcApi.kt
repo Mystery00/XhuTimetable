@@ -18,7 +18,11 @@ interface JwcApi {
     ): Response<List<CourseResponse>>
 
     @GET("/api/rest/xhu-timetable/server/jwc/exam")
-    suspend fun examList(@Header("token") token: String): Response<ExamResponse>
+    suspend fun examList(
+        @Header("token") token: String,
+        @Query("year") year: String,
+        @Query("term") term: Int,
+    ): Response<ExamResponse>
 
     @GET("/api/rest/xhu-timetable/server/jwc/score")
     suspend fun scoreList(
