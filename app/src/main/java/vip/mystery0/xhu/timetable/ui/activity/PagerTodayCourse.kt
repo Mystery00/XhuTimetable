@@ -80,7 +80,7 @@ val todayCourseContent: TabContent = @Composable { ext ->
 private fun DrawLine() {
     Box(
         modifier = Modifier
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = 10.dp)
             .fillMaxHeight()
             .width(1.dp)
             .background(color = Color.White)
@@ -98,7 +98,7 @@ private fun DrawPoemsCard(dialogState: ModalBottomSheetState, scope: CoroutineSc
             shape = CircleShape,
             modifier = Modifier
                 .padding(horizontal = 6.dp)
-                .size(5.dp),
+                .size(9.dp),
             color = ColorPool.random
         ) {}
         Card(
@@ -148,7 +148,7 @@ private fun DrawThingCard(
             shape = CircleShape,
             modifier = Modifier
                 .padding(horizontal = 6.dp)
-                .size(5.dp),
+                .size(9.dp),
             color = thing.color,
         ) {}
         Card(
@@ -247,7 +247,7 @@ private fun DrawCourseCard(
             shape = CircleShape,
             modifier = Modifier
                 .padding(horizontal = 6.dp)
-                .size(5.dp),
+                .size(9.dp),
             color = course.color
         ) {}
         Card(
@@ -255,92 +255,120 @@ private fun DrawCourseCard(
                 .padding(end = 8.dp)
                 .fillMaxWidth(),
         ) {
-            Box {
-                if (multiAccountMode) {
-                    Text(
-                        text = "${course.studentId}(${course.userName})",
-                        fontSize = 8.sp,
-                        color = MaterialTheme.colors.onSecondary,
-                        modifier = Modifier
-                            .background(
-                                color = MaterialTheme.colors.secondary,
-                                shape = RoundedCornerShape(bottomStart = 4.dp),
-                            )
-                            .padding(1.dp)
-                            .align(Alignment.TopEnd),
-                    )
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(
-                        top = if (multiAccountMode) 16.dp else 8.dp,
-                        bottom = if (showStatus) 24.dp else 8.dp,
-                        end = 8.dp
-                    ),
+            Row(
+                modifier = Modifier.height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(start = 12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Icon(
                         painter = XhuIcons.todayWaterMelon,
                         contentDescription = null,
                         tint = course.color,
                         modifier = Modifier
-                            .padding(6.dp)
                             .size(16.dp),
                     )
-                    Column(
+                    Text(
+                        text = course.timeText.first,
+                        fontSize = 12.sp,
                         modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(vertical = 1.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = course.courseName,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
-                                modifier = Modifier.weight(1F),
-                            )
-                            Text(
-                                text = course.timeString,
-                                fontSize = 14.sp,
-                            )
-                        }
+                            .padding(vertical = 1.dp),
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        text = course.timeText.second,
+                        fontSize = 12.sp,
+                        modifier = Modifier
+                            .padding(vertical = 1.dp),
+                        textAlign = TextAlign.Center,
+                    )
+                }
+                Surface(
+                    shape = RoundedCornerShape(36.dp),
+                    modifier = Modifier
+                        .padding(vertical = 12.dp)
+                        .fillMaxHeight()
+                        .width(4.dp),
+                    color = course.color
+                ) {}
+                Box {
+                    if (multiAccountMode) {
                         Text(
-                            text = course.teacherName,
-                            fontSize = 12.sp,
+                            text = "${course.studentId}(${course.userName})",
+                            fontSize = 8.sp,
+                            color = MaterialTheme.colors.onSecondary,
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 1.dp),
-                        )
-                        Text(
-                            text = course.time,
-                            fontSize = 12.sp,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 1.dp),
-                        )
-                        Text(
-                            text = course.location,
-                            fontSize = 12.sp,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 1.dp),
+                                .background(
+                                    color = MaterialTheme.colors.secondary,
+                                    shape = RoundedCornerShape(bottomStart = 4.dp),
+                                )
+                                .padding(1.dp)
+                                .align(Alignment.TopEnd),
                         )
                     }
-                }
-                if (showStatus) {
-                    Text(
-                        text = course.courseStatus.title,
-                        fontSize = 12.sp,
-                        color = course.courseStatus.color,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .background(
-                                color = course.courseStatus.backgroundColor,
-                                shape = RoundedCornerShape(topStart = 4.dp),
+                            .padding(
+                                top = if (multiAccountMode) 16.dp else 8.dp,
+                                bottom = if (showStatus) 24.dp else 8.dp,
+                                end = 8.dp
+                            ),
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(vertical = 1.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = course.courseName,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp,
+                                    modifier = Modifier.weight(1F),
+                                )
+                                Text(
+                                    text = course.timeString,
+                                    fontSize = 14.sp,
+                                )
+                            }
+                            Text(
+                                text = course.teacherName,
+                                fontSize = 12.sp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 1.dp),
                             )
-                            .padding(2.dp)
-                            .align(Alignment.BottomEnd),
-                    )
+                            Text(
+                                text = course.location,
+                                fontSize = 12.sp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 1.dp),
+                            )
+                        }
+                    }
+                    if (showStatus) {
+                        Text(
+                            text = course.courseStatus.title,
+                            fontSize = 12.sp,
+                            color = course.courseStatus.color,
+                            modifier = Modifier
+                                .background(
+                                    color = course.courseStatus.backgroundColor,
+                                    shape = RoundedCornerShape(topStart = 4.dp),
+                                )
+                                .padding(2.dp)
+                                .align(Alignment.BottomEnd),
+                        )
+                    }
                 }
             }
         }

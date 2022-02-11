@@ -497,7 +497,7 @@ class MainViewModel : ComposeViewModel() {
         val courseList = getAllCourseList(false)
         //转换对象
         runOnCpu {
-            var allCourseList = courseList.map {
+            val allCourseList = courseList.map {
                 val thisWeek = it.week.contains(currentWeek)
                 val timeString = it.time.formatTimeString()
                 Course(
@@ -783,12 +783,14 @@ data class TodayCourseSheet(
     val date: LocalDate,
 ) {
     lateinit var time: String
+    lateinit var timeText: Pair<String, String>
     lateinit var timeString: String
     lateinit var courseStatus: CourseStatus
 
     fun calc(now: LocalDateTime): TodayCourseSheet {
         val list = timeSet.toList()
         time = list.formatTime()
+        timeText = startArray[list.first() - 1] to endArray[list.last() - 1]
         timeString = list.formatTimeString()
         val startTime = LocalTime.parse(startArray[list.first() - 1], timeFormatter).atDate(date)
         val endTime = LocalTime.parse(endArray[list.last() - 1], timeFormatter).atDate(date)
