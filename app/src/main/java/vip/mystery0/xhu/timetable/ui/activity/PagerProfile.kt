@@ -32,7 +32,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
             .background(MaterialTheme.colors.background)
             .verticalScroll(rememberScrollState()),
     ) {
-        var profileExpanded by remember { mutableStateOf(false) }
+        var profileExpanded by remember { mutableStateOf(true) }
         val mainUser by viewModel.mainUser.collectAsState()
         AnimatedContent(
             targetState = profileExpanded,
