@@ -212,7 +212,7 @@ private fun BoxScope.ShowCourseDialog(
     multiAccountMode: Boolean,
 ) {
     val showList = dialogState.value
-    if (showList.isNullOrEmpty()) return
+    if (showList.isEmpty()) return
     val first = showList.firstOrNull { it.thisWeek }
     val initPage = if (first == null) 0 else showList.indexOf(first)
     val pagerState = rememberPagerState(initialPage = initPage)
