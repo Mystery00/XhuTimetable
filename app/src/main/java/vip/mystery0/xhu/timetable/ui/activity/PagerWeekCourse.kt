@@ -53,7 +53,12 @@ val weekCourseTitle: TabTitle = @Composable { ext ->
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ) {
-        Text(text = "第${week.value}周")
+        val title = when {
+            week.value <= 0 -> "还没有开学哦~"
+            week.value > 20 -> "学期已结束啦~"
+            else -> "第${week.value}周"
+        }
+        Text(text = title)
         val showWeekView by viewModel.showWeekView.collectAsState()
         val rotationAngle by animateFloatAsState(
             targetValue = if (showWeekView) 180F else 0F,

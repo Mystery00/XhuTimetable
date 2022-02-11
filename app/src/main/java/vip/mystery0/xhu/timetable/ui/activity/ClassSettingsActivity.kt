@@ -230,6 +230,13 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             )
                         },
                         title = { Text(text = "自定义课程") },
+                        subtitle = {
+                            val text = if (showCustomCourse)
+                                "当前：在课程表中显示自定义课程信息"
+                            else
+                                "当前：不显示自定义课程信息"
+                            Text(text = text)
+                        },
                         action = {
                             Checkbox(
                                 checked = showCustomCourse,
@@ -251,6 +258,13 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             )
                         },
                         title = { Text(text = "自定义事项") },
+                        subtitle = {
+                            val text = if (showCustomThing)
+                                "当前：在今日课程页面中显示自定义事项列表"
+                            else
+                                "当前：不显示自定义事项列表"
+                            Text(text = text)
+                        },
                         action = {
                             Checkbox(
                                 checked = showCustomThing,
