@@ -151,7 +151,7 @@ private fun BuildItem(
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(8.dp),
         elevation = 0.dp,
-        backgroundColor = XhuColor.cardBackground,
+        backgroundColor = XhuColor.accountCardBackground,
     ) {
         Box {
             if (mainUser) {
