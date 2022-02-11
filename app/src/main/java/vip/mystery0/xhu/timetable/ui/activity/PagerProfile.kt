@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import android.content.Intent
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -10,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
@@ -79,12 +81,16 @@ val profileCourseContent: TabContent = @Composable { ext ->
                         )
                         Text(mainUser?.info?.className ?: "", fontSize = 14.sp, color = Color.Gray)
                     }
+                    val rotationAngle by animateFloatAsState(
+                        targetValue = if (profileExpanded) 90F else 0F,
+                    )
                     Icon(
                         imageVector = MaterialIcons.TwoTone.ArrowForwardIos,
                         contentDescription = null,
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
-                            .size(12.dp),
+                            .size(12.dp)
+                            .rotate(rotationAngle),
                         tint = more,
                     )
                 }
