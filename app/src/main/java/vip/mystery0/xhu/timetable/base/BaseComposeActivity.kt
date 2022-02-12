@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.LayoutRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -110,8 +109,6 @@ abstract class BaseComposeActivity(
         toast = Toast.makeText(context, message, length)
         toast?.show()
     }
-
-    protected fun @receiver:StringRes Int.asString(): String = getString(this)
 
     @Composable
     fun BuildNoDataLayout() {

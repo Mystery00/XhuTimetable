@@ -229,7 +229,11 @@ class MainViewModel : ComposeViewModel() {
                         Duration.between(startDate.atStartOfDay(), date.atStartOfDay()).toDays()
                     val weekIndex = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.CHINESE)
                     val week = (days / 7) + 1
-                    "第${week}周 $weekIndex"
+                    if (week > 20) {
+                        "本学期已结束"
+                    } else {
+                        "第${week}周 $weekIndex"
+                    }
                 }
             }
         }
