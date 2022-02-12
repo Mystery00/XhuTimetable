@@ -6,6 +6,7 @@ import org.koin.core.component.inject
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.repository.CourseRepo
 import vip.mystery0.xhu.timetable.repository.CustomThingRepo
@@ -59,5 +60,11 @@ inline fun <reified INTER : Repo> KoinComponent.getRepo(): INTER =
     } else {
         get(named("$SCOPE_LOCAL${INTER::class.simpleName}"))
     }
+
+inline fun <reified INTER : Repo> getLocalRepo(): INTER =
+    KoinJavaComponent.get(INTER::class.java, named("$SCOPE_LOCAL${INTER::class.simpleName}"))
+
+inline fun <reified INTER : Repo> getRemoteRepo(): INTER =
+    KoinJavaComponent.get(INTER::class.java, named("$SCOPE_REMOTE${INTER::class.simpleName}"))
 
 interface Repo
