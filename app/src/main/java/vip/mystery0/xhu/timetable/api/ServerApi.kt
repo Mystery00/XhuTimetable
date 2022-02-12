@@ -109,6 +109,9 @@ interface ServerApi {
         @Header("token") token: String,
         @Query("resourceId") resourceId: Long,
     ): Response<ResourceUrlResponse>
+
+    @GET("/api/rest/xhu-timetable/common/teamMember")
+    suspend fun getTeamMemberList(): List<TeamMemberResponse>
 }
 
 fun <T : Any> Response<T>.checkLogin(): T {

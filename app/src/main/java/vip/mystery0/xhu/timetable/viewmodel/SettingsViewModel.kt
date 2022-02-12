@@ -8,12 +8,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.inject
+import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.startUniqueWork
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.response.Splash
+import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
 import vip.mystery0.xhu.timetable.setTrigger
 import vip.mystery0.xhu.timetable.ui.theme.Theme
 import vip.mystery0.xhu.timetable.work.DownloadApkWork
@@ -27,6 +29,7 @@ class SettingsViewModel : ComposeViewModel() {
 
     private val workManager: WorkManager by inject()
     private val alarmManager: AlarmManager by inject()
+    private val serverApi: ServerApi by inject()
 
     private val _errorMessage = MutableStateFlow("")
     val errorMessage: StateFlow<String> = _errorMessage
@@ -35,6 +38,10 @@ class SettingsViewModel : ComposeViewModel() {
 
     private val _notifyTimeData = MutableStateFlow<LocalTime?>(null)
     val notifyTimeData: StateFlow<LocalTime?> = _notifyTimeData
+
+    private val _teamMemberData = MutableStateFlow<List<TeamMemberResponse>>(emptyList())
+    val teamMemberData: StateFlow<List<TeamMemberResponse>> = _teamMemberData
+
     val debugMode = MutableStateFlow(false)
 
     private val _splashList = MutableStateFlow<List<Splash>>(emptyList())
@@ -46,6 +53,7 @@ class SettingsViewModel : ComposeViewModel() {
             _notifyTimeData.value = getConfig { notifyTime }
             debugMode.value = getConfig { debugMode }
             _splashList.value = getConfig { splashList }
+            _teamMemberData.value = serverApi.getTeamMemberList()
         }
     }
 

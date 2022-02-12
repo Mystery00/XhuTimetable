@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -15,6 +16,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.microsoft.appcenter.crashes.model.TestCrashException
 import com.vanpra.composematerialdialogs.*
@@ -372,36 +375,19 @@ class SettingsActivity : BaseComposeActivity() {
                 XhuSettingsGroup(title = {
                     Text(text = "西瓜课表团队出品")
                 }) {
-                    TeamItem(
-                        painter = XhuIcons.Team.yue,
-                        title = "图标以及界面设计",
-                        subTitle = "@爱吃饭的越越",
-                    )
-                    TeamItem(
-                        painter = XhuIcons.Team.pan,
-                        title = "数据提供",
-                        subTitle = "@pan",
-                    )
-                    TeamItem(
-                        painter = XhuIcons.Team.johnny,
-                        title = "产品设计",
-                        subTitle = "@Johnny Zen",
-                    )
-                    TeamItem(
-                        painter = XhuIcons.Team.quinn,
-                        title = "微信小程序端开发",
-                        subTitle = "@Quinn",
-                    )
-                    TeamItem(
-                        painter = XhuIcons.Team.chen,
-                        title = "iOS端开发",
-                        subTitle = "@Chen",
-                    )
-                    TeamItem(
-                        painter = XhuIcons.Team.mystery0,
-                        title = "Android端开发",
-                        subTitle = "@Mystery0",
-                    )
+                    val teamMember by viewModel.teamMemberData.collectAsState()
+                    teamMember.forEach {
+                        TeamItem(
+                            painter = rememberImagePainter(
+                                data = it.icon,
+                                builder = {
+                                    size(width = 192, height = 192)
+                                }
+                            ),
+                            title = it.title,
+                            subTitle = it.subtitle,
+                        )
+                    }
                 }
                 val debugMode by viewModel.debugMode.collectAsState()
                 if (debugMode) {
@@ -566,6 +552,7 @@ private fun TeamItem(
     SettingsMenuLink(
         icon = {
             Icon(
+                modifier = Modifier.size(48.dp),
                 painter = painter,
                 contentDescription = null,
                 tint = Color.Unspecified,
