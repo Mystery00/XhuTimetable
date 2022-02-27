@@ -6,6 +6,7 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tencent.mmkv.MMKV
 import vip.mystery0.xhu.timetable.BuildConfig
 import vip.mystery0.xhu.timetable.model.entity.NightMode
+import vip.mystery0.xhu.timetable.model.response.Menu
 import vip.mystery0.xhu.timetable.model.response.Splash
 import java.io.File
 import java.time.*
@@ -288,4 +289,22 @@ class Config internal constructor() {
             kv.encode("disableBackgroundWhenNight", value)
         }
         get() = kv.decodeBool("disableBackgroundWhenNight", false)
+    var menuList: List<Menu>
+        set(value) {
+            kv.encode(
+                "menuList",
+                moshi.adapter<List<Menu>>(
+                    Types.newParameterizedType(
+                        List::class.java,
+                        Menu::class.java
+                    )
+                ).toJson(value)
+            )
+        }
+        get() = moshi.adapter<List<Menu>>(
+            Types.newParameterizedType(
+                List::class.java,
+                Menu::class.java
+            )
+        ).fromJson(kv.decodeString("menuList", "[]")!!)!!
 }

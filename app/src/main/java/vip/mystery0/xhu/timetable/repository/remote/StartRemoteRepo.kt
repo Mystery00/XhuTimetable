@@ -24,6 +24,7 @@ class StartRemoteRepo : StartRepo, KoinComponent {
         setConfig {
             customTermStartTime = Instant.ofEpochMilli(response.startTime) to false
             splashList = response.splash
+            menuList = response.menu
         }
         return response
     }
