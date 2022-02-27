@@ -389,8 +389,8 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             }
         }
         val errorMessage by viewModel.errorMessage.collectAsState()
-        if (errorMessage.isNotBlank()) {
-            errorMessage.toast()
+        if (errorMessage.second.isNotBlank()) {
+            errorMessage.second.toast(true)
         }
         val emptyUser by viewModel.emptyUser.collectAsState()
         if (emptyUser) {

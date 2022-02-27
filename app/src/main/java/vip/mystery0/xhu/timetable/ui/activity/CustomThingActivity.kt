@@ -85,6 +85,7 @@ class CustomThingActivity : BaseComposeActivity() {
         var thingTitle by remember { mutableStateOf(customThing.title) }
         var location by remember { mutableStateOf(customThing.location) }
         var allDay by remember { mutableStateOf(customThing.allDay) }
+        var saveAsCountdown by remember { mutableStateOf(customThing.saveAsCountDown) }
         val startTime = remember { mutableStateOf(customThing.startTime) }
         val endTime = remember { mutableStateOf(customThing.endTime) }
         var remark by remember { mutableStateOf(customThing.remark) }
@@ -95,6 +96,7 @@ class CustomThingActivity : BaseComposeActivity() {
             thingTitle = data.title
             location = data.location
             allDay = data.allDay
+            saveAsCountdown = data.saveAsCountDown
             startTime.value = data.startTime
             endTime.value = data.endTime
             remark = data.remark
@@ -258,6 +260,10 @@ class CustomThingActivity : BaseComposeActivity() {
                                 if (!saveCustomThingState.loading) {
                                     TextButton(
                                         onClick = {
+                                            if (saveAsCountdown) {
+                                                //存储为倒计时，那么持续时间为一天
+                                                endTime.value = startTime.value.plusDays(1)
+                                            }
                                             if (startTime.value.isAfter(endTime.value)) {
                                                 "开始时间不能晚于结束时间".toast(true)
                                                 return@TextButton
@@ -271,6 +277,9 @@ class CustomThingActivity : BaseComposeActivity() {
                                                 endTime.value,
                                                 remark,
                                                 color.value,
+                                                mapOf(
+                                                    CustomThing.Key.SAVE_AS_COUNT_DOWN to saveAsCountdown.toString()
+                                                )
                                             )
                                         }) {
                                         Text(text = "保存")
@@ -278,7 +287,7 @@ class CustomThingActivity : BaseComposeActivity() {
                                 }
                                 if (saveCustomThingState.loading) {
                                     TextButton(
-                                        enabled = !saveCustomThingState.loading,
+                                        enabled = false,
                                         onClick = {
                                         }) {
                                         Text(text = "保存操作中...")
@@ -311,7 +320,6 @@ class CustomThingActivity : BaseComposeActivity() {
                                 modifier = Modifier
                                     .defaultMinSize(minHeight = 48.dp)
                                     .padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Image(
                                     modifier = Modifier
@@ -337,6 +345,26 @@ class CustomThingActivity : BaseComposeActivity() {
                                         Switch(
                                             checked = allDay,
                                             onCheckedChange = { allDay = it },
+                                        )
+                                    }
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(
+                                            modifier = Modifier
+                                                .weight(1F),
+                                            text = "存储为倒计时",
+                                        )
+                                        Switch(
+                                            checked = saveAsCountdown,
+                                            onCheckedChange = {
+                                                saveAsCountdown = it
+                                                if (it) {
+                                                    //启用存储为倒计时，那么自动打开全天
+                                                    allDay = true
+                                                }
+                                            },
                                         )
                                     }
                                     Row(
@@ -371,36 +399,38 @@ class CustomThingActivity : BaseComposeActivity() {
                                             )
                                         }
                                     }
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(36.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Text(
+                                    if (!saveAsCountdown) {
+                                        Row(
                                             modifier = Modifier
-                                                .weight(1F)
-                                                .clickable(
-                                                    onClick = {
-                                                        endDateDialog.show()
-                                                    },
-                                                    indication = null,
-                                                    interactionSource = MutableInteractionSource(),
-                                                ),
-                                            text = endTime.value.format(dateWithWeekFormatter),
-                                        )
-                                        if (!allDay) {
+                                                .fillMaxWidth()
+                                                .height(36.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
                                             Text(
                                                 modifier = Modifier
+                                                    .weight(1F)
                                                     .clickable(
                                                         onClick = {
-                                                            endTimeDialog.show()
+                                                            endDateDialog.show()
                                                         },
                                                         indication = null,
                                                         interactionSource = MutableInteractionSource(),
                                                     ),
-                                                text = endTime.value.format(enTimeFormatter),
+                                                text = endTime.value.format(dateWithWeekFormatter),
                                             )
+                                            if (!allDay) {
+                                                Text(
+                                                    modifier = Modifier
+                                                        .clickable(
+                                                            onClick = {
+                                                                endTimeDialog.show()
+                                                            },
+                                                            indication = null,
+                                                            interactionSource = MutableInteractionSource(),
+                                                        ),
+                                                    text = endTime.value.format(enTimeFormatter),
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -519,11 +549,9 @@ class CustomThingActivity : BaseComposeActivity() {
                                     items(list.size) { index ->
                                         val item = list[index]
                                         BuildItem(item) {
-                                            if (!customThingListState.loading) {
-                                                updateCustomThing(item)
-                                                scope.launch {
-                                                    showSelect.animateTo(targetValue = ModalBottomSheetValue.Expanded)
-                                                }
+                                            updateCustomThing(item)
+                                            scope.launch {
+                                                showSelect.animateTo(targetValue = ModalBottomSheetValue.Expanded)
                                             }
                                         }
                                     }
@@ -888,8 +916,9 @@ private fun BuildItem(
                     item.startTime.format(if (item.allDay) dateFormatter else thingDateTimeFormatter)
                 val endText =
                     item.endTime.format(if (item.allDay) dateFormatter else thingDateTimeFormatter)
+                val timeText = if (item.saveAsCountDown) startText else "$startText - $endText"
                 Text(
-                    text = "时间：$startText - $endText"
+                    text = "时间：$timeText"
                 )
             }
             Row(
