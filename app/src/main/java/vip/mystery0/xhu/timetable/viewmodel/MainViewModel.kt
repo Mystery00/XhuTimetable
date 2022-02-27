@@ -43,8 +43,6 @@ class MainViewModel : ComposeViewModel() {
         private const val TAG = "MainViewModel"
     }
 
-    private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-
     private var lastCheckUnreadTime = Instant.MIN
 
     private val poemsApi: PoemsApi by inject()
@@ -67,8 +65,8 @@ class MainViewModel : ComposeViewModel() {
 
     private val isDarkMode = MutableStateFlow(false)
 
-    private val _errorMessage = MutableStateFlow("")
-    val errorMessage: StateFlow<String> = _errorMessage
+    private val _errorMessage = MutableStateFlow(Pair(System.currentTimeMillis(), ""))
+    val errorMessage: StateFlow<Pair<Long, String>> = _errorMessage
 
     //今日页面标题
     private val _todayTitle = MutableStateFlow("")
@@ -140,6 +138,10 @@ class MainViewModel : ComposeViewModel() {
         calculateTodayTitle()
         calculateWeek()
         loadCourseList(forceUpdate = false)
+    }
+
+    private fun toastMessage(message: String) {
+        _errorMessage.value = System.currentTimeMillis() to message
     }
 
     private suspend fun loadFromConfig() {
@@ -337,12 +339,10 @@ class MainViewModel : ComposeViewModel() {
             customThingList.filter {
                 val thing = it.thing
                 if (showTomorrowCourse)
-                    !thing.startTime.toLocalDate().isAfter(tomorrow) && !thing.endTime.toLocalDate()
-                        .isBefore(tomorrow)
+                    thing.showOnToday(tomorrow)
                 else
-                    !thing.startTime.toLocalDate().isAfter(today) && !thing.endTime.toLocalDate()
-                        .isBefore(today)
-            }.sortedBy { it.thing.startTime }
+                    thing.showOnToday(today)
+            }.sortedBy { it.thing.sort }
         }
     }
 
@@ -351,7 +351,7 @@ class MainViewModel : ComposeViewModel() {
             Log.w(TAG, "load course list failed", throwable)
             _loading.value = false
             _tableCourse.value = emptyList()
-            _errorMessage.value = throwable.message ?: throwable.javaClass.simpleName
+            toastMessage(throwable.message ?: throwable.javaClass.simpleName)
         }) {
             fun convertCourseList(
                 courseList: List<CourseResponse>,
@@ -470,7 +470,7 @@ class MainViewModel : ComposeViewModel() {
                 loadData(getAllCourseList(true), colorMap, currentWeek)
                 //加载自定义事项
                 loadTodayThing(getAllThingList(true))
-                _errorMessage.emit("${LocalDateTime.now().format(dateTimeFormatter)} 数据同步成功！")
+                toastMessage("数据同步成功！")
             }
             _loading.value = false
         }
@@ -481,7 +481,7 @@ class MainViewModel : ComposeViewModel() {
             Log.w(TAG, "load thing list failed", throwable)
             _loading.value = false
             _todayThing.value = emptyList()
-            _errorMessage.value = throwable.message ?: throwable.javaClass.simpleName
+            toastMessage(throwable.message ?: throwable.javaClass.simpleName)
         }) {
             //加载自定义事项
             loadTodayThing(getAllThingList(false))
@@ -643,7 +643,7 @@ class MainViewModel : ComposeViewModel() {
     fun checkUnReadNotice() {
         viewModelScope.launch(serverExceptionHandler { throwable ->
             Log.w(TAG, "load notice list failed", throwable)
-            _errorMessage.value = throwable.message ?: throwable.javaClass.simpleName
+            toastMessage(throwable.message ?: throwable.javaClass.simpleName)
         }) {
             if (SessionManager.mainUserOrNull() == null) return@launch
             _hasUnReadNotice.value = noticeRepo.hasUnReadNotice()

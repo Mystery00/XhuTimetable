@@ -28,6 +28,8 @@ import vip.mystery0.xhu.timetable.utils.dateFormatter
 import vip.mystery0.xhu.timetable.utils.thingDateTimeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.CustomThingSheet
 import vip.mystery0.xhu.timetable.viewmodel.TodayCourseSheet
+import java.time.Duration
+import java.time.LocalDate
 
 val todayCourseTitle: TabTitle = @Composable { ext ->
     val viewModel = ext.viewModel
@@ -189,7 +191,7 @@ private fun DrawThingCard(
                     )
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .weight(1F)
                     ) {
                         Text(
                             text = thing.title,
@@ -203,28 +205,72 @@ private fun DrawThingCard(
                             thing.startTime.format(if (thing.allDay) dateFormatter else thingDateTimeFormatter)
                         val endText =
                             thing.endTime.format(if (thing.allDay) dateFormatter else thingDateTimeFormatter)
+                        val timeText =
+                            if (thing.saveAsCountDown) startText else "$startText - $endText"
                         Text(
-                            text = "$startText - $endText",
+                            text = timeText,
                             fontSize = 12.sp,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 1.dp),
                         )
-                        Text(
-                            text = thing.location,
-                            fontSize = 12.sp,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 1.dp),
-                        )
-                        Text(
-                            text = thing.remark,
-                            fontSize = 12.sp,
-                            fontStyle = FontStyle.Italic,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 1.dp),
-                        )
+                        if (thing.location.isNotBlank()) {
+                            Text(
+                                text = thing.location,
+                                fontSize = 12.sp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 1.dp),
+                            )
+                        }
+                        if (thing.remark.isNotBlank()) {
+                            Text(
+                                text = thing.remark,
+                                fontSize = 12.sp,
+                                fontStyle = FontStyle.Italic,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 1.dp),
+                            )
+                        }
+                    }
+                    if (thing.saveAsCountDown) {
+                        val remainDays =
+                            Duration.between(LocalDate.now().atStartOfDay(), thing.startTime)
+                                .toDays()
+
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            if (remainDays <= 0L) {
+                                //今天
+                                Text(
+                                    text = "就在\n今天",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = thing.color,
+                                )
+                            } else {
+                                //还没到
+                                Text(
+                                    text = "还剩",
+                                    fontSize = 12.sp,
+                                )
+                                Text(
+                                    text = remainDays.toString(),
+                                    fontSize = 24.sp,
+                                    modifier = Modifier
+                                        .padding(vertical = 2.dp),
+                                    textAlign = TextAlign.Center,
+                                    fontWeight = FontWeight.Bold,
+                                    color = thing.color,
+                                )
+                                Text(
+                                    text = "天",
+                                    fontSize = 12.sp,
+                                )
+                            }
+                        }
                     }
                 }
             }

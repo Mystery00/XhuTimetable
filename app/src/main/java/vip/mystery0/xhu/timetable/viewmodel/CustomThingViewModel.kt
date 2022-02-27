@@ -121,6 +121,7 @@ class CustomThingViewModel : ComposeViewModel(), KoinComponent {
         endTime: LocalDateTime,
         remark: String,
         color: Color,
+        map: Map<String, String>,
     ) {
         viewModelScope.launch(serverExceptionHandler { throwable ->
             Log.w(TAG, "save custom thing failed", throwable)
@@ -150,7 +151,7 @@ class CustomThingViewModel : ComposeViewModel(), KoinComponent {
                 remark,
                 "",
                 color,
-                "",
+                CustomThing.extraDataToJson(map),
             )
             if (thingId == 0L) {
                 customThingRemoteRepo.createCustomThing(
