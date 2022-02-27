@@ -215,6 +215,12 @@ object XhuIcons {
                 painterResource(id = R.drawable.ic_share_night) to
                         painterResource(id = R.drawable.ic_share)
             )
+        val unknownMenu: Painter
+            @Composable
+            get() = iconOf(
+                painterResource(id = R.drawable.ic_unknown_menu_night) to
+                        painterResource(id = R.drawable.ic_unknown_menu)
+            )
     }
 
     object Action {
@@ -251,27 +257,6 @@ object XhuIcons {
         val failed: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_ws_state_failed)
-    }
-
-    object Team {
-        val yue: Painter
-            @Composable
-            get() = painterResource(id = R.mipmap.img_yue)
-        val pan: Painter
-            @Composable
-            get() = painterResource(id = R.mipmap.img_pan)
-        val johnny: Painter
-            @Composable
-            get() = painterResource(id = R.mipmap.img_johnny)
-        val quinn: Painter
-            @Composable
-            get() = painterResource(id = R.mipmap.img_quinn)
-        val chen: Painter
-            @Composable
-            get() = painterResource(id = R.mipmap.img_chen)
-        val mystery0: Painter
-            @Composable
-            get() = painterResource(id = R.mipmap.img_mystery0)
     }
 }
 

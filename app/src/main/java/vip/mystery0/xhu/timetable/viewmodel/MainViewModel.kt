@@ -19,6 +19,7 @@ import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
 import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.CustomThing
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
+import vip.mystery0.xhu.timetable.model.response.Menu
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.model.response.Version
 import vip.mystery0.xhu.timetable.module.localRepo
@@ -127,6 +128,9 @@ class MainViewModel : ComposeViewModel() {
     private val _mainUser = MutableStateFlow<User?>(null)
     val mainUser: StateFlow<User?> = _mainUser
 
+    private val _menu = MutableStateFlow<List<Menu>>(emptyList())
+    val menu: StateFlow<List<Menu>> = _menu
+
     init {
         viewModelScope.launch {
             loadFromConfig()
@@ -151,6 +155,7 @@ class MainViewModel : ComposeViewModel() {
         _showTomorrowCourse.value = time?.let {
             LocalTime.now().isAfter(it)
         } ?: false
+        _menu.value = getConfig { menuList }
     }
 
     fun loadConfig() {

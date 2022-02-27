@@ -4,6 +4,7 @@ data class InitResponse(
     val version: Version?,
     val splash: List<Splash>,
     val startTime: Long,
+    val menu: List<Menu>,
 )
 
 data class Version(
@@ -34,4 +35,10 @@ data class Splash(
     val showTime: Int,
     val startShowTime: Long,
     val endShowTime: Long,
+)
+
+data class Menu(
+    var title: String,
+    var key: String,
+    var groupSort: Int,
 )

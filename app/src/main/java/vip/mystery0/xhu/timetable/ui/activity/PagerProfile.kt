@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
-import android.content.Intent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.*
@@ -18,7 +17,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
-import vip.mystery0.xhu.timetable.ui.theme.*
+import vip.mystery0.xhu.timetable.model.event.MenuItem
+import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
+import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
+import vip.mystery0.xhu.timetable.ui.theme.XhuColor
+import vip.mystery0.xhu.timetable.ui.theme.XhuImages
 
 val profileCourseTitle: TabTitle = @Composable {
     Text(text = "我的", modifier = Modifier.align(Alignment.Center))
@@ -118,125 +121,44 @@ val profileCourseContent: TabContent = @Composable { ext ->
                 .height(6.dp)
                 .background(divider),
         )
-        val dividerHeight = 0.33.dp
-        BuildProfileItem(
-            painter = XhuIcons.Profile.exam,
-            title = "考试查询",
-            click = {
-                activity.intentTo(ExamActivity::class)
-            })
-        Divider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(dividerHeight)
-                .background(dividerSmall),
-        )
-        BuildProfileItem(
-            painter = XhuIcons.Profile.score,
-            title = "成绩查询",
-            click = {
-                activity.intentTo(ScoreActivity::class)
-            })
-        Divider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(dividerHeight)
-                .background(dividerSmall),
-        )
-        BuildProfileItem(
-            painter = XhuIcons.Profile.classroom,
-            title = "空闲教室",
-            click = {
-                activity.intentTo(CourseRoomActivity::class)
-            })
-        Divider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(6.dp)
-                .background(divider),
-        )
-        BuildProfileItem(
-            painter = XhuIcons.Profile.accountSettings,
-            title = "账号管理",
-            click = {
-                activity.intentTo(AccountSettingsActivity::class)
-            })
-        Divider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(dividerHeight)
-                .background(dividerSmall),
-        )
-        BuildProfileItem(
-            painter = XhuIcons.Profile.classSettings,
-            title = "课程设置",
-            click = {
-                activity.intentTo(ClassSettingsActivity::class)
-            })
-        Divider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(dividerHeight)
-                .background(dividerSmall),
-        )
-        BuildProfileItem(
-            painter = XhuIcons.Profile.settings,
-            title = "软件设置",
-            click = {
-                activity.intentTo(SettingsActivity::class)
-            })
-        Divider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(6.dp)
-                .background(divider),
-        )
+
+        val menuList by viewModel.menu.collectAsState()
         val hasUnReadNotice by viewModel.hasUnReadNotice.collectAsState()
-        BuildProfileItem(
-            painter = XhuIcons.Profile.notice,
-            title = "通知公告",
-            showBadge = hasUnReadNotice,
-            click = {
-                activity.intentTo(NoticeActivity::class)
-            }
-        )
-        Divider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(dividerHeight)
-                .background(dividerSmall),
-        )
         val hasUnReadFeedback by viewModel.hasUnReadFeedback.collectAsState()
-        BuildProfileItem(
-            painter = XhuIcons.Profile.feedback,
-            title = "意见反馈",
-            showBadge = hasUnReadFeedback,
-            click = {
-                activity.intentTo(FeedbackActivity::class)
-            })
-        Divider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(dividerHeight)
-                .background(dividerSmall),
-        )
-        BuildProfileItem(
-            painter = XhuIcons.Profile.share,
-            title = "分享应用",
-            click = {
-                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                    putExtra(Intent.EXTRA_TEXT, shareText.random())
-                    type = "text/plain"
+        menuList.groupBy { it.groupSort }
+            .forEach { (_, list) ->
+                val iterator = list.iterator()
+                while (iterator.hasNext()) {
+                    val menu = iterator.next()
+                    val item = MenuItem.parseKey(menu.key.uppercase())
+                    val showBadge = when (item) {
+                        MenuItem.NOTICE -> hasUnReadNotice
+                        MenuItem.FEEDBACK -> hasUnReadFeedback
+                        else -> false
+                    }
+                    BuildProfileItem(
+                        painter = item.icon(),
+                        title = menu.title,
+                        showBadge = showBadge,
+                        click = {
+                            item.action(activity)
+                        })
+                    if (iterator.hasNext()) {
+                        Divider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(0.33.dp)
+                                .background(dividerSmall),
+                        )
+                    }
                 }
-                activity.startActivity(Intent.createChooser(shareIntent, "分享西瓜课表到"))
-            },
-        )
-        Divider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(6.dp)
-                .background(divider),
-        )
+                Divider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .background(divider),
+                )
+            }
     }
 }
 
@@ -249,11 +171,6 @@ private val dividerSmall: Color
 private val more: Color
     @Composable
     get() = XhuColor.Profile.more
-
-private val shareText = arrayListOf(
-    "查课查课表，我就用西瓜课表~ 下载链接：https://xgkb.mystery0.vip",
-    "西瓜子都在用的课表~ 下载链接：https://xgkb.mystery0.vip"
-)
 
 @Composable
 private fun BuildProfileItem(

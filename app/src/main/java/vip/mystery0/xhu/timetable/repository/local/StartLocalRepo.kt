@@ -6,5 +6,10 @@ import vip.mystery0.xhu.timetable.repository.StartRepo
 
 class StartLocalRepo : StartRepo {
     override suspend fun init(): InitResponse =
-        InitResponse(null, getConfig { splashList }, getConfig { termStartTime }.toEpochMilli())
+        InitResponse(
+            null,
+            getConfig { splashList },
+            getConfig { termStartTime }.toEpochMilli(),
+            getConfig { menuList },
+        )
 }
