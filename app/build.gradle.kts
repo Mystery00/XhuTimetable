@@ -144,7 +144,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
     //accompanist
-    val accompanistVersion = "0.22.1-rc"
+    val accompanistVersion = "0.23.1"
     implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-pager:$accompanistVersion")
@@ -152,6 +152,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-swiperefresh:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-placeholder-material:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
     //compose-material-dialogs
     val composeMaterialDialogsVersion = "0.6.3"
     implementation("io.github.vanpra.compose-material-dialogs:core:$composeMaterialDialogsVersion")

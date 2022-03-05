@@ -1,7 +1,6 @@
 package vip.mystery0.xhu.timetable.repository.remote
 
 import androidx.compose.ui.graphics.Color
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.api.checkLogin
@@ -17,7 +16,7 @@ import vip.mystery0.xhu.timetable.repository.CustomThingRepo
 import java.time.Instant
 import java.util.*
 
-class CustomThingRemoteRepo : CustomThingRepo, KoinComponent {
+class CustomThingRemoteRepo : CustomThingRepo {
     private val serverApi: ServerApi by inject()
 
     private val local: CustomThingRepo by localRepo()

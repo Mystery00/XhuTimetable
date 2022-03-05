@@ -16,6 +16,7 @@ import androidx.browser.customtabs.CustomTabsIntent
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.Crashes
+import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.chinaZone
@@ -49,8 +50,9 @@ const val appVersionCodeNumber: Long = BuildConfig.VERSION_CODE.toLong()
 
 @Suppress("DEPRECATION")
 fun isOnline(): Boolean {
-    val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val networkInfo = connMgr.activeNetworkInfo
+    val connectivityManager =
+        KoinJavaComponent.get<ConnectivityManager>(ConnectivityManager::class.java)
+    val networkInfo = connectivityManager.activeNetworkInfo
     return networkInfo?.isConnected == true
 }
 

@@ -6,6 +6,8 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineExceptionHandler
 import retrofit2.HttpException
+import vip.mystery0.xhu.timetable.isOnline
+import vip.mystery0.xhu.timetable.module.NetworkNotConnectException
 
 data class ErrorMessage(
     val code: Int,
@@ -22,6 +24,10 @@ fun serverExceptionHandler(
     handler: (Throwable) -> Unit
 ): CoroutineExceptionHandler =
     CoroutineExceptionHandler { _, throwable ->
+        if (!isOnline()) {
+            handler(NetworkNotConnectException())
+            return@CoroutineExceptionHandler
+        }
         var exception: Throwable = throwable
         if (exception is HttpException) {
             val response = exception.response()?.errorBody()?.string()

@@ -23,8 +23,8 @@ import vip.mystery0.xhu.timetable.model.response.CourseResponse
 import vip.mystery0.xhu.timetable.model.response.Menu
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.model.response.Version
+import vip.mystery0.xhu.timetable.module.getRepo
 import vip.mystery0.xhu.timetable.module.localRepo
-import vip.mystery0.xhu.timetable.module.repo
 import vip.mystery0.xhu.timetable.repository.CourseRepo
 import vip.mystery0.xhu.timetable.repository.CustomThingRepo
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
@@ -51,15 +51,15 @@ class MainViewModel : ComposeViewModel() {
 
     private val feedbackApi: FeedbackApi by inject()
 
-    private val courseRepo: CourseRepo by repo()
+    private val courseRepo: CourseRepo = getRepo()
 
     private val courseLocalRepo: CourseRepo by localRepo()
 
-    private val customThingRepo: CustomThingRepo by repo()
+    private val customThingRepo: CustomThingRepo = getRepo()
 
     private val customThingLocalRepo: CustomThingRepo by localRepo()
 
-    private val noticeRepo: NoticeRepo by repo()
+    private val noticeRepo: NoticeRepo = getRepo()
 
     private val workManager: WorkManager by inject()
 
@@ -650,9 +650,6 @@ class MainViewModel : ComposeViewModel() {
     }
 
     fun checkUnReadNotice() {
-        if (!isOnline()) {
-            return
-        }
         viewModelScope.launch(serverExceptionHandler { throwable ->
             Log.w(TAG, "load notice list failed", throwable)
             toastMessage(throwable.message ?: throwable.javaClass.simpleName)

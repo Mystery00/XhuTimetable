@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.repository.local
 
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.config.User
 import vip.mystery0.xhu.timetable.config.runOnIo
@@ -10,7 +9,7 @@ import vip.mystery0.xhu.timetable.model.response.CourseResponse
 import vip.mystery0.xhu.timetable.repository.CourseRepo
 import vip.mystery0.xhu.timetable.repository.db.dao.CourseDao
 
-class CourseLocalRepo : CourseRepo, KoinComponent {
+class CourseLocalRepo : CourseRepo {
     private val courseDao: CourseDao by inject()
 
     override suspend fun getCourseList(
