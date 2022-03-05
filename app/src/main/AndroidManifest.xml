@@ -15,15 +15,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/JetpackSplashTheme">
-        <service
-            android:name=".work.NotifyService"
-            android:enabled="true"
-            android:exported="true" />
 
         <activity
             android:name=".ui.activity.StartActivity"
-            android:exported="true"
-            android:label="@string/app_name">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,12 +26,16 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ui.activity.ErrorReportActivity"
+            android:exported="true"
+            android:process=":error_activity"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar" />
+        <activity
             android:name=".ui.activity.LoginActivity"
             android:exported="true"
             android:theme="@style/Theme.XhuTimetable.NoActionBar.Immersive" />
         <activity
             android:name=".ui.activity.MainActivity"
-            android:label="@string/app_name"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
         <activity
             android:name=".ui.activity.NoticeActivity"
@@ -104,6 +103,11 @@
             android:exported="true"
             android:label="@string/title_activity_background"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
+
+        <service
+            android:name=".work.NotifyService"
+            android:enabled="true"
+            android:exported="true" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"

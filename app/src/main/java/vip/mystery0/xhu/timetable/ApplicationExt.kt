@@ -9,16 +9,13 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
-import com.microsoft.appcenter.crashes.AbstractCrashesListener
 import com.microsoft.appcenter.crashes.Crashes
-import com.microsoft.appcenter.crashes.model.ErrorReport
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.chinaZone
@@ -90,19 +87,6 @@ fun registerAppCenter(application: Application) {
         if (BuildConfig.DEBUG) {
             AppCenter.setLogLevel(Log.VERBOSE)
         }
-        Crashes.setListener(object : AbstractCrashesListener() {
-            override fun onBeforeSending(report: ErrorReport?) {
-                if (report == null) {
-                    return
-                }
-                try {
-                    dumpStackTraceToFile(report.appStartTime.time, report.stackTrace)
-                    Log.d(packageName, "onBeforeSending: write exception to file success")
-                } catch (e: Exception) {
-                    Log.w(packageName, "onBeforeSending: dump stackTrace failed", e)
-                }
-            }
-        })
         AppCenter.setUserId(publicDeviceId)
         AppCenter.start(
             application,
@@ -113,22 +97,16 @@ fun registerAppCenter(application: Application) {
     }
 }
 
-private fun dumpStackTraceToFile(timestamp: Long, stackTrace: String) {
-    val dumpDir = File(externalDocumentsDir, "crash")
-    val dumpFile = File(dumpDir, "Crash-${timestamp}.txt")
-    if (!dumpDir.exists()) dumpDir.mkdirs()
-    val content = buildString {
-        appendLine("===================================")
-        appendLine("应用版本: $appVersionName")
-        appendLine("Android版本: ${Build.VERSION.RELEASE}_${Build.VERSION.SDK_INT}")
-        appendLine("厂商: ${Build.MANUFACTURER}")
-        appendLine("型号: ${Build.MODEL}")
-        appendLine("设备id: $publicDeviceId")
-        appendLine("===================================")
-        appendLine()
-        appendLine(stackTrace)
+fun Context.joinQQGroup(activity: BaseComposeActivity) {
+    try {
+        val goIntent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3DJwFjXuBEWPJuevlxn9QhtMRGFSh-geZV")
+        )
+        startActivity(goIntent)
+    } catch (e: ActivityNotFoundException) {
+        activity.toastString("QQ未安装", true)
     }
-    dumpFile.writeText(content)
 }
 
 suspend fun setTrigger(alarmManager: AlarmManager) {

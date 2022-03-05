@@ -4,7 +4,6 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.ViewTreeObserver
 import androidx.activity.viewModels
@@ -120,7 +119,6 @@ class StartActivity : BaseComposeActivity(setSystemUiColor = false) {
     }
 
     private fun goToMainScreen() {
-        Log.i("TAG", "goToMainScreen: ")
         if (SessionManager.isLogin()) {
             intentTo(MainActivity::class)
         } else {
