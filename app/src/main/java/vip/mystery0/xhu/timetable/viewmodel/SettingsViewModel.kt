@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.viewmodel
 
 import android.app.AlarmManager
 import android.os.SystemClock
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +25,7 @@ import java.time.LocalTime
 
 class SettingsViewModel : ComposeViewModel() {
     companion object {
+        private const val TAG = "SettingsViewModel"
         private var hits = Array(5) { 0L }
     }
 
@@ -53,7 +55,11 @@ class SettingsViewModel : ComposeViewModel() {
             _notifyTimeData.value = getConfig { notifyTime }
             debugMode.value = getConfig { debugMode }
             _splashList.value = getConfig { splashList }
-            _teamMemberData.value = serverApi.getTeamMemberList()
+            try {
+                _teamMemberData.value = serverApi.getTeamMemberList()
+            } catch (e: Exception) {
+                Log.w(TAG, "load team member list", e)
+            }
         }
     }
 
