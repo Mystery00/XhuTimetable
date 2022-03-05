@@ -92,3 +92,7 @@ val networkModule = module {
 private inline fun <reified API> Module.serverApi() {
     single<API> { get<Retrofit>(named(RETROFIT)).create(API::class.java) }
 }
+
+const val HINT_NETWORK = "网络无法使用，请检查网络连接！"
+
+class NetworkNotConnectException : RuntimeException(HINT_NETWORK)

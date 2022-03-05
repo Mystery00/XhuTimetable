@@ -9,8 +9,8 @@ import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.model.entity.Notice
+import vip.mystery0.xhu.timetable.module.getRepo
 import vip.mystery0.xhu.timetable.module.localRepo
-import vip.mystery0.xhu.timetable.module.repo
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
 
 class NoticeViewModel : ComposeViewModel(), KoinComponent {
@@ -18,7 +18,7 @@ class NoticeViewModel : ComposeViewModel(), KoinComponent {
         private const val TAG = "NoticeViewModel"
     }
 
-    private val noticeRepo: NoticeRepo by repo()
+    private val noticeRepo: NoticeRepo = getRepo()
     private val local: NoticeRepo by localRepo()
 
     private val _noticeListState = MutableStateFlow(NoticeListState())

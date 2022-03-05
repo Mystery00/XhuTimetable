@@ -17,7 +17,9 @@ import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.config.setConfig
+import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.model.response.Message
+import vip.mystery0.xhu.timetable.module.HINT_NETWORK
 import java.util.concurrent.TimeUnit
 
 class FeedbackViewModel : ComposeViewModel() {
@@ -102,6 +104,10 @@ class FeedbackViewModel : ComposeViewModel() {
 
     fun sendMessage(content: String) {
         viewModelScope.launch {
+            if (!isOnline()) {
+                _wsStatus.value = WebSocketState(WebSocketStatus.DISCONNECTED, HINT_NETWORK)
+                return@launch
+            }
             webSocket?.send(content)
         }
     }
@@ -120,6 +126,10 @@ class FeedbackViewModel : ComposeViewModel() {
         val mainUser = SessionManager.mainUserOrNull()
         if (mainUser == null) {
             _wsStatus.value = WebSocketState(WebSocketStatus.DISCONNECTED, "用户未登录")
+            return
+        }
+        if (!isOnline()) {
+            _wsStatus.value = WebSocketState(WebSocketStatus.DISCONNECTED, "")
             return
         }
         webSocket?.close(1000, "管理员登录")

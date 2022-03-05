@@ -14,7 +14,7 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.*
 import vip.mystery0.xhu.timetable.externalPictureDir
-import vip.mystery0.xhu.timetable.module.repo
+import vip.mystery0.xhu.timetable.module.getRepo
 import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.setTrigger
 import vip.mystery0.xhu.timetable.utils.md5
@@ -29,7 +29,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
         private const val TAG = "StarterViewModel"
     }
 
-    private val startRepo: StartRepo by repo()
+    private val startRepo: StartRepo = getRepo()
     private val workManager: WorkManager by inject()
     private val alarmManager: AlarmManager by inject()
 

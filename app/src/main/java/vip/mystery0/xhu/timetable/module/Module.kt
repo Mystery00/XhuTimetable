@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.NotificationManager
 import android.content.ClipboardManager
 import android.content.Context
+import android.net.ConnectivityManager
 import androidx.work.WorkManager
 import org.greenrobot.eventbus.EventBus
 import org.koin.android.ext.koin.androidContext
@@ -24,5 +25,6 @@ private val appModule = module {
     single { androidContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
     single { androidContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
     single { androidContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager }
+    single { androidContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
     single { EventBus.getDefault() }
 }

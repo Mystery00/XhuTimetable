@@ -4,67 +4,85 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
 import org.koin.core.module.Module
+import org.koin.core.qualifier.StringQualifier
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.isOnline
-import vip.mystery0.xhu.timetable.repository.CourseRepo
-import vip.mystery0.xhu.timetable.repository.CustomThingRepo
-import vip.mystery0.xhu.timetable.repository.NoticeRepo
 import vip.mystery0.xhu.timetable.repository.local.CourseLocalRepo
 import vip.mystery0.xhu.timetable.repository.local.CustomThingLocalRepo
 import vip.mystery0.xhu.timetable.repository.local.NoticeLocalRepo
 import vip.mystery0.xhu.timetable.repository.local.StartLocalRepo
+import vip.mystery0.xhu.timetable.repository.network.CourseNetworkRepo
+import vip.mystery0.xhu.timetable.repository.network.CustomThingNetworkRepo
+import vip.mystery0.xhu.timetable.repository.network.NoticeNetworkRepo
+import vip.mystery0.xhu.timetable.repository.network.StartNetworkRepo
 import vip.mystery0.xhu.timetable.repository.remote.CourseRemoteRepo
 import vip.mystery0.xhu.timetable.repository.remote.CustomThingRemoteRepo
 import vip.mystery0.xhu.timetable.repository.remote.NoticeRemoteRepo
 import vip.mystery0.xhu.timetable.repository.remote.StartRemoteRepo
 
 val repoModule = module {
-    injectRepo(StartLocalRepo(), StartRemoteRepo())
-    injectRepo<CourseRepo, CourseLocalRepo, CourseRemoteRepo>(CourseLocalRepo(), CourseRemoteRepo())
-    injectRepo<NoticeRepo, NoticeLocalRepo, NoticeRemoteRepo>(NoticeLocalRepo(), NoticeRemoteRepo())
-    injectRepo<CustomThingRepo, CustomThingLocalRepo, CustomThingRemoteRepo>(
-        CustomThingLocalRepo(),
-        CustomThingRemoteRepo()
-    )
+    injectRepo(StartLocalRepo(), StartRemoteRepo(), StartNetworkRepo)
+    injectRepo(CourseLocalRepo(), CourseRemoteRepo(), CourseNetworkRepo)
+    injectRepo(NoticeLocalRepo(), NoticeRemoteRepo(), NoticeNetworkRepo)
+    injectRepo(CustomThingLocalRepo(), CustomThingRemoteRepo(), CustomThingNetworkRepo)
 }
 
 const val SCOPE_LOCAL = "_Local"
 const val SCOPE_REMOTE = "_Remote"
+const val SCOPE_NETWORK = "_Network"
+
+inline fun <reified R : Repo> _localName(): StringQualifier =
+    named("$SCOPE_LOCAL${R::class.simpleName}")
+
+inline fun <reified R : Repo> _remoteName(): StringQualifier =
+    named("$SCOPE_REMOTE${R::class.simpleName}")
+
+inline fun <reified R : Repo> _networkName(): StringQualifier =
+    named("$SCOPE_NETWORK${R::class.simpleName}")
 
 private inline fun <reified I : Repo, reified L : I, reified R : I> Module.injectRepo(
     local: L,
-    remote: R
+    remote: R,
+    network: I? = null
 ) {
-    single<I>(named("$SCOPE_LOCAL${I::class.simpleName}")) { local }
-    single<I>(named("$SCOPE_REMOTE${I::class.simpleName}")) { remote }
+    single<I>(_localName<I>()) { local }
+    single<I>(_remoteName<I>()) { remote }
+    if (network != null) {
+        single(_networkName<I>()) { network }
+    }
 }
 
-inline fun <reified INTER : Repo> KoinComponent.repo(): Lazy<INTER> =
-    if (isOnline()) {
-        inject(named("$SCOPE_REMOTE${INTER::class.simpleName}"))
-    } else {
-        inject(named("$SCOPE_LOCAL${INTER::class.simpleName}"))
-    }
-
 inline fun <reified INTER : Repo> KoinComponent.localRepo(): Lazy<INTER> =
-    inject(named("$SCOPE_LOCAL${INTER::class.simpleName}"))
+    inject(_localName<INTER>())
 
 inline fun <reified INTER : Repo> KoinComponent.remoteRepo(): Lazy<INTER> =
-    inject(named("$SCOPE_REMOTE${INTER::class.simpleName}"))
+    inject(_remoteName<INTER>())
 
-inline fun <reified INTER : Repo> KoinComponent.getRepo(): INTER =
-    if (isOnline()) {
-        get(named("$SCOPE_REMOTE${INTER::class.simpleName}"))
-    } else {
-        get(named("$SCOPE_LOCAL${INTER::class.simpleName}"))
+inline fun <reified INTER : Repo> KoinComponent.getRepo(): INTER {
+    val network = getKoin().getOrNull<INTER>(_networkName<INTER>())
+    if (network != null) {
+        return network
     }
+    return if (isOnline()) {
+        get(_remoteName<INTER>())
+    } else {
+        get(_localName<INTER>())
+    }
+}
 
 inline fun <reified INTER : Repo> getLocalRepo(): INTER =
-    KoinJavaComponent.get(INTER::class.java, named("$SCOPE_LOCAL${INTER::class.simpleName}"))
+    KoinJavaComponent.get(INTER::class.java, _localName<INTER>())
 
 inline fun <reified INTER : Repo> getRemoteRepo(): INTER =
-    KoinJavaComponent.get(INTER::class.java, named("$SCOPE_REMOTE${INTER::class.simpleName}"))
+    KoinJavaComponent.get(INTER::class.java, _remoteName<INTER>())
 
-interface Repo
+interface Repo : KoinComponent
+
+interface NetworkRepo<R : Repo> : KoinComponent {
+    val local: R
+    val remote: R
+
+    fun dispatch(): R = if (isOnline()) remote else local
+}

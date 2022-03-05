@@ -8,6 +8,7 @@ import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.ui.activity.ErrorReportActivity
 import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
+import vip.mystery0.xhu.timetable.utils.finishAllActivity
 import java.io.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -21,6 +22,7 @@ class ApplicationExceptionCatcher : Thread.UncaughtExceptionHandler {
     override fun uncaughtException(t: Thread, e: Throwable) {
         dumpExceptionToFile(e)
         e.printStackTrace()
+        finishAllActivity()
         showErrorReport(e)
     }
 

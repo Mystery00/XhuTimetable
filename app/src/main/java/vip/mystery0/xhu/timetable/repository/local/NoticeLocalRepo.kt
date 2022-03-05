@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.repository.local
 
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.model.entity.Notice
@@ -8,7 +7,7 @@ import vip.mystery0.xhu.timetable.model.response.NoticeResponse
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
 import vip.mystery0.xhu.timetable.repository.db.dao.NoticeDao
 
-class NoticeLocalRepo : NoticeRepo, KoinComponent {
+class NoticeLocalRepo : NoticeRepo {
     private val noticeDao: NoticeDao by inject()
 
     override suspend fun queryAllNotice(): List<Notice> =
