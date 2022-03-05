@@ -1,8 +1,5 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.net.Uri
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -32,6 +29,7 @@ import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.setConfig
+import vip.mystery0.xhu.timetable.joinQQGroup
 import vip.mystery0.xhu.timetable.loadInBrowser
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.entity.nightModeSelectList
@@ -295,15 +293,7 @@ class SettingsActivity : BaseComposeActivity() {
                         },
                         title = { Text(text = "点击加入『西瓜课表用户交流反馈』") },
                         onClick = {
-                            try {
-                                val goIntent = Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3DJwFjXuBEWPJuevlxn9QhtMRGFSh-geZV")
-                                )
-                                startActivity(goIntent)
-                            } catch (e: ActivityNotFoundException) {
-                                "QQ未安装".toast()
-                            }
+                            joinQQGroup(this@SettingsActivity)
                         }
                     )
                 }

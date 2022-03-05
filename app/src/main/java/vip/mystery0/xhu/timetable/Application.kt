@@ -7,6 +7,7 @@ import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
+import vip.mystery0.xhu.timetable.config.ApplicationExceptionCatcher
 import vip.mystery0.xhu.timetable.module.moduleList
 import vip.mystery0.xhu.timetable.ui.notification.initChannelID
 import vip.mystery0.xhu.timetable.utils.registerActivityLifecycle
@@ -15,6 +16,7 @@ class Application : Application() {
     override fun onCreate() {
         super.onCreate()
         context = this
+        Thread.setDefaultUncaughtExceptionHandler(ApplicationExceptionCatcher())
 //        Glance.initialize(this)
         //配置Koin
         startKoin {

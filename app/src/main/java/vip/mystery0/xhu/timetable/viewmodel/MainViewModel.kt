@@ -16,6 +16,7 @@ import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.*
 import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
+import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.CustomThing
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
@@ -196,6 +197,9 @@ class MainViewModel : ComposeViewModel() {
     }
 
     private fun showPoems() {
+        if (!isOnline()) {
+            return
+        }
         viewModelScope.launch {
             val disablePoems = getConfig { disablePoems }
             if (disablePoems) {
@@ -646,6 +650,9 @@ class MainViewModel : ComposeViewModel() {
     }
 
     fun checkUnReadNotice() {
+        if (!isOnline()) {
+            return
+        }
         viewModelScope.launch(serverExceptionHandler { throwable ->
             Log.w(TAG, "load notice list failed", throwable)
             toastMessage(throwable.message ?: throwable.javaClass.simpleName)
@@ -656,6 +663,9 @@ class MainViewModel : ComposeViewModel() {
     }
 
     fun checkUnReadFeedback() {
+        if (!isOnline()) {
+            return
+        }
         viewModelScope.launch(serverExceptionHandler { throwable ->
             Log.w(TAG, "check unread feedback failed", throwable)
         }) {
