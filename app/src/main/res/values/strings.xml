@@ -12,4 +12,5 @@
     <string name="title_activity_custom_thing">自定义事项</string>
     <string name="title_activity_course_room">空闲教室</string>
     <string name="title_activity_background">自定义背景图片</string>
+    <string name="title_activity_export_calendar">日历导出管理</string>
 </resources>

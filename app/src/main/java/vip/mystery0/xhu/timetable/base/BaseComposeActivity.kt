@@ -10,10 +10,8 @@ import androidx.activity.compose.setContent
 import androidx.annotation.LayoutRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +19,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import org.greenrobot.eventbus.EventBus
@@ -121,7 +120,27 @@ abstract class BaseComposeActivity(
     }
 
     @Composable
-    private fun BuildLayout(painter: Painter, text: String) {
+    fun BuildNoPermissionLayout(
+        permissionDescription: String,
+        onRequestPermission: () -> Unit = {},
+    ) {
+        BuildLayout(
+            painter = XhuImages.noCourse,
+            text = permissionDescription,
+            appendLayout = {
+                Button(onClick = onRequestPermission) {
+                    Text("授予权限")
+                }
+            }
+        )
+    }
+
+    @Composable
+    private fun BuildLayout(
+        painter: Painter,
+        text: String,
+        appendLayout: (@Composable () -> Unit)? = null,
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -136,7 +155,13 @@ abstract class BaseComposeActivity(
                     contentDescription = null,
                     modifier = Modifier.width(256.dp)
                 )
-                Text(text = text, color = MaterialTheme.colors.onSurface)
+                Text(
+                    text = text,
+                    color = MaterialTheme.colors.onSurface,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 48.dp)
+                )
+                appendLayout?.invoke()
             }
         }
     }

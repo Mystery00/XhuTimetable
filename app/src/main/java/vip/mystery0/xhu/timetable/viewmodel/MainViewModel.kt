@@ -7,7 +7,6 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.FeedbackApi
@@ -715,7 +714,7 @@ private val startArray = arrayOf(
     "14:00",
     "14:55",
     "16:00",
-    "16:00",
+    "16:55",
     "19:00",
     "19:55",
     "20:50",

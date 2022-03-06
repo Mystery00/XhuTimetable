@@ -28,6 +28,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.loadInBrowser
+import vip.mystery0.xhu.timetable.model.entity.Notice
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
@@ -70,85 +71,68 @@ class NoticeActivity : BaseComposeActivity() {
                 onRefresh = { viewModel.loadNoticeList() },
             ) {
                 val list = noticeListState.noticeList
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(XhuColor.Common.grayBackground),
-                    contentPadding = PaddingValues(4.dp),
-                ) {
-                    if (noticeListState.loading) {
-                        items(3) {
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                                    .placeholder(
-                                        visible = true,
-                                        highlight = PlaceholderHighlight.shimmer(),
-                                    )
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(4.dp)
-                                ) {
-                                    Text(
-                                        text = "占位符标题",
-                                    )
-                                    Text(
-                                        text = "公告内容，\n总共\n三行",
-                                    )
-                                    Text(
-                                        text = "2021-10-01",
-                                        fontSize = 12.sp,
-                                    )
-                                }
+                if (noticeListState.loading || list.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(XhuColor.Common.grayBackground),
+                        contentPadding = PaddingValues(4.dp),
+                    ) {
+                        if (noticeListState.loading) {
+                            items(3) {
+                                BuildLoadingItem()
                             }
-                        }
-                    } else {
-                        if (list.isNotEmpty()) {
-                            items(list.size) { index ->
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                                    backgroundColor = XhuColor.cardBackground,
-                                ) {
-                                    Column(
-                                        modifier = Modifier.padding(8.dp)
-                                    ) {
-                                        Text(
-                                            text = list[index].title,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 16.sp,
-                                        )
-                                        AnnotatedClickableText(
-                                            text = list[index].content,
-                                        )
-                                        Text(
-                                            text = "发布于 ${
-                                                LocalDateTime.ofInstant(
-                                                    Instant.ofEpochMilli(list[index].createTime),
-                                                    chinaZone
-                                                ).format(chinaDateTimeFormatter)
-                                            }",
-                                            fontSize = 12.sp,
-                                            modifier = Modifier
-                                                .fillMaxWidth(),
-                                            textAlign = TextAlign.End,
-                                            color = XhuColor.Common.grayText,
-                                        )
-                                    }
+                        } else {
+                            if (list.isNotEmpty()) {
+                                items(list.size) { index ->
+                                    BuildItem(notice = list[index])
                                 }
                             }
                         }
                     }
-                }
-                if (!noticeListState.loading && list.isEmpty()) {
+                } else {
                     BuildNoDataLayout()
                 }
             }
         }
         if (noticeListState.errorMessage.isNotBlank()) {
             noticeListState.errorMessage.toast(true)
+        }
+    }
+
+    @Composable
+    fun BuildItem(notice: Notice) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            backgroundColor = XhuColor.cardBackground,
+        ) {
+            Column(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = notice.title,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                )
+                AnnotatedClickableText(
+                    text = notice.content,
+                )
+                Text(
+                    text = "发布于 ${
+                        LocalDateTime.ofInstant(
+                            Instant.ofEpochMilli(notice.createTime),
+                            chinaZone
+                        ).format(chinaDateTimeFormatter)
+                    }",
+                    fontSize = 12.sp,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.End,
+                    color = XhuColor.Common.grayText,
+                )
+            }
         }
     }
 
@@ -198,6 +182,34 @@ class NoticeActivity : BaseComposeActivity() {
                         loadInBrowser(annotation.item)
                     }
                 }
+            )
+        }
+    }
+}
+
+@Composable
+private fun BuildLoadingItem() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .placeholder(
+                visible = true,
+                highlight = PlaceholderHighlight.shimmer(),
+            )
+    ) {
+        Column(
+            modifier = Modifier.padding(4.dp)
+        ) {
+            Text(
+                text = "占位符标题",
+            )
+            Text(
+                text = "公告内容，\n总共\n三行",
+            )
+            Text(
+                text = "2021-10-01",
+                fontSize = 12.sp,
             )
         }
     }

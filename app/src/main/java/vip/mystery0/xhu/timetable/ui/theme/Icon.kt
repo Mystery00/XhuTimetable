@@ -45,6 +45,9 @@ object XhuIcons {
     val schoolCalendar: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_school_calendar)
+    val exportCalendar: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_export_calendar)
     val customCourse: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_custom_course)
@@ -90,6 +93,9 @@ object XhuIcons {
     val reset: Painter
         @Composable
         get() = painterResource(R.drawable.ic_round_settings_backup_restore)
+    val close: Painter
+        @Composable
+        get() = painterResource(R.drawable.ic_action_close)
 
     object CustomCourse {
         val title: Painter

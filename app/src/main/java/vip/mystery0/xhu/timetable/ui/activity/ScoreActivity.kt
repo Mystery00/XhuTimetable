@@ -188,33 +188,14 @@ class ScoreActivity : BaseComposeActivity() {
                     ) {
                         val scoreList = scoreListState.scoreList
                         val failedScoreList = scoreListState.failedScoreList
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(XhuColor.Common.grayBackground),
-                            contentPadding = PaddingValues(4.dp),
-                        ) {
-                            if (scoreListState.loading) {
-                                stickyHeader {
-                                    Text(
-                                        text = "通过课程列表",
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .background(XhuColor.Common.whiteBackground)
-                                            .padding(12.dp),
-                                    )
-                                }
-                                items(3) {
-                                    BuildItem(
-                                        ScoreItem.PLACEHOLDER,
-                                        showGpa,
-                                        showCredit,
-                                        showCourseType,
-                                        true,
-                                    )
-                                }
-                            } else {
-                                if (scoreList.isNotEmpty()) {
+                        if (scoreListState.loading || scoreList.isNotEmpty() || failedScoreList.isNotEmpty()) {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(XhuColor.Common.grayBackground),
+                                contentPadding = PaddingValues(4.dp),
+                            ) {
+                                if (scoreListState.loading) {
                                     stickyHeader {
                                         Text(
                                             text = "通过课程列表",
@@ -224,33 +205,33 @@ class ScoreActivity : BaseComposeActivity() {
                                                 .padding(12.dp),
                                         )
                                     }
+                                    items(3) {
+                                        BuildItem(
+                                            ScoreItem.PLACEHOLDER,
+                                            showGpa,
+                                            showCredit,
+                                            showCourseType,
+                                            true,
+                                        )
+                                    }
+                                } else {
+                                    if (scoreList.isNotEmpty()) {
+                                        stickyHeader {
+                                            Text(
+                                                text = "通过课程列表",
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .background(XhuColor.Common.whiteBackground)
+                                                    .padding(12.dp),
+                                            )
+                                        }
+                                    }
+                                    items(scoreList.size) { index ->
+                                        val item = scoreList[index]
+                                        BuildItem(item, showGpa, showCredit, showCourseType)
+                                    }
                                 }
-                                items(scoreList.size) { index ->
-                                    val item = scoreList[index]
-                                    BuildItem(item, showGpa, showCredit, showCourseType)
-                                }
-                            }
-                            if (scoreListState.loading) {
-                                stickyHeader {
-                                    Text(
-                                        text = "未通过课程列表",
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .background(XhuColor.Common.whiteBackground)
-                                            .padding(12.dp),
-                                    )
-                                }
-                                item {
-                                    BuildItem(
-                                        ScoreItem.PLACEHOLDER,
-                                        showGpa,
-                                        showCredit,
-                                        showCourseType,
-                                        true,
-                                    )
-                                }
-                            } else {
-                                if (failedScoreList.isNotEmpty()) {
+                                if (scoreListState.loading) {
                                     stickyHeader {
                                         Text(
                                             text = "未通过课程列表",
@@ -260,14 +241,34 @@ class ScoreActivity : BaseComposeActivity() {
                                                 .padding(12.dp),
                                         )
                                     }
-                                }
-                                items(failedScoreList.size) { index ->
-                                    val item = failedScoreList[index]
-                                    BuildItem(item, showGpa, showCredit, showCourseType)
+                                    item {
+                                        BuildItem(
+                                            ScoreItem.PLACEHOLDER,
+                                            showGpa,
+                                            showCredit,
+                                            showCourseType,
+                                            true,
+                                        )
+                                    }
+                                } else {
+                                    if (failedScoreList.isNotEmpty()) {
+                                        stickyHeader {
+                                            Text(
+                                                text = "未通过课程列表",
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .background(XhuColor.Common.whiteBackground)
+                                                    .padding(12.dp),
+                                            )
+                                        }
+                                    }
+                                    items(failedScoreList.size) { index ->
+                                        val item = failedScoreList[index]
+                                        BuildItem(item, showGpa, showCredit, showCourseType)
+                                    }
                                 }
                             }
-                        }
-                        if (!scoreListState.loading && scoreList.isEmpty() && failedScoreList.isEmpty()) {
+                        } else {
                             BuildNoDataLayout()
                         }
                     }

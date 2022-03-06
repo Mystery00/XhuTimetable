@@ -224,6 +224,19 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                     SettingsMenuLink(
                         icon = {
                             Icon(
+                                painter = XhuIcons.exportCalendar,
+                                contentDescription = null,
+                                tint = XhuColor.Common.blackText,
+                            )
+                        },
+                        title = { Text(text = "导出到日历") },
+                        onClick = {
+                            intentTo(ExportCalendarActivity::class)
+                        }
+                    )
+                    SettingsMenuLink(
+                        icon = {
+                            Icon(
                                 painter = XhuIcons.customCourse,
                                 contentDescription = null,
                                 tint = XhuColor.Common.blackText,

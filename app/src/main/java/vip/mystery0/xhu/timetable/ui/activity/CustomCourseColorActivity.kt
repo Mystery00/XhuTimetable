@@ -62,42 +62,13 @@ class CustomCourseColorActivity : BaseComposeActivity() {
             ) {
                 if (list.isNotEmpty()) {
                     items(list.size) { index ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 8.dp, vertical = 4.dp),
-                            backgroundColor = XhuColor.cardBackground,
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Surface(
-                                    shape = CircleShape,
-                                    modifier = Modifier
-                                        .padding(horizontal = 8.dp)
-                                        .size(36.dp),
-                                    color = list[index].second
-                                ) {}
-                                Text(
-                                    text = list[index].first,
-                                    modifier = Modifier
-                                        .padding(horizontal = 8.dp)
-                                        .weight(1F),
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
-                                )
-                                TextButton(onClick = {
-                                    courseName = list[index].first
-                                    currentColor = list[index].second
-                                    dialogState.show()
-                                }) {
-                                    Text(
-                                        text = "修改"
-                                    )
-                                }
-                            }
-                        }
+                        BuildItem(
+                            item = list[index],
+                            onChangeClick = {
+                                courseName = list[index].first
+                                currentColor = list[index].second
+                                dialogState.show()
+                            })
                     }
                 }
             }
@@ -133,6 +104,47 @@ class CustomCourseColorActivity : BaseComposeActivity() {
             val colors = ArrayList(ColorPalette.Primary).apply { add(0, currentColor) }
             colorChooser(colors = colors, argbPickerState = ARGBPickerState.WithoutAlphaSelector) {
                 selectedColor = it
+            }
+        }
+    }
+}
+
+@Composable
+private fun BuildItem(
+    item: Pair<String, Color>,
+    onChangeClick: (Pair<String, Color>) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        backgroundColor = XhuColor.cardBackground,
+    ) {
+        Row(
+            modifier = Modifier.padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(
+                shape = CircleShape,
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .size(36.dp),
+                color = item.second
+            ) {}
+            Text(
+                text = item.first,
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1F),
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+            )
+            TextButton(onClick = {
+                onChangeClick(item)
+            }) {
+                Text(
+                    text = "修改"
+                )
             }
         }
     }

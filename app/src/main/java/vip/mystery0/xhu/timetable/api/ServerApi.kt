@@ -112,6 +112,15 @@ interface ServerApi {
 
     @GET("/api/rest/xhu-timetable/common/teamMember")
     suspend fun getTeamMemberList(): List<TeamMemberResponse>
+
+    @GET("/api/rest/xhu-timetable/server/calendar")
+    suspend fun getCalendarEventList(
+        @Header("token") token: String,
+        @Query("year") year: String,
+        @Query("term") term: Int,
+        @Query("includeCustomCourse") includeCustomCourse: Boolean,
+        @Query("includeCustomThing") includeCustomThing: Boolean,
+    ): Response<List<CalendarEventResponse>>
 }
 
 fun <T : Any> Response<T>.checkLogin(): T {

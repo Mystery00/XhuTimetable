@@ -97,25 +97,26 @@ class ExamActivity : BaseComposeActivity() {
                     onRefresh = { viewModel.loadExamList() },
                 ) {
                     val list = examListState.examList
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(XhuColor.Common.grayBackground),
-                        contentPadding = PaddingValues(4.dp),
-                    ) {
-                        if (examListState.loading) {
-                            items(3) {
-                                BuildItem(item = Exam.EMPTY, placeholder = true)
-                            }
-                        } else {
-                            if (list.isNotEmpty()) {
-                                items(list.size) { index ->
-                                    BuildItem(item = list[index])
+                    if (examListState.loading || list.isNotEmpty()) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(XhuColor.Common.grayBackground),
+                            contentPadding = PaddingValues(4.dp),
+                        ) {
+                            if (examListState.loading) {
+                                items(3) {
+                                    BuildItem(item = Exam.EMPTY, placeholder = true)
+                                }
+                            } else {
+                                if (list.isNotEmpty()) {
+                                    items(list.size) { index ->
+                                        BuildItem(item = list[index])
+                                    }
                                 }
                             }
                         }
-                    }
-                    if (!examListState.loading && list.isEmpty()) {
+                    } else {
                         BuildNoDataLayout()
                     }
                 }
