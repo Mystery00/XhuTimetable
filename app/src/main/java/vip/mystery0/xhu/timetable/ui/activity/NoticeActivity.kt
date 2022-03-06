@@ -83,7 +83,7 @@ class NoticeActivity : BaseComposeActivity() {
                                     .fillMaxWidth()
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                                     .placeholder(
-                                        visible = noticeListState.loading,
+                                        visible = true,
                                         highlight = PlaceholderHighlight.shimmer(),
                                     )
                             ) {

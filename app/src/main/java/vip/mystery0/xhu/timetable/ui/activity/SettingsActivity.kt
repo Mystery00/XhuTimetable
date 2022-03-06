@@ -16,8 +16,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.microsoft.appcenter.crashes.model.TestCrashException
 import com.vanpra.composematerialdialogs.*
@@ -377,11 +379,13 @@ class SettingsActivity : BaseComposeActivity() {
                     val teamMember by viewModel.teamMemberData.collectAsState()
                     teamMember.forEach {
                         TeamItem(
-                            painter = rememberImagePainter(
-                                data = it.icon,
-                                builder = {
-                                    size(width = 192, height = 192)
-                                }
+                            painter = rememberAsyncImagePainter(
+                                ImageRequest.Builder(LocalContext.current)
+                                    .data(data = it.icon)
+                                    .apply {
+                                        size(width = 192, height = 192)
+                                    }
+                                    .build()
                             ),
                             title = it.title,
                             subTitle = it.subtitle,

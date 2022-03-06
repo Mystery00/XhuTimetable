@@ -2,7 +2,6 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -10,10 +9,12 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
+import coil.compose.SubcomposeAsyncImage
 import coil.request.CachePolicy
-import coil.size.Scale
+import coil.request.ImageRequest
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
@@ -121,21 +122,20 @@ class SchoolCalendarActivity : BaseComposeActivity() {
                     state = rememberSwipeRefreshState(loading.loading),
                     onRefresh = { },
                 ) {
-                    Image(
-                        painter = rememberImagePainter(
-                            data = loadImageUrl.second,
-                            builder = {
-                                scale(Scale.FIT)
-                                memoryCachePolicy(CachePolicy.ENABLED)
-                                diskCachePolicy(CachePolicy.ENABLED)
-                                listener(
-                                    onError = { _, t ->
-                                        t.message ?: "加载失败".toast(true)
-                                    },
-                                )
-                            }
-                        ),
+                    SubcomposeAsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(loadImageUrl.second)
+                            .memoryCachePolicy(CachePolicy.ENABLED)
+                            .diskCachePolicy(CachePolicy.ENABLED)
+                            .listener(onError = { _, result ->
+                                result.throwable.message ?: "加载失败".toast(true)
+                            })
+                            .build(),
+                        loading = {
+                            CircularProgressIndicator()
+                        },
                         contentDescription = null,
+                        contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize(),
                     )
                 }

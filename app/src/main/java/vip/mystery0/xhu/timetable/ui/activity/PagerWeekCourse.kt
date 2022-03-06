@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,7 +36,6 @@ import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.*
 
-@OptIn(ExperimentalAnimationApi::class)
 val weekCourseTitle: TabTitle = @Composable { ext ->
     val viewModel = ext.viewModel
     val week = viewModel.week.collectAsState()

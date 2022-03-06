@@ -171,8 +171,9 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-workmanager:$koinVersion")
     implementation("io.insert-koin:koin-androidx-compose:$koinVersion")
     //coil
-    implementation("io.coil-kt:coil-compose:1.4.0")
-    implementation("io.coil-kt:coil-gif:1.4.0")
+    val coilVersion = "2.0.0-rc01"
+    implementation("io.coil-kt:coil-compose:$coilVersion")
+    implementation("io.coil-kt:coil-gif:$coilVersion")
     //retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
