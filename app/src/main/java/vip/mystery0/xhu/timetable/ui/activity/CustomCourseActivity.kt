@@ -2,7 +2,10 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
-import androidx.compose.foundation.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -42,7 +45,6 @@ import java.util.*
 class CustomCourseActivity : BaseComposeActivity() {
     private val viewModel: CustomCourseViewModel by viewModels()
 
-    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     override fun BuildContent() {
         val customCourseListState by viewModel.customCourseListState.collectAsState()
@@ -238,44 +240,38 @@ class CustomCourseActivity : BaseComposeActivity() {
                                 Spacer(modifier = Modifier.weight(1F))
                                 if (customCourse.courseId != 0L && !saveCustomCourseState.loading && createType == CreateType.INPUT) {
                                     TextButton(
-                                        enabled = !saveCustomCourseState.loading,
                                         onClick = {
-                                            if (!saveCustomCourseState.loading) {
-                                                viewModel.delete(customCourse.courseId)
-                                            }
+                                            viewModel.delete(customCourse.courseId)
                                         }) {
                                         Text(text = "删除", color = Color.Red)
                                     }
                                 }
                                 if (!saveCustomCourseState.loading) {
                                     TextButton(
-                                        enabled = !saveCustomCourseState.loading,
                                         onClick = {
-                                            if (!saveCustomCourseState.loading) {
-                                                if (createType == CreateType.INPUT) {
-                                                    viewModel.saveCustomCourse(
-                                                        customCourse.courseId,
-                                                        courseName,
-                                                        teacherName,
-                                                        weekList,
-                                                        location,
-                                                        courseIndex.value,
-                                                        day.value,
-                                                    )
-                                                } else {
-                                                    viewModel.saveCustomCourse(
-                                                        0L,
-                                                        searchCourse.name,
-                                                        searchCourse.teacher,
-                                                        searchCourse.week,
-                                                        searchCourse.location,
-                                                        listOf(
-                                                            searchCourse.time.first(),
-                                                            searchCourse.time.last()
-                                                        ),
-                                                        searchCourse.day,
-                                                    )
-                                                }
+                                            if (createType == CreateType.INPUT) {
+                                                viewModel.saveCustomCourse(
+                                                    customCourse.courseId,
+                                                    courseName,
+                                                    teacherName,
+                                                    weekList,
+                                                    location,
+                                                    courseIndex.value,
+                                                    day.value,
+                                                )
+                                            } else {
+                                                viewModel.saveCustomCourse(
+                                                    0L,
+                                                    searchCourse.name,
+                                                    searchCourse.teacher,
+                                                    searchCourse.week,
+                                                    searchCourse.location,
+                                                    listOf(
+                                                        searchCourse.time.first(),
+                                                        searchCourse.time.last()
+                                                    ),
+                                                    searchCourse.day,
+                                                )
                                             }
                                         }) {
                                         Text(text = "保存")
@@ -283,7 +279,7 @@ class CustomCourseActivity : BaseComposeActivity() {
                                 }
                                 if (saveCustomCourseState.loading) {
                                     TextButton(
-                                        enabled = !saveCustomCourseState.loading,
+                                        enabled = false,
                                         onClick = {
                                         }) {
                                         Text(text = "保存操作中...")
@@ -704,27 +700,27 @@ class CustomCourseActivity : BaseComposeActivity() {
                             swipeEnabled = false,
                         ) {
                             val list = customCourseListState.customCourseList
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(XhuColor.Common.grayBackground),
-                                contentPadding = PaddingValues(4.dp),
-                            ) {
-                                if (customCourseListState.loading) {
-                                    scope.launch {
-                                        showSelect.hide()
-                                    }
-                                    items(3) {
-                                        BuildItem(
-                                            CustomCourse.PLACEHOLDER,
-                                            true,
-                                        ) {}
-                                    }
-                                } else {
-                                    items(list.size) { index ->
-                                        val item = list[index]
-                                        BuildItem(item) {
-                                            if (!customCourseListState.loading) {
+                            if (customCourseListState.loading || list.isNotEmpty()) {
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(XhuColor.Common.grayBackground),
+                                    contentPadding = PaddingValues(4.dp),
+                                ) {
+                                    if (customCourseListState.loading) {
+                                        scope.launch {
+                                            showSelect.hide()
+                                        }
+                                        items(3) {
+                                            BuildItem(
+                                                CustomCourse.PLACEHOLDER,
+                                                true,
+                                            ) {}
+                                        }
+                                    } else {
+                                        items(list.size) { index ->
+                                            val item = list[index]
+                                            BuildItem(item) {
                                                 updateCustomCourse(item)
                                                 scope.launch {
                                                     showSelect.animateTo(targetValue = ModalBottomSheetValue.Expanded)
@@ -733,8 +729,7 @@ class CustomCourseActivity : BaseComposeActivity() {
                                         }
                                     }
                                 }
-                            }
-                            if (!customCourseListState.loading && list.isEmpty()) {
+                            } else {
                                 BuildNoDataLayout()
                             }
                         }

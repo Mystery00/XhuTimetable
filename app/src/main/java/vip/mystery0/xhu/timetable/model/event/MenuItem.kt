@@ -2,11 +2,12 @@ package vip.mystery0.xhu.timetable.model.event
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
+import vip.mystery0.xhu.timetable.model.response.Menu
 import vip.mystery0.xhu.timetable.ui.activity.MainActivity
 
 enum class MenuItem(
     val icon: @Composable () -> Painter,
-    val action: MainActivity.() -> Unit,
+    val action: MainActivity.(Menu) -> Unit,
 ) {
     QUERY_EXAM(
         { vip.mystery0.xhu.timetable.ui.theme.XhuIcons.Profile.exam },
@@ -52,7 +53,13 @@ enum class MenuItem(
     ),
     EMPTY(
         { vip.mystery0.xhu.timetable.ui.theme.XhuIcons.Profile.unknownMenu },
-        {}
+        { menu ->
+            if (menu.hint.isNotBlank()) {
+                toastString(menu.hint, true)
+            } else {
+                toastString("当前版本暂不支持该功能，请更新到最新版本", true)
+            }
+        }
     )
     ;
 

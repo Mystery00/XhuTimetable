@@ -2,7 +2,6 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -53,7 +52,6 @@ import java.time.LocalDateTime
 class CustomThingActivity : BaseComposeActivity() {
     private val viewModel: CustomThingViewModel by viewModels()
 
-    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     override fun BuildContent() {
         val customThingListState by viewModel.customThingListState.collectAsState()
@@ -529,35 +527,36 @@ class CustomThingActivity : BaseComposeActivity() {
                             swipeEnabled = false,
                         ) {
                             val list = customThingListState.customThingList
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(XhuColor.Common.grayBackground),
-                                contentPadding = PaddingValues(4.dp),
-                            ) {
-                                if (customThingListState.loading) {
-                                    scope.launch {
-                                        showSelect.hide()
-                                    }
-                                    items(3) {
-                                        BuildItem(
-                                            CustomThing.PLACEHOLDER,
-                                            true,
-                                        ) {}
-                                    }
-                                } else {
-                                    items(list.size) { index ->
-                                        val item = list[index]
-                                        BuildItem(item) {
-                                            updateCustomThing(item)
-                                            scope.launch {
-                                                showSelect.animateTo(targetValue = ModalBottomSheetValue.Expanded)
+                            if (customThingListState.loading || list.isNotEmpty()) {
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(XhuColor.Common.grayBackground),
+                                    contentPadding = PaddingValues(4.dp),
+                                ) {
+                                    if (customThingListState.loading) {
+                                        scope.launch {
+                                            showSelect.hide()
+                                        }
+                                        items(3) {
+                                            BuildItem(
+                                                CustomThing.PLACEHOLDER,
+                                                true,
+                                            ) {}
+                                        }
+                                    } else {
+                                        items(list.size) { index ->
+                                            val item = list[index]
+                                            BuildItem(item) {
+                                                updateCustomThing(item)
+                                                scope.launch {
+                                                    showSelect.animateTo(targetValue = ModalBottomSheetValue.Expanded)
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
-                            if (!customThingListState.loading && list.isEmpty()) {
+                            } else {
                                 BuildNoDataLayout()
                             }
                         }
@@ -665,7 +664,6 @@ class CustomThingActivity : BaseComposeActivity() {
             )
         }
     }
-
 
     @Composable
     private fun ShowYearDialog(

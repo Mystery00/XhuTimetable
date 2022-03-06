@@ -167,27 +167,28 @@ class CourseRoomActivity : BaseComposeActivity() {
                     swipeEnabled = false,
                 ) {
                     val list = courseRoomListState.courseRoomList
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(XhuColor.Common.grayBackground),
-                        contentPadding = PaddingValues(4.dp),
-                    ) {
-                        if (courseRoomListState.loading) {
-                            items(3) {
-                                BuildItem(
-                                    CourseRoom.PLACEHOLDER,
-                                    true,
-                                )
-                            }
-                        } else {
-                            items(list.size) { index ->
-                                val item = list[index]
-                                BuildItem(item)
+                    if (courseRoomListState.loading || list.isNotEmpty()) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(XhuColor.Common.grayBackground),
+                            contentPadding = PaddingValues(4.dp),
+                        ) {
+                            if (courseRoomListState.loading) {
+                                items(3) {
+                                    BuildItem(
+                                        CourseRoom.PLACEHOLDER,
+                                        true,
+                                    )
+                                }
+                            } else {
+                                items(list.size) { index ->
+                                    val item = list[index]
+                                    BuildItem(item)
+                                }
                             }
                         }
-                    }
-                    if (!courseRoomListState.loading && list.isEmpty()) {
+                    } else {
                         BuildNoDataLayout()
                     }
                 }

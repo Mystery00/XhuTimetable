@@ -14,7 +14,7 @@ class NoticeLocalRepo : NoticeRepo {
         runOnIo { noticeDao.queryAllNoticeList() }
 
     override suspend fun hasUnReadNotice(): Boolean =
-        runOnIo { noticeDao.queryNoticeList().isNotEmpty() }
+        runOnIo { noticeDao.queryNoticeList(read = false).isNotEmpty() }
 
     override suspend fun saveList(noticeList: List<NoticeResponse>): Unit =
         runOnIo {
