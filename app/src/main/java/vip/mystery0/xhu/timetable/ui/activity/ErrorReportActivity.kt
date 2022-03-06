@@ -53,7 +53,7 @@ class ErrorReportActivity : BaseComposeActivity() {
                     Spacer(modifier = Modifier.height(24.dp))
                     val details = intent.getStringExtra(EXTRA_STACK_TRACE) ?: "未检测到异常"
                     Text(
-                        text = details + details,
+                        text = details,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
