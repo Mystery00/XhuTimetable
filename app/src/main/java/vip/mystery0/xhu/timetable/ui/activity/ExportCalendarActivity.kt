@@ -208,8 +208,8 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                 )
                             }
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .defaultMinSize(minHeight = 48.dp),
                             ) {
                                 Icon(
                                     modifier = Modifier
@@ -225,7 +225,10 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                     verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     reminder.forEach {
-                                        Row {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
                                             Text(
                                                 text = "事件开始前 $it 分钟提醒",
                                                 modifier = Modifier
@@ -386,7 +389,8 @@ class ExportCalendarActivity : BaseComposeActivity() {
     ) {
         if (show.value) {
             var selected by remember { mutableStateOf(0) }
-            var input = 20
+            var remindTime = 5
+            var input = ""
             AlertDialog(
                 onDismissRequest = {
                     show.value = false
@@ -406,6 +410,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                         interactionSource = remember { MutableInteractionSource() },
                                     ) {
                                         selected = 0
+                                        remindTime = 5
                                     },
                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                                 verticalAlignment = Alignment.CenterVertically,
@@ -424,6 +429,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                         interactionSource = remember { MutableInteractionSource() },
                                     ) {
                                         selected = 1
+                                        remindTime = 10
                                     },
                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                                 verticalAlignment = Alignment.CenterVertically,
@@ -449,14 +455,13 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                 RadioButton(selected = selected == 2, onClick = null)
                                 Text(text = "开始前")
                                 TextField(
-                                    value = input.toString(),
+                                    value = input,
                                     onValueChange = {
-                                        input = it.toInt()
+                                        input = it
                                     },
                                     keyboardOptions = KeyboardOptions(
                                         keyboardType = KeyboardType.Number,
                                     ),
-                                    isError = input <= 0 || input > 100
                                 )
                                 Text(text = "分钟提醒")
                             }
@@ -466,8 +471,11 @@ class ExportCalendarActivity : BaseComposeActivity() {
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            if (!list.contains(input))
-                                list.add(input)
+                            if (selected == 2) {
+                                remindTime = input.toInt()
+                            }
+                            if (!list.contains(remindTime))
+                                list.add(remindTime)
                             show.value = false
                         },
                     ) {
