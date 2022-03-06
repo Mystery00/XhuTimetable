@@ -8,7 +8,6 @@ import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.compose.animation.*
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -25,19 +24,19 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import coil.compose.rememberImagePainter
+import coil.compose.AsyncImage
 import coil.request.CachePolicy
-import coil.size.Scale
+import coil.request.ImageRequest
 import com.google.accompanist.pager.*
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.material.math.MathUtils.lerp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -263,11 +262,11 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                 Box {
                     val backgroundImage by viewModel.backgroundImage.collectAsState()
                     if (backgroundImage != Unit) {
-                        Image(
-                            painter = rememberImagePainter(data = backgroundImage) {
-                                scale(Scale.FIT)
-                                diskCachePolicy(CachePolicy.DISABLED)
-                            },
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(backgroundImage)
+                                .diskCachePolicy(CachePolicy.DISABLED)
+                                .build(),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier

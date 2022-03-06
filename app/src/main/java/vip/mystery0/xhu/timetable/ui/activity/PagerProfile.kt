@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import vip.mystery0.xhu.timetable.model.event.MenuItem
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
 import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
@@ -58,9 +58,10 @@ val profileCourseContent: TabContent = @Composable { ext ->
                         it.profileImage ?: ProfileImages.hash(it.info.userName, it.info.sex == "男")
                     } ?: XhuImages.defaultProfileImage
                     Image(
-                        painter = if (profileImage is Painter) profileImage else rememberImagePainter(
-                            data = profileImage
-                        ),
+                        painter = if (profileImage is Painter)
+                            profileImage
+                        else
+                            rememberAsyncImagePainter(model = profileImage),
                         contentDescription = null,
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
@@ -141,7 +142,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
                         title = menu.title,
                         showBadge = showBadge,
                         click = {
-                            item.action(activity)
+                            item.action(activity, menu)
                         })
                     if (iterator.hasNext()) {
                         Divider(
