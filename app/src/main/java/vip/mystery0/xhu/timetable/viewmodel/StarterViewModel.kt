@@ -2,10 +2,10 @@ package vip.mystery0.xhu.timetable.viewmodel
 
 import android.app.AlarmManager
 import android.util.Log
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -36,9 +36,6 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
     private val _readyState = MutableStateFlow(ReadyState(loading = true))
     val readyState: StateFlow<ReadyState> = _readyState
 
-    private val _timerState = MutableStateFlow(-1)
-    val timerState: StateFlow<Int> = _timerState
-
     init {
         viewModelScope.launch(serverExceptionHandler { throwable ->
             Log.w(TAG, "init failed", throwable)
@@ -64,7 +61,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
                         File(
                             dir,
                             "${name.sha256()}.${extension}"
-                        ) to it.showTime
+                        ) to it
                     }
                     .filter {
                         it.first.exists()
@@ -74,26 +71,24 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
                         .build()
                 )
                 val splash = splashList.randomOrNull()
-                val showTime = splash?.second ?: 0
-                _timerState.emit(showTime)
-                _readyState.emit(ReadyState(splash = splash?.first))
-                (showTime - 1 downTo 0).forEach {
-                    delay(1000L)
-                    _timerState.emit(it)
+                val showTime = splash?.second?.showTime ?: 0
+                val backgroundColor = splash?.second?.backgroundColor?.let {
+                    try {
+                        Color(android.graphics.Color.parseColor(it))
+                    } catch (e: Exception) {
+                        null
+                    }
                 }
+                DataHolder.splashFile = splash?.first
+                DataHolder.splashShowTime = showTime
+                DataHolder.backgroundColor = backgroundColor
+                _readyState.emit(ReadyState())
             }
-        }
-    }
-
-    fun skip() {
-        viewModelScope.launch {
-            _timerState.value = 0
         }
     }
 }
 
 data class ReadyState(
     val loading: Boolean = false,
-    val splash: File? = null,
     val errorMessage: String = "",
 )

@@ -31,6 +31,7 @@ data class VersionUrl(
 data class Splash(
     val splashId: Long,
     val imageUrl: String,
+    var backgroundColor: String,
     val locationUrl: String,
     val showTime: Int,
     val startShowTime: Long,
@@ -41,4 +42,5 @@ data class Menu(
     var title: String,
     var key: String,
     var groupSort: Int,
+    var hint: String,
 )

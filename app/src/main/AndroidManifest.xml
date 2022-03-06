@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
 
     <application
         android:name=".Application"
@@ -25,6 +27,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.activity.SplashImageActivity"
+            android:exported="true"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar.Immersive" />
         <activity
             android:name=".ui.activity.ErrorReportActivity"
             android:exported="true"
@@ -102,6 +108,11 @@
             android:name=".ui.activity.BackgroundActivity"
             android:exported="true"
             android:label="@string/title_activity_background"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar" />
+        <activity
+            android:name=".ui.activity.ExportCalendarActivity"
+            android:exported="true"
+            android:label="@string/title_activity_export_calendar"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
 
         <service
