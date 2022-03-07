@@ -193,6 +193,8 @@ dependencies {
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
     //Glance
     debugImplementation("com.guolindev.glance:glance:1.1.0")
+    //zloading
+    implementation("com.zyao89:zloading:1.2.0")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {

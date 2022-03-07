@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -18,10 +17,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsPadding
+import com.zyao89.view.zloading.Z_TYPE
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
@@ -181,33 +179,7 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
     @Composable
     private fun DialogContent() {
         val loginState by viewModel.loginState.collectAsState()
-        if (loginState.loading) {
-            Dialog(
-                onDismissRequest = {
-                    "取消登录操作".toast()
-                },
-                DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .background(Color.White, shape = RoundedCornerShape(12.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .padding(6.dp, 0.dp, 0.dp, 0.dp)
-                        )
-                        Text(
-                            text = "登录中……",
-                            modifier = Modifier
-                                .padding(0.dp, 8.dp, 0.dp, 0.dp)
-                        )
-                    }
-                }
-            }
-        }
+        ShowProgressDialog(show = loginState.loading, text = "登录中……", type = Z_TYPE.STAR_LOADING)
         if (loginState.success) {
             "登录成功，欢迎使用${appName}！".toast()
             if (!intent.getBooleanExtra(AccountSettingsActivity.INTENT_EXTRA, false)) {
