@@ -9,7 +9,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -18,13 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.zyao89.view.zloading.Z_TYPE
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
@@ -51,7 +50,6 @@ class ExportCalendarActivity : BaseComposeActivity() {
             viewModel.loadCalendarAccountList()
         }
 
-        val exportAccountState by viewModel.exportAccountState.collectAsState()
         val showSheet = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
         val scope = rememberCoroutineScope()
 
@@ -116,25 +114,15 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                     contentDescription = null,
                                 )
                                 Spacer(modifier = Modifier.weight(1F))
-                                if (!exportAccountState.loading) {
-                                    TextButton(
-                                        onClick = {
-                                            viewModel.exportCalendar(
-                                                includeCustomCourse,
-                                                includeCustomThing,
-                                                reminder
-                                            )
-                                        }) {
-                                        Text(text = "导出")
-                                    }
-                                }
-                                if (exportAccountState.loading) {
-                                    TextButton(
-                                        enabled = false,
-                                        onClick = {
-                                        }) {
-                                        Text(text = "正在导出...")
-                                    }
+                                TextButton(
+                                    onClick = {
+                                        viewModel.exportCalendar(
+                                            includeCustomCourse,
+                                            includeCustomThing,
+                                            reminder
+                                        )
+                                    }) {
+                                    Text(text = "导出")
                                 }
                             }
                             Row(
@@ -222,11 +210,12 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                 Column(
                                     modifier = Modifier
                                         .weight(1F),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     reminder.forEach {
                                         Row(
-                                            modifier = Modifier.fillMaxWidth(),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(48.dp),
                                             verticalAlignment = Alignment.CenterVertically,
                                         ) {
                                             Text(
@@ -244,10 +233,10 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                             }
                                         }
                                     }
-                                    Text(
-                                        text = "添加提醒",
+                                    Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
+                                            .height(48.dp)
                                             .clickable(
                                                 interactionSource = remember { MutableInteractionSource() },
                                                 indication = null,
@@ -255,7 +244,12 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                                     reminderDialog.value = true
                                                 }
                                             ),
-                                    )
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(
+                                            text = "添加提醒",
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -319,6 +313,12 @@ class ExportCalendarActivity : BaseComposeActivity() {
         }
         ShowUserDialog(show = userDialog)
         ShowReminderDialog(show = reminderDialog, list = reminder)
+        val exportAccountState by viewModel.exportAccountState.collectAsState()
+        ShowProgressDialog(
+            show = exportAccountState.loading,
+            text = "数据导出中",
+            type = Z_TYPE.STAR_LOADING
+        )
     }
 
     @Composable
@@ -388,9 +388,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
         list: MutableList<Int>,
     ) {
         if (show.value) {
-            var selected by remember { mutableStateOf(0) }
-            var remindTime = 5
-            var input = ""
+            var selected by remember { mutableStateOf(5) }
             AlertDialog(
                 onDismissRequest = {
                     show.value = false
@@ -409,13 +407,12 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                         indication = null,
                                         interactionSource = remember { MutableInteractionSource() },
                                     ) {
-                                        selected = 0
-                                        remindTime = 5
+                                        selected = 5
                                     },
                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                RadioButton(selected = selected == 0, onClick = null)
+                                RadioButton(selected = selected == 5, onClick = null)
                                 Text(text = "开始前 5 分钟提醒")
                             }
                         }
@@ -428,13 +425,12 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                         indication = null,
                                         interactionSource = remember { MutableInteractionSource() },
                                     ) {
-                                        selected = 1
-                                        remindTime = 10
+                                        selected = 10
                                     },
                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                RadioButton(selected = selected == 1, onClick = null)
+                                RadioButton(selected = selected == 10, onClick = null)
                                 Text(text = "开始前 10 分钟提醒")
                             }
                         }
@@ -447,23 +443,13 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                         indication = null,
                                         interactionSource = remember { MutableInteractionSource() },
                                     ) {
-                                        selected = 2
+                                        selected = 20
                                     },
                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                RadioButton(selected = selected == 2, onClick = null)
-                                Text(text = "开始前")
-                                TextField(
-                                    value = input,
-                                    onValueChange = {
-                                        input = it
-                                    },
-                                    keyboardOptions = KeyboardOptions(
-                                        keyboardType = KeyboardType.Number,
-                                    ),
-                                )
-                                Text(text = "分钟提醒")
+                                RadioButton(selected = selected == 20, onClick = null)
+                                Text(text = "开始前 20 分钟提醒")
                             }
                         }
                     }
@@ -471,11 +457,8 @@ class ExportCalendarActivity : BaseComposeActivity() {
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            if (selected == 2) {
-                                remindTime = input.toInt()
-                            }
-                            if (!list.contains(remindTime))
-                                list.add(remindTime)
+                            if (!list.contains(selected))
+                                list.add(selected)
                             show.value = false
                         },
                     ) {

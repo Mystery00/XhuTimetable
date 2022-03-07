@@ -100,18 +100,20 @@ class ExportCalendarViewModel : ComposeViewModel() {
             if (accountId != null) {
                 CalendarRepo.deleteAllEvent(accountId)
             }
-            eventList.forEach { response ->
-                val event = CalendarEvent(
-                    response.title,
-                    Instant.ofEpochMilli(response.startTime),
-                    Instant.ofEpochMilli(response.endTime),
-                    response.location,
-                    response.description,
-                    response.allDay,
-                )
-                event.attenderList.addAll(response.attenders.map { CalendarAttender(it) })
-                event.reminder.addAll(reminderList)
-                CalendarRepo.addEvent(account, event)
+            runOnIo {
+                eventList.forEach { response ->
+                    val event = CalendarEvent(
+                        response.title,
+                        Instant.ofEpochMilli(response.startTime),
+                        Instant.ofEpochMilli(response.endTime),
+                        response.location,
+                        response.description,
+                        response.allDay,
+                    )
+                    event.attenderList.addAll(response.attenders.map { CalendarAttender(it) })
+                    event.reminder.addAll(reminderList)
+                    CalendarRepo.addEvent(account, event)
+                }
             }
             _exportAccountState.value = ExportAccountState()
             loadCalendarAccountList()

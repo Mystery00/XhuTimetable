@@ -3,6 +3,7 @@ package vip.mystery0.xhu.timetable.base
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -11,6 +12,7 @@ import androidx.annotation.LayoutRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -20,11 +22,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.zyao89.view.zloading.ZLoadingView
+import com.zyao89.view.zloading.Z_TYPE
 import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
 import kotlin.reflect.KClass
@@ -107,6 +116,58 @@ abstract class BaseComposeActivity(
         toast?.cancel()
         toast = Toast.makeText(context, message, length)
         toast?.show()
+    }
+
+    @Composable
+    protected fun ShowProgressDialog(
+        show: Boolean,
+        text: String,
+        fontSize: TextUnit = TextUnit.Unspecified,
+        type: Z_TYPE = Z_TYPE.SINGLE_CIRCLE,
+    ) {
+        if (!show) {
+            return
+        }
+        Dialog(
+            onDismissRequest = { },
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+            )
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .background(MaterialTheme.colors.background, shape = RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    val contentColor = XhuColor.Common.blackText
+                    AndroidView(
+                        factory = { context ->
+                            ZLoadingView(context)
+                        }, modifier = Modifier
+                            .width(64.dp)
+                            .height(64.dp)
+                    ) {
+                        it.setLoadingBuilder(type)
+                        it.setColorFilter(
+                            Color.valueOf(
+                                contentColor.red,
+                                contentColor.green,
+                                contentColor.blue
+                            ).toArgb()
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = text,
+                        fontSize = fontSize,
+                        color = contentColor
+                    )
+                }
+            }
+        }
     }
 
     @Composable
