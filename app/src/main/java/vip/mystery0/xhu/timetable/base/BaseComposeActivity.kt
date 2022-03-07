@@ -138,11 +138,11 @@ abstract class BaseComposeActivity(
             Box(
                 modifier = Modifier
                     .size(120.dp)
-                    .background(MaterialTheme.colors.background, shape = RoundedCornerShape(12.dp)),
+                    .background(XhuColor.Common.grayBackground, shape = RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    val contentColor = XhuColor.Common.blackText
+                    val contentColor = MaterialTheme.colors.primary
                     AndroidView(
                         factory = { context ->
                             ZLoadingView(context)
