@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,15 +10,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.appVersionCode
 import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.joinQQGroup
+import java.io.File
 import kotlin.system.exitProcess
 
 class ErrorReportActivity : BaseComposeActivity() {
     companion object {
+        const val EXTRA_LOG_FILE = "EXTRA_LOG_FILE"
         const val EXTRA_STACK_TRACE = "EXTRA_STACK_TRACE"
     }
 
@@ -68,6 +72,24 @@ class ErrorReportActivity : BaseComposeActivity() {
                         Text(text = "加入交流反馈群")
                     }
                     Button(
+                        onClick = {
+                            val logFilePath = intent.getStringExtra(EXTRA_LOG_FILE)
+                            if (logFilePath.isNullOrBlank()) {
+                                toastString("日志文件不存在")
+                                return@Button
+                            }
+                            val logFile = File(logFilePath)
+                            if (!logFile.exists()) {
+                                toastString("日志文件不存在")
+                                return@Button
+                            }
+                            sendLog(logFile)
+                        },
+                        modifier = Modifier.weight(1F),
+                    ) {
+                        Text(text = "发送日志文件")
+                    }
+                    Button(
                         onClick = { killCurrentProcess() },
                         modifier = Modifier.weight(1F),
                     ) {
@@ -76,6 +98,19 @@ class ErrorReportActivity : BaseComposeActivity() {
                 }
             }
         }
+    }
+
+    private fun sendLog(logFile: File) {
+        val shareIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            putExtra(
+                Intent.EXTRA_STREAM,
+                FileProvider.getUriForFile(this@ErrorReportActivity, packageName, logFile)
+            )
+            type = "text/plain"
+        }
+        startActivity(Intent.createChooser(shareIntent, "发送日志到"))
     }
 
     private fun killCurrentProcess() {

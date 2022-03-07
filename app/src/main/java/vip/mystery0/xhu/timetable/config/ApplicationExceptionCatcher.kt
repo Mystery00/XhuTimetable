@@ -20,17 +20,17 @@ class ApplicationExceptionCatcher : Thread.UncaughtExceptionHandler {
     }
 
     override fun uncaughtException(t: Thread, e: Throwable) {
-        dumpExceptionToFile(e)
+        val logFile = dumpExceptionToFile(e)
         e.printStackTrace()
         finishAllActivity()
-        showErrorReport(e)
+        showErrorReport(e, logFile)
     }
 
-    private fun dumpExceptionToFile(throwable: Throwable) {
+    private fun dumpExceptionToFile(throwable: Throwable): File {
         val dir = File(context.externalCacheDir, "crash")
         if (!dir.exists() && !dir.mkdirs()) {
             Log.w(TAG, "dumpExceptionToFile: log dump dir not exist")
-            return
+            return dir
         }
         val now = LocalDateTime.now()
         val time = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(now)
@@ -52,15 +52,17 @@ class ApplicationExceptionCatcher : Thread.UncaughtExceptionHandler {
         } catch (e: Exception) {
             Log.e(TAG, "dumpExceptionToFile: exception dump failed ", e)
         }
+        return file
     }
 
-    private fun showErrorReport(e: Throwable) {
+    private fun showErrorReport(e: Throwable, logFile: File) {
         val sw = StringWriter()
         val pw = PrintWriter(sw)
         e.printStackTrace(pw)
         val stackTraceString = sw.toString()
 
         val intent = Intent(context, ErrorReportActivity::class.java)
+        intent.putExtra(ErrorReportActivity.EXTRA_LOG_FILE, logFile.absolutePath)
         intent.putExtra(ErrorReportActivity.EXTRA_STACK_TRACE, stackTraceString)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         context.startActivity(intent)

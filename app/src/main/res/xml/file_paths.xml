@@ -11,4 +11,7 @@
     <external-files-path
         name="externalFiles"
         path="/" />
+    <external-cache-path
+        name="externalCache"
+        path="/crash/" />
 </paths>
