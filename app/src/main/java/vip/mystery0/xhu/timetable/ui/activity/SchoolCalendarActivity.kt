@@ -132,7 +132,7 @@ class SchoolCalendarActivity : BaseComposeActivity() {
                             })
                             .build(),
                         loading = {
-                            CircularProgressIndicator()
+                            CircularProgressIndicator(modifier = Modifier.size(48.dp))
                         },
                         contentDescription = null,
                         contentScale = ContentScale.Crop,

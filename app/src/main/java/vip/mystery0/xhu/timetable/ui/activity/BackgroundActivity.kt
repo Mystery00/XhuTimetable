@@ -134,7 +134,7 @@ class BackgroundActivity : BaseComposeActivity() {
                     .diskCachePolicy(CachePolicy.DISABLED)
                     .build(),
                 loading = {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(modifier = Modifier.size(48.dp))
                 },
                 contentDescription = null,
                 modifier = Modifier

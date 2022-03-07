@@ -36,8 +36,8 @@ class ExportCalendarViewModel : ComposeViewModel() {
     private val _calendarAccountListState = MutableStateFlow(CalendarAccountListState())
     val calendarAccountListState: StateFlow<CalendarAccountListState> = _calendarAccountListState
 
-    private val _exportAccountState = MutableStateFlow(ExportAccountState())
-    val exportAccountState: StateFlow<ExportAccountState> = _exportAccountState
+    private val _actionState = MutableStateFlow(ActionState())
+    val actionState: StateFlow<ActionState> = _actionState
 
     init {
         viewModelScope.launch {
@@ -71,16 +71,16 @@ class ExportCalendarViewModel : ComposeViewModel() {
         reminderList: List<Int>,
     ) {
         if (!isOnline()) {
-            _exportAccountState.value = ExportAccountState(errorMessage = HINT_NETWORK)
+            _actionState.value = ActionState(errorMessage = HINT_NETWORK)
             return
         }
         viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
             Log.w(TAG, "export calendar failed", throwable)
-            _exportAccountState.value = ExportAccountState(
+            _actionState.value = ActionState(
                 errorMessage = throwable.message ?: throwable.javaClass.simpleName
             )
         }) {
-            _exportAccountState.value = ExportAccountState(loading = true)
+            _actionState.value = ActionState(loading = true)
             val selected = runOnCpu { _userSelect.value.first { it.selected }.studentId }
             val selectUser = SessionManager.user(selected)
             val year = getConfig { currentYear }
@@ -115,7 +115,21 @@ class ExportCalendarViewModel : ComposeViewModel() {
                     CalendarRepo.addEvent(account, event)
                 }
             }
-            _exportAccountState.value = ExportAccountState()
+            _actionState.value = ActionState()
+            loadCalendarAccountList()
+        }
+    }
+
+    fun deleteCalendarAccount(accountId: Long) {
+        viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
+            Log.w(TAG, "delete calendar account failed", throwable)
+            _actionState.value = ActionState(
+                errorMessage = throwable.message ?: throwable.javaClass.simpleName
+            )
+        }) {
+            _actionState.value = ActionState(loading = true)
+            CalendarRepo.deleteCalendarAccount(accountId)
+            _actionState.value = ActionState()
             loadCalendarAccountList()
         }
     }
@@ -140,7 +154,7 @@ data class CalendarAccountListState(
     val errorMessage: String = "",
 )
 
-data class ExportAccountState(
+data class ActionState(
     val loading: Boolean = false,
     val errorMessage: String = "",
 )
