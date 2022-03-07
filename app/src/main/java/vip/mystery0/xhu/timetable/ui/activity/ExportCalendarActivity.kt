@@ -98,8 +98,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
 
                         Column(modifier = Modifier.fillMaxSize()) {
                             Row(
-                                modifier = Modifier
-                                    .padding(8.dp),
+                                modifier = Modifier.padding(8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Image(
@@ -114,14 +113,11 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                     contentDescription = null,
                                 )
                                 Spacer(modifier = Modifier.weight(1F))
-                                TextButton(
-                                    onClick = {
-                                        viewModel.exportCalendar(
-                                            includeCustomCourse,
-                                            includeCustomThing,
-                                            reminder
-                                        )
-                                    }) {
+                                TextButton(onClick = {
+                                    viewModel.exportCalendar(
+                                        includeCustomCourse, includeCustomThing, reminder
+                                    )
+                                }) {
                                     Text(text = "导出")
                                 }
                             }
@@ -164,8 +160,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                     tint = XhuColor.Common.blackText,
                                 )
                                 Text(
-                                    modifier = Modifier
-                                        .weight(1F),
+                                    modifier = Modifier.weight(1F),
                                     text = "包含自定义课程",
                                 )
                                 Switch(
@@ -186,8 +181,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                     tint = XhuColor.Common.blackText,
                                 )
                                 Text(
-                                    modifier = Modifier
-                                        .weight(1F),
+                                    modifier = Modifier.weight(1F),
                                     text = "包含自定义事项",
                                 )
                                 Switch(
@@ -196,8 +190,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                 )
                             }
                             Row(
-                                modifier = Modifier
-                                    .defaultMinSize(minHeight = 48.dp),
+                                modifier = Modifier.defaultMinSize(minHeight = 48.dp),
                             ) {
                                 Icon(
                                     modifier = Modifier
@@ -208,8 +201,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                     tint = XhuColor.Common.blackText,
                                 )
                                 Column(
-                                    modifier = Modifier
-                                        .weight(1F),
+                                    modifier = Modifier.weight(1F),
                                 ) {
                                     reminder.forEach {
                                         Row(
@@ -220,8 +212,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                         ) {
                                             Text(
                                                 text = "事件开始前 $it 分钟提醒",
-                                                modifier = Modifier
-                                                    .weight(1F),
+                                                modifier = Modifier.weight(1F),
                                             )
                                             IconButton(onClick = {
                                                 reminder.remove(it)
@@ -237,13 +228,11 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(48.dp)
-                                            .clickable(
-                                                interactionSource = remember { MutableInteractionSource() },
+                                            .clickable(interactionSource = remember { MutableInteractionSource() },
                                                 indication = null,
                                                 onClick = {
                                                     reminderDialog.value = true
-                                                }
-                                            ),
+                                                }),
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Text(
@@ -276,7 +265,9 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                     }
                                 } else {
                                     items(list.size) { index ->
-                                        BuildItem(item = list[index])
+                                        BuildItem(item = list[index], onClick = {
+                                            viewModel.deleteCalendarAccount(it.accountId)
+                                        })
                                     }
                                 }
                             }
@@ -284,10 +275,9 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                 BuildNoDataLayout()
                             }
                         }
-                        FloatingActionButton(
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(24.dp),
+                        FloatingActionButton(modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(24.dp),
                             onClick = {
                                 if (!calendarAccountListState.loading) {
                                     scope.launch {
@@ -302,8 +292,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
                             )
                         }
                     } else {
-                        BuildNoPermissionLayout(
-                            permissionDescription = "将课程导出到系统日历功能需要对${appName}授予“读取/写入日历”权限。没有这个权限，该功能无法运作",
+                        BuildNoPermissionLayout(permissionDescription = "将课程导出到系统日历功能需要对${appName}授予“读取/写入日历”权限。没有这个权限，该功能无法运作",
                             onRequestPermission = {
                                 calendarPermissionState.launchMultiplePermissionRequest()
                             })
@@ -313,11 +302,9 @@ class ExportCalendarActivity : BaseComposeActivity() {
         }
         ShowUserDialog(show = userDialog)
         ShowReminderDialog(show = reminderDialog, list = reminder)
-        val exportAccountState by viewModel.exportAccountState.collectAsState()
+        val exportAccountState by viewModel.actionState.collectAsState()
         ShowProgressDialog(
-            show = exportAccountState.loading,
-            text = "数据导出中",
-            type = Z_TYPE.STAR_LOADING
+            show = exportAccountState.loading, text = "数据导出中", type = Z_TYPE.STAR_LOADING
         )
     }
 
@@ -329,56 +316,48 @@ class ExportCalendarActivity : BaseComposeActivity() {
         val selectedUser = userSelect.firstOrNull { it.selected } ?: return
         if (show.value) {
             var selected by remember { mutableStateOf(selectedUser) }
-            AlertDialog(
-                onDismissRequest = {
-                    show.value = false
-                },
-                title = {
-                    Text(text = "请选择要导出的账号")
-                },
-                text = {
-                    LazyColumn {
-                        items(userSelect.size) { index ->
-                            val item = userSelect[index]
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                    ) {
-                                        selected = item
-                                    },
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(selected = selected == item, onClick = null)
-                                Text(text = "${item.userName}(${item.studentId})")
-                            }
+            AlertDialog(onDismissRequest = {
+                show.value = false
+            }, title = {
+                Text(text = "请选择要导出的账号")
+            }, text = {
+                LazyColumn {
+                    items(userSelect.size) { index ->
+                        val item = userSelect[index]
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                ) {
+                                    selected = item
+                                },
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(selected = selected == item, onClick = null)
+                            Text(text = "${item.userName}(${item.studentId})")
                         }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.selectUser(selected.studentId)
-                            show.value = false
-                        },
-                    ) {
-                        Text("确认")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            show.value = false
-                        }
-                    ) {
-                        Text("取消")
                     }
                 }
-            )
+            }, confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.selectUser(selected.studentId)
+                        show.value = false
+                    },
+                ) {
+                    Text("确认")
+                }
+            }, dismissButton = {
+                TextButton(onClick = {
+                    show.value = false
+                }) {
+                    Text("取消")
+                }
+            })
         }
     }
 
@@ -389,99 +368,90 @@ class ExportCalendarActivity : BaseComposeActivity() {
     ) {
         if (show.value) {
             var selected by remember { mutableStateOf(5) }
-            AlertDialog(
-                onDismissRequest = {
-                    show.value = false
-                },
-                title = {
-                    Text(text = "请选择要添加的提醒时间")
-                },
-                text = {
-                    LazyColumn {
-                        item {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                    ) {
-                                        selected = 5
-                                    },
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(selected = selected == 5, onClick = null)
-                                Text(text = "开始前 5 分钟提醒")
-                            }
-                        }
-                        item {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                    ) {
-                                        selected = 10
-                                    },
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(selected = selected == 10, onClick = null)
-                                Text(text = "开始前 10 分钟提醒")
-                            }
-                        }
-                        item {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                    ) {
-                                        selected = 20
-                                    },
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(selected = selected == 20, onClick = null)
-                                Text(text = "开始前 20 分钟提醒")
-                            }
+            AlertDialog(onDismissRequest = {
+                show.value = false
+            }, title = {
+                Text(text = "请选择要添加的提醒时间")
+            }, text = {
+                LazyColumn {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                ) {
+                                    selected = 5
+                                },
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(selected = selected == 5, onClick = null)
+                            Text(text = "开始前 5 分钟提醒")
                         }
                     }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            if (!list.contains(selected))
-                                list.add(selected)
-                            show.value = false
-                        },
-                    ) {
-                        Text("确认")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            show.value = false
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                ) {
+                                    selected = 10
+                                },
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(selected = selected == 10, onClick = null)
+                            Text(text = "开始前 10 分钟提醒")
                         }
-                    ) {
-                        Text("取消")
+                    }
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                ) {
+                                    selected = 20
+                                },
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(selected = selected == 20, onClick = null)
+                            Text(text = "开始前 20 分钟提醒")
+                        }
                     }
                 }
-            )
+            }, confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (!list.contains(selected)) list.add(selected)
+                        show.value = false
+                    },
+                ) {
+                    Text("确认")
+                }
+            }, dismissButton = {
+                TextButton(onClick = {
+                    show.value = false
+                }) {
+                    Text("取消")
+                }
+            })
         }
     }
 }
 
 @Composable
 private fun BuildItem(
-    item: CalendarAccount,
+    item: CalendarAccount, onClick: (CalendarAccount) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -500,18 +470,22 @@ private fun BuildItem(
                     .size(36.dp),
                 color = item.color
             ) {}
-            Text(
-                text = "${item.studentName}(${item.studentId})",
+            Column(
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
-                    .weight(1F),
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-            )
+                    .weight(1F)
+            ) {
+                Text(
+                    text = "${item.studentName}(${item.studentId})",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                )
+                Text(
+                    text = "共 ${item.eventNum} 个事项",
+                )
+            }
             TextButton(onClick = {
-//                courseName = list[index].first
-//                currentColor = list[index].second
-//                dialogState.show()
+                onClick(item)
             }) {
                 Text(
                     text = "删除"
