@@ -8,6 +8,10 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.DataHolder
+import vip.mystery0.xhu.timetable.config.getConfig
+import vip.mystery0.xhu.timetable.config.setConfig
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 class SplashImageViewModel : ComposeViewModel(), KoinComponent {
     companion object {
@@ -30,6 +34,18 @@ class SplashImageViewModel : ComposeViewModel(), KoinComponent {
     fun skip() {
         viewModelScope.launch {
             _timerState.value = 0
+        }
+    }
+
+    fun hide() {
+        viewModelScope.launch {
+            val hideTime = Instant.now().plus(7, ChronoUnit.DAYS)
+            setConfig { hideSplashBefore = hideTime }
+            DataHolder.splash?.let {
+                val list = ArrayList(getConfig { hideSplashList })
+                list.add(it.splashId)
+                setConfig { hideSplashList = list }
+            }
         }
     }
 }

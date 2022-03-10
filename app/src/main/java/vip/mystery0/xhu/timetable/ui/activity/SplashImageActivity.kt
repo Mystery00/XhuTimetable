@@ -95,6 +95,28 @@ class SplashImageActivity : BaseComposeActivity() {
                             textAlign = TextAlign.Center,
                         )
                     }
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(36.dp)
+                            .navigationBarsPadding()
+                            .background(Color(0x80000000), shape = RoundedCornerShape(24.dp))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = {
+                                    viewModel.hide()
+                                    "启动图将会隐藏7天".toast()
+                                }
+                            )) {
+                        Text(
+                            modifier = Modifier.padding(12.dp),
+                            text = "隐藏",
+                            fontSize = 12.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
                 }
                 if (timer <= 0) {
                     intentTo(MainActivity::class)
