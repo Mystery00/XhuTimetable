@@ -262,7 +262,6 @@ class MainViewModel : ComposeViewModel() {
             }
             _week.collect {
                 loadCourseToTable(it)
-                _loading.value = false
                 _dateStart.value = runOnCpu {
                     val date = startDate.plusWeeks(it.toLong() - 1)
                     date.with(WeekFields.of(DayOfWeek.MONDAY, 1).dayOfWeek(), 1)
@@ -487,7 +486,6 @@ class MainViewModel : ComposeViewModel() {
     fun loadThingList(forceUpdate: Boolean = true) {
         viewModelScope.launch(serverExceptionHandler { throwable ->
             Log.w(TAG, "load thing list failed", throwable)
-            _loading.value = false
             _todayThing.value = emptyList()
             toastMessage(throwable.message ?: throwable.javaClass.simpleName)
         }) {
