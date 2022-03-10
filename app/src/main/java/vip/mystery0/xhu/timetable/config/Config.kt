@@ -307,4 +307,23 @@ class Config internal constructor() {
                 Menu::class.java
             )
         ).fromJson(kv.decodeString("menuList", "[]")!!)!!
+    var hideSplashList: List<Long>
+        set(value) {
+            kv.encode("hideSplashList", value.joinToString())
+        }
+        get() {
+            val list = kv.decodeString("hideSplashList", "")
+            if (list.isNullOrBlank()) {
+                return emptyList()
+            }
+            return list.split(",").map { it.toLong() }
+        }
+    var hideSplashBefore: Instant
+        set(value) {
+            kv.encode("hideSplashBefore", value.toEpochMilli())
+        }
+        get() {
+            val time = kv.decodeLong("hideSplashBefore", 0L)
+            return Instant.ofEpochMilli(time)
+        }
 }
