@@ -316,7 +316,7 @@ class Config internal constructor() {
             if (list.isNullOrBlank()) {
                 return emptyList()
             }
-            return list.split(",").map { it.toLong() }
+            return list.split(",").map { it.trim().toLong() }
         }
     var hideSplashBefore: Instant
         set(value) {
