@@ -20,7 +20,7 @@ object XhuColor {
         get() = Color(0xFFCCCCCC)
     val mainBarColorBackground: Color
         @Composable
-        get() = colorOf(pair = Color(0xFF004D40) to Color.White)
+        get() = colorOf(pair = Color(0xFF646464) to Color.White)
     val iconChecked: Color
         @Composable
         get() = colorOf(pair = Color(0xFF2196F3) to Color(0xFF2C5CCB))

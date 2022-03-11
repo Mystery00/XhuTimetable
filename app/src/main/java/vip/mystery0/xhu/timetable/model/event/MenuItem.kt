@@ -53,7 +53,7 @@ enum class MenuItem(
         },
     ),
     URGE(
-        { XhuIcons.Profile.unknownMenu },
+        { XhuIcons.Profile.urge },
         { intentTo(UrgeActivity::class) }
     ),
     EMPTY(
