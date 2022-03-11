@@ -83,9 +83,13 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
                 val hideTime = getConfig { hideSplashBefore }
                 val hideList = getConfig { hideSplashList }
                 if (splash != null) {
-                    if (Instant.now().isBefore(hideTime) &&
-                        !hideList.contains(splash.second.splashId)
+                    var hide = false
+                    if (Instant.now()
+                            .isBefore(hideTime) && hideList.contains(splash.second.splashId)
                     ) {
+                        hide = true
+                    }
+                    if (!hide) {
                         DataHolder.splashFile = splash.first
                         DataHolder.splash = splash.second
                         DataHolder.splashShowTime = showTime
