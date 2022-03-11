@@ -196,7 +196,7 @@ private fun BuildItem(
                     Text(
                         text = "更新于 ${
                             LocalDateTime.ofInstant(
-                                Instant.ofEpochMilli(urgeItem.createTime),
+                                Instant.ofEpochMilli(urgeItem.updateTime),
                                 chinaZone
                             ).format(chinaDateTimeFormatter)
                         }",
