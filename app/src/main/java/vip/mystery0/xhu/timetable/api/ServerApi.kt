@@ -121,6 +121,17 @@ interface ServerApi {
         @Query("includeCustomCourse") includeCustomCourse: Boolean,
         @Query("includeCustomThing") includeCustomThing: Boolean,
     ): Response<List<CalendarEventResponse>>
+
+    @GET("/api/rest/xhu-timetable/server/urge")
+    suspend fun getUrgeList(
+        @Header("token") token: String,
+    ): Response<UrgeResponse>
+
+    @PUT("/api/rest/xhu-timetable/server/urge")
+    suspend fun urge(
+        @Header("token") token: String,
+        @Query("urgeId") urgeId: Long,
+    ): Response<Unit>
 }
 
 fun <T : Any> Response<T>.checkLogin(): T {

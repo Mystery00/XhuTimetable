@@ -3,46 +3,47 @@ package vip.mystery0.xhu.timetable.model.event
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import vip.mystery0.xhu.timetable.model.response.Menu
-import vip.mystery0.xhu.timetable.ui.activity.MainActivity
+import vip.mystery0.xhu.timetable.ui.activity.*
+import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
 enum class MenuItem(
     val icon: @Composable () -> Painter,
     val action: MainActivity.(Menu) -> Unit,
 ) {
     QUERY_EXAM(
-        { vip.mystery0.xhu.timetable.ui.theme.XhuIcons.Profile.exam },
-        { intentTo(vip.mystery0.xhu.timetable.ui.activity.ExamActivity::class) },
+        { XhuIcons.Profile.exam },
+        { intentTo(ExamActivity::class) },
     ),
     QUERY_SCORE(
-        { vip.mystery0.xhu.timetable.ui.theme.XhuIcons.Profile.score },
-        { intentTo(vip.mystery0.xhu.timetable.ui.activity.ScoreActivity::class) },
+        { XhuIcons.Profile.score },
+        { intentTo(ScoreActivity::class) },
     ),
     QUERY_FREE_ROOM(
-        { vip.mystery0.xhu.timetable.ui.theme.XhuIcons.Profile.classroom },
-        { intentTo(vip.mystery0.xhu.timetable.ui.activity.CourseRoomActivity::class) },
+        { XhuIcons.Profile.classroom },
+        { intentTo(CourseRoomActivity::class) },
     ),
     ACCOUNT_MANAGE(
-        { vip.mystery0.xhu.timetable.ui.theme.XhuIcons.Profile.accountSettings },
-        { intentTo(vip.mystery0.xhu.timetable.ui.activity.AccountSettingsActivity::class) },
+        { XhuIcons.Profile.accountSettings },
+        { intentTo(AccountSettingsActivity::class) },
     ),
     CLASS_SETTING(
-        { vip.mystery0.xhu.timetable.ui.theme.XhuIcons.Profile.classSettings },
-        { intentTo(vip.mystery0.xhu.timetable.ui.activity.ClassSettingsActivity::class) },
+        { XhuIcons.Profile.classSettings },
+        { intentTo(ClassSettingsActivity::class) },
     ),
     SETTINGS(
-        { vip.mystery0.xhu.timetable.ui.theme.XhuIcons.Profile.settings },
-        { intentTo(vip.mystery0.xhu.timetable.ui.activity.SettingsActivity::class) },
+        { XhuIcons.Profile.settings },
+        { intentTo(SettingsActivity::class) },
     ),
     NOTICE(
-        { vip.mystery0.xhu.timetable.ui.theme.XhuIcons.Profile.notice },
-        { intentTo(vip.mystery0.xhu.timetable.ui.activity.NoticeActivity::class) },
+        { XhuIcons.Profile.notice },
+        { intentTo(NoticeActivity::class) },
     ),
     FEEDBACK(
-        { vip.mystery0.xhu.timetable.ui.theme.XhuIcons.Profile.feedback },
-        { intentTo(vip.mystery0.xhu.timetable.ui.activity.FeedbackActivity::class) },
+        { XhuIcons.Profile.feedback },
+        { intentTo(FeedbackActivity::class) },
     ),
     SHARE(
-        { vip.mystery0.xhu.timetable.ui.theme.XhuIcons.Profile.share },
+        { XhuIcons.Profile.share },
         {
             val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
                 putExtra(android.content.Intent.EXTRA_TEXT, shareText.random())
@@ -51,8 +52,12 @@ enum class MenuItem(
             startActivity(android.content.Intent.createChooser(shareIntent, "分享西瓜课表到"))
         },
     ),
+    URGE(
+        { XhuIcons.Profile.unknownMenu },
+        { intentTo(UrgeActivity::class) }
+    ),
     EMPTY(
-        { vip.mystery0.xhu.timetable.ui.theme.XhuIcons.Profile.unknownMenu },
+        { XhuIcons.Profile.unknownMenu },
         { menu ->
             if (menu.hint.isNotBlank()) {
                 toastString(menu.hint, true)
