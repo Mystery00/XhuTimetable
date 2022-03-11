@@ -11,4 +11,5 @@ object DataHolder {
     var splashShowTime: Int = 0
     var backgroundColor: Color? = null
     var version: Version? = null
+    var mainUserName: String = "未登录"
 }
