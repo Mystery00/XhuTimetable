@@ -288,7 +288,7 @@ class Config internal constructor() {
         set(value) {
             kv.encode("disableBackgroundWhenNight", value)
         }
-        get() = kv.decodeBool("disableBackgroundWhenNight", false)
+        get() = kv.decodeBool("disableBackgroundWhenNight", true)
     var menuList: List<Menu>
         set(value) {
             kv.encode(
