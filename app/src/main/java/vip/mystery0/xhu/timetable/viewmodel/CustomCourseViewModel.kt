@@ -213,7 +213,7 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
         }) {
             _saveCustomCourseState.value = SaveCustomCourseState(loading = true)
 
-            deleteCustomCourse(currentUser, currentYear, currentTerm, courseId)
+            deleteCustomCourse(currentUser, courseId)
             _saveCustomCourseState.value = SaveCustomCourseState()
             toastMessage("删除成功")
             changeCustomCourse = true

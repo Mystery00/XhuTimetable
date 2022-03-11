@@ -3,7 +3,7 @@ package vip.mystery0.xhu.timetable.ui.theme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.utils.md5
 
@@ -296,10 +296,10 @@ object XhuImages {
         get() = R.mipmap.ic_launcher
     val noData: Painter
         @Composable
-        get() = rememberImagePainter(R.drawable.ic_no_data)
+        get() = rememberAsyncImagePainter(R.drawable.ic_no_data)
     val noCourse: Painter
         @Composable
-        get() = rememberImagePainter(R.drawable.ic_no_course)
+        get() = rememberAsyncImagePainter(R.drawable.ic_no_course)
 }
 
 object ProfileImages {

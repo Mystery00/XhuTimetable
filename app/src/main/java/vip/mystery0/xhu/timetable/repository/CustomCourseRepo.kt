@@ -81,8 +81,6 @@ suspend fun updateCustomCourse(
 
 suspend fun deleteCustomCourse(
     user: User,
-    year: String,
-    term: Int,
     courseId: Long,
 ) {
     val serverApi = KoinJavaComponent.get<ServerApi>(ServerApi::class.java)
