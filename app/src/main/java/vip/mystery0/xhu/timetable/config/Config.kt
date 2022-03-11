@@ -309,7 +309,7 @@ class Config internal constructor() {
         ).fromJson(kv.decodeString("menuList", "[]")!!)!!
     var hideSplashList: List<Long>
         set(value) {
-            kv.encode("hideSplashList", value.joinToString())
+            kv.encode("hideSplashList", value.toSet().joinToString())
         }
         get() {
             val list = kv.decodeString("hideSplashList", "")
