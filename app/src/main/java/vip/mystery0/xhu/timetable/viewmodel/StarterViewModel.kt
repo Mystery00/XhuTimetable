@@ -82,8 +82,6 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
                 }
                 val hideTime = getConfig { hideSplashBefore }
                 val hideList = getConfig { hideSplashList }
-                Log.i(TAG, ": $hideTime")
-                Log.i(TAG, ": $hideList")
                 if (splash != null) {
                     var hide = true
                     if (Instant.now().isAfter(hideTime)) {
