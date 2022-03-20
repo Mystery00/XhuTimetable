@@ -120,6 +120,11 @@
             android:label="@string/title_activity_urge"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
 
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="fullSensor"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar" />
+
         <service
             android:name=".work.NotifyService"
             android:enabled="true"

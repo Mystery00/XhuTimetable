@@ -195,6 +195,8 @@ dependencies {
     debugImplementation("com.guolindev.glance:glance:1.1.0")
     //zloading
     implementation("com.zyao89:zloading:1.2.0")
+    //ucrop
+    implementation("com.github.yalantis:ucrop:2.2.8")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {

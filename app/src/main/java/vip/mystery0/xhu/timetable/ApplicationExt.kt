@@ -63,6 +63,18 @@ val externalDownloadDir: File
 val externalDocumentsDir: File
     get() = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)!!
 
+val customImageDir: File
+    get() = File(externalPictureDir, "custom").apply {
+        if (!exists()) {
+            mkdirs()
+        }
+    }
+
+val screenWidth: Int
+    get() = context.resources.displayMetrics.widthPixels
+val screenHeight: Int
+    get() = context.resources.displayMetrics.heightPixels
+
 fun BaseComposeActivity.toCustomTabs(url: String) {
     try {
         val builder = CustomTabsIntent.Builder()
