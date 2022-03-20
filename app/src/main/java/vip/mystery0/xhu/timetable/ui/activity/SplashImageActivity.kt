@@ -57,6 +57,10 @@ class SplashImageActivity : BaseComposeActivity() {
                 val timer by viewModel.timerState.collectAsState()
                 val showSplash = DataHolder.splashFile
                 val backgroundColor = DataHolder.backgroundColor
+                if (showSplash == null) {
+                    toMain()
+                    return@ProvideWindowInsets
+                }
                 Box(
                     modifier = Modifier
                         .background(backgroundColor ?: MaterialTheme.colors.background)
@@ -119,10 +123,14 @@ class SplashImageActivity : BaseComposeActivity() {
                     }
                 }
                 if (timer <= 0) {
-                    intentTo(MainActivity::class)
-                    finish()
+                    toMain()
                 }
             }
         }
+    }
+
+    private fun toMain() {
+        intentTo(MainActivity::class)
+        finish()
     }
 }
