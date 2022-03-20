@@ -265,6 +265,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
                                 .data(backgroundImage)
+                                .memoryCachePolicy(CachePolicy.DISABLED)
                                 .diskCachePolicy(CachePolicy.DISABLED)
                                 .build(),
                             contentDescription = null,

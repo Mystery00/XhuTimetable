@@ -1,5 +1,7 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import android.graphics.Bitmap
+import android.net.Uri
 import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -26,16 +28,57 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.customImageDir
+import vip.mystery0.xhu.timetable.screenHeight
+import vip.mystery0.xhu.timetable.screenWidth
+import vip.mystery0.xhu.timetable.ui.activity.contract.BackgroundResultContract
+import vip.mystery0.xhu.timetable.ui.activity.contract.UCropResultContract
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.Background
 import vip.mystery0.xhu.timetable.viewmodel.BackgroundViewModel
 import vip.mystery0.xhu.timetable.viewmodel.DownloadProgressState
+import java.io.File
+import java.time.Instant
 
 class BackgroundActivity : BaseComposeActivity() {
+    companion object {
+        private const val FILE_NAME_CUSTOM_BACKGROUND = "custom-background"
+    }
+
     private val viewModel: BackgroundViewModel by viewModels()
+    private val cropLauncher = registerForActivityResult(UCropResultContract()) {
+        if (it == null) {
+            "操作已取消".toast()
+            return@registerForActivityResult
+        }
+        viewModel.setCustomBackground(it)
+    }
+    private val imageSelectLauncher =
+        registerForActivityResult(BackgroundResultContract()) { intent ->
+            if (intent == null) {
+                "操作已取消".toast()
+                return@registerForActivityResult
+            }
+            intent.data?.let {
+                val saveFile = File(
+                    customImageDir,
+                    "${FILE_NAME_CUSTOM_BACKGROUND}-${Instant.now().toEpochMilli()}.png"
+                )
+                val destinationUri = Uri.fromFile(saveFile)
+                cropLauncher.launch(
+                    UCrop.of(it, destinationUri)
+                        .withAspectRatio(screenWidth.toFloat(), screenHeight.toFloat())
+                        .withMaxResultSize(screenWidth * 10, screenHeight * 10)
+                        .withOptions(UCrop.Options().apply {
+                            setCompressionFormat(Bitmap.CompressFormat.PNG)
+                        })
+                )
+            }
+        }
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
@@ -72,9 +115,7 @@ class BackgroundActivity : BaseComposeActivity() {
                             )
                         }
                         IconButton(onClick = {
-                            scope.launch {
-                                "暂不支持".toast()
-                            }
+                            imageSelectLauncher.launch("image/*")
                         }) {
                             Icon(
                                 imageVector = Icons.Rounded.Add,
@@ -181,11 +222,9 @@ class BackgroundActivity : BaseComposeActivity() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(text = downloadProgressState.text)
-                    if (!downloadProgressState.finished) {
-                        LinearProgressIndicator(
-                            progress = (downloadProgressState.progress.progress / 100).toFloat(),
-                        )
-                    }
+                    LinearProgressIndicator(
+                        progress = (downloadProgressState.progress.progress / 100).toFloat(),
+                    )
                 }
             }, confirmButton = {
             }, dismissButton = {

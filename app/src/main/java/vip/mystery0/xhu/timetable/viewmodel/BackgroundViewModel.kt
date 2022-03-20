@@ -18,6 +18,7 @@ import vip.mystery0.xhu.timetable.config.*
 import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
 import vip.mystery0.xhu.timetable.config.interceptor.FileDownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.FileDownloadProgressState
+import vip.mystery0.xhu.timetable.customImageDir
 import vip.mystery0.xhu.timetable.externalPictureDir
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
@@ -98,16 +99,46 @@ class BackgroundViewModel : ComposeViewModel() {
             0,
             Background(0, 0L, imageResId = R.mipmap.main_bg)
         )
-        if (backgroundFile == null) {
-            resultList[0].checked = true
-        } else {
-            val fileName = backgroundFile.nameWithoutExtension
-            resultList.forEach {
-                val hashKey = it.getHashKey()
-                it.checked = fileName == hashKey
+        backgroundFile?.let {
+            if (it.absolutePath.startsWith(customImageDir.absolutePath)) {
+                //自定义的背景图，添加到第2位
+                resultList.add(
+                    1,
+                    Background(-1, -1L, thumbnailUrl = it.absolutePath)
+                )
+            }
+        }
+        when {
+            backgroundFile == null -> {
+                resultList[0].checked = true
+            }
+            backgroundFile.absolutePath.startsWith(customImageDir.absolutePath) -> {
+                resultList[1].checked = true
+            }
+            else -> {
+                val fileName = backgroundFile.nameWithoutExtension
+                resultList.forEach {
+                    val hashKey = it.getHashKey()
+                    it.checked = fileName == hashKey
+                }
             }
         }
         return resultList
+    }
+
+    fun setCustomBackground(file: File) {
+        viewModelScope.launch(serverExceptionHandler { throwable ->
+            Log.w(TAG, "set custom background failed", throwable)
+            _backgroundListState.value = _backgroundListState.value.replaceMessage(
+                throwable.message ?: throwable.javaClass.simpleName
+            )
+        }) {
+            _backgroundListState.value = _backgroundListState.value.loadWithList(true)
+            setConfig { backgroundImage = file }
+            _backgroundListState.value =
+                BackgroundListState(backgroundList = generateList(), errorMessage = "背景图设置成功")
+            eventBus.post(UIEvent(EventType.CHANGE_MAIN_BACKGROUND))
+        }
     }
 
     fun setBackground(backgroundId: Long) {
@@ -130,40 +161,42 @@ class BackgroundViewModel : ComposeViewModel() {
                 _backgroundListState.value = _backgroundListState.value.loadWithList(false)
                 return@launch
             }
-            if (backgroundId == 0L) {
-                setConfig { backgroundImage = null }
-            } else {
-                _progressState.value =
-                    DownloadProgressState(FileDownloadProgressState(), text = "正在获取下载地址")
-                val url = SessionManager.mainUser().withAutoLogin {
-                    serverApi.getBackgroundUrl(it, selected.resourceId).checkLogin()
-                }.first.url
-                val file = runOnCpu {
-                    val dir = File(externalPictureDir, "background")
-                    if (!dir.exists()) {
-                        dir.mkdirs()
+            when (backgroundId) {
+                0L -> setConfig { backgroundImage = null }
+                -1L -> return@launch
+                else -> {
+                    _progressState.value =
+                        DownloadProgressState(FileDownloadProgressState(), text = "正在获取下载地址")
+                    val url = SessionManager.mainUser().withAutoLogin {
+                        serverApi.getBackgroundUrl(it, selected.resourceId).checkLogin()
+                    }.first.url
+                    val file = runOnCpu {
+                        val dir = File(externalPictureDir, "background")
+                        if (!dir.exists()) {
+                            dir.mkdirs()
+                        }
+                        val extension = url.substringAfterLast(".")
+                        val name =
+                            "${
+                                selected.backgroundId.toString().sha1()
+                            }-${selected.thumbnailUrl.md5()}+${selected.resourceId}"
+                        File(dir, "${name.sha256()}.${extension}")
                     }
-                    val extension = url.substringAfterLast(".")
-                    val name =
-                        "${
-                            selected.backgroundId.toString().sha1()
-                        }-${selected.thumbnailUrl.md5()}+${selected.resourceId}"
-                    File(dir, "${name.sha256()}.${extension}")
-                }
-                runOnIo {
-                    val response = fileApi.downloadFile(url)
-                    response.byteStream().use { input ->
-                        FileOutputStream(file).use { output ->
-                            input.copyTo(output)
+                    runOnIo {
+                        val response = fileApi.downloadFile(url)
+                        response.byteStream().use { input ->
+                            FileOutputStream(file).use { output ->
+                                input.copyTo(output)
+                            }
                         }
                     }
+                    setConfig { backgroundImage = file }
+                    _progressState.value =
+                        DownloadProgressState(
+                            FileDownloadProgressState(),
+                            finished = true,
+                        )
                 }
-                setConfig { backgroundImage = file }
-                _progressState.value =
-                    DownloadProgressState(
-                        FileDownloadProgressState(),
-                        finished = true,
-                    )
             }
             _backgroundListState.value =
                 BackgroundListState(backgroundList = generateList(), errorMessage = "背景图设置成功")
