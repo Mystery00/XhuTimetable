@@ -44,6 +44,7 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.timeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.SettingsViewModel
+import java.time.Instant
 import java.time.LocalTime
 
 class SettingsActivity : BaseComposeActivity() {
@@ -147,6 +148,22 @@ class SettingsActivity : BaseComposeActivity() {
                         onCheckedChange = {
                             setConfig { enablePageEffect = it }
                             eventBus.post(UIEvent(EventType.CHANGE_PAGE_EFFECT))
+                        }
+                    )
+                    SettingsMenuLink(
+                        icon = {
+                            Icon(
+                                painter = XhuIcons.clearSplash,
+                                contentDescription = null,
+                                tint = XhuColor.Common.blackText,
+                            )
+                        },
+                        title = { Text(text = "清除启动图隐藏设置") },
+                        onClick = {
+                            scope.launch {
+                                setConfig { hideSplashBefore = Instant.ofEpochMilli(0L) }
+                                "清理成功".toast()
+                            }
                         }
                     )
                 }
@@ -324,6 +341,13 @@ class SettingsActivity : BaseComposeActivity() {
                         }
                     )
                     SettingsMenuLink(
+                        icon = {
+                            Icon(
+                                painter = XhuIcons.github,
+                                contentDescription = null,
+                                tint = XhuColor.Common.blackText,
+                            )
+                        },
                         title = { Text(text = "开源地址") },
                         subtitle = {
                             Text(text = "https://github.com/Mystery00/XhuTimetable")

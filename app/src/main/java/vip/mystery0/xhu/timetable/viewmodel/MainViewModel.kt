@@ -588,7 +588,7 @@ class MainViewModel : ComposeViewModel() {
                             }
                         }
                         val show = list.first()
-                        val showTitle = "${show.courseName}@${show.location}"
+                        val showTitle = "${show.courseName}\n@${show.location}"
                         courseSheet.showTitle =
                             if (show.thisWeek) showTitle else "[非本周]\n${showTitle}"
                         courseSheet.course =

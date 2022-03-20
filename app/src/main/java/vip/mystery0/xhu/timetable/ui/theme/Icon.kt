@@ -96,6 +96,12 @@ object XhuIcons {
     val close: Painter
         @Composable
         get() = painterResource(R.drawable.ic_action_close)
+    val clearSplash: Painter
+        @Composable
+        get() = painterResource(R.drawable.ic_action_clear_splash)
+    val github: Painter
+        @Composable
+        get() = painterResource(R.drawable.ic_github)
 
     object CustomCourse {
         val title: Painter
