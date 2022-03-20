@@ -81,20 +81,17 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
                     }
                 }
                 val hideTime = getConfig { hideSplashBefore }
-                val hideList = getConfig { hideSplashList }
                 if (splash != null) {
-                    var hide = true
                     if (Instant.now().isAfter(hideTime)) {
-                        hide = false
-                    }
-                    if (!hideList.contains(splash.second.splashId)) {
-                        hide = false
-                    }
-                    if (!hide) {
                         DataHolder.splashFile = splash.first
                         DataHolder.splash = splash.second
                         DataHolder.splashShowTime = showTime
                         DataHolder.backgroundColor = backgroundColor
+                    } else {
+                        DataHolder.splashFile = null
+                        DataHolder.splash = null
+                        DataHolder.splashShowTime = 0
+                        DataHolder.backgroundColor = null
                     }
                 }
                 _readyState.emit(ReadyState())
