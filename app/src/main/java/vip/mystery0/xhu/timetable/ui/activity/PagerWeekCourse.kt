@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -75,12 +76,12 @@ val weekCourseContent: TabContent = @Composable { ext ->
     val courseDialogState = remember { mutableStateOf<List<Course>>(emptyList()) }
     val tableCourse by viewModel.tableCourse.collectAsState()
     val multiAccountMode by viewModel.multiAccountMode.collectAsState()
+    val itemHeight = 72.dp
     Box {
         Column(modifier = Modifier.fillMaxSize()) {
             //顶部日期栏
             Row(
                 modifier = Modifier
-                    .padding(vertical = 2.dp)
                     .background(Color.Black.copy(0.2F))
             ) {
                 val firstDay by viewModel.dateStart.collectAsState()
@@ -115,7 +116,7 @@ val weekCourseContent: TabContent = @Composable { ext ->
                         .background(dateBackgroundColor)
                 ) {
                     for (time in 1..11) {
-                        BuildTimeItem(time = time)
+                        BuildTimeItem(time = time, itemHeight)
                     }
                 }
                 if (tableCourse.isNotEmpty()) {
@@ -174,7 +175,6 @@ val weekCourseContent: TabContent = @Composable { ext ->
 private val twoFormat = DecimalFormat("00")
 private val dateBackgroundColor = Color(0x2E000000)
 private val highlightDateBackgroundColor = Color(0x80000000)
-private val itemHeight = 72.dp
 
 @Composable
 private fun RowScope.BuildDateItem(week: String, date: String, isToday: Boolean = false) {
@@ -190,16 +190,19 @@ private fun RowScope.BuildDateItem(week: String, date: String, isToday: Boolean 
 }
 
 @Composable
-private fun BuildTimeItem(time: Int) {
-    Text(
-        text = time.toString(),
-        color = Color.White,
-        textAlign = TextAlign.Center,
-        fontSize = 10.sp,
+private fun BuildTimeItem(time: Int, itemHeight: Dp) {
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(itemHeight),
-    )
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = time.toString(),
+            color = Color.White,
+            fontSize = 10.sp,
+        )
+    }
 }
 
 @ExperimentalComposeUiApi
