@@ -123,6 +123,10 @@ private fun BuildTopDesc(remainCount: Int) {
                 fontSize = 13.sp,
             )
             Text(
+                text = "如果您想要的功能不在以下列表中，可以通过 意见反馈 功能联系作者，也可以加入交流反馈群进行反馈。",
+                fontSize = 13.sp,
+            )
+            Text(
                 text = buildAnnotatedString {
                     append("您(${DataHolder.mainUserName})当前剩余的催更次数为： ")
                     withStyle(
