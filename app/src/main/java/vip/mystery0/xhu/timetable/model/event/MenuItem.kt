@@ -56,6 +56,10 @@ enum class MenuItem(
         { XhuIcons.Profile.urge },
         { intentTo(UrgeActivity::class) }
     ),
+    EXP_SCORE(
+        { XhuIcons.Profile.expScore },
+        { intentTo(ExpScoreActivity::class) },
+    ),
     EMPTY(
         { XhuIcons.Profile.unknownMenu },
         { menu ->

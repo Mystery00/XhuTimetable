@@ -3,6 +3,7 @@ package vip.mystery0.xhu.timetable.config.interceptor
 import okhttp3.Interceptor
 import okhttp3.Response
 import okio.Buffer
+import vip.mystery0.xhu.timetable.publicDeviceId
 import vip.mystery0.xhu.timetable.utils.md5
 import vip.mystery0.xhu.timetable.utils.sha256
 import java.nio.charset.Charset
@@ -38,6 +39,7 @@ class ServerApiInterceptor : Interceptor {
         val newRequest = request.newBuilder()
             .addHeader("sign", sign)
             .addHeader("signTime", signTime.toEpochMilli().toString())
+            .addHeader("deviceId", publicDeviceId)
             .build()
 
         return chain.proceed(newRequest)
