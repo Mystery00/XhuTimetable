@@ -142,11 +142,13 @@ suspend fun setTrigger(alarmManager: AlarmManager) {
     alarmManager.cancel(pendingIntent)
     //设置新的定时器
     val triggerAtTime =
-        if (now.isBefore(notifyTime)) notifyTime.atDate(LocalDate.now())
-        else notifyTime.atDate(LocalDate.now().plusDays(1))
+        (if (now.isBefore(notifyTime)) notifyTime.atDate(LocalDate.now())
+        else notifyTime.atDate(LocalDate.now().plusDays(1)))
+            .withSecond(0)
     alarmManager.set(
         AlarmManager.RTC_WAKEUP,
         triggerAtTime.atZone(chinaZone).toInstant().toEpochMilli(),
         pendingIntent
     )
+    Log.i("TAG", "setTrigger: $triggerAtTime")
 }
