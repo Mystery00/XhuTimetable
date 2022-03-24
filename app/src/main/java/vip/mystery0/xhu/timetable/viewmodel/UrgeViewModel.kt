@@ -39,9 +39,14 @@ class UrgeViewModel : ComposeViewModel() {
             _urgeListState.value = UrgeListState(loading = true)
             val user = SessionManager.mainUser()
             val response = getUrgeList(user)
+            val urgeList = response.urgeList.filter { !it.complete }.reversed()
+            val completeList = response.urgeList.filter { it.complete }.reversed()
             _urgeListState.value =
                 UrgeListState(
-                    urgeList = response.urgeList.reversed(),
+                    urgeList = ArrayList<UrgeItem>().apply {
+                        addAll(urgeList)
+                        addAll(completeList)
+                    },
                     remainCount = response.remainCount
                 )
         }
@@ -66,6 +71,7 @@ class UrgeViewModel : ComposeViewModel() {
 data class UrgeListState(
     val loading: Boolean = false,
     val urgeList: List<UrgeItem> = emptyList(),
+    val completeList: List<UrgeItem> = emptyList(),
     val remainCount: Int = 0,
     val errorMessage: String = "",
 )

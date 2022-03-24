@@ -166,11 +166,14 @@ private fun BuildItem(
                     .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                LinearProgressIndicator(
-                    progress = urgeItem.rate / 100F,
-                )
+                if (!urgeItem.complete) {
+                    LinearProgressIndicator(
+                        progress = urgeItem.rate / 100F,
+                    )
+                }
+                val title = if (urgeItem.complete) "【已完成】${urgeItem.title}" else urgeItem.title
                 Text(
-                    text = urgeItem.title,
+                    text = title,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                 )
@@ -207,14 +210,16 @@ private fun BuildItem(
                     )
                 }
             }
-            Button(
-                enabled = !urgeItem.urged,
-                onClick = {
-                    onUrge(urgeItem)
-                }) {
-                Row {
-                    Icon(painter = XhuIcons.Profile.urge, contentDescription = null)
-                    Text(text = "(${urgeItem.count})")
+            if (!urgeItem.complete) {
+                Button(
+                    enabled = !urgeItem.urged,
+                    onClick = {
+                        onUrge(urgeItem)
+                    }) {
+                    Row {
+                        Icon(painter = XhuIcons.Profile.urge, contentDescription = null)
+                        Text(text = "(${urgeItem.count})")
+                    }
                 }
             }
         }
