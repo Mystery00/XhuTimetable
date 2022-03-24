@@ -9,6 +9,7 @@ import vip.mystery0.xhu.timetable.publicDeviceId
 data class InitRequest(
     val deviceId: String = publicDeviceId,
     val appVersion: String = AppVersion,
+    val appVersionCode: String = vip.mystery0.xhu.timetable.appVersionCode,
     val systemVersion: String = SystemVersion,
     val factory: String = Build.MANUFACTURER,
     val model: String = Build.MODEL,

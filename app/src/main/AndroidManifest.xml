@@ -59,6 +59,11 @@
             android:label="@string/title_activity_score"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
         <activity
+            android:name=".ui.activity.ExpScoreActivity"
+            android:exported="true"
+            android:label="@string/title_activity_exp_score"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar" />
+        <activity
             android:name=".ui.activity.AccountSettingsActivity"
             android:exported="true"
             android:label="@string/title_activity_settings_account_management"

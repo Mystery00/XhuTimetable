@@ -10,6 +10,7 @@ import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.model.request.CourseRoomRequest
 import vip.mystery0.xhu.timetable.model.response.CourseRoomResponse
 import vip.mystery0.xhu.timetable.model.response.ExamResponse
+import vip.mystery0.xhu.timetable.model.response.ExpScoreResponse
 import vip.mystery0.xhu.timetable.model.response.ScoreResponse
 import vip.mystery0.xhu.timetable.module.NetworkNotConnectException
 
@@ -37,6 +38,21 @@ suspend fun getScoreList(
     val jwcApi = KoinJavaComponent.get<JwcApi>(JwcApi::class.java)
     val response = user.withAutoLogin {
         jwcApi.scoreList(it, year, term).checkLogin()
+    }
+    return response.first
+}
+
+suspend fun getExpScoreList(
+    user: User,
+    year: String,
+    term: Int,
+): List<ExpScoreResponse> {
+    if (!isOnline()) {
+        throw NetworkNotConnectException()
+    }
+    val jwcApi = KoinJavaComponent.get<JwcApi>(JwcApi::class.java)
+    val response = user.withAutoLogin {
+        jwcApi.expScoreList(it, year, term).checkLogin()
     }
     return response.first
 }
