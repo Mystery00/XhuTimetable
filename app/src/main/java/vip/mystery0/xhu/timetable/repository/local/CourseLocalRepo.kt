@@ -5,6 +5,7 @@ import vip.mystery0.xhu.timetable.config.User
 import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.model.entity.CourseItem
 import vip.mystery0.xhu.timetable.model.entity.CourseSource
+import vip.mystery0.xhu.timetable.model.entity.CourseType
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
 import vip.mystery0.xhu.timetable.repository.CourseRepo
 import vip.mystery0.xhu.timetable.repository.db.dao.CourseDao
@@ -89,6 +90,46 @@ class CourseLocalRepo : CourseRepo {
                     )
                 )
             }
+        }
+    }
+
+    override suspend fun getRandomCourseList(size: Int): List<CourseResponse> = runOnIo {
+        val courseList = ArrayList(courseDao.queryDistinctCourseByUsernameAndTerm())
+        if (courseList.isEmpty()) {
+            //没有数据，添加一条模拟数据
+            courseList.add(
+                CourseItem(
+                    courseName = "西瓜课表",
+                    teacherName = "西瓜课表团队",
+                    location = "西华大学本部6A",
+                    weekString = "",
+                    weekNum = 1,
+                    time = "",
+                    weekIndex = 1,
+                    type = CourseType.ALL,
+                    source = CourseSource.JWC,
+                    year = "",
+                    term = 1,
+                    studentId = ""
+                )
+            )
+        }
+        while (courseList.size < size) {
+            //数量不够，强行复制
+            courseList.addAll(courseList)
+        }
+        val itemList = courseList.shuffled().take(size)
+        itemList.map { item ->
+            CourseResponse(
+                item.courseName,
+                item.teacherName,
+                item.location,
+                "",
+                emptyList(),
+                emptyList(),
+                CourseType.ALL,
+                item.weekIndex,
+            )
         }
     }
 }

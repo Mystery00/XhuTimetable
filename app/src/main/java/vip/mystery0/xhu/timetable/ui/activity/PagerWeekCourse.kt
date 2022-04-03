@@ -30,6 +30,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
 import vip.mystery0.xhu.timetable.model.Course
+import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import java.text.DecimalFormat
@@ -76,7 +77,7 @@ val weekCourseContent: TabContent = @Composable { ext ->
     val courseDialogState = remember { mutableStateOf<List<Course>>(emptyList()) }
     val tableCourse by viewModel.tableCourse.collectAsState()
     val multiAccountMode by viewModel.multiAccountMode.collectAsState()
-    val itemHeight = 72.dp
+    val customUi by viewModel.customUi.collectAsState()
     Box {
         Column(modifier = Modifier.fillMaxSize()) {
             //顶部日期栏
@@ -116,7 +117,7 @@ val weekCourseContent: TabContent = @Composable { ext ->
                         .background(dateBackgroundColor)
                 ) {
                     for (time in 1..11) {
-                        BuildTimeItem(time = time, itemHeight)
+                        BuildTimeItem(time = time, customUi.weekItemHeight.dp)
                     }
                 }
                 if (tableCourse.isNotEmpty()) {
@@ -124,42 +125,21 @@ val weekCourseContent: TabContent = @Composable { ext ->
                         Column(modifier = Modifier.weight(1F)) {
                             tableCourse[index].forEach { sheet ->
                                 if (!sheet.isEmpty()) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(itemHeight * sheet.step)
-                                            .padding(1.dp)
-                                            .background(
-                                                sheet.color.copy(0.8F),
-                                                MaterialTheme.shapes.small
-                                            )
-                                            .clickable {
-                                                courseDialogState.value = sheet.course
-                                            },
+                                    BuildWeekItem(
+                                        customUi = customUi,
+                                        backgroundColor = sheet.color,
+                                        itemStep = sheet.step,
+                                        title = sheet.showTitle,
+                                        textColor = sheet.textColor,
+                                        showMore = sheet.course.size > 1,
                                     ) {
-                                        Text(
-                                            text = sheet.showTitle,
-                                            color = sheet.textColor,
-                                            textAlign = TextAlign.Center,
-                                            fontSize = 10.sp,
-                                            modifier = Modifier.fillMaxSize(),
-                                        )
-                                        if (sheet.course.size > 1) {
-                                            Icon(
-                                                painter = XhuIcons.conflict,
-                                                contentDescription = null,
-                                                tint = Color.White,
-                                                modifier = Modifier
-                                                    .align(Alignment.BottomEnd)
-                                                    .size(6.dp),
-                                            )
-                                        }
+                                        courseDialogState.value = sheet.course
                                     }
                                 } else {
                                     Spacer(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(itemHeight * sheet.step)
+                                            .height(customUi.weekItemHeight.dp * sheet.step)
                                     )
                                 }
                             }
@@ -169,6 +149,47 @@ val weekCourseContent: TabContent = @Composable { ext ->
             }
         }
         ShowCourseDialog(dialogState = courseDialogState, multiAccountMode = multiAccountMode)
+    }
+}
+
+@Composable
+fun BuildWeekItem(
+    customUi: CustomUi,
+    backgroundColor: Color,
+    itemStep: Int,
+    title: String,
+    textColor: Color,
+    showMore: Boolean,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(customUi.weekItemHeight.dp * itemStep)
+            .padding(1.dp)
+            .background(
+                backgroundColor.copy(customUi.weekBackgroundAlpha),
+                RoundedCornerShape(customUi.weekItemCorner),
+            )
+            .clickable(onClick = onClick),
+    ) {
+        Text(
+            text = title,
+            color = textColor,
+            textAlign = TextAlign.Center,
+            fontSize = customUi.weekTitleTextSize.sp,
+            modifier = Modifier.fillMaxSize(),
+        )
+        if (showMore) {
+            Icon(
+                painter = XhuIcons.conflict,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(6.dp),
+            )
+        }
     }
 }
 

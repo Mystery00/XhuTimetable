@@ -18,6 +18,7 @@ import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
 import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.CustomThing
+import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
 import vip.mystery0.xhu.timetable.model.response.Menu
 import vip.mystery0.xhu.timetable.model.response.Poems
@@ -131,6 +132,9 @@ class MainViewModel : ComposeViewModel() {
     private val _menu = MutableStateFlow<List<Menu>>(emptyList())
     val menu: StateFlow<List<Menu>> = _menu
 
+    private val _customUi = MutableStateFlow(CustomUi.DEFAULT)
+    val customUi: StateFlow<CustomUi> = _customUi
+
     init {
         viewModelScope.launch {
             loadFromConfig()
@@ -156,6 +160,7 @@ class MainViewModel : ComposeViewModel() {
             LocalTime.now().isAfter(it)
         } ?: false
         _menu.value = getConfig { menuList }
+        _customUi.value = getConfig { customUi }
     }
 
     fun loadConfig() {
@@ -588,14 +593,14 @@ class MainViewModel : ComposeViewModel() {
                             }
                         }
                         val show = list.first()
-                        val showTitle = "${show.courseName}\n@${show.location}"
                         courseSheet.showTitle =
-                            if (show.thisWeek) showTitle else "[非本周]\n${showTitle}"
+                            if (show.thisWeek) show.format(_customUi.value.weekTitleTemplate)
+                            else show.format(_customUi.value.weekNotTitleTemplate)
                         courseSheet.course =
                             ArrayList(courseSheet.course.distinct().sortedBy { it.weekSet.first() })
                         courseSheet.color =
                             if (show.thisWeek) colorMap[show.courseName]
-                                ?: ColorPool.hash(show.courseName) else notThisWeekBackgroundColor
+                                ?: ColorPool.hash(show.courseName) else XhuColor.notThisWeekBackgroundColor
                         courseSheet.textColor = if (show.thisWeek) Color.White else Color.Gray
                     }
                     courseSheet
@@ -698,8 +703,6 @@ class MainViewModel : ComposeViewModel() {
         }
     }
 }
-
-private val notThisWeekBackgroundColor = Color(0xFFe5e5e5)
 
 fun List<Int>.formatTimeString(): String =
     if (size == 1) "第${this[0]}节" else "${first()}-${last()}节"
