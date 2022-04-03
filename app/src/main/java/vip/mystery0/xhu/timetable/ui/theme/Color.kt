@@ -25,8 +25,9 @@ object XhuColor {
         @Composable
         get() = colorOf(pair = Color(0xFF2196F3) to Color(0xFF2C5CCB))
     val customCourseWeekColorBackground: Color
-        @Composable
         get() = Color(0xFFE5E5E5)
+    val notThisWeekBackgroundColor: Color
+        get() = Color(0xFFe5e5e5)
 
     object Profile {
         val divider: Color

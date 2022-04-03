@@ -18,4 +18,6 @@ interface CourseRepo : Repo {
         list: List<CourseResponse>
     ) {
     }
+
+    suspend fun getRandomCourseList(size: Int): List<CourseResponse> = emptyList()
 }

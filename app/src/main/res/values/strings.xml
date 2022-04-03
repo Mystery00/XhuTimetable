@@ -15,4 +15,5 @@
     <string name="title_activity_background">自定义背景图片</string>
     <string name="title_activity_export_calendar">日历导出管理</string>
     <string name="title_activity_urge">催更管理</string>
+    <string name="title_activity_ui">UI设置</string>
 </resources>

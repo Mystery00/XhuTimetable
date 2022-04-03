@@ -124,6 +124,11 @@
             android:exported="true"
             android:label="@string/title_activity_urge"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
+        <activity
+            android:name=".ui.activity.CustomUiActivity"
+            android:exported="true"
+            android:label="@string/title_activity_ui"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar" />
 
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"

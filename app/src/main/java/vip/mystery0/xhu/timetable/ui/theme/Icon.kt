@@ -57,6 +57,9 @@ object XhuIcons {
     val customBackground: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_background)
+    val customUi: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_custom_ui)
     val disableBackgroundWhenNight: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_disable_when_night)

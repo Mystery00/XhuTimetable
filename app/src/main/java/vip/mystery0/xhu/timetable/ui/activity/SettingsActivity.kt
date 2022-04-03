@@ -166,6 +166,19 @@ class SettingsActivity : BaseComposeActivity() {
                             }
                         }
                     )
+                    SettingsMenuLink(
+                        icon = {
+                            Icon(
+                                painter = XhuIcons.customUi,
+                                contentDescription = null,
+                                tint = XhuColor.Common.blackText,
+                            )
+                        },
+                        title = { Text(text = "自定义课表界面") },
+                        onClick = {
+                            intentTo(CustomUiActivity::class)
+                        }
+                    )
                 }
                 XhuSettingsGroup(title = {
                     Text(text = "通知设置")

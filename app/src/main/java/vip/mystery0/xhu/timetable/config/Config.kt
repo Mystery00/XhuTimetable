@@ -5,6 +5,7 @@ import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tencent.mmkv.MMKV
 import vip.mystery0.xhu.timetable.BuildConfig
+import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.response.Menu
 import vip.mystery0.xhu.timetable.model.response.Splash
@@ -314,5 +315,14 @@ class Config internal constructor() {
         get() {
             val time = kv.decodeLong("hideSplashBefore", 0L)
             return Instant.ofEpochMilli(time)
+        }
+    var customUi: CustomUi
+        set(value) {
+            kv.encode("customUi", moshi.adapter(CustomUi::class.java).toJson(value))
+        }
+        get() {
+            val save = kv.decodeString("customUi", "")
+            return if (save.isNullOrBlank()) CustomUi.DEFAULT
+            else moshi.adapter(CustomUi::class.java).fromJson(save)!!
         }
 }
