@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
@@ -11,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import coil.compose.SubcomposeAsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
@@ -29,15 +31,15 @@ class SchoolCalendarActivity : BaseComposeActivity() {
     override fun BuildContent() {
         val loading by viewModel.loading.collectAsState()
         val area by viewModel.area.collectAsState()
-        val loadImageUrl by viewModel.loadImageUrl.collectAsState()
+        val schoolCalendarData by viewModel.schoolCalendarData.collectAsState()
 
         val scope = rememberCoroutineScope()
         val scaffoldState: BackdropScaffoldState =
             rememberBackdropScaffoldState(initialValue = BackdropValue.Concealed)
-        var selected by remember { mutableStateOf(loadImageUrl.first) }
+        var selected by remember { mutableStateOf(schoolCalendarData.area) }
 
-        LaunchedEffect(loadImageUrl) {
-            selected = loadImageUrl.first
+        LaunchedEffect(schoolCalendarData) {
+            selected = schoolCalendarData.area
         }
 
         fun onBack() {
@@ -85,10 +87,26 @@ class SchoolCalendarActivity : BaseComposeActivity() {
                             }
                         }
                         IconButton(onClick = {
-                            "暂未实现！".toast()
+                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                                putExtra(
+                                    Intent.EXTRA_STREAM, FileProvider.getUriForFile(
+                                        this@SchoolCalendarActivity,
+                                        packageName,
+                                        schoolCalendarData.cacheFile,
+                                    )
+                                )
+                                type = "image/*"
+                            }
+                            startActivity(
+                                Intent.createChooser(
+                                    shareIntent,
+                                    "分享校历到"
+                                )
+                            )
                         }) {
                             Icon(
-                                painter = XhuIcons.Action.download,
+                                painter = XhuIcons.Action.send,
                                 contentDescription = null,
                             )
                         }
@@ -123,7 +141,7 @@ class SchoolCalendarActivity : BaseComposeActivity() {
                 ) {
                     SubcomposeAsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data(loadImageUrl.second)
+                            .data(schoolCalendarData.imageUrl)
                             .memoryCachePolicy(CachePolicy.ENABLED)
                             .diskCachePolicy(CachePolicy.ENABLED)
                             .listener(onError = { _, result ->

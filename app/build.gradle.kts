@@ -154,7 +154,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
     //compose-material-dialogs
-    val composeMaterialDialogsVersion = "0.6.3"
+    val composeMaterialDialogsVersion = "0.7.0"
     implementation("io.github.vanpra.compose-material-dialogs:core:$composeMaterialDialogsVersion")
     implementation("io.github.vanpra.compose-material-dialogs:datetime:$composeMaterialDialogsVersion")
     implementation("io.github.vanpra.compose-material-dialogs:color:$composeMaterialDialogsVersion")
@@ -171,7 +171,7 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-workmanager:$koinVersion")
     implementation("io.insert-koin:koin-androidx-compose:$koinVersion")
     //coil
-    val coilVersion = "2.0.0-rc01"
+    val coilVersion = "2.0.0-rc02"
     implementation("io.coil-kt:coil-compose:$coilVersion")
     implementation("io.coil-kt:coil-gif:$coilVersion")
     //retrofit
@@ -182,13 +182,13 @@ dependencies {
     implementation("com.squareup.moshi:moshi:1.13.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.13.0")
     //mmkv
-    implementation("com.tencent:mmkv-static:1.2.12")
+    implementation("com.tencent:mmkv-static:1.2.13")
     //eventbus
     implementation("org.greenrobot:eventbus:3.3.1")
     //preference
     implementation("com.github.alorma:compose-settings-ui:0.7.2")
     //AppCenter
-    val appCenterSdkVersion = "4.4.2"
+    val appCenterSdkVersion = "4.4.3"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
     //Glance
