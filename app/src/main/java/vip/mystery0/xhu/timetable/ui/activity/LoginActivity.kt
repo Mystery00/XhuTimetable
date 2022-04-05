@@ -5,12 +5,18 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -32,8 +38,15 @@ import vip.mystery0.xhu.timetable.viewmodel.LoginViewModel
 class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
     private val viewModel: LoginViewModel by viewModels()
 
+    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     override fun BuildContent() {
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val usernameFocusRequester = remember { FocusRequester() }
+        val passwordFocusRequester = remember { FocusRequester() }
+        var usernameError by remember { mutableStateOf(false) }
+        var passwordError by remember { mutableStateOf(false) }
+
         ProvideWindowInsets {
             Column(
                 modifier = Modifier
@@ -62,7 +75,14 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                     OutlinedTextField(
                         modifier = Modifier
                             .height(IntrinsicSize.Min)
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .onFocusChanged { focusState ->
+                                if (focusState.isFocused) {
+                                    //持有焦点
+                                    usernameError = username.isBlank()
+                                }
+                            }
+                            .focusRequester(usernameFocusRequester),
                         value = username,
                         onValueChange = {
                             username = it
@@ -92,7 +112,7 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                             keyboardType = KeyboardType.Number,
                         ),
                         maxLines = 1,
-                        isError = username.isBlank(),
+                        isError = usernameError,
                     )
                     Spacer(
                         modifier = Modifier
@@ -102,7 +122,14 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                     OutlinedTextField(
                         modifier = Modifier
                             .height(IntrinsicSize.Min)
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .onFocusChanged { focusState ->
+                                if (focusState.isFocused) {
+                                    //持有焦点
+                                    passwordError = password.isBlank()
+                                }
+                            }
+                            .focusRequester(passwordFocusRequester),
                         value = password,
                         onValueChange = {
                             password = it
@@ -132,8 +159,19 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                             imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Password,
                         ),
+                        keyboardActions = KeyboardActions(onDone = {
+                            if (doLogin(
+                                    username,
+                                    password,
+                                    usernameFocusRequester,
+                                    passwordFocusRequester
+                                )
+                            ) {
+                                keyboardController?.hide()
+                            }
+                        }),
                         maxLines = 1,
-                        isError = password.isBlank(),
+                        isError = passwordError,
                     )
                     Text(
                         modifier = Modifier
@@ -159,10 +197,14 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                         ),
                         shape = RoundedCornerShape(36.dp),
                         onClick = {
-                            when {
-                                username.isBlank() -> "用户名不能为空".toast()
-                                password.isBlank() -> "密码不能为空".toast()
-                                else -> viewModel.login(username, password)
+                            if (doLogin(
+                                    username,
+                                    password,
+                                    usernameFocusRequester,
+                                    passwordFocusRequester
+                                )
+                            ) {
+                                keyboardController?.hide()
                             }
                         }) {
                         Text(
@@ -174,6 +216,28 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
             }
         }
         DialogContent()
+    }
+
+    private fun doLogin(
+        username: String,
+        password: String,
+        usernameFocusRequester: FocusRequester,
+        passwordFocusRequester: FocusRequester,
+    ): Boolean {
+        when {
+            username.isBlank() -> {
+                usernameFocusRequester.requestFocus()
+                "用户名不能为空".toast()
+                return false
+            }
+            password.isBlank() -> {
+                passwordFocusRequester.requestFocus()
+                "密码不能为空".toast()
+                return false
+            }
+            else -> viewModel.login(username, password)
+        }
+        return true
     }
 
     @Composable
