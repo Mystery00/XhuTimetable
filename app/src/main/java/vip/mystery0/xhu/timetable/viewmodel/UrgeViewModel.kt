@@ -11,6 +11,7 @@ import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.model.response.UrgeItem
 import vip.mystery0.xhu.timetable.repository.doUrge
 import vip.mystery0.xhu.timetable.repository.getUrgeList
+import vip.mystery0.xhu.timetable.trackEvent
 import java.time.format.DateTimeFormatter
 
 class UrgeViewModel : ComposeViewModel() {
@@ -60,6 +61,7 @@ class UrgeViewModel : ComposeViewModel() {
                 UrgeListState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
         }) {
             _urgeLoading.value = true
+            trackEvent("催更")
             val user = SessionManager.mainUser()
             doUrge(user, urgeId)
             _urgeLoading.value = false

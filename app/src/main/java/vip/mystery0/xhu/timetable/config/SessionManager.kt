@@ -1,10 +1,13 @@
 package vip.mystery0.xhu.timetable.config
 
+import android.widget.Toast
 import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
+import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.model.UserInfo
 import vip.mystery0.xhu.timetable.repository.doLogin
+import kotlin.system.exitProcess
 
 object SessionManager {
     //用户列表
@@ -14,7 +17,13 @@ object SessionManager {
         userMap.values.find { it.main } ?: userMap.values.firstOrNull()
     }
 
-    suspend fun mainUser(): User = mainUserOrNull()!!
+    suspend fun mainUser(): User {
+        val main = mainUserOrNull()
+        if (main != null) return main
+        Toast.makeText(context.applicationContext, "检测到异常，即将关闭应用", Toast.LENGTH_LONG).show()
+        android.os.Process.killProcess(android.os.Process.myPid())
+        exitProcess(10)
+    }
 
     fun isLogin(): Boolean = userMap.isNotEmpty()
 

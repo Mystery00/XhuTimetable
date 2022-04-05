@@ -111,6 +111,12 @@ fun registerAppCenter(application: Application) {
     }
 }
 
+fun trackEvent(event: String) {
+    if (!AppCenter.isConfigured() && GlobalConfig.allowSendCrashReport) {
+        Analytics.trackEvent(event)
+    }
+}
+
 fun Context.joinQQGroup(activity: BaseComposeActivity) {
     try {
         val goIntent = Intent(
