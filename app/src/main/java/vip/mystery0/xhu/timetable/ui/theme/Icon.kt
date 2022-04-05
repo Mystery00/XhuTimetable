@@ -269,6 +269,9 @@ object XhuIcons {
         val download: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_action_download)
+        val search: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_action_search)
     }
 
     object WsState {

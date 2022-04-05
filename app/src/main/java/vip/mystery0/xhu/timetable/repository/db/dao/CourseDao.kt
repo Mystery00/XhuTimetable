@@ -25,4 +25,7 @@ interface CourseDao {
 
     @Query("select * from tb_course_item group by courseName")
     suspend fun queryDistinctCourseByUsernameAndTerm(): List<CourseItem>
+
+    @Query("select * from tb_course_item where courseName like :keywords group by courseName")
+    suspend fun queryDistinctCourseByKeywordsAndUsernameAndTerm(keywords: String): List<CourseItem>
 }

@@ -27,8 +27,12 @@ class CustomCourseColorViewModel : ComposeViewModel(), KoinComponent {
     val listState: StateFlow<List<Pair<String, Color>>> = _listState
 
     init {
+        loadList("")
+    }
+
+    fun loadList(keywords: String) {
         viewModelScope.launch {
-            _listState.value = getCourseColorList()
+            _listState.value = getCourseColorList(keywords)
                 .sortedWith { o1, o2 -> comparator.compare(o1.first, o2.first) }
         }
     }
@@ -41,8 +45,7 @@ class CustomCourseColorViewModel : ComposeViewModel(), KoinComponent {
             } else {
                 updateCourseColor(courseName, null)
             }
-            _listState.value = getCourseColorList()
-                .sortedWith { o1, o2 -> comparator.compare(o1.first, o2.first) }
+            loadList("")
             eventBus.post(UIEvent(EventType.CHANGE_TERM_START_TIME))
         }
     }
