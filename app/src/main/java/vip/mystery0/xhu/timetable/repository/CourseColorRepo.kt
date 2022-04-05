@@ -28,8 +28,14 @@ suspend fun getRawCourseColorList(): Map<String, Color> {
     }
 }
 
-suspend fun getCourseColorList(): List<Pair<String, Color>> {
-    val courseList = runOnIo { courseDao.queryDistinctCourseByUsernameAndTerm() }
+suspend fun getCourseColorList(keywords: String): List<Pair<String, Color>> {
+    val courseList = runOnIo {
+        if (keywords.isBlank()) {
+            courseDao.queryDistinctCourseByUsernameAndTerm()
+        } else {
+            courseDao.queryDistinctCourseByKeywordsAndUsernameAndTerm("%${keywords}%")
+        }
+    }
     val colorList = runOnIo { courseColorDao.queryAllCourseColorList() }
     return runOnCpu {
         val map = HashMap<String, Color>(colorList.size)

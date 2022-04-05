@@ -1,16 +1,27 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vanpra.composematerialdialogs.MaterialDialog
@@ -34,6 +45,8 @@ class CustomCourseColorActivity : BaseComposeActivity() {
         val dialogState = rememberMaterialDialogState()
         var courseName by remember { mutableStateOf("") }
         var currentColor by remember { mutableStateOf(Color.Black) }
+        var showSearchView by remember { mutableStateOf(false) }
+        var searchText by remember { mutableStateOf("") }
 
         Scaffold(
             topBar = {
@@ -51,6 +64,30 @@ class CustomCourseColorActivity : BaseComposeActivity() {
                             )
                         }
                     },
+                    actions = {
+                        if (showSearchView) {
+                            BuildSearchText(
+                                searchText = searchText,
+                                placeholderText = "请输入课程名称",
+                                onSearchTextChanged = {
+                                    searchText = it
+                                    viewModel.loadList(it)
+                                },
+                                onClearClick = {
+                                    showSearchView = false
+                                }
+                            )
+                        } else {
+                            IconButton(onClick = {
+                                showSearchView = true
+                            }) {
+                                Icon(
+                                    painter = XhuIcons.Action.search,
+                                    contentDescription = null,
+                                )
+                            }
+                        }
+                    }
                 )
             },
         ) { paddingValues ->
@@ -107,6 +144,68 @@ class CustomCourseColorActivity : BaseComposeActivity() {
                 selectedColor = it
             }
         }
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun BuildSearchText(
+    searchText: String,
+    placeholderText: String = "",
+    onSearchTextChanged: (String) -> Unit = {},
+    onClearClick: () -> Unit = {},
+) {
+    var showClearButton by remember { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
+
+    OutlinedTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp)
+            .onFocusChanged { focusState ->
+                showClearButton = (focusState.isFocused)
+            }
+            .focusRequester(focusRequester),
+        value = searchText,
+        onValueChange = onSearchTextChanged,
+        placeholder = {
+            Text(text = placeholderText)
+        },
+        colors = TextFieldDefaults.textFieldColors(
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            backgroundColor = Color.Transparent,
+            cursorColor = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+        ),
+        trailingIcon = {
+            AnimatedVisibility(
+                visible = showClearButton,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                IconButton(onClick = {
+                    onClearClick()
+                }) {
+                    Icon(
+                        painter = XhuIcons.close,
+                        contentDescription = null,
+                        tint = XhuColor.Common.blackText,
+                    )
+                }
+
+            }
+        },
+        maxLines = 1,
+        singleLine = true,
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = {
+            keyboardController?.hide()
+        }),
+    )
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
     }
 }
 
