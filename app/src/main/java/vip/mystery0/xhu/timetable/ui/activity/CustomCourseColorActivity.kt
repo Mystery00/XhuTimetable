@@ -34,6 +34,7 @@ class CustomCourseColorActivity : BaseComposeActivity() {
         val dialogState = rememberMaterialDialogState()
         var courseName by remember { mutableStateOf("") }
         var currentColor by remember { mutableStateOf(Color.Black) }
+
         Scaffold(
             topBar = {
                 TopAppBar(

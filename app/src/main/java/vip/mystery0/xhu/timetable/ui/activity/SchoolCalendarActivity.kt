@@ -20,6 +20,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.trackEvent
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.SchoolCalendarViewModel
 
@@ -87,6 +88,7 @@ class SchoolCalendarActivity : BaseComposeActivity() {
                             }
                         }
                         IconButton(onClick = {
+                            trackEvent("分享校历")
                             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                                 putExtra(

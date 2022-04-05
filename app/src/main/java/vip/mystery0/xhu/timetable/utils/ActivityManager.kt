@@ -3,6 +3,8 @@ package vip.mystery0.xhu.timetable.utils
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import android.util.Log
+import vip.mystery0.xhu.timetable.trackEvent
 import java.util.*
 
 private val activityStack by lazy { Stack<Activity>() }
@@ -40,6 +42,8 @@ fun Application.registerActivityLifecycle() {
         override fun onActivityStopped(activity: Activity) = Unit
         override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
             addActivity(activity)
+            Log.i("TAG", "onActivityCreated: 打开 ${activity.javaClass.simpleName}:${activity.title}")
+            trackEvent("打开 ${activity.javaClass.simpleName}:${activity.title}")
         }
     })
 }

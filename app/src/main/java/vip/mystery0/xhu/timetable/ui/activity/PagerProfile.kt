@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import vip.mystery0.xhu.timetable.model.event.MenuItem
+import vip.mystery0.xhu.timetable.trackEvent
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
 import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
@@ -142,6 +143,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
                         title = menu.title,
                         showBadge = showBadge,
                         click = {
+                            trackEvent("点击菜单 ${menu.key}")
                             item.action(activity, menu)
                         })
                     if (iterator.hasNext()) {

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.model.response.Poems
+import vip.mystery0.xhu.timetable.trackEvent
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.dateFormatter
@@ -106,6 +107,7 @@ private fun DrawPoemsCard(dialogState: ModalBottomSheetState, scope: CoroutineSc
         Card(
             onClick = {
                 scope.launch {
+                    trackEvent("点击今日诗词")
                     dialogState.show()
                 }
             },
