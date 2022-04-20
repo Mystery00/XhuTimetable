@@ -242,6 +242,12 @@ object XhuIcons {
                 painterResource(id = R.drawable.ic_exp_score_night) to
                         painterResource(id = R.drawable.ic_exp_score)
             )
+        val serverDetect: Painter
+            @Composable
+            get() = iconOf(
+                painterResource(id = R.drawable.ic_server_detect_night) to
+                        painterResource(id = R.drawable.ic_server_detect)
+            )
         val unknownMenu: Painter
             @Composable
             get() = iconOf(
