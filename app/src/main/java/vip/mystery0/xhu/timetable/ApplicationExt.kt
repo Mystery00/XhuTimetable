@@ -97,7 +97,7 @@ fun BaseComposeActivity.loadInBrowser(url: String) {
 }
 
 fun registerAppCenter(application: Application) {
-    if (!AppCenter.isConfigured() && GlobalConfig.allowSendCrashReport) {
+    if (GlobalConfig.allowSendCrashReport) {
         if (BuildConfig.DEBUG) {
             AppCenter.setLogLevel(Log.VERBOSE)
         }
