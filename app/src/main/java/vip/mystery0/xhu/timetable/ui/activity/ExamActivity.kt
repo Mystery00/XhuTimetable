@@ -189,9 +189,9 @@ private fun BuildItem(
             ) {
                 val text = when {
                     item.days > 0L -> "${item.days}\n天"
-                    item.days < 0L && item.hours < 0L -> "已结束"
                     item.days == 0L && item.hours > 0L -> "${item.hours}\n小时后"
-                    else -> "今天"
+                    item.days == 0L -> "今天"
+                    else -> "已结束"
                 }
                 Text(
                     text = text,
