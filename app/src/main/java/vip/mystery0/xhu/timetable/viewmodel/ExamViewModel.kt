@@ -76,12 +76,15 @@ class ExamViewModel : ComposeViewModel() {
                     }
                     val time =
                         "${timeFormatter.format(startTime)} - ${timeFormatter.format(endTime)}"
-                    val expireDays = Duration.between(now, startTime).toDays()
+                    val duration = Duration.between(now, startTime)
+                    val remainDays = duration.toDays()
+                    val remainHours = duration.toHours()
                     Exam(
                         getCourseColorByName(it.courseName),
                         date,
                         it.date,
-                        expireDays,
+                        remainDays,
+                        remainHours,
                         it.examNumber,
                         it.courseName,
                         it.type,
@@ -140,6 +143,7 @@ data class Exam(
     val date: LocalDate,
     val dateString: String,
     val days: Long,
+    val hours: Long,
     val examNumber: String,
     val courseName: String,
     val type: String,
@@ -154,6 +158,7 @@ data class Exam(
             date = LocalDate.MIN,
             dateString = "",
             days = 0L,
+            hours = 0L,
             examNumber = "座位号",
             courseName = "课程名称",
             type = "考试类型",
