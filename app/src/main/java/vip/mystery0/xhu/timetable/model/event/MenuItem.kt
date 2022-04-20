@@ -8,7 +8,7 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
 enum class MenuItem(
     val icon: @Composable () -> Painter,
-    val action: MainActivity.(Menu) -> Unit,
+    val action: suspend MainActivity.(Menu) -> Unit,
 ) {
     QUERY_EXAM(
         { XhuIcons.Profile.exam },
@@ -59,6 +59,13 @@ enum class MenuItem(
     EXP_SCORE(
         { XhuIcons.Profile.expScore },
         { intentTo(ExpScoreActivity::class) },
+    ),
+    SERVER_DETECT(
+        { XhuIcons.Profile.serverDetect },
+        {
+            toastString("正在检查服务器可用性...", false)
+            serverDetect()
+        },
     ),
     EMPTY(
         { XhuIcons.Profile.unknownMenu },
