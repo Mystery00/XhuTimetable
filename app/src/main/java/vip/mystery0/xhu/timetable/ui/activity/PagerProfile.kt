@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.model.event.MenuItem
 import vip.mystery0.xhu.timetable.trackEvent
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
@@ -38,6 +39,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
             .background(MaterialTheme.colors.background)
             .verticalScroll(rememberScrollState()),
     ) {
+        val coroutineScope = rememberCoroutineScope()
         var profileExpanded by remember { mutableStateOf(true) }
         val mainUser by viewModel.mainUser.collectAsState()
         AnimatedContent(
@@ -143,8 +145,10 @@ val profileCourseContent: TabContent = @Composable { ext ->
                         title = menu.title,
                         showBadge = showBadge,
                         click = {
-                            trackEvent("点击菜单 ${menu.key}")
-                            item.action(activity, menu)
+                            coroutineScope.launch {
+                                trackEvent("点击菜单 ${menu.key}")
+                                item.action(activity, menu)
+                            }
                         })
                     if (iterator.hasNext()) {
                         Divider(

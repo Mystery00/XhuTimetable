@@ -40,7 +40,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
+import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.appVersionCodeNumber
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
@@ -59,6 +61,7 @@ import kotlin.math.min
 
 @OptIn(ExperimentalMaterialApi::class)
 class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEventBus = true) {
+    private val serverApi: ServerApi by inject()
     private val viewModel: MainViewModel by viewModels()
     private lateinit var modalBottomSheetState: ModalBottomSheetState
 
@@ -476,6 +479,19 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         }
     }
 
+    suspend fun serverDetect() {
+        kotlin.runCatching {
+            val response = serverApi.serverDetect()
+            if (response.isSuccessful) {
+                toastString("当前服务器状态正常", true)
+            } else {
+                toastString("服务器不可用，请联系开发者", true)
+            }
+        }.onFailure {
+            toastString("服务器不可用，请联系开发者", true)
+        }
+    }
+
     override fun onBackPressed() {
         if (isTwiceClick())
             super.onBackPressed()
@@ -490,7 +506,6 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             viewModel.checkUnReadFeedback()
         }
     }
-
 
     @Subscribe(threadMode = ThreadMode.MAIN_ORDERED)
     fun updateUIFromConfig(uiEvent: UIEvent) {
@@ -523,6 +538,9 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             }
             EventType.CHANGE_MAIN_BACKGROUND -> {
                 viewModel.loadBackground()
+            }
+            EventType.READ_NOTICE -> {
+                viewModel.clearLastCheckUnreadTime()
             }
             else -> {
             }
