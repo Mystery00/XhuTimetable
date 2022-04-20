@@ -69,7 +69,7 @@ class ExamViewModel : ComposeViewModel() {
                         LocalDateTime.ofInstant(Instant.ofEpochMilli(it.startTime), chinaZone)
                     val endTime =
                         LocalDateTime.ofInstant(Instant.ofEpochMilli(it.endTime), chinaZone)
-                    val startDate = startTime.toLocalDate()
+                    val startDate = startTime.toLocalDate().atStartOfDay()
                     val examStatus = when {
                         now.isBefore(startTime) -> ExamStatus.BEFORE
                         now.isAfter(endTime) -> ExamStatus.AFTER
@@ -77,7 +77,7 @@ class ExamViewModel : ComposeViewModel() {
                     }
                     val time =
                         "${timeFormatter.format(startTime)} - ${timeFormatter.format(endTime)}"
-                    val dayDuration = Duration.between(LocalDate.now(), startDate)
+                    val dayDuration = Duration.between(LocalDate.now().atStartOfDay(), startDate)
                     val duration = Duration.between(now, startTime)
                     var remainDays = duration.toDays()
                     val remainHours = duration.toHours()
