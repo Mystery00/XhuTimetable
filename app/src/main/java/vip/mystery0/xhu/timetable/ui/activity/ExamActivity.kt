@@ -188,8 +188,9 @@ private fun BuildItem(
                 contentAlignment = Alignment.Center,
             ) {
                 val text = when {
-                    item.days > 0 -> "${item.days}\n天"
-                    item.days < 0 -> "已结束"
+                    item.days > 0L -> "${item.days}\n天"
+                    item.days < 0L && item.hours < 0L -> "已结束"
+                    item.days == 0L && item.hours > 0L -> "${item.hours}\n小时后"
                     else -> "今天"
                 }
                 Text(
