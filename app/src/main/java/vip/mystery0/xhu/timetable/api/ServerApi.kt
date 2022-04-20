@@ -132,6 +132,9 @@ interface ServerApi {
         @Header("token") token: String,
         @Query("urgeId") urgeId: Long,
     ): Response<Unit>
+
+    @GET("/api/rest/xhu-timetable/health/check")
+    suspend fun serverDetect(): Response<Unit>
 }
 
 fun <T : Any> Response<T>.checkLogin(): T {

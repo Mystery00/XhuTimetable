@@ -184,6 +184,10 @@ class MainViewModel : ComposeViewModel() {
         }
     }
 
+    fun clearLastCheckUnreadTime() {
+        lastCheckUnreadTime = Instant.MIN
+    }
+
     fun checkUnRead(block: () -> Unit) {
         val now = Instant.now()
         if (Duration.between(lastCheckUnreadTime, now) > Duration.ofMinutes(1)) {
