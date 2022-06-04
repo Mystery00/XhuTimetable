@@ -187,14 +187,8 @@ private fun BuildItem(
                     .background(item.courseColor),
                 contentAlignment = Alignment.Center,
             ) {
-                val text = when {
-                    item.days > 0L -> "${item.days}\n天"
-                    item.days == 0L && item.hours > 0L -> "${item.hours}\n小时后"
-                    item.days == 0L -> "今天"
-                    else -> "已结束"
-                }
                 Text(
-                    text = text,
+                    text = item.showText,
                     color = Color.White,
                     fontSize = 16.sp,
                     textAlign = TextAlign.Center,

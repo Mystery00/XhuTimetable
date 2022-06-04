@@ -69,7 +69,6 @@ class ExamViewModel : ComposeViewModel() {
                         LocalDateTime.ofInstant(Instant.ofEpochMilli(it.startTime), chinaZone)
                     val endTime =
                         LocalDateTime.ofInstant(Instant.ofEpochMilli(it.endTime), chinaZone)
-                    val startDate = startTime.toLocalDate().atStartOfDay()
                     val examStatus = when {
                         now.isBefore(startTime) -> ExamStatus.BEFORE
                         now.isAfter(endTime) -> ExamStatus.AFTER
@@ -77,19 +76,42 @@ class ExamViewModel : ComposeViewModel() {
                     }
                     val time =
                         "${timeFormatter.format(startTime)} - ${timeFormatter.format(endTime)}"
-                    val dayDuration = Duration.between(LocalDate.now().atStartOfDay(), startDate)
-                    val duration = Duration.between(now, startTime)
-                    var remainDays = duration.toDays()
-                    val remainHours = duration.toHours()
-                    if (remainDays > 0L) {
-                        remainDays = dayDuration.toDays()
+                    val showText = when {
+                        now.isBefore(startTime) -> {
+                            //考试前
+                            val duration = Duration.between(now, startTime)
+                            val remainDays = duration.toDays()
+                            if (remainDays > 0L) {
+                                //还有超过一天的时间，那么显示 x天
+                                val dayDuration = Duration.between(
+                                    now.toLocalDate().atStartOfDay(),
+                                    startTime.toLocalDate().atStartOfDay()
+                                )
+                                //如果在明天之外，那么不计算小时
+                                if (dayDuration.toDays() > 1) {
+                                    "${remainDays + 1}\n天"
+                                } else {
+                                    "${remainDays}\n天"
+                                }
+                            } else {
+                                //剩余时间不足一天，显示 x小时
+                                val remainHours = duration.toHours()
+                                "${remainHours}\n小时后"
+                            }
+                        }
+                        now.isAfter(endTime) -> {
+                            //考试后
+                            "已结束"
+                        }
+                        else -> {
+                            //考试中
+                            "今天"
+                        }
                     }
                     Exam(
                         getCourseColorByName(it.courseName),
                         date,
                         it.date,
-                        remainDays,
-                        remainHours,
                         it.examNumber,
                         it.courseName,
                         it.type,
@@ -97,6 +119,7 @@ class ExamViewModel : ComposeViewModel() {
                         time,
                         it.region,
                         examStatus,
+                        showText,
                     )
                 }.sortedWith(object : Comparator<Exam> {
                     override fun compare(o1: Exam, o2: Exam): Int {
@@ -147,8 +170,6 @@ data class Exam(
     val courseColor: Color,
     val date: LocalDate,
     val dateString: String,
-    val days: Long,
-    val hours: Long,
     val examNumber: String,
     val courseName: String,
     val type: String,
@@ -156,21 +177,21 @@ data class Exam(
     val time: String,
     val region: String,
     val examStatus: ExamStatus,
+    val showText: String,
 ) {
     companion object {
         val EMPTY = Exam(
             courseColor = Color.White,
             date = LocalDate.MIN,
             dateString = "",
-            days = 0L,
-            hours = 0L,
             examNumber = "座位号",
             courseName = "课程名称",
             type = "考试类型",
             location = "考试地点",
             time = "考试日期",
             region = "地区",
-            examStatus = ExamStatus.BEFORE
+            examStatus = ExamStatus.BEFORE,
+            showText = "",
         )
     }
 }
