@@ -76,6 +76,10 @@ val screenHeight: Int
     get() = context.resources.displayMetrics.heightPixels
 
 fun BaseComposeActivity.toCustomTabs(url: String) {
+    if (url.isBlank()) {
+        "跳转地址不能为空".toast(true)
+        return
+    }
     try {
         val builder = CustomTabsIntent.Builder()
         val intent = builder.build()
