@@ -112,7 +112,7 @@ fun registerAppCenter(application: Application) {
 }
 
 fun trackEvent(event: String) {
-    if (!AppCenter.isConfigured() && GlobalConfig.allowSendCrashReport) {
+    if (AppCenter.isConfigured() && GlobalConfig.allowSendCrashReport) {
         Analytics.trackEvent(event)
     }
 }
