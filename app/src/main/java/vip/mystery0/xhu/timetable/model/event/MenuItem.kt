@@ -3,6 +3,7 @@ package vip.mystery0.xhu.timetable.model.event
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import vip.mystery0.xhu.timetable.model.response.Menu
+import vip.mystery0.xhu.timetable.toCustomTabs
 import vip.mystery0.xhu.timetable.ui.activity.*
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
@@ -17,6 +18,10 @@ enum class MenuItem(
     QUERY_SCORE(
         { XhuIcons.Profile.score },
         { intentTo(ScoreActivity::class) },
+    ),
+    QUERY_CET_SCORE(
+        { XhuIcons.Profile.cetScore },
+        { toCustomTabs(it.link) },
     ),
     QUERY_FREE_ROOM(
         { XhuIcons.Profile.classroom },
