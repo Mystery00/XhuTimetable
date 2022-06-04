@@ -11,6 +11,7 @@ import vip.mystery0.xhu.timetable.config.*
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import java.time.*
+import kotlin.math.max
 
 class ClassSettingsViewModel : ComposeViewModel() {
     private val eventBus: EventBus by inject()
@@ -51,9 +52,10 @@ class ClassSettingsViewModel : ComposeViewModel() {
             _selectYearAndTermList.value = runOnCpu {
                 val startYear = loggedUserList.minByOrNull { it.info.grade }!!.info.grade.toInt()
                 val time = LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone)
-                val endYear = if (time.month < Month.JUNE) time.year - 1 else time.year
+                val nowEndYear = if (time.month < Month.JUNE) time.year - 1 else time.year
+                val endYear = loggedUserList.maxByOrNull { it.info.grade }!!.info.grade.toInt() + 3
                 val tempArrayList = ArrayList<String>()
-                for (it in startYear..endYear) {
+                for (it in startYear..max(nowEndYear, endYear)) {
                     tempArrayList.add("${it}-${it + 1}学年 第1学期")
                     tempArrayList.add("${it}-${it + 1}学年 第2学期")
                 }
