@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -162,9 +161,9 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                                 lazyListState.scrollToItem(0)
                             }
                         },
-                        // Use navigationBarsWithImePadding(), to move the input panel above both the
-                        // navigation bar, and on-screen keyboard (IME)
-                        modifier = Modifier.navigationBarsWithImePadding(),
+                        modifier = Modifier
+                            .navigationBarsPadding()
+                            .imePadding(),
                     )
                 }
             }
