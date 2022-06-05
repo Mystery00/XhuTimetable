@@ -135,6 +135,9 @@ interface ServerApi {
 
     @GET("/api/rest/xhu-timetable/health/check")
     suspend fun serverDetect(): Response<Unit>
+
+    @GET("/api/rest/xhu-timetable/push/fetch")
+    suspend fun fetchPush(@Header("token") token: String): Response<List<PushResponse>>
 }
 
 fun <T : Any> Response<T>.checkLogin(): T {

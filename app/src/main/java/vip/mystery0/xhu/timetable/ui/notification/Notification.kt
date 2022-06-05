@@ -16,6 +16,10 @@ const val NOTIFICATION_CHANNEL_ID_TOMORROW = "XhuTimetable-Tomorrow"
 private const val NOTIFICATION_CHANNEL_NAME_TOMORROW = "课程提醒"
 private const val NOTIFICATION_CHANNEL_DESCRIPTION_TOMORROW = "每日提醒课程、考试、自定义事项等"
 
+const val NOTIFICATION_CHANNEL_ID_PUSH = "XhuTimetable-Push"
+private const val NOTIFICATION_CHANNEL_NAME_PUSH = "推送消息"
+private const val NOTIFICATION_CHANNEL_DESCRIPTION_PUSH = "推送一些信息，包括成绩查询等"
+
 enum class NotificationId(val id: Int) {
     CHECK_UPDATE(1001),
     DOWNLOAD(1002),
@@ -23,6 +27,7 @@ enum class NotificationId(val id: Int) {
     NOTIFY_TOMORROW_COURSE(1004),
     NOTIFY_TOMORROW_TEST(1005),
     NOTIFY_TOMORROW_DEBUG(1006),
+    PULL(1100),
 }
 
 fun initChannelID(applicationContext: Context) {
@@ -42,6 +47,14 @@ fun initChannelID(applicationContext: Context) {
             NOTIFICATION_CHANNEL_ID_TOMORROW,
             NOTIFICATION_CHANNEL_NAME_TOMORROW,
             NOTIFICATION_CHANNEL_DESCRIPTION_TOMORROW,
+            NotificationManager.IMPORTANCE_HIGH
+        )
+    )
+    notificationManager.createNotificationChannel(
+        createChannel(
+            NOTIFICATION_CHANNEL_ID_PUSH,
+            NOTIFICATION_CHANNEL_NAME_PUSH,
+            NOTIFICATION_CHANNEL_DESCRIPTION_PUSH,
             NotificationManager.IMPORTANCE_HIGH
         )
     )
