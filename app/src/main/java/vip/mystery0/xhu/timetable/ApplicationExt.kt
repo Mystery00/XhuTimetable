@@ -11,7 +11,9 @@ import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.work.*
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.Crashes
@@ -140,16 +142,8 @@ suspend fun setTrigger(workManager: WorkManager, executeTime: LocalDateTime? = n
         return
     }
     val uniqueWorkName = NotifyWork::class.java.name
-    val workQuery = WorkQuery.Builder
-        .fromUniqueWorkNames(listOf(uniqueWorkName))
-        .addStates(listOf(WorkInfo.State.ENQUEUED))
-        .build()
-    val workInfoList = workManager.getWorkInfos(workQuery)
-        .await()
-    if (workInfoList.isNotEmpty()) {
-        //任务不为空，说明已经存在任务了，那么不进行处理
-        Log.d("ApplicationExt: setTrigger", "work already exist")
-        return
+    if (executeTime == null) {
+        workManager.cancelUniqueWork(uniqueWorkName)
     }
 
     val now = LocalDateTime.now()
@@ -172,5 +166,5 @@ suspend fun setTrigger(workManager: WorkManager, executeTime: LocalDateTime? = n
             .setInitialDelay(duration.toMillis(), TimeUnit.MILLISECONDS)
             .build()
     )
-    Log.i("ApplicationExt: setTrigger", "work enqueue success")
+    Log.i("ApplicationExt", "work enqueue success")
 }
