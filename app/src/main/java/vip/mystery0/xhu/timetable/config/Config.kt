@@ -325,4 +325,9 @@ class Config internal constructor() {
             return if (save.isNullOrBlank()) CustomUi.DEFAULT
             else moshi.adapter(CustomUi::class.java).fromJson(save)!!
         }
+    var pushNotificationIndex: Int
+        set(value) {
+            kv.encode("pushNotificationIndex", value)
+        }
+        get() = kv.decodeInt("pushNotificationIndex", 1)
 }

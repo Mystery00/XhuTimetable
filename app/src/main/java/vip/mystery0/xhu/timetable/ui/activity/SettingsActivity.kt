@@ -18,6 +18,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.alorma.compose.settings.ui.SettingsMenuLink
@@ -25,6 +28,7 @@ import com.microsoft.appcenter.crashes.model.TestCrashException
 import com.vanpra.composematerialdialogs.*
 import com.vanpra.composematerialdialogs.datetime.time.timepicker
 import kotlinx.coroutines.launch
+import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.appVersionCode
 import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
@@ -44,11 +48,15 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.timeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.SettingsViewModel
+import vip.mystery0.xhu.timetable.work.PullWork
 import java.time.Instant
 import java.time.LocalTime
+import java.util.concurrent.TimeUnit
 
 class SettingsActivity : BaseComposeActivity() {
     private val viewModel: SettingsViewModel by viewModels()
+
+    private val workManager: WorkManager by inject()
 
     @Composable
     override fun BuildContent() {
@@ -511,6 +519,24 @@ class SettingsActivity : BaseComposeActivity() {
                                 if (version != null) {
                                     viewModel.downloadPatch()
                                 }
+                            },
+                        )
+                        SettingsMenuLink(
+                            title = { Text(text = "启用定时任务") },
+                            onClick = {
+                                workManager.cancelUniqueWork("debug-${PullWork::class.java.name}")
+                                workManager.enqueueUniquePeriodicWork(
+                                    "debug-${PullWork::class.java.name}",
+                                    ExistingPeriodicWorkPolicy.KEEP,
+                                    PeriodicWorkRequestBuilder<PullWork>(5, TimeUnit.MINUTES)
+                                        .build()
+                                )
+                            },
+                        )
+                        SettingsMenuLink(
+                            title = { Text(text = "取消定时任务") },
+                            onClick = {
+                                workManager.cancelUniqueWork("debug-${PullWork::class.java.name}")
                             },
                         )
                     }
