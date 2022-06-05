@@ -1,9 +1,7 @@
 package vip.mystery0.xhu.timetable
 
 import android.annotation.SuppressLint
-import android.app.AlarmManager
 import android.app.Application
-import android.app.PendingIntent
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -13,18 +11,20 @@ import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.work.*
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.Crashes
 import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.GlobalConfig
-import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.getConfig
-import vip.mystery0.xhu.timetable.work.NotifyService
+import vip.mystery0.xhu.timetable.work.NotifyWork
 import java.io.File
+import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalTime
+import java.time.LocalDateTime
+import java.util.concurrent.TimeUnit
 
 @SuppressLint("StaticFieldLeak")
 internal lateinit var context: Context
@@ -133,32 +133,44 @@ fun Context.joinQQGroup(activity: BaseComposeActivity) {
     }
 }
 
-suspend fun setTrigger(alarmManager: AlarmManager) {
+suspend fun setTrigger(workManager: WorkManager, executeTime: LocalDateTime? = null) {
     val notifyCourse = getConfig { notifyCourse }
     val notifyExam = getConfig { notifyExam }
     if (!notifyCourse && !notifyExam) {
         return
     }
-    val notifyTime = getConfig { notifyTime } ?: return
-    val now = LocalTime.now()
-    val alarmIntent = Intent(context, NotifyService::class.java)
-    val pendingIntent = PendingIntent.getForegroundService(
-        context,
-        0,
-        alarmIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    val uniqueWorkName = NotifyWork::class.java.name
+    val workQuery = WorkQuery.Builder
+        .fromUniqueWorkNames(listOf(uniqueWorkName))
+        .addStates(listOf(WorkInfo.State.ENQUEUED))
+        .build()
+    val workInfoList = workManager.getWorkInfos(workQuery)
+        .await()
+    if (workInfoList.isNotEmpty()) {
+        //任务不为空，说明已经存在任务了，那么不进行处理
+        Log.d("ApplicationExt: setTrigger", "work already exist")
+        return
+    }
+
+    val now = LocalDateTime.now()
+    val nextExecuteTime = if (executeTime == null) {
+        val notifyTime = getConfig { notifyTime } ?: return
+        var time = notifyTime.atDate(LocalDate.now())
+        if (time.isBefore(now)) {
+            //当天计算出来的时间比当前时间早，那么调度时间改成明天
+            time = time.plusDays(1)
+        }
+        time
+    } else {
+        executeTime
+    }
+    val duration = Duration.between(now, nextExecuteTime)
+    workManager.enqueueUniqueWork(
+        uniqueWorkName,
+        ExistingWorkPolicy.KEEP,
+        OneTimeWorkRequestBuilder<NotifyWork>()
+            .setInitialDelay(duration.toMillis(), TimeUnit.MILLISECONDS)
+            .build()
     )
-    //关闭定时器
-    alarmManager.cancel(pendingIntent)
-    //设置新的定时器
-    val triggerAtTime =
-        (if (now.isBefore(notifyTime)) notifyTime.atDate(LocalDate.now())
-        else notifyTime.atDate(LocalDate.now().plusDays(1)))
-            .withSecond(0)
-    alarmManager.set(
-        AlarmManager.RTC_WAKEUP,
-        triggerAtTime.atZone(chinaZone).toInstant().toEpochMilli(),
-        pendingIntent
-    )
-    Log.i("TAG", "setTrigger: $triggerAtTime")
+    Log.i("ApplicationExt: setTrigger", "work enqueue success")
 }

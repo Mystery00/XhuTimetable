@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
@@ -37,7 +36,6 @@ class PullWork(private val appContext: Context, workerParams: WorkerParameters) 
     }
 
     override suspend fun doWork(): Result {
-        Log.i(TAG, "doWork: PullWork")
         startForeground()
         val user = SessionManager.loggedUserList().find { it.main } ?: return Result.success()
         val response = user.withAutoLogin {
@@ -90,6 +88,7 @@ class PullWork(private val appContext: Context, workerParams: WorkerParameters) 
 
     private val notificationBuilder: NotificationCompat.Builder
         get() = NotificationCompat.Builder(appContext, NOTIFICATION_CHANNEL_ID_PUSH)
+            .setDefaults(Notification.DEFAULT_ALL)
             .setSmallIcon(R.drawable.ic_push)
             .setOngoing(false)
             .setAutoCancel(true)

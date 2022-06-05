@@ -265,11 +265,6 @@ class Config internal constructor() {
             kv.encode("alwaysShowNewVersion", value)
         }
         get() = kv.decodeBool("alwaysShowNewVersion", false)
-    var alwaysShowNotification: Boolean
-        set(value) {
-            kv.encode("alwaysShowNotification", value)
-        }
-        get() = kv.decodeBool("alwaysShowNotification", false)
     var showCustomCourseOnWeek: Boolean
         set(value) {
             kv.encode("showCustomCourseOnWeek", value)

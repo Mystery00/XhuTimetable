@@ -491,14 +491,6 @@ class SettingsActivity : BaseComposeActivity() {
                                 setConfig { alwaysShowNewVersion = it }
                             }
                         )
-                        ConfigSettingsCheckbox(
-                            config = GlobalConfig::alwaysShowNotification,
-                            scope = scope,
-                            title = { Text(text = "始终显示提醒通知") },
-                            onCheckedChange = {
-                                setConfig { alwaysShowNotification = it }
-                            }
-                        )
                         SettingsMenuLink(
                             title = { Text(text = "测试下载最新安装包") },
                             subtitle = {
