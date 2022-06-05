@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.module
 
-import android.app.AlarmManager
 import android.app.NotificationManager
 import android.content.ClipboardManager
 import android.content.Context
@@ -24,7 +23,6 @@ private val appModule = module {
     single { WorkManager.getInstance(androidContext()) }
     single { androidContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
     single { androidContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
-    single { androidContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager }
     single { androidContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
     single { EventBus.getDefault() }
 }

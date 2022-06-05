@@ -7,9 +7,11 @@ import android.content.Context
 import android.content.Intent
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
+import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -24,12 +26,14 @@ import vip.mystery0.xhu.timetable.packageName
 import vip.mystery0.xhu.timetable.repository.CourseRepo
 import vip.mystery0.xhu.timetable.repository.getExamList
 import vip.mystery0.xhu.timetable.repository.getRawCourseColorList
+import vip.mystery0.xhu.timetable.setTrigger
 import vip.mystery0.xhu.timetable.ui.activity.ExamActivity
 import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_TOMORROW
 import vip.mystery0.xhu.timetable.ui.notification.NotificationId
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.viewmodel.formatTime
 import java.time.*
+import java.time.format.DateTimeFormatter
 
 class NotifyWork(private val appContext: Context, workerParams: WorkerParameters) :
     CoroutineWorker(appContext, workerParams), KoinComponent {
@@ -40,36 +44,29 @@ class NotifyWork(private val appContext: Context, workerParams: WorkerParameters
 
     private val notificationManager: NotificationManager by inject()
     private val courseLocalRepo: CourseRepo by localRepo()
+    private val workManager: WorkManager by inject()
     private val colorAccent = android.graphics.Color.parseColor("#2196F3")
+    private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     override suspend fun doWork(): Result {
-        val alwaysShowNotification = getConfig { alwaysShowNotification }
-        if (alwaysShowNotification) {
-            notificationBuilder
-                .setContentTitle("检查明日课程任务已启动")
-                .build()
-                .notify(NotificationId.NOTIFY_TOMORROW_DEBUG)
-        }
-        val currentYear = getConfig { currentYear }
-        val currentTerm = getConfig { currentTerm }
-        val mainUser = SessionManager.mainUser()
-        val tomorrow = LocalDate.now().plusDays(1)
-        val currentWeek = runOnCpu {
-            //计算当前周
-            val startDate =
-                LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone).toLocalDate()
-            val days =
-                Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay())
-                    .toDays()
-            ((days / 7) + 1).toInt()
-        }
-        val tomorrowWeek =
-            if (tomorrow.dayOfWeek == DayOfWeek.SUNDAY) currentWeek + 1 else currentWeek
-        val examResponse = getExamList(mainUser)
-        val examList = runOnCpu {
-            if (alwaysShowNotification) {
-                examResponse.list
-            } else {
+        try {
+            val currentYear = getConfig { currentYear }
+            val currentTerm = getConfig { currentTerm }
+            val mainUser = SessionManager.loggedUserList().find { it.main } ?: return complete()
+            val tomorrow = LocalDate.now().plusDays(1)
+            val currentWeek = runOnCpu {
+                //计算当前周
+                val startDate =
+                    LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone).toLocalDate()
+                val days =
+                    Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay())
+                        .toDays()
+                ((days / 7) + 1).toInt()
+            }
+            val tomorrowWeek =
+                if (tomorrow.dayOfWeek == DayOfWeek.SUNDAY) currentWeek + 1 else currentWeek
+            val examResponse = getExamList(mainUser)
+            val examList = runOnCpu {
                 examResponse.list.filter {
                     tomorrow == LocalDateTime.ofInstant(
                         Instant.ofEpochMilli(it.startTime),
@@ -78,35 +75,39 @@ class NotifyWork(private val appContext: Context, workerParams: WorkerParameters
                         .toLocalDate()
                 }
             }
-        }
-        notifyTest(examList.sortedBy { it.startTime })
-        if (currentWeek > 0) {
-            //获取自定义颜色列表
-            val colorMap = getRawCourseColorList()
-            val list = if (alwaysShowNotification) {
-                courseLocalRepo.getCourseList(mainUser, currentYear, currentTerm)
-            } else {
-                courseLocalRepo.getCourseList(mainUser, currentYear, currentTerm)
+            notifyTest(examList.sortedBy { it.startTime })
+            if (currentWeek > 0) {
+                //获取自定义颜色列表
+                val colorMap = getRawCourseColorList()
+                val list = courseLocalRepo.getCourseList(mainUser, currentYear, currentTerm)
                     .filter {
                         it.week.contains(tomorrowWeek) && it.day == tomorrow.dayOfWeek.value
                     }
+                val tomorrowCourseList = list.map {
+                    Course(
+                        it.name,
+                        it.location,
+                        it.time.formatTime(),
+                        it.time.first(),
+                        color = colorMap[it.name] ?: ColorPool.hash(it.name),
+                    )
+                }
+                notifyCourse(tomorrowCourseList.sortedBy { it.firstTime })
             }
-            val tomorrowCourseList = list.map {
-                Course(
-                    it.name,
-                    it.location,
-                    it.time.formatTime(),
-                    it.time.first(),
-                    color = colorMap[it.name] ?: ColorPool.hash(it.name),
-                )
-            }
-            notifyCourse(tomorrowCourseList.sortedBy { it.firstTime })
+        } catch (e: Exception) {
+            Log.w(TAG, "doWork failed", e)
+        }
+        return complete()
+    }
+
+    private suspend fun complete(): Result {
+        getConfig { notifyTime }?.let {
+            setTrigger(workManager, it.atDate(LocalDate.now().plusDays(1)))
         }
         return Result.success()
     }
 
     private fun notifyTest(examList: List<ExamItem>) {
-        ColorPool.random
         val title = "您明天有${examList.size}门考试，记得带上学生证和文具哦~"
         val builder = notificationBuilder
             .setContentTitle(title)
@@ -130,7 +131,13 @@ class NotifyWork(private val appContext: Context, workerParams: WorkerParameters
                 courseItem.length,
                 0
             )
-            courseItem.append(" 时间：${it.startTime} 地点：${it.location}")
+            val startTime =
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(it.startTime), chinaZone)
+            val endTime =
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(it.endTime), chinaZone)
+            val time =
+                "${timeFormatter.format(startTime)} - ${timeFormatter.format(endTime)}"
+            courseItem.append(" 时间：$time 地点：${it.location}")
             style.addLine(courseItem)
         }
         style.addLine("具体详情请点击查看")

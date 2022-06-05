@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
-import android.app.AlarmManager
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
@@ -31,7 +30,6 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
 
     private val startRepo: StartRepo = getRepo()
     private val workManager: WorkManager by inject()
-    private val alarmManager: AlarmManager by inject()
 
     private val _readyState = MutableStateFlow(ReadyState(loading = true))
     val readyState: StateFlow<ReadyState> = _readyState
@@ -43,7 +41,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
                 ReadyState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
         }) {
             SessionManager.readFromCache()
-            setTrigger(alarmManager)
+            setTrigger(workManager)
             val response = startRepo.init()
             runOnCpu {
                 var version = response.version
