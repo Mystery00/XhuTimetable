@@ -193,8 +193,9 @@ dependencies {
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
     //Glance
     debugImplementation("com.guolindev.glance:glance:1.1.0")
-    //zloading
-    implementation("com.zyao89:zloading:1.2.0")
+    //zloading，通过jitpack导入修改版本
+//    implementation("com.zyao89:zloading:1.2.0")
+    implementation("com.github.Mystery00:ZLoading:1.2.1")
     //ucrop
     implementation("com.github.yalantis:ucrop:2.2.8")
 }
