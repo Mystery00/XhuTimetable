@@ -325,4 +325,20 @@ class Config internal constructor() {
             kv.encode("pushNotificationIndex", value)
         }
         get() = kv.decodeInt("pushNotificationIndex", 1)
+    var pullWorkLastExecuteTime: Instant
+        set(value) {
+            kv.encode("pullWorkLastExecuteTime", value.toEpochMilli())
+        }
+        get() {
+            val time = kv.decodeLong("pullWorkLastExecuteTime", 0L)
+            return Instant.ofEpochMilli(time)
+        }
+    var notifyWorkLastExecuteTime: Instant
+        set(value) {
+            kv.encode("notifyWorkLastExecuteTime", value.toEpochMilli())
+        }
+        get() {
+            val time = kv.decodeLong("notifyWorkLastExecuteTime", 0L)
+            return Instant.ofEpochMilli(time)
+        }
 }
