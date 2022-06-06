@@ -108,6 +108,11 @@ class FeedbackViewModel : ComposeViewModel() {
                 _wsStatus.value = WebSocketState(WebSocketStatus.DISCONNECTED, HINT_NETWORK)
                 return@launch
             }
+            if (_wsStatus.value.status == WebSocketStatus.DISCONNECTED || _wsStatus.value.status == WebSocketStatus.FAILED) {
+                _wsStatus.value =
+                    WebSocketState(WebSocketStatus.DISCONNECTED, "网络连接异常，请点击右上角的图标进行重连")
+                return@launch
+            }
             webSocket?.send(content)
         }
     }
@@ -129,20 +134,24 @@ class FeedbackViewModel : ComposeViewModel() {
             return
         }
         if (!isOnline()) {
-            _wsStatus.value = WebSocketState(WebSocketStatus.DISCONNECTED, "")
+            _wsStatus.value = WebSocketState(WebSocketStatus.DISCONNECTED, "网络连接失败，请稍候重试")
             return
         }
         webSocket?.close(1000, "管理员登录")
         _wsStatus.value = WebSocketState(WebSocketStatus.CONNECTING)
-        val url = if (adminMode)
+        val url = if (adminMode) {
             "wss://ws.api.mystery0.vip/admin/ws?token=${token}&receiveUserId=${targetUserId}"
-        else
+        } else {
+            if (token.isEmpty()) {
+                token = mainUser.token
+            }
             "wss://ws.api.mystery0.vip/ws?token=${token}"
+        }
         val request = Request.Builder()
             .url(url)
             .build()
         val webSocketClient = OkHttpClient.Builder()
-            .pingInterval(10, TimeUnit.SECONDS)
+            .pingInterval(5, TimeUnit.SECONDS)
             .build()
         webSocket = webSocketClient.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {

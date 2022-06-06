@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.work.WorkManager
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.alorma.compose.settings.ui.SettingsMenuLink
@@ -26,16 +25,12 @@ import com.microsoft.appcenter.crashes.model.TestCrashException
 import com.vanpra.composematerialdialogs.*
 import com.vanpra.composematerialdialogs.datetime.time.timepicker
 import kotlinx.coroutines.launch
-import org.koin.core.component.inject
-import vip.mystery0.xhu.timetable.appVersionCode
-import vip.mystery0.xhu.timetable.appVersionName
+import vip.mystery0.xhu.timetable.*
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.setConfig
-import vip.mystery0.xhu.timetable.joinQQGroup
-import vip.mystery0.xhu.timetable.loadInBrowser
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.entity.nightModeSelectList
 import vip.mystery0.xhu.timetable.model.event.EventType
@@ -54,8 +49,6 @@ import java.time.LocalTime
 
 class SettingsActivity : BaseComposeActivity() {
     private val viewModel: SettingsViewModel by viewModels()
-
-    private val workManager: WorkManager by inject()
 
     @Composable
     override fun BuildContent() {
@@ -232,7 +225,7 @@ class SettingsActivity : BaseComposeActivity() {
                         subtitle = {
                             Text(
                                 text = if (notifyTime != null)
-                                    "将会在每天的 ${notifyTime!!.format(timeFormatter)} 提醒"
+                                    "将会在每天的 ${notifyTime!!.format(timeFormatter)} 提醒\n为了避免无法提醒，请将${appName}添加到系统后台白名单中"
                                 else
                                     "提醒功能已禁用"
                             )
