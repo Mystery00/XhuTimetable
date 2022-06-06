@@ -16,10 +16,7 @@ import androidx.work.WorkerParameters
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
-import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.chinaZone
-import vip.mystery0.xhu.timetable.config.getConfig
-import vip.mystery0.xhu.timetable.config.runOnCpu
+import vip.mystery0.xhu.timetable.config.*
 import vip.mystery0.xhu.timetable.model.response.ExamItem
 import vip.mystery0.xhu.timetable.module.localRepo
 import vip.mystery0.xhu.timetable.packageName
@@ -49,6 +46,7 @@ class NotifyWork(private val appContext: Context, workerParams: WorkerParameters
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     override suspend fun doWork(): Result {
+        setConfig { notifyWorkLastExecuteTime = Instant.now() }
         try {
             val currentYear = getConfig { currentYear }
             val currentTerm = getConfig { currentTerm }

@@ -22,6 +22,7 @@ import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.packageName
 import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_PUSH
 import vip.mystery0.xhu.timetable.ui.notification.NotificationId
+import java.time.Instant
 
 class PullWork(private val appContext: Context, workerParams: WorkerParameters) :
     CoroutineWorker(appContext, workerParams), KoinComponent {
@@ -37,6 +38,7 @@ class PullWork(private val appContext: Context, workerParams: WorkerParameters) 
 
     override suspend fun doWork(): Result {
         startForeground()
+        setConfig { pullWorkLastExecuteTime = Instant.now() }
         val user = SessionManager.loggedUserList().find { it.main } ?: return Result.success()
         val response = user.withAutoLogin {
             serverApi.fetchPush(it).checkLogin()

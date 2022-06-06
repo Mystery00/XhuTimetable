@@ -18,8 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -34,6 +32,7 @@ import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.GlobalConfig
+import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.joinQQGroup
 import vip.mystery0.xhu.timetable.loadInBrowser
@@ -46,12 +45,12 @@ import vip.mystery0.xhu.timetable.ui.preference.XhuFoldSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
 import vip.mystery0.xhu.timetable.utils.timeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.SettingsViewModel
-import vip.mystery0.xhu.timetable.work.PullWork
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.LocalTime
-import java.util.concurrent.TimeUnit
 
 class SettingsActivity : BaseComposeActivity() {
     private val viewModel: SettingsViewModel by viewModels()
@@ -514,22 +513,30 @@ class SettingsActivity : BaseComposeActivity() {
                             },
                         )
                         SettingsMenuLink(
-                            title = { Text(text = "启用定时任务") },
-                            onClick = {
-                                workManager.cancelUniqueWork("debug-${PullWork::class.java.name}")
-                                workManager.enqueueUniquePeriodicWork(
-                                    "debug-${PullWork::class.java.name}",
-                                    ExistingPeriodicWorkPolicy.KEEP,
-                                    PeriodicWorkRequestBuilder<PullWork>(5, TimeUnit.MINUTES)
-                                        .build()
+                            title = { Text(text = "NotifyWork 上一次执行时间") },
+                            subtitle = {
+                                Text(
+                                    text = LocalDateTime.ofInstant(
+                                        GlobalConfig.notifyWorkLastExecuteTime,
+                                        chinaZone
+                                    ).format(chinaDateTimeFormatter)
                                 )
                             },
+                            onClick = {
+                            }
                         )
                         SettingsMenuLink(
-                            title = { Text(text = "取消定时任务") },
-                            onClick = {
-                                workManager.cancelUniqueWork("debug-${PullWork::class.java.name}")
+                            title = { Text(text = "PullWork 上一次执行时间") },
+                            subtitle = {
+                                Text(
+                                    text = LocalDateTime.ofInstant(
+                                        GlobalConfig.pullWorkLastExecuteTime,
+                                        chinaZone
+                                    ).format(chinaDateTimeFormatter)
+                                )
                             },
+                            onClick = {
+                            }
                         )
                     }
                 }
