@@ -106,6 +106,9 @@ class NotifyWork(private val appContext: Context, workerParams: WorkerParameters
     }
 
     private fun notifyTest(examList: List<ExamItem>) {
+        if (examList.isEmpty()) {
+            return
+        }
         val title = "您明天有${examList.size}门考试，记得带上学生证和文具哦~"
         val builder = notificationBuilder
             .setContentTitle(title)
@@ -144,6 +147,9 @@ class NotifyWork(private val appContext: Context, workerParams: WorkerParameters
     }
 
     private fun notifyCourse(courseList: List<Course>) {
+        if (courseList.isEmpty()) {
+            return
+        }
         val title = "您明天有${courseList.size}节课要上哦~"
         val builder = notificationBuilder
             .setContentTitle(title)
