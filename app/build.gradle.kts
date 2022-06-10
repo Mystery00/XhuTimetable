@@ -144,7 +144,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
     //accompanist
-    val accompanistVersion = "0.24.9-beta"
+    val accompanistVersion = "0.24.10-beta"
     implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-pager:accompanistVersion")
