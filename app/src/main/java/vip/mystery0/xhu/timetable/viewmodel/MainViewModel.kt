@@ -366,7 +366,9 @@ class MainViewModel : ComposeViewModel() {
         viewModelScope.launch(serverExceptionHandler { throwable ->
             Log.w(TAG, "load course list failed", throwable)
             _loading.value = false
-//            _tableCourse.value = emptyList()
+            if (!GlobalConfig.showOldCourseWhenFailed) {
+                _tableCourse.value = emptyList()
+            }
             toastMessage(throwable.message ?: throwable.javaClass.simpleName)
         }) {
             fun convertCourseList(
