@@ -285,6 +285,15 @@ class SettingsActivity : BaseComposeActivity() {
                         }
                     )
                     ConfigSettingsCheckbox(
+                        config = GlobalConfig::showOldCourseWhenFailed,
+                        scope = scope,
+                        title = { Text(text = "当加载课表的新数据失败时，显示缓存的旧数据") },
+                        subtitle = { Text(text = "在一定程度上，可能会有点作用？！") },
+                        onCheckedChange = {
+                            setConfig { showOldCourseWhenFailed = it }
+                        }
+                    )
+                    ConfigSettingsCheckbox(
                         icon = {
                             Icon(
                                 painter = XhuIcons.allowUploadCrash,

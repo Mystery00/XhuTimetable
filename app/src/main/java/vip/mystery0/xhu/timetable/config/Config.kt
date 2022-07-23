@@ -346,4 +346,9 @@ class Config internal constructor() {
             kv.encode("autoCacheJwcCourse", value)
         }
         get() = kv.decodeBool("autoCacheJwcCourse", true)
+    var showOldCourseWhenFailed: Boolean
+        set(value) {
+            kv.encode("showOldCourseWhenFailed", value)
+        }
+        get() = kv.decodeBool("showOldCourseWhenFailed", true)
 }
