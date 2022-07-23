@@ -284,6 +284,9 @@ object XhuIcons {
         val search: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_action_search)
+        val addCircle: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_add_circle)
     }
 
     object WsState {

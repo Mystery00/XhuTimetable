@@ -311,7 +311,6 @@ class ExpScoreActivity : BaseComposeActivity() {
         }
     }
 
-
     @Composable
     private fun ShowYearDialog(
         show: MutableState<Boolean>,

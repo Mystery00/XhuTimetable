@@ -36,6 +36,10 @@ import coil.request.ImageRequest
 import com.google.accompanist.pager.*
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.material.math.MathUtils.lerp
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.MaterialDialogState
+import com.vanpra.composematerialdialogs.listItems
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.Subscribe
@@ -64,9 +68,10 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
     private val serverApi: ServerApi by inject()
     private val viewModel: MainViewModel by viewModels()
     private lateinit var modalBottomSheetState: ModalBottomSheetState
+    private lateinit var addDialogState: MaterialDialogState
 
     private val ext: MainActivityExt
-        get() = MainActivityExt(this, viewModel, modalBottomSheetState)
+        get() = MainActivityExt(this, viewModel, modalBottomSheetState, addDialogState)
 
     @OptIn(ExperimentalPagerApi::class)
     @Composable
@@ -85,6 +90,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         val poems by viewModel.poems.collectAsState()
 
         modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+        addDialogState = rememberMaterialDialogState()
 
         val isDarkMode = isDarkMode()
 
@@ -169,58 +175,63 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                             .background(barColor)
                             .height(45.dp),
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(horizontal = 8.dp)
-                                .align(Alignment.CenterEnd)
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() },
-                                ) {
-                                    trackEvent("手动刷新课表")
-                                    viewModel.loadCourseList()
-                                },
-                        ) {
-                            val isDark = isDarkMode()
-                            AndroidView(
-                                factory = { context ->
-                                    ImageView(context)
-                                },
+                        val tab = tabOf(pagerState.currentPage)
+                        if (tab.titleBar != null) {
+                            tab.titleBar.invoke(this, ext)
+                        } else {
+                            Box(
                                 modifier = Modifier
-                                    .size(24.dp)
-                                    .align(Alignment.Center),
+                                    .fillMaxHeight()
+                                    .padding(horizontal = 8.dp)
+                                    .align(Alignment.CenterEnd)
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = remember { MutableInteractionSource() },
+                                    ) {
+                                        trackEvent("手动刷新课表")
+                                        viewModel.loadCourseList()
+                                    },
                             ) {
-                                it.imageTintList =
-                                    ColorStateList.valueOf(if (isDark) android.graphics.Color.WHITE else android.graphics.Color.BLACK)
-                                it.setImageResource(R.drawable.ic_sync)
-                                val animation =
-                                    ObjectAnimator.ofFloat(it, "rotation", 0F, 360F).apply {
-                                        duration = 1000L
-                                        repeatCount = ValueAnimator.INFINITE
-                                        addListener(object : Animator.AnimatorListener {
-                                            override fun onAnimationStart(p0: Animator?) {
-                                            }
-
-                                            override fun onAnimationEnd(p0: Animator?) {
-                                            }
-
-                                            override fun onAnimationCancel(p0: Animator?) {
-                                            }
-
-                                            override fun onAnimationRepeat(p0: Animator?) {
-                                                if (!loading) {
-                                                    p0?.cancel()
+                                val isDark = isDarkMode()
+                                AndroidView(
+                                    factory = { context ->
+                                        ImageView(context)
+                                    },
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .align(Alignment.Center),
+                                ) {
+                                    it.imageTintList =
+                                        ColorStateList.valueOf(if (isDark) android.graphics.Color.WHITE else android.graphics.Color.BLACK)
+                                    it.setImageResource(R.drawable.ic_sync)
+                                    val animation =
+                                        ObjectAnimator.ofFloat(it, "rotation", 0F, 360F).apply {
+                                            duration = 1000L
+                                            repeatCount = ValueAnimator.INFINITE
+                                            addListener(object : Animator.AnimatorListener {
+                                                override fun onAnimationStart(p0: Animator?) {
                                                 }
-                                            }
-                                        })
+
+                                                override fun onAnimationEnd(p0: Animator?) {
+                                                }
+
+                                                override fun onAnimationCancel(p0: Animator?) {
+                                                }
+
+                                                override fun onAnimationRepeat(p0: Animator?) {
+                                                    if (!loading) {
+                                                        p0?.cancel()
+                                                    }
+                                                }
+                                            })
+                                        }
+                                    if (loading) {
+                                        animation.start()
                                     }
-                                if (loading) {
-                                    animation.start()
                                 }
                             }
+                            tab.title(this, ext)
                         }
-                        tabOf(pagerState.currentPage).title(this, ext)
                         Divider(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -403,6 +414,8 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                 it.putExtra(AccountSettingsActivity.INTENT_EXTRA, true)
             }
         }
+
+        ShowAddDialog(addDialogState)
     }
 
     @Composable
@@ -430,6 +443,24 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                 }
             }
         )
+    }
+
+    @Composable
+    private fun ShowAddDialog(
+        dialogState: MaterialDialogState,
+    ) {
+        MaterialDialog(dialogState = dialogState) {
+            listItems(list = listOf("添加自定义课程", "添加自定义事项")) { index, _ ->
+                when (index) {
+                    0 -> {
+                        intentTo(CustomCourseActivity::class)
+                    }
+                    1 -> {
+                        intentTo(CustomThingActivity::class)
+                    }
+                }
+            }
+        }
     }
 
     @OptIn(ExperimentalPagerApi::class)
@@ -563,14 +594,15 @@ private enum class Tab(
     val index: Int,
     val label: String,
     val otherLabel: String = label,
-    val title: TabTitle,
+    val titleBar: TabTitle? = null,
+    val title: TabTitle = {},
     val content: TabContent,
 ) {
     TODAY(
         index = 0,
         label = "今日",
         otherLabel = "明日",
-        title = todayCourseTitle,
+        titleBar = todayCourseTitleBar,
         content = todayCourseContent,
     ),
     WEEK(
@@ -600,6 +632,7 @@ data class MainActivityExt(
     val activity: MainActivity,
     val viewModel: MainViewModel,
     val modalBottomSheetState: ModalBottomSheetState,
+    val addDialogState: MaterialDialogState,
 )
 
 typealias TabTitle = @Composable BoxScope.(MainActivityExt) -> Unit
