@@ -14,6 +14,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -32,10 +33,30 @@ import vip.mystery0.xhu.timetable.viewmodel.TodayCourseSheet
 import java.time.Duration
 import java.time.LocalDate
 
-val todayCourseTitle: TabTitle = @Composable { ext ->
+val todayCourseTitleBar: TabTitle = @Composable { ext ->
     val viewModel = ext.viewModel
     val title = viewModel.todayTitle.collectAsState()
-    Text(text = title.value, modifier = Modifier.align(Alignment.Center))
+    Text(
+        text = title.value,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier
+            .align(Alignment.CenterStart)
+            .padding(start = 8.dp),
+    )
+    IconButton(
+        onClick = {
+            ext.addDialogState.show()
+        },
+        modifier = Modifier
+            .fillMaxHeight()
+            .align(Alignment.CenterEnd),
+    ) {
+        Icon(
+            painter = XhuIcons.Action.addCircle,
+            contentDescription = null,
+        )
+    }
 }
 
 @ExperimentalMaterialApi
