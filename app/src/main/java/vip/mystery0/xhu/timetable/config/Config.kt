@@ -341,4 +341,9 @@ class Config internal constructor() {
             val time = kv.decodeLong("notifyWorkLastExecuteTime", 0L)
             return Instant.ofEpochMilli(time)
         }
+    var autoCacheJwcCourse: Boolean
+        set(value) {
+            kv.encode("autoCacheJwcCourse", value)
+        }
+        get() = kv.decodeBool("autoCacheJwcCourse", true)
 }

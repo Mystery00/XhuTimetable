@@ -29,6 +29,7 @@ class CourseRemoteRepo : CourseRepo {
                 getConfig { currentYear },
                 getConfig { currentTerm },
                 getConfig { showCustomCourseOnWeek },
+                getConfig { autoCacheJwcCourse },
             ).checkLogin()
         }
         val courseList = response.first

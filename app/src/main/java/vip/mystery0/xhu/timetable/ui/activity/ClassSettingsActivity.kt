@@ -206,6 +206,21 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                     )
                 }
                 XhuSettingsGroup(title = {
+                    Text(text = "云端设置")
+                }) {
+                    ConfigSettingsCheckbox(
+                        config = GlobalConfig::autoCacheJwcCourse,
+                        scope = scope,
+                        title = { Text(text = "云端自动缓存课程数据") },
+                        subtitle = {
+                            Text(text = "由云端控制课程数据的缓存，在一定程度上，可以提高APP打开后数据刷新的效率")
+                        },
+                        onCheckedChange = {
+                            setConfig { autoCacheJwcCourse = it }
+                        }
+                    )
+                }
+                XhuSettingsGroup(title = {
                     Text(text = "额外功能")
                 }) {
                     SettingsMenuLink(
