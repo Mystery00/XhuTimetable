@@ -12,6 +12,7 @@ interface JwcApi {
         @Query("year") year: String,
         @Query("term") term: Int,
         @Query("showCustomCourse") showCustomCourse: Boolean,
+        @Query("autoCache") autoCache: Boolean,
     ): Response<List<CourseResponse>>
 
     @GET("/api/rest/xhu-timetable/server/jwc/exam")
