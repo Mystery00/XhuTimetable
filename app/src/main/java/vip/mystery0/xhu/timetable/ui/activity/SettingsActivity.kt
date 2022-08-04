@@ -134,22 +134,6 @@ class SettingsActivity : BaseComposeActivity() {
                             showNightModeState.show()
                         }
                     )
-                    ConfigSettingsCheckbox(
-                        config = GlobalConfig::enablePageEffect,
-                        scope = scope,
-                        icon = {
-                            Icon(
-                                painter = XhuIcons.pageEffect,
-                                contentDescription = null,
-                                tint = XhuColor.Common.blackText,
-                            )
-                        },
-                        title = { Text(text = "启用切换动画") },
-                        onCheckedChange = {
-                            setConfig { enablePageEffect = it }
-                            eventBus.post(UIEvent(EventType.CHANGE_PAGE_EFFECT))
-                        }
-                    )
                     SettingsMenuLink(
                         icon = {
                             Icon(
