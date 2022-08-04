@@ -287,6 +287,9 @@ object XhuIcons {
         val addCircle: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_add_circle)
+        val sync: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_sync)
     }
 
     object WsState {
