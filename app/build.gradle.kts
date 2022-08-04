@@ -130,21 +130,21 @@ dependencies {
     implementation("androidx.core:core-ktx:1.8.0")
     implementation("androidx.appcompat:appcompat:1.4.2")
     implementation("com.google.android.material:material:1.6.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.0")
-    implementation("androidx.activity:activity-compose:1.5.0")
-    implementation("androidx.core:core-splashscreen:1.0.0-rc01")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
+    implementation("androidx.activity:activity-compose:1.5.1")
+    implementation("androidx.core:core-splashscreen:1.0.0")
     implementation("androidx.browser:browser:1.4.0")
     implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
     implementation("androidx.glance:glance-appwidget:1.0.0-alpha03")
     //compose
-    val composeVersion = "1.2.0-rc02"
+    val composeVersion = "1.2.0-rc03"
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.material:material:$composeVersion")
     implementation("androidx.glance:glance:1.0.0-alpha03")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
     //accompanist
-    val accompanistVersion = "0.24.13-rc"
+    val accompanistVersion = "0.25.0"
     implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-pager:accompanistVersion")
@@ -159,7 +159,7 @@ dependencies {
     implementation("io.github.vanpra.compose-material-dialogs:datetime:$composeMaterialDialogsVersion")
     implementation("io.github.vanpra.compose-material-dialogs:color:$composeMaterialDialogsVersion")
     //room
-    val roomVersion = "2.4.2"
+    val roomVersion = "2.4.3"
     implementation("androidx.room:room-runtime:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
@@ -186,7 +186,7 @@ dependencies {
     //eventbus
     implementation("org.greenrobot:eventbus:3.3.1")
     //preference
-    implementation("com.github.alorma:compose-settings-ui:0.7.2")
+    implementation("com.github.alorma:compose-settings-ui:0.8.0")
     //AppCenter
     val appCenterSdkVersion = "4.4.5"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
