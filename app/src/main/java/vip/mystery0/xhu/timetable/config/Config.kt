@@ -219,11 +219,6 @@ class Config internal constructor() {
         }
         get() = kv.decodeString("showTomorrowCourseTime")
             ?.let { LocalTime.parse(it, timeFormatter) }
-    var enablePageEffect: Boolean
-        set(value) {
-            kv.encode("enablePageEffect", value)
-        }
-        get() = kv.decodeBool("enablePageEffect", true)
     var notifyCourse: Boolean
         set(value) {
             kv.encode("notifyCourse", value)
