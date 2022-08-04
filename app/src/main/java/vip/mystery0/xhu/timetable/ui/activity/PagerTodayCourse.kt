@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -14,6 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +38,7 @@ import java.time.LocalDate
 val todayCourseTitleBar: TabTitle = @Composable { ext ->
     val viewModel = ext.viewModel
     val title = viewModel.todayTitle.collectAsState()
+    val loading by viewModel.loading.collectAsState()
     Text(
         text = title.value,
         fontSize = 18.sp,
@@ -44,18 +47,44 @@ val todayCourseTitleBar: TabTitle = @Composable { ext ->
             .align(Alignment.CenterStart)
             .padding(start = 8.dp),
     )
-    IconButton(
-        onClick = {
-            ext.addDialogState.show()
-        },
-        modifier = Modifier
+    Row(modifier = Modifier
             .fillMaxHeight()
-            .align(Alignment.CenterEnd),
-    ) {
-        Icon(
-            painter = XhuIcons.Action.addCircle,
-            contentDescription = null,
-        )
+            .align(Alignment.CenterEnd)) {
+        if (loading) {
+            val infiniteTransition = rememberInfiniteTransition()
+            val angle by infiniteTransition.animateFloat(
+                initialValue = 0F,
+                targetValue = 360F,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(1000, easing = LinearEasing)
+                )
+            )
+            IconButton(
+                onClick = { },
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .graphicsLayer {
+                        rotationZ = angle
+                    },
+            ) {
+                Icon(
+                    painter = XhuIcons.Action.sync,
+                    contentDescription = null,
+                )
+            }
+        }
+        IconButton(
+            onClick = {
+                ext.addDialogState.show()
+            },
+            modifier = Modifier
+                .fillMaxHeight()
+        ) {
+            Icon(
+                painter = XhuIcons.Action.addCircle,
+                contentDescription = null,
+            )
+        }
     }
 }
 
