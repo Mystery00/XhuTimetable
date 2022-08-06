@@ -185,7 +185,7 @@ jobs:
           --arg versionName "${{ steps.apk.outputs.versionName }}" \
           --arg lastVersionCode "${{ inputs.oldVersionCode }}" \
           --arg forceUpdate "${{ inputs.forceUpdate }}" \
-          --arg betaVersion "${{ input.betaVersion }}" \
+          --arg betaVersion "${{ inputs.betaVersion }}" \
           -n "$json"
           )
           curl -s -X POST "${{ secrets.NEW_VERSION_API }}" \
