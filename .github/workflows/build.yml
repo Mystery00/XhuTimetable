@@ -1,0 +1,39 @@
+name: Build Android APK
+on:
+  workflow_dispatch:
+env:
+  OUTPUT_DIR: "app/build/outputs/apk/debug"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: 设置JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: 设置Android SDK
+        uses: android-actions/setup-android@v2
+      - name: 构建安装包
+        run: ./gradlew assembleDebug
+      - name: 解析编译json
+        run: |
+          sudo apt-get install jq
+          outputMetadataJson="${{ env.OUTPUT_DIR }}/output-metadata.json"
+          versionName=$(cat "$outputMetadataJson" | jq -r '.elements[0].versionName')
+          versionCode=$(cat "$outputMetadataJson" | jq -r '.elements[0].versionCode')
+          apkFile=$(cat "$outputMetadataJson" | jq -r '.elements[0].outputFile')
+          echo "apkFile=$apkFile" >> $GITHUB_ENV
+      - name: Upload APK
+        uses: actions/upload-artifact@v1
+        with:
+          name: app
+          path: ${{ env.OUTPUT_DIR }}/${{ env.apkFile }}
+#      - name: Upload To Pgyer
+#        uses: JantHsueh/upload-file-action@master
+#        with:
+#          url: https://www.pgyer.com/apiv2/app/upload
+#          method: POST
+#          # ${{ secrets.pgyer_key }} 使用秘钥，如何设置下面会介绍
+#          forms: '{"_api_key":"${{ secrets.pgyer_key }}","buildInstallType":3}'
+#          fileForms: '{"file":"app/build/outputs/apk/debug/xw-debug.apk"}'
