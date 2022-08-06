@@ -103,10 +103,8 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                 ) {
                     LazyColumn(
                         reverseLayout = true,
-                        contentPadding = rememberInsetsPaddingValues(
-                            insets = LocalWindowInsets.current.statusBars,
-                            additionalTop = 90.dp
-                        ),
+                        contentPadding = WindowInsets.statusBars.add(WindowInsets(top = 90.dp))
+                            .asPaddingValues(),
                         modifier = Modifier.weight(1F),
                         state = lazyListState,
                     ) {

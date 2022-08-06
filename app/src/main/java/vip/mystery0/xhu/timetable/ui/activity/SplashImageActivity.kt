@@ -53,78 +53,76 @@ class SplashImageActivity : BaseComposeActivity() {
     @Composable
     override fun BuildContentWindow() {
         XhuTimetableTheme {
-            ProvideWindowInsets {
-                val timer by viewModel.timerState.collectAsState()
-                val showSplash = DataHolder.splashFile
-                val backgroundColor = DataHolder.backgroundColor
-                if (showSplash == null) {
-                    toMain()
-                    return@ProvideWindowInsets
+            val timer by viewModel.timerState.collectAsState()
+            val showSplash = DataHolder.splashFile
+            val backgroundColor = DataHolder.backgroundColor
+            if (showSplash == null) {
+                toMain()
+                return@XhuTimetableTheme
+            }
+            Box(
+                modifier = Modifier
+                    .background(backgroundColor ?: MaterialTheme.colors.background)
+                    .fillMaxSize()
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(showSplash)
+                        .crossfade(true)
+                        .diskCachePolicy(CachePolicy.DISABLED)
+                        .build(),
+                    imageLoader = loader,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxSize(),
+                )
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(36.dp)
+                        .navigationBarsPadding()
+                        .background(Color(0x80000000), shape = RoundedCornerShape(24.dp))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = {
+                                viewModel.skip()
+                            }
+                        )) {
+                    Text(
+                        modifier = Modifier.padding(12.dp),
+                        text = "跳 过 $timer",
+                        fontSize = 12.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                    )
                 }
                 Box(
                     modifier = Modifier
-                        .background(backgroundColor ?: MaterialTheme.colors.background)
-                        .fillMaxSize()
-                ) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(showSplash)
-                            .crossfade(true)
-                            .diskCachePolicy(CachePolicy.DISABLED)
-                            .build(),
-                        imageLoader = loader,
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .fillMaxSize(),
+                        .align(Alignment.BottomStart)
+                        .padding(36.dp)
+                        .navigationBarsPadding()
+                        .background(Color(0x80000000), shape = RoundedCornerShape(24.dp))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = {
+                                viewModel.hide()
+                                "启动图将会隐藏7天".toast()
+                            }
+                        )) {
+                    Text(
+                        modifier = Modifier.padding(12.dp),
+                        text = "隐藏",
+                        fontSize = 12.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
                     )
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(36.dp)
-                            .navigationBarsPadding()
-                            .background(Color(0x80000000), shape = RoundedCornerShape(24.dp))
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = {
-                                    viewModel.skip()
-                                }
-                            )) {
-                        Text(
-                            modifier = Modifier.padding(12.dp),
-                            text = "跳 过 $timer",
-                            fontSize = 12.sp,
-                            color = Color.White,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(36.dp)
-                            .navigationBarsPadding()
-                            .background(Color(0x80000000), shape = RoundedCornerShape(24.dp))
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = {
-                                    viewModel.hide()
-                                    "启动图将会隐藏7天".toast()
-                                }
-                            )) {
-                        Text(
-                            modifier = Modifier.padding(12.dp),
-                            text = "隐藏",
-                            fontSize = 12.sp,
-                            color = Color.White,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
                 }
-                if (timer <= 0) {
-                    toMain()
-                }
+            }
+            if (timer <= 0) {
+                toMain()
             }
         }
     }
