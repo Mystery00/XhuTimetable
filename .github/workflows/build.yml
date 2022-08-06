@@ -21,7 +21,7 @@ on:
         default: false
         type: boolean
 env:
-  OUTPUT_DIR: "app/build/outputs/apk/debug"
+  OUTPUT_DIR: "app/build/outputs/apk/release"
   SIGN_KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}
   SIGN_KEY_STORE_PASSWORD: ${{ secrets.SIGN_KEY_STORE_PASSWORD }}
   SIGN_KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
