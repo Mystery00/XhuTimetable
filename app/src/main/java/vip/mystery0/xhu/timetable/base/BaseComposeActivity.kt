@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.DrawableRes
 import androidx.annotation.LayoutRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,6 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.zyao89.view.zloading.ZLoadingView
 import com.zyao89.view.zloading.Z_TYPE
@@ -232,5 +236,21 @@ abstract class BaseComposeActivity(
             eventBus.unregister(this)
         }
         super.onDestroy()
+    }
+
+    protected inline fun <reified T : BaseComposeActivity> pushDynamicShortcuts(
+        id: String,
+        label: String,
+        @DrawableRes iconResId: Int,
+    ) {
+        val shortcut = ShortcutInfoCompat.Builder(this, id)
+            .setShortLabel(label)
+            .setLongLabel(label)
+            .setIcon(IconCompat.createWithResource(this, iconResId))
+            .setIntent(Intent(this, T::class.java).apply {
+                action = "${packageName}.${T::class.java.simpleName}"
+            })
+            .build()
+        ShortcutManagerCompat.pushDynamicShortcut(this, shortcut)
     }
 }
