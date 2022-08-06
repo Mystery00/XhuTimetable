@@ -3,6 +3,10 @@ on:
   workflow_dispatch:
 env:
   OUTPUT_DIR: "app/build/outputs/apk/debug"
+  SIGN_KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}
+  SIGN_KEY_STORE_PASSWORD: ${{ secrets.SIGN_KEY_STORE_PASSWORD }}
+  SIGN_KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
+  SIGN_KEY_STORE_FILE: "/tmp/key.jks"
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,8 +18,13 @@ jobs:
           java-version: 11
       - name: 设置Android SDK
         uses: android-actions/setup-android@v2
+      - name: 解密签名
+        run: |
+            echo ${{ secrets.SIGN_KEY_BASE64 }} | base64 --decode > /tmp/key.jks
       - name: 构建安装包
-        run: ./gradlew assembleDebug
+        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+        with:
+          arguments: assembleDebug
       - name: 解析编译json
         run: |
           sudo apt-get install jq
