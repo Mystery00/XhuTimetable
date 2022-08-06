@@ -26,6 +26,8 @@ val networkModule = module {
     single(named(HTTP_CLIENT)) {
         OkHttpClient.Builder()
             .retryOnConnectionFailure(true)
+            .connectTimeout(20, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
             .addInterceptor(LogInterceptor())
             .addInterceptor(ServerApiInterceptor())
             .build()
