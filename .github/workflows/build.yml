@@ -20,10 +20,6 @@ on:
         required: true
         default: false
         type: boolean
-      updateLog:
-        description: '更新日志'
-        required: true
-        type: string
 env:
   OUTPUT_DIR: "app/build/outputs/apk/debug"
   SIGN_KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}
@@ -175,6 +171,8 @@ jobs:
           echo $apkResourceId
           echo $patchResourceId
           
+          updateLog=$(cat "version.log")
+          
           json='{apkResourceId:$apkResourceId,apkMd5:$apkMd5,patchResourceId:$patchResourceId,patchMd5:$patchMd5,updateLog:$updateLog,versionCode:$versionCode,versionName:$versionName,lastVersionCode:$lastVersionCode,forceUpdate:$forceUpdate,betaVersion:$betaVersion}'
           requestJson=$(
           jq \
@@ -182,7 +180,7 @@ jobs:
           --arg apkMd5 "${{ steps.patch.outputs.apkMd5 }}" \
           --arg patchResourceId "$patchResourceId" \
           --arg patchMd5 "${{ steps.patch.outputs.patchMd5 }}" \
-          --arg updateLog "${{ input.updateLog }}" \
+          --arg updateLog "${updateLog}" \
           --arg versionCode "${{ steps.apk.outputs.versionCode }}" \
           --arg versionName "${{ steps.apk.outputs.versionName }}" \
           --arg lastVersionCode "${{ inputs.oldVersionCode }}" \
