@@ -10,6 +10,16 @@ on:
         description: '上一版本版本号'
         required: true
         type: string
+      betaVersion:
+        description: '测试版本'
+        required: true
+        default: true
+        type: boolean
+      forceUpdate:
+        description: '是否强制更新'
+        required: true
+        default: false
+        type: boolean
       updateLog:
         description: '更新日志'
         required: true
@@ -42,32 +52,144 @@ jobs:
         run: |
           sudo apt-get install jq bsdiff
           mkdir patch
-          curl -# -o "patch/old.apk" "${{ inputs.oldVersionUrl }}"
+          curl -# -o "patch/old.apk" ${{ inputs.oldVersionUrl }}
       - name: 解析编译文件路径
+        id: apk
         run: |
           versionName=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionName')
           versionCode=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionCode')
           apkFile=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].outputFile')
-          echo "versionName=$versionName" >> $GITHUB_ENV
-          echo "versionCode=$versionCode" >> $GITHUB_ENV
+          
           cp "${{ env.OUTPUT_DIR }}/${{ env.apkFile }}" "patch/new.apk"
-          echo "apkFile=$apkFile" >> $GITHUB_ENV
+          
+          echo ::set-output name=versionName::$versionName
+          echo ::set-output name=versionCode::$versionCode
+          echo ::set-output name=apkFile::$apkFile
       - name: 上传 APK
         uses: actions/upload-artifact@v1
         with:
           name: debug.apk
-          path: ${{ env.OUTPUT_DIR }}/${{ env.apkFile }}
+          path: ${{ env.OUTPUT_DIR }}/${{ steps.apk.outputs.apkFile }}
       - name: 生成 patch 文件
+        id: patch
         run: |
-          echo "${{ env.versionName }}"
-          echo "${{ env.versionCode }}"
-          patchFile="patch/${{ inputs.oldVersionCode }}-${{ env.versionCode }}.patch"
-          bsdiff "patch/old.apk" "patch/new.apk" "$patchFile"
-#      - name: Upload To Pgyer
-#        uses: JantHsueh/upload-file-action@master
-#        with:
-#          url: https://www.pgyer.com/apiv2/app/upload
-#          method: POST
-#          # ${{ secrets.pgyer_key }} 使用秘钥，如何设置下面会介绍
-#          forms: '{"_api_key":"${{ secrets.pgyer_key }}","buildInstallType":3}'
-#          fileForms: '{"file":"app/build/outputs/apk/debug/xw-debug.apk"}'
+          echo "${{ steps.apk.outputs.versionName }}"
+          echo "${{ steps.apk.outputs.versionCode }}"
+          patchFile="${{ inputs.oldVersionCode }}-${{ steps.apk.outputs.versionCode }}.patch"
+          bsdiff "patch/old.apk" "patch/new.apk" "patch/$patchFile"
+          
+          echo ::set-output name=patchFile::$patchFile
+          
+          apkMd5=$(md5sum "patch/new.apk" | cut -d" " -f1)
+          patchMd5=$(md5sum "patch/$patchFile" | cut -d" " -f1)
+
+          echo "=========================================="
+          echo "新版本：${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}"
+          ls -l "patch/new.apk"
+          echo "md5: $apkMd5"
+          echo "=========================================="
+          echo "增量包：${patchFile}"
+          ls -l "patch/$patchFile"
+          echo "md5: $patchMd5"
+          echo "=========================================="
+          
+          echo ::set-output name=apkMd5::$apkMd5
+          echo ::set-output name=patchMd5::$patchMd5
+      - name: 上传 APK 文件签名
+        id: upload_apk
+        run: |
+          file="patch/new.apk"
+          title="${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}.apk"
+          mimeType="application/vnd.android.package-archive"
+          fileSize=$(wc -c <"$file")
+          json='{"serviceName":"","storeType":"apk",fileSize:$fileSize,mimeType:$mimeType,title:$title}'
+          requestJson=$(
+            jq \
+              --arg fileSize "$fileSize" \
+              --arg title "$title" \
+              --arg mimeType "$mimeType" \
+              -n "$json"
+          )
+          apkSignResp=$(
+            curl -s -X POST "${{ secrets.SIGNATURE_API }}" \
+              -H 'Content-Type: application/json' \
+              -d "$requestJson"
+          )
+          uploadUrl=$(echo "$apkSignResp" | jq -r '.uploadUrl')
+          key=$(echo "$apkSignResp" | jq -r '.uploadMeta.key')
+          token=$(echo "$apkSignResp" | jq -r '.uploadMeta.signature')
+          
+          echo ::set-output name=uploadUrl::$uploadUrl
+          echo ::set-output name=key::$key
+          echo ::set-output name=token::$token
+      - name: 上传 APK 文件
+        id: upload_apk_response
+        uses: JantHsueh/upload-file-action@master
+        with:
+          url: "${{ steps.upload_apk.outputs.uploadUrl }}"
+          method: POST
+          forms: '{"key":"${{ steps.upload_apk.outputs.key }}","token":"${{ steps.upload_apk.outputs.token }}"}'
+          fileForms: '{"file":"patch/new.apk"}'
+      - name: 上传 patch 文件签名
+        id: upload_patch
+        run: |
+          file="patch/${{ steps.patch.outputs.patchFile }}"
+          title="${{ steps.patch.outputs.patchFile }}"
+          mimeType="text/x-diff"
+          fileSize=$(wc -c <"$file")
+          json='{"serviceName":"","storeType":"apk",fileSize:$fileSize,mimeType:$mimeType,title:$title}'
+          requestJson=$(
+            jq \
+              --arg fileSize "$fileSize" \
+              --arg title "$title" \
+              --arg mimeType "$mimeType" \
+              -n "$json"
+          )
+          apkSignResp=$(
+            curl -s -X POST "${{ secrets.SIGNATURE_API }}" \
+              -H 'Content-Type: application/json' \
+              -d "$requestJson"
+          )
+          uploadUrl=$(echo "$apkSignResp" | jq -r '.uploadUrl')
+          key=$(echo "$apkSignResp" | jq -r '.uploadMeta.key')
+          token=$(echo "$apkSignResp" | jq -r '.uploadMeta.signature')
+          
+          echo ::set-output name=uploadUrl::$uploadUrl
+          echo ::set-output name=key::$key
+          echo ::set-output name=token::$token
+      - name: 上传 patch 文件
+        id: upload_patch_response
+        uses: JantHsueh/upload-file-action@master
+        with:
+          url: "${{ steps.upload_patch.outputs.uploadUrl }}"
+          method: POST
+          forms: '{"key":"${{ steps.upload_patch.outputs.key }}","token":"${{ steps.upload_patch.outputs.token }}"}'
+          fileForms: '{"file":"patch/new.apk"}'
+      - name: 发布新版本
+        run: |
+          apkResponse=${{ steps.upload_apk_response.outputs.output.data }}
+          apkResourceId=$(echo "$apkResponse" | jq -r '.resourceId')
+          patchResponse=${{ steps.upload_patch_response.outputs.output.data }}
+          patchResourceId=$(echo "$patchResponse" | jq -r '.resourceId')
+          
+          echo $apkResourceId
+          echo $patchResourceId
+          
+          json='{apkResourceId:$apkResourceId,apkMd5:$apkMd5,patchResourceId:$patchResourceId,patchMd5:$patchMd5,updateLog:$updateLog,versionCode:$versionCode,versionName:$versionName,lastVersionCode:$lastVersionCode,forceUpdate:$forceUpdate,betaVersion:$betaVersion}'
+          requestJson=$(
+          jq \
+          --arg apkResourceId "$apkResourceId" \
+          --arg apkMd5 "${{ steps.patch.outputs.apkMd5 }}" \
+          --arg patchResourceId "$patchResourceId" \
+          --arg patchMd5 "${{ steps.patch.outputs.patchMd5 }}" \
+          --arg updateLog "${{ input.updateLog }}" \
+          --arg versionCode "${{ steps.apk.outputs.versionCode }}" \
+          --arg versionName "${{ steps.apk.outputs.versionName }}" \
+          --arg lastVersionCode "${{ inputs.oldVersionCode }}" \
+          --arg forceUpdate "${{ inputs.forceUpdate }}" \
+          --arg betaVersion "${{ input.betaVersion }}" \
+          -n "$json"
+          )
+          curl -s -X POST "${{ secrets.NEW_VERSION_API }}" \
+            -H 'Content-Type: application/json' \
+            -d "$requestJson"
