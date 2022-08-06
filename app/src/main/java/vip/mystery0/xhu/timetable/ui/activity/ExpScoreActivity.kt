@@ -24,6 +24,7 @@ import com.google.accompanist.placeholder.material.shimmer
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
+import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.model.response.ExpScoreResponse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
@@ -433,6 +434,11 @@ class ExpScoreActivity : BaseComposeActivity() {
                 }
             )
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        pushDynamicShortcuts<ScoreActivity>(this.javaClass.name, title.toString(), R.drawable.ic_exp_score)
     }
 }
 

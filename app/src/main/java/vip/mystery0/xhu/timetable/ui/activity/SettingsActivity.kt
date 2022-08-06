@@ -26,6 +26,7 @@ import com.vanpra.composematerialdialogs.*
 import com.vanpra.composematerialdialogs.datetime.time.timepicker
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.*
+import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.GlobalConfig
@@ -590,6 +591,11 @@ class SettingsActivity : BaseComposeActivity() {
                 selectedTime = it
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        pushDynamicShortcuts<SettingsActivity>(this.javaClass.name, title.toString(), R.drawable.ic_settings)
     }
 }
 

@@ -20,6 +20,7 @@ import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.packageName
+import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_DEFAULT
 import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_PUSH
 import vip.mystery0.xhu.timetable.ui.notification.NotificationId
 import java.time.Instant
@@ -81,7 +82,7 @@ class PullWork(private val appContext: Context, workerParams: WorkerParameters) 
         )
 
     private val silentNotificationBuilder: NotificationCompat.Builder
-        get() = NotificationCompat.Builder(appContext, NOTIFICATION_CHANNEL_ID_PUSH)
+        get() = NotificationCompat.Builder(appContext, NOTIFICATION_CHANNEL_ID_DEFAULT)
             .setSound(null)
             .setVibrate(null)
             .setSmallIcon(R.drawable.ic_push)

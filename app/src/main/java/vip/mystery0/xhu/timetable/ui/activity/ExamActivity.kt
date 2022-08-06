@@ -30,6 +30,7 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.Exam
 import vip.mystery0.xhu.timetable.viewmodel.ExamViewModel
+import vip.mystery0.xhu.timetable.R
 
 class ExamActivity : BaseComposeActivity() {
     private val viewModel: ExamViewModel by viewModels()
@@ -158,6 +159,11 @@ class ExamActivity : BaseComposeActivity() {
                 onBack()
             }
         )
+    }
+
+    override fun onStart() {
+        super.onStart()
+        pushDynamicShortcuts<ExamActivity>(this.javaClass.name, title.toString(), R.drawable.ic_exam)
     }
 }
 
