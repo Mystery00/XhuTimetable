@@ -1,6 +1,19 @@
 name: Build Android APK
 on:
   workflow_dispatch:
+    inputs:
+      oldVersionUrl:
+        description: '上一版本下载地址'
+        required: true
+        type: string
+      oldVersionCode:
+        description: '上一版本版本号'
+        required: true
+        type: string
+      updateLog:
+        description: '更新日志'
+        required: true
+        type: string
 env:
   OUTPUT_DIR: "app/build/outputs/apk/debug"
   SIGN_KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}
@@ -15,29 +28,41 @@ jobs:
       - name: 设置JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 11
+          java-version: 1.8
       - name: 设置Android SDK
         uses: android-actions/setup-android@v2
       - name: 解密签名
         run: |
             echo ${{ secrets.SIGN_KEY_BASE64 }} | base64 --decode > /tmp/key.jks
-      - name: 构建安装包
+      - name: 构建 APK
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
-          arguments: assembleDebug
-      - name: 解析编译json
+          arguments: assembleRelease
+      - name: 安装工具
         run: |
-          sudo apt-get install jq
-          outputMetadataJson="${{ env.OUTPUT_DIR }}/output-metadata.json"
-          versionName=$(cat "$outputMetadataJson" | jq -r '.elements[0].versionName')
-          versionCode=$(cat "$outputMetadataJson" | jq -r '.elements[0].versionCode')
-          apkFile=$(cat "$outputMetadataJson" | jq -r '.elements[0].outputFile')
+          sudo apt-get install jq bsdiff
+          mkdir patch
+          curl -# -o "patch/old.apk" "${{ inputs.oldVersionUrl }}"
+      - name: 解析编译文件路径
+        run: |
+          versionName=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionName')
+          versionCode=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionCode')
+          apkFile=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].outputFile')
+          echo "versionName=$versionName" >> $GITHUB_ENV
+          echo "versionCode=$versionCode" >> $GITHUB_ENV
+          cp "${{ env.OUTPUT_DIR }}/${{ env.apkFile }}" "patch/new.apk"
           echo "apkFile=$apkFile" >> $GITHUB_ENV
-      - name: Upload APK
+      - name: 上传 APK
         uses: actions/upload-artifact@v1
         with:
-          name: app
+          name: debug.apk
           path: ${{ env.OUTPUT_DIR }}/${{ env.apkFile }}
+      - name: 生成 patch 文件
+        run: |
+          echo "${{ env.versionName }}"
+          echo "${{ env.versionCode }}"
+          patchFile="patch/${{ inputs.oldVersionCode }}-${{ env.versionCode }}.patch"
+          bsdiff "patch/old.apk" "patch/new.apk" "$patchFile"
 #      - name: Upload To Pgyer
 #        uses: JantHsueh/upload-file-action@master
 #        with:
