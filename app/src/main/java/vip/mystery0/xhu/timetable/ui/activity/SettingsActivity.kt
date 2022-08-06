@@ -36,6 +36,7 @@ import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.entity.nightModeSelectList
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
+import vip.mystery0.xhu.timetable.ui.activity.contract.FontFileResultContract
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.XhuFoldSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
@@ -50,6 +51,18 @@ import java.time.LocalTime
 
 class SettingsActivity : BaseComposeActivity() {
     private val viewModel: SettingsViewModel by viewModels()
+
+    private val fontFileSelectLauncher =
+        registerForActivityResult(FontFileResultContract()) { intent ->
+            if (intent == null) {
+                toastString("操作已取消")
+                return@registerForActivityResult
+            }
+            intent.data?.let {
+                viewModel.setCustomFont(it)
+                toastString("字体设置成功，重启应用后生效")
+            }
+        }
 
     @Composable
     override fun BuildContent() {
@@ -162,6 +175,22 @@ class SettingsActivity : BaseComposeActivity() {
                         title = { Text(text = "自定义课表界面") },
                         onClick = {
                             intentTo(CustomUiActivity::class)
+                        }
+                    )
+                    SettingsMenuLink(
+                        title = { Text(text = "自定义字体") },
+                        subtitle = {
+                            Text(text = "注意，如果选择的字体文件无效，会使用默认字体")
+                        },
+                        onClick = {
+                            fontFileSelectLauncher.launch("")
+                        }
+                    )
+                    SettingsMenuLink(
+                        title = { Text(text = "恢复默认字体") },
+                        onClick = {
+                            viewModel.setCustomFont(null)
+                            toastString("字体恢复默认成功，重启应用后生效")
                         }
                     )
                 }
@@ -595,7 +624,11 @@ class SettingsActivity : BaseComposeActivity() {
 
     override fun onStart() {
         super.onStart()
-        pushDynamicShortcuts<SettingsActivity>(this.javaClass.name, title.toString(), R.drawable.ic_settings)
+        pushDynamicShortcuts<SettingsActivity>(
+            this.javaClass.name,
+            title.toString(),
+            R.drawable.ic_settings
+        )
     }
 }
 

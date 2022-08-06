@@ -3,6 +3,7 @@ package vip.mystery0.xhu.timetable
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.ActivityNotFoundException
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
@@ -64,6 +65,8 @@ val externalDownloadDir: File
     get() = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
 val externalDocumentsDir: File
     get() = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)!!
+val contentResolver: ContentResolver
+    get() = context.contentResolver
 
 val customImageDir: File
     get() = File(externalPictureDir, "custom").apply {
