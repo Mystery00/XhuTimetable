@@ -56,7 +56,7 @@ jobs:
           versionCode=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionCode')
           apkFile=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].outputFile')
           
-          cp "${{ env.OUTPUT_DIR }}/${{ env.apkFile }}" "patch/new.apk"
+          cp "${{ env.OUTPUT_DIR }}/${apkFile}" "patch/new.apk"
           
           echo ::set-output name=versionName::$versionName
           echo ::set-output name=versionCode::$versionCode
