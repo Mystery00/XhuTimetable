@@ -346,4 +346,16 @@ class Config internal constructor() {
             kv.encode("showOldCourseWhenFailed", value)
         }
         get() = kv.decodeBool("showOldCourseWhenFailed", true)
+    var customFontFile: File?
+        set(value) {
+            kv.encode("customFontFile", value?.absolutePath)
+        }
+        get() {
+            val save = kv.getString("customFontFile", null) ?: return null
+            val file = File(save)
+            if (!file.exists()) {
+                return null
+            }
+            return file
+        }
 }

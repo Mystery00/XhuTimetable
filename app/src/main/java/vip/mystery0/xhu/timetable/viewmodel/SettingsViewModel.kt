@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
+import android.net.Uri
 import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.viewModelScope
@@ -8,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.inject
+import vip.mystery0.xhu.timetable.*
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.startUniqueWork
@@ -16,11 +18,13 @@ import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
-import vip.mystery0.xhu.timetable.setTrigger
 import vip.mystery0.xhu.timetable.ui.theme.Theme
 import vip.mystery0.xhu.timetable.work.DownloadApkWork
 import vip.mystery0.xhu.timetable.work.DownloadPatchWork
 import vip.mystery0.xhu.timetable.work.NotifyWork
+import java.io.File
+import java.io.FileOutputStream
+import java.time.Instant
 import java.time.LocalTime
 
 class SettingsViewModel : ComposeViewModel() {
@@ -116,6 +120,22 @@ class SettingsViewModel : ComposeViewModel() {
     fun downloadPatch() {
         viewModelScope.launch {
             workManager.startUniqueWork<DownloadPatchWork>()
+        }
+    }
+
+    fun setCustomFont(uri: Uri?) {
+        viewModelScope.launch {
+            if (uri == null) {
+                setConfig { customFontFile = null }
+                return@launch
+            }
+            val fontFile = File(externalDocumentsDir, "custom.font")
+            contentResolver.openInputStream(uri).use { input ->
+                FileOutputStream(fontFile).use { output ->
+                    input?.copyTo(output)
+                }
+            }
+            setConfig { customFontFile = fontFile }
         }
     }
 }
