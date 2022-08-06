@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.core.animation.doOnEnd
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.registerAppCenter
 import vip.mystery0.xhu.timetable.viewmodel.StarterViewModel
@@ -42,7 +43,11 @@ class StartActivity : BaseComposeActivity(setSystemUiColor = false) {
 
     private fun goToMainScreen() {
         if (SessionManager.isLogin()) {
-            intentTo(SplashImageActivity::class)
+            if (DataHolder.splashFile == null) {
+                intentTo(MainActivity::class)
+            } else {
+                intentTo(SplashImageActivity::class)
+            }
         } else {
             intentTo(LoginActivity::class)
         }

@@ -23,8 +23,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.insets.ProvideWindowInsets
-import com.google.accompanist.insets.navigationBarsPadding
 import com.zyao89.view.zloading.Z_TYPE
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
@@ -47,171 +45,169 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
         var usernameError by remember { mutableStateOf(false) }
         var passwordError by remember { mutableStateOf(false) }
 
-        ProvideWindowInsets {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(XhuColor.Common.whiteBackground)
+        ) {
+            Image(
+                modifier = Modifier.fillMaxWidth(),
+                painter = painterResource(id = R.mipmap.login_header),
+                contentDescription = null,
+                contentScale = ContentScale.FillWidth
+            )
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(XhuColor.Common.whiteBackground)
+                    .padding(horizontal = 48.dp)
+                    .navigationBarsPadding()
+                    .fillMaxHeight()
             ) {
-                Image(
-                    modifier = Modifier.fillMaxWidth(),
-                    painter = painterResource(id = R.mipmap.login_header),
-                    contentDescription = null,
-                    contentScale = ContentScale.FillWidth
-                )
-                Column(
+                var username by remember { mutableStateOf("") }
+                var password by remember { mutableStateOf("") }
+                Spacer(
                     modifier = Modifier
-                        .padding(horizontal = 48.dp)
-                        .navigationBarsPadding()
-                        .fillMaxHeight()
-                ) {
-                    var username by remember { mutableStateOf("") }
-                    var password by remember { mutableStateOf("") }
-                    Spacer(
-                        modifier = Modifier
-                            .height(62.dp)
-                            .fillMaxWidth()
-                    )
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .height(IntrinsicSize.Min)
-                            .fillMaxWidth()
-                            .onFocusChanged { focusState ->
-                                if (focusState.isFocused) {
-                                    //持有焦点
-                                    usernameError = username.isBlank()
-                                }
+                        .height(62.dp)
+                        .fillMaxWidth()
+                )
+                OutlinedTextField(
+                    modifier = Modifier
+                        .height(IntrinsicSize.Min)
+                        .fillMaxWidth()
+                        .onFocusChanged { focusState ->
+                            if (focusState.isFocused) {
+                                //持有焦点
+                                usernameError = username.isBlank()
                             }
-                            .focusRequester(usernameFocusRequester),
-                        value = username,
-                        onValueChange = {
-                            username = it
-                        },
-                        shape = RoundedCornerShape(18.dp),
-                        leadingIcon = {
-                            Icon(MaterialIcons.TwoTone.AccountCircle, null)
-                        },
-                        trailingIcon = {
-                            if (username.isNotBlank()) {
-                                IconButton(onClick = { username = "" }) {
-                                    Icon(MaterialIcons.TwoTone.Clear, null)
-                                }
+                        }
+                        .focusRequester(usernameFocusRequester),
+                    value = username,
+                    onValueChange = {
+                        username = it
+                    },
+                    shape = RoundedCornerShape(18.dp),
+                    leadingIcon = {
+                        Icon(MaterialIcons.TwoTone.AccountCircle, null)
+                    },
+                    trailingIcon = {
+                        if (username.isNotBlank()) {
+                            IconButton(onClick = { username = "" }) {
+                                Icon(MaterialIcons.TwoTone.Clear, null)
                             }
-                        },
-                        label = {
-                            Text(text = "学号")
-                        },
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = MaterialTheme.colors.secondary,
-                            unfocusedLabelColor = XhuColor.loginLabel,
-                            backgroundColor = Color.Transparent,
-                            leadingIconColor = MaterialTheme.colors.secondary,
-                        ),
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Next,
-                            keyboardType = KeyboardType.Number,
-                        ),
-                        maxLines = 1,
-                        isError = usernameError,
-                    )
-                    Spacer(
-                        modifier = Modifier
-                            .height(48.dp)
-                            .fillMaxWidth()
-                    )
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .height(IntrinsicSize.Min)
-                            .fillMaxWidth()
-                            .onFocusChanged { focusState ->
-                                if (focusState.isFocused) {
-                                    //持有焦点
-                                    passwordError = password.isBlank()
-                                }
+                        }
+                    },
+                    label = {
+                        Text(text = "学号")
+                    },
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = MaterialTheme.colors.secondary,
+                        unfocusedLabelColor = XhuColor.loginLabel,
+                        backgroundColor = Color.Transparent,
+                        leadingIconColor = MaterialTheme.colors.secondary,
+                    ),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next,
+                        keyboardType = KeyboardType.Number,
+                    ),
+                    maxLines = 1,
+                    isError = usernameError,
+                )
+                Spacer(
+                    modifier = Modifier
+                        .height(48.dp)
+                        .fillMaxWidth()
+                )
+                OutlinedTextField(
+                    modifier = Modifier
+                        .height(IntrinsicSize.Min)
+                        .fillMaxWidth()
+                        .onFocusChanged { focusState ->
+                            if (focusState.isFocused) {
+                                //持有焦点
+                                passwordError = password.isBlank()
                             }
-                            .focusRequester(passwordFocusRequester),
-                        value = password,
-                        onValueChange = {
-                            password = it
-                        },
-                        shape = RoundedCornerShape(18.dp),
-                        leadingIcon = {
-                            Icon(MaterialIcons.TwoTone.Lock, null)
-                        },
-                        trailingIcon = {
-                            if (password.isNotBlank()) {
-                                IconButton(onClick = { password = "" }) {
-                                    Icon(MaterialIcons.TwoTone.Clear, null)
-                                }
+                        }
+                        .focusRequester(passwordFocusRequester),
+                    value = password,
+                    onValueChange = {
+                        password = it
+                    },
+                    shape = RoundedCornerShape(18.dp),
+                    leadingIcon = {
+                        Icon(MaterialIcons.TwoTone.Lock, null)
+                    },
+                    trailingIcon = {
+                        if (password.isNotBlank()) {
+                            IconButton(onClick = { password = "" }) {
+                                Icon(MaterialIcons.TwoTone.Clear, null)
                             }
-                        },
-                        label = {
-                            Text(text = "密码")
-                        },
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = MaterialTheme.colors.secondary,
-                            unfocusedLabelColor = XhuColor.loginLabel,
-                            backgroundColor = Color.Transparent,
-                            leadingIconColor = MaterialTheme.colors.secondary,
-                        ),
-                        visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Done,
-                            keyboardType = KeyboardType.Password,
-                        ),
-                        keyboardActions = KeyboardActions(onDone = {
-                            if (doLogin(
-                                    username,
-                                    password,
-                                    usernameFocusRequester,
-                                    passwordFocusRequester
-                                )
-                            ) {
-                                keyboardController?.hide()
-                            }
-                        }),
-                        maxLines = 1,
-                        isError = passwordError,
-                    )
+                        }
+                    },
+                    label = {
+                        Text(text = "密码")
+                    },
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = MaterialTheme.colors.secondary,
+                        unfocusedLabelColor = XhuColor.loginLabel,
+                        backgroundColor = Color.Transparent,
+                        leadingIconColor = MaterialTheme.colors.secondary,
+                    ),
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done,
+                        keyboardType = KeyboardType.Password,
+                    ),
+                    keyboardActions = KeyboardActions(onDone = {
+                        if (doLogin(
+                                username,
+                                password,
+                                usernameFocusRequester,
+                                passwordFocusRequester
+                            )
+                        ) {
+                            keyboardController?.hide()
+                        }
+                    }),
+                    maxLines = 1,
+                    isError = passwordError,
+                )
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    text = "* 密码为教育系统密码（默认为18位身份证号）",
+                    color = XhuColor.loginLabel,
+                    fontSize = 12.sp,
+                )
+                Spacer(
+                    modifier = Modifier
+                        .height(60.dp)
+                        .fillMaxWidth()
+                )
+                val loginState by viewModel.loginState.collectAsState()
+                TextButton(
+                    enabled = !loginState.loading,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = ButtonDefaults.textButtonColors(
+                        backgroundColor = MaterialTheme.colors.secondary,
+                        contentColor = Color.White,
+                    ),
+                    shape = RoundedCornerShape(36.dp),
+                    onClick = {
+                        if (doLogin(
+                                username,
+                                password,
+                                usernameFocusRequester,
+                                passwordFocusRequester
+                            )
+                        ) {
+                            keyboardController?.hide()
+                        }
+                    }) {
                     Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp),
-                        text = "* 密码为教育系统密码（默认为18位身份证号）",
-                        color = XhuColor.loginLabel,
-                        fontSize = 12.sp,
+                        text = "登 录",
+                        fontSize = 16.sp
                     )
-                    Spacer(
-                        modifier = Modifier
-                            .height(60.dp)
-                            .fillMaxWidth()
-                    )
-                    val loginState by viewModel.loginState.collectAsState()
-                    TextButton(
-                        enabled = !loginState.loading,
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        colors = ButtonDefaults.textButtonColors(
-                            backgroundColor = MaterialTheme.colors.secondary,
-                            contentColor = Color.White,
-                        ),
-                        shape = RoundedCornerShape(36.dp),
-                        onClick = {
-                            if (doLogin(
-                                    username,
-                                    password,
-                                    usernameFocusRequester,
-                                    passwordFocusRequester
-                                )
-                            ) {
-                                keyboardController?.hide()
-                            }
-                        }) {
-                        Text(
-                            text = "登 录",
-                            fontSize = 16.sp
-                        )
-                    }
                 }
             }
         }
