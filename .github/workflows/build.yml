@@ -112,6 +112,14 @@ jobs:
           
           echo $apkResourceId
           echo $patchResourceId
+          if [ -z "$apkResourceId" ]; then
+            echo "apkResourceId is empty"
+            exit 1
+          fi
+          if [ -z "$patchResourceId" ]; then
+            echo "patchResourceId is empty"
+            exit 1
+          fi
           
           updateLog=$(cat "version.log")
           
