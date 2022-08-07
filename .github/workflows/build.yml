@@ -94,7 +94,7 @@ jobs:
           signUrl: "${{ secrets.SIGNATURE_API }}"
           mimeType: "application/vnd.android.package-archive"
           st: apk
-          filePath: "patch/new.apk"
+          filePath: "${{ env.OUTPUT_DIR }}/${apkFile}"
           title: "${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}.apk"
       - name: 上传 APK 文件
         id: upload_patch
