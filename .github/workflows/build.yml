@@ -91,7 +91,7 @@ jobs:
           echo ::set-output name=patchMd5::$patchMd5
       - name: 上传 APK 文件
         id: upload_apk
-        uses: Mystery00/upload-actions@v1.3
+        uses: Mystery00/upload-actions@v1.4
         with:
           signUrl: "${{ secrets.SIGNATURE_API }}"
           mimeType: "application/vnd.android.package-archive"
@@ -100,7 +100,7 @@ jobs:
           title: "${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}.apk"
       - name: 上传 APK 文件
         id: upload_patch
-        uses: Mystery00/upload-actions@v1.3
+        uses: Mystery00/upload-actions@v1.4
         with:
           signUrl: "${{ secrets.SIGNATURE_API }}"
           mimeType: "text/x-diff"
