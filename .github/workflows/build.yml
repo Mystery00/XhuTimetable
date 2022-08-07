@@ -56,7 +56,7 @@ jobs:
           versionCode=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionCode')
           apkFile=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].outputFile')
           
-          cp "${{ env.OUTPUT_DIR }}/${apkFile}" "patch/new.apk"
+          cp "${{ env.OUTPUT_DIR }}/$apkFile" "patch/new.apk"
           
           echo ::set-output name=versionName::$versionName
           echo ::set-output name=versionCode::$versionCode
@@ -69,8 +69,6 @@ jobs:
       - name: 生成 patch 文件
         id: patch
         run: |
-          echo "${{ steps.apk.outputs.versionName }}"
-          echo "${{ steps.apk.outputs.versionCode }}"
           patchFile="${{ inputs.oldVersionCode }}-${{ steps.apk.outputs.versionCode }}.patch"
           bsdiff "patch/old.apk" "patch/new.apk" "patch/$patchFile"
           
@@ -94,7 +92,7 @@ jobs:
           signUrl: "${{ secrets.SIGNATURE_API }}"
           mimeType: "application/vnd.android.package-archive"
           st: apk
-          filePath: "${{ env.OUTPUT_DIR }}/${apkFile}"
+          filePath: "patch/new.apk"
           title: "${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}.apk"
       - name: 上传 APK 文件
         id: upload_patch
