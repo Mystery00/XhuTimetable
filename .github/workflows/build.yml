@@ -100,7 +100,7 @@ jobs:
           title: "${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}.apk"
       - name: 上传 APK 文件
         id: upload_patch
-        uses: Mystery00/upload-actions@v1.0
+        uses: Mystery00/upload-actions@v1.3
         with:
           signUrl: "${{ secrets.SIGNATURE_API }}"
           mimeType: "text/x-diff"
