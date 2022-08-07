@@ -64,7 +64,7 @@ jobs:
       - name: 上传 APK
         uses: actions/upload-artifact@v1
         with:
-          name: debug.apk
+          name: release.apk
           path: ${{ env.OUTPUT_DIR }}/${{ steps.apk.outputs.apkFile }}
       - name: 生成 patch 文件
         id: patch
@@ -79,21 +79,19 @@ jobs:
           apkMd5=$(md5sum "patch/new.apk" | cut -d" " -f1)
           patchMd5=$(md5sum "patch/$patchFile" | cut -d" " -f1)
 
-          echo "=========================================="
-          echo "新版本：${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}"
-          ls -l "patch/new.apk"
-          echo "md5: $apkMd5"
-          echo "=========================================="
-          echo "增量包：${patchFile}"
-          ls -l "patch/$patchFile"
-          echo "md5: $patchMd5"
-          echo "=========================================="
+          echo "==========================================" >> $GITHUB_STEP_SUMMARY
+          echo "新版本：${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}" >> $GITHUB_STEP_SUMMARY
+          echo "md5: $apkMd5" >> $GITHUB_STEP_SUMMARY
+          echo "==========================================" >> $GITHUB_STEP_SUMMARY
+          echo "增量包：${patchFile}" >> $GITHUB_STEP_SUMMARY
+          echo "md5: $patchMd5" >> $GITHUB_STEP_SUMMARY
+          echo "==========================================" >> $GITHUB_STEP_SUMMARY
           
           echo ::set-output name=apkMd5::$apkMd5
           echo ::set-output name=patchMd5::$patchMd5
       - name: 上传 APK 文件
         id: upload_apk
-        uses: Mystery00/upload-actions@v1.0
+        uses: Mystery00/upload-actions@v1.1
         with:
           signUrl: "${{ secrets.SIGNATURE_API }}"
           mimeType: "application/vnd.android.package-archive"
