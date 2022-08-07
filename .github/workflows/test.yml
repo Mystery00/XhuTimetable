@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 测试上传文件
-        uses: Mystery00/upload-actions@v1.2
+        uses: Mystery00/upload-actions@v1.3
         with:
           signUrl: "https://www.baidu.com"
           mimeType: "application/vnd.android.package-archive"
