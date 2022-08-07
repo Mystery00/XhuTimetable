@@ -1,0 +1,16 @@
+name: Build Android APK
+on:
+  workflow_dispatch:
+env:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 测试上传文件
+        uses: Mystery00/upload-actions@v1.2
+        with:
+          signUrl: "https://www.baidu.com"
+          mimeType: "application/vnd.android.package-archive"
+          st: apk
+          filePath: "patch/new.apk"
+          title: "test.apk"
