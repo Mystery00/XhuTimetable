@@ -91,82 +91,28 @@ jobs:
           
           echo ::set-output name=apkMd5::$apkMd5
           echo ::set-output name=patchMd5::$patchMd5
-      - name: 上传 APK 文件签名
-        id: upload_apk
-        run: |
-          file="patch/new.apk"
-          title="${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}.apk"
-          mimeType="application/vnd.android.package-archive"
-          fileSize=$(wc -c <"$file")
-          json='{"serviceName":"","storeType":"apk",fileSize:$fileSize,mimeType:$mimeType,title:$title}'
-          requestJson=$(
-            jq \
-              --arg fileSize "$fileSize" \
-              --arg title "$title" \
-              --arg mimeType "$mimeType" \
-              -n "$json"
-          )
-          apkSignResp=$(
-            curl -s -X POST "${{ secrets.SIGNATURE_API }}" \
-              -H 'Content-Type: application/json' \
-              -d "$requestJson"
-          )
-          uploadUrl=$(echo "$apkSignResp" | jq -r '.uploadUrl')
-          key=$(echo "$apkSignResp" | jq -r '.uploadMeta.key')
-          token=$(echo "$apkSignResp" | jq -r '.uploadMeta.signature')
-          
-          echo ::set-output name=uploadUrl::$uploadUrl
-          echo ::set-output name=key::$key
-          echo ::set-output name=token::$token
       - name: 上传 APK 文件
-        id: upload_apk_response
-        uses: JantHsueh/upload-file-action@master
+        id: upload_apk
+        uses: Mystery00/upload-actions@v1.0
         with:
-          url: "${{ steps.upload_apk.outputs.uploadUrl }}"
-          method: POST
-          forms: '{"key":"${{ steps.upload_apk.outputs.key }}","token":"${{ steps.upload_apk.outputs.token }}"}'
-          fileForms: '{"file":"patch/new.apk"}'
-      - name: 上传 patch 文件签名
+          signUrl: "${{ secrets.SIGNATURE_API }}"
+          mimeType: "application/vnd.android.package-archive"
+          st: apk
+          filePath: "patch/new.apk"
+          title: "${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}.apk"
+      - name: 上传 APK 文件
         id: upload_patch
-        run: |
-          file="patch/${{ steps.patch.outputs.patchFile }}"
-          title="${{ steps.patch.outputs.patchFile }}"
-          mimeType="text/x-diff"
-          fileSize=$(wc -c <"$file")
-          json='{"serviceName":"","storeType":"apk",fileSize:$fileSize,mimeType:$mimeType,title:$title}'
-          requestJson=$(
-            jq \
-              --arg fileSize "$fileSize" \
-              --arg title "$title" \
-              --arg mimeType "$mimeType" \
-              -n "$json"
-          )
-          apkSignResp=$(
-            curl -s -X POST "${{ secrets.SIGNATURE_API }}" \
-              -H 'Content-Type: application/json' \
-              -d "$requestJson"
-          )
-          uploadUrl=$(echo "$apkSignResp" | jq -r '.uploadUrl')
-          key=$(echo "$apkSignResp" | jq -r '.uploadMeta.key')
-          token=$(echo "$apkSignResp" | jq -r '.uploadMeta.signature')
-          
-          echo ::set-output name=uploadUrl::$uploadUrl
-          echo ::set-output name=key::$key
-          echo ::set-output name=token::$token
-      - name: 上传 patch 文件
-        id: upload_patch_response
-        uses: JantHsueh/upload-file-action@master
+        uses: Mystery00/upload-actions@v1.0
         with:
-          url: "${{ steps.upload_patch.outputs.uploadUrl }}"
-          method: POST
-          forms: '{"key":"${{ steps.upload_patch.outputs.key }}","token":"${{ steps.upload_patch.outputs.token }}"}'
-          fileForms: '{"file":"patch/new.apk"}'
+          signUrl: "${{ secrets.SIGNATURE_API }}"
+          mimeType: "text/x-diff"
+          st: apk
+          filePath: "patch/${{ steps.patch.outputs.patchFile }}"
+          title: "${{ steps.patch.outputs.patchFile }}"
       - name: 发布新版本
         run: |
-          apkResponse=${{ steps.upload_apk_response.outputs.output.data }}
-          apkResourceId=$(echo "$apkResponse" | jq -r '.resourceId')
-          patchResponse=${{ steps.upload_patch_response.outputs.output.data }}
-          patchResourceId=$(echo "$patchResponse" | jq -r '.resourceId')
+          apkResourceId=${{ steps.upload_apk.outputs.resId }}
+          patchResourceId=${{ steps.upload_patch.outputs.resId }}
           
           echo $apkResourceId
           echo $patchResourceId
