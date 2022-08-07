@@ -61,11 +61,6 @@ jobs:
           echo ::set-output name=versionName::$versionName
           echo ::set-output name=versionCode::$versionCode
           echo ::set-output name=apkFile::$apkFile
-      - name: 上传 APK
-        uses: actions/upload-artifact@v1
-        with:
-          name: release.apk
-          path: ${{ env.OUTPUT_DIR }}/${{ steps.apk.outputs.apkFile }}
       - name: 生成 patch 文件
         id: patch
         run: |
