@@ -1,7 +1,6 @@
 name: Test
 on:
   workflow_dispatch:
-env:
 jobs:
   build:
     runs-on: ubuntu-latest
