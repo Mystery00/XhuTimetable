@@ -79,13 +79,11 @@ jobs:
           apkMd5=$(md5sum "patch/new.apk" | cut -d" " -f1)
           patchMd5=$(md5sum "patch/$patchFile" | cut -d" " -f1)
 
-          echo "==========================================" >> $GITHUB_STEP_SUMMARY
           echo "新版本：${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}" >> $GITHUB_STEP_SUMMARY
           echo "md5: $apkMd5" >> $GITHUB_STEP_SUMMARY
           echo "==========================================" >> $GITHUB_STEP_SUMMARY
           echo "增量包：${patchFile}" >> $GITHUB_STEP_SUMMARY
           echo "md5: $patchMd5" >> $GITHUB_STEP_SUMMARY
-          echo "==========================================" >> $GITHUB_STEP_SUMMARY
           
           echo ::set-output name=apkMd5::$apkMd5
           echo ::set-output name=patchMd5::$patchMd5
