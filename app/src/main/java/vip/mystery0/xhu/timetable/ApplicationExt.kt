@@ -64,7 +64,11 @@ val externalPictureDir: File
 val externalDownloadDir: File
     get() = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
 val externalCacheDownloadDir: File
-    get() = File(context.externalCacheDir, "update")
+    get() = File(context.externalCacheDir, "update").apply {
+        if (!exists()) {
+            mkdirs()
+        }
+    }
 val externalDocumentsDir: File
     get() = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)!!
 val contentResolver: ContentResolver
