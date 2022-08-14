@@ -14,6 +14,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.*
+import vip.mystery0.xhu.timetable.doClear
 import vip.mystery0.xhu.timetable.externalPictureDir
 import vip.mystery0.xhu.timetable.module.getRepo
 import vip.mystery0.xhu.timetable.repository.StartRepo
@@ -44,6 +45,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
             _readyState.value =
                 ReadyState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
         }) {
+            doClear()
             SessionManager.readFromCache()
             setTrigger(workManager)
             initPullWork()
