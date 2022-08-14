@@ -20,7 +20,7 @@ import vip.mystery0.xhu.timetable.base.XhuCoroutineWorker
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.config.runOnIo
-import vip.mystery0.xhu.timetable.externalDownloadDir
+import vip.mystery0.xhu.timetable.externalCacheDownloadDir
 import vip.mystery0.xhu.timetable.model.response.Version
 import vip.mystery0.xhu.timetable.packageName
 import vip.mystery0.xhu.timetable.ui.activity.*
@@ -55,7 +55,7 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
     override suspend fun doWork(): Result {
         val version = DataHolder.version ?: return Result.success()
         startForeground(version)
-        val dir = File(externalDownloadDir, "apk")
+        val dir = File(externalCacheDownloadDir, "apk")
         if (!dir.exists()) {
             dir.mkdirs()
         }

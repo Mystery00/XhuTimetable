@@ -63,6 +63,8 @@ val externalPictureDir: File
     get() = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
 val externalDownloadDir: File
     get() = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
+val externalCacheDownloadDir: File
+    get() = File(context.externalCacheDir, "update")
 val externalDocumentsDir: File
     get() = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)!!
 val contentResolver: ContentResolver
@@ -79,6 +81,11 @@ val screenWidth: Int
     get() = context.resources.displayMetrics.widthPixels
 val screenHeight: Int
     get() = context.resources.displayMetrics.heightPixels
+
+fun doClear() {
+    //clear dir
+    externalDownloadDir.deleteRecursively()
+}
 
 fun BaseComposeActivity.toCustomTabs(url: String) {
     if (url.isBlank()) {
