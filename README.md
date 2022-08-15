@@ -1,5 +1,6 @@
 # 西瓜课表-新装版
 [西瓜课表官网](https://xgkb.mystery0.vip)
+[![Build Android APK](https://github.com/Mystery00/XhuTimetable/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/Mystery00/XhuTimetable/actions/workflows/build.yml)
 
 ## 和以前有什么不一样？
 我们尽量让新旧版本功能上没有太大的差异，旧版本的西瓜课表是使用Android View开发的，新装版是使用Jetpack Compose进行开发的，所以新装版在写界面上更加的灵活，这也是新装版界面与旧版本不太一致的原因。
