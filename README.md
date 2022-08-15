@@ -1,5 +1,6 @@
 # 西瓜课表-新装版
 [西瓜课表官网](https://xgkb.mystery0.vip)
+
 [![Build Android APK](https://github.com/Mystery00/XhuTimetable/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/Mystery00/XhuTimetable/actions/workflows/build.yml)
 
 ## 和以前有什么不一样？
