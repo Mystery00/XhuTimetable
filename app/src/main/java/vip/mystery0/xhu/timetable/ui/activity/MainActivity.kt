@@ -4,7 +4,9 @@ import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.res.ColorStateList
+import android.os.Bundle
 import android.widget.ImageView
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.compose.animation.*
 import androidx.compose.foundation.Canvas
@@ -72,6 +74,16 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
 
     private val ext: MainActivityExt
         get() = MainActivityExt(this, viewModel, modalBottomSheetState, addDialogState)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        onBackPressedDispatcher.addCallback {
+            if (isTwiceClick())
+                finish()
+            else
+                "再按一次退出${appName}".toast()
+        }
+    }
 
     @OptIn(ExperimentalPagerApi::class)
     @Composable
@@ -521,13 +533,6 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         }.onFailure {
             toastString("服务器不可用，请联系开发者", true)
         }
-    }
-
-    override fun onBackPressed() {
-        if (isTwiceClick())
-            super.onBackPressed()
-        else
-            "再按一次退出${appName}".toast()
     }
 
     override fun onResume() {
