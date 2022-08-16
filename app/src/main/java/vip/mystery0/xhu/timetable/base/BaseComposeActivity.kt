@@ -9,8 +9,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
-import androidx.annotation.LayoutRes
-import androidx.compose.foundation.Image
+import androidx.annotation.RawRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +18,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
@@ -31,12 +31,17 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.zyao89.view.zloading.ZLoadingView
 import com.zyao89.view.zloading.Z_TYPE
 import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
@@ -45,9 +50,8 @@ import kotlin.reflect.KClass
 abstract class BaseComposeActivity(
     private val setSystemUiColor: Boolean = true,
     private val registerEventBus: Boolean = false,
-    @LayoutRes val contentLayoutId: Int = 0
 ) :
-    ComponentActivity(contentLayoutId), KoinComponent {
+    ComponentActivity(), KoinComponent {
     val eventBus: EventBus by inject()
 
     private var toast: Toast? = null
@@ -176,12 +180,12 @@ abstract class BaseComposeActivity(
 
     @Composable
     fun BuildNoDataLayout() {
-        BuildLayout(painter = XhuImages.noData, text = "暂无数据")
+        BuildLayout(resId = R.raw.lottie_no_data, text = "暂无数据")
     }
 
     @Composable
     fun BuildNoCourseLayout() {
-        BuildLayout(painter = XhuImages.noCourse, text = "暂无课程")
+        BuildLayout(resId = R.raw.lottie_no_course, text = "暂无课程")
     }
 
     @Composable
@@ -190,7 +194,7 @@ abstract class BaseComposeActivity(
         onRequestPermission: () -> Unit = {},
     ) {
         BuildLayout(
-            painter = XhuImages.noCourse,
+            resId = R.raw.lottie_no_permission,
             text = permissionDescription,
             appendLayout = {
                 Button(onClick = onRequestPermission) {
@@ -202,7 +206,7 @@ abstract class BaseComposeActivity(
 
     @Composable
     private fun BuildLayout(
-        painter: Painter,
+        @RawRes resId: Int,
         text: String,
         appendLayout: (@Composable () -> Unit)? = null,
     ) {
@@ -215,17 +219,20 @@ abstract class BaseComposeActivity(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Image(
-                    painter = painter,
-                    contentDescription = null,
-                    modifier = Modifier.width(256.dp)
+                val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(resId))
+                LottieAnimation(
+                    composition = composition,
+                    iterations = LottieConstants.IterateForever,
+                    modifier = Modifier.size(256.dp)
                 )
-                Text(
-                    text = text,
-                    color = MaterialTheme.colors.onSurface,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 48.dp)
-                )
+                if (text.isNotBlank()) {
+                    Text(
+                        text = text,
+                        color = MaterialTheme.colors.onSurface,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 48.dp)
+                    )
+                }
                 appendLayout?.invoke()
             }
         }

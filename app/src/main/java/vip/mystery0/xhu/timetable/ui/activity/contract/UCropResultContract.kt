@@ -16,7 +16,7 @@ class UCropResultContract : ActivityResultContract<UCrop, File?>() {
         if (resultCode != Activity.RESULT_OK) {
             return null
         }
-        val outputUri = intent?.getParcelableExtra<Uri>(UCrop.EXTRA_OUTPUT_URI)
+        val outputUri = intent?.getParcelableExtra(UCrop.EXTRA_OUTPUT_URI, Uri::class.java)
         return outputUri?.toFile()
     }
 }

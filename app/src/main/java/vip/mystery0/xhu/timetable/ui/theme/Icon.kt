@@ -330,12 +330,6 @@ object XhuImages {
         get() = R.mipmap.main_bg
     val defaultProfileImage: Int
         get() = R.mipmap.ic_launcher
-    val noData: Painter
-        @Composable
-        get() = rememberAsyncImagePainter(R.drawable.ic_no_data)
-    val noCourse: Painter
-        @Composable
-        get() = rememberAsyncImagePainter(R.drawable.ic_no_course)
 }
 
 object ProfileImages {

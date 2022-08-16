@@ -47,9 +47,11 @@ val todayCourseTitleBar: TabTitle = @Composable { ext ->
             .align(Alignment.CenterStart)
             .padding(start = 8.dp),
     )
-    Row(modifier = Modifier
+    Row(
+        modifier = Modifier
             .fillMaxHeight()
-            .align(Alignment.CenterEnd)) {
+            .align(Alignment.CenterEnd)
+    ) {
         if (loading) {
             val infiniteTransition = rememberInfiniteTransition()
             val angle by infiniteTransition.animateFloat(
