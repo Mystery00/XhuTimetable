@@ -17,7 +17,6 @@ class Application : Application() {
         super.onCreate()
         context = this
         Thread.setDefaultUncaughtExceptionHandler(ApplicationExceptionCatcher())
-//        Glance.initialize(this)
         //配置Koin
         startKoin {
             androidLogger(Level.ERROR)
