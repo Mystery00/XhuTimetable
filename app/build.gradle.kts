@@ -20,13 +20,13 @@ val gitVersionCode: Int = "git rev-list HEAD --count".runCommand().toInt()
 val gitVersionName = "git rev-parse --short=8 HEAD".runCommand()
 
 android {
-    compileSdk = 32
-    buildToolsVersion = "32.0.0"
+    compileSdk = 33
+    buildToolsVersion = "33.0.0"
 
     defaultConfig {
         applicationId = "vip.mystery0.xhu.timetable"
         minSdk = 26
-        targetSdk = 32
+        targetSdk = 33
         versionCode = gitVersionCode
         versionName = "1.3.0"
 
@@ -191,8 +191,6 @@ dependencies {
     val appCenterSdkVersion = "4.4.5"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
-    //Glance
-    debugImplementation("com.guolindev.glance:glance:1.1.0")
     //zloading，通过jitpack导入修改版本
 //    implementation("com.zyao89:zloading:1.2.0")
     implementation("com.github.Mystery00:ZLoading:1.2.1")

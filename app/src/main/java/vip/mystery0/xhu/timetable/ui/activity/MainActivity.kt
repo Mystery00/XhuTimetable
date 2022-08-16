@@ -209,18 +209,18 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                                             duration = 1000L
                                             repeatCount = ValueAnimator.INFINITE
                                             addListener(object : Animator.AnimatorListener {
-                                                override fun onAnimationStart(p0: Animator?) {
+                                                override fun onAnimationStart(animation: Animator) {
                                                 }
 
-                                                override fun onAnimationEnd(p0: Animator?) {
+                                                override fun onAnimationEnd(animation: Animator) {
                                                 }
 
-                                                override fun onAnimationCancel(p0: Animator?) {
+                                                override fun onAnimationCancel(animation: Animator) {
                                                 }
 
-                                                override fun onAnimationRepeat(p0: Animator?) {
+                                                override fun onAnimationRepeat(animation: Animator) {
                                                     if (!loading) {
-                                                        p0?.cancel()
+                                                        animation.cancel()
                                                     }
                                                 }
                                             })
