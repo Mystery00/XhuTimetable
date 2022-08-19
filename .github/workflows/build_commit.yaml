@@ -1,0 +1,21 @@
+name: "Build Commit"
+on: push
+env:
+  OUTPUT_DIR: "app/build/outputs/apk/debug"
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: 设置JDK
+              uses: actions/setup-java@v1
+              with:
+                java-version: 11
+            - name: 设置Android SDK
+              uses: android-actions/setup-android@v2
+            - name: 构建安装包
+              run: ./gradlew assembleDebug
+            - uses: actions/upload-artifact@v3
+              with:
+                  name: github-${{ github.sha }}
+                  path: ${{ env.OUTPUT_DIR }}/*.apk
