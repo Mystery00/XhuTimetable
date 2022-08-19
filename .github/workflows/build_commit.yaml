@@ -5,7 +5,7 @@ env:
   SIGN_KEY_ALIAS: ""
   SIGN_KEY_STORE_PASSWORD: ""
   SIGN_KEY_PASSWORD: ""
-  SIGN_KEY_STORE_FILE: ""
+  SIGN_KEY_STORE_FILE: "/tmp/key.jks"
 jobs:
     build:
         runs-on: ubuntu-latest
