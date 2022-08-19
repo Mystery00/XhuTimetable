@@ -2,6 +2,10 @@ name: "Build Commit"
 on: push
 env:
   OUTPUT_DIR: "app/build/outputs/apk/debug"
+  SIGN_KEY_ALIAS: ""
+  SIGN_KEY_STORE_PASSWORD: ""
+  SIGN_KEY_PASSWORD: ""
+  SIGN_KEY_STORE_FILE: ""
 jobs:
     build:
         runs-on: ubuntu-latest
