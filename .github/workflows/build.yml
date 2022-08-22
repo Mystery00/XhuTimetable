@@ -30,7 +30,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: 设置JDK
         uses: actions/setup-java@v1
         with:
@@ -134,3 +134,7 @@ jobs:
           curl -s -X POST "${{ secrets.NEW_VERSION_API }}" \
             -H 'Content-Type: application/json' \
             -d "$requestJson"
+      - uses: actions/upload-artifact@v3
+        with:
+            name: apk-sign
+            path: ${{ env.OUTPUT_DIR }}/${{ steps.apk.outputs.apkFile }}
