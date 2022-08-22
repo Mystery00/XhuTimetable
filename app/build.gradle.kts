@@ -173,7 +173,7 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-workmanager:$koinVersion")
     implementation("io.insert-koin:koin-androidx-compose:$koinVersion")
     //coil
-    val coilVersion = "2.1.0"
+    val coilVersion = "2.2.0"
     implementation("io.coil-kt:coil-compose:$coilVersion")
     implementation("io.coil-kt:coil-gif:$coilVersion")
     //retrofit
@@ -183,11 +183,11 @@ dependencies {
     implementation("com.squareup.moshi:moshi:1.13.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.13.0")
     //mmkv
-    implementation("com.tencent:mmkv-static:1.2.13")
+    implementation("com.tencent:mmkv-static:1.2.14")
     //eventbus
     implementation("org.greenrobot:eventbus:3.3.1")
     //preference
-    implementation("com.github.alorma:compose-settings-ui:0.8.0")
+    implementation("com.github.alorma:compose-settings-ui:0.11.0")
     //AppCenter
     val appCenterSdkVersion = "4.4.5"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
