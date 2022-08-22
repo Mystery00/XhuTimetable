@@ -3,7 +3,6 @@ package vip.mystery0.xhu.timetable.ui.theme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
-import coil.compose.rememberAsyncImagePainter
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.utils.md5
 
