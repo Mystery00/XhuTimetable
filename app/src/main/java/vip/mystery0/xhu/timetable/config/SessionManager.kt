@@ -7,11 +7,12 @@ import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
 import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.model.UserInfo
 import vip.mystery0.xhu.timetable.repository.doLogin
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.system.exitProcess
 
 object SessionManager {
     //用户列表
-    private val userMap = HashMap<String, User>(4)
+    private val userMap = ConcurrentHashMap<String, User>(4)
 
     suspend fun mainUserOrNull(): User? = runOnCpu {
         userMap.values.find { it.main } ?: userMap.values.firstOrNull()
@@ -75,7 +76,6 @@ object SessionManager {
     }
 
     suspend fun loggedUserList(): List<User> {
-        readFromCache()
         return runOnCpu { userMap.values.sortedBy { !it.main }.toList() }
     }
 
