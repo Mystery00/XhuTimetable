@@ -10,7 +10,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import vip.mystery0.xhu.timetable.api.*
 import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
-import vip.mystery0.xhu.timetable.config.interceptor.LogInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.PoemsInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.ServerApiInterceptor
 import java.util.concurrent.TimeUnit
@@ -28,7 +27,6 @@ val networkModule = module {
             .retryOnConnectionFailure(true)
             .connectTimeout(20, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
-            .addInterceptor(LogInterceptor())
             .addInterceptor(ServerApiInterceptor())
             .build()
     }

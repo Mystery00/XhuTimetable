@@ -2,15 +2,21 @@ package vip.mystery0.xhu.timetable.ui.activity.contract
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.result.contract.ActivityResultContract
 
 class BackgroundResultContract : ActivityResultContract<String, Intent?>() {
-    override fun createIntent(context: Context, input: String): Intent {
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, input)
-        return intent
-    }
+    override fun createIntent(context: Context, input: String): Intent =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Intent(MediaStore.ACTION_PICK_IMAGES).apply {
+                type = input
+            }
+        } else {
+            Intent(Intent.ACTION_PICK).apply {
+                setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, input)
+            }
+        }
 
     override fun parseResult(resultCode: Int, intent: Intent?): Intent? = intent
 }
