@@ -169,7 +169,7 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
 }
 
 class UpdateTodayCourseActionCallback : ActionCallback {
-    override suspend fun onAction(
+    override suspend fun onRun(
         context: Context,
         glanceId: GlanceId,
         parameters: ActionParameters

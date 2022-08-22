@@ -135,7 +135,7 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.0")
     implementation("androidx.browser:browser:1.4.0")
     implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
-    implementation("androidx.glance:glance-appwidget:1.0.0-alpha04")
+    implementation("androidx.glance:glance-appwidget:1.0.0-alpha03")
     //compose
     val composeVersion = "1.2.0-rc03"
     implementation("androidx.compose.ui:ui:$composeVersion")
