@@ -137,6 +137,12 @@ fun trackEvent(event: String) {
     }
 }
 
+fun trackError(error: Throwable) {
+    if (AppCenter.isConfigured() && GlobalConfig.allowSendCrashReport) {
+        Crashes.trackError(error)
+    }
+}
+
 fun Context.joinQQGroup(activity: BaseComposeActivity) {
     try {
         val goIntent = Intent(
