@@ -84,6 +84,7 @@ jobs:
           name: build-context
           path: |
             patch_name
+            version.log
             patch/new.apk
             patch/${{ steps.patch.outputs.patchFile }}
             ${{ env.OUTPUT_DIR }}/output-metadata.json
