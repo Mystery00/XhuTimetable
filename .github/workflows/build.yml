@@ -103,6 +103,8 @@ jobs:
       - name: 计算MD5
         id: result
         run: |
+          sudo apt-get install jq
+          
           versionName=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionName')
           versionCode=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionCode')
           echo ::set-output name=versionName::$versionName
