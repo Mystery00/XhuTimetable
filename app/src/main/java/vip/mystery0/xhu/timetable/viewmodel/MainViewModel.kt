@@ -272,7 +272,11 @@ class MainViewModel : ComposeViewModel() {
                 val days =
                     Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay())
                         .toDays()
-                ((days / 7) + 1).toInt()
+                var week = ((days / 7) + 1).toInt()
+                if (days < 0 && week > 0) {
+                    week = 0
+                }
+                week
             }
             _week.collect {
                 loadCourseToTable(it)
@@ -476,7 +480,11 @@ class MainViewModel : ComposeViewModel() {
                 val days =
                     Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay())
                         .toDays()
-                ((days / 7) + 1).toInt()
+                var week = ((days / 7) + 1).toInt()
+                if (days < 0 && week > 0) {
+                    week = 0
+                }
+                week
             }
             _week.value = currentWeek
 
@@ -622,7 +630,10 @@ class MainViewModel : ComposeViewModel() {
                 LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone).toLocalDate()
             val days =
                 Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay()).toDays()
-            val thisWeek = ((days / 7) + 1).toInt()
+            var thisWeek = ((days / 7) + 1).toInt()
+            if (days < 0 && thisWeek > 0) {
+                thisWeek = 0
+            }
             val weekViewArray = Array(20) { index ->
                 WeekView(index + 1, thisWeek == index + 1, Array(5) { Array(5) { false } })
             }
