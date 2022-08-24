@@ -59,7 +59,11 @@ class NotifyWork(private val appContext: Context, workerParams: WorkerParameters
                 val days =
                     Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay())
                         .toDays()
-                ((days / 7) + 1).toInt()
+                var week = ((days / 7) + 1).toInt()
+                if (days < 0 && week > 0) {
+                    week = 0
+                }
+                week
             }
             val tomorrowWeek =
                 if (tomorrow.dayOfWeek == DayOfWeek.SUNDAY) currentWeek + 1 else currentWeek

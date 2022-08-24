@@ -26,7 +26,11 @@ suspend fun getCurrentWeek(): Int = runOnCpu {
     val days =
         Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay())
             .toDays()
-    ((days / 7) + 1).toInt()
+    var week = ((days / 7) + 1).toInt()
+    if (days < 0 && week > 0) {
+        week = 0
+    }
+    week
 }
 
 suspend fun getTimeTitle() =
