@@ -77,6 +77,37 @@ jobs:
           echo "==========================================" >> $GITHUB_STEP_SUMMARY
           echo "增量包：${patchFile}" >> $GITHUB_STEP_SUMMARY
           echo "md5: $patchMd5" >> $GITHUB_STEP_SUMMARY
+      - name: 上传文件
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-context
+          path: |
+            patch/new.apk
+            patch/${{ steps.patch.outputs.patchFile }}
+            ${{ env.OUTPUT_DIR }}/output-metadata.json
+      - uses: actions/upload-artifact@v3
+        with:
+          name: apk-sign
+          path: ${{ env.OUTPUT_DIR }}/${{ steps.apk.outputs.apkFile }}
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: 下载部署文件
+        uses: actions/download-artifact@v3
+      - name: 计算MD5
+        id: result
+        run: |
+          versionName=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionName')
+          versionCode=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionCode')
+          echo ::set-output name=versionName::$versionName
+          echo ::set-output name=versionCode::$versionCode
+          
+          patchFile=$(ls "patch/*.patch" | cut -d/ -f2)
+          echo ::set-output name=patchFile::$patchFile
+          
+          apkMd5=$(md5sum "patch/new.apk" | cut -d" " -f1)
+          patchMd5=$(md5sum "patch/$patchFile" | cut -d" " -f1)
           
           echo ::set-output name=apkMd5::$apkMd5
           echo ::set-output name=patchMd5::$patchMd5
@@ -88,7 +119,7 @@ jobs:
           mimeType: "application/vnd.android.package-archive"
           st: apk
           filePath: "patch/new.apk"
-          title: "${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}.apk"
+          title: "${{ steps.result.outputs.versionName }}-${{ steps.result.outputs.versionCode }}.apk"
       - name: 上传 APK 文件
         id: upload_patch
         uses: Mystery00/upload-actions@v1.5
@@ -96,8 +127,8 @@ jobs:
           signUrl: "${{ secrets.SIGNATURE_API }}"
           mimeType: "text/x-diff"
           st: apk
-          filePath: "patch/${{ steps.patch.outputs.patchFile }}"
-          title: "${{ steps.patch.outputs.patchFile }}"
+          filePath: "patch/${{ steps.result.outputs.patchFile }}"
+          title: "${{ steps.result.outputs.patchFile }}"
       - name: 发布新版本
         run: |
           apkResourceId=${{ steps.upload_apk.outputs.resId }}
@@ -120,12 +151,12 @@ jobs:
           requestJson=$(
           jq \
           --arg apkResourceId "$apkResourceId" \
-          --arg apkMd5 "${{ steps.patch.outputs.apkMd5 }}" \
+          --arg apkMd5 "${{ steps.result.outputs.apkMd5 }}" \
           --arg patchResourceId "$patchResourceId" \
-          --arg patchMd5 "${{ steps.patch.outputs.patchMd5 }}" \
+          --arg patchMd5 "${{ steps.result.outputs.patchMd5 }}" \
           --arg updateLog "${updateLog}" \
-          --arg versionCode "${{ steps.apk.outputs.versionCode }}" \
-          --arg versionName "${{ steps.apk.outputs.versionName }}" \
+          --arg versionCode "${{ steps.result.outputs.versionCode }}" \
+          --arg versionName "${{ steps.result.outputs.versionName }}" \
           --arg lastVersionCode "${{ inputs.oldVersionCode }}" \
           --arg forceUpdate "${{ inputs.forceUpdate }}" \
           --arg betaVersion "${{ inputs.betaVersion }}" \
@@ -134,7 +165,3 @@ jobs:
           curl -s -X POST "${{ secrets.NEW_VERSION_API }}" \
             -H 'Content-Type: application/json' \
             -d "$requestJson"
-      - uses: actions/upload-artifact@v3
-        with:
-            name: apk-sign
-            path: ${{ env.OUTPUT_DIR }}/${{ steps.apk.outputs.apkFile }}
