@@ -65,6 +65,7 @@ jobs:
         id: patch
         run: |
           patchFile="${{ inputs.oldVersionCode }}-${{ steps.apk.outputs.versionCode }}.patch"
+          echo "$patchFile" > patch_name
           bsdiff "patch/old.apk" "patch/new.apk" "patch/$patchFile"
           
           echo ::set-output name=patchFile::$patchFile
@@ -82,6 +83,7 @@ jobs:
         with:
           name: build-context
           path: |
+            patch_name
             patch/new.apk
             patch/${{ steps.patch.outputs.patchFile }}
             ${{ env.OUTPUT_DIR }}/output-metadata.json
@@ -105,7 +107,7 @@ jobs:
           echo ::set-output name=versionName::$versionName
           echo ::set-output name=versionCode::$versionCode
           
-          patchFile=$(ls "patch/*.patch" | cut -d/ -f2)
+          patchFile=$(cat patch_name)
           echo ::set-output name=patchFile::$patchFile
           
           apkMd5=$(md5sum "patch/new.apk" | cut -d" " -f1)
