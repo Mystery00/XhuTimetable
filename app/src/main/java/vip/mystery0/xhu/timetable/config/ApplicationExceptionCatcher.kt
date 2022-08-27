@@ -42,7 +42,7 @@ class ApplicationExceptionCatcher : Thread.UncaughtExceptionHandler {
                 //导出手机信息
                 printWriter.println("===================================")
                 printWriter.println("应用版本: $appVersionName")
-                printWriter.println("Android版本: $${Build.VERSION.RELEASE}_${Build.VERSION.SDK_INT}")
+                printWriter.println("Android版本: ${Build.VERSION.RELEASE}_${Build.VERSION.SDK_INT}")
                 printWriter.println("厂商: ${Build.MANUFACTURER}")
                 printWriter.println("型号: ${Build.MODEL}")
                 printWriter.println("===================================")
