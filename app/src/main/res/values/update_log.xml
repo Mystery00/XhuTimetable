@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="update_log">
-        <item>新增：适配Android 13</item>
+        <item>修复：自定义背景图片在Android 13以下崩溃</item>
         <item> </item>
-        <item>修复：开学前一周时，时间计算错误</item>
-        <item>修复：今日诗词加载时，不再引起应用崩溃</item>
-        <item>修复：部分情况下因为账号数据加载导致的应用崩溃</item>
-        <item> </item>
-        <item>优化：存储空间占用优化，部分文件放到缓存中，可随时清理</item>
-        <item>优化：动画调整</item>
+        <item>优化：部分对话框显示优化</item>
     </string-array>
 </resources>
