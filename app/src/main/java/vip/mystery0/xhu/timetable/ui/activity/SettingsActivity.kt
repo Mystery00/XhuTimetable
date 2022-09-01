@@ -626,13 +626,26 @@ class SettingsActivity : BaseComposeActivity() {
 
     @Composable
     private fun BuildUpdateLogDialog(dialogState: MaterialDialogState) {
-        MaterialDialog(dialogState = dialogState,
-            buttons = {
-                positiveButton("关闭")
-            }) {
-            title(text = "$appVersionName 更新日志")
-            message(text = updateLogArray.joinToString("\n"))
+        if (!dialogState.showing) {
+            return
         }
+        AlertDialog(
+            onDismissRequest = {
+                dialogState.hide()
+            },
+            title = {
+                Text(text = "$appVersionName 更新日志")
+            },
+            text = {
+                Text(text = updateLogArray.joinToString("\n"))
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    dialogState.hide()
+                }) {
+                    Text(text = "关闭")
+                }
+            })
     }
 
     override fun onStart() {
