@@ -38,24 +38,19 @@ import coil.request.ImageRequest
 import com.google.accompanist.pager.*
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.material.math.MathUtils.lerp
-import com.vanpra.composematerialdialogs.MaterialDialog
-import com.vanpra.composematerialdialogs.MaterialDialogState
-import com.vanpra.composematerialdialogs.listItems
-import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import com.vanpra.composematerialdialogs.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import org.koin.core.component.inject
+import vip.mystery0.xhu.timetable.*
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.api.ServerApi
-import vip.mystery0.xhu.timetable.appName
-import vip.mystery0.xhu.timetable.appVersionCodeNumber
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
-import vip.mystery0.xhu.timetable.trackEvent
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuStateIcons
 import vip.mystery0.xhu.timetable.ui.theme.isDarkMode
@@ -462,7 +457,8 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         dialogState: MaterialDialogState,
     ) {
         MaterialDialog(dialogState = dialogState) {
-            listItems(list = listOf("添加自定义课程", "添加自定义事项")) { index, _ ->
+            title("请选择需要添加的数据类型")
+            listItems(list = listOf("自定义课程", "自定义事项")) { index, _ ->
                 when (index) {
                     0 -> {
                         intentTo(CustomCourseActivity::class)
