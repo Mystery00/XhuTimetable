@@ -1,9 +1,14 @@
 package vip.mystery0.xhu.timetable.ui.notification
 
+import android.Manifest.permission.POST_NOTIFICATIONS
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Color
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
+
 
 const val NOTIFICATION_CHANNEL_ID_DEFAULT = "XhuTimetable-Default"
 private const val NOTIFICATION_CHANNEL_NAME_DEFAULT = "默认"

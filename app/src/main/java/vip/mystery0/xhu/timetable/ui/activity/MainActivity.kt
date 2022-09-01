@@ -1,9 +1,11 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import android.Manifest
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.res.ColorStateList
+import android.os.Build
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.activity.addCallback
@@ -36,6 +38,7 @@ import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.google.accompanist.pager.*
+import com.google.accompanist.permissions.*
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.material.math.MathUtils.lerp
 import com.vanpra.composematerialdialogs.*
@@ -80,7 +83,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         }
     }
 
-    @OptIn(ExperimentalPagerApi::class)
+    @OptIn(ExperimentalPagerApi::class, ExperimentalPermissionsApi::class)
     @Composable
     override fun BuildContent() {
         val systemUiController = rememberSystemUiController()
@@ -95,6 +98,15 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         val pagerState = rememberPagerState(initialPage = 0)
         val loading by viewModel.loading.collectAsState()
         val poems by viewModel.poems.collectAsState()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val permissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+            if (permissionState.status != PermissionStatus.Granted) {
+                coroutineScope.launch {
+                    permissionState.launchPermissionRequest()
+                }
+            }
+        }
 
         modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
         addDialogState = rememberMaterialDialogState()
