@@ -2,6 +2,7 @@
 <resources>
     <string-array name="update_log">
         <item>修复：自定义背景图片在Android 13以下崩溃</item>
+        <item>修复：升级到Android 13之后，通知不显示</item>
         <item> </item>
         <item>优化：部分对话框显示优化</item>
     </string-array>
