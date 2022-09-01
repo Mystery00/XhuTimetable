@@ -73,6 +73,7 @@ class SettingsActivity : BaseComposeActivity() {
 
         val showNightModeState = rememberMaterialDialogState()
         val showNotifyTimeState = rememberMaterialDialogState()
+        val showUpdateLogState = rememberMaterialDialogState()
 
         Scaffold(
             topBar = {
@@ -371,9 +372,7 @@ class SettingsActivity : BaseComposeActivity() {
                     SettingsMenuLink(
                         title = { Text(text = "更新日志") },
                         onClick = {
-                            scope.launch {
-                                "暂未实现".toast()
-                            }
+                            showUpdateLogState.show()
                         }
                     )
                     SettingsMenuLink(
@@ -570,6 +569,9 @@ class SettingsActivity : BaseComposeActivity() {
             dialogState = showNotifyTimeState,
             initTime = notifyTime ?: LocalTime.now(),
         )
+        BuildUpdateLogDialog(
+            dialogState = showUpdateLogState
+        )
     }
 
     @Composable
@@ -619,6 +621,17 @@ class SettingsActivity : BaseComposeActivity() {
             ) {
                 selectedTime = it
             }
+        }
+    }
+
+    @Composable
+    private fun BuildUpdateLogDialog(dialogState: MaterialDialogState) {
+        MaterialDialog(dialogState = dialogState,
+            buttons = {
+                positiveButton("关闭")
+            }) {
+            title(text = "$appVersionName 更新日志")
+            message(text = updateLogArray.joinToString("\n"))
         }
     }
 
