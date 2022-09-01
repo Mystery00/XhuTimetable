@@ -26,7 +26,7 @@ private val LightColorPalette = lightColors(
 @Composable
 fun isDarkMode(): Boolean {
     val mode by Theme.nightMode.collectAsState()
-    val dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+//    val dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     return when (mode) {
         NightMode.AUTO -> isSystemInDarkTheme()
         NightMode.ON -> true

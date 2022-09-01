@@ -51,6 +51,10 @@ const val appVersionName: String = BuildConfig.VERSION_NAME
 const val appVersionCode: String = BuildConfig.VERSION_CODE.toString()
 const val appVersionCodeNumber: Long = BuildConfig.VERSION_CODE.toLong()
 
+//更新日志
+val updateLogArray: Array<String>
+    get() = context.resources.getStringArray(R.array.update_log)
+
 @Suppress("DEPRECATION")
 fun isOnline(): Boolean {
     val connectivityManager =
