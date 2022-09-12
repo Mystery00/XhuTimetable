@@ -70,9 +70,11 @@ class SettingsActivity : BaseComposeActivity() {
         val scope = rememberCoroutineScope()
 
         val nightMode by viewModel.nightMode.collectAsState()
+        val serverUrl by viewModel.serverUrl.collectAsState()
 
         val showNightModeState = rememberMaterialDialogState()
         val showNotifyTimeState = rememberMaterialDialogState()
+        val showServerUrlState = rememberMaterialDialogState()
         val showUpdateLogState = rememberMaterialDialogState()
 
         Scaffold(
@@ -528,6 +530,15 @@ class SettingsActivity : BaseComposeActivity() {
                             },
                         )
                         SettingsMenuLink(
+                            title = { Text(text = "服务器地址") },
+                            subtitle = {
+                                Text(text = serverUrl)
+                            },
+                            onClick = {
+                                showServerUrlState.show()
+                            },
+                        )
+                        SettingsMenuLink(
                             title = { Text(text = "NotifyWork 上一次执行时间") },
                             subtitle = {
                                 Text(
@@ -568,6 +579,10 @@ class SettingsActivity : BaseComposeActivity() {
         BuildTimeSelector(
             dialogState = showNotifyTimeState,
             initTime = notifyTime ?: LocalTime.now(),
+        )
+        BuildServerUrlInputDialog(
+            dialogState = showServerUrlState,
+            serverUrl = serverUrl
         )
         BuildUpdateLogDialog(
             dialogState = showUpdateLogState
@@ -620,6 +635,27 @@ class SettingsActivity : BaseComposeActivity() {
                 is24HourClock = true,
             ) {
                 selectedTime = it
+            }
+        }
+    }
+
+    @Composable
+    private fun BuildServerUrlInputDialog(
+        dialogState: MaterialDialogState,
+        serverUrl: String,
+    ) {
+        var input = serverUrl
+        MaterialDialog(
+            dialogState = dialogState,
+            buttons = {
+                positiveButton("确定") {
+                    viewModel.updateServerUrl(input)
+                }
+                negativeButton("取消")
+            }) {
+            title("请输入服务器地址")
+            input(label = "服务器地址", placeholder = serverUrl) { inputString ->
+                input = inputString
             }
         }
     }

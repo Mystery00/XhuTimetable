@@ -9,6 +9,7 @@ import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import vip.mystery0.xhu.timetable.api.*
+import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.PoemsInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.ServerApiInterceptor
@@ -38,7 +39,7 @@ val networkModule = module {
 
     single(named(RETROFIT)) {
         Retrofit.Builder()
-            .baseUrl("https://xgkb.api.mystery0.vip")
+            .baseUrl(GlobalConfig.serverUrl)
             .client(get(named(HTTP_CLIENT)))
             .addConverterFactory(
                 MoshiConverterFactory.create(

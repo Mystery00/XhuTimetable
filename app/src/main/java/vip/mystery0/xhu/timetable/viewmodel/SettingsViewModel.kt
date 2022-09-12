@@ -52,12 +52,16 @@ class SettingsViewModel : ComposeViewModel() {
     private val _splashList = MutableStateFlow<List<Splash>>(emptyList())
     val splashList: StateFlow<List<Splash>> = _splashList
 
+    private val _serverUrl = MutableStateFlow("")
+    val serverUrl: StateFlow<String> = _serverUrl
+
     init {
         viewModelScope.launch {
             Theme.nightMode.value = getConfig { nightMode }
             _notifyTimeData.value = getConfig { notifyTime }
             debugMode.value = getConfig { debugMode }
             _splashList.value = getConfig { splashList }
+            _serverUrl.value = getConfig { serverUrl }
             try {
                 _teamMemberData.value = serverApi.getTeamMemberList()
             } catch (e: Exception) {
@@ -84,6 +88,18 @@ class SettingsViewModel : ComposeViewModel() {
             //取消旧的任务
             workManager.cancelUniqueWork(NotifyWork::class.java.name)
             setTrigger(workManager)
+        }
+    }
+
+    fun updateServerUrl(url: String) {
+        if (url.isBlank()) {
+            return
+        }
+        viewModelScope.launch {
+            setConfig {
+                serverUrl = url
+            }
+            _serverUrl.value = getConfig { serverUrl }
         }
     }
 
