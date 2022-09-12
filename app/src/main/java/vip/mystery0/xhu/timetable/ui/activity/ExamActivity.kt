@@ -67,16 +67,16 @@ class ExamActivity : BaseComposeActivity() {
                         }
                     },
                     actions = {
-                        if (examListState.examHtml.isNotBlank()) {
-                            Text(
-                                text = "显示原始网页",
-                                modifier = Modifier.clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() },
-                                ) {
-                                    examListState.examHtml.toast()
-                                })
-                        }
+//                        if (examListState.examHtml.isNotBlank()) {
+//                            Text(
+//                                text = "显示原始网页",
+//                                modifier = Modifier.clickable(
+//                                    indication = null,
+//                                    interactionSource = remember { MutableInteractionSource() },
+//                                ) {
+//                                    examListState.examHtml.toast()
+//                                })
+//                        }
                         IconButton(onClick = {
                             showUserSelect = !showUserSelect
                         }) {
