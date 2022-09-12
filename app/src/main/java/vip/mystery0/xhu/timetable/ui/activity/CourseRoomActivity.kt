@@ -434,6 +434,15 @@ private fun BuildItem(
                     Text(text = "教室类型：${item.type}")
                 }
             }
+            if (item.remark.isNotBlank()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Image(painter = XhuIcons.CourseRoom.remark, contentDescription = null)
+                    Text(text = "备注：${item.remark}")
+                }
+            }
         }
     }
 }

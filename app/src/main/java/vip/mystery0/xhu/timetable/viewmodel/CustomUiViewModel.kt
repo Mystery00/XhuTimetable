@@ -71,6 +71,7 @@ class CustomUiViewModel : ComposeViewModel() {
                     timeString = "",
                     time = "",
                     day = it.day,
+                    extraData = it.extraData,
                     thisWeek = thisWeek,
                     today = false,
                     tomorrow = false,

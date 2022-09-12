@@ -15,6 +15,7 @@ data class Course(
     val timeString: String,
     val time: String,
     val day: Int,
+    val extraData: List<String>,
     val thisWeek: Boolean,
     val today: Boolean,
     val tomorrow: Boolean,

@@ -84,6 +84,7 @@ class CourseRoomViewModel : ComposeViewModel() {
                     it.seat,
                     it.region,
                     it.type,
+                    it.remark
                 )
             }.let {
                 _courseRoomListState.value = CourseRoomListState(
@@ -138,9 +139,10 @@ data class CourseRoom(
     var seat: String,
     var region: String,
     var type: String,
+    var remark: String,
 ) {
     companion object {
         val PLACEHOLDER =
-            CourseRoom("教室编号", "教室名称", "座位数", "所在地区", "教室类型")
+            CourseRoom("教室编号", "教室名称", "座位数", "所在地区", "教室类型", "")
     }
 }

@@ -6,4 +6,5 @@ data class CourseRoomResponse(
     var name: String,
     var region: String,
     var type: String,
+    var remark: String,
 )

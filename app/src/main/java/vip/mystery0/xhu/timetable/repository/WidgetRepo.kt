@@ -80,6 +80,7 @@ suspend fun getTodayCourse(currentWeek: Int): List<CourseGlance> {
             timeString,
             it.time.formatTime(),
             it.day,
+            it.extraData,
             thisWeek,
             isToday,
             false,

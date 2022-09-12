@@ -558,6 +558,10 @@ private fun BuildItem(
                             text = item.courseType,
                             color = XhuColor.Common.grayText,
                         )
+                        Text(
+                            text = item.examType,
+                            color = XhuColor.Common.grayText,
+                        )
                     }
                 }
                 Text(

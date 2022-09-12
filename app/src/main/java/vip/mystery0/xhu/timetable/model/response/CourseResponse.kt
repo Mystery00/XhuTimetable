@@ -12,6 +12,7 @@ data class CourseResponse(
     var time: List<Int>,
     var type: CourseType,
     var day: Int,
+    var extraData: List<String>,
 ) {
     @Transient
     lateinit var user: User
