@@ -1,5 +1,8 @@
 package vip.mystery0.xhu.timetable.repository.local
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.config.User
 import vip.mystery0.xhu.timetable.config.runOnIo
@@ -11,6 +14,16 @@ import vip.mystery0.xhu.timetable.repository.CourseRepo
 import vip.mystery0.xhu.timetable.repository.db.dao.CourseDao
 
 class CourseLocalRepo : CourseRepo {
+    private val moshi = Moshi.Builder()
+        .addLast(KotlinJsonAdapterFactory())
+        .build()
+        .adapter<List<String>>(
+            Types.newParameterizedType(
+                List::class.java,
+                String::class.java
+            )
+        )
+
     private val courseDao: CourseDao by inject()
 
     override suspend fun getCourseList(
@@ -27,6 +40,10 @@ class CourseLocalRepo : CourseRepo {
                 "${item.courseName}!${item.teacherName}!${item.location}!${item.weekIndex}!${item.time}!${item.type}"
             var courseItem = map[key]
             if (courseItem == null) {
+                var extraData = item.extraData
+                if (extraData.isBlank()) {
+                    extraData = "[]"
+                }
                 courseItem = CourseResponse(
                     item.courseName,
                     item.teacherName,
@@ -36,6 +53,7 @@ class CourseLocalRepo : CourseRepo {
                     item.time.split(",").map { it.toInt() },
                     item.type,
                     item.weekIndex,
+                    moshi.fromJson(extraData) ?: emptyList()
                 )
                 map[key] = courseItem
             }
@@ -54,6 +72,7 @@ class CourseLocalRepo : CourseRepo {
                     courseResponse.time,
                     courseResponse.type,
                     courseResponse.day,
+                    courseResponse.extraData,
                 )
             )
         }
@@ -84,6 +103,7 @@ class CourseLocalRepo : CourseRepo {
                         course.day,
                         course.type,
                         CourseSource.JWC,
+                        moshi.toJson(course.extraData),
                         year,
                         term,
                         studentId,
@@ -108,6 +128,7 @@ class CourseLocalRepo : CourseRepo {
                     weekIndex = 1,
                     type = CourseType.ALL,
                     source = CourseSource.JWC,
+                    extraData = "[\"QQ群：426878786\"]",
                     year = "",
                     term = 1,
                     studentId = ""
@@ -120,6 +141,10 @@ class CourseLocalRepo : CourseRepo {
         }
         val itemList = courseList.shuffled().take(size)
         itemList.map { item ->
+            var extraData = item.extraData
+            if (extraData.isBlank()) {
+                extraData = "[]";
+            }
             CourseResponse(
                 item.courseName,
                 item.teacherName,
@@ -129,6 +154,7 @@ class CourseLocalRepo : CourseRepo {
                 emptyList(),
                 CourseType.ALL,
                 item.weekIndex,
+                moshi.fromJson(extraData) ?: emptyList()
             )
         }
     }

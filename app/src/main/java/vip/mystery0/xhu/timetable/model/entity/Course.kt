@@ -24,6 +24,8 @@ data class CourseItem(
     val type: CourseType,
     //课程来源
     val source: CourseSource,
+    //额外信息
+    val extraData: String,
     //学年
     val year: String,
     //学期

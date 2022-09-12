@@ -11,7 +11,7 @@ import vip.mystery0.xhu.timetable.repository.db.dao.NoticeDao
 
 @Database(
     entities = [CourseItem::class, CourseColor::class, Notice::class, CustomThing::class],
-    version = 3
+    version = 4
 )
 @TypeConverters(
     CourseConverts::class,

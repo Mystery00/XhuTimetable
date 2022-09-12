@@ -172,6 +172,9 @@ object XhuIcons {
         val type: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_room_type)
+        val remark: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_room_remark)
     }
 
     object Profile {

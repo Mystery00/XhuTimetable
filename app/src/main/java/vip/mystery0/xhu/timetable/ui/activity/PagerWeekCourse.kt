@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -259,52 +260,62 @@ private fun BoxScope.ShowCourseDialog(
                         .padding(horizontal = 36.dp, vertical = 8.dp)
                         .background(course.color.copy(0.8F), RoundedCornerShape(12.dp)),
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(24.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Text(
-                            text = course.courseName,
-                            maxLines = 2,
-                            fontSize = 18.sp,
-                            overflow = TextOverflow.Ellipsis,
-                            color = Color.White,
-                            textAlign = TextAlign.Center,
-                            style = androidx.compose.ui.text.TextStyle(
-                                fontWeight = FontWeight.Bold,
-                            ),
-                        )
-                        Text(
-                            text = course.teacherName,
-                            color = Color.White,
-                        )
-                        Text(
-                            text = course.location,
-                            color = Color.White,
-                        )
-                        Text(
-                            text = course.weekString,
-                            color = Color.White,
-                        )
-                        Text(
-                            text = course.time,
-                            color = Color.White,
-                        )
-                        if (multiAccountMode) {
+                    SelectionContainer {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(24.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
                             Text(
-                                text = "${course.studentId}(${course.userName})",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colors.onSecondary,
-                                modifier = Modifier
-                                    .background(
-                                        color = MaterialTheme.colors.secondary,
-                                        shape = RoundedCornerShape(4.dp),
-                                    )
-                                    .padding(2.dp),
+                                text = course.courseName,
+                                maxLines = 2,
+                                fontSize = 18.sp,
+                                overflow = TextOverflow.Ellipsis,
+                                color = Color.White,
+                                textAlign = TextAlign.Center,
+                                style = androidx.compose.ui.text.TextStyle(
+                                    fontWeight = FontWeight.Bold,
+                                ),
                             )
+                            Text(
+                                text = course.teacherName,
+                                color = Color.White,
+                            )
+                            Text(
+                                text = course.location,
+                                color = Color.White,
+                            )
+                            Text(
+                                text = course.weekString,
+                                color = Color.White,
+                            )
+                            Text(
+                                text = course.time,
+                                color = Color.White,
+                            )
+                            if (course.extraData.isNotEmpty()) {
+                                for (data in course.extraData) {
+                                    Text(
+                                        text = data,
+                                        color = Color.White,
+                                    )
+                                }
+                            }
+                            if (multiAccountMode) {
+                                Text(
+                                    text = "${course.studentId}(${course.userName})",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colors.onSecondary,
+                                    modifier = Modifier
+                                        .background(
+                                            color = MaterialTheme.colors.secondary,
+                                            shape = RoundedCornerShape(4.dp),
+                                        )
+                                        .padding(2.dp),
+                                )
+                            }
                         }
                     }
                 }
