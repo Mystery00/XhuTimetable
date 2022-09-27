@@ -131,7 +131,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.5.1")
     implementation("com.google.android.material:material:1.6.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
-    implementation("androidx.activity:activity-compose:1.5.1")
+    implementation("androidx.activity:activity-compose:1.6.0")
     implementation("androidx.core:core-splashscreen:1.0.0")
     implementation("androidx.browser:browser:1.4.0")
     implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
@@ -168,7 +168,7 @@ dependencies {
     //work manager
     implementation("androidx.work:work-runtime-ktx:2.7.1")
     //koin
-    val koinVersion = "3.2.0"
+    val koinVersion = "3.2.2"
     implementation("io.insert-koin:koin-android:$koinVersion")
     implementation("io.insert-koin:koin-androidx-workmanager:$koinVersion")
     implementation("io.insert-koin:koin-androidx-compose:$koinVersion")
