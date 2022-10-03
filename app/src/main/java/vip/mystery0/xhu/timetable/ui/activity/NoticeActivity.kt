@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -30,6 +31,7 @@ import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.loadInBrowser
 import vip.mystery0.xhu.timetable.model.entity.Notice
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
+import vip.mystery0.xhu.timetable.ui.theme.XhuFonts
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.NoticeViewModel
@@ -172,6 +174,9 @@ class NoticeActivity : BaseComposeActivity() {
             ClickableText(
                 modifier = modifier,
                 text = annotatedText,
+                style = TextStyle(
+                    fontFamily = XhuFonts.DEFAULT,
+                ),
                 onClick = { offset ->
                     annotatedText.getStringAnnotations(
                         tag = "URL",

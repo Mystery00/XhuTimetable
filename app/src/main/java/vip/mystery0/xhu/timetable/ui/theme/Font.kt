@@ -6,6 +6,9 @@ import androidx.compose.ui.text.font.FontFamily
 import vip.mystery0.xhu.timetable.config.GlobalConfig
 
 object XhuFonts {
+    val DEFAULT: FontFamily = custom ?: FontFamily.Default
+
+
     @OptIn(ExperimentalTextApi::class)
     val custom: FontFamily?
         get() {

@@ -42,7 +42,7 @@ fun XhuTimetableTheme(
     val colors = if (isDarkMode()) DarkColorPalette else LightColorPalette
 
     val replacementTypography = Typography(
-        defaultFontFamily = XhuFonts.custom ?: FontFamily.Default
+        defaultFontFamily = XhuFonts.DEFAULT
     )
     MaterialTheme(
         typography = replacementTypography,
