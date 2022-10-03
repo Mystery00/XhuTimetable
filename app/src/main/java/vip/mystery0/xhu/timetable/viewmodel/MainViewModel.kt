@@ -356,12 +356,17 @@ class MainViewModel : ComposeViewModel() {
             val today = LocalDate.now()
             val tomorrow = today.plusDays(1)
             val nowTime = LocalTime.now()
+            val now = LocalDateTime.now()
 
             //过滤出今日或者明日的课程
             val showTomorrowCourse = getConfig { showTomorrowCourseTime }?.let {
                 nowTime.isAfter(it)
             } ?: false
             customThingList.filter {
+                if (it.thing.endTime.isBefore(now)) {
+                    //事项的结束时间比当前时间早，说明事件结束了
+                    return@filter false
+                }
                 val thing = it.thing
                 if (showTomorrowCourse)
                     thing.showOnToday(tomorrow)
