@@ -205,7 +205,7 @@ Int32 longestFileName;
 Char inName[FILE_NAME_LEN];
 Char outName[FILE_NAME_LEN];
 Char tmpName[FILE_NAME_LEN];
-Char *progName;
+extern Char *progName;
 Char progNameReally[FILE_NAME_LEN];
 FILE *outputHandleJustInCase;
 Int32 workFactor;
