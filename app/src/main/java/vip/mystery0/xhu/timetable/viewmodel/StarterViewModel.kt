@@ -106,7 +106,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
 
     private fun initPullWork() {
         val uniqueWorkName = PullWork::class.java.name
-        workManager.cancelUniqueWork(uniqueWorkName)
+//        workManager.cancelUniqueWork(uniqueWorkName)
         workManager.enqueueUniquePeriodicWork(
             uniqueWorkName,
             ExistingPeriodicWorkPolicy.KEEP,
