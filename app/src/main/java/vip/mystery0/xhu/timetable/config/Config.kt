@@ -362,5 +362,5 @@ class Config internal constructor() {
         set(value) {
             kv.encode("serverUrl", value)
         }
-        get() = kv.decodeString("serverUrl","https://xgkb.api.mystery0.vip")!!
+        get() = kv.decodeString("serverUrl", "https://xgkb.api.mystery0.vip")!!
 }

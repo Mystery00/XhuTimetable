@@ -1,22 +1,16 @@
 package vip.mystery0.xhu.timetable.model
 
 open class CustomUi(
-    open val weekItemHeight: Int,
-    open val weekBackgroundAlpha: Float,
-    open val weekItemCorner: Int,
-    open val weekTitleTemplate: String,
-    open val weekNotTitleTemplate: String,
-    open val weekTitleTextSize: Int,
+    open val weekItemHeight: Int = 72,
+    open val weekBackgroundAlpha: Float = 0.8F,
+    open val weekItemCorner: Int = 4,
+    open val weekTitleTemplate: String = "{courseName}\n@{location}",
+    open val weekNotTitleTemplate: String = "[非本周]\n{courseName}\n@{location}",
+    open val weekTitleTextSize: Int = 10,
+    open val backgroundImageBlur: Int = 0,
 ) {
     companion object {
-        val DEFAULT = CustomUi(
-            weekItemHeight = 72,
-            weekBackgroundAlpha = 0.8F,
-            weekItemCorner = 4,
-            weekTitleTemplate = "{courseName}\n@{location}",
-            weekNotTitleTemplate = "[非本周]\n{courseName}\n@{location}",
-            weekTitleTextSize = 10,
-        )
+        val DEFAULT = CustomUi()
     }
 
     fun builder(): Builder = Builder(
@@ -26,6 +20,7 @@ open class CustomUi(
         weekTitleTemplate = weekTitleTemplate,
         weekNotTitleTemplate = weekNotTitleTemplate,
         weekTitleTextSize = weekTitleTextSize,
+        backgroundImageBlur = backgroundImageBlur,
     )
 
     class Builder(
@@ -35,12 +30,14 @@ open class CustomUi(
         override var weekTitleTemplate: String,
         override var weekNotTitleTemplate: String,
         override var weekTitleTextSize: Int,
+        override var backgroundImageBlur: Int,
     ) : CustomUi(
         weekItemHeight,
         weekBackgroundAlpha,
         weekItemCorner,
         weekTitleTemplate,
         weekNotTitleTemplate,
-        weekTitleTextSize
+        weekTitleTextSize,
+        backgroundImageBlur,
     )
 }

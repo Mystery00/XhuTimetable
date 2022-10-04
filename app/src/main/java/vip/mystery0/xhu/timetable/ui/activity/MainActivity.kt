@@ -24,6 +24,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -297,6 +298,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             ) { paddingValues ->
                 Box {
                     val backgroundImage by viewModel.backgroundImage.collectAsState()
+                    val backgroundImageBlur by viewModel.backgroundImageBlur.collectAsState()
                     if (backgroundImage != Unit) {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
@@ -308,6 +310,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
+                                .blur(backgroundImageBlur.dp)
                         )
                     }
                     HorizontalPager(

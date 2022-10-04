@@ -36,6 +36,7 @@ class CustomUiViewModel : ComposeViewModel() {
     val weekTitleTemplate = MutableStateFlow(CustomUi.DEFAULT.weekTitleTemplate)
     val weekNotTitleTemplate = MutableStateFlow(CustomUi.DEFAULT.weekNotTitleTemplate)
     val weekTitleTextSize = MutableStateFlow(CustomUi.DEFAULT.weekTitleTextSize)
+    val backgroundImageBlur = MutableStateFlow(CustomUi.DEFAULT.backgroundImageBlur)
 
     init {
         loadCustomUi()
@@ -52,6 +53,7 @@ class CustomUiViewModel : ComposeViewModel() {
             weekTitleTemplate.value = customUi.weekTitleTemplate
             weekNotTitleTemplate.value = customUi.weekNotTitleTemplate
             weekTitleTextSize.value = customUi.weekTitleTextSize
+            backgroundImageBlur.value = customUi.backgroundImageBlur
         }
     }
 
@@ -99,6 +101,7 @@ class CustomUiViewModel : ComposeViewModel() {
                 weekTitleTemplate.value.ifEmpty { CustomUi.DEFAULT.weekTitleTemplate },
                 weekNotTitleTemplate.value.ifEmpty { CustomUi.DEFAULT.weekNotTitleTemplate },
                 weekTitleTextSize.value,
+                backgroundImageBlur.value,
             )
             _customUi.value = nowCustomUi
         }
@@ -113,9 +116,11 @@ class CustomUiViewModel : ComposeViewModel() {
                 weekTitleTemplate.value.ifEmpty { CustomUi.DEFAULT.weekTitleTemplate },
                 weekNotTitleTemplate.value.ifEmpty { CustomUi.DEFAULT.weekNotTitleTemplate },
                 weekTitleTextSize.value,
+                backgroundImageBlur.value,
             )
             setConfig { customUi = nowCustomUi }
             eventBus.post(UIEvent(EventType.CHANGE_CUSTOM_UI))
+            eventBus.post(UIEvent(EventType.CHANGE_MAIN_BACKGROUND))
             loadCustomUi()
         }
     }

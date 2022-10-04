@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import android.os.Build
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -9,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -78,6 +80,8 @@ class CustomUiActivity : BaseComposeActivity() {
             val weekTitleTemplate by viewModel.weekTitleTemplate.collectAsState()
             val weekNotTitleTemplate by viewModel.weekNotTitleTemplate.collectAsState()
 
+            val customUi by viewModel.customUi.collectAsState()
+
             val showCustomTitleTemplateDialog = remember { mutableStateOf(false) }
             val showCustomNotTitleTemplateDialog = remember { mutableStateOf(false) }
             Column(modifier = Modifier.padding(paddingValues)) {
@@ -92,7 +96,9 @@ class CustomUiActivity : BaseComposeActivity() {
                             painter = painterResource(XhuImages.defaultBackgroundImage),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .blur(customUi.backgroundImageBlur.dp),
                         )
                         Row(
                             modifier = Modifier
@@ -100,7 +106,6 @@ class CustomUiActivity : BaseComposeActivity() {
                         ) {
                             Spacer(modifier = Modifier.weight(2.15F))
                             BoxWithConstraints(modifier = Modifier.weight(3F)) {
-                                val customUi by viewModel.customUi.collectAsState()
                                 Row {
                                     //列数
                                     val columnSize = 3
@@ -193,6 +198,25 @@ class CustomUiActivity : BaseComposeActivity() {
                                 viewModel.weekTitleTextSize.value = newValue
                                 viewModel.update()
                             })
+                        val backgroundImageBlur by viewModel.backgroundImageBlur.collectAsState()
+                        BuildSeekBar(
+                            enabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
+                            title = "动态模糊半径",
+                            value = backgroundImageBlur,
+                            start = 0,
+                            end = 30,
+                            listener = { newValue ->
+                                viewModel.backgroundImageBlur.value = newValue
+                                viewModel.update()
+                            })
+                        SettingsMenuLink(
+                            title = { Text(text = "动态模糊说明") },
+                            subtitle = {
+                                Text(text = "仅 Android 12+ 可使用")
+                            },
+                            onClick = {
+                            }
+                        )
                         SettingsMenuLink(
                             title = { Text(text = "格子文本模板") },
                             subtitle = {
@@ -308,6 +332,7 @@ class CustomUiActivity : BaseComposeActivity() {
 
 @Composable
 private fun BuildSeekBar(
+    enabled: Boolean = true,
     title: String,
     value: Int,
     start: Int,
@@ -322,6 +347,7 @@ private fun BuildSeekBar(
         title = { Text(text = title) },
         subtitle = {
             Slider(
+                enabled = enabled,
                 value = valueState.value,
                 onValueChange = {
                     valueState.value = it
