@@ -27,6 +27,10 @@ enum class MenuItem(
         { XhuIcons.Profile.classroom },
         { intentTo(CourseRoomActivity::class) },
     ),
+    ACADEMIC_REPORT(
+        { XhuIcons.Profile.academicReport },
+        { intentTo(AcademicReportActivity::class) },
+    ),
     ACCOUNT_MANAGE(
         { XhuIcons.Profile.accountSettings },
         { intentTo(AccountSettingsActivity::class) },

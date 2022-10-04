@@ -138,6 +138,12 @@ interface ServerApi {
 
     @GET("/api/rest/xhu-timetable/push/fetch")
     suspend fun fetchPush(@Header("token") token: String): Response<List<PushResponse>>
+
+    @POST("/api/rest/xhu-timetable/server/academicReport")
+    suspend fun getAcademicReportList(
+        @Header("token") token: String,
+        @Body keywords: AcademicReportRequest,
+    ): Response<List<AcademicReportResponse>>
 }
 
 fun <T : Any> Response<T>.checkLogin(): T {

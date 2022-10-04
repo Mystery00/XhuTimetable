@@ -147,68 +147,6 @@ class CustomCourseColorActivity : BaseComposeActivity() {
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-private fun BuildSearchText(
-    searchText: String,
-    placeholderText: String = "",
-    onSearchTextChanged: (String) -> Unit = {},
-    onClearClick: () -> Unit = {},
-) {
-    var showClearButton by remember { mutableStateOf(false) }
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val focusRequester = remember { FocusRequester() }
-
-    OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 2.dp)
-            .onFocusChanged { focusState ->
-                showClearButton = (focusState.isFocused)
-            }
-            .focusRequester(focusRequester),
-        value = searchText,
-        onValueChange = onSearchTextChanged,
-        placeholder = {
-            Text(text = placeholderText)
-        },
-        colors = TextFieldDefaults.textFieldColors(
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            backgroundColor = Color.Transparent,
-            cursorColor = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
-        ),
-        trailingIcon = {
-            AnimatedVisibility(
-                visible = showClearButton,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                IconButton(onClick = {
-                    onClearClick()
-                }) {
-                    Icon(
-                        painter = XhuIcons.close,
-                        contentDescription = null,
-                        tint = XhuColor.Common.blackText,
-                    )
-                }
-
-            }
-        },
-        maxLines = 1,
-        singleLine = true,
-        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-        keyboardActions = KeyboardActions(onDone = {
-            keyboardController?.hide()
-        }),
-    )
-
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
-}
-
 @Composable
 private fun BuildItem(
     item: Pair<String, Color>,
