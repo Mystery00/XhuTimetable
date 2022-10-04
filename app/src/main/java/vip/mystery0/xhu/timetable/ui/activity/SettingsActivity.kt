@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -670,7 +671,10 @@ class SettingsActivity : BaseComposeActivity() {
                 dialogState.hide()
             },
             title = {
-                Text(text = "$appVersionName 更新日志")
+                Text(
+                    text = "$appVersionName 更新日志",
+                    fontWeight = FontWeight.Bold,
+                )
             },
             text = {
                 Text(text = updateLogArray.joinToString("\n"))
