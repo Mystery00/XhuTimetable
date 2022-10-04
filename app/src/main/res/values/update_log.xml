@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="update_log">
-        <item>优化：课程、成绩、空闲教室信息显示更多信息</item>
         <item>新增：学术报告功能（数据来源于西华大学官网）</item>
         <item>新增：背景图支持设置动态模糊半径（仅Android 12+可用）</item>
         <item> </item>
