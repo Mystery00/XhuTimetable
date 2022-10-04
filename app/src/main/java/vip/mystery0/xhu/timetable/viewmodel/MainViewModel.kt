@@ -125,6 +125,9 @@ class MainViewModel : ComposeViewModel() {
     private val _backgroundImage = MutableStateFlow<Any>(Unit)
     val backgroundImage: StateFlow<Any> = _backgroundImage
 
+    private val _backgroundImageBlur = MutableStateFlow(1)
+    val backgroundImageBlur: StateFlow<Int> = _backgroundImageBlur
+
     private val _emptyUser = MutableStateFlow(false)
     val emptyUser: StateFlow<Boolean> = _emptyUser
 
@@ -183,6 +186,7 @@ class MainViewModel : ComposeViewModel() {
                 _backgroundImage.value =
                     getConfig { backgroundImage } ?: XhuImages.defaultBackgroundImage
             }
+            _backgroundImageBlur.value= getConfig { customUi }.backgroundImageBlur
         }
     }
 
