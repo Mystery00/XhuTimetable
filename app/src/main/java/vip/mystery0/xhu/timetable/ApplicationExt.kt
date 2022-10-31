@@ -1,13 +1,16 @@
 package vip.mystery0.xhu.timetable
 
 import android.annotation.SuppressLint
+import android.app.AlarmManager
 import android.app.Application
+import android.app.PendingIntent
 import android.content.ActivityNotFoundException
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.provider.Settings
 import android.util.Log
@@ -21,7 +24,9 @@ import com.microsoft.appcenter.crashes.Crashes
 import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.GlobalConfig
+import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.getConfig
+import vip.mystery0.xhu.timetable.work.NotifyService
 import vip.mystery0.xhu.timetable.work.NotifyWork
 import java.io.File
 import java.time.Duration
@@ -157,6 +162,47 @@ fun Context.joinQQGroup(activity: BaseComposeActivity) {
     } catch (e: ActivityNotFoundException) {
         activity.toastString("QQ未安装", true)
     }
+}
+
+suspend fun setAlarmTrigger(
+    alarmManager: AlarmManager,
+    executeTime: LocalDateTime? = null,
+) {
+    val notifyCourse = getConfig { notifyCourse }
+    val notifyExam = getConfig { notifyExam }
+    if (!notifyCourse && !notifyExam) {
+        return
+    }
+    val alarmIntent = Intent(context, NotifyService::class.java)
+    val pendingIntent = PendingIntent.getForegroundService(
+        context,
+        0,
+        alarmIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+    //关闭定时器
+    alarmManager.cancel(pendingIntent)
+
+    val now = LocalDateTime.now()
+    val nextExecuteTime = if (executeTime == null) {
+        val notifyTime = getConfig { notifyTime } ?: return
+        var time = notifyTime.atDate(LocalDate.now())
+        if (time.isBefore(now)) {
+            //当天计算出来的时间比当前时间早，那么调度时间改成明天
+            time = time.plusDays(1)
+        }
+        time
+    } else {
+        executeTime
+    }
+
+    alarmManager.cancel(pendingIntent)
+    alarmManager.set(
+        AlarmManager.RTC_WAKEUP,
+        nextExecuteTime.atZone(chinaZone).toInstant().toEpochMilli(),
+        pendingIntent
+    )
+    Log.i("ApplicationExt", "set alarm trigger success")
 }
 
 suspend fun setTrigger(workManager: WorkManager, executeTime: LocalDateTime? = null) {
