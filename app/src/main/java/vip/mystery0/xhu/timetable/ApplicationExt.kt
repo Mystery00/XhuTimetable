@@ -202,7 +202,7 @@ suspend fun setAlarmTrigger(
         nextExecuteTime.atZone(chinaZone).toInstant().toEpochMilli(),
         pendingIntent
     )
-    Log.i("ApplicationExt", "set alarm trigger success")
+    Log.i("ApplicationExt", "set alarm trigger success, next execute time: $nextExecuteTime")
 }
 
 suspend fun setTrigger(workManager: WorkManager, executeTime: LocalDateTime? = null) {
@@ -236,5 +236,5 @@ suspend fun setTrigger(workManager: WorkManager, executeTime: LocalDateTime? = n
             .setInitialDelay(duration.toMillis(), TimeUnit.MILLISECONDS)
             .build()
     )
-    Log.i("ApplicationExt", "work enqueue success")
+    Log.i("ApplicationExt", "work enqueue success, next execute time: $nextExecuteTime")
 }
