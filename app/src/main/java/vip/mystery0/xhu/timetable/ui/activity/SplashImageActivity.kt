@@ -33,6 +33,7 @@ import coil.request.ImageRequest
 import com.google.accompanist.insets.ProvideWindowInsets
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.DataHolder
+import vip.mystery0.xhu.timetable.loadInBrowser
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
 import vip.mystery0.xhu.timetable.viewmodel.SplashImageViewModel
 
@@ -64,6 +65,15 @@ class SplashImageActivity : BaseComposeActivity() {
                 modifier = Modifier
                     .background(backgroundColor ?: MaterialTheme.colors.background)
                     .fillMaxSize()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {
+                            DataHolder.splash?.locationUrl?.let {
+                                loadInBrowser(it)
+                            }
+                        }
+                    )
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
