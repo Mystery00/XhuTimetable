@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
+import android.app.AlarmManager
 import android.net.Uri
 import android.os.SystemClock
 import android.util.Log
@@ -21,10 +22,8 @@ import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
 import vip.mystery0.xhu.timetable.ui.theme.Theme
 import vip.mystery0.xhu.timetable.work.DownloadApkWork
 import vip.mystery0.xhu.timetable.work.DownloadPatchWork
-import vip.mystery0.xhu.timetable.work.NotifyWork
 import java.io.File
 import java.io.FileOutputStream
-import java.time.Instant
 import java.time.LocalTime
 
 class SettingsViewModel : ComposeViewModel() {
@@ -34,6 +33,7 @@ class SettingsViewModel : ComposeViewModel() {
     }
 
     private val workManager: WorkManager by inject()
+    private val alarmManager: AlarmManager by inject()
     private val serverApi: ServerApi by inject()
 
     private val _errorMessage = MutableStateFlow("")
@@ -85,9 +85,10 @@ class SettingsViewModel : ComposeViewModel() {
                 notifyTime = time
             }
             _notifyTimeData.value = getConfig { notifyTime }
-            //取消旧的任务
-            workManager.cancelUniqueWork(NotifyWork::class.java.name)
-            setTrigger(workManager)
+            setAlarmTrigger(alarmManager)
+//            //取消旧的任务
+//            workManager.cancelUniqueWork(NotifyWork::class.java.name)
+//            setTrigger(workManager)
         }
     }
 
