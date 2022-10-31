@@ -13,7 +13,6 @@ import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.work.WorkManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
@@ -239,7 +238,7 @@ class NotifyService : Service(), KoinComponent {
 
     override fun onDestroy() {
         super.onDestroy()
-        stopForeground(NotificationId.NOTIFY_TOMORROW_FOREGROUND.id)
+        stopForeground(STOP_FOREGROUND_REMOVE)
         job.cancel()
     }
 }

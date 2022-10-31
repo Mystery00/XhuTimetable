@@ -141,6 +141,8 @@
             android:screenOrientation="fullSensor"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
 
+        <service android:name=".work.NotifyService" />
+
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
