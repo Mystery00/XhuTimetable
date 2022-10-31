@@ -379,6 +379,15 @@ class SettingsActivity : BaseComposeActivity() {
                         }
                     )
                     SettingsMenuLink(
+                        title = { Text(text = "西瓜课表官网") },
+                        subtitle = {
+                            Text(text = "点击访问 https://xgkb.mystery0.vip")
+                        },
+                        onClick = {
+                            loadInBrowser("https://xgkb.mystery0.vip")
+                        }
+                    )
+                    SettingsMenuLink(
                         icon = {
                             Icon(
                                 painter = XhuIcons.github,
