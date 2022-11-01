@@ -50,10 +50,18 @@ class ClassSettingsViewModel : ComposeViewModel() {
 
             val loggedUserList = SessionManager.loggedUserList()
             _selectYearAndTermList.value = runOnCpu {
-                val startYear = loggedUserList.minByOrNull { it.info.grade }!!.info.grade.toInt()
+                var startGrade = loggedUserList.minByOrNull { it.info.grade }?.info?.grade
+                var endGrade = loggedUserList.maxByOrNull { it.info.grade }?.info?.grade
+                if (startGrade.isNullOrBlank()) {
+                    startGrade = "2019"
+                }
+                val startYear = startGrade.toInt()
                 val time = LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone)
                 val nowEndYear = if (time.month < Month.JUNE) time.year - 1 else time.year
-                val endYear = loggedUserList.maxByOrNull { it.info.grade }!!.info.grade.toInt() + 3
+                if (endGrade.isNullOrBlank()) {
+                    endGrade = nowEndYear.toString()
+                }
+                val endYear = endGrade.toInt() + 3
                 val tempArrayList = ArrayList<String>()
                 for (it in startYear..max(nowEndYear, endYear)) {
                     tempArrayList.add("${it}-${it + 1}学年 第1学期")
