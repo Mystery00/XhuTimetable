@@ -1,5 +1,9 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -50,6 +54,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
 
+
 class SettingsActivity : BaseComposeActivity() {
     private val viewModel: SettingsViewModel by viewModels()
 
@@ -65,6 +70,7 @@ class SettingsActivity : BaseComposeActivity() {
             }
         }
 
+    @SuppressLint("BatteryLife")
     @Composable
     override fun BuildContent() {
         val notifyTime by viewModel.notifyTimeData.collectAsState()
@@ -243,7 +249,7 @@ class SettingsActivity : BaseComposeActivity() {
                         subtitle = {
                             Text(
                                 text = if (notifyTime != null)
-                                    "将会在每天的 ${notifyTime!!.format(timeFormatter)} 提醒\n为了避免无法提醒，请将${appName}添加到系统后台白名单中"
+                                    "将会在每天的 ${notifyTime!!.format(timeFormatter)} 提醒"
                                 else
                                     "提醒功能已禁用"
                             )
@@ -259,6 +265,24 @@ class SettingsActivity : BaseComposeActivity() {
                         },
                         onClick = {
                             showNotifyTimeState.show()
+                        }
+                    )
+                    SettingsMenuLink(
+                        title = { Text(text = "设置忽略电池优化") },
+                        subtitle = {
+                            Text(
+                                text = "为了确保提醒功能正常，请将 $appName 添加到系统电池优化白名单中，点击即可前往设置"
+                            )
+                        },
+                        onClick = {
+                            if (isIgnoringBatteryOptimizations()) {
+                                "已经在电池优化白名单中，无需重复设置".toast()
+                            } else {
+                                val intent =
+                                    Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                                intent.data = Uri.parse("package:$packageName")
+                                startActivity(intent)
+                            }
                         }
                     )
                 }
@@ -565,10 +589,7 @@ class SettingsActivity : BaseComposeActivity() {
                             title = { Text(text = "PullWork 上一次执行时间") },
                             subtitle = {
                                 Text(
-                                    text = LocalDateTime.ofInstant(
-                                        GlobalConfig.pullWorkLastExecuteTime,
-                                        chinaZone
-                                    ).format(chinaDateTimeFormatter)
+                                    text = GlobalConfig.pullWorkLastExecuteTimeListRead.joinToString("\n"),
                                 )
                             },
                             onClick = {

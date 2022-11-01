@@ -39,7 +39,12 @@ class PullWork(private val appContext: Context, workerParams: WorkerParameters) 
 
     override suspend fun doWork(): Result {
         startForeground()
-        setConfig { pullWorkLastExecuteTime = Instant.now() }
+        val list = getConfig { pullWorkLastExecuteTimeList }
+        setConfig {
+            pullWorkLastExecuteTimeList = ArrayList(list).apply {
+                add(Instant.now())
+            }
+        }
         val user = SessionManager.loggedUserList().find { it.main } ?: return Result.success()
         val response = user.withAutoLogin {
             serverApi.fetchPush(it).checkLogin()
@@ -114,12 +119,14 @@ class PullWork(private val appContext: Context, workerParams: WorkerParameters) 
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
             }
+
             ActionType.OPEN_ACTIVITY -> PendingIntent.getActivity(
                 appContext,
                 0,
                 appContext.packageManager.getLaunchIntentForPackage(packageName),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
+
             else -> null
         }
         return notificationBuilder

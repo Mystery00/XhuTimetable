@@ -10,8 +10,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
+import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
@@ -33,6 +33,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
+
 
 @SuppressLint("StaticFieldLeak")
 internal lateinit var context: Context
@@ -237,4 +238,13 @@ suspend fun setTrigger(workManager: WorkManager, executeTime: LocalDateTime? = n
             .build()
     )
     Log.i("ApplicationExt", "work enqueue success, next execute time: $nextExecuteTime")
+}
+
+fun isIgnoringBatteryOptimizations(): Boolean {
+    var isIgnoring = false
+    val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager?
+    if (powerManager != null) {
+        isIgnoring = powerManager.isIgnoringBatteryOptimizations(packageName)
+    }
+    return isIgnoring
 }
