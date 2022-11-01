@@ -21,7 +21,7 @@ enum class MenuItem(
     ),
     QUERY_CET_SCORE(
         { XhuIcons.Profile.cetScore },
-        { toCustomTabs(it.link) },
+        { it.link?.let { url -> toCustomTabs(url) } },
     ),
     QUERY_FREE_ROOM(
         { XhuIcons.Profile.classroom },
