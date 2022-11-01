@@ -9,6 +9,7 @@ import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.response.Menu
 import vip.mystery0.xhu.timetable.model.response.Splash
+import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
 import java.io.File
 import java.time.*
 import java.time.format.DateTimeFormatter
@@ -320,13 +321,37 @@ class Config internal constructor() {
             kv.encode("pushNotificationIndex", value)
         }
         get() = kv.decodeInt("pushNotificationIndex", 1)
-    var pullWorkLastExecuteTime: Instant
+    var pullWorkLastExecuteTimeList: List<Instant>
         set(value) {
-            kv.encode("pullWorkLastExecuteTime", value.toEpochMilli())
+            val list = value.map { it.toEpochMilli() }.sortedDescending()
+            var saveList = list
+            if (list.size > 5) {
+                saveList = list.subList(0, 5)
+            }
+            moshi.adapter<List<Long>>(
+                Types.newParameterizedType(
+                    List::class.java,
+                    Long::class.javaObjectType
+                )
+            ).toJson(saveList).let {
+                kv.encode("pullWorkLastExecuteTimeList", it)
+            }
         }
         get() {
-            val time = kv.decodeLong("pullWorkLastExecuteTime", 0L)
-            return Instant.ofEpochMilli(time)
+            val timeString = kv.decodeString("pullWorkLastExecuteTimeList", "[]")
+            return moshi.adapter<List<Long>>(
+                Types.newParameterizedType(
+                    List::class.java,
+                    Long::class.javaObjectType
+                )
+            ).fromJson(timeString!!)!!.map { Instant.ofEpochMilli(it) }
+        }
+    val pullWorkLastExecuteTimeListRead: List<String>
+        get() {
+            return pullWorkLastExecuteTimeList.map {
+                it.atZone(chinaZone)
+                    .format(chinaDateTimeFormatter)
+            }
         }
     var notifyWorkLastExecuteTime: Instant
         set(value) {
