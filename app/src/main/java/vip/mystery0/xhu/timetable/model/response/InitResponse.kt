@@ -43,5 +43,5 @@ data class Menu(
     var key: String,
     var groupSort: Int,
     var hint: String,
-    var link: String,
+    var link: String?,
 )
