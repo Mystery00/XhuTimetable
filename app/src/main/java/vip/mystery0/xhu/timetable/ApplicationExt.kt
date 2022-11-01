@@ -20,10 +20,14 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
+import com.microsoft.appcenter.crashes.AbstractCrashesListener
 import com.microsoft.appcenter.crashes.Crashes
+import com.microsoft.appcenter.crashes.ingestion.models.ErrorAttachmentLog
+import com.microsoft.appcenter.crashes.model.ErrorReport
 import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.GlobalConfig
+import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.work.NotifyService
@@ -131,6 +135,28 @@ fun registerAppCenter(application: Application) {
         if (BuildConfig.DEBUG) {
             AppCenter.setLogLevel(Log.VERBOSE)
         }
+        Crashes.setListener(object : AbstractCrashesListener() {
+            override fun getErrorAttachments(report: ErrorReport): MutableIterable<ErrorAttachmentLog> {
+                try {
+                    val loggedUserList = GlobalConfig.userList
+                    val list = loggedUserList.map {
+                        mapOf(
+                            "studentId" to it.studentId,
+                            "token" to it.token,
+                            "main" to it.main,
+                        )
+                    }
+                    val attachment = ErrorAttachmentLog.attachmentWithText(
+                        "loggedUserList: $list}",
+                        "userInfo.txt"
+                    )
+                    return mutableListOf(attachment)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                return mutableListOf()
+            }
+        })
         AppCenter.setUserId(publicDeviceId)
         AppCenter.start(
             application,
