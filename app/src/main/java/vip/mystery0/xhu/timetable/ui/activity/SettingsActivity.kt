@@ -324,7 +324,7 @@ class SettingsActivity : BaseComposeActivity() {
                         title = { Text(text = "检查更新") },
                         onClick = {
                             scope.launch {
-                                "暂未实现".toast()
+                                viewModel.checkUpdate()
                             }
                         }
                     )
@@ -635,6 +635,7 @@ class SettingsActivity : BaseComposeActivity() {
             dialogState = checkVersionChannelState,
             initChannel = versionChannel,
         )
+        ShowCheckUpdateDialog()
     }
 
     @Composable
@@ -759,6 +760,30 @@ class SettingsActivity : BaseComposeActivity() {
                 selectedMode = it
             }
         }
+    }
+
+    @Composable
+    private fun ShowCheckUpdateDialog() {
+        val version by viewModel.version.collectAsState()
+        val newVersion = version ?: return
+        var show = newVersion.versionCode > appVersionCodeNumber
+        if (GlobalConfig.debugMode && GlobalConfig.alwaysShowNewVersion) {
+            show = true
+        }
+        if (!show) return "检查更新完成，当前暂无新版本".toast()
+        //需要提示版本更新
+        CheckUpdate(
+            version = newVersion,
+            onDownload = {
+                if (it) {
+                    viewModel.downloadApk()
+                } else {
+                    viewModel.downloadPatch()
+                }
+            },
+            onIgnore = {
+            }
+        )
     }
 
     override fun onStart() {

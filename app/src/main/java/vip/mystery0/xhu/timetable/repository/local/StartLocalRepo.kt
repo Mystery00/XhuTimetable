@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.repository.local
 
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.model.response.InitResponse
+import vip.mystery0.xhu.timetable.model.response.Version
 import vip.mystery0.xhu.timetable.repository.StartRepo
 
 class StartLocalRepo : StartRepo {
@@ -12,4 +13,6 @@ class StartLocalRepo : StartRepo {
             getConfig { termStartTime }.toEpochMilli(),
             getConfig { menuList },
         )
+
+    override suspend fun checkVersion(): Version? = null
 }

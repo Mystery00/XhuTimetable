@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.api
 
 import retrofit2.Response
 import retrofit2.http.*
+import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.ServerError
 import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
 import vip.mystery0.xhu.timetable.config.parseServerError
@@ -13,6 +14,9 @@ import vip.mystery0.xhu.timetable.model.response.*
 interface ServerApi {
     @POST("/api/rest/xhu-timetable/common/init")
     suspend fun initRequest(@Body initRequest: InitRequest): InitResponse
+
+    @GET("/api/rest/xhu-timetable/common/version")
+    suspend fun getLatestVersion(@Query("betaVersion") betaVersion: Boolean = GlobalConfig.versionChannel.isBeta()): Version
 
     @GET("/api/rest/xhu-timetable/common/version/url")
     suspend fun versionUrl(

@@ -14,12 +14,16 @@ import vip.mystery0.xhu.timetable.*
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.startUniqueWork
+import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
+import vip.mystery0.xhu.timetable.model.response.Version
+import vip.mystery0.xhu.timetable.module.getRepo
+import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.ui.theme.Theme
 import vip.mystery0.xhu.timetable.work.DownloadApkWork
 import vip.mystery0.xhu.timetable.work.DownloadPatchWork
@@ -58,6 +62,9 @@ class SettingsViewModel : ComposeViewModel() {
 
     private val _versionChannel = MutableStateFlow(VersionChannel.STABLE)
     val versionChannel: StateFlow<VersionChannel> = _versionChannel
+
+    val version = MutableStateFlow<Version?>(null)
+    private val startRepo: StartRepo = getRepo()
 
     init {
         viewModelScope.launch {
@@ -167,6 +174,14 @@ class SettingsViewModel : ComposeViewModel() {
                 }
             }
             setConfig { customFontFile = fontFile }
+        }
+    }
+
+    fun checkUpdate() {
+        viewModelScope.launch {
+            val latestVersion = startRepo.checkVersion()
+            DataHolder.version = latestVersion
+            version.value = latestVersion
         }
     }
 }

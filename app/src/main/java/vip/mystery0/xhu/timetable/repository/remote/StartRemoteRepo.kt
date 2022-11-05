@@ -7,6 +7,7 @@ import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.request.InitRequest
 import vip.mystery0.xhu.timetable.model.response.InitResponse
+import vip.mystery0.xhu.timetable.model.response.Version
 import vip.mystery0.xhu.timetable.module.localRepo
 import vip.mystery0.xhu.timetable.repository.StartRepo
 import java.time.Duration
@@ -27,5 +28,11 @@ class StartRemoteRepo : StartRepo, KoinComponent {
             menuList = response.menu
         }
         return response
+    }
+
+    override suspend fun checkVersion(): Version? {
+        return withTimeoutOrNull(Duration.ofSeconds(5).toMillis()) {
+            serverApi.getLatestVersion()
+        } ?: return local.checkVersion()
     }
 }
