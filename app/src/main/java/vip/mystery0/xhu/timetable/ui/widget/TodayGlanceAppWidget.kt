@@ -86,7 +86,10 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
                         }
                     } else {
                         item {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(
+                                modifier = GlanceModifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
                                 Image(
                                     provider = ImageProvider(R.drawable.ic_no_data),
                                     contentDescription = null,
