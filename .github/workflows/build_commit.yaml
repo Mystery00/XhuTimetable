@@ -8,18 +8,35 @@ env:
   SIGN_KEY_STORE_FILE: "/tmp/key.jks"
 jobs:
     build:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
-            - name: 设置JDK
-              uses: actions/setup-java@v1
-              with:
-                java-version: 11
-            - name: 设置Android SDK
-              uses: android-actions/setup-android@v2
-            - name: 构建安装包
-              run: ./gradlew assembleDebug
-            - uses: actions/upload-artifact@v3
-              with:
-                  name: github-${{ github.sha }}
-                  path: ${{ env.OUTPUT_DIR }}/*.apk
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - name: 设置JDK
+          uses: actions/setup-java@v1
+          with:
+            java-version: 11
+        - name: 设置Android SDK
+          uses: android-actions/setup-android@v2
+        - name: 构建 APK
+          uses: gradle/gradle-build-action@2.3.3
+          with:
+            arguments: assembleDebug
+        - name: 安装工具
+          run: |
+            sudo apt-get install jq
+        - name: 解析编译文件路径
+          id: apk
+          run: |
+            versionName=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionName')
+            versionCode=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionCode')
+            apkFile=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].outputFile')
+            cp "${{ env.OUTPUT_DIR }}/$apkFile" "${{ env.OUTPUT_DIR }}/XhuTimetable-$versionName-$versionCode.apk"
+            echo ::set-output name=versionName::$versionName
+            echo ::set-output name=versionCode::$versionCode
+        - name: 发布版本
+          uses: softprops/action-gh-release@v1
+          with:
+            tag_name: ${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}-nightly
+            prerelease: true
+            files: |
+              "${{ env.OUTPUT_DIR }}/XhuTimetable-${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}.apk"
