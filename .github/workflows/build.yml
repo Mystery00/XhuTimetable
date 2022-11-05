@@ -41,7 +41,7 @@ jobs:
         run: |
             echo ${{ secrets.SIGN_KEY_BASE64 }} | base64 --decode > /tmp/key.jks
       - name: 构建 APK
-        uses: gradle/gradle-build-action@2.3.3
+        uses: gradle/gradle-build-action@v2
         with:
           arguments: assembleRelease
       - name: 安装工具
