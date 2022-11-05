@@ -6,6 +6,7 @@ env:
   SIGN_KEY_STORE_PASSWORD: ${{ secrets.SIGN_KEY_STORE_PASSWORD }}
   SIGN_KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
   SIGN_KEY_STORE_FILE: "/tmp/key.jks"
+  NIGHTLY: true
 jobs:
     build:
       runs-on: ubuntu-latest
