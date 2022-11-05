@@ -66,7 +66,7 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
         }
         setForeground(getDownloadUrl(version))
         //获取下载地址
-        val versionUrl = serverApi.versionUrl(version.versionId)
+        val versionUrl = serverApi.versionUrl(version.versionId, false)
         val md5 = runOnIo {
             val response =
                 fileApi.download(versionUrl.patchUrl, DownloadProgressInterceptor.buildTag(true))

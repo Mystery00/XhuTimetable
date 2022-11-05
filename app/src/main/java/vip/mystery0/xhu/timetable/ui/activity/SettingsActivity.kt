@@ -38,7 +38,7 @@ import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.entity.NightMode
-import vip.mystery0.xhu.timetable.model.entity.nightModeSelectList
+import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.ui.activity.contract.FontFileResultContract
@@ -78,11 +78,13 @@ class SettingsActivity : BaseComposeActivity() {
 
         val nightMode by viewModel.nightMode.collectAsState()
         val serverUrl by viewModel.serverUrl.collectAsState()
+        val versionChannel by viewModel.versionChannel.collectAsState()
 
         val showNightModeState = rememberMaterialDialogState()
         val showNotifyTimeState = rememberMaterialDialogState()
         val showServerUrlState = rememberMaterialDialogState()
         val showUpdateLogState = rememberMaterialDialogState()
+        val checkVersionChannelState = rememberMaterialDialogState()
 
         Scaffold(
             topBar = {
@@ -467,6 +469,15 @@ class SettingsActivity : BaseComposeActivity() {
                             }
                         }
                     )
+                    SettingsMenuLink(
+                        title = { Text(text = "版本更新渠道") },
+                        subtitle = {
+                            Text(text = "重启应用后生效")
+                        },
+                        onClick = {
+                            checkVersionChannelState.show()
+                        }
+                    )
                 }
                 XhuSettingsGroup(title = {
                     Text(text = "西瓜课表团队出品")
@@ -589,7 +600,9 @@ class SettingsActivity : BaseComposeActivity() {
                             title = { Text(text = "PullWork 上一次执行时间") },
                             subtitle = {
                                 Text(
-                                    text = GlobalConfig.pullWorkLastExecuteTimeListRead.joinToString("\n"),
+                                    text = GlobalConfig.pullWorkLastExecuteTimeListRead.joinToString(
+                                        "\n"
+                                    ),
                                 )
                             },
                             onClick = {
@@ -618,6 +631,10 @@ class SettingsActivity : BaseComposeActivity() {
         BuildUpdateLogDialog(
             dialogState = showUpdateLogState
         )
+        BuildVersionChannelDialog(
+            dialogState = checkVersionChannelState,
+            initChannel = versionChannel,
+        )
     }
 
     @Composable
@@ -625,7 +642,7 @@ class SettingsActivity : BaseComposeActivity() {
         dialogState: MaterialDialogState,
         initNightMode: NightMode,
     ) {
-        val list = nightModeSelectList()
+        val list = NightMode.selectList()
         var selectedMode = list.indexOf(initNightMode)
         if (selectedMode == -1) selectedMode = 0
         MaterialDialog(
@@ -716,6 +733,32 @@ class SettingsActivity : BaseComposeActivity() {
                     Text(text = "关闭")
                 }
             })
+    }
+
+    @Composable
+    private fun BuildVersionChannelDialog(
+        dialogState: MaterialDialogState,
+        initChannel: VersionChannel,
+    ) {
+        val list = VersionChannel.selectList()
+        var selectedMode = list.indexOf(initChannel)
+        if (selectedMode == -1) selectedMode = 0
+        MaterialDialog(
+            dialogState = dialogState,
+            buttons = {
+                positiveButton("确定") {
+                    viewModel.updateVersionChannel(list[selectedMode])
+                }
+                negativeButton("取消")
+            }) {
+            title("修改更新渠道")
+            listItemsSingleChoice(
+                list = list.map { it.title },
+                initialSelection = selectedMode,
+            ) {
+                selectedMode = it
+            }
+        }
     }
 
     override fun onStart() {

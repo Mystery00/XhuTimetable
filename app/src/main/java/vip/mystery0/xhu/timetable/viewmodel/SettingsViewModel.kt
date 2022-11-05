@@ -17,6 +17,7 @@ import vip.mystery0.xhu.timetable.base.startUniqueWork
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.entity.NightMode
+import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
 import vip.mystery0.xhu.timetable.ui.theme.Theme
@@ -55,6 +56,9 @@ class SettingsViewModel : ComposeViewModel() {
     private val _serverUrl = MutableStateFlow("")
     val serverUrl: StateFlow<String> = _serverUrl
 
+    private val _versionChannel = MutableStateFlow(VersionChannel.STABLE)
+    val versionChannel: StateFlow<VersionChannel> = _versionChannel
+
     init {
         viewModelScope.launch {
             Theme.nightMode.value = getConfig { nightMode }
@@ -62,6 +66,7 @@ class SettingsViewModel : ComposeViewModel() {
             debugMode.value = getConfig { debugMode }
             _splashList.value = getConfig { splashList }
             _serverUrl.value = getConfig { serverUrl }
+            _versionChannel.value = getConfig { versionChannel }
             try {
                 _teamMemberData.value = serverApi.getTeamMemberList()
             } catch (e: Exception) {
@@ -101,6 +106,15 @@ class SettingsViewModel : ComposeViewModel() {
                 serverUrl = url
             }
             _serverUrl.value = getConfig { serverUrl }
+        }
+    }
+
+    fun updateVersionChannel(versionChannel: VersionChannel) {
+        viewModelScope.launch {
+            setConfig {
+                this.versionChannel = versionChannel
+            }
+            _versionChannel.value = getConfig { versionChannel }
         }
     }
 

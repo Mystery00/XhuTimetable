@@ -15,7 +15,10 @@ interface ServerApi {
     suspend fun initRequest(@Body initRequest: InitRequest): InitResponse
 
     @GET("/api/rest/xhu-timetable/common/version/url")
-    suspend fun versionUrl(@Query("versionId") versionId: Long): VersionUrl
+    suspend fun versionUrl(
+        @Query("versionId") versionId: Long,
+        @Query("betaVersion") betaVersion: Boolean,
+    ): VersionUrl
 
     @GET("/api/rest/xhu-timetable/server/publicKey")
     suspend fun publicKey(): PublicKeyResponse
