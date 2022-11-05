@@ -92,19 +92,25 @@ android {
                     "app_version_name",
                     "${defaultConfig.versionName}.n$gitVersionCode.$gitVersionName-$date.nightly"
                 )
+                isMinifyEnabled = false
+                proguardFiles(
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
+                )
+                versionNameSuffix = ".n$gitVersionCode.$gitVersionName-$date.nightly"
             }else{
                 resValue(
                     "string",
                     "app_version_name",
                     "${defaultConfig.versionName}.r$gitVersionCode.$gitVersionName"
                 )
+                isMinifyEnabled = true
+                proguardFiles(
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
+                )
+                versionNameSuffix = ".r$gitVersionCode.$gitVersionName"
             }
-            isMinifyEnabled = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            versionNameSuffix = ".r$gitVersionCode.$gitVersionName"
             signingConfig = signingConfigs.getByName("release")
         }
     }
