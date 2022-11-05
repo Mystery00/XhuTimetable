@@ -83,22 +83,23 @@ android {
             versionNameSuffix = ".d$gitVersionCode.$gitVersionName"
         }
         release {
+            val nightly = System.getenv("NIGHTLY")?.toBoolean() ?: false
+
             resValue("string", "app_name", "西瓜课表")
             resValue("string", "app_version_code", gitVersionCode.toString())
-            if (BuildVersionConfig.nightly) {
-                val date = "date \"+%Y%m%d".runCommand()
+            if (nightly) {
                 resValue(
                     "string",
                     "app_version_name",
-                    "${defaultConfig.versionName}.n$gitVersionCode.$gitVersionName-$date.nightly"
+                    "${defaultConfig.versionName}.n$gitVersionCode.nightly"
                 )
                 isMinifyEnabled = false
                 proguardFiles(
                     getDefaultProguardFile("proguard-android-optimize.txt"),
                     "proguard-rules.pro"
                 )
-                versionNameSuffix = ".n$gitVersionCode.$gitVersionName-$date.nightly"
-            }else{
+                versionNameSuffix = ".n$gitVersionCode.nightly"
+            } else {
                 resValue(
                     "string",
                     "app_version_name",

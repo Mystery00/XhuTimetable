@@ -44,7 +44,7 @@ jobs:
         - name: 发布版本
           uses: softprops/action-gh-release@v1
           with:
-            tag_name: ${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}-nightly
+            tag_name: ${{ steps.apk.outputs.versionName }}
             prerelease: true
             body: |
               注意：该版本为测试版本，可能存在一些问题，不建议日常使用。
