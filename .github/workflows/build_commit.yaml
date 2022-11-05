@@ -10,7 +10,7 @@ jobs:
     build:
       runs-on: ubuntu-latest
       steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v1
         - name: 设置JDK
           uses: actions/setup-java@v1
           with:
@@ -39,4 +39,4 @@ jobs:
             tag_name: ${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}-nightly
             prerelease: true
             files: |
-              "${{ env.OUTPUT_DIR }}/XhuTimetable-${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}.apk"
+              ${{ env.OUTPUT_DIR }}/XhuTimetable-${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}.apk
