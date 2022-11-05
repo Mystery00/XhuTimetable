@@ -17,6 +17,7 @@ class UCropResultContract : ActivityResultContract<UCrop, File?>() {
         if (resultCode != Activity.RESULT_OK) {
             return null
         }
+        @Suppress("DEPRECATION")
         val outputUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent?.getParcelableExtra(UCrop.EXTRA_OUTPUT_URI, Uri::class.java)
         } else {
