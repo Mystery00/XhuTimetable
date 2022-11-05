@@ -85,11 +85,20 @@ android {
         release {
             resValue("string", "app_name", "西瓜课表")
             resValue("string", "app_version_code", gitVersionCode.toString())
-            resValue(
-                "string",
-                "app_version_name",
-                "${defaultConfig.versionName}.r$gitVersionCode.$gitVersionName"
-            )
+            if (BuildVersionConfig.nightly) {
+                val date = "date \"+%Y%m%d".runCommand()
+                resValue(
+                    "string",
+                    "app_version_name",
+                    "${defaultConfig.versionName}.n$gitVersionCode.$gitVersionName-$date.nightly"
+                )
+            }else{
+                resValue(
+                    "string",
+                    "app_version_name",
+                    "${defaultConfig.versionName}.r$gitVersionCode.$gitVersionName"
+                )
+            }
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

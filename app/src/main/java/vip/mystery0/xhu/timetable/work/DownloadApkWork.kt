@@ -65,7 +65,7 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
         }
         setForeground(getDownloadUrl(version))
         //获取下载地址
-        val versionUrl = serverApi.versionUrl(version.versionId)
+        val versionUrl = serverApi.versionUrl(version.versionId, version.beta)
         val md5 = runOnIo {
             val response =
                 fileApi.download(versionUrl.apkUrl, DownloadProgressInterceptor.buildTag(false))
@@ -80,7 +80,7 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
             file.md5()
         }
         updateStatus(status = "文件处理中", patch = false, progress = 100)
-        if (!md5.equals(versionUrl.apkMd5, ignoreCase = true)) {
+        if (!version.beta && !md5.equals(versionUrl.apkMd5, ignoreCase = true)) {
             throw DownloadError.MD5CheckFailed()
         }
         //md5校验通过，安装应用

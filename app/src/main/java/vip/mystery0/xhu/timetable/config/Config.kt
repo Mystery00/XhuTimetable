@@ -7,6 +7,7 @@ import com.tencent.mmkv.MMKV
 import vip.mystery0.xhu.timetable.BuildConfig
 import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.entity.NightMode
+import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.response.Menu
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
@@ -388,4 +389,12 @@ class Config internal constructor() {
             kv.encode("serverUrl", value)
         }
         get() = kv.decodeString("serverUrl", "https://xgkb.api.mystery0.vip")!!
+    var versionChannel: VersionChannel
+        set(value) {
+            kv.encode("versionChannel", value.value)
+        }
+        get() {
+            val save = kv.decodeInt("versionChannel", VersionChannel.STABLE.value)
+            return VersionChannel.parse(save)
+        }
 }

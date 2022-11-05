@@ -40,10 +40,10 @@ jobs:
       - name: 解密签名
         run: |
             echo ${{ secrets.SIGN_KEY_BASE64 }} | base64 --decode > /tmp/key.jks
-      - name: 构建 APK
+      - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-        with:
-          arguments: assembleRelease
+      - name: 构建 APK
+        run: ./gradlew assembleRelease
       - name: 安装工具
         run: |
           sudo apt-get install jq bsdiff

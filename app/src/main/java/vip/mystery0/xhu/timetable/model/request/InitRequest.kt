@@ -4,6 +4,7 @@ import android.os.Build
 import vip.mystery0.xhu.timetable.BuildConfig
 import vip.mystery0.xhu.timetable.appVersionCode
 import vip.mystery0.xhu.timetable.appVersionName
+import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.publicDeviceId
 
 data class InitRequest(
@@ -14,7 +15,7 @@ data class InitRequest(
     val factory: String = Build.MANUFACTURER,
     val model: String = Build.MODEL,
     val rom: String = Build.DISPLAY,
-    val checkBeta: Boolean,
+    val betaVersion: Boolean = GlobalConfig.versionChannel.isBeta(),
 )
 
 private val AppVersion: String
