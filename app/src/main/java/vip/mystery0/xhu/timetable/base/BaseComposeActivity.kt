@@ -40,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -65,7 +64,6 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
-import vip.mystery0.xhu.timetable.ui.theme.XhuImages
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
 import kotlin.reflect.KClass
 

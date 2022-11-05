@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable.repository.network
 
 import vip.mystery0.xhu.timetable.model.response.InitResponse
+import vip.mystery0.xhu.timetable.model.response.Version
 import vip.mystery0.xhu.timetable.module.NetworkRepo
 import vip.mystery0.xhu.timetable.module.localRepo
 import vip.mystery0.xhu.timetable.module.remoteRepo
@@ -12,4 +13,7 @@ object StartNetworkRepo : StartRepo, NetworkRepo<StartRepo> {
 
     override suspend fun init(): InitResponse =
         dispatch().init()
+
+    override suspend fun checkVersion(): Version? =
+        dispatch().checkVersion()
 }

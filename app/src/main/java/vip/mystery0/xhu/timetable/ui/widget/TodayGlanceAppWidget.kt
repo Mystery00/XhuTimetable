@@ -187,14 +187,14 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
             }
         }
     }
-}
 
-class UpdateTodayCourseActionCallback : ActionCallback {
-    override suspend fun onAction(
-        context: Context,
-        glanceId: GlanceId,
-        parameters: ActionParameters
-    ) {
-        TodayGlanceAppWidget().update(context, glanceId)
+    class UpdateTodayCourseActionCallback : ActionCallback {
+        override suspend fun onAction(
+            context: Context,
+            glanceId: GlanceId,
+            parameters: ActionParameters
+        ) {
+            TodayGlanceAppWidget().update(context, glanceId)
+        }
     }
 }
