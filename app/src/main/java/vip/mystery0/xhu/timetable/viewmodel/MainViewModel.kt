@@ -641,6 +641,7 @@ class MainViewModel : ComposeViewModel() {
                 LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone).toLocalDate()
             val days =
                 Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay()).toDays()
+            //计算顶部周组件
             var thisWeek = ((days / 7) + 1).toInt()
             if (days < 0 && thisWeek > 0) {
                 thisWeek = 0
