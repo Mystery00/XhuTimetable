@@ -17,10 +17,10 @@ jobs:
             java-version: 11
         - name: 设置Android SDK
           uses: android-actions/setup-android@v2
-        - name: 构建 APK
+        - name: Setup Gradle
           uses: gradle/gradle-build-action@v2
-          with:
-            arguments: assembleDebug
+        - name: 构建 APK
+          run: ./gradlew assembleDebug
         - name: 安装工具
           run: |
             sudo apt-get install jq
