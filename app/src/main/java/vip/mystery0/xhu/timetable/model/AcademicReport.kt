@@ -1,7 +1,5 @@
 package vip.mystery0.xhu.timetable.model
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import java.time.LocalDateTime
 
 data class AcademicReport(

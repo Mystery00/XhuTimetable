@@ -23,7 +23,11 @@ import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.externalCacheDownloadDir
 import vip.mystery0.xhu.timetable.model.response.Version
 import vip.mystery0.xhu.timetable.packageName
-import vip.mystery0.xhu.timetable.ui.activity.*
+import vip.mystery0.xhu.timetable.ui.activity.DownloadUpdateState
+import vip.mystery0.xhu.timetable.ui.activity.addDownloadObserver
+import vip.mystery0.xhu.timetable.ui.activity.formatFileSize
+import vip.mystery0.xhu.timetable.ui.activity.removeDownloadObserver
+import vip.mystery0.xhu.timetable.ui.activity.updateStatus
 import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_DOWNLOAD
 import vip.mystery0.xhu.timetable.ui.notification.NotificationId
 import vip.mystery0.xhu.timetable.utils.BsPatch

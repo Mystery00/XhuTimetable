@@ -14,7 +14,7 @@ import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.repository.getCourseColorList
 import vip.mystery0.xhu.timetable.repository.updateCourseColor
 import java.text.Collator
-import java.util.*
+import java.util.Locale
 
 class CustomCourseColorViewModel : ComposeViewModel(), KoinComponent {
     companion object {

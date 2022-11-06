@@ -16,7 +16,6 @@ import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.lazy.LazyColumn
-import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.background
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
@@ -39,7 +38,6 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.ui.activity.StartActivity
-import vip.mystery0.xhu.timetable.ui.widget.state.WeekCourseDataStore
 import vip.mystery0.xhu.timetable.ui.widget.state.WeekCourseStateGlance
 import vip.mystery0.xhu.timetable.ui.widget.state.WeekGlanceStateDefinition
 import java.text.DecimalFormat

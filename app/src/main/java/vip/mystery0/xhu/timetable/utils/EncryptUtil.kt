@@ -5,7 +5,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.nio.channels.FileChannel
 import java.security.MessageDigest
-import java.util.*
+import java.util.Locale
 
 fun String.md5(): String = bytes2HexString(hashTemplate(toByteArray(), "MD5"))
 

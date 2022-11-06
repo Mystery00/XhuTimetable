@@ -4,7 +4,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import vip.mystery0.xhu.timetable.model.response.Menu
 import vip.mystery0.xhu.timetable.toCustomTabs
-import vip.mystery0.xhu.timetable.ui.activity.*
+import vip.mystery0.xhu.timetable.ui.activity.AcademicReportActivity
+import vip.mystery0.xhu.timetable.ui.activity.AccountSettingsActivity
+import vip.mystery0.xhu.timetable.ui.activity.ClassSettingsActivity
+import vip.mystery0.xhu.timetable.ui.activity.CourseRoomActivity
+import vip.mystery0.xhu.timetable.ui.activity.ExamActivity
+import vip.mystery0.xhu.timetable.ui.activity.ExpScoreActivity
+import vip.mystery0.xhu.timetable.ui.activity.FeedbackActivity
+import vip.mystery0.xhu.timetable.ui.activity.MainActivity
+import vip.mystery0.xhu.timetable.ui.activity.NoticeActivity
+import vip.mystery0.xhu.timetable.ui.activity.ScoreActivity
+import vip.mystery0.xhu.timetable.ui.activity.SettingsActivity
+import vip.mystery0.xhu.timetable.ui.activity.UrgeActivity
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
 enum class MenuItem(

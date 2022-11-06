@@ -1,7 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.widget.state
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.glance.state.GlanceStateDefinition
 import kotlinx.coroutines.flow.Flow

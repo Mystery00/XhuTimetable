@@ -12,7 +12,12 @@ import vip.mystery0.xhu.timetable.model.response.Menu
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
 import java.io.File
-import java.time.*
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.Month
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 val chinaZone: ZoneId = ZoneId.of("Asia/Shanghai")

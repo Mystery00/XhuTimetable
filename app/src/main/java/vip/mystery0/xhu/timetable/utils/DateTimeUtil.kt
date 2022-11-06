@@ -1,7 +1,7 @@
 package vip.mystery0.xhu.timetable.utils
 
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.TreeSet
 
 val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 val dateFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日")
