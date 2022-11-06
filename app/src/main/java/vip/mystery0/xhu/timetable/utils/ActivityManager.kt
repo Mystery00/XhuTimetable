@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.os.Bundle
 import vip.mystery0.xhu.timetable.trackEvent
-import java.util.*
+import java.util.Stack
 
 private val activityStack by lazy { Stack<Activity>() }
 

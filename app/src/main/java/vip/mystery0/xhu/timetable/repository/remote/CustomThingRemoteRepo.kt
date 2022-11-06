@@ -14,7 +14,7 @@ import vip.mystery0.xhu.timetable.model.request.CustomThingRequest
 import vip.mystery0.xhu.timetable.module.localRepo
 import vip.mystery0.xhu.timetable.repository.CustomThingRepo
 import java.time.Instant
-import java.util.*
+import java.util.Locale
 
 class CustomThingRemoteRepo : CustomThingRepo {
     private val serverApi: ServerApi by inject()

@@ -9,7 +9,11 @@ import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.ui.activity.ErrorReportActivity
 import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
 import vip.mystery0.xhu.timetable.utils.finishAllActivity
-import java.io.*
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
+import java.io.PrintWriter
+import java.io.StringWriter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 

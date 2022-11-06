@@ -34,7 +34,6 @@ import com.google.accompanist.pager.rememberPagerState
 import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
-import vip.mystery0.xhu.timetable.ui.theme.XhuFonts
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import java.text.DecimalFormat
 import java.time.LocalDate

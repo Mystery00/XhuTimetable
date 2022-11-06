@@ -4,7 +4,11 @@ import okhttp3.Interceptor
 import okhttp3.MediaType
 import okhttp3.Response
 import okhttp3.ResponseBody
-import okio.*
+import okio.Buffer
+import okio.BufferedSource
+import okio.ForwardingSource
+import okio.Source
+import okio.buffer
 
 class FileDownloadProgressInterceptor(
     private val progressUpdater: (FileDownloadProgressState) -> Unit,

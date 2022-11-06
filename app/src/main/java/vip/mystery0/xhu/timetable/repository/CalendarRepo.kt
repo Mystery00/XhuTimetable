@@ -12,7 +12,7 @@ import vip.mystery0.xhu.timetable.model.CalendarAttender
 import vip.mystery0.xhu.timetable.model.CalendarEvent
 import vip.mystery0.xhu.timetable.packageName
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
-import java.util.*
+import java.util.TimeZone
 
 object CalendarRepo {
     private const val CALENDARS_ACCOUNT_TYPE = CalendarContract.ACCOUNT_TYPE_LOCAL

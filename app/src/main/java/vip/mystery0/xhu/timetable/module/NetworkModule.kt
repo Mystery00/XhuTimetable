@@ -8,7 +8,11 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import vip.mystery0.xhu.timetable.api.*
+import vip.mystery0.xhu.timetable.api.FeedbackApi
+import vip.mystery0.xhu.timetable.api.FileApi
+import vip.mystery0.xhu.timetable.api.JwcApi
+import vip.mystery0.xhu.timetable.api.PoemsApi
+import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.PoemsInterceptor

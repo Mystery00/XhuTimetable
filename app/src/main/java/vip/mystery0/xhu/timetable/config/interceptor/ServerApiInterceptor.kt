@@ -9,7 +9,7 @@ import vip.mystery0.xhu.timetable.utils.sha256
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.time.Instant
-import java.util.*
+import java.util.TreeMap
 
 class ServerApiInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
