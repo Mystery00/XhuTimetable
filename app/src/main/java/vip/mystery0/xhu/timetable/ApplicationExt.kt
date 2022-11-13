@@ -14,6 +14,7 @@ import android.os.Environment
 import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
+import android.webkit.WebSettings
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -59,6 +60,10 @@ const val appVersionName: String = BuildConfig.VERSION_NAME
 //版本号
 const val appVersionCode: String = BuildConfig.VERSION_CODE.toString()
 const val appVersionCodeNumber: Long = BuildConfig.VERSION_CODE.toLong()
+
+//系统UA
+val userAgent: String
+    get() = WebSettings.getDefaultUserAgent(context)
 
 //更新日志
 val updateLogArray: Array<String>

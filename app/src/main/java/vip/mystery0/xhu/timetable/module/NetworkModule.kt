@@ -1,8 +1,10 @@
 package vip.mystery0.xhu.timetable.module
 
+import android.webkit.WebSettings
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -17,6 +19,7 @@ import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.PoemsInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.ServerApiInterceptor
+import vip.mystery0.xhu.timetable.config.interceptor.UserAgentInterceptor
 import java.util.concurrent.TimeUnit
 
 const val HTTP_CLIENT = "client"
@@ -33,11 +36,13 @@ val networkModule = module {
             .connectTimeout(20, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
             .addInterceptor(ServerApiInterceptor())
+            .addInterceptor(UserAgentInterceptor())
             .build()
     }
     single(named(HTTP_CLIENT_POEMS)) {
         OkHttpClient.Builder()
             .addInterceptor(PoemsInterceptor())
+            .addInterceptor(UserAgentInterceptor())
             .build()
     }
 

@@ -309,6 +309,16 @@ class SettingsActivity : BaseComposeActivity() {
                             "重启应用后生效".toast()
                         }
                     )
+                    SettingsMenuLink(
+                        title = { Text(text = "重置Token") },
+                        subtitle = { Text(text = "如果一直无法显示今日诗词，可能是缓存的Token出现了问题，点击此处可以进行重置") },
+                        onClick = {
+                            scope.launch {
+                                viewModel.resetPoemsToken()
+                                "重置成功，重启应用后生效".toast()
+                            }
+                        }
+                    )
                 }
                 XhuSettingsGroup(title = {
                     Text(text = "其他设置")
