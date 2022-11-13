@@ -186,4 +186,10 @@ class SettingsViewModel : ComposeViewModel() {
             version.value = latestVersion
         }
     }
+
+    fun resetPoemsToken(){
+        viewModelScope.launch {
+            setConfig { poemsToken = null }
+        }
+    }
 }
