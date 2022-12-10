@@ -47,7 +47,8 @@ class ScoreViewModel : ComposeViewModel(), KoinComponent {
 
     private suspend fun buildYearSelect(selectedYear: String): List<YearSelect> = runOnCpu {
         val loggedUserList = SessionManager.loggedUserList()
-        val startYear = loggedUserList.minByOrNull { it.info.grade }!!.info.grade.toInt()
+        val grade = loggedUserList.minByOrNull { it.info.grade }!!.info.grade
+        val startYear = if (grade.isNotBlank()) grade.toInt() else 2019
         val time = LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone)
         val endYear = if (time.month < Month.JUNE) time.year - 1 else time.year
         (startYear..endYear).map {
