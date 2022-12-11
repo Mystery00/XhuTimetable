@@ -154,8 +154,8 @@ dependencies {
     implementation("androidx.glance:glance:1.0.0-alpha05")
     implementation("androidx.glance:glance-appwidget:1.0.0-alpha05")
     //compose
-    val composeVersion = "1.2.1"
-    implementation("androidx.compose.ui:ui:$composeVersion")
+    val composeVersion = "1.3.1"
+    implementation("androidx.compose.ui:ui:1.3.2")
     implementation("androidx.compose.material:material:$composeVersion")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
@@ -205,7 +205,7 @@ dependencies {
     //preference
     implementation("com.github.alorma:compose-settings-ui:0.12.0")
     //AppCenter
-    val appCenterSdkVersion = "4.4.5"
+    val appCenterSdkVersion = "5.0.0"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
     //zloading，通过jitpack导入修改版本
