@@ -140,8 +140,8 @@ interface ServerApi {
         @Query("urgeId") urgeId: Long,
     ): Response<Unit>
 
-    @GET("/api/rest/xhu-timetable/health/check")
-    suspend fun serverDetect(): Response<Unit>
+    @GET("/api/rest/xhu-timetable/health/detect")
+    suspend fun serverDetect(): Response<List<DetectResponse>>
 
     @GET("/api/rest/xhu-timetable/push/fetch")
     suspend fun fetchPush(@Header("token") token: String): Response<List<PushResponse>>
