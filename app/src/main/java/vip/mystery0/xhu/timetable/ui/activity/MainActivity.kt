@@ -70,6 +70,8 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
     private val viewModel: MainViewModel by viewModels()
     private lateinit var modalBottomSheetState: ModalBottomSheetState
     private lateinit var addDialogState: MaterialDialogState
+    private lateinit var detectDialogState: MaterialDialogState
+    private var detectContent: String = ""
 
     private val ext: MainActivityExt
         get() = MainActivityExt(this, viewModel, modalBottomSheetState, addDialogState)
@@ -111,6 +113,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
 
         modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
         addDialogState = rememberMaterialDialogState()
+        detectDialogState = rememberMaterialDialogState()
 
         val isDarkMode = isDarkMode()
 
@@ -176,7 +179,11 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                                     if (!poemsDetail.translate.isNullOrEmpty()) {
                                         Spacer(modifier = Modifier.height(6.dp))
                                         Text(
-                                            text = "诗词大意：${poemsDetail.translate!!.joinToString("")}",
+                                            text = "诗词大意：${
+                                                poemsDetail.translate!!.joinToString(
+                                                    ""
+                                                )
+                                            }",
                                             fontSize = 11.sp,
                                             modifier = Modifier.fillMaxWidth(),
                                         )
@@ -438,6 +445,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         }
 
         ShowAddDialog(addDialogState)
+        ShowDetectDialog(detectDialogState)
     }
 
     @Composable
@@ -478,11 +486,25 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                     0 -> {
                         intentTo(CustomCourseActivity::class)
                     }
+
                     1 -> {
                         intentTo(CustomThingActivity::class)
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun ShowDetectDialog(
+        dialogState: MaterialDialogState,
+    ) {
+        MaterialDialog(dialogState = dialogState,
+            buttons = {
+                positiveButton("确定")
+            }) {
+            title("服务器状态")
+            message(detectContent)
         }
     }
 
@@ -537,7 +559,10 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         kotlin.runCatching {
             val response = serverApi.serverDetect()
             if (response.isSuccessful) {
-                toastString("当前服务器状态正常", true)
+                detectContent = response.body()!!.joinToString("\n") {
+                    "${it.title}: ${if (it.health) "正常" else "异常"}"
+                }
+                detectDialogState.show()
             } else {
                 toastString("服务器不可用，请联系开发者", true)
             }
@@ -563,32 +588,40 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                 viewModel.checkMainUser()
                 viewModel.loadCourseList(true)
             }
+
             EventType.CHANGE_CURRENT_YEAR_AND_TERM,
             EventType.CHANGE_SHOW_CUSTOM_COURSE -> {
                 viewModel.loadCourseList(true)
             }
+
             EventType.MAIN_USER_LOGOUT -> {
                 viewModel.checkMainUser()
             }
+
             EventType.CHANGE_AUTO_SHOW_TOMORROW_COURSE -> {
                 viewModel.loadCourseList(false)
                 viewModel.calculateTodayTitle()
             }
+
             EventType.CHANGE_SHOW_NOT_THIS_WEEK,
             EventType.CHANGE_TERM_START_TIME,
             EventType.CHANGE_COURSE_COLOR,
             EventType.CHANGE_CUSTOM_UI -> {
                 viewModel.loadCourseList(false)
             }
+
             EventType.CHANGE_SHOW_CUSTOM_THING -> {
                 viewModel.loadThingList(true)
             }
+
             EventType.CHANGE_MAIN_BACKGROUND -> {
                 viewModel.loadBackground()
             }
+
             EventType.READ_NOTICE -> {
                 viewModel.clearLastCheckUnreadTime()
             }
+
             else -> {
             }
         }

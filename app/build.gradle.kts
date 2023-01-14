@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("kotlin-kapt")
+    id("org.jetbrains.kotlin.android")
 }
 
 fun String.runCommand(workingDir: File = file("./")): String {
@@ -126,7 +127,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.2.0"
+        kotlinCompilerExtensionVersion = "1.3.2"
     }
     packagingOptions {
         resources {
@@ -154,11 +155,9 @@ dependencies {
     implementation("androidx.glance:glance:1.0.0-alpha05")
     implementation("androidx.glance:glance-appwidget:1.0.0-alpha05")
     //compose
-    val composeVersion = "1.3.3"
     implementation("androidx.compose.ui:ui:1.3.3")
-    implementation("androidx.compose.material:material:$composeVersion")
-    debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
+    implementation("androidx.compose.material:material:1.3.1")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.3.3")
     //accompanist
     val accompanistVersion = "0.25.1"
     implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")
@@ -184,10 +183,9 @@ dependencies {
     //work manager
     implementation("androidx.work:work-runtime-ktx:2.7.1")
     //koin
-    val koinVersion = "3.4.1"
-    implementation("io.insert-koin:koin-android:$koinVersion")
-    implementation("io.insert-koin:koin-androidx-workmanager:$koinVersion")
-    implementation("io.insert-koin:koin-androidx-compose:$koinVersion")
+    implementation("io.insert-koin:koin-android:3.3.2")
+    implementation("io.insert-koin:koin-androidx-workmanager:3.3.2")
+    implementation("io.insert-koin:koin-androidx-compose:3.4.1")
     //coil
     val coilVersion = "2.2.2"
     implementation("io.coil-kt:coil-compose:$coilVersion")
