@@ -144,7 +144,7 @@ android {
 
 dependencies {
     implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.5.1")
+    implementation("androidx.appcompat:appcompat:1.6.0")
     implementation("com.google.android.material:material:1.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
     implementation("androidx.activity:activity-compose:1.6.1")
@@ -154,8 +154,8 @@ dependencies {
     implementation("androidx.glance:glance:1.0.0-alpha05")
     implementation("androidx.glance:glance-appwidget:1.0.0-alpha05")
     //compose
-    val composeVersion = "1.3.1"
-    implementation("androidx.compose.ui:ui:1.3.2")
+    val composeVersion = "1.3.3"
+    implementation("androidx.compose.ui:ui:1.3.3")
     implementation("androidx.compose.material:material:$composeVersion")
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
@@ -177,14 +177,14 @@ dependencies {
     //lottie
     implementation("com.airbnb.android:lottie-compose:5.2.0")
     //room
-    val roomVersion = "2.4.3"
+    val roomVersion = "2.5.0"
     implementation("androidx.room:room-runtime:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     //work manager
     implementation("androidx.work:work-runtime-ktx:2.7.1")
     //koin
-    val koinVersion = "3.3.0"
+    val koinVersion = "3.4.1"
     implementation("io.insert-koin:koin-android:$koinVersion")
     implementation("io.insert-koin:koin-androidx-workmanager:$koinVersion")
     implementation("io.insert-koin:koin-androidx-compose:$koinVersion")
@@ -199,11 +199,11 @@ dependencies {
     implementation("com.squareup.moshi:moshi:1.14.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.14.0")
     //mmkv
-    implementation("com.tencent:mmkv-static:1.2.14")
+    implementation("com.tencent:mmkv-static:1.2.15")
     //eventbus
     implementation("org.greenrobot:eventbus:3.3.1")
     //preference
-    implementation("com.github.alorma:compose-settings-ui:0.12.0")
+    implementation("com.github.alorma:compose-settings-ui:0.15.0")
     //AppCenter
     val appCenterSdkVersion = "5.0.0"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
