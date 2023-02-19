@@ -27,7 +27,7 @@ abstract class XhuCoroutineWorker(
                     job.cancel()
                 }
             },
-            taskExecutor.backgroundExecutor
+            taskExecutor.serialTaskExecutor
         )
     }
 
