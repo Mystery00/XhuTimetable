@@ -26,6 +26,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.R
+import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.model.response.ScoreItem
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
@@ -162,7 +163,8 @@ class ScoreActivity : BaseComposeActivity() {
                                 }) {
                                 val termSelect by viewModel.termSelect.collectAsState()
                                 val termString =
-                                    termSelect.firstOrNull { it.selected }?.let { "第${it.term}学期" }
+                                    termSelect.firstOrNull { it.selected }
+                                        ?.let { "第${it.term}学期" }
                                         ?: "查询中"
                                 Text(text = termString)
                             }
@@ -196,6 +198,20 @@ class ScoreActivity : BaseComposeActivity() {
                                     .background(XhuColor.Common.grayBackground),
                                 contentPadding = PaddingValues(4.dp),
                             ) {
+                                if (!scoreListState.loading) {
+                                    stickyHeader {
+                                        Text(
+                                            text = "学期总览",
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .background(XhuColor.Common.whiteBackground)
+                                                .padding(12.dp),
+                                        )
+                                    }
+                                    item {
+                                        BuildTermInfo(scoreList, failedScoreList)
+                                    }
+                                }
                                 if (scoreListState.loading) {
                                     stickyHeader {
                                         Text(
@@ -520,7 +536,72 @@ class ScoreActivity : BaseComposeActivity() {
 
     override fun onStart() {
         super.onStart()
-        pushDynamicShortcuts<ScoreActivity>(this.javaClass.name, title.toString(), R.drawable.ic_score)
+        pushDynamicShortcuts<ScoreActivity>(
+            this.javaClass.name,
+            title.toString(),
+            R.drawable.ic_score
+        )
+    }
+}
+
+@Composable
+private fun BuildTermInfo(
+    scoreListOrigin: List<ScoreItem>,
+    failedScoreListOrigin: List<ScoreItem>,
+) {
+    //正常考试的列表，也就是不包含重修的列表
+    val successList = scoreListOrigin.filter { it.examType == "正常考试" }
+    val failedList = failedScoreListOrigin.filter { it.examType == "正常考试" }
+    val list = successList + failedList
+
+    val scoreList = list.map { it.score.toDouble() }
+
+    //总成绩
+    val totalScore = scoreList.sum()
+    //平均成绩
+    val avgScore = scoreList.average()
+    //总学分
+    val totalCredit = list.map { it.credit.toDouble() }.sum()
+
+    //GPA
+    val gpa = successList.sumOf { it.score.toDouble() * it.credit.toDouble() } / totalCredit
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(XhuColor.Common.whiteBackground),
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1F)
+                .padding(start = 16.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = "总成绩：${totalScore}",
+                fontSize = 13.sp,
+            )
+            Text(
+                text = "平均成绩：${String.format("%.2f", avgScore)}",
+                fontSize = 13.sp,
+            )
+            Text(
+                text = "总学分：${totalCredit}",
+                fontSize = 13.sp,
+            )
+        }
+        Column(
+            modifier = Modifier
+                .weight(1F)
+                .padding(end = 16.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = "GPA = ${String.format("%.2f", gpa)}",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
     }
 }
 
