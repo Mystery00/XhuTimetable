@@ -22,7 +22,7 @@ val gitVersionName = "git rev-parse --short=8 HEAD".runCommand()
 
 android {
     compileSdk = 33
-    buildToolsVersion = "33.0.0"
+    buildToolsVersion = "33.0.2"
 
     defaultConfig {
         applicationId = "vip.mystery0.xhu.timetable"
