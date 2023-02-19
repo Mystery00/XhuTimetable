@@ -271,6 +271,7 @@ private fun DrawThingCard(
                         Text(
                             text = thing.title,
                             fontWeight = FontWeight.Bold,
+                            color = thing.color,
                             fontSize = 16.sp,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -284,6 +285,7 @@ private fun DrawThingCard(
                             if (thing.saveAsCountDown) startText else "$startText - $endText"
                         Text(
                             text = timeText,
+                            color = thing.color.copy(alpha = 0.8F),
                             fontSize = 12.sp,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -292,6 +294,7 @@ private fun DrawThingCard(
                         if (thing.location.isNotBlank()) {
                             Text(
                                 text = thing.location,
+                                color = thing.color.copy(alpha = 0.8F),
                                 fontSize = 12.sp,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -301,6 +304,7 @@ private fun DrawThingCard(
                         if (thing.remark.isNotBlank()) {
                             Text(
                                 text = thing.remark,
+                                color = thing.color.copy(alpha = 0.6F),
                                 fontSize = 12.sp,
                                 fontStyle = FontStyle.Italic,
                                 modifier = Modifier
@@ -316,6 +320,7 @@ private fun DrawThingCard(
 
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(start = 4.dp),
                         ) {
                             if (remainDays <= 0L) {
                                 //今天

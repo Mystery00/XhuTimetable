@@ -1,5 +1,8 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
@@ -45,6 +48,15 @@ import java.util.*
 class CustomCourseActivity : BaseComposeActivity() {
     private val viewModel: CustomCourseViewModel by viewModels()
 
+    companion object {
+        private const val INTENT_HIDE_SELECTOR = "hideSelector"
+        fun hideSelector(): Intent.() -> Unit {
+            return {
+                putExtra(INTENT_HIDE_SELECTOR, true)
+            }
+        }
+    }
+
     @Composable
     override fun BuildContent() {
         val customCourseListState by viewModel.customCourseListState.collectAsState()
@@ -55,9 +67,14 @@ class CustomCourseActivity : BaseComposeActivity() {
             confirmStateChange = {
                 !customCourseListState.loading && !saveCustomCourseState.loading
             })
+        val initBackdropValue = if (intent.getBooleanExtra(INTENT_HIDE_SELECTOR, false)) {
+            BackdropValue.Concealed
+        }else{
+            BackdropValue.Revealed
+        }
         val scaffoldState: BackdropScaffoldState =
             rememberBackdropScaffoldState(
-                initialValue = BackdropValue.Revealed,
+                initialValue = initBackdropValue,
                 confirmStateChange = {
                     !showSelect.isVisible && !customCourseListState.loading && !saveCustomCourseState.loading
                 })
@@ -503,6 +520,7 @@ class CustomCourseActivity : BaseComposeActivity() {
                                     }
                                     Spacer(modifier = Modifier.weight(1F))
                                 }
+
                                 CreateType.SELECT -> {
                                     var searchCourseName by remember { mutableStateOf("") }
                                     var searchTeacherName by remember { mutableStateOf("") }

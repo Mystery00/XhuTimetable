@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
@@ -52,6 +53,15 @@ import java.time.LocalDateTime
 class CustomThingActivity : BaseComposeActivity() {
     private val viewModel: CustomThingViewModel by viewModels()
 
+    companion object {
+        private const val INTENT_HIDE_SELECTOR = "hideSelector"
+        fun hideSelector(): Intent.() -> Unit {
+            return {
+                putExtra(INTENT_HIDE_SELECTOR, true)
+            }
+        }
+    }
+
     @Composable
     override fun BuildContent() {
         val customThingListState by viewModel.customThingListState.collectAsState()
@@ -62,9 +72,14 @@ class CustomThingActivity : BaseComposeActivity() {
             confirmStateChange = {
                 !customThingListState.loading && !saveCustomThingState.loading
             })
+        val initBackdropValue = if (intent.getBooleanExtra(INTENT_HIDE_SELECTOR, false)) {
+            BackdropValue.Concealed
+        }else{
+            BackdropValue.Revealed
+        }
         val scaffoldState: BackdropScaffoldState =
             rememberBackdropScaffoldState(
-                initialValue = BackdropValue.Revealed,
+                initialValue = initBackdropValue,
                 confirmStateChange = {
                     !showSelect.isVisible && !customThingListState.loading && !saveCustomThingState.loading
                 })
