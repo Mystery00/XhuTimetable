@@ -145,12 +145,12 @@ android {
 
 dependencies {
     implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.6.0")
-    implementation("com.google.android.material:material:1.7.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.8.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
     implementation("androidx.activity:activity-compose:1.6.1")
     implementation("androidx.core:core-splashscreen:1.0.0")
-    implementation("androidx.browser:browser:1.4.0")
+    implementation("androidx.browser:browser:1.5.0")
     implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
     implementation("androidx.glance:glance:1.0.0-alpha05")
     implementation("androidx.glance:glance-appwidget:1.0.0-alpha05")
@@ -174,18 +174,18 @@ dependencies {
     implementation("io.github.vanpra.compose-material-dialogs:datetime:$composeMaterialDialogsVersion")
     implementation("io.github.vanpra.compose-material-dialogs:color:$composeMaterialDialogsVersion")
     //lottie
-    implementation("com.airbnb.android:lottie-compose:5.2.0")
+    implementation("com.airbnb.android:lottie-compose:6.0.0")
     //room
     val roomVersion = "2.5.0"
     implementation("androidx.room:room-runtime:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     //work manager
-    implementation("androidx.work:work-runtime-ktx:2.7.1")
+    implementation("androidx.work:work-runtime-ktx:2.8.0")
     //koin
-    implementation("io.insert-koin:koin-android:3.3.2")
-    implementation("io.insert-koin:koin-androidx-workmanager:3.3.2")
-    implementation("io.insert-koin:koin-androidx-compose:3.4.1")
+    implementation("io.insert-koin:koin-android:3.3.3")
+    implementation("io.insert-koin:koin-androidx-workmanager:3.3.3")
+    implementation("io.insert-koin:koin-androidx-compose:3.4.2")
     //coil
     val coilVersion = "2.2.2"
     implementation("io.coil-kt:coil-compose:$coilVersion")
@@ -201,7 +201,7 @@ dependencies {
     //eventbus
     implementation("org.greenrobot:eventbus:3.3.1")
     //preference
-    implementation("com.github.alorma:compose-settings-ui:0.15.0")
+    implementation("com.github.alorma:compose-settings-ui:0.16.0")
     //AppCenter
     val appCenterSdkVersion = "5.0.0"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
