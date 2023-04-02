@@ -37,7 +37,7 @@ class ScoreViewModel : ComposeViewModel(), KoinComponent {
             val loggedUserList = SessionManager.loggedUserList()
             _userSelect.value = runOnCpu {
                 loggedUserList.map {
-                    UserSelect(it.studentId, it.info.userName, it.main)
+                    UserSelect(it.studentId, it.info.name, it.main)
                 }
             }
             _yearSelect.value = buildYearSelect(getConfig { currentYear })
@@ -47,8 +47,7 @@ class ScoreViewModel : ComposeViewModel(), KoinComponent {
 
     private suspend fun buildYearSelect(selectedYear: String): List<YearSelect> = runOnCpu {
         val loggedUserList = SessionManager.loggedUserList()
-        val grade = loggedUserList.minByOrNull { it.info.grade }!!.info.grade
-        val startYear = if (grade.isNotBlank()) grade.toInt() else 2019
+        val startYear = loggedUserList.minByOrNull { it.info.xhuGrade }!!.info.xhuGrade
         val time = LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone)
         val endYear = if (time.month < Month.JUNE) time.year - 1 else time.year
         (startYear..endYear).map {
@@ -89,7 +88,7 @@ class ScoreViewModel : ComposeViewModel(), KoinComponent {
             }
             _userSelect.value = runOnCpu {
                 SessionManager.loggedUserList().map {
-                    UserSelect(it.studentId, it.info.userName, it.studentId == studentId)
+                    UserSelect(it.studentId, it.info.name, it.studentId == studentId)
                 }
             }
         }

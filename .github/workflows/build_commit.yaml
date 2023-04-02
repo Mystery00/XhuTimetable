@@ -11,47 +11,48 @@ env:
   SIGN_KEY_STORE_FILE: "/tmp/key.jks"
   NIGHTLY: true
 jobs:
-    build:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v3
-          with:
-            fetch-depth: 0
-        - name: 设置JDK
-          uses: actions/setup-java@v1
-          with:
-            java-version: 11
-        - name: 设置Android SDK
-          uses: android-actions/setup-android@v2
-        - name: 解密签名
-          run: |
-            echo ${{ secrets.SIGN_KEY_BASE64 }} | base64 --decode > /tmp/key.jks
-        - name: Setup Gradle
-          uses: gradle/gradle-build-action@v2
-        - name: 构建 APK
-          run: ./gradlew assembleRelease
-        - name: 安装工具
-          run: |
-            sudo apt-get install jq
-        - name: 解析编译文件路径
-          id: apk
-          run: |
-            commitMessage=$(git show -s --format=%s)
-            versionName=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionName')
-            versionCode=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionCode')
-            apkFile=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].outputFile')
-            cp "${{ env.OUTPUT_DIR }}/$apkFile" "${{ env.OUTPUT_DIR }}/XhuTimetable-$versionName-$versionCode.apk"
-            echo ::set-output name=commitMessage::$commitMessage
-            echo ::set-output name=versionName::$versionName
-            echo ::set-output name=versionCode::$versionCode
-        - name: 发布版本
-          uses: softprops/action-gh-release@v1
-          with:
-            tag_name: ${{ steps.apk.outputs.versionName }}
-            prerelease: true
-            body: |
-              注意：该版本为测试版本，可能存在一些问题，不建议日常使用。
-              
-              ${{ steps.apk.outputs.commitMessage }}
-            files: |
-              ${{ env.OUTPUT_DIR }}/XhuTimetable-${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}.apk
+  build:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: 设置JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: 设置Android SDK
+        uses: android-actions/setup-android@v2
+      - name: 解密签名
+        run: |
+          echo ${{ secrets.SIGN_KEY_BASE64 }} | base64 --decode > /tmp/key.jks
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+      - name: 构建 APK
+        run: ./gradlew assembleRelease
+      - name: 安装工具
+        run: |
+          sudo apt-get install jq
+      - name: 解析编译文件路径
+        id: apk
+        run: |
+          commitMessage=$(git show -s --format=%s)
+          versionName=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionName')
+          versionCode=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionCode')
+          apkFile=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].outputFile')
+          cp "${{ env.OUTPUT_DIR }}/$apkFile" "${{ env.OUTPUT_DIR }}/XhuTimetable-$versionName-$versionCode.apk"
+          echo ::set-output name=commitMessage::$commitMessage
+          echo ::set-output name=versionName::$versionName
+          echo ::set-output name=versionCode::$versionCode
+      - name: 发布版本
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.apk.outputs.versionName }}
+          prerelease: true
+          body: |
+            注意：该版本为测试版本，可能存在一些问题，不建议日常使用。
+            
+            ${{ steps.apk.outputs.commitMessage }}
+          files: |
+            ${{ env.OUTPUT_DIR }}/XhuTimetable-${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}.apk

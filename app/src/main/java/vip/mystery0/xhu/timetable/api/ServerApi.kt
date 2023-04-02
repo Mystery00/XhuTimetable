@@ -24,96 +24,96 @@ interface ServerApi {
         @Query("betaVersion") betaVersion: Boolean,
     ): VersionUrl
 
-    @GET("/api/rest/xhu-timetable/server/publicKey")
+    @GET("/api/rest/external/login/publicKey")
     suspend fun publicKey(): PublicKeyResponse
 
-    @POST("/api/rest/xhu-timetable/login")
+    @POST("/api/rest/external/login")
     suspend fun login(@Body loginRequest: LoginRequest): LoginResponse
 
-    @GET("/api/rest/xhu-timetable/server/user")
-    suspend fun userInfo(@Header("token") token: String): UserInfo
+    @GET("/api/rest/external/user/info")
+    suspend fun userInfo(@Header("sessionToken") token: String): UserInfo
 
     @GET("/api/rest/xhu-timetable/server/notice")
     suspend fun noticeList(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
         @Query("platform") platform: String = "Android"
     ): Response<List<NoticeResponse>>
 
     @GET("/api/rest/xhu-timetable/server/schoolCalendar")
-    suspend fun schoolCalendarList(@Header("token") token: String): Response<List<SchoolCalendarResponse>>
+    suspend fun schoolCalendarList(@Header("sessionToken") token: String): Response<List<SchoolCalendarResponse>>
 
     @GET("/api/rest/xhu-timetable/server/schoolCalendarUrl")
     suspend fun schoolCalendarUrl(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
         @Query("resourceId") resourceId: Long,
     ): Response<ResourceUrlResponse>
 
     @GET("/api/rest/xhu-timetable/server/customCourse")
     suspend fun customCourseList(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
         @Query("year") year: String,
         @Query("term") term: Int,
     ): Response<List<CustomCourse>>
 
     @POST("/api/rest/xhu-timetable/server/customCourse")
     suspend fun createCustomCourse(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
         @Body customCourseRequest: CustomCourseRequest
     ): Response<Boolean>
 
     @PUT("/api/rest/xhu-timetable/server/customCourse")
     suspend fun updateCustomCourse(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
         @Query("id") id: Long,
         @Body customCourseRequest: CustomCourseRequest
     ): Response<Boolean>
 
     @DELETE("/api/rest/xhu-timetable/server/customCourse")
     suspend fun deleteCustomCourse(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
         @Query("id") id: Long,
     ): Response<Boolean>
 
     @GET("/api/rest/xhu-timetable/server/customThing")
     suspend fun customThingList(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
         @Query("year") year: String,
         @Query("term") term: Int,
     ): Response<List<CustomThingResponse>>
 
     @POST("/api/rest/xhu-timetable/server/customThing")
     suspend fun createCustomThing(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
         @Body customThingRequest: CustomThingRequest
     ): Response<Boolean>
 
     @PUT("/api/rest/xhu-timetable/server/customThing")
     suspend fun updateCustomThing(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
         @Query("id") id: Long,
         @Body customThingRequest: CustomThingRequest
     ): Response<Boolean>
 
     @DELETE("/api/rest/xhu-timetable/server/customThing")
     suspend fun deleteCustomThing(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
         @Query("id") id: Long,
     ): Response<Boolean>
 
     @POST("/api/rest/xhu-timetable/server/allCourse")
     suspend fun selectAllCourse(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
         @Body allCourseRequest: AllCourseRequest,
     ): Response<List<AllCourseResponse>>
 
     @GET("/api/rest/xhu-timetable/server/background")
     suspend fun selectAllBackground(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
     ): Response<List<BackgroundResponse>>
 
     @GET("/api/rest/xhu-timetable/server/background/url")
     suspend fun getBackgroundUrl(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
         @Query("resourceId") resourceId: Long,
     ): Response<ResourceUrlResponse>
 
@@ -122,7 +122,7 @@ interface ServerApi {
 
     @GET("/api/rest/xhu-timetable/server/calendar")
     suspend fun getCalendarEventList(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
         @Query("year") year: String,
         @Query("term") term: Int,
         @Query("includeCustomCourse") includeCustomCourse: Boolean,
@@ -131,12 +131,12 @@ interface ServerApi {
 
     @GET("/api/rest/xhu-timetable/server/urge")
     suspend fun getUrgeList(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
     ): Response<UrgeResponse>
 
     @PUT("/api/rest/xhu-timetable/server/urge")
     suspend fun urge(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
         @Query("urgeId") urgeId: Long,
     ): Response<Unit>
 
@@ -144,11 +144,11 @@ interface ServerApi {
     suspend fun serverDetect(): Response<List<DetectResponse>>
 
     @GET("/api/rest/xhu-timetable/push/fetch")
-    suspend fun fetchPush(@Header("token") token: String): Response<List<PushResponse>>
+    suspend fun fetchPush(@Header("sessionToken") token: String): Response<List<PushResponse>>
 
     @POST("/api/rest/xhu-timetable/server/academicReport")
     suspend fun getAcademicReportList(
-        @Header("token") token: String,
+        @Header("sessionToken") token: String,
         @Body keywords: AcademicReportRequest,
     ): Response<List<AcademicReportResponse>>
 }

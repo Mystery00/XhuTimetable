@@ -59,16 +59,16 @@ class ClassSettingsViewModel : ComposeViewModel() {
 
             val loggedUserList = SessionManager.loggedUserList()
             _selectYearAndTermList.value = runOnCpu {
-                var startGrade = loggedUserList.minByOrNull { it.info.grade }?.info?.grade
-                var endGrade = loggedUserList.maxByOrNull { it.info.grade }?.info?.grade
-                if (startGrade.isNullOrBlank()) {
-                    startGrade = "2019"
+                var startGrade = loggedUserList.minByOrNull { it.info.xhuGrade }?.info?.xhuGrade
+                var endGrade = loggedUserList.maxByOrNull { it.info.xhuGrade }?.info?.xhuGrade
+                if (startGrade == null) {
+                    startGrade = 2019
                 }
                 val startYear = startGrade.toInt()
                 val time = LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone)
                 val nowEndYear = if (time.month < Month.JUNE) time.year - 1 else time.year
-                if (endGrade.isNullOrBlank()) {
-                    endGrade = nowEndYear.toString()
+                if (endGrade == null) {
+                    endGrade = nowEndYear
                 }
                 val endYear = endGrade.toInt() + 3
                 val tempArrayList = ArrayList<String>()

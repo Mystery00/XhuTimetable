@@ -44,7 +44,7 @@ class ExportCalendarViewModel : ComposeViewModel() {
             val loggedUserList = SessionManager.loggedUserList()
             _userSelect.value = runOnCpu {
                 loggedUserList.map {
-                    UserSelect(it.studentId, it.info.userName, it.main)
+                    UserSelect(it.studentId, it.info.name, it.main)
                 }
             }
         }
@@ -94,7 +94,7 @@ class ExportCalendarViewModel : ComposeViewModel() {
                     includeCustomThing,
                 ).checkLogin()
             }.first
-            val account = CalendarAccount.byAccount(selectUser.studentId, selectUser.info.userName)
+            val account = CalendarAccount.byAccount(selectUser.studentId, selectUser.info.name)
             val accountId =
                 CalendarRepo.getCalendarIdByAccountName(account.generateAccountName())
             if (accountId != null) {
@@ -141,7 +141,7 @@ class ExportCalendarViewModel : ComposeViewModel() {
             }
             _userSelect.value = runOnCpu {
                 SessionManager.loggedUserList().map {
-                    UserSelect(it.studentId, it.info.userName, it.studentId == studentId)
+                    UserSelect(it.studentId, it.info.name, it.studentId == studentId)
                 }
             }
         }

@@ -5,6 +5,7 @@ import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
 import vip.mystery0.xhu.timetable.context
+import vip.mystery0.xhu.timetable.model.OldUserInfo
 import vip.mystery0.xhu.timetable.model.UserInfo
 import vip.mystery0.xhu.timetable.repository.doLogin
 import java.util.concurrent.ConcurrentHashMap
@@ -21,7 +22,8 @@ object SessionManager {
     suspend fun mainUser(): User {
         val main = mainUserOrNull()
         if (main != null) return main
-        Toast.makeText(context.applicationContext, "检测到异常，即将关闭应用", Toast.LENGTH_LONG).show()
+        Toast.makeText(context.applicationContext, "检测到异常，即将关闭应用", Toast.LENGTH_LONG)
+            .show()
         android.os.Process.killProcess(android.os.Process.myPid())
         exitProcess(10)
     }
@@ -119,11 +121,26 @@ object SessionManager {
             val loginResponse = doLogin(this)
             //获取用户信息
             val serverApi = KoinJavaComponent.get<ServerApi>(ServerApi::class.java)
-            val userInfo = serverApi.userInfo(loginResponse.token)
-            reLogin(this, loginResponse.token, userInfo)
-            block(loginResponse.token) to true
+            val userInfo = serverApi.userInfo(loginResponse.sessionToken)
+            reLogin(this, loginResponse.sessionToken, userInfo)
+            block(loginResponse.sessionToken) to true
         }
 }
+
+data class OldUser(
+    //用户名
+    val studentId: String,
+    //密码
+    val password: String,
+    //token
+    val token: String,
+    //用户信息
+    val info: OldUserInfo,
+    //是否为主用户
+    var main: Boolean = false,
+    //头像
+    var profileImage: String?,
+)
 
 data class User(
     //用户名

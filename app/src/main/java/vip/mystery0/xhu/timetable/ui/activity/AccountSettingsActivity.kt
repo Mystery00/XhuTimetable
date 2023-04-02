@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.GlobalConfig
+import vip.mystery0.xhu.timetable.model.Gender
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
@@ -120,7 +121,10 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                     val loggedUserList by viewModel.loggedUserList.collectAsState()
                     loggedUserList.forEach { userItem ->
                         BuildItem(
-                            painter = ProfileImages.hash(userItem.userName, userItem.sex == "男"),
+                            painter = ProfileImages.hash(
+                                userItem.userName,
+                                userItem.gender == Gender.MALE
+                            ),
                             text = "${userItem.studentId}(${userItem.userName})",
                             onClick = {
                                 viewModel.changeMainUser(userItem.studentId)

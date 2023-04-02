@@ -10,6 +10,7 @@ import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.setConfig
+import vip.mystery0.xhu.timetable.model.Gender
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 
@@ -30,7 +31,7 @@ class AccountManagementViewModel : ComposeViewModel() {
         viewModelScope.launch {
             val loggedList = SessionManager.loggedUserList()
             _loggedUserList.value =
-                loggedList.map { UserItem(it.studentId, it.info.userName, it.info.sex, it.main) }
+                loggedList.map { UserItem(it.studentId, it.info.name, it.info.gender, it.main) }
         }
     }
 
@@ -70,7 +71,7 @@ data class UserItem(
     //用户姓名
     val userName: String,
     //性别
-    val sex: String,
+    val gender:Gender,
     //是否为主用户
     var main: Boolean,
 )

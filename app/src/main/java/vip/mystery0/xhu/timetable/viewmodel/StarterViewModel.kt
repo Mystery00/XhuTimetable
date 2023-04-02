@@ -63,7 +63,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
                     version = null
                 }
                 DataHolder.version = version
-                DataHolder.mainUserName = SessionManager.mainUserOrNull()?.info?.userName ?: "未登录"
+                DataHolder.mainUserName = SessionManager.mainUserOrNull()?.info?.name ?: "未登录"
                 val dir = File(externalPictureDir, "splash")
                 val now = Instant.now().toEpochMilli()
                 val splashList = getConfig { splashList }

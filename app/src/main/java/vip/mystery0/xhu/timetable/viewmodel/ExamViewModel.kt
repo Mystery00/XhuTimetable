@@ -37,7 +37,7 @@ class ExamViewModel : ComposeViewModel() {
         viewModelScope.launch {
             val list = runOnCpu {
                 SessionManager.loggedUserList().map {
-                    UserSelect(it.studentId, it.info.userName, it.main)
+                    UserSelect(it.studentId, it.info.name, it.main)
                 }
             }
             _userSelect.value = list
@@ -145,7 +145,7 @@ class ExamViewModel : ComposeViewModel() {
             }
             _userSelect.value = runOnCpu {
                 SessionManager.loggedUserList().map {
-                    UserSelect(it.studentId, it.info.userName, it.studentId == studentId)
+                    UserSelect(it.studentId, it.info.name, it.studentId == studentId)
                 }
             }
             loadExamList()
