@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import kotlinx.coroutines.launch
+import vip.mystery0.xhu.timetable.model.Gender
 import vip.mystery0.xhu.timetable.model.event.MenuItem
 import vip.mystery0.xhu.timetable.trackEvent
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
@@ -43,10 +44,11 @@ val profileCourseContent: TabContent = @Composable { ext ->
         var profileExpanded by remember { mutableStateOf(true) }
         val mainUser by viewModel.mainUser.collectAsState()
         AnimatedContent(
+            label = "个人信息动画",
             targetState = profileExpanded,
             transitionSpec = {
                 fadeIn() with fadeOut()
-            }
+            },
         ) { targetExpanded ->
             Column {
                 Row(
@@ -58,7 +60,10 @@ val profileCourseContent: TabContent = @Composable { ext ->
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     val profileImage = mainUser?.let {
-                        it.profileImage ?: ProfileImages.hash(it.info.userName, it.info.sex == "男")
+                        it.profileImage ?: ProfileImages.hash(
+                            it.info.name,
+                            it.info.gender == Gender.MALE
+                        )
                     } ?: XhuImages.defaultProfileImage
                     Image(
                         painter = if (profileImage is Painter)
@@ -75,9 +80,9 @@ val profileCourseContent: TabContent = @Composable { ext ->
                         var text = "账号未登录"
                         mainUser?.info?.let {
                             text = if (targetExpanded) {
-                                "${it.userName}(${it.studentId})"
+                                "${it.name}(${it.studentNo})"
                             } else {
-                                it.userName
+                                it.name
                             }
                         }
                         Text(
@@ -90,6 +95,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
                     }
                     val rotationAngle by animateFloatAsState(
                         targetValue = if (profileExpanded) 90F else 0F,
+                        label = "个人信息动画",
                     )
                     Icon(
                         imageVector = MaterialIcons.TwoTone.ArrowForwardIos,
@@ -105,11 +111,11 @@ val profileCourseContent: TabContent = @Composable { ext ->
                     mainUser?.info?.let { userInfo ->
                         Text(
                             buildString {
-                                if (userInfo.sex.isNotBlank()) appendLine("性别：${userInfo.sex}")
-                                if (userInfo.grade.isNotBlank()) appendLine("年级：${userInfo.grade}")
-                                if (userInfo.profession.isNotBlank()) appendLine("专业：${userInfo.profession}")
-                                if (userInfo.institute.isNotBlank()) appendLine("学院：${userInfo.institute}")
-                                if (userInfo.direction.isNotBlank()) appendLine("专业方向：${userInfo.direction}")
+                                appendLine("性别：${userInfo.gender.showTitle}")
+                                appendLine("年级：${userInfo.xhuGrade}")
+                                if (userInfo.majorName.isNotBlank()) appendLine("专业：${userInfo.majorName}")
+                                if (userInfo.college.isNotBlank()) appendLine("学院：${userInfo.college}")
+                                if (userInfo.majorDirection.isNotBlank()) appendLine("专业方向：${userInfo.majorDirection}")
                             },
                             fontSize = 14.sp,
                             color = Color.Gray,

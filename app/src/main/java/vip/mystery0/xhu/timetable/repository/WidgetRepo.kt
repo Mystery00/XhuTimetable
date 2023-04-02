@@ -89,7 +89,7 @@ suspend fun getTodayCourse(currentWeek: Int): List<CourseGlance> {
             false,
             colorMap[it.name] ?: ColorPool.hash(it.name),
             it.user.studentId,
-            it.user.info.userName,
+            it.user.info.name,
         )
     }
 
@@ -201,7 +201,7 @@ suspend fun getWeekCourse(currentWeek: Int): List<List<CourseSheet>> {
             false,
             colorMap[it.name] ?: ColorPool.hash(it.name),
             it.user.studentId,
-            it.user.info.userName,
+            it.user.info.name,
         )
     }
 

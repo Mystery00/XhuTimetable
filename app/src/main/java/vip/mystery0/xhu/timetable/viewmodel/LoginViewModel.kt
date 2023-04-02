@@ -46,8 +46,8 @@ class LoginViewModel : ComposeViewModel() {
                 }
             }
             val loginResponse = doLogin(username, password)
-            val userInfo = serverApi.userInfo(loginResponse.token)
-            SessionManager.login(username, password, loginResponse.token, userInfo)
+            val userInfo = serverApi.userInfo(loginResponse.sessionToken)
+            SessionManager.login(username, password, loginResponse.sessionToken, userInfo)
             if (SessionManager.mainUser().studentId == username) {
                 //刚刚登录的账号是主账号，说明是异常情况下登录
                 eventBus.post(UIEvent(EventType.CHANGE_MAIN_USER))

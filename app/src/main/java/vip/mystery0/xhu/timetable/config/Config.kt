@@ -6,6 +6,8 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tencent.mmkv.MMKV
 import vip.mystery0.xhu.timetable.BuildConfig
 import vip.mystery0.xhu.timetable.model.CustomUi
+import vip.mystery0.xhu.timetable.model.Gender
+import vip.mystery0.xhu.timetable.model.UserInfo
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.response.Menu
@@ -152,12 +154,46 @@ class Config internal constructor() {
                 ).toJson(value)
             )
         }
-        get() = moshi.adapter<List<User>>(
-            Types.newParameterizedType(
-                List::class.java,
-                User::class.java
+        get() {
+            val adapter = moshi.adapter<List<User>>(
+                Types.newParameterizedType(
+                    List::class.java,
+                    User::class.java
+                )
             )
-        ).fromJson(kv.decodeString("userList", "[]")!!)!!
+            try {
+                return adapter.fromJson(kv.decodeString("userList", "[]")!!)!!
+            } catch (e: Exception) {
+                val oldAdapter = moshi.adapter<List<OldUser>>(
+                    Types.newParameterizedType(
+                        List::class.java,
+                        OldUser::class.java
+                    )
+                )
+                return oldAdapter.fromJson(kv.decodeString("userList", "[]")!!)!!
+                    .map {
+                        val info = it.info
+                        val userInfo = UserInfo(
+                            info.studentId,
+                            info.userName,
+                            Gender.parseOld(info.sex),
+                            info.grade.toInt(),
+                            info.institute,
+                            info.profession,
+                            info.className,
+                            info.direction,
+                        )
+                        User(
+                            it.studentId,
+                            it.password,
+                            it.token,
+                            userInfo,
+                            it.main,
+                            it.profileImage,
+                        )
+                    }
+            }
+        }
     var poemsToken: String?
         set(value) {
             kv.encode("poemsToken", value)

@@ -351,7 +351,7 @@ class MainViewModel : ComposeViewModel() {
                     list.addAll(result.map {
                         CustomThingSheet(
                             user.studentId,
-                            user.info.userName,
+                            user.info.name,
                             it
                         )
                     })
@@ -364,7 +364,7 @@ class MainViewModel : ComposeViewModel() {
                 } else {
                     customThingLocalRepo.getCustomThingList(user, currentYear, currentTerm)
                 }
-                result.map { CustomThingSheet(user.studentId, user.info.userName, it) }
+                result.map { CustomThingSheet(user.studentId, user.info.name, it) }
             }
         return thingList
     }
@@ -434,7 +434,7 @@ class MainViewModel : ComposeViewModel() {
                     isTomorrow,
                     colorMap[it.name] ?: ColorPool.hash(it.name),
                     it.user.studentId,
-                    it.user.info.userName,
+                    it.user.info.name,
                 )
             }
 
@@ -575,7 +575,7 @@ class MainViewModel : ComposeViewModel() {
                     tomorrow = false,
                     color = colorMap[it.name] ?: ColorPool.hash(it.name),
                     studentId = it.user.studentId,
-                    userName = it.user.info.userName,
+                    userName = it.user.info.name,
                 )
             }
             //组建表格的数据结构

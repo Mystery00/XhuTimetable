@@ -67,7 +67,7 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
             val loggedUserList = SessionManager.loggedUserList()
             _userSelect.value = runOnCpu {
                 loggedUserList.map {
-                    UserSelect(it.studentId, it.info.userName, it.main)
+                    UserSelect(it.studentId, it.info.name, it.main)
                 }
             }
             currentUser = loggedUserList.find { it.main }!!
@@ -86,7 +86,7 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
 
     private suspend fun buildYearSelect(selectedYear: String): List<YearSelect> = runOnCpu {
         val loggedUserList = SessionManager.loggedUserList()
-        val startYear = loggedUserList.minByOrNull { it.info.grade }!!.info.grade.toInt()
+        val startYear = loggedUserList.minByOrNull { it.info.xhuGrade }!!.info.xhuGrade
         val time = LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone)
         val endYear = if (time.month < Month.JUNE) time.year - 1 else time.year
         (startYear..endYear).map {
@@ -233,7 +233,7 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
             }
             _userSelect.value = runOnCpu {
                 SessionManager.loggedUserList().map {
-                    UserSelect(it.studentId, it.info.userName, it.studentId == studentId)
+                    UserSelect(it.studentId, it.info.name, it.studentId == studentId)
                 }
             }
         }
