@@ -67,9 +67,8 @@ class CustomThingActivity : BaseComposeActivity() {
         val customThingListState by viewModel.customThingListState.collectAsState()
         val saveCustomThingState by viewModel.saveCustomThingState.collectAsState()
 
-        val showSelect = rememberModalBottomSheetState(
-            initialValue = ModalBottomSheetValue.Hidden,
-            confirmStateChange = {
+        val showSelect = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden,
+            confirmValueChange = {
                 !customThingListState.loading && !saveCustomThingState.loading
             })
         val initBackdropValue = if (intent.getBooleanExtra(INTENT_HIDE_SELECTOR, false)) {
@@ -565,7 +564,7 @@ class CustomThingActivity : BaseComposeActivity() {
                                             BuildItem(item) {
                                                 updateCustomThing(item)
                                                 scope.launch {
-                                                    showSelect.animateTo(targetValue = ModalBottomSheetValue.Expanded)
+                                                    showSelect.show()
                                                 }
                                             }
                                         }
@@ -583,7 +582,7 @@ class CustomThingActivity : BaseComposeActivity() {
                                 if (!customThingListState.loading) {
                                     updateCustomThing(CustomThing.EMPTY)
                                     scope.launch {
-                                        showSelect.animateTo(targetValue = ModalBottomSheetValue.Expanded)
+                                        showSelect.show()
                                     }
                                 }
                             }) {

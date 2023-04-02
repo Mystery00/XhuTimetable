@@ -3,6 +3,7 @@ plugins {
     id("kotlin-android")
     id("kotlin-kapt")
     id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp")
 }
 
 fun String.runCommand(workingDir: File = file("./")): String {
@@ -127,7 +128,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.3.2"
+        kotlinCompilerExtensionVersion = "1.4.4"
     }
     packagingOptions {
         resources {
@@ -147,17 +148,17 @@ dependencies {
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.8.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
-    implementation("androidx.activity:activity-compose:1.6.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+    implementation("androidx.activity:activity-compose:1.7.0")
     implementation("androidx.core:core-splashscreen:1.0.0")
     implementation("androidx.browser:browser:1.5.0")
     implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
     implementation("androidx.glance:glance:1.0.0-alpha05")
     implementation("androidx.glance:glance-appwidget:1.0.0-alpha05")
     //compose
-    implementation("androidx.compose.ui:ui:1.3.3")
-    implementation("androidx.compose.material:material:1.3.1")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.3.3")
+    implementation("androidx.compose.ui:ui:1.4.0")
+    implementation("androidx.compose.material:material:1.4.0")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.4.0")
     //accompanist
     val accompanistVersion = "0.25.1"
     implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")
@@ -176,18 +177,17 @@ dependencies {
     //lottie
     implementation("com.airbnb.android:lottie-compose:6.0.0")
     //room
-    val roomVersion = "2.5.0"
-    implementation("androidx.room:room-runtime:$roomVersion")
-    kapt("androidx.room:room-compiler:$roomVersion")
-    implementation("androidx.room:room-ktx:$roomVersion")
+    implementation("androidx.room:room-runtime:2.5.1")
+    ksp("androidx.room:room-compiler:2.5.1")
+    implementation("androidx.room:room-ktx:2.5.1")
     //work manager
-    implementation("androidx.work:work-runtime-ktx:2.8.0")
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
     //koin
-    implementation("io.insert-koin:koin-android:3.3.3")
-    implementation("io.insert-koin:koin-androidx-workmanager:3.3.3")
-    implementation("io.insert-koin:koin-androidx-compose:3.4.2")
+    implementation("io.insert-koin:koin-android:3.4.0")
+    implementation("io.insert-koin:koin-androidx-workmanager:3.4.0")
+    implementation("io.insert-koin:koin-androidx-compose:3.4.3")
     //coil
-    val coilVersion = "2.2.2"
+    val coilVersion = "2.3.0"
     implementation("io.coil-kt:coil-compose:$coilVersion")
     implementation("io.coil-kt:coil-gif:$coilVersion")
     //retrofit
@@ -203,7 +203,7 @@ dependencies {
     //preference
     implementation("com.github.alorma:compose-settings-ui:0.16.0")
     //AppCenter
-    val appCenterSdkVersion = "5.0.0"
+    val appCenterSdkVersion = "5.0.1"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
     //zloading，通过jitpack导入修改版本

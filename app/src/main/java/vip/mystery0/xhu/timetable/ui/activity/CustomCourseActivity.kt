@@ -62,9 +62,8 @@ class CustomCourseActivity : BaseComposeActivity() {
         val customCourseListState by viewModel.customCourseListState.collectAsState()
         val saveCustomCourseState by viewModel.saveCustomCourseState.collectAsState()
 
-        val showSelect = rememberModalBottomSheetState(
-            initialValue = ModalBottomSheetValue.Hidden,
-            confirmStateChange = {
+        val showSelect = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden,
+            confirmValueChange = {
                 !customCourseListState.loading && !saveCustomCourseState.loading
             })
         val initBackdropValue = if (intent.getBooleanExtra(INTENT_HIDE_SELECTOR, false)) {
@@ -741,7 +740,7 @@ class CustomCourseActivity : BaseComposeActivity() {
                                             BuildItem(item) {
                                                 updateCustomCourse(item)
                                                 scope.launch {
-                                                    showSelect.animateTo(targetValue = ModalBottomSheetValue.Expanded)
+                                                    showSelect.show()
                                                 }
                                             }
                                         }
@@ -759,7 +758,7 @@ class CustomCourseActivity : BaseComposeActivity() {
                                 if (!customCourseListState.loading) {
                                     updateCustomCourse(CustomCourse.EMPTY)
                                     scope.launch {
-                                        showSelect.animateTo(targetValue = ModalBottomSheetValue.Expanded)
+                                        showSelect.show()
                                     }
                                 }
                             }) {
