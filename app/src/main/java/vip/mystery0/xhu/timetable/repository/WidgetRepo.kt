@@ -6,7 +6,7 @@ import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.model.Course
-import vip.mystery0.xhu.timetable.model.response.CourseResponse
+import vip.mystery0.xhu.timetable.model.response.OldCourseResponse
 import vip.mystery0.xhu.timetable.module.getLocalRepo
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
@@ -64,7 +64,7 @@ suspend fun getTodayCourse(currentWeek: Int): List<CourseGlance> {
     val courseRepo: CourseRepo = getLocalRepo()
 
     fun convertCourseList(
-        courseList: List<CourseResponse>,
+        courseList: List<OldCourseResponse>,
         colorMap: Map<String, Color>,
         currentWeek: Int,
         today: LocalDate,
@@ -98,9 +98,9 @@ suspend fun getTodayCourse(currentWeek: Int): List<CourseGlance> {
     val currentTerm = getConfig { currentTerm }
 
     //获取所有课程列表
-    val courseList: List<CourseResponse> =
+    val courseList: List<OldCourseResponse> =
         if (getConfig { multiAccountMode }) {
-            val list = ArrayList<CourseResponse>()
+            val list = ArrayList<OldCourseResponse>()
             SessionManager.loggedUserList().forEach { user ->
                 list.addAll(
                     courseRepo.getCourseList(user, currentYear, currentTerm)
@@ -176,7 +176,7 @@ suspend fun getWeekCourse(currentWeek: Int): List<List<CourseSheet>> {
     val courseRepo: CourseRepo = getLocalRepo()
 
     fun convertCourseList(
-        courseList: List<CourseResponse>,
+        courseList: List<OldCourseResponse>,
         colorMap: Map<String, Color>,
         currentWeek: Int,
         today: LocalDate,
@@ -210,9 +210,9 @@ suspend fun getWeekCourse(currentWeek: Int): List<List<CourseSheet>> {
     val currentTerm = getConfig { currentTerm }
 
     //获取所有课程列表
-    val courseList: List<CourseResponse> =
+    val courseList: List<OldCourseResponse> =
         if (getConfig { multiAccountMode }) {
-            val list = ArrayList<CourseResponse>()
+            val list = ArrayList<OldCourseResponse>()
             SessionManager.loggedUserList().forEach { user ->
                 list.addAll(
                     courseRepo.getCourseList(user, currentYear, currentTerm)

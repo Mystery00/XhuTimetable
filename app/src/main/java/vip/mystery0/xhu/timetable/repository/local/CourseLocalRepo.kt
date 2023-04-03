@@ -10,6 +10,7 @@ import vip.mystery0.xhu.timetable.model.entity.CourseItem
 import vip.mystery0.xhu.timetable.model.entity.CourseSource
 import vip.mystery0.xhu.timetable.model.entity.CourseType
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
+import vip.mystery0.xhu.timetable.model.response.OldCourseResponse
 import vip.mystery0.xhu.timetable.repository.CourseRepo
 import vip.mystery0.xhu.timetable.repository.db.dao.CourseDao
 
@@ -26,14 +27,18 @@ class CourseLocalRepo : CourseRepo {
 
     private val courseDao: CourseDao by inject()
 
+    override suspend fun fetchCourseList(user: User, year: Int, term: Int): CourseResponse {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getCourseList(
         user: User,
         year: String,
         term: Int,
-    ): List<CourseResponse> = runOnIo {
+    ): List<OldCourseResponse> = runOnIo {
         val courseList = courseDao.queryCourseList(user.studentId, year, term)
-        val result = ArrayList<CourseResponse>(courseList.size)
-        val map = HashMap<String, CourseResponse>()
+        val result = ArrayList<OldCourseResponse>(courseList.size)
+        val map = HashMap<String, OldCourseResponse>()
         val weekMap = HashMap<String, ArrayList<Int>>()
         courseList.forEach { item ->
             val key =
@@ -44,7 +49,7 @@ class CourseLocalRepo : CourseRepo {
                 if (extraData.isBlank()) {
                     extraData = "[]"
                 }
-                courseItem = CourseResponse(
+                courseItem = OldCourseResponse(
                     item.courseName,
                     item.teacherName,
                     item.location,
@@ -63,7 +68,7 @@ class CourseLocalRepo : CourseRepo {
         }
         map.forEach { (key, courseResponse) ->
             result.add(
-                CourseResponse(
+                OldCourseResponse(
                     courseResponse.name,
                     courseResponse.teacher,
                     courseResponse.location,
@@ -84,7 +89,7 @@ class CourseLocalRepo : CourseRepo {
         year: String,
         term: Int,
         studentId: String,
-        list: List<CourseResponse>
+        list: List<OldCourseResponse>
     ) = runOnIo {
         //删除旧数据
         courseDao.queryCourseList(studentId, year, term).forEach {
@@ -113,7 +118,7 @@ class CourseLocalRepo : CourseRepo {
         }
     }
 
-    override suspend fun getRandomCourseList(size: Int): List<CourseResponse> = runOnIo {
+    override suspend fun getRandomCourseList(size: Int): List<OldCourseResponse> = runOnIo {
         val courseList = ArrayList(courseDao.queryDistinctCourseByUsernameAndTerm())
         if (courseList.isEmpty()) {
             //没有数据，添加一条模拟数据
@@ -145,7 +150,7 @@ class CourseLocalRepo : CourseRepo {
             if (extraData.isBlank()) {
                 extraData = "[]";
             }
-            CourseResponse(
+            OldCourseResponse(
                 item.courseName,
                 item.teacherName,
                 item.location,

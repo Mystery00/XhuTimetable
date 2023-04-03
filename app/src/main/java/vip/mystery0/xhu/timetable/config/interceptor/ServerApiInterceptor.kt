@@ -39,7 +39,7 @@ class ServerApiInterceptor : Interceptor {
         val newRequest = request.newBuilder()
             .addHeader("sign", sign)
             .addHeader("signTime", signTime.toEpochMilli().toString())
-            .addHeader("deviceId", publicDeviceId)
+            .addHeader("deviceId", "android-$publicDeviceId")
             .build()
 
         return chain.proceed(newRequest)
