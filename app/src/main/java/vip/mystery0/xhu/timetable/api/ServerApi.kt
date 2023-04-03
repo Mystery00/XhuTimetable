@@ -36,7 +36,7 @@ interface ServerApi {
     @GET("/api/rest/external/notice/list")
     suspend fun noticeList(
         @Header("sessionToken") token: String,
-        @Query("platform") platform: String = "Android",
+        @Query("platform") platform: String = "ANDROID",
         @Query("lastId") lastId: Long = 0,
         @Query("size") size: Int = 20,
     ): Response<List<NoticeResponse>>
