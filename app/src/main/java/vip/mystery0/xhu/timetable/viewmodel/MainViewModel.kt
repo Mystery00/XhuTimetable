@@ -28,7 +28,7 @@ import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.CustomThing
 import vip.mystery0.xhu.timetable.model.CustomUi
-import vip.mystery0.xhu.timetable.model.response.CourseResponse
+import vip.mystery0.xhu.timetable.model.response.OldCourseResponse
 import vip.mystery0.xhu.timetable.model.response.Menu
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.model.response.Version
@@ -306,12 +306,12 @@ class MainViewModel : ComposeViewModel() {
         }
     }
 
-    private suspend fun getAllCourseList(loadFromCloud: Boolean): List<CourseResponse> {
+    private suspend fun getAllCourseList(loadFromCloud: Boolean): List<OldCourseResponse> {
         val currentYear = getConfig { currentYear }
         val currentTerm = getConfig { currentTerm }
-        val courseList: List<CourseResponse> =
+        val courseList: List<OldCourseResponse> =
             if (getConfig { multiAccountMode }) {
-                val list = ArrayList<CourseResponse>()
+                val list = ArrayList<OldCourseResponse>()
                 SessionManager.loggedUserList().forEach { user ->
                     list.addAll(
                         if (loadFromCloud) {
@@ -404,7 +404,7 @@ class MainViewModel : ComposeViewModel() {
             toastMessage(throwable.message ?: throwable.javaClass.simpleName)
         }) {
             fun convertCourseList(
-                courseList: List<CourseResponse>,
+                courseList: List<OldCourseResponse>,
                 colorMap: Map<String, Color>,
                 currentWeek: Int,
                 today: LocalDate,
@@ -439,7 +439,7 @@ class MainViewModel : ComposeViewModel() {
             }
 
             suspend fun loadData(
-                courseList: List<CourseResponse>,
+                courseList: List<OldCourseResponse>,
                 colorMap: Map<String, Color>,
                 currentWeek: Int,
             ) {

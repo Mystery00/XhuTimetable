@@ -9,6 +9,7 @@ import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
+import vip.mystery0.xhu.timetable.model.response.OldCourseResponse
 import vip.mystery0.xhu.timetable.module.localRepo
 import vip.mystery0.xhu.timetable.repository.CourseRepo
 import java.time.LocalDate
@@ -18,11 +19,15 @@ class CourseRemoteRepo : CourseRepo {
 
     private val local: CourseRepo by localRepo()
 
+    override suspend fun fetchCourseList(user: User, year: Int, term: Int): CourseResponse {
+        TODO()
+    }
+
     override suspend fun getCourseList(
         user: User,
         year: String,
         term: Int,
-    ): List<CourseResponse> = runOnCpu {
+    ): List<OldCourseResponse> = runOnCpu {
         val response = user.withAutoLogin {
             jwcApi.courseList(
                 it,

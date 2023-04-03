@@ -1,6 +1,9 @@
 package vip.mystery0.xhu.timetable.module
 
 import android.webkit.WebSettings
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
@@ -10,6 +13,8 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import vip.mystery0.xhu.timetable.api.CommonApi
+import vip.mystery0.xhu.timetable.api.CourseApi
 import vip.mystery0.xhu.timetable.api.FeedbackApi
 import vip.mystery0.xhu.timetable.api.FileApi
 import vip.mystery0.xhu.timetable.api.JwcApi
@@ -20,6 +25,8 @@ import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.PoemsInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.ServerApiInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.UserAgentInterceptor
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 
 const val HTTP_CLIENT = "client"
@@ -52,7 +59,10 @@ val networkModule = module {
             .client(get(named(HTTP_CLIENT)))
             .addConverterFactory(
                 MoshiConverterFactory.create(
-                    Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
+                    Moshi.Builder()
+                        .add(LocalDate::class.java, LocalDateAdapter())
+                        .addLast(KotlinJsonAdapterFactory())
+                        .build()
                 )
             )
             .build()
@@ -63,7 +73,10 @@ val networkModule = module {
             .client(get(named(HTTP_CLIENT_POEMS)))
             .addConverterFactory(
                 MoshiConverterFactory.create(
-                    Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
+                    Moshi.Builder()
+                        .add(LocalDate::class.java, LocalDateAdapter())
+                        .addLast(KotlinJsonAdapterFactory())
+                        .build()
                 )
             )
             .build()
@@ -74,7 +87,10 @@ val networkModule = module {
             .client(get(named(HTTP_CLIENT)))
             .addConverterFactory(
                 MoshiConverterFactory.create(
-                    Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
+                    Moshi.Builder()
+                        .add(LocalDate::class.java, LocalDateAdapter())
+                        .addLast(KotlinJsonAdapterFactory())
+                        .build()
                 )
             )
             .build()
@@ -93,6 +109,8 @@ val networkModule = module {
 
     serverApi<ServerApi>()
     serverApi<JwcApi>()
+    serverApi<CommonApi>()
+    serverApi<CourseApi>()
 
     single { get<Retrofit>(named(RETROFIT_POEMS)).create(PoemsApi::class.java) }
     single { get<Retrofit>(named(RETROFIT_FILE)).create(FileApi::class.java) }
@@ -106,3 +124,23 @@ private inline fun <reified API> Module.serverApi() {
 const val HINT_NETWORK = "网络无法使用，请检查网络连接！"
 
 class NetworkNotConnectException : RuntimeException(HINT_NETWORK)
+
+class LocalDateAdapter : JsonAdapter<LocalDate>() {
+    private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
+
+    override fun fromJson(reader: JsonReader): LocalDate? {
+        val value = reader.nextString()
+        if (value.isNullOrBlank()) {
+            return null
+        }
+        return LocalDate.parse(value, formatter)
+    }
+
+    override fun toJson(writer: JsonWriter, value: LocalDate?) {
+        if (value == null) {
+            writer.nullValue()
+            return
+        }
+        writer.value(formatter.format(value))
+    }
+}
