@@ -5,8 +5,8 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.config.ServerError
-import vip.mystery0.xhu.timetable.config.UserStore.withAutoLogin
-import vip.mystery0.xhu.timetable.config.User
+import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLogin
+import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.model.CustomThing

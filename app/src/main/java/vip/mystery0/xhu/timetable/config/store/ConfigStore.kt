@@ -1,28 +1,31 @@
-package vip.mystery0.xhu.timetable.config
+package vip.mystery0.xhu.timetable.config.store
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tencent.mmkv.MMKV
+import vip.mystery0.xhu.timetable.config.Customisable
+import vip.mystery0.xhu.timetable.config.chinaZone
+import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.module.registerAdapter
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 object Formatter {
     val DATE = DateTimeFormatter.ISO_LOCAL_DATE
 }
 
-private val instance = NewConfig()
+private val instance = ConfigStore()
 val GlobalNewConfig = instance
 
-suspend fun <T> getNewConfig(block: NewConfig.() -> T) = runOnIo { block(instance) }
-suspend fun setNewConfig(block: suspend NewConfig.() -> Unit) = runOnIo { block(instance) }
+suspend fun <T> getConfigStore(block: ConfigStore.() -> T) = runOnIo { block(instance) }
+suspend fun setConfigStore(block: suspend ConfigStore.() -> Unit) = runOnIo { block(instance) }
 
-class NewConfig internal constructor() {
-    private val kv = MMKV.mmkvWithID("NewConfig")
+class ConfigStore internal constructor() {
+    private val kv = MMKV.mmkvWithID("ConfigStore")
     private val moshi = Moshi.Builder().registerAdapter().build()
 
     private val userStoreSecretKey = "userStoreSecret"
@@ -121,6 +124,36 @@ class NewConfig internal constructor() {
             val time = kv.decodeLong(hideSplashBeforeKey, 0L)
             return Instant.ofEpochMilli(time)
         }
+    private val showCustomCourseOnWeekKey = "showCustomCourseOnWeek"
+    var showCustomCourseOnWeek: Boolean
+        set(value) {
+            kv.encode(showCustomCourseOnWeekKey, value)
+        }
+        get() = kv.decodeBool(showCustomCourseOnWeekKey, true)
+    private val lastSyncCourseKey = "lastSyncCourse"
+    var lastSyncCourse: LocalDate
+        set(value) {
+            kv.encode(lastSyncCourseKey, value.format(Formatter.DATE))
+        }
+        get() {
+            val value = kv.decodeString(lastSyncCourseKey)
+            if (value.isNullOrBlank()) {
+                return LocalDate.MIN
+            }
+            return LocalDate.parse(value, Formatter.DATE)
+        }
+    private val multiAccountModeKey = "multiAccountMode"
+    var multiAccountMode: Boolean
+        set(value) {
+            kv.encode(multiAccountModeKey, value)
+        }
+        get() = kv.decodeBool(multiAccountModeKey, false)
+    private val showNotThisWeekKey = "showNotThisWeek"
+    var showNotThisWeek: Boolean
+        set(value) {
+            kv.encode(showNotThisWeekKey, value)
+        }
+        get() = kv.decodeBool(showNotThisWeekKey, true)
     private val versionChannelKey = "versionChannel"
     var versionChannel: VersionChannel
         set(value) {

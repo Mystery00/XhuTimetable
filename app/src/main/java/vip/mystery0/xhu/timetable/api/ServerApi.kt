@@ -18,9 +18,6 @@ interface ServerApi {
         @Query("betaVersion") betaVersion: Boolean,
     ): VersionUrl
 
-    @GET("/api/rest/external/user/info")
-    suspend fun userInfo(@Header("sessionToken") token: String): UserInfo
-
     @GET("/api/rest/external/notice/list")
     suspend fun noticeList(
         @Header("sessionToken") token: String,

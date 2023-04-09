@@ -1,5 +1,7 @@
 package vip.mystery0.xhu.timetable.config
 
+import vip.mystery0.xhu.timetable.config.store.User
+import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.model.Gender
 import vip.mystery0.xhu.timetable.model.OldUserInfo
 import vip.mystery0.xhu.timetable.model.UserInfo

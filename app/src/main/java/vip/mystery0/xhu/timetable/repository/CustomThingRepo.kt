@@ -1,6 +1,6 @@
 package vip.mystery0.xhu.timetable.repository
 
-import vip.mystery0.xhu.timetable.config.User
+import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.CustomThing
 import vip.mystery0.xhu.timetable.module.Repo
 

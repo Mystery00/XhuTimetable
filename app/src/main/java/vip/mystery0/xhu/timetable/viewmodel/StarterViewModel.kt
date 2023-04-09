@@ -2,7 +2,6 @@ package vip.mystery0.xhu.timetable.viewmodel
 
 import android.app.AlarmManager
 import android.util.Log
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -14,19 +13,14 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.UserStore
-import vip.mystery0.xhu.timetable.config.getConfig
-import vip.mystery0.xhu.timetable.config.getNewConfig
-import vip.mystery0.xhu.timetable.config.runOnCpu
+import vip.mystery0.xhu.timetable.config.store.UserStore
+import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.doClear
 import vip.mystery0.xhu.timetable.externalPictureDir
-import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.module.getRepo
 import vip.mystery0.xhu.timetable.repository.StartRepo
-import vip.mystery0.xhu.timetable.setAlarmTrigger
 import vip.mystery0.xhu.timetable.utils.md5
 import vip.mystery0.xhu.timetable.utils.sha1
 import vip.mystery0.xhu.timetable.utils.sha256
@@ -64,7 +58,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
 //            setAlarmTrigger(alarmManager)
 //            initPullWork()
             val response = startRepo.init()
-            val hideTime = getNewConfig { hideSplashBefore }
+            val hideTime = getConfigStore { hideSplashBefore }
             if (Instant.now().isBefore(hideTime)) {
                 //已经设置了隐藏时间，且当前时间还未到达隐藏时间
                 _readyState.emit(ReadyState())
@@ -78,7 +72,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
 //                DataHolder.mainUserName = SessionManager.mainUserOrNull()?.info?.name ?: "未登录"
             val dir = File(externalPictureDir, "splash")
             val now = Instant.now()
-            val splashList = getNewConfig { splashList }
+            val splashList = getConfigStore { splashList }
                 .filter { now >= it.startShowTime && now <= it.endShowTime }
                 .map {
                     val extension = it.imageUrl.substringAfterLast(".")

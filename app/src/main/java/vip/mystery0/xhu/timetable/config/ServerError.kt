@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import retrofit2.HttpException
 import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.module.NetworkNotConnectException
+import vip.mystery0.xhu.timetable.module.registerAdapter
 
 data class ErrorMessage(
     val code: Int,
@@ -17,7 +18,7 @@ data class ErrorMessage(
 class ServerError(override val message: String) : RuntimeException(message)
 
 private val errorMessageMoshi: JsonAdapter<ErrorMessage> =
-    Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build().adapter(ErrorMessage::class.java)
+    Moshi.Builder().registerAdapter().build().adapter(ErrorMessage::class.java)
 
 fun serverExceptionHandler(
     messageHandler: (ErrorMessage) -> Boolean = { false },

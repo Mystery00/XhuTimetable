@@ -210,6 +210,9 @@ dependencies {
     implementation("com.github.Mystery00:ZLoading:1.2.1")
     //ucrop
     implementation("com.github.yalantis:ucrop:2.2.8")
+    //feature-probe
+    implementation("com.featureprobe:client-sdk-android:2.0.2@aar")
+    implementation("net.java.dev.jna:jna:5.7.0@aar")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {

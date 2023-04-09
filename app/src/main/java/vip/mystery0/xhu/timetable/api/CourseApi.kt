@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.api
 
-import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Query
@@ -13,6 +12,5 @@ interface CourseApi {
         @Query("year") year: Int,
         @Query("term") term: Int,
         @Query("showCustomCourse") showCustomCourse: Boolean,
-        @Query("autoCache") autoCache: Boolean,
-    ): Response<CourseResponse>
+    ): CourseResponse
 }

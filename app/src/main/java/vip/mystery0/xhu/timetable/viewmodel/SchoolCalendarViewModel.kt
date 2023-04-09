@@ -8,8 +8,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.FileApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.UserStore
+import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler

@@ -1,11 +1,6 @@
 package vip.mystery0.xhu.timetable.module
 
-import android.webkit.WebSettings
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
@@ -21,6 +16,7 @@ import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.api.UserApi
 import vip.mystery0.xhu.timetable.config.GlobalConfig
+import vip.mystery0.xhu.timetable.config.interceptor.CheckLoginInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.PoemsInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.ServerApiInterceptor
@@ -41,6 +37,7 @@ val networkModule = module {
             .connectTimeout(20, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
             .addInterceptor(ServerApiInterceptor())
+            .addInterceptor(CheckLoginInterceptor())
             .addInterceptor(UserAgentInterceptor())
             .build()
     }
@@ -92,6 +89,7 @@ val networkModule = module {
 
     serverApi<ServerApi>()
     serverApi<JwcApi>()
+
     serverApi<CommonApi>()
     serverApi<UserApi>()
     serverApi<CourseApi>()

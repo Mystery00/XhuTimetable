@@ -4,7 +4,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.koin.core.component.inject
-import vip.mystery0.xhu.timetable.config.User
+import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.model.entity.CourseItem
 import vip.mystery0.xhu.timetable.model.entity.CourseSource
@@ -29,6 +29,14 @@ class CourseLocalRepo : CourseRepo {
 
     override suspend fun fetchCourseList(user: User, year: Int, term: Int): CourseResponse {
         TODO("Not yet implemented")
+    }
+
+    override suspend fun saveCourseList(
+        user: User,
+        year: Int,
+        term: Int,
+        response: CourseResponse
+    ) {
     }
 
     override suspend fun getCourseList(
