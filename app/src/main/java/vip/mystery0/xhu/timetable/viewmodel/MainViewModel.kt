@@ -36,6 +36,7 @@ import vip.mystery0.xhu.timetable.model.response.OldCourseResponse
 import vip.mystery0.xhu.timetable.model.response.Menu
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.model.response.Version
+import vip.mystery0.xhu.timetable.module.Feature
 import vip.mystery0.xhu.timetable.module.getRepo
 import vip.mystery0.xhu.timetable.module.localRepo
 import vip.mystery0.xhu.timetable.repository.CourseRepo
@@ -238,6 +239,9 @@ class MainViewModel : ComposeViewModel() {
         }) {
             val disablePoems = getConfig { disablePoems }
             if (disablePoems) {
+                return@launch
+            }
+            if (!Feature.JRSC.isEnabled()){
                 return@launch
             }
             val token = PoemsStore.token
