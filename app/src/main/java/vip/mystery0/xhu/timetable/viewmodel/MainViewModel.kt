@@ -16,19 +16,22 @@ import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.GlobalConfig
-import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.UserStore.withAutoLogin
-import vip.mystery0.xhu.timetable.config.User
-import vip.mystery0.xhu.timetable.config.UserStore
+import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLogin
+import vip.mystery0.xhu.timetable.config.store.User
+import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.config.setConfig
+import vip.mystery0.xhu.timetable.config.store.PoemsStore
+import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.CustomThing
 import vip.mystery0.xhu.timetable.model.CustomUi
+import vip.mystery0.xhu.timetable.model.WeekCourseView
+import vip.mystery0.xhu.timetable.model.format
 import vip.mystery0.xhu.timetable.model.response.OldCourseResponse
 import vip.mystery0.xhu.timetable.model.response.Menu
 import vip.mystery0.xhu.timetable.model.response.Poems
@@ -201,7 +204,7 @@ class MainViewModel : ComposeViewModel() {
                 _backgroundImage.value =
                     getConfig { backgroundImage } ?: XhuImages.defaultBackgroundImage
             }
-            _backgroundImageBlur.value= getConfig { customUi }.backgroundImageBlur
+            _backgroundImageBlur.value = getConfig { customUi }.backgroundImageBlur
         }
     }
 
@@ -237,9 +240,9 @@ class MainViewModel : ComposeViewModel() {
             if (disablePoems) {
                 return@launch
             }
-            val token = getConfig { poemsToken }
-            if (token == null) {
-                setConfig { this.poemsToken = poemsApi.getToken().data }
+            val token = PoemsStore.token
+            if (token.isNullOrBlank()) {
+                PoemsStore.token = poemsApi.getToken().data
             }
             val poems = poemsApi.getSentence().data
             val showPoemsTranslate = getConfig { showPoemsTranslate }
@@ -305,6 +308,30 @@ class MainViewModel : ComposeViewModel() {
                 }
             }
         }
+    }
+
+    private suspend fun getUserCourseList(forceLoadFromCloud: Boolean): List<WeekCourseView> {
+        val resultList = ArrayList<WeekCourseView>()
+        val nowYear = getConfigStore { nowYear }
+        val nowTerm = getConfigStore { nowTerm }
+        val multiAccountMode = getConfigStore { multiAccountMode }
+        val userList =
+            if (multiAccountMode) UserStore.loggedUserList() else listOf(UserStore.mainUser())
+        userList.forEach { user ->
+            val courseResponse = if (forceLoadFromCloud) {
+                courseRepo.fetchCourseList(user, nowYear, nowTerm)
+            } else {
+//                courseLocalRepo.fetchCourseList(user, nowYear, nowTerm)
+                courseRepo.fetchCourseList(user, nowYear, nowTerm)
+            }
+            courseResponse.courseList.forEach { course ->
+                resultList.add(WeekCourseView.valueOf(course, user))
+            }
+            courseResponse.experimentCourseList.forEach { experimentCourse ->
+                resultList.add(WeekCourseView.valueOf(experimentCourse, user))
+            }
+        }
+        return resultList
     }
 
     private suspend fun getAllCourseList(loadFromCloud: Boolean): List<OldCourseResponse> {
@@ -553,139 +580,108 @@ class MainViewModel : ComposeViewModel() {
         //获取自定义颜色列表
         val colorMap = getRawCourseColorList()
         //获取所有的课程列表
-        val courseList = getAllCourseList(false)
-        //转换对象
-        runOnCpu {
-            val allCourseList = courseList.map {
-                val thisWeek = it.week.contains(currentWeek)
-                val timeString = it.time.formatTimeString()
-                Course(
-                    courseName = it.name,
-                    teacherName = it.teacher,
-                    location = it.location,
-                    weekSet = it.week,
-                    weekString = it.weekString,
-                    type = it.type,
-                    timeSet = it.time,
-                    timeString = timeString,
-                    time = it.time.formatTime(),
-                    day = it.day,
-                    extraData = it.extraData,
-                    thisWeek = thisWeek,
-                    today = false,
-                    tomorrow = false,
-                    color = colorMap[it.name] ?: ColorPool.hash(it.name),
-                    studentId = it.user.studentId,
-                    userName = it.user.info.name,
-                )
+        val courseList = getUserCourseList(false)
+        //设置是否本周以及课程颜色
+        courseList.forEach {
+            it.thisWeek = it.weekList.contains(currentWeek)
+            it.backgroundColor = colorMap[it.courseName] ?: ColorPool.hash(it.courseName)
+            it.generateKey()
+        }
+        //组建表格的数据结构
+        val expandTableCourse = Array(7) { day ->
+            Array(11) { index ->
+                CourseSheet.empty(1, index + 1, day + 1)
             }
-            //组建表格的数据结构
-            val expandTableCourse = Array(7) { day ->
-                Array(11) { index ->
-                    CourseSheet.empty(1, index + 1, day + 1)
+        }
+        //展开的列表，key为 当前课程的唯一标识，用于合并，value为课程信息，用于后续生成格子信息
+        val expandItemMap = courseList.associateBy { it.key }
+        //平铺课程
+        courseList.forEach { course ->
+            val day = course.day.value - 1
+            (course.startDayTime..course.endDayTime).forEach { time ->
+                //填充表格
+                expandTableCourse[day][time - 1].course.add(course)
+            }
+        }
+        //使用key判断格子内容是否相同，相同则合并
+        val tableCourse = Array(7) { day ->
+            val dayArray = expandTableCourse[day]
+            val first = dayArray.first()
+            val result = ArrayList<CourseSheet>(dayArray.size)
+            var last = first
+            var lastKey = first.course.sortedBy { it.key }.joinToString { it.key }
+            dayArray.forEachIndexed { index, courseSheet ->
+                if (index == 0) {
+                    return@forEachIndexed
+                }
+                val thisKey = courseSheet.course.sortedBy { it.key }.joinToString { it.key }
+                if (lastKey == thisKey) {
+                    last.step++
+                } else {
+                    result.add(last)
+                    last = courseSheet
+                    lastKey = thisKey
                 }
             }
-            //展开的列表，key为 当前课程的唯一标识，用于合并，value为课程信息，用于后续生成格子信息
-            val expandItemMap = HashMap<String, Course>(allCourseList.size)
-            //生成key
-            allCourseList.forEach {
-                it.generateKey()
-                expandItemMap[it.key] = it
+            if (result.last() != last) {
+                result.add(last)
             }
-            //平铺课程
-            allCourseList.forEach { course ->
-                course.timeSet.forEach { time ->
-                    //填充表格
-                    expandTableCourse[course.day - 1][time - 1].course.add(course)
-                }
-            }
-            //合并相同的格子
-            val tableCourse = Array<ArrayList<CourseSheet>>(7) { ArrayList(11) }
-            expandTableCourse.forEachIndexed { index, dayArray ->
-                val first = dayArray.first()
-                var lastKey = first.course.joinToString { it.key }
-                var lastSheet = first
-                for (i in 1 until dayArray.size) {
-                    val thisSheet = dayArray[i]
-                    val thisKey = thisSheet.course.joinToString { it.key }
-                    if (lastKey != thisKey) {
-                        //键不相等，那么添加这个sheet
-                        tableCourse[index].add(lastSheet)
-                        lastKey = thisKey
-                        lastSheet = thisSheet
+            result
+        }
+        //处理显示的信息
+        tableCourse.forEach { array ->
+            array.forEach { sheet ->
+                if (sheet.course.isNotEmpty()) {
+                    sheet.course.sort()
+                    val show = sheet.course.first()
+                    sheet.course = ArrayList(sheet.course.sortedBy { it.weekList.first() })
+                    if (show.thisWeek) {
+                        sheet.showTitle = show.format(_customUi.value.weekTitleTemplate)
+                        sheet.color = colorMap[show.courseName] ?: ColorPool.hash(show.courseName)
+                        sheet.textColor = Color.White
                     } else {
-                        //键相等，合并
-                        lastSheet.step++
+                        sheet.showTitle = show.format(_customUi.value.weekNotTitleTemplate)
+                        sheet.color = XhuColor.notThisWeekBackgroundColor
+                        sheet.textColor = Color.Gray
                     }
                 }
-                if (tableCourse[index].lastOrNull() != lastSheet) {
-                    tableCourse[index].add(lastSheet)
+            }
+        }
+        //过滤非本周课程
+        val showNotThisWeek = getConfigStore { showNotThisWeek }
+        if (!showNotThisWeek) {
+            tableCourse.forEach { array ->
+                array.forEach { sheet ->
+                    sheet.course.removeIf { !it.thisWeek }
                 }
             }
-            //填充显示的信息
-            val tableCourseList = tableCourse.map { array ->
-                array.map { courseSheet ->
-                    if (courseSheet.course.isNotEmpty()) {
-                        val list = courseSheet.course.sortedWith { o1, o2 ->
-                            if (o1.thisWeek == o2.thisWeek) {
-                                if (o1.type != o2.type) {
-                                    o2.type.type.compareTo(o1.type.type)
-                                } else {
-                                    o1.weekSet.first().compareTo(o2.weekSet.first())
-                                }
-                            } else {
-                                o2.thisWeek.compareTo(o1.thisWeek)
-                            }
-                        }
-                        val show = list.first()
-                        courseSheet.showTitle =
-                            if (show.thisWeek) show.format(_customUi.value.weekTitleTemplate)
-                            else show.format(_customUi.value.weekNotTitleTemplate)
-                        courseSheet.course =
-                            ArrayList(courseSheet.course.distinct().sortedBy { it.weekSet.first() })
-                        courseSheet.color =
-                            if (show.thisWeek) colorMap[show.courseName]
-                                ?: ColorPool.hash(show.courseName) else XhuColor.notThisWeekBackgroundColor
-                        courseSheet.textColor = if (show.thisWeek) Color.White else Color.Gray
-                    }
-                    courseSheet
-                }
-            }
-            //计算周课程视图
-            val startDate =
-                LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone).toLocalDate()
-            val days =
-                Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay()).toDays()
-            //计算顶部周组件
-            var thisWeek = ((days / 7) + 1).toInt()
-            if (days < 0 && thisWeek > 0) {
-                thisWeek = 0
-            }
-            val weekViewArray = Array(20) { index ->
-                WeekView(index + 1, thisWeek == index + 1, Array(5) { Array(5) { false } })
-            }
-            for (dayIndex in 0 until 5) {
-                val dayArray = expandTableCourse[dayIndex]
-                for (itemIndex in 0 until 10) {
-                    val courseSheet = dayArray[itemIndex]
-                    val weekSet = courseSheet.course.map { it.weekSet }.flatten().toSet()
-                    weekSet.forEach { week ->
+        }
+        _tableCourse.value = tableCourse.toList()
+
+        //计算当前周
+        val termStartDate = getConfigStore { termStartDate }
+        val days =
+            Duration.between(termStartDate.atStartOfDay(), LocalDate.now().atStartOfDay()).toDays()
+        var thisWeekIndex = ((days / 7) + 1).toInt()
+        if (days < 0 && thisWeekIndex > 0) {
+            thisWeekIndex = 0
+        }
+        //计算顶部周视图
+        val weekViewArray = Array(20) { index ->
+            WeekView(index + 1, thisWeekIndex == index + 1, Array(5) { Array(5) { false } })
+        }
+        for (dayIndex in 0 until 5) {
+            val dayArray = expandTableCourse[dayIndex]
+            for (itemIndex in 0 until 10) {
+                val sheet = dayArray[itemIndex]
+                sheet.course.forEach {
+                    it.weekList.forEach { week ->
                         weekViewArray[week - 1].array[dayIndex][itemIndex / 2] = true
                     }
                 }
             }
-            //设置数据
-            _weekView.emit(weekViewArray.toList())
-            val showNotThisWeek = getConfig { showNotThisWeek }
-            if (!showNotThisWeek) {
-                tableCourseList.forEach { array ->
-                    array.forEach { sheet ->
-                        sheet.course.removeIf { !it.thisWeek }
-                    }
-                }
-            }
-            _tableCourse.emit(tableCourseList)
         }
+        _weekView.value = weekViewArray.toList()
     }
 
     fun animeWeekView() {
@@ -701,29 +697,29 @@ class MainViewModel : ComposeViewModel() {
     }
 
     fun checkUnReadNotice() {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
-            Log.w(TAG, "load notice list failed", throwable)
-            toastMessage(throwable.message ?: throwable.javaClass.simpleName)
-        }) {
-            if (UserStore.getMainUser() == null) return@launch
-            _hasUnReadNotice.value = noticeRepo.hasUnReadNotice()
-        }
+//        viewModelScope.launch(serverExceptionHandler { throwable ->
+//            Log.w(TAG, "load notice list failed", throwable)
+//            toastMessage(throwable.message ?: throwable.javaClass.simpleName)
+//        }) {
+//            if (UserStore.getMainUser() == null) return@launch
+//            _hasUnReadNotice.value = noticeRepo.hasUnReadNotice()
+//        }
     }
 
     fun checkUnReadFeedback() {
-        if (!isOnline()) {
-            return
-        }
-        viewModelScope.launch(serverExceptionHandler { throwable ->
-            Log.w(TAG, "check unread feedback failed", throwable)
-        }) {
-            if (UserStore.getMainUser() == null) return@launch
-            val firstFeedbackMessageId = getConfig { firstFeedbackMessageId }
-            val response = UserStore.mainUser().withAutoLogin {
-                feedbackApi.checkMessage(it, firstFeedbackMessageId).checkLogin()
-            }
-            _hasUnReadFeedback.value = response.first.newResult
-        }
+//        if (!isOnline()) {
+//            return
+//        }
+//        viewModelScope.launch(serverExceptionHandler { throwable ->
+//            Log.w(TAG, "check unread feedback failed", throwable)
+//        }) {
+//            if (UserStore.getMainUser() == null) return@launch
+//            val firstFeedbackMessageId = getConfig { firstFeedbackMessageId }
+//            val response = UserStore.mainUser().withAutoLogin {
+//                feedbackApi.checkMessage(it, firstFeedbackMessageId).checkLogin()
+//            }
+//            _hasUnReadFeedback.value = response.first.newResult
+//        }
     }
 
     fun downloadApk() {
@@ -802,7 +798,7 @@ data class CourseSheet(
     //周几
     val day: Int,
     //当前格子的课程列表
-    var course: ArrayList<Course>,
+    var course: ArrayList<WeekCourseView>,
     //颜色
     var color: Color,
     //文本颜色

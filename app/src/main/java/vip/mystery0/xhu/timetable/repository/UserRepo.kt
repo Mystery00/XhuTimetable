@@ -3,7 +3,7 @@ package vip.mystery0.xhu.timetable.repository
 import android.util.Base64
 import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.api.UserApi
-import vip.mystery0.xhu.timetable.config.User
+import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.model.request.LoginRequest
 import vip.mystery0.xhu.timetable.model.response.LoginResponse

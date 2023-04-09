@@ -16,6 +16,7 @@ import vip.mystery0.xhu.timetable.base.startUniqueWork
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.setConfig
+import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.contentResolver
 import vip.mystery0.xhu.timetable.externalDocumentsDir
 import vip.mystery0.xhu.timetable.model.entity.NightMode
@@ -187,9 +188,9 @@ class SettingsViewModel : ComposeViewModel() {
 //        }
     }
 
-    fun resetPoemsToken(){
+    fun resetPoemsToken() {
         viewModelScope.launch {
-            setConfig { poemsToken = null }
+            PoemsStore.token = null
         }
     }
 }

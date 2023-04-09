@@ -135,7 +135,7 @@ val weekCourseContent: TabContent = @Composable { ext ->
                                         textColor = sheet.textColor,
                                         showMore = sheet.course.size > 1,
                                     ) {
-                                        courseDialogState.value = sheet.course
+//                                        courseDialogState.value = sheet.course
                                     }
                                 } else {
                                     Spacer(

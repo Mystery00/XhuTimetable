@@ -8,11 +8,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.DataHolder
-import vip.mystery0.xhu.timetable.config.getNewConfig
-import vip.mystery0.xhu.timetable.config.setConfig
-import vip.mystery0.xhu.timetable.config.setNewConfig
-import vip.mystery0.xhu.timetable.model.response.Splash
+import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import java.io.File
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -40,7 +37,7 @@ class SplashImageViewModel : ComposeViewModel(), KoinComponent {
     fun hide() {
         viewModelScope.launch {
             val hideTime = Instant.now().plus(7, ChronoUnit.DAYS)
-            setNewConfig { hideSplashBefore = hideTime }
+            setConfigStore { hideSplashBefore = hideTime }
         }
     }
 
@@ -49,7 +46,7 @@ class SplashImageViewModel : ComposeViewModel(), KoinComponent {
         splashId: Long,
     ) {
         viewModelScope.launch {
-            val splashList = getNewConfig { splashList }
+            val splashList = getConfigStore { splashList }
             val splash = splashList.firstOrNull() { it.splashId == splashId }
             if (splash == null) {
                 _timerState.value = 0

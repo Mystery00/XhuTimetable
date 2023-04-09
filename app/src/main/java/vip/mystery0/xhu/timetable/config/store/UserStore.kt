@@ -1,13 +1,13 @@
-package vip.mystery0.xhu.timetable.config
+package vip.mystery0.xhu.timetable.config.store
 
 import android.util.Log
 import android.widget.Toast
 import com.squareup.moshi.Moshi
 import com.tencent.mmkv.MMKV
 import org.koin.java.KoinJavaComponent
-import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.api.UserApi
 import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
+import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.model.UserInfo
 import vip.mystery0.xhu.timetable.module.registerAdapter
@@ -135,6 +135,20 @@ object UserStore {
 
     private fun String.userMapKey() = "user_$this"
     private fun User.mapKey() = studentId.userMapKey()
+
+    suspend fun <R> User.withAutoLoginOnce(block: suspend (String) -> R): R =
+        try {
+            block(token)
+        } catch (exception: ServerNeedLoginException) {
+            //做一次登录
+            val loginResponse = doLogin(this)
+            //获取用户信息
+            val userApi = KoinJavaComponent.get<UserApi>(UserApi::class.java)
+            val userInfo = userApi.getUserInfo(loginResponse.sessionToken)
+            val user = this.copy(token = loginResponse.sessionToken, info = userInfo)
+            updateUser(user)
+            block(loginResponse.sessionToken)
+        }
 
     suspend fun <R> User.withAutoLogin(block: suspend (String) -> R): Pair<R, Boolean> =
         try {

@@ -5,7 +5,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.CommonApi
 import vip.mystery0.xhu.timetable.config.Customisable
-import vip.mystery0.xhu.timetable.config.setNewConfig
+import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.request.ClientInitRequest
 import vip.mystery0.xhu.timetable.model.response.ClientInitResponse
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
@@ -23,9 +23,11 @@ class StartRemoteRepo : StartRepo, KoinComponent {
             commonApi.clientInit(ClientInitRequest())
         } ?: return local.init()
         val xhuStartTime = clientInitResponse.xhuStartTime
-        setNewConfig {
+        setConfigStore {
             customTermStartDate = Customisable.serverDetect(xhuStartTime.startDate)
             splashList = clientInitResponse.splash
+            customNowYear = Customisable.serverDetect(xhuStartTime.nowYear)
+            customNowTerm = Customisable.serverDetect(xhuStartTime.nowTerm)
         }
         return clientInitResponse
     }

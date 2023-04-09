@@ -18,6 +18,7 @@ fun moduleList(): List<Module> =
         workModule,
         networkModule,
         repoModule,
+        featureModule,
     )
 
 private val appModule = module {

@@ -1,6 +1,6 @@
 package vip.mystery0.xhu.timetable.repository
 
-import vip.mystery0.xhu.timetable.config.User
+import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
 import vip.mystery0.xhu.timetable.model.response.OldCourseResponse
 import vip.mystery0.xhu.timetable.module.Repo
@@ -11,6 +11,14 @@ interface CourseRepo : Repo {
         year: Int,
         term: Int
     ): CourseResponse
+
+    suspend fun saveCourseList(
+        user: User,
+        year: Int,
+        term: Int,
+        response: CourseResponse,
+    ) {
+    }
 
     suspend fun getCourseList(
         user: User,

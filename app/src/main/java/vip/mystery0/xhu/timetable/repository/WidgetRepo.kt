@@ -1,8 +1,7 @@
 package vip.mystery0.xhu.timetable.repository
 
 import androidx.compose.ui.graphics.Color
-import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.UserStore
+import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.runOnCpu
@@ -249,7 +248,7 @@ suspend fun getWeekCourse(currentWeek: Int): List<List<CourseSheet>> {
         allCourseList.forEach { course ->
             course.timeSet.forEach { time ->
                 //填充表格
-                expandTableCourse[course.day - 1][time - 1].course.add(course)
+//                expandTableCourse[course.day - 1][time - 1].course.add(course)
             }
         }
         //合并相同的格子
@@ -278,29 +277,29 @@ suspend fun getWeekCourse(currentWeek: Int): List<List<CourseSheet>> {
         //填充显示的信息
         val tableCourseList = tableCourse.map { array ->
             array.map { courseSheet ->
-                if (courseSheet.course.isNotEmpty()) {
-                    val list = courseSheet.course.sortedWith { o1, o2 ->
-                        if (o1.thisWeek == o2.thisWeek) {
-                            if (o1.type != o2.type) {
-                                o2.type.type.compareTo(o1.type.type)
-                            } else {
-                                o1.weekSet.first().compareTo(o2.weekSet.first())
-                            }
-                        } else {
-                            o2.thisWeek.compareTo(o1.thisWeek)
-                        }
-                    }
-                    val show = list.first()
-                    courseSheet.showTitle =
-                        if (show.thisWeek) show.format("{courseName}@{location}")
-                        else show.format("[非本周]\n{courseName}@{location}")
-                    courseSheet.course =
-                        ArrayList(courseSheet.course.distinct().sortedBy { it.weekSet.first() })
-                    courseSheet.color =
-                        if (show.thisWeek) colorMap[show.courseName]
-                            ?: ColorPool.hash(show.courseName) else XhuColor.notThisWeekBackgroundColor
-                    courseSheet.textColor = if (show.thisWeek) Color.White else Color.Gray
-                }
+//                if (courseSheet.course.isNotEmpty()) {
+//                    val list = courseSheet.course.sortedWith { o1, o2 ->
+//                        if (o1.thisWeek == o2.thisWeek) {
+//                            if (o1.type != o2.type) {
+//                                o2.type.type.compareTo(o1.type.type)
+//                            } else {
+//                                o1.weekSet.first().compareTo(o2.weekSet.first())
+//                            }
+//                        } else {
+//                            o2.thisWeek.compareTo(o1.thisWeek)
+//                        }
+//                    }
+//                    val show = list.first()
+//                    courseSheet.showTitle =
+//                        if (show.thisWeek) show.format("{courseName}@{location}")
+//                        else show.format("[非本周]\n{courseName}@{location}")
+//                    courseSheet.course =
+//                        ArrayList(courseSheet.course.distinct().sortedBy { it.weekSet.first() })
+//                    courseSheet.color =
+//                        if (show.thisWeek) colorMap[show.courseName]
+//                            ?: ColorPool.hash(show.courseName) else XhuColor.notThisWeekBackgroundColor
+//                    courseSheet.textColor = if (show.thisWeek) Color.White else Color.Gray
+//                }
                 courseSheet
             }
         }

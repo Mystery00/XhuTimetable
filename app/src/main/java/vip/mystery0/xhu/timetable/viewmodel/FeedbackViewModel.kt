@@ -17,9 +17,8 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.FeedbackApi
 import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.UserStore.withAutoLogin
-import vip.mystery0.xhu.timetable.config.UserStore
+import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLogin
+import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.isOnline

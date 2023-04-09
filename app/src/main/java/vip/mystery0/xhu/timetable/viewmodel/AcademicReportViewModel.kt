@@ -8,9 +8,8 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.UserStore.withAutoLogin
-import vip.mystery0.xhu.timetable.config.UserStore
+import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLogin
+import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.model.AcademicReport
 import vip.mystery0.xhu.timetable.model.request.AcademicReportRequest
