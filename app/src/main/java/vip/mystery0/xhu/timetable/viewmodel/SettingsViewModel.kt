@@ -180,11 +180,11 @@ class SettingsViewModel : ComposeViewModel() {
     }
 
     fun checkUpdate() {
-        viewModelScope.launch {
-            val latestVersion = startRepo.checkVersion()
-            DataHolder.version = latestVersion
-            version.value = latestVersion
-        }
+//        viewModelScope.launch {
+//            val latestVersion = startRepo.checkVersion()
+//            DataHolder.version = latestVersion
+//            version.value = latestVersion
+//        }
     }
 
     fun resetPoemsToken(){

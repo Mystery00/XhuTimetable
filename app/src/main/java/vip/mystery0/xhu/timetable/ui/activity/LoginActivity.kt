@@ -254,8 +254,8 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (!SessionManager.isLogin()) {
-            finishAllActivity()
-        }
+//        if (!SessionManager.isLogin()) {
+//            finishAllActivity()
+//        }
     }
 }

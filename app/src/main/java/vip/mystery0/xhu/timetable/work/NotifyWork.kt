@@ -17,6 +17,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.UserStore
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.runOnCpu
@@ -58,7 +59,7 @@ class NotifyWork(private val appContext: Context, workerParams: WorkerParameters
         try {
             val currentYear = getConfig { currentYear }
             val currentTerm = getConfig { currentTerm }
-            val mainUser = SessionManager.loggedUserList().find { it.main } ?: return complete()
+            val mainUser = UserStore.getMainUser() ?: return complete()
             val tomorrow = LocalDate.now().plusDays(1)
             val currentWeek = runOnCpu {
                 //计算当前周

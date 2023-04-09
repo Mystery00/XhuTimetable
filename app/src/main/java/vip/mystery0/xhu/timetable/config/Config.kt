@@ -6,8 +6,6 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tencent.mmkv.MMKV
 import vip.mystery0.xhu.timetable.BuildConfig
 import vip.mystery0.xhu.timetable.model.CustomUi
-import vip.mystery0.xhu.timetable.model.Gender
-import vip.mystery0.xhu.timetable.model.UserInfo
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.response.Menu
@@ -142,57 +140,17 @@ class Config internal constructor() {
             )
         ).fromJson(kv.decodeString("splashList", "[]")!!)!!
 
-    var userList: List<User>
-        set(value) {
-            kv.encode(
-                "userList",
-                moshi.adapter<List<User>>(
-                    Types.newParameterizedType(
-                        List::class.java,
-                        User::class.java
-                    )
-                ).toJson(value)
-            )
-        }
+    val userList: List<OldUser>
         get() {
-            val adapter = moshi.adapter<List<User>>(
+            val adapter = moshi.adapter<List<OldUser>>(
                 Types.newParameterizedType(
                     List::class.java,
-                    User::class.java
+                    OldUser::class.java
                 )
             )
-            try {
-                return adapter.fromJson(kv.decodeString("userList", "[]")!!)!!
-            } catch (e: Exception) {
-                val oldAdapter = moshi.adapter<List<OldUser>>(
-                    Types.newParameterizedType(
-                        List::class.java,
-                        OldUser::class.java
-                    )
-                )
-                return oldAdapter.fromJson(kv.decodeString("userList", "[]")!!)!!
-                    .map {
-                        val info = it.info
-                        val userInfo = UserInfo(
-                            info.studentId,
-                            info.userName,
-                            Gender.parseOld(info.sex),
-                            info.grade.toInt(),
-                            info.institute,
-                            info.profession,
-                            info.className,
-                            info.direction,
-                        )
-                        User(
-                            it.studentId,
-                            it.password,
-                            it.token,
-                            userInfo,
-                            it.main,
-                            it.profileImage,
-                        )
-                    }
-            }
+            val result = adapter.fromJson(kv.decodeString("userList", "[]")!!)!!
+            kv.removeValueForKey("userList")
+            return result
         }
     var poemsToken: String?
         set(value) {

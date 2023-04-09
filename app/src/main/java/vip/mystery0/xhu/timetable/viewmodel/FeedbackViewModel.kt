@@ -18,7 +18,8 @@ import vip.mystery0.xhu.timetable.api.FeedbackApi
 import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
+import vip.mystery0.xhu.timetable.config.UserStore.withAutoLogin
+import vip.mystery0.xhu.timetable.config.UserStore
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.isOnline
@@ -76,7 +77,7 @@ class FeedbackViewModel : ComposeViewModel() {
             )
         }) {
             _loading.value = LoadingState(loading = true)
-            val mainUser = SessionManager.mainUserOrNull()
+            val mainUser = UserStore.getMainUser()
             if (mainUser == null) {
                 _loading.value = LoadingState(loading = false, errorMessage = "用户未登录")
                 return@launch
@@ -89,7 +90,7 @@ class FeedbackViewModel : ComposeViewModel() {
                 if (adminMode)
                     feedbackApi.pullAdminMessage(token, lastId, size, targetUserId)
                 else
-                    SessionManager.mainUser().withAutoLogin {
+                    UserStore.mainUser().withAutoLogin {
                         feedbackApi.pullMessage(it, lastId, size).checkLogin()
                     }.first
             pullMessage.forEach {
@@ -132,7 +133,7 @@ class FeedbackViewModel : ComposeViewModel() {
     }
 
     private suspend fun initWebSocket() {
-        val mainUser = SessionManager.mainUserOrNull()
+        val mainUser = UserStore.getMainUser()
         if (mainUser == null) {
             _wsStatus.value = WebSocketState(WebSocketStatus.DISCONNECTED, "用户未登录")
             return

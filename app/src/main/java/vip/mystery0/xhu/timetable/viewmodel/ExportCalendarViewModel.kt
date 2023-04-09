@@ -11,7 +11,8 @@ import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
+import vip.mystery0.xhu.timetable.config.UserStore.withAutoLogin
+import vip.mystery0.xhu.timetable.config.UserStore
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.runOnIo
@@ -41,11 +42,10 @@ class ExportCalendarViewModel : ComposeViewModel() {
 
     init {
         viewModelScope.launch {
-            val loggedUserList = SessionManager.loggedUserList()
-            _userSelect.value = runOnCpu {
-                loggedUserList.map {
-                    UserSelect(it.studentId, it.info.name, it.main)
-                }
+            val loggedUserList = UserStore.loggedUserList()
+            val mainUserId = UserStore.mainUserId()
+            _userSelect.value = loggedUserList.map {
+                UserSelect(it.studentId, it.info.name, it.studentId == mainUserId)
             }
         }
     }
@@ -82,7 +82,7 @@ class ExportCalendarViewModel : ComposeViewModel() {
         }) {
             _actionState.value = ActionState(loading = true)
             val selected = runOnCpu { _userSelect.value.first { it.selected }.studentId }
-            val selectUser = SessionManager.user(selected)
+            val selectUser = UserStore.userByStudentId(selected)
             val year = getConfig { currentYear }
             val term = getConfig { currentTerm }
             val eventList = selectUser.withAutoLogin {
@@ -140,7 +140,7 @@ class ExportCalendarViewModel : ComposeViewModel() {
                 return@launch
             }
             _userSelect.value = runOnCpu {
-                SessionManager.loggedUserList().map {
+                UserStore.loggedUserList().map {
                     UserSelect(it.studentId, it.info.name, it.studentId == studentId)
                 }
             }

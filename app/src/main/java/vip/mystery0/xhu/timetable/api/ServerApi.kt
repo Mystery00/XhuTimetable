@@ -12,23 +12,11 @@ import vip.mystery0.xhu.timetable.model.request.*
 import vip.mystery0.xhu.timetable.model.response.*
 
 interface ServerApi {
-    @POST("/api/rest/xhu-timetable/common/init")
-    suspend fun initRequest(@Body initRequest: InitRequest): InitResponse
-
-    @GET("/api/rest/xhu-timetable/common/version")
-    suspend fun getLatestVersion(@Query("betaVersion") betaVersion: Boolean = GlobalConfig.versionChannel.isBeta()): Version
-
     @GET("/api/rest/xhu-timetable/common/version/url")
     suspend fun versionUrl(
         @Query("versionId") versionId: Long,
         @Query("betaVersion") betaVersion: Boolean,
     ): VersionUrl
-
-    @GET("/api/rest/external/login/publicKey")
-    suspend fun publicKey(): PublicKeyResponse
-
-    @POST("/api/rest/external/login")
-    suspend fun login(@Body loginRequest: LoginRequest): LoginResponse
 
     @GET("/api/rest/external/user/info")
     suspend fun userInfo(@Header("sessionToken") token: String): UserInfo

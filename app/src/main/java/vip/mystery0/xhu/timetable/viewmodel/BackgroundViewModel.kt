@@ -15,7 +15,8 @@ import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
+import vip.mystery0.xhu.timetable.config.UserStore.withAutoLogin
+import vip.mystery0.xhu.timetable.config.UserStore
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.interceptor.FileDownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.FileDownloadProgressState
@@ -81,7 +82,7 @@ class BackgroundViewModel : ComposeViewModel() {
             _progressState.value =
                 DownloadProgressState(FileDownloadProgressState(), finished = true)
             _backgroundListState.value = BackgroundListState(loading = true)
-            val list = SessionManager.mainUser().withAutoLogin {
+            val list = UserStore.mainUser().withAutoLogin {
                 serverApi.selectAllBackground(it).checkLogin()
             }.first
             backgroundList.clear()
@@ -172,7 +173,7 @@ class BackgroundViewModel : ComposeViewModel() {
                 else -> {
                     _progressState.value =
                         DownloadProgressState(FileDownloadProgressState(), text = "正在获取下载地址")
-                    val url = SessionManager.mainUser().withAutoLogin {
+                    val url = UserStore.mainUser().withAutoLogin {
                         serverApi.getBackgroundUrl(it, selected.resourceId).checkLogin()
                     }.first.url
                     val file = runOnCpu {

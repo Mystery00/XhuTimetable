@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.UserStore
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.runOnCpu
@@ -34,11 +35,10 @@ class ScoreViewModel : ComposeViewModel(), KoinComponent {
 
     init {
         viewModelScope.launch {
-            val loggedUserList = SessionManager.loggedUserList()
-            _userSelect.value = runOnCpu {
-                loggedUserList.map {
-                    UserSelect(it.studentId, it.info.name, it.main)
-                }
+            val loggedUserList = UserStore.loggedUserList()
+            val mainUserId = UserStore.mainUserId()
+            _userSelect.value = loggedUserList.map {
+                UserSelect(it.studentId, it.info.name, it.studentId == mainUserId)
             }
             _yearSelect.value = buildYearSelect(getConfig { currentYear })
             _termSelect.value = buildTermSelect(getConfig { currentTerm })
@@ -46,7 +46,7 @@ class ScoreViewModel : ComposeViewModel(), KoinComponent {
     }
 
     private suspend fun buildYearSelect(selectedYear: String): List<YearSelect> = runOnCpu {
-        val loggedUserList = SessionManager.loggedUserList()
+        val loggedUserList = UserStore.loggedUserList()
         val startYear = loggedUserList.minByOrNull { it.info.xhuGrade }!!.info.xhuGrade
         val time = LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone)
         val endYear = if (time.month < Month.JUNE) time.year - 1 else time.year
@@ -71,8 +71,7 @@ class ScoreViewModel : ComposeViewModel(), KoinComponent {
         }) {
             _scoreListState.value = ScoreListState(loading = true)
             val selected = runOnCpu { _userSelect.value.first { it.selected }.studentId }
-            val selectUser =
-                SessionManager.user(selected)
+            val selectUser = UserStore.userByStudentId(selected)
             val year = runOnCpu { yearSelect.value.first { it.selected }.year }
             val term = runOnCpu { termSelect.value.first { it.selected }.term }
             val response = getScoreList(selectUser, year, term)
@@ -87,7 +86,7 @@ class ScoreViewModel : ComposeViewModel(), KoinComponent {
                 return@launch
             }
             _userSelect.value = runOnCpu {
-                SessionManager.loggedUserList().map {
+                UserStore.loggedUserList().map {
                     UserSelect(it.studentId, it.info.name, it.studentId == studentId)
                 }
             }

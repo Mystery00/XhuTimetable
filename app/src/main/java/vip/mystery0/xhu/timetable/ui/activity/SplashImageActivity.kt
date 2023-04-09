@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import android.content.Intent
 import android.os.Build
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
@@ -35,6 +36,7 @@ import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.loadInBrowser
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
 import vip.mystery0.xhu.timetable.viewmodel.SplashImageViewModel
+import java.io.File
 
 class SplashImageActivity : BaseComposeActivity() {
     private val viewModel: SplashImageViewModel by viewModels()
@@ -50,25 +52,49 @@ class SplashImageActivity : BaseComposeActivity() {
             .build()
     }
 
+    companion object {
+        private const val INTENT_SPLASH_FILE_PATH = "splashFilePath"
+        private const val INTENT_SPLASH_ID = "splashId"
+
+        fun setParams(
+            intent: Intent,
+            splashFilePath: String,
+            splashId: Long,
+        ) {
+            intent.putExtra(INTENT_SPLASH_FILE_PATH, splashFilePath)
+            intent.putExtra(INTENT_SPLASH_ID, splashId)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        intent?.let {
+            val splashFilePath = it.getStringExtra(INTENT_SPLASH_FILE_PATH)
+            val splashId = it.getLongExtra(INTENT_SPLASH_ID, -1)
+            if (splashFilePath.isNullOrBlank() || splashId == -1L) {
+                toMain()
+                return
+            }
+            viewModel.startInit(splashFilePath, splashId)
+        }
+    }
+
     @Composable
     override fun BuildContentWindow() {
         XhuTimetableTheme {
             val timer by viewModel.timerState.collectAsState()
-            val showSplash = DataHolder.splashFile
-            val backgroundColor = DataHolder.backgroundColor
-            if (showSplash == null) {
-                toMain()
-                return@XhuTimetableTheme
-            }
+            val showSplashBackgroundColor by viewModel.showSplashBackgroundColor.collectAsState()
+            val showSplashLocationUrl by viewModel.showSplashLocationUrl.collectAsState()
+            val showSplashFile by viewModel.showSplashFile.collectAsState()
             Box(
                 modifier = Modifier
-                    .background(backgroundColor ?: MaterialTheme.colors.background)
+                    .background(showSplashBackgroundColor ?: MaterialTheme.colors.background)
                     .fillMaxSize()
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
                         onClick = {
-                            DataHolder.splash?.locationUrl?.let {
+                            showSplashLocationUrl?.let {
                                 loadInBrowser(it)
                             }
                         }
@@ -76,7 +102,7 @@ class SplashImageActivity : BaseComposeActivity() {
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(showSplash)
+                        .data(showSplashFile)
                         .crossfade(true)
                         .diskCachePolicy(CachePolicy.DISABLED)
                         .build(),

@@ -8,6 +8,7 @@ import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.UserStore
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.Gender
@@ -29,15 +30,23 @@ class AccountManagementViewModel : ComposeViewModel() {
 
     fun loadLoggedUserList() {
         viewModelScope.launch {
-            val loggedList = SessionManager.loggedUserList()
+            val mainUserId = UserStore.getMainUserId()
+            val userList = UserStore.loggedUserList()
             _loggedUserList.value =
-                loggedList.map { UserItem(it.studentId, it.info.name, it.info.gender, it.main) }
+                userList.map {
+                    UserItem(
+                        it.studentId,
+                        it.info.name,
+                        it.info.gender,
+                        it.studentId == mainUserId,
+                    )
+                }
         }
     }
 
     fun changeMainUser(studentId: String) {
         viewModelScope.launch {
-            SessionManager.changeMainUser(studentId)
+            UserStore.setMainUser(studentId)
             eventBus.post(UIEvent(EventType.CHANGE_MAIN_USER))
             loadLoggedUserList()
         }
@@ -45,7 +54,7 @@ class AccountManagementViewModel : ComposeViewModel() {
 
     fun logoutUser(studentId: String) {
         viewModelScope.launch {
-            val result = SessionManager.logout(studentId)
+            val result = UserStore.logout(studentId)
             if (result) {
                 eventBus.post(UIEvent(EventType.MAIN_USER_LOGOUT))
             }
@@ -71,7 +80,7 @@ data class UserItem(
     //用户姓名
     val userName: String,
     //性别
-    val gender:Gender,
+    val gender: Gender,
     //是否为主用户
     var main: Boolean,
 )

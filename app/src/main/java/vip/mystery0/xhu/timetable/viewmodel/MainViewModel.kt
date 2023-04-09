@@ -17,8 +17,9 @@ import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
+import vip.mystery0.xhu.timetable.config.UserStore.withAutoLogin
 import vip.mystery0.xhu.timetable.config.User
+import vip.mystery0.xhu.timetable.config.UserStore
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.runOnCpu
@@ -157,7 +158,7 @@ class MainViewModel : ComposeViewModel() {
     init {
         viewModelScope.launch {
             loadFromConfig()
-            val mainUser = SessionManager.mainUserOrNull()
+            val mainUser = UserStore.getMainUser()
             _mainUser.value = mainUser
             _emptyUser.value = mainUser == null
         }
@@ -218,7 +219,7 @@ class MainViewModel : ComposeViewModel() {
 
     fun checkMainUser() {
         viewModelScope.launch {
-            val mainUser = SessionManager.mainUserOrNull()
+            val mainUser = UserStore.getMainUser()
             _mainUser.value = mainUser
             _emptyUser.value = mainUser == null
         }
@@ -312,7 +313,7 @@ class MainViewModel : ComposeViewModel() {
         val courseList: List<OldCourseResponse> =
             if (getConfig { multiAccountMode }) {
                 val list = ArrayList<OldCourseResponse>()
-                SessionManager.loggedUserList().forEach { user ->
+                UserStore.loggedUserList().forEach { user ->
                     list.addAll(
                         if (loadFromCloud) {
                             courseRepo.getCourseList(user, currentYear, currentTerm)
@@ -323,7 +324,7 @@ class MainViewModel : ComposeViewModel() {
                 }
                 list
             } else {
-                val user = SessionManager.mainUser()
+                val user = UserStore.mainUser()
                 if (loadFromCloud) {
                     courseRepo.getCourseList(user, currentYear, currentTerm)
                 } else {
@@ -342,7 +343,7 @@ class MainViewModel : ComposeViewModel() {
         val thingList: List<CustomThingSheet> =
             if (getConfig { multiAccountMode }) {
                 val list = ArrayList<CustomThingSheet>()
-                SessionManager.loggedUserList().forEach { user ->
+                UserStore.loggedUserList().forEach { user ->
                     val result = if (loadFromCloud) {
                         customThingRepo.getCustomThingList(user, currentYear, currentTerm)
                     } else {
@@ -358,7 +359,7 @@ class MainViewModel : ComposeViewModel() {
                 }
                 list
             } else {
-                val user = SessionManager.mainUser()
+                val user = UserStore.mainUser()
                 val result = if (loadFromCloud) {
                     customThingRepo.getCustomThingList(user, currentYear, currentTerm)
                 } else {
@@ -704,7 +705,7 @@ class MainViewModel : ComposeViewModel() {
             Log.w(TAG, "load notice list failed", throwable)
             toastMessage(throwable.message ?: throwable.javaClass.simpleName)
         }) {
-            if (SessionManager.mainUserOrNull() == null) return@launch
+            if (UserStore.getMainUser() == null) return@launch
             _hasUnReadNotice.value = noticeRepo.hasUnReadNotice()
         }
     }
@@ -716,9 +717,9 @@ class MainViewModel : ComposeViewModel() {
         viewModelScope.launch(serverExceptionHandler { throwable ->
             Log.w(TAG, "check unread feedback failed", throwable)
         }) {
-            if (SessionManager.mainUserOrNull() == null) return@launch
+            if (UserStore.getMainUser() == null) return@launch
             val firstFeedbackMessageId = getConfig { firstFeedbackMessageId }
-            val response = SessionManager.mainUser().withAutoLogin {
+            val response = UserStore.mainUser().withAutoLogin {
                 feedbackApi.checkMessage(it, firstFeedbackMessageId).checkLogin()
             }
             _hasUnReadFeedback.value = response.first.newResult

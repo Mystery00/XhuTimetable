@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.UserStore
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.model.response.UrgeItem
 import vip.mystery0.xhu.timetable.repository.doUrge
@@ -38,7 +39,7 @@ class UrgeViewModel : ComposeViewModel() {
                 UrgeListState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
         }) {
             _urgeListState.value = UrgeListState(loading = true)
-            val user = SessionManager.mainUser()
+            val user = UserStore.mainUser()
             val response = getUrgeList(user)
             val urgeList = response.urgeList.filter { !it.complete }.reversed()
             val completeList = response.urgeList.filter { it.complete }.reversed()
@@ -62,7 +63,7 @@ class UrgeViewModel : ComposeViewModel() {
         }) {
             _urgeLoading.value = true
             trackEvent("催更")
-            val user = SessionManager.mainUser()
+            val user = UserStore.mainUser()
             doUrge(user, urgeId)
             _urgeLoading.value = false
             loadUrgeList()

@@ -4,7 +4,10 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tencent.mmkv.MMKV
+import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.response.Splash
+import vip.mystery0.xhu.timetable.module.registerAdapter
+import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -20,8 +23,14 @@ suspend fun setNewConfig(block: suspend NewConfig.() -> Unit) = runOnIo { block(
 
 class NewConfig internal constructor() {
     private val kv = MMKV.mmkvWithID("NewConfig")
-    private val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
+    private val moshi = Moshi.Builder().registerAdapter().build()
 
+    private val userStoreSecretKey = "userStoreSecret"
+    var userStoreSecret: String
+        set(value) {
+            kv.encode(userStoreSecretKey, value)
+        }
+        get() = kv.decodeString(userStoreSecretKey) ?: ""
     private val termStartDateKey = "termStartDate"
     val termStartDate: LocalDate
         get() = customTermStartDate.data
@@ -102,5 +111,23 @@ class NewConfig internal constructor() {
         get() {
             val saveValue = kv.decodeString(splashListKey) ?: "[]"
             return splashListMoshi.fromJson(saveValue) ?: emptyList()
+        }
+    private val hideSplashBeforeKey = "hideSplashBefore"
+    var hideSplashBefore: Instant
+        set(value) {
+            kv.encode(hideSplashBeforeKey, value.toEpochMilli())
+        }
+        get() {
+            val time = kv.decodeLong(hideSplashBeforeKey, 0L)
+            return Instant.ofEpochMilli(time)
+        }
+    private val versionChannelKey = "versionChannel"
+    var versionChannel: VersionChannel
+        set(value) {
+            kv.encode(versionChannelKey, value.value)
+        }
+        get() {
+            val save = kv.decodeInt(versionChannelKey, VersionChannel.STABLE.value)
+            return VersionChannel.parse(save)
         }
 }
