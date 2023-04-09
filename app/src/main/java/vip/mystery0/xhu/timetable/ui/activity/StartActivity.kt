@@ -10,12 +10,16 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import androidx.core.animation.doOnEnd
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.registerAppCenter
 import vip.mystery0.xhu.timetable.viewmodel.StarterViewModel
+import java.io.File
 
 class StartActivity : BaseComposeActivity(setSystemUiColor = false) {
     private val viewModel: StarterViewModel by viewModels()
@@ -27,10 +31,15 @@ class StartActivity : BaseComposeActivity(setSystemUiColor = false) {
 
     @Composable
     override fun BuildContentWindow() {
-        val readyState = viewModel.readyState.collectAsState()
-        readyState.value.errorMessage.notBlankToast(true)
-        if (!readyState.value.loading) {
-            goToMainScreen()
+        val readyState by viewModel.readyState.collectAsState()
+        val isLoginState by viewModel.isLoginState.collectAsState()
+        readyState.errorMessage.notBlankToast(true)
+        if (!readyState.loading) {
+            goToMainScreen(
+                isLoginState,
+                readyState.splashFile,
+                readyState.splashId,
+            )
         }
     }
 
@@ -41,15 +50,24 @@ class StartActivity : BaseComposeActivity(setSystemUiColor = false) {
         customizeSplashScreenExit()
     }
 
-    private fun goToMainScreen() {
-        if (SessionManager.isLogin()) {
-            if (DataHolder.splashFile == null) {
-                intentTo(MainActivity::class)
-            } else {
-                intentTo(SplashImageActivity::class)
-            }
-        } else {
+    private fun goToMainScreen(
+        isLogin: Boolean,
+        splashFile: File?,
+        splashId: Long?,
+    ) {
+        if (!isLogin) {
             intentTo(LoginActivity::class)
+            finish()
+            return
+        }
+        if (splashFile == null || splashId == null) {
+            intentTo(MainActivity::class)
+            finish()
+            return
+        }
+        val splashFilePath = splashFile.absolutePath
+        intentTo(SplashImageActivity::class) {
+            SplashImageActivity.setParams(it, splashFilePath, splashId)
         }
         finish()
     }

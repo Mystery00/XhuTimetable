@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.UserStore
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
@@ -35,12 +35,11 @@ class ExamViewModel : ComposeViewModel() {
 
     init {
         viewModelScope.launch {
-            val list = runOnCpu {
-                SessionManager.loggedUserList().map {
-                    UserSelect(it.studentId, it.info.name, it.main)
-                }
+            val loggedUserList = UserStore.loggedUserList()
+            val mainUserId = UserStore.mainUserId()
+            _userSelect.value = loggedUserList.map {
+                UserSelect(it.studentId, it.info.name, it.studentId == mainUserId)
             }
-            _userSelect.value = list
         }
         loadExamList()
     }
@@ -54,10 +53,10 @@ class ExamViewModel : ComposeViewModel() {
             _examListState.value = ExamListState(loading = true)
             val selectUser = runOnCpu {
                 if (_userSelect.value.isEmpty()) {
-                    SessionManager.mainUser()
+                    UserStore.mainUser()
                 } else {
                     val studentId = _userSelect.value.first { it.selected }.studentId
-                    SessionManager.user(studentId)
+                    UserStore.userByStudentId(studentId)
                 }
             }
             val response = getExamList(selectUser)
@@ -144,7 +143,7 @@ class ExamViewModel : ComposeViewModel() {
                 return@launch
             }
             _userSelect.value = runOnCpu {
-                SessionManager.loggedUserList().map {
+                UserStore.loggedUserList().map {
                     UserSelect(it.studentId, it.info.name, it.studentId == studentId)
                 }
             }

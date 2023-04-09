@@ -16,7 +16,8 @@ import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
+import vip.mystery0.xhu.timetable.config.UserStore.withAutoLogin
+import vip.mystery0.xhu.timetable.config.UserStore
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.packageName
@@ -45,8 +46,8 @@ class PullWork(private val appContext: Context, workerParams: WorkerParameters) 
                 add(Instant.now())
             }
         }
-        val user = SessionManager.loggedUserList().find { it.main } ?: return Result.success()
-        val response = user.withAutoLogin {
+        val mainUser = UserStore.getMainUser() ?: return Result.success()
+        val response = mainUser.withAutoLogin {
             serverApi.fetchPush(it).checkLogin()
         }.first
         if (response.isEmpty()) {

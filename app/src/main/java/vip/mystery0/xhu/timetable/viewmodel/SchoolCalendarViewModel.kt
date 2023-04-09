@@ -9,6 +9,7 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.FileApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.UserStore
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
@@ -44,7 +45,7 @@ class SchoolCalendarViewModel : ComposeViewModel() {
             )
         }) {
             _loading.value = LoadingState(true)
-            val mainUser = SessionManager.mainUserOrNull()
+            val mainUser = UserStore.getMainUser()
             if (mainUser == null) {
                 _loading.value = LoadingState(loading = false, errorMessage = "用户未登录")
                 return@launch
@@ -68,7 +69,7 @@ class SchoolCalendarViewModel : ComposeViewModel() {
             )
         }) {
             _loading.value = LoadingState(true)
-            val mainUser = SessionManager.mainUserOrNull()
+            val mainUser = UserStore.getMainUser()
             if (mainUser == null) {
                 _loading.value = LoadingState(loading = false, errorMessage = "用户未登录")
                 return@launch

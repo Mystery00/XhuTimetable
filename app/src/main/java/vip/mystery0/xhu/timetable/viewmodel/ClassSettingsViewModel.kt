@@ -9,6 +9,7 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.UserStore
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.runOnCpu
@@ -57,7 +58,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
             _showCustomCourseData.value = getConfig { showCustomCourseOnWeek }
             _showCustomThingData.value = getConfig { showCustomThing }
 
-            val loggedUserList = SessionManager.loggedUserList()
+            val loggedUserList = UserStore.loggedUserList()
             _selectYearAndTermList.value = runOnCpu {
                 var startGrade = loggedUserList.minByOrNull { it.info.xhuGrade }?.info?.xhuGrade
                 var endGrade = loggedUserList.maxByOrNull { it.info.xhuGrade }?.info?.xhuGrade

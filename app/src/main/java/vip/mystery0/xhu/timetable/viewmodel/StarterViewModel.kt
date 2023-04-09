@@ -16,11 +16,14 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.UserStore
 import vip.mystery0.xhu.timetable.config.getConfig
+import vip.mystery0.xhu.timetable.config.getNewConfig
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.doClear
 import vip.mystery0.xhu.timetable.externalPictureDir
+import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.module.getRepo
 import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.setAlarmTrigger
@@ -45,69 +48,65 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
     private val _readyState = MutableStateFlow(ReadyState(loading = true))
     val readyState: StateFlow<ReadyState> = _readyState
 
+    private val _isLoginState = MutableStateFlow(false)
+    val isLoginState: StateFlow<Boolean> = _isLoginState
+
     init {
         viewModelScope.launch(serverExceptionHandler { throwable ->
             Log.w(TAG, "init failed", throwable)
             _readyState.value =
                 ReadyState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
         }) {
+            _isLoginState.value = UserStore.isLogin()
             doClear()
             SessionManager.readFromCache()
 //            setTrigger(workManager)
-            setAlarmTrigger(alarmManager)
-            initPullWork()
+//            setAlarmTrigger(alarmManager)
+//            initPullWork()
             val response = startRepo.init()
-            runOnCpu {
-                var version = response.version
-                if (getConfig { ignoreVersionList }.contains("${version?.versionName}-${version?.versionCode}")) {
-                    version = null
+            val hideTime = getNewConfig { hideSplashBefore }
+            if (Instant.now().isBefore(hideTime)) {
+                //已经设置了隐藏时间，且当前时间还未到达隐藏时间
+                _readyState.emit(ReadyState())
+                return@launch
+            }
+//                var version = response.latestVersion
+//                if (getConfig { ignoreVersionList }.contains("${version?.versionName}-${version?.versionCode}")) {
+//                    version = null
+//                }
+//                DataHolder.version = version
+//                DataHolder.mainUserName = SessionManager.mainUserOrNull()?.info?.name ?: "未登录"
+            val dir = File(externalPictureDir, "splash")
+            val now = Instant.now()
+            val splashList = getNewConfig { splashList }
+                .filter { now >= it.startShowTime && now <= it.endShowTime }
+                .map {
+                    val extension = it.imageUrl.substringAfterLast(".")
+                    val name = "${it.splashId.toString().sha1()}-${it.imageUrl.md5()}"
+                    File(
+                        dir,
+                        "${name.sha256()}.${extension}"
+                    ) to it
                 }
-                DataHolder.version = version
-                DataHolder.mainUserName = SessionManager.mainUserOrNull()?.info?.name ?: "未登录"
-                val dir = File(externalPictureDir, "splash")
-                val now = Instant.now().toEpochMilli()
-                val splashList = getConfig { splashList }
-                    .filter { now >= it.startShowTime && now <= it.endShowTime }
-                    .map {
-                        val extension = it.imageUrl.substringAfterLast(".")
-                        val name = "${it.splashId.toString().sha1()}-${it.imageUrl.md5()}"
-                        File(
-                            dir,
-                            "${name.sha256()}.${extension}"
-                        ) to it
-                    }
-                    .filter {
-                        it.first.exists()
-                    }
+                .filter { it.first.exists() }
+            if (splashList.isNotEmpty()) {
                 workManager.enqueue(
                     OneTimeWorkRequestBuilder<DownloadSplashWork>()
                         .build()
                 )
-                val splash = splashList.randomOrNull()
-                val showTime = splash?.second?.showTime ?: 0
-                val backgroundColor = splash?.second?.backgroundColor?.let {
-                    try {
-                        Color(android.graphics.Color.parseColor(it))
-                    } catch (e: Exception) {
-                        null
-                    }
-                }
-                val hideTime = getConfig { hideSplashBefore }
-                if (splash != null) {
-                    if (Instant.now().isAfter(hideTime)) {
-                        DataHolder.splashFile = splash.first
-                        DataHolder.splash = splash.second
-                        DataHolder.splashShowTime = showTime
-                        DataHolder.backgroundColor = backgroundColor
-                    } else {
-                        DataHolder.splashFile = null
-                        DataHolder.splash = null
-                        DataHolder.splashShowTime = 0
-                        DataHolder.backgroundColor = null
-                    }
-                }
-                _readyState.emit(ReadyState())
             }
+            val splash = splashList.randomOrNull()
+            if (splash == null) {
+                _readyState.emit(ReadyState())
+                return@launch
+            }
+            _readyState.emit(
+                ReadyState(
+                    loading = false,
+                    splashFile = splash.first,
+                    splashId = splash.second.splashId,
+                )
+            )
         }
     }
 
@@ -125,5 +124,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
 
 data class ReadyState(
     val loading: Boolean = false,
+    val splashFile: File? = null,
+    val splashId: Long? = null,
     val errorMessage: String = "",
 )

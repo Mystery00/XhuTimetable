@@ -3,7 +3,7 @@ package vip.mystery0.xhu.timetable.repository
 import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.api.JwcApi
 import vip.mystery0.xhu.timetable.api.checkLogin
-import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
+import vip.mystery0.xhu.timetable.config.UserStore.withAutoLogin
 import vip.mystery0.xhu.timetable.config.User
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.isOnline

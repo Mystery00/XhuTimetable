@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.repository
 
 import androidx.compose.ui.graphics.Color
 import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.UserStore
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.runOnCpu
@@ -101,14 +102,14 @@ suspend fun getTodayCourse(currentWeek: Int): List<CourseGlance> {
     val courseList: List<OldCourseResponse> =
         if (getConfig { multiAccountMode }) {
             val list = ArrayList<OldCourseResponse>()
-            SessionManager.loggedUserList().forEach { user ->
+            UserStore.loggedUserList().forEach { user ->
                 list.addAll(
                     courseRepo.getCourseList(user, currentYear, currentTerm)
                 )
             }
             list
         } else {
-            val user = SessionManager.mainUser()
+            val user = UserStore.mainUser()
             courseRepo.getCourseList(user, currentYear, currentTerm)
         }
 
@@ -213,14 +214,14 @@ suspend fun getWeekCourse(currentWeek: Int): List<List<CourseSheet>> {
     val courseList: List<OldCourseResponse> =
         if (getConfig { multiAccountMode }) {
             val list = ArrayList<OldCourseResponse>()
-            SessionManager.loggedUserList().forEach { user ->
+            UserStore.loggedUserList().forEach { user ->
                 list.addAll(
                     courseRepo.getCourseList(user, currentYear, currentTerm)
                 )
             }
             list
         } else {
-            val user = SessionManager.mainUser()
+            val user = UserStore.mainUser()
             courseRepo.getCourseList(user, currentYear, currentTerm)
         }
 

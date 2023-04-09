@@ -1,5 +1,7 @@
 package vip.mystery0.xhu.timetable.model.response
 
+import java.time.Instant
+
 data class InitResponse(
     val version: Version?,
     val splash: List<Splash>,
@@ -34,8 +36,8 @@ data class Splash(
     var backgroundColor: String,
     val locationUrl: String,
     val showTime: Int,
-    val startShowTime: Long,
-    val endShowTime: Long,
+    val startShowTime: Instant,
+    val endShowTime: Instant,
 )
 
 data class Menu(

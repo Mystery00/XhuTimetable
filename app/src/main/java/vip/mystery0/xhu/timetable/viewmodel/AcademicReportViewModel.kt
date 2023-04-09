@@ -9,7 +9,8 @@ import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.SessionManager.withAutoLogin
+import vip.mystery0.xhu.timetable.config.UserStore.withAutoLogin
+import vip.mystery0.xhu.timetable.config.UserStore
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.model.AcademicReport
 import vip.mystery0.xhu.timetable.model.request.AcademicReportRequest
@@ -27,7 +28,7 @@ class AcademicReportViewModel : ComposeViewModel() {
 
     fun loadList(keywords: String) {
         viewModelScope.launch {
-            val user = SessionManager.mainUser()
+            val user = UserStore.mainUser()
             val response = user.withAutoLogin {
                 serverApi.getAcademicReportList(it, AcademicReportRequest(keywords)).checkLogin()
             }

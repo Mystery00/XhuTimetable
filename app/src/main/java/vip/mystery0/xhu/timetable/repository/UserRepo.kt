@@ -2,7 +2,7 @@ package vip.mystery0.xhu.timetable.repository
 
 import android.util.Base64
 import org.koin.java.KoinJavaComponent
-import vip.mystery0.xhu.timetable.api.ServerApi
+import vip.mystery0.xhu.timetable.api.UserApi
 import vip.mystery0.xhu.timetable.config.User
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.model.request.LoginRequest
@@ -15,8 +15,8 @@ suspend fun doLogin(user: User): LoginResponse =
     doLogin(user.studentId, user.password)
 
 suspend fun doLogin(username: String, password: String): LoginResponse {
-    val serverApi = KoinJavaComponent.get<ServerApi>(ServerApi::class.java)
-    val publicKey = serverApi.publicKey().publicKey
+    val userApi = KoinJavaComponent.get<UserApi>(UserApi::class.java)
+    val publicKey = userApi.publicKey().publicKey
     val encryptPassword = runOnCpu {
         val decodedPublicKey = Base64.decode(publicKey, Base64.DEFAULT)
         val key =
@@ -26,5 +26,5 @@ suspend fun doLogin(username: String, password: String): LoginResponse {
         Base64.encodeToString(cipher.doFinal(password.toByteArray()), Base64.DEFAULT)
     }
     val loginRequest = LoginRequest(username, encryptPassword, publicKey)
-    return serverApi.login(loginRequest)
+    return userApi.login(loginRequest)
 }

@@ -8,9 +8,12 @@ import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.ServerApi
+import vip.mystery0.xhu.timetable.api.UserApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.CoroutineStopException
 import vip.mystery0.xhu.timetable.config.SessionManager
+import vip.mystery0.xhu.timetable.config.User
+import vip.mystery0.xhu.timetable.config.UserStore
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.model.event.EventType
@@ -24,14 +27,14 @@ class LoginViewModel : ComposeViewModel() {
 
     private val eventBus: EventBus by inject()
 
-    private val serverApi: ServerApi by inject()
+    private val userApi: UserApi by inject()
 
     private val _loginState = MutableStateFlow(LoginState())
     val loginState: StateFlow<LoginState> = _loginState
 
     fun login(
         username: String,
-        password: String
+        password: String,
     ) {
         viewModelScope.launch(serverExceptionHandler { throwable ->
             Log.w(TAG, "login failed", throwable)
@@ -40,15 +43,22 @@ class LoginViewModel : ComposeViewModel() {
         }) {
             _loginState.value = LoginState(loading = true)
             runOnCpu {
-                if (SessionManager.getUser(username) != null) {
+                if (UserStore.getUserByStudentId(username) != null) {
                     //账号已登录，不允许二次登陆
                     throw CoroutineStopException("该用户已登录！")
                 }
             }
             val loginResponse = doLogin(username, password)
-            val userInfo = serverApi.userInfo(loginResponse.sessionToken)
-            SessionManager.login(username, password, loginResponse.sessionToken, userInfo)
-            if (SessionManager.mainUser().studentId == username) {
+            val userInfo = userApi.getUserInfo(loginResponse.sessionToken)
+            val user = User(
+                studentId = username,
+                password = password,
+                token = loginResponse.sessionToken,
+                info = userInfo,
+                null,
+            )
+            UserStore.login(user)
+            if (UserStore.mainUser().studentId == username) {
                 //刚刚登录的账号是主账号，说明是异常情况下登录
                 eventBus.post(UIEvent(EventType.CHANGE_MAIN_USER))
             }
