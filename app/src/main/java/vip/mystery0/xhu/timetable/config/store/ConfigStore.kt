@@ -4,18 +4,19 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.tencent.mmkv.MMKV
 import vip.mystery0.xhu.timetable.config.Customisable
-import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.runOnIo
+import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.module.registerAdapter
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 object Formatter {
     val DATE = DateTimeFormatter.ISO_LOCAL_DATE
+    val TIME = DateTimeFormatter.ISO_LOCAL_TIME
 }
 
 private val instance = ConfigStore()
@@ -154,6 +155,29 @@ class ConfigStore internal constructor() {
             kv.encode(showNotThisWeekKey, value)
         }
         get() = kv.decodeBool(showNotThisWeekKey, true)
+    private val showTomorrowCourseTimeKey = "showTomorrowCourseTime"
+    var showTomorrowCourseTime: LocalTime?
+        set(value) {
+            kv.encode(showTomorrowCourseTimeKey, value?.format(Formatter.TIME))
+        }
+        get() = kv.decodeString(showTomorrowCourseTimeKey)
+            ?.let { LocalTime.parse(it, Formatter.TIME) }
+    private val showStatusKey = "showStatus"
+    var showStatus: Boolean
+        set(value) {
+            kv.encode(showStatusKey, value)
+        }
+        get() = kv.decodeBool(showStatusKey, true)
+    private val customUiKey = "customUi"
+    var customUi: CustomUi
+        set(value) {
+            kv.encode(customUiKey, moshi.adapter(CustomUi::class.java).toJson(value))
+        }
+        get() {
+            val save = kv.decodeString(customUiKey, "")
+            return if (save.isNullOrBlank()) CustomUi.DEFAULT
+            else moshi.adapter(CustomUi::class.java).fromJson(save)!!
+        }
     private val versionChannelKey = "versionChannel"
     var versionChannel: VersionChannel
         set(value) {
