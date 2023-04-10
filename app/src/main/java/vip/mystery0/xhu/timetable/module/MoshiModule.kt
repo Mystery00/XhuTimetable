@@ -7,10 +7,12 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 fun Moshi.Builder.registerAdapter(): Moshi.Builder {
     add(LocalDate::class.java, LocalDateAdapter())
+    add(LocalTime::class.java, LocalTimeAdapter())
     add(Instant::class.java, InstantAdapter())
     addLast(KotlinJsonAdapterFactory())
     return this
@@ -36,6 +38,26 @@ class LocalDateAdapter : JsonAdapter<LocalDate>() {
     }
 }
 
+class LocalTimeAdapter : JsonAdapter<LocalTime>() {
+    private val formatter = DateTimeFormatter.ISO_LOCAL_TIME
+
+    override fun fromJson(reader: JsonReader): LocalTime? {
+        val value = reader.nextString()
+        if (value.isNullOrBlank()) {
+            return null
+        }
+        return LocalTime.parse(value, formatter)
+    }
+
+    override fun toJson(writer: JsonWriter, value: LocalTime?) {
+        if (value == null) {
+            writer.nullValue()
+            return
+        }
+        writer.value(formatter.format(value))
+    }
+}
+
 class InstantAdapter : JsonAdapter<Instant>() {
     override fun fromJson(reader: JsonReader): Instant? {
         val value = reader.nextLong()
@@ -50,3 +72,6 @@ class InstantAdapter : JsonAdapter<Instant>() {
         writer.value(value.toEpochMilli())
     }
 }
+
+fun betweenDays(start: LocalDate, end: LocalDate): Int =
+    end.toEpochDay().toInt() - start.toEpochDay().toInt()

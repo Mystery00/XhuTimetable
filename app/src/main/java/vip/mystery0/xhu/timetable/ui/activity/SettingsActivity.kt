@@ -37,6 +37,7 @@ import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.setConfig
+import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.event.EventType
@@ -296,7 +297,7 @@ class SettingsActivity : BaseComposeActivity() {
                         scope = scope,
                         title = { Text(text = "禁用今日诗词") },
                         onCheckedChange = {
-                            setConfig { disablePoems = it }
+                            PoemsStore.disablePoems = it
                             "重启应用后生效".toast()
                         }
                     )
@@ -305,7 +306,7 @@ class SettingsActivity : BaseComposeActivity() {
                         scope = scope,
                         title = { Text(text = "显示诗词大意") },
                         onCheckedChange = {
-                            setConfig { showPoemsTranslate = it }
+                            PoemsStore.showPoemsTranslate = it
                             "重启应用后生效".toast()
                         }
                     )

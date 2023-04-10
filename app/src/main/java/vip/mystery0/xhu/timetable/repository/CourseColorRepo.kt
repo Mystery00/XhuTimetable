@@ -18,14 +18,12 @@ private val courseColorDao by lazy {
 
 suspend fun getRawCourseColorList(): Map<String, Color> {
     val colorList = runOnIo { courseColorDao.queryAllCourseColorList() }
-    return runOnCpu {
-        val map = HashMap<String, Color>(colorList.size)
-        colorList.forEach {
-            val color = android.graphics.Color.parseColor(it.color)
-            map[it.courseName] = Color(color)
-        }
-        map
+    val map = HashMap<String, Color>(colorList.size)
+    colorList.forEach {
+        val color = android.graphics.Color.parseColor(it.color)
+        map[it.courseName] = Color(color)
     }
+    return map
 }
 
 suspend fun getCourseColorList(keywords: String): List<Pair<String, Color>> {

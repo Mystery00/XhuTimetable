@@ -9,6 +9,8 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.setConfig
+import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.entity.CourseType
@@ -45,7 +47,7 @@ class CustomUiViewModel : ComposeViewModel() {
 
     private fun loadCustomUi() {
         viewModelScope.launch {
-            val customUi = getConfig { customUi }
+            val customUi = getConfigStore { customUi }
             _customUi.value = customUi
             weekItemHeight.value = customUi.weekItemHeight
             weekBackgroundAlpha.value = customUi.weekBackgroundAlpha
@@ -87,7 +89,7 @@ class CustomUiViewModel : ComposeViewModel() {
 
     fun reset() {
         viewModelScope.launch {
-            setConfig { customUi = CustomUi.DEFAULT }
+            setConfigStore { customUi = CustomUi.DEFAULT }
             loadCustomUi()
         }
     }
@@ -118,7 +120,7 @@ class CustomUiViewModel : ComposeViewModel() {
                 weekTitleTextSize.value,
                 backgroundImageBlur.value,
             )
-            setConfig { customUi = nowCustomUi }
+            setConfigStore { customUi = nowCustomUi }
             eventBus.post(UIEvent(EventType.CHANGE_CUSTOM_UI))
             eventBus.post(UIEvent(EventType.CHANGE_MAIN_BACKGROUND))
             loadCustomUi()
