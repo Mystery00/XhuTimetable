@@ -9,12 +9,9 @@ import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.response.OldCourseResponse
 import vip.mystery0.xhu.timetable.module.getLocalRepo
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.widget.state.CourseGlance
 import vip.mystery0.xhu.timetable.viewmodel.CourseSheet
 import vip.mystery0.xhu.timetable.viewmodel.TodayCourseSheet
-import vip.mystery0.xhu.timetable.viewmodel.formatTime
-import vip.mystery0.xhu.timetable.viewmodel.formatTimeString
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -70,7 +67,8 @@ suspend fun getTodayCourse(currentWeek: Int): List<CourseGlance> {
         today: LocalDate,
     ) = courseList.map {
         val thisWeek = it.week.contains(currentWeek)
-        val timeString = it.time.formatTimeString()
+//        val timeString = it.time.formatTimeString()
+        val timeString = "it.time.formatTimeString()"
         val isToday = thisWeek && it.day == today.dayOfWeek.value
         Course(
             it.name,
@@ -81,7 +79,8 @@ suspend fun getTodayCourse(currentWeek: Int): List<CourseGlance> {
             it.type,
             it.time,
             timeString,
-            it.time.formatTime(),
+//            it.time.formatTime(),
+            "",
             it.day,
             it.extraData,
             thisWeek,
@@ -138,6 +137,8 @@ suspend fun getTodayCourse(currentWeek: Int): List<CourseGlance> {
                         it.courseName,
                         it.teacherName,
                         TreeSet(it.timeSet),
+                        "" to "",
+                        "",
                         it.location,
                         it.studentId,
                         it.userName,
@@ -182,7 +183,7 @@ suspend fun getWeekCourse(currentWeek: Int): List<List<CourseSheet>> {
         today: LocalDate,
     ) = courseList.map {
         val thisWeek = it.week.contains(currentWeek)
-        val timeString = it.time.formatTimeString()
+        val timeString = "it.time.formatTimeString()"
         val isToday = thisWeek && it.day == today.dayOfWeek.value
         Course(
             it.name,
@@ -193,7 +194,8 @@ suspend fun getWeekCourse(currentWeek: Int): List<List<CourseSheet>> {
             it.type,
             it.time,
             timeString,
-            it.time.formatTime(),
+//            it.time.formatTime(),
+            "",
             it.day,
             it.extraData,
             thisWeek,
