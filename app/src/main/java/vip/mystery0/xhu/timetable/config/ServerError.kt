@@ -25,6 +25,7 @@ fun serverExceptionHandler(
     handler: (Throwable) -> Unit
 ): CoroutineExceptionHandler =
     CoroutineExceptionHandler { _, throwable ->
+        Log.i("TAG", "serverExceptionHandler: ${throwable.message}}")
         if (!isOnline()) {
             handler(NetworkNotConnectException())
             return@CoroutineExceptionHandler

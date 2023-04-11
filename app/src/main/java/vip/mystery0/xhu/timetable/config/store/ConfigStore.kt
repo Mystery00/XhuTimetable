@@ -20,7 +20,7 @@ object Formatter {
 }
 
 private val instance = ConfigStore()
-val GlobalNewConfig = instance
+val GlobalConfigStore = instance
 
 suspend fun <T> getConfigStore(block: ConfigStore.() -> T) = runOnIo { block(instance) }
 suspend fun setConfigStore(block: suspend ConfigStore.() -> Unit) = runOnIo { block(instance) }
@@ -178,6 +178,18 @@ class ConfigStore internal constructor() {
             return if (save.isNullOrBlank()) CustomUi.DEFAULT
             else moshi.adapter(CustomUi::class.java).fromJson(save)!!
         }
+    private val showOldCourseWhenFailedKey = "showOldCourseWhenFailed"
+    var showOldCourseWhenFailed: Boolean
+        set(value) {
+            kv.encode(showOldCourseWhenFailedKey, value)
+        }
+        get() = kv.decodeBool(showOldCourseWhenFailedKey, true)
+    private val showCustomThingKey = "showCustomThing"
+    var showCustomThing: Boolean
+        set(value) {
+            kv.encode(showCustomThingKey, value)
+        }
+        get() = kv.decodeBool(showCustomThingKey, true)
     private val versionChannelKey = "versionChannel"
     var versionChannel: VersionChannel
         set(value) {

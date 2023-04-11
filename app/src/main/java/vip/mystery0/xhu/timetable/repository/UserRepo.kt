@@ -17,14 +17,13 @@ suspend fun doLogin(user: User): LoginResponse =
 suspend fun doLogin(username: String, password: String): LoginResponse {
     val userApi = KoinJavaComponent.get<UserApi>(UserApi::class.java)
     val publicKey = userApi.publicKey().publicKey
-    val encryptPassword = runOnCpu {
-        val decodedPublicKey = Base64.decode(publicKey, Base64.DEFAULT)
-        val key =
-            KeyFactory.getInstance("RSA").generatePublic(X509EncodedKeySpec(decodedPublicKey))
-        val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
-        cipher.init(Cipher.ENCRYPT_MODE, key)
+    val decodedPublicKey = Base64.decode(publicKey, Base64.DEFAULT)
+    val key =
+        KeyFactory.getInstance("RSA").generatePublic(X509EncodedKeySpec(decodedPublicKey))
+    val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
+    cipher.init(Cipher.ENCRYPT_MODE, key)
+    val encryptPassword =
         Base64.encodeToString(cipher.doFinal(password.toByteArray()), Base64.DEFAULT)
-    }
     val loginRequest = LoginRequest(username, encryptPassword, publicKey)
     return userApi.login(loginRequest)
 }

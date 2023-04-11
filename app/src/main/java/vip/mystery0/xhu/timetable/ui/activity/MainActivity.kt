@@ -216,7 +216,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                                         interactionSource = remember { MutableInteractionSource() },
                                     ) {
                                         trackEvent("手动刷新课表")
-                                        viewModel.loadCourseList()
+                                        viewModel.refreshCloudDataToState()
                                     },
                             ) {
                                 val isDark = isDarkMode()
@@ -590,12 +590,12 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             EventType.MULTI_MODE_CHANGED,
             EventType.CHANGE_MAIN_USER -> {
                 viewModel.checkMainUser()
-                viewModel.loadCourseList(true)
+                viewModel.refreshCloudDataToState()
             }
 
             EventType.CHANGE_CURRENT_YEAR_AND_TERM,
             EventType.CHANGE_SHOW_CUSTOM_COURSE -> {
-                viewModel.loadCourseList(true)
+                viewModel.refreshCloudDataToState()
             }
 
             EventType.MAIN_USER_LOGOUT -> {
@@ -603,7 +603,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             }
 
             EventType.CHANGE_AUTO_SHOW_TOMORROW_COURSE -> {
-                viewModel.loadCourseList(false)
+                viewModel.loadLocalDataToState()
                 viewModel.calculateTodayTitle()
             }
 
@@ -611,7 +611,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             EventType.CHANGE_TERM_START_TIME,
             EventType.CHANGE_COURSE_COLOR,
             EventType.CHANGE_CUSTOM_UI -> {
-                viewModel.loadCourseList(false)
+                viewModel.loadLocalDataToState()
             }
 
             EventType.CHANGE_SHOW_CUSTOM_THING -> {

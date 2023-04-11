@@ -32,7 +32,6 @@ import vip.mystery0.xhu.timetable.ui.activity.ExamActivity
 import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_TOMORROW
 import vip.mystery0.xhu.timetable.ui.notification.NotificationId
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
-import vip.mystery0.xhu.timetable.viewmodel.formatTime
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.Instant
@@ -97,7 +96,7 @@ class NotifyWork(private val appContext: Context, workerParams: WorkerParameters
                     Course(
                         it.name,
                         it.location,
-                        it.time.formatTime(),
+                        "it.time.formatTime()",
                         it.time.first(),
                         color = colorMap[it.name] ?: ColorPool.hash(it.name),
                     )
