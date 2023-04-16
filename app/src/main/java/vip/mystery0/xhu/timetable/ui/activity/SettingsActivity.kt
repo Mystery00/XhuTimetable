@@ -799,11 +799,7 @@ class SettingsActivity : BaseComposeActivity() {
 
     override fun onStart() {
         super.onStart()
-        pushDynamicShortcuts<SettingsActivity>(
-            this.javaClass.name,
-            title.toString(),
-            R.drawable.ic_settings
-        )
+        pushDynamicShortcuts<SettingsActivity>(iconResId = R.drawable.ic_settings)
     }
 }
 

@@ -16,6 +16,7 @@ import vip.mystery0.xhu.timetable.api.FileApi
 import vip.mystery0.xhu.timetable.api.JwcApi
 import vip.mystery0.xhu.timetable.api.MenuApi
 import vip.mystery0.xhu.timetable.api.PoemsApi
+import vip.mystery0.xhu.timetable.api.ScoreApi
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.api.ThingApi
 import vip.mystery0.xhu.timetable.api.UserApi
@@ -99,6 +100,7 @@ val networkModule = module {
     serverApi<CourseApi>()
     serverApi<ThingApi>()
     serverApi<ExamApi>()
+    serverApi<ScoreApi>()
 
     single { get<Retrofit>(named(RETROFIT_POEMS)).create(PoemsApi::class.java) }
     single { get<Retrofit>(named(RETROFIT_FILE)).create(FileApi::class.java) }

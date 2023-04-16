@@ -22,13 +22,6 @@ interface JwcApi {
         @Query("term") term: Int,
     ): Response<ExamResponse11>
 
-    @GET("/api/rest/xhu-timetable/server/jwc/score")
-    suspend fun scoreList(
-        @Header("sessionToken") token: String,
-        @Query("year") year: String,
-        @Query("term") term: Int,
-    ): Response<ScoreResponse>
-
     @GET("/api/rest/xhu-timetable/server/jwc/exp/score")
     suspend fun expScoreList(
         @Header("sessionToken") token: String,

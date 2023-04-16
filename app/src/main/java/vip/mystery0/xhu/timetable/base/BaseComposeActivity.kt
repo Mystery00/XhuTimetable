@@ -70,8 +70,7 @@ import kotlin.reflect.KClass
 abstract class BaseComposeActivity(
     private val setSystemUiColor: Boolean = true,
     private val registerEventBus: Boolean = false,
-) :
-    ComponentActivity(), KoinComponent {
+) : ComponentActivity(), KoinComponent {
     val eventBus: EventBus by inject()
 
     private var toast: Toast? = null
@@ -328,9 +327,9 @@ abstract class BaseComposeActivity(
     }
 
     protected inline fun <reified T : BaseComposeActivity> pushDynamicShortcuts(
-        id: String,
-        label: String,
         @DrawableRes iconResId: Int,
+        id: String = this.javaClass.name,
+        label: String = title.toString(),
     ) {
         val shortcut = ShortcutInfoCompat.Builder(this, id)
             .setShortLabel(label)

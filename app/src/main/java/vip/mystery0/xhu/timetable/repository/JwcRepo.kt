@@ -11,7 +11,6 @@ import vip.mystery0.xhu.timetable.model.request.CourseRoomRequest
 import vip.mystery0.xhu.timetable.model.response.CourseRoomResponse
 import vip.mystery0.xhu.timetable.model.response.ExamResponse11
 import vip.mystery0.xhu.timetable.model.response.ExpScoreResponse
-import vip.mystery0.xhu.timetable.model.response.ScoreResponse
 import vip.mystery0.xhu.timetable.module.NetworkNotConnectException
 
 suspend fun getExamList(user: User): ExamResponse11 {
@@ -23,21 +22,6 @@ suspend fun getExamList(user: User): ExamResponse11 {
     val term = getConfig { currentTerm }
     val response = user.withAutoLogin {
         jwcApi.examList(it, year, term).checkLogin()
-    }
-    return response.first
-}
-
-suspend fun getScoreList(
-    user: User,
-    year: String,
-    term: Int,
-): ScoreResponse {
-    if (!isOnline()) {
-        throw NetworkNotConnectException()
-    }
-    val jwcApi = KoinJavaComponent.get<JwcApi>(JwcApi::class.java)
-    val response = user.withAutoLogin {
-        jwcApi.scoreList(it, year, term).checkLogin()
     }
     return response.first
 }

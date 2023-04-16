@@ -1,19 +1,39 @@
 package vip.mystery0.xhu.timetable.model.response
 
 data class ScoreResponse(
-    val list: List<ScoreItem>,
-    val failedList: List<ScoreItem>,
-)
-
-data class ScoreItem(
+    //教学班名称
+    val teachingClassName: String,
+    //课程编号
+    val courseNo: String,
+    //课程名称
     val courseName: String,
-    val score: String,
-    val gpa: String,
-    val credit: String,
+    //课程性质
     val courseType: String,
-    val examType: String,
+    //学分
+    val credit: Double,
+    //成绩
+    val score: Double,
+    //成绩说明
+    val scoreDescription: String,
+    //绩点
+    val gpa: Double,
+    //成绩性质
+    val scoreType: String,
+    //学分绩点
+    val creditGpa: Double,
 ) {
     companion object {
-        val PLACEHOLDER = ScoreItem("课程名称", "成绩", "绩点", "学分", "课程类型", "补考1")
+        val PLACEHOLDER = ScoreResponse(
+            "教学班名称",
+            "课程编号",
+            "课程名称",
+            "课程性质",
+            0.0,
+            0.0,
+            "成绩说明",
+            0.0,
+            "成绩性质",
+            0.0,
+        )
     }
 }
