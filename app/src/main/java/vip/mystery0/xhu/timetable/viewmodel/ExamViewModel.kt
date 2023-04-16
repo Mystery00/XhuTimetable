@@ -172,6 +172,16 @@ data class Exam(
     }
 }
 
+data class YearSelect(
+    val year: String,
+    val selected: Boolean,
+)
+
+data class TermSelect(
+    val term: Int,
+    val selected: Boolean,
+)
+
 enum class ExamStatus(
     val index: Int,
     val title: String,

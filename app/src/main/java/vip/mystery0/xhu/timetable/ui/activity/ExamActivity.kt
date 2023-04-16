@@ -175,7 +175,7 @@ class ExamActivity : BaseComposeActivity() {
 
     override fun onStart() {
         super.onStart()
-        pushDynamicShortcuts<ExamActivity>(this.javaClass.name, title.toString(), R.drawable.ic_exam)
+        pushDynamicShortcuts<ExamActivity>(iconResId = R.drawable.ic_exam)
     }
 }
 

@@ -8,15 +8,11 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.UserSelect
-import vip.mystery0.xhu.timetable.config.store.UserStore
-import vip.mystery0.xhu.timetable.config.chinaZone
-import vip.mystery0.xhu.timetable.config.getConfig
-import vip.mystery0.xhu.timetable.config.runOnCpu
+import vip.mystery0.xhu.timetable.base.YearSelect
+import vip.mystery0.xhu.timetable.base.TermSelect
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
-import vip.mystery0.xhu.timetable.model.response.ScoreItem
-import vip.mystery0.xhu.timetable.repository.getScoreList
-import java.time.LocalDateTime
-import java.time.Month
+import vip.mystery0.xhu.timetable.model.response.ScoreResponse
+import vip.mystery0.xhu.timetable.repository.ScoreRepo
 
 class ScoreViewModel : ComposeViewModel(), KoinComponent {
     companion object {
@@ -35,32 +31,10 @@ class ScoreViewModel : ComposeViewModel(), KoinComponent {
 
     init {
         viewModelScope.launch {
-            val loggedUserList = UserStore.loggedUserList()
-            val mainUserId = UserStore.mainUserId()
-            _userSelect.value = loggedUserList.map {
-                UserSelect(it.studentId, it.info.name, it.studentId == mainUserId)
-            }
-            _yearSelect.value = buildYearSelect(getConfig { currentYear })
-            _termSelect.value = buildTermSelect(getConfig { currentTerm })
+            _userSelect.value = initUserSelect()
+            _yearSelect.value = initYearSelect()
+            _termSelect.value = initTermSelect()
         }
-    }
-
-    private suspend fun buildYearSelect(selectedYear: String): List<YearSelect> = runOnCpu {
-        val loggedUserList = UserStore.loggedUserList()
-        val startYear = loggedUserList.minByOrNull { it.info.xhuGrade }!!.info.xhuGrade
-        val time = LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone)
-        val endYear = if (time.month < Month.JUNE) time.year - 1 else time.year
-        (startYear..endYear).map {
-            val year = "${it}-${it + 1}"
-            YearSelect(year, selectedYear == year)
-        }
-    }
-
-    private suspend fun buildTermSelect(selectedTerm: Int): List<TermSelect> = runOnCpu {
-        Array(2) {
-            val term = it + 1
-            TermSelect(term, term == selectedTerm)
-        }.toList()
     }
 
     fun loadScoreList() {
@@ -70,61 +44,38 @@ class ScoreViewModel : ComposeViewModel(), KoinComponent {
                 ScoreListState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
         }) {
             _scoreListState.value = ScoreListState(loading = true)
-            val selected = runOnCpu { _userSelect.value.first { it.selected }.studentId }
-            val selectUser = UserStore.userByStudentId(selected)
-            val year = runOnCpu { yearSelect.value.first { it.selected }.year }
-            val term = runOnCpu { termSelect.value.first { it.selected }.term }
-            val response = getScoreList(selectUser, year, term)
-            _scoreListState.value =
-                ScoreListState(scoreList = response.list, failedScoreList = response.failedList)
+            val selectedUser = getSelectedUser(_userSelect.value)
+            if (selectedUser == null) {
+                Log.w(TAG, "loadScoreList: empty selected user")
+                _scoreListState.value = ScoreListState(errorMessage = "选择用户为空，请重新选择")
+                return@launch
+            }
+            val scoreList = ScoreRepo.fetchScoreList(selectedUser)
+            _scoreListState.value = ScoreListState(scoreList = scoreList)
         }
     }
 
     fun selectUser(studentId: String) {
         viewModelScope.launch {
-            if (_userSelect.value.first { it.selected }.studentId == studentId) {
-                return@launch
-            }
-            _userSelect.value = runOnCpu {
-                UserStore.loggedUserList().map {
-                    UserSelect(it.studentId, it.info.name, it.studentId == studentId)
-                }
-            }
+            _userSelect.value = setSelectedUser(_userSelect.value, studentId).first
         }
     }
 
-    fun selectYear(year: String) {
+    fun selectYear(year: Int) {
         viewModelScope.launch {
-            if (_yearSelect.value.first { it.selected }.year == year) {
-                return@launch
-            }
-            _yearSelect.value = buildYearSelect(year)
+            _yearSelect.value = setSelectedYear(_yearSelect.value, year)
         }
     }
 
     fun selectTerm(term: Int) {
         viewModelScope.launch {
-            if (_termSelect.value.first { it.selected }.term == term) {
-                return@launch
-            }
-            _termSelect.value = buildTermSelect(term)
+            _termSelect.value = setSelectedTerm(_termSelect.value, term)
         }
     }
 }
 
-data class YearSelect(
-    val year: String,
-    val selected: Boolean,
-)
-
-data class TermSelect(
-    val term: Int,
-    val selected: Boolean,
-)
-
 data class ScoreListState(
     val loading: Boolean = false,
-    val scoreList: List<ScoreItem> = emptyList(),
-    val failedScoreList: List<ScoreItem> = emptyList(),
+    val scoreList: List<ScoreResponse> = emptyList(),
     val errorMessage: String = "",
 )

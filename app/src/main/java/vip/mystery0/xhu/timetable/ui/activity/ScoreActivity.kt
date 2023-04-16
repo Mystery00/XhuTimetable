@@ -3,12 +3,12 @@ package vip.mystery0.xhu.timetable.ui.activity
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
@@ -26,21 +26,23 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.R
-import vip.mystery0.xhu.timetable.appName
-import vip.mystery0.xhu.timetable.base.BaseComposeActivity
-import vip.mystery0.xhu.timetable.model.response.ScoreItem
+import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
+import vip.mystery0.xhu.timetable.model.response.ScoreResponse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.ScoreViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
-class ScoreActivity : BaseComposeActivity() {
+class ScoreActivity : BaseSelectComposeActivity() {
     private val viewModel: ScoreViewModel by viewModels()
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     override fun BuildContent() {
         val scoreListState by viewModel.scoreListState.collectAsState()
+        val userSelectStatus = viewModel.userSelect.collectAsState()
+        val yearSelectStatus = viewModel.yearSelect.collectAsState()
+        val termSelectStatus = viewModel.termSelect.collectAsState()
 
         val showSelect = rememberModalBottomSheetState(ModalBottomSheetValue.Expanded)
         val scope = rememberCoroutineScope()
@@ -116,68 +118,21 @@ class ScoreActivity : BaseComposeActivity() {
             },
         ) { paddingValues ->
             Box {
-                var showGpa by remember { mutableStateOf(false) }
-                var showCredit by remember { mutableStateOf(false) }
-                var showCourseType by remember { mutableStateOf(true) }
+                var showMoreInfo by remember { mutableStateOf(true) }
                 ModalBottomSheetLayout(
                     sheetState = showSelect,
                     scrimColor = Color.Black.copy(alpha = 0.32f),
                     sheetContent = {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
+                        BuildSelectSheetLayout(
+                            bottomSheetState = showSelect,
+                            selectUserState = userSelectStatus,
+                            selectYearState = yearSelectStatus,
+                            selectTermState = termSelectStatus,
+                            showUserDialog = userDialog,
+                            showYearDialog = yearDialog,
+                            showTermDialog = termDialog,
                         ) {
-                            Text(text = "请选择需要查询的信息")
-                            OutlinedButton(
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = {
-                                    userDialog.value = true
-                                }) {
-                                val userSelect by viewModel.userSelect.collectAsState()
-                                val selected = userSelect.firstOrNull { it.selected }
-                                val userString =
-                                    selected?.let { "${it.userName}(${it.studentId})" } ?: "查询中"
-                                Text(text = "查询用户：$userString")
-                            }
-                            OutlinedButton(
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = {
-                                    yearDialog.value = true
-                                }) {
-                                val yearSelect by viewModel.yearSelect.collectAsState()
-                                val yearString =
-                                    yearSelect.firstOrNull { it.selected }?.let { "${it.year}学年" }
-                                        ?: "查询中"
-                                Text(text = yearString)
-                            }
-                            OutlinedButton(
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = {
-                                    termDialog.value = true
-                                }) {
-                                val termSelect by viewModel.termSelect.collectAsState()
-                                val termString =
-                                    termSelect.firstOrNull { it.selected }
-                                        ?.let { "第${it.term}学期" }
-                                        ?: "查询中"
-                                Text(text = termString)
-                            }
-                            Button(
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = {
-                                    viewModel.loadScoreList()
-                                    scope.launch {
-                                        showSelect.hide()
-                                    }
-                                }) {
-                                Text(text = "查询")
-                            }
+                            viewModel.loadScoreList()
                         }
                     }
                 ) {
@@ -190,8 +145,7 @@ class ScoreActivity : BaseComposeActivity() {
                         swipeEnabled = false,
                     ) {
                         val scoreList = scoreListState.scoreList
-                        val failedScoreList = scoreListState.failedScoreList
-                        if (scoreListState.loading || scoreList.isNotEmpty() || failedScoreList.isNotEmpty()) {
+                        if (scoreListState.loading || scoreList.isNotEmpty()) {
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -209,79 +163,30 @@ class ScoreActivity : BaseComposeActivity() {
                                         )
                                     }
                                     item {
-                                        BuildTermInfo(scoreList, failedScoreList)
+                                        BuildTermInfo(scoreList)
                                     }
                                 }
+                                stickyHeader {
+                                    Text(
+                                        text = "课程成绩列表",
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(XhuColor.Common.whiteBackground)
+                                            .padding(12.dp),
+                                    )
+                                }
                                 if (scoreListState.loading) {
-                                    stickyHeader {
-                                        Text(
-                                            text = "通过课程列表",
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .background(XhuColor.Common.whiteBackground)
-                                                .padding(12.dp),
-                                        )
-                                    }
                                     items(3) {
                                         BuildItem(
-                                            ScoreItem.PLACEHOLDER,
-                                            showGpa,
-                                            showCredit,
-                                            showCourseType,
+                                            showMoreInfo,
+                                            ScoreResponse.PLACEHOLDER,
                                             true,
                                         )
                                     }
                                 } else {
-                                    if (scoreList.isNotEmpty()) {
-                                        stickyHeader {
-                                            Text(
-                                                text = "通过课程列表",
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .background(XhuColor.Common.whiteBackground)
-                                                    .padding(12.dp),
-                                            )
-                                        }
-                                    }
                                     items(scoreList.size) { index ->
                                         val item = scoreList[index]
-                                        BuildItem(item, showGpa, showCredit, showCourseType)
-                                    }
-                                }
-                                if (scoreListState.loading) {
-                                    stickyHeader {
-                                        Text(
-                                            text = "未通过课程列表",
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .background(XhuColor.Common.whiteBackground)
-                                                .padding(12.dp),
-                                        )
-                                    }
-                                    item {
-                                        BuildItem(
-                                            ScoreItem.PLACEHOLDER,
-                                            showGpa,
-                                            showCredit,
-                                            showCourseType,
-                                            true,
-                                        )
-                                    }
-                                } else {
-                                    if (failedScoreList.isNotEmpty()) {
-                                        stickyHeader {
-                                            Text(
-                                                text = "未通过课程列表",
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .background(XhuColor.Common.whiteBackground)
-                                                    .padding(12.dp),
-                                            )
-                                        }
-                                    }
-                                    items(failedScoreList.size) { index ->
-                                        val item = failedScoreList[index]
-                                        BuildItem(item, showGpa, showCredit, showCourseType)
+                                        BuildItem(showMoreInfo, item)
                                     }
                                 }
                             }
@@ -305,38 +210,27 @@ class ScoreActivity : BaseComposeActivity() {
                             Row(modifier = Modifier
                                 .padding(8.dp)
                                 .clickable {
-                                    showGpa = !showGpa
+                                    showMoreInfo = !showMoreInfo
                                     showOption = false
                                 }) {
-                                Checkbox(checked = showGpa, onCheckedChange = null)
-                                Text(text = "显示绩点")
-                            }
-                            Row(modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    showCredit = !showCredit
-                                    showOption = false
-                                }) {
-                                Checkbox(checked = showCredit, onCheckedChange = null)
-                                Text(text = "显示学分")
-                            }
-                            Row(modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    showCourseType = !showCourseType
-                                    showOption = false
-                                }) {
-                                Checkbox(checked = showCourseType, onCheckedChange = null)
-                                Text(text = "显示课程类型")
+                                Checkbox(checked = showMoreInfo, onCheckedChange = null)
+                                Text(text = "显示更多信息")
                             }
                         }
                     }
                 }
             }
         }
-        ShowUserDialog(show = userDialog)
-        ShowYearDialog(show = yearDialog)
-        ShowTermDialog(show = termDialog)
+        ShowUserDialog(selectState = userSelectStatus, show = userDialog, onSelect = {
+            viewModel.selectUser(it.studentId)
+        })
+        ShowYearDialog(selectState = yearSelectStatus, show = yearDialog, onSelect = {
+            viewModel.selectYear(it.value)
+        })
+        ShowTermDialog(selectState = termSelectStatus, show = termDialog, onSelect = {
+            viewModel.selectTerm(it.value)
+        })
+
         if (scoreListState.errorMessage.isNotBlank()) {
             scoreListState.errorMessage.toast(true)
         }
@@ -348,284 +242,90 @@ class ScoreActivity : BaseComposeActivity() {
         )
     }
 
-    @Composable
-    private fun ShowUserDialog(
-        show: MutableState<Boolean>,
-    ) {
-        val userSelect by viewModel.userSelect.collectAsState()
-        val selectedUser = userSelect.firstOrNull { it.selected } ?: return
-        if (show.value) {
-            var selected by remember { mutableStateOf(selectedUser) }
-            AlertDialog(
-                onDismissRequest = {
-                    show.value = false
-                },
-                title = {
-                    Text(text = "请选择要查询的学生")
-                },
-                text = {
-                    LazyColumn {
-                        items(userSelect.size) { index ->
-                            val item = userSelect[index]
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                    ) {
-                                        selected = item
-                                    },
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(selected = selected == item, onClick = null)
-                                Text(text = "${item.userName}(${item.studentId})")
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.selectUser(selected.studentId)
-                            show.value = false
-                        },
-                    ) {
-                        Text("确认")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            show.value = false
-                        }
-                    ) {
-                        Text("取消")
-                    }
-                }
-            )
-        }
-    }
-
-
-    @Composable
-    private fun ShowYearDialog(
-        show: MutableState<Boolean>,
-    ) {
-        val yearSelect by viewModel.yearSelect.collectAsState()
-        val selectedYear = yearSelect.firstOrNull { it.selected } ?: return
-        if (show.value) {
-            var selected by remember { mutableStateOf(selectedYear) }
-            AlertDialog(
-                onDismissRequest = {
-                    show.value = false
-                },
-                title = {
-                    Text(text = "请选择要查询的学生")
-                },
-                text = {
-                    Column {
-                        LazyColumn {
-                            items(yearSelect.size) { index ->
-                                val item = yearSelect[index]
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp)
-                                        .clickable(
-                                            indication = null,
-                                            interactionSource = remember { MutableInteractionSource() },
-                                        ) {
-                                            selected = item
-                                        },
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    RadioButton(selected = selected == item, onClick = null)
-                                    Text(text = item.year)
-                                }
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.selectYear(selected.year)
-                            show.value = false
-                        },
-                    ) {
-                        Text("确认")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            show.value = false
-                        }
-                    ) {
-                        Text("取消")
-                    }
-                }
-            )
-        }
-    }
-
-    @Composable
-    private fun ShowTermDialog(
-        show: MutableState<Boolean>,
-    ) {
-        val termSelect by viewModel.termSelect.collectAsState()
-        val selectedTerm = termSelect.firstOrNull { it.selected } ?: return
-        if (show.value) {
-            var selected by remember { mutableStateOf(selectedTerm) }
-            AlertDialog(
-                onDismissRequest = {
-                    show.value = false
-                },
-                title = {
-                    Text(text = "请选择要查询的学期")
-                },
-                text = {
-                    LazyColumn {
-                        items(termSelect.size) { index ->
-                            val item = termSelect[index]
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                    ) {
-                                        selected = item
-                                    },
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(selected = selected == item, onClick = null)
-                                Text(text = "${item.term}")
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.selectTerm(selected.term)
-                            show.value = false
-                        },
-                    ) {
-                        Text("确认")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            show.value = false
-                        }
-                    ) {
-                        Text("取消")
-                    }
-                }
-            )
-        }
-    }
-
     override fun onStart() {
         super.onStart()
-        pushDynamicShortcuts<ScoreActivity>(
-            this.javaClass.name,
-            title.toString(),
-            R.drawable.ic_score
-        )
+        pushDynamicShortcuts<ScoreActivity>(iconResId = R.drawable.ic_score)
     }
 }
 
 @Composable
-private fun BuildTermInfo(
-    scoreListOrigin: List<ScoreItem>,
-    failedScoreListOrigin: List<ScoreItem>,
-) {
+private fun BuildTermInfo(scoreListOrigin: List<ScoreResponse>) {
     //正常考试的列表，也就是不包含重修的列表
-    val successList = scoreListOrigin.filter { it.examType == "正常考试" }
-    val failedList = failedScoreListOrigin.filter { it.examType == "正常考试" }
-    val list = successList + failedList
+    val list = scoreListOrigin.filter { it.scoreType == "正常考试" }
+    val successList = list.filter { it.score >= 60 }
 
-    val scoreList = list.map { it.score.toDouble() }
+    val scoreList = list.map { it.score }
 
     //总成绩
     val totalScore = scoreList.sum()
     //平均成绩
     val avgScore = scoreList.average()
     //总学分
-    val totalCredit = list.map { it.credit.toDouble() }.sum()
+    val totalCredit = list.sumOf { it.credit }
 
     //GPA
-    val gpa = successList.sumOf { it.score.toDouble() * it.credit.toDouble() } / totalCredit
+    val gpa = successList.sumOf { it.score * it.credit } / totalCredit
 
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .background(XhuColor.Common.whiteBackground),
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        backgroundColor = XhuColor.cardBackground,
     ) {
-        Column(
-            modifier = Modifier
-                .weight(1F)
-                .padding(start = 16.dp),
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Text(
-                text = "总成绩：${totalScore}",
-                fontSize = 13.sp,
-            )
-            Text(
-                text = "平均成绩：${String.format("%.2f", avgScore)}",
-                fontSize = 13.sp,
-            )
-            Text(
-                text = "总学分：${totalCredit}",
-                fontSize = 13.sp,
-            )
-        }
-        Column(
-            modifier = Modifier
-                .weight(1F)
-                .padding(end = 16.dp),
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Text(
-                text = "GPA = ${String.format("%.2f", gpa)}",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-            )
+        Row(modifier = Modifier.padding(8.dp)) {
+            Column(
+                modifier = Modifier
+                    .weight(1F)
+                    .padding(start = 16.dp),
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = "总成绩：${totalScore}",
+                    fontSize = 13.sp,
+                )
+                Text(
+                    text = "平均成绩：${String.format("%.2f", avgScore)}",
+                    fontSize = 13.sp,
+                )
+                Text(
+                    text = "总学分：${totalCredit}",
+                    fontSize = 13.sp,
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1F)
+                    .padding(end = 16.dp),
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = "GPA = ${String.format("%.2f", gpa)}",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
         }
     }
 }
 
 @Composable
 private fun BuildItem(
-    item: ScoreItem,
-    showGpa: Boolean,
-    showCredit: Boolean,
-    showCourseType: Boolean,
+    showMoreInfo: Boolean,
+    item: ScoreResponse,
     placeHolder: Boolean = false,
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
+            .animateContentSize()
             .placeholder(
                 visible = placeHolder,
                 highlight = PlaceholderHighlight.shimmer(),
             ),
         backgroundColor = XhuColor.cardBackground,
     ) {
-        Column(
-            modifier = Modifier.padding(8.dp)
-        ) {
+        Column(modifier = Modifier.padding(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1F)) {
                     Text(
@@ -634,30 +334,40 @@ private fun BuildItem(
                         fontSize = 16.sp,
                         color = XhuColor.Common.blackText,
                     )
-                    if (showCourseType) {
+                    if (showMoreInfo) {
                         Text(
                             text = item.courseType,
                             color = XhuColor.Common.grayText,
+                            fontSize = 14.sp,
                         )
                         Text(
-                            text = item.examType,
+                            text = item.scoreType,
                             color = XhuColor.Common.grayText,
+                            fontSize = 14.sp,
                         )
+                        Text(
+                            text = "课程学分：${item.credit}",
+                            color = XhuColor.Common.grayText,
+                            fontSize = 14.sp,
+                        )
+                        Text(
+                            text = "课程绩点：${item.creditGpa}",
+                            color = XhuColor.Common.grayText,
+                            fontSize = 14.sp,
+                        )
+                        if (item.scoreDescription.isNotBlank()) {
+                            Text(
+                                text = "成绩说明：${item.scoreDescription}",
+                                color = XhuColor.Common.grayText,
+                                fontSize = 14.sp,
+                            )
+                        }
                     }
                 }
                 Text(
-                    text = buildString {
-                        if (showCredit) {
-                            append(item.credit)
-                            append("/")
-                        }
-                        if (showGpa) {
-                            append(item.gpa)
-                            append("/")
-                        }
-                        append(item.score)
-                    },
+                    text = "${item.score}",
                     color = XhuColor.Common.blackText,
+                    fontSize = 16.sp,
                 )
             }
         }
