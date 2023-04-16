@@ -9,12 +9,12 @@ import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.model.request.CourseRoomRequest
 import vip.mystery0.xhu.timetable.model.response.CourseRoomResponse
-import vip.mystery0.xhu.timetable.model.response.ExamResponse
+import vip.mystery0.xhu.timetable.model.response.ExamResponse11
 import vip.mystery0.xhu.timetable.model.response.ExpScoreResponse
 import vip.mystery0.xhu.timetable.model.response.ScoreResponse
 import vip.mystery0.xhu.timetable.module.NetworkNotConnectException
 
-suspend fun getExamList(user: User): ExamResponse {
+suspend fun getExamList(user: User): ExamResponse11 {
     if (!isOnline()) {
         throw NetworkNotConnectException()
     }

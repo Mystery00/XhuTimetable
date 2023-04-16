@@ -20,7 +20,7 @@ interface JwcApi {
         @Header("sessionToken") token: String,
         @Query("year") year: String,
         @Query("term") term: Int,
-    ): Response<ExamResponse>
+    ): Response<ExamResponse11>
 
     @GET("/api/rest/xhu-timetable/server/jwc/score")
     suspend fun scoreList(

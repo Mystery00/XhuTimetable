@@ -6,9 +6,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.FeedbackApi
 import vip.mystery0.xhu.timetable.api.PoemsApi
@@ -245,13 +247,16 @@ class MainViewModel : ComposeViewModel() {
             if (!Feature.JRSC.isEnabled()) {
                 return@launch
             }
-            val token = PoemsStore.token
-            if (token.isNullOrBlank()) {
-                PoemsStore.token = poemsApi.getToken().data
-            }
-            val poems = poemsApi.getSentence().data
-            if (!PoemsStore.showPoemsTranslate) {
-                poems.origin.translate = null
+            val poems = withContext(Dispatchers.IO) {
+                val token = PoemsStore.token
+                if (token.isNullOrBlank()) {
+                    PoemsStore.token = poemsApi.getToken().data
+                }
+                val poems = poemsApi.getSentence().data
+                if (!PoemsStore.showPoemsTranslate) {
+                    poems.origin.translate = null
+                }
+                poems
             }
             _poems.value = poems
         }
@@ -264,23 +269,25 @@ class MainViewModel : ComposeViewModel() {
             } ?: false
 
             val termStartDate = getConfigStore { termStartDate }
-            val now = LocalDate.now()
-            val todayWeekIndex =
-                now.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.CHINESE)
-            if (now.isBefore(termStartDate)) {
-                //开学之前，那么计算剩余时间
-                val remainDays = betweenDays(now, termStartDate)
-                _todayTitle.value = "距离开学还有${remainDays}天 $todayWeekIndex"
-                return@launch
-            }
-            val date = if (showTomorrow) now.plusDays(1) else now
-            val days = betweenDays(termStartDate, date)
-            val weekIndex = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.CHINESE)
-            val week = (days / 7) + 1
-            if (week > 20) {
-                _todayTitle.value = "本学期已结束"
-            } else {
-                _todayTitle.value = "第${week}周 $weekIndex"
+            withContext(Dispatchers.Default) {
+                val now = LocalDate.now()
+                val todayWeekIndex =
+                    now.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.CHINESE)
+                if (now.isBefore(termStartDate)) {
+                    //开学之前，那么计算剩余时间
+                    val remainDays = betweenDays(now, termStartDate)
+                    _todayTitle.value = "距离开学还有${remainDays}天 $todayWeekIndex"
+                    return@withContext
+                }
+                val date = if (showTomorrow) now.plusDays(1) else now
+                val days = betweenDays(termStartDate, date)
+                val weekIndex = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.CHINESE)
+                val week = (days / 7) + 1
+                if (week > 20) {
+                    _todayTitle.value = "本学期已结束"
+                } else {
+                    _todayTitle.value = "第${week}周 $weekIndex"
+                }
             }
         }
     }
@@ -308,12 +315,14 @@ class MainViewModel : ComposeViewModel() {
      */
     private suspend fun calculateWeekInternal(date: LocalDate = LocalDate.now()): Int {
         val termStartDate = getConfigStore { termStartDate }
-        val days = betweenDays(termStartDate, date)
-        var week = ((days / 7) + 1)
-        if (days < 0 && week > 0) {
-            week = 0
+        return withContext(Dispatchers.Default) {
+            val days = betweenDays(termStartDate, date)
+            var week = ((days / 7) + 1)
+            if (days < 0 && week > 0) {
+                week = 0
+            }
+            return@withContext week
         }
-        return week
     }
 
     private suspend fun getMainPageData(forceLoadFromCloud: Boolean): AggregationView {
@@ -343,22 +352,26 @@ class MainViewModel : ComposeViewModel() {
             val loadFromCloud = pair.second
             //获取缓存的课程数据
             val data = getMainPageData(false)
-            //加载今日列表的数据
-            loadTodayCourse(currentWeek, data.todayViewList)
-            //加载今日事项
-            loadTodayThing(data.todayThingList)
-            //加载周列表的数据
-            loadCourseToTable(currentWeek, currentWeek, data.weekViewList, false)
+            withContext(Dispatchers.Default) {
+                //加载今日列表的数据
+                loadTodayCourse(currentWeek, data.todayViewList)
+                //加载今日事项
+                loadTodayThing(data.todayThingList)
+                //加载周列表的数据
+                loadCourseToTable(currentWeek, currentWeek, data.weekViewList, false)
+            }
 
             if (loadFromCloud) {
                 //需要从云端加载数据
                 val cloudData = getMainPageData(true)
-                //加载今日列表的数据
-                loadTodayCourse(currentWeek, cloudData.todayViewList)
-                //加载今日事项
-                loadTodayThing(cloudData.todayThingList)
-                //加载周列表的数据
-                loadCourseToTable(currentWeek, currentWeek, cloudData.weekViewList, false)
+                withContext(Dispatchers.Default) {
+                    //加载今日列表的数据
+                    loadTodayCourse(currentWeek, cloudData.todayViewList)
+                    //加载今日事项
+                    loadTodayThing(cloudData.todayThingList)
+                    //加载周列表的数据
+                    loadCourseToTable(currentWeek, currentWeek, cloudData.weekViewList, false)
+                }
                 toastMessage("数据同步成功！")
             }
             _loading.value = false
@@ -384,12 +397,14 @@ class MainViewModel : ComposeViewModel() {
             val currentWeek = pair.first
             //从云端加载数据
             val cloudData = getMainPageData(true)
-            //加载今日列表的数据
-            loadTodayCourse(currentWeek, cloudData.todayViewList)
-            //加载今日事项
-            loadTodayThing(cloudData.todayThingList)
-            //加载周列表的数据
-            loadCourseToTable(currentWeek, currentWeek, cloudData.weekViewList, false)
+            withContext(Dispatchers.Default){
+                //加载今日列表的数据
+                loadTodayCourse(currentWeek, cloudData.todayViewList)
+                //加载今日事项
+                loadTodayThing(cloudData.todayThingList)
+                //加载周列表的数据
+                loadCourseToTable(currentWeek, currentWeek, cloudData.weekViewList, false)
+            }
             toastMessage("数据同步成功！")
             _loading.value = false
         }

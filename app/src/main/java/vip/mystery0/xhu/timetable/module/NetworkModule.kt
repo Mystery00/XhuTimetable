@@ -10,6 +10,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import vip.mystery0.xhu.timetable.api.AggregationApi
 import vip.mystery0.xhu.timetable.api.CommonApi
 import vip.mystery0.xhu.timetable.api.CourseApi
+import vip.mystery0.xhu.timetable.api.ExamApi
 import vip.mystery0.xhu.timetable.api.FeedbackApi
 import vip.mystery0.xhu.timetable.api.FileApi
 import vip.mystery0.xhu.timetable.api.JwcApi
@@ -97,6 +98,7 @@ val networkModule = module {
     serverApi<AggregationApi>()
     serverApi<CourseApi>()
     serverApi<ThingApi>()
+    serverApi<ExamApi>()
 
     single { get<Retrofit>(named(RETROFIT_POEMS)).create(PoemsApi::class.java) }
     single { get<Retrofit>(named(RETROFIT_FILE)).create(FileApi::class.java) }
