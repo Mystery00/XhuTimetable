@@ -1,5 +1,7 @@
 package vip.mystery0.xhu.timetable.repository
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.AggregationApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
@@ -29,27 +31,35 @@ object AggregationRepo : BaseDataRepo {
         val todayThingList = ArrayList<TodayThingView>()
 
         if (isOnline) {
-            userList.forEach { user ->
-                val response = user.withAutoLoginOnce {
-                    aggregationApi.pageMain(it, nowYear, nowTerm, showCustomCourse, showCustomThing)
+            withContext(Dispatchers.Default) {
+                userList.forEach { user ->
+                    val response = user.withAutoLoginOnce {
+                        aggregationApi.pageMain(
+                            it,
+                            nowYear,
+                            nowTerm,
+                            showCustomCourse,
+                            showCustomThing
+                        )
+                    }
+                    response.courseList.forEach { course ->
+                        todayViewList.add(TodayCourseView.valueOf(course, user))
+                        weekViewList.add(WeekCourseView.valueOf(course, user))
+                    }
+                    response.experimentCourseList.forEach { experimentCourse ->
+                        todayViewList.add(TodayCourseView.valueOf(experimentCourse, user))
+                        weekViewList.add(WeekCourseView.valueOf(experimentCourse, user))
+                    }
+                    response.customCourseList.forEach { customCourse ->
+                        todayViewList.add(TodayCourseView.valueOf(customCourse, user))
+                        weekViewList.add(WeekCourseView.valueOf(customCourse, user))
+                    }
+                    response.customThingList.forEach { customThing ->
+                        todayThingList.add(TodayThingView.valueOf(customThing, user))
+                    }
+                    //保存数据到数据库
+                    //TODO
                 }
-                response.courseList.forEach { course ->
-                    todayViewList.add(TodayCourseView.valueOf(course, user))
-                    weekViewList.add(WeekCourseView.valueOf(course, user))
-                }
-                response.experimentCourseList.forEach { experimentCourse ->
-                    todayViewList.add(TodayCourseView.valueOf(experimentCourse, user))
-                    weekViewList.add(WeekCourseView.valueOf(experimentCourse, user))
-                }
-                response.customCourseList.forEach { customCourse ->
-                    todayViewList.add(TodayCourseView.valueOf(customCourse, user))
-                    weekViewList.add(WeekCourseView.valueOf(customCourse, user))
-                }
-                response.customThingList.forEach { customThing ->
-                    todayThingList.add(TodayThingView.valueOf(customThing, user))
-                }
-                //保存数据到数据库
-                //TODO
             }
         } else {
 

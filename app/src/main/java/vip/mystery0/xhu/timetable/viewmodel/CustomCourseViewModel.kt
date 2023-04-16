@@ -10,6 +10,7 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.base.UserSelect
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLogin
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore

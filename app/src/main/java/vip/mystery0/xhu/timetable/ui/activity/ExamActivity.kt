@@ -89,16 +89,6 @@ class ExamActivity : BaseComposeActivity() {
                         }
                     },
                     actions = {
-//                        if (examListState.examHtml.isNotBlank()) {
-//                            Text(
-//                                text = "显示原始网页",
-//                                modifier = Modifier.clickable(
-//                                    indication = null,
-//                                    interactionSource = remember { MutableInteractionSource() },
-//                                ) {
-//                                    examListState.examHtml.toast()
-//                                })
-//                        }
                         IconButton(onClick = {
                             showUserSelect = !showUserSelect
                         }) {
@@ -243,7 +233,7 @@ private fun BuildItem(
                     fontSize = 14.sp,
                 )
                 Text(
-                    text = "考试类型：${item.type}",
+                    text = "考试类型：${item.examName}",
                     color = XhuColor.Common.grayText,
                     fontSize = 14.sp,
                 )
@@ -256,7 +246,7 @@ private fun BuildItem(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "座位号\n${item.examNumber}",
+                    text = "座位号\n${item.seatNo}",
                     color = Color.White,
                     fontSize = 16.sp,
                     textAlign = TextAlign.Center,
