@@ -67,7 +67,6 @@ class SettingsViewModel : ComposeViewModel() {
     val versionChannel: StateFlow<VersionChannel> = _versionChannel
 
     val version = MutableStateFlow<Version?>(null)
-    private val startRepo: StartRepo = getRepo()
 
     init {
         viewModelScope.launch {

@@ -610,12 +610,9 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             EventType.CHANGE_SHOW_NOT_THIS_WEEK,
             EventType.CHANGE_TERM_START_TIME,
             EventType.CHANGE_COURSE_COLOR,
-            EventType.CHANGE_CUSTOM_UI -> {
-                viewModel.loadLocalDataToState()
-            }
-
+            EventType.CHANGE_CUSTOM_UI,
             EventType.CHANGE_SHOW_CUSTOM_THING -> {
-                viewModel.loadThingList(true)
+                viewModel.loadLocalDataToState()
             }
 
             EventType.CHANGE_MAIN_BACKGROUND -> {

@@ -49,12 +49,8 @@ import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.trackEvent
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
-import vip.mystery0.xhu.timetable.utils.dateFormatter
-import vip.mystery0.xhu.timetable.utils.thingDateTimeFormatter
-import vip.mystery0.xhu.timetable.viewmodel.CustomThingSheet
 import vip.mystery0.xhu.timetable.viewmodel.TodayCourseSheet
-import java.time.Duration
-import java.time.LocalDate
+import vip.mystery0.xhu.timetable.viewmodel.TodayThingSheet
 
 val todayCourseTitleBar: TabTitle = @Composable { ext ->
     val viewModel = ext.viewModel
@@ -138,7 +134,7 @@ val todayCourseContent: TabContent = @Composable { ext ->
                     DrawPoemsCard(modalBottomSheetState, scope, poems = value)
                 }
                 todayThingList.forEach {
-                    DrawThingCard(customThingSheet = it, multiAccountMode = multiAccountMode)
+                    DrawThingCard(thing = it, multiAccountMode = multiAccountMode)
                 }
                 todayCourseList.forEach {
                     DrawCourseCard(
@@ -213,10 +209,9 @@ private fun DrawPoemsCard(dialogState: ModalBottomSheetState, scope: CoroutineSc
 @ExperimentalMaterialApi
 @Composable
 private fun DrawThingCard(
-    customThingSheet: CustomThingSheet,
+    thing: TodayThingSheet,
     multiAccountMode: Boolean,
 ) {
-    val thing = customThingSheet.thing
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(vertical = 4.dp)
@@ -236,7 +231,7 @@ private fun DrawThingCard(
             Box {
                 if (multiAccountMode) {
                     Text(
-                        text = "${customThingSheet.studentId}(${customThingSheet.userName})",
+                        text = "${thing.studentId}(${thing.userName})",
                         fontSize = 8.sp,
                         color = MaterialTheme.colors.onSecondary,
                         modifier = Modifier
@@ -277,14 +272,8 @@ private fun DrawThingCard(
                                 .fillMaxWidth()
                                 .padding(vertical = 1.dp),
                         )
-                        val startText =
-                            thing.startTime.format(if (thing.allDay) dateFormatter else thingDateTimeFormatter)
-                        val endText =
-                            thing.endTime.format(if (thing.allDay) dateFormatter else thingDateTimeFormatter)
-                        val timeText =
-                            if (thing.saveAsCountDown) startText else "$startText - $endText"
                         Text(
-                            text = timeText,
+                            text = thing.timeText,
                             color = thing.color.copy(alpha = 0.8F),
                             fontSize = 12.sp,
                             modifier = Modifier
@@ -314,15 +303,11 @@ private fun DrawThingCard(
                         }
                     }
                     if (thing.saveAsCountDown) {
-                        val remainDays =
-                            Duration.between(LocalDate.now().atStartOfDay(), thing.startTime)
-                                .toDays()
-
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.padding(start = 4.dp),
                         ) {
-                            if (remainDays <= 0L) {
+                            if (thing.remainDays <= 0L) {
                                 //今天
                                 Text(
                                     text = "就在\n今天",
@@ -337,7 +322,7 @@ private fun DrawThingCard(
                                     fontSize = 12.sp,
                                 )
                                 Text(
-                                    text = remainDays.toString(),
+                                    text = thing.remainDays.toString(),
                                     fontSize = 24.sp,
                                     modifier = Modifier
                                         .padding(vertical = 2.dp),

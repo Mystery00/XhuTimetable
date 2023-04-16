@@ -3,6 +3,8 @@ package vip.mystery0.xhu.timetable.config.store
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.tencent.mmkv.MMKV
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.config.Customisable
 import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.model.CustomUi
@@ -22,8 +24,11 @@ object Formatter {
 private val instance = ConfigStore()
 val GlobalConfigStore = instance
 
-suspend fun <T> getConfigStore(block: ConfigStore.() -> T) = runOnIo { block(instance) }
-suspend fun setConfigStore(block: suspend ConfigStore.() -> Unit) = runOnIo { block(instance) }
+suspend fun <T> getConfigStore(block: ConfigStore.() -> T) =
+    withContext(Dispatchers.IO) { block(instance) }
+
+suspend fun setConfigStore(block: suspend ConfigStore.() -> Unit) =
+    withContext(Dispatchers.IO) { block(instance) }
 
 class ConfigStore internal constructor() {
     private val kv = MMKV.mmkvWithID("ConfigStore")

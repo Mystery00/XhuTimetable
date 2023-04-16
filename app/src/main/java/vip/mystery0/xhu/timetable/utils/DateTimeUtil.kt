@@ -1,7 +1,14 @@
 package vip.mystery0.xhu.timetable.utils
 
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.TreeSet
+
+private val chinaZone: ZoneId = ZoneId.of("Asia/Shanghai")
+fun LocalDateTime.asInstant(): Instant = atZone(chinaZone).toInstant()
+fun Instant.asLocalDateTime(): LocalDateTime = LocalDateTime.ofInstant(this, chinaZone)
 
 val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 val dateFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日")

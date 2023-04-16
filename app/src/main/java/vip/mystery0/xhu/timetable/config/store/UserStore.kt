@@ -4,12 +4,12 @@ import android.util.Log
 import android.widget.Toast
 import com.squareup.moshi.Moshi
 import com.tencent.mmkv.MMKV
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent
+import retrofit2.Response
 import vip.mystery0.xhu.timetable.api.UserApi
-import vip.mystery0.xhu.timetable.config.coroutine.RetryCallback
+import vip.mystery0.xhu.timetable.config.checkNeedLogin
 import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
 import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.context
@@ -140,44 +140,23 @@ object UserStore {
     private fun String.userMapKey() = "user_$this"
     private fun User.mapKey() = studentId.userMapKey()
 
-    suspend fun <R> User.withReLoginOnce(block: suspend (User) -> R): R {
-
-    }
-
-    suspend fun <R> User.withAutoLoginOnce(block: suspend (String) -> R): R {
-        val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
-            val callback = coroutineContext[RetryCallback]?.callback
-            if (throwable is ServerNeedLoginException) {
-
-                callback?.invoke()
+    suspend fun <R> User.withAutoLoginOnce(block: suspend (String) -> Response<R>): R =
+        withContext(Dispatchers.IO) {
+            try {
+                return@withContext block(token).checkNeedLogin()
+            } catch (exception: ServerNeedLoginException) {
+                //做一次登录
+                val loginResponse = doLogin(this@withAutoLoginOnce)
+                //获取用户信息
+                val userApi = KoinJavaComponent.get<UserApi>(UserApi::class.java)
+                val userInfo = userApi.getUserInfo(loginResponse.sessionToken)
+                val user = this@withAutoLoginOnce.copy(token = loginResponse.sessionToken, info = userInfo)
+                updateUser(user)
+                return@withContext block(loginResponse.sessionToken).checkNeedLogin()
             }
         }
-        withContext(coroutineExceptionHandler + RetryCallback {
-            //做一次登录
-            val loginResponse = doLogin(this)
-            //获取用户信息
-            val userApi = KoinJavaComponent.get<UserApi>(UserApi::class.java)
-            val userInfo = userApi.getUserInfo(loginResponse.sessionToken)
-            val user = this.copy(token = loginResponse.sessionToken, info = userInfo)
-            updateUser(user)
-            block(loginResponse.sessionToken)
-        }) {
-            block(token)
-        }
-//        try {
-//            return block(token)
-//        } catch (exception: ServerNeedLoginException) {
-//            //做一次登录
-//            val loginResponse = doLogin(this)
-//            //获取用户信息
-//            val userApi = KoinJavaComponent.get<UserApi>(UserApi::class.java)
-//            val userInfo = userApi.getUserInfo(loginResponse.sessionToken)
-//            val user = this.copy(token = loginResponse.sessionToken, info = userInfo)
-//            updateUser(user)
-//            return block(loginResponse.sessionToken)
-//        }
-    }
 
+    @Deprecated("不再使用")
     suspend fun <R> User.withAutoLogin(block: suspend (String) -> R): Pair<R, Boolean> =
         try {
             block(token) to false

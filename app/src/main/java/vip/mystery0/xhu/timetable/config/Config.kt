@@ -8,7 +8,6 @@ import vip.mystery0.xhu.timetable.BuildConfig
 import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
-import vip.mystery0.xhu.timetable.model.response.Menu
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
 import java.io.File
@@ -281,24 +280,6 @@ class Config internal constructor() {
             kv.encode("disableBackgroundWhenNight", value)
         }
         get() = kv.decodeBool("disableBackgroundWhenNight", true)
-    var menuList: List<Menu>
-        set(value) {
-            kv.encode(
-                "menuList",
-                moshi.adapter<List<Menu>>(
-                    Types.newParameterizedType(
-                        List::class.java,
-                        Menu::class.java
-                    )
-                ).toJson(value)
-            )
-        }
-        get() = moshi.adapter<List<Menu>>(
-            Types.newParameterizedType(
-                List::class.java,
-                Menu::class.java
-            )
-        ).fromJson(kv.decodeString("menuList", "[]")!!)!!
     var hideSplashBefore: Instant
         set(value) {
             kv.encode("hideSplashBefore", value.toEpochMilli())

@@ -3,6 +3,7 @@ package vip.mystery0.xhu.timetable.model
 import androidx.compose.ui.graphics.Color
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.response.Course
+import vip.mystery0.xhu.timetable.model.response.CustomCourseResponse
 import vip.mystery0.xhu.timetable.model.response.ExperimentCourse
 import vip.mystery0.xhu.timetable.utils.sha512
 import java.time.DayOfWeek
@@ -115,6 +116,30 @@ data class WeekCourseView(
                 location = experimentCourse.location,
                 teacher = experimentCourse.teacherName,
                 extraData = extraData,
+                user = user,
+            )
+        }
+
+        fun valueOf(course: CustomCourseResponse, user: User): WeekCourseView {
+            val courseDayTime = if (course.startDayTime == course.endDayTime) {
+                "第${course.startDayTime}节"
+            } else {
+                "${course.startDayTime}-${course.endDayTime}节"
+            }
+            val courseTime =
+                "${courseTimeStartArray[course.startDayTime - 1]} - ${courseTimeEndArray[course.endDayTime - 1]}"
+            return WeekCourseView(
+                courseName = course.courseName,
+                weekStr = course.weekStr,
+                weekList = course.weekList,
+                day = course.day,
+                startDayTime = course.startDayTime,
+                endDayTime = course.endDayTime,
+                courseDayTime = courseDayTime,
+                courseTime = courseTime,
+                location = course.location,
+                teacher = course.teacher,
+                extraData = emptyList(),
                 user = user,
             )
         }
