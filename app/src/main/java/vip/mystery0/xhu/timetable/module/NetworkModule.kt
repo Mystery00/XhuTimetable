@@ -7,16 +7,18 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import vip.mystery0.xhu.timetable.api.AggregationApi
 import vip.mystery0.xhu.timetable.api.CommonApi
 import vip.mystery0.xhu.timetable.api.CourseApi
 import vip.mystery0.xhu.timetable.api.FeedbackApi
 import vip.mystery0.xhu.timetable.api.FileApi
 import vip.mystery0.xhu.timetable.api.JwcApi
+import vip.mystery0.xhu.timetable.api.MenuApi
 import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.api.ServerApi
+import vip.mystery0.xhu.timetable.api.ThingApi
 import vip.mystery0.xhu.timetable.api.UserApi
 import vip.mystery0.xhu.timetable.config.GlobalConfig
-import vip.mystery0.xhu.timetable.config.interceptor.CheckLoginInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.PoemsInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.ServerApiInterceptor
@@ -37,7 +39,6 @@ val networkModule = module {
             .connectTimeout(20, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
             .addInterceptor(ServerApiInterceptor())
-            .addInterceptor(CheckLoginInterceptor())
             .addInterceptor(UserAgentInterceptor())
             .build()
     }
@@ -91,8 +92,11 @@ val networkModule = module {
     serverApi<JwcApi>()
 
     serverApi<CommonApi>()
+    serverApi<MenuApi>()
     serverApi<UserApi>()
+    serverApi<AggregationApi>()
     serverApi<CourseApi>()
+    serverApi<ThingApi>()
 
     single { get<Retrofit>(named(RETROFIT_POEMS)).create(PoemsApi::class.java) }
     single { get<Retrofit>(named(RETROFIT_FILE)).create(FileApi::class.java) }

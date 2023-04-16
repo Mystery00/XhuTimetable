@@ -100,17 +100,14 @@ class CustomThingViewModel : ComposeViewModel(), KoinComponent {
             _customThingListState.value = CustomThingListState(loading = true)
             val selected = runOnCpu { _userSelect.value.first { it.selected }.studentId }
             val selectUser = UserStore.userByStudentId(selected)
-            val year = runOnCpu { yearSelect.value.first { it.selected }.year }
-            val term = runOnCpu { termSelect.value.first { it.selected }.term }
 
             currentUser = selectUser
-            currentYear = year
-            currentTerm = term
 
+            //TODO
             val response =
-                customThingRemoteRepo.getCustomThingList(currentUser, currentYear, currentTerm)
+                customThingRemoteRepo.fetchCustomThingList(currentUser,0,0)
             _customThingListState.value = CustomThingListState(
-                customThingList = response,
+                customThingList = response.items,
                 loading = false
             )
         }

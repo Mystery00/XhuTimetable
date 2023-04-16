@@ -14,35 +14,30 @@ import vip.mystery0.xhu.timetable.api.FeedbackApi
 import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.DataHolder
-import vip.mystery0.xhu.timetable.config.GlobalConfig
-import vip.mystery0.xhu.timetable.config.coroutine.RetryCallback
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.getConfig
-import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.config.setConfig
-import vip.mystery0.xhu.timetable.config.store.ConfigStore
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
+import vip.mystery0.xhu.timetable.config.store.Menu
+import vip.mystery0.xhu.timetable.config.store.MenuStore
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.isOnline
-import vip.mystery0.xhu.timetable.model.Course
-import vip.mystery0.xhu.timetable.model.CustomThing
 import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.TodayCourseView
+import vip.mystery0.xhu.timetable.model.TodayThingView
 import vip.mystery0.xhu.timetable.model.WeekCourseView
-import vip.mystery0.xhu.timetable.model.courseTimeEndArray
-import vip.mystery0.xhu.timetable.model.courseTimeStartArray
 import vip.mystery0.xhu.timetable.model.format
-import vip.mystery0.xhu.timetable.model.response.OldCourseResponse
-import vip.mystery0.xhu.timetable.model.response.Menu
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.model.response.Version
+import vip.mystery0.xhu.timetable.model.transfer.AggregationView
 import vip.mystery0.xhu.timetable.module.Feature
 import vip.mystery0.xhu.timetable.module.betweenDays
 import vip.mystery0.xhu.timetable.module.getRepo
 import vip.mystery0.xhu.timetable.module.localRepo
+import vip.mystery0.xhu.timetable.repository.AggregationRepo
 import vip.mystery0.xhu.timetable.repository.CourseRepo
 import vip.mystery0.xhu.timetable.repository.CustomThingRepo
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
@@ -51,6 +46,10 @@ import vip.mystery0.xhu.timetable.trackError
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
+import vip.mystery0.xhu.timetable.utils.asInstant
+import vip.mystery0.xhu.timetable.utils.asLocalDateTime
+import vip.mystery0.xhu.timetable.utils.dateFormatter
+import vip.mystery0.xhu.timetable.utils.thingDateTimeFormatter
 import vip.mystery0.xhu.timetable.work.DownloadApkWork
 import vip.mystery0.xhu.timetable.work.DownloadPatchWork
 import java.time.DayOfWeek
@@ -112,8 +111,8 @@ class MainViewModel : ComposeViewModel() {
     val poems: StateFlow<Poems?> = _poems
 
     //今日事项列表
-    private val _todayThing = MutableStateFlow<List<CustomThingSheet>>(emptyList())
-    val todayThing: StateFlow<List<CustomThingSheet>> = _todayThing
+    private val _todayThing = MutableStateFlow<List<TodayThingSheet>>(emptyList())
+    val todayThing: StateFlow<List<TodayThingSheet>> = _todayThing
 
     private val _todayCourse = MutableStateFlow<List<TodayCourseSheet>>(emptyList())
     val todayCourse: StateFlow<List<TodayCourseSheet>> = _todayCourse
@@ -157,8 +156,8 @@ class MainViewModel : ComposeViewModel() {
     private val _mainUser = MutableStateFlow<User?>(null)
     val mainUser: StateFlow<User?> = _mainUser
 
-    private val _menu = MutableStateFlow<List<Menu>>(emptyList())
-    val menu: StateFlow<List<Menu>> = _menu
+    private val _menu = MutableStateFlow<List<List<Menu>>>(emptyList())
+    val menu: StateFlow<List<List<Menu>>> = _menu
 
     private val _customUi = MutableStateFlow(CustomUi.DEFAULT)
     val customUi: StateFlow<CustomUi> = _customUi
@@ -186,7 +185,7 @@ class MainViewModel : ComposeViewModel() {
         _showStatus.value = getConfigStore { showStatus }
         _showTomorrowCourse.value = getConfigStore { showTomorrowCourseTime }
             ?.let { LocalTime.now().isAfter(it) } ?: false
-        _menu.value = getConfig { menuList }
+        _menu.value = MenuStore.loadAllMenu()
         _customUi.value = getConfigStore { customUi }
     }
 
@@ -294,8 +293,8 @@ class MainViewModel : ComposeViewModel() {
                 val termStartDate = getConfigStore { termStartDate }
                 val currentWeek = calculateWeekInternal()
                 //获取缓存的课程数据
-                val dataPair = getUserCourseList(false)
-                val weekList = dataPair.second
+                val data = getMainPageData(false)
+                val weekList = data.weekViewList
                 loadCourseToTable(currentWeek, it, weekList, true)
                 _dateStart.value = termStartDate.plusWeeks(it.toLong() - 1)
                     //设置一周开始为周一
@@ -317,101 +316,14 @@ class MainViewModel : ComposeViewModel() {
         return week
     }
 
-    private suspend fun getUserCourseList(forceLoadFromCloud: Boolean): Pair<List<TodayCourseView>, List<WeekCourseView>> {
-        val todayList = ArrayList<TodayCourseView>()
-        val weekList = ArrayList<WeekCourseView>()
-        val nowYear = getConfigStore { nowYear }
-        val nowTerm = getConfigStore { nowTerm }
-        val multiAccountMode = getConfigStore { multiAccountMode }
-        val userList =
-            if (multiAccountMode) UserStore.loggedUserList() else listOf(UserStore.mainUser())
-        userList.forEach { user ->
-            val courseResponse = if (forceLoadFromCloud) {
-                courseRepo.fetchCourseList(user, nowYear, nowTerm)
-            } else {
-//                courseLocalRepo.fetchCourseList(user, nowYear, nowTerm)
-                courseRepo.fetchCourseList(user, nowYear, nowTerm)
-            }
-            courseResponse.courseList.forEach { course ->
-                todayList.add(TodayCourseView.valueOf(course, user))
-                weekList.add(WeekCourseView.valueOf(course, user))
-            }
-            courseResponse.experimentCourseList.forEach { experimentCourse ->
-                todayList.add(TodayCourseView.valueOf(experimentCourse, user))
-                weekList.add(WeekCourseView.valueOf(experimentCourse, user))
-            }
-        }
-        return todayList to weekList
-    }
-
-    private suspend fun getUserThingList(forceLoadFromCloud: Boolean): List<CustomThingSheet> {
-        if (!getConfigStore { showCustomThing }) {
-            return emptyList()
-        }
-        //TODO
-        return emptyList()
-    }
-
-    private suspend fun getAllThingList(loadFromCloud: Boolean): List<CustomThingSheet> {
-        if (!getConfig { showCustomThing }) {
-            return emptyList()
-        }
-        val currentYear = getConfig { currentYear }
-        val currentTerm = getConfig { currentTerm }
-        val thingList: List<CustomThingSheet> =
-            if (getConfig { multiAccountMode }) {
-                val list = ArrayList<CustomThingSheet>()
-                UserStore.loggedUserList().forEach { user ->
-                    val result = if (loadFromCloud) {
-                        customThingRepo.getCustomThingList(user, currentYear, currentTerm)
-                    } else {
-                        customThingLocalRepo.getCustomThingList(user, currentYear, currentTerm)
-                    }
-                    list.addAll(result.map {
-                        CustomThingSheet(
-                            user.studentId,
-                            user.info.name,
-                            it
-                        )
-                    })
-                }
-                list
-            } else {
-                val user = UserStore.mainUser()
-                val result = if (loadFromCloud) {
-                    customThingRepo.getCustomThingList(user, currentYear, currentTerm)
-                } else {
-                    customThingLocalRepo.getCustomThingList(user, currentYear, currentTerm)
-                }
-                result.map { CustomThingSheet(user.studentId, user.info.name, it) }
-            }
-        return thingList
-    }
-
-    @Deprecated("不再使用")
-    private suspend fun loadTodayThing(customThingList: List<CustomThingSheet>) {
-        _todayThing.value = runOnCpu {
-            val today = LocalDate.now()
-            val tomorrow = today.plusDays(1)
-            val nowTime = LocalTime.now()
-            val now = LocalDateTime.now()
-
-            //过滤出今日或者明日的课程
-            val showTomorrowCourse = getConfig { showTomorrowCourseTime }?.let {
-                nowTime.isAfter(it)
-            } ?: false
-            customThingList.filter {
-                if (it.thing.endTime.isBefore(now)) {
-                    //事项的结束时间比当前时间早，说明事件结束了
-                    return@filter false
-                }
-                val thing = it.thing
-                if (showTomorrowCourse)
-                    thing.showOnToday(tomorrow)
-                else
-                    thing.showOnToday(today)
-            }.sortedBy { it.thing.sort }
-        }
+    private suspend fun getMainPageData(forceLoadFromCloud: Boolean): AggregationView {
+        val showCustomCourse = getConfigStore { showCustomCourseOnWeek }
+        val showCustomThing = getConfigStore { showCustomThing }
+        return AggregationRepo.fetchAggregationMainPage(
+            forceLoadFromCloud,
+            showCustomCourse,
+            showCustomThing,
+        )
     }
 
     /**
@@ -430,27 +342,23 @@ class MainViewModel : ComposeViewModel() {
             val currentWeek = pair.first
             val loadFromCloud = pair.second
             //获取缓存的课程数据
-            val dataPair = getUserCourseList(false)
-            val todayList = dataPair.first
-            val weekList = dataPair.second
+            val data = getMainPageData(false)
             //加载今日列表的数据
-            loadTodayCourse(currentWeek, todayList)
+            loadTodayCourse(currentWeek, data.todayViewList)
             //加载今日事项
-            loadTodayThing(getUserThingList(false))
+            loadTodayThing(data.todayThingList)
             //加载周列表的数据
-            loadCourseToTable(currentWeek, currentWeek, weekList, false)
+            loadCourseToTable(currentWeek, currentWeek, data.weekViewList, false)
 
             if (loadFromCloud) {
                 //需要从云端加载数据
-                val cloudDataPair = getUserCourseList(true)
-                val cloudTodayList = cloudDataPair.first
-                val cloudWeekList = cloudDataPair.second
+                val cloudData = getMainPageData(true)
                 //加载今日列表的数据
-                loadTodayCourse(currentWeek, cloudTodayList)
+                loadTodayCourse(currentWeek, cloudData.todayViewList)
                 //加载今日事项
-                loadTodayThing(getUserThingList(true))
+                loadTodayThing(cloudData.todayThingList)
                 //加载周列表的数据
-                loadCourseToTable(currentWeek, currentWeek, cloudWeekList, false)
+                loadCourseToTable(currentWeek, currentWeek, cloudData.weekViewList, false)
                 toastMessage("数据同步成功！")
             }
             _loading.value = false
@@ -475,15 +383,13 @@ class MainViewModel : ComposeViewModel() {
             val pair = loadCourseConfig(forceUpdate = false)
             val currentWeek = pair.first
             //从云端加载数据
-            val cloudDataPair = getUserCourseList(true)
-            val cloudTodayList = cloudDataPair.first
-            val cloudWeekList = cloudDataPair.second
+            val cloudData = getMainPageData(true)
             //加载今日列表的数据
-            loadTodayCourse(currentWeek, cloudTodayList)
+            loadTodayCourse(currentWeek, cloudData.todayViewList)
             //加载今日事项
-            loadTodayThing(getAllThingList(true))
+            loadTodayThing(cloudData.todayThingList)
             //加载周列表的数据
-            loadCourseToTable(currentWeek, currentWeek, cloudWeekList, false)
+            loadCourseToTable(currentWeek, currentWeek, cloudData.weekViewList, false)
             toastMessage("数据同步成功！")
             _loading.value = false
         }
@@ -517,12 +423,12 @@ class MainViewModel : ComposeViewModel() {
         //获取自定义颜色列表
         val colorMap = getRawCourseColorList()
         val today = LocalDate.now()
-        val showTomorrowCourse = getConfigStore { showTomorrowCourseTime }
+        val showTomorrow = getConfigStore { showTomorrowCourseTime }
             ?.let { LocalTime.now().isAfter(it) } ?: false
         val showDate: LocalDate
         val showDay: DayOfWeek
         val showCurrentWeek: Int
-        if (showTomorrowCourse) {
+        if (showTomorrow) {
             //显示明天的课程，那么showDate就是明天对应的日期
             showDate = today.plusDays(1)
             showDay = showDate.dayOfWeek
@@ -533,27 +439,27 @@ class MainViewModel : ComposeViewModel() {
             showCurrentWeek = currentWeek
         }
         //过滤出今日或者明日的课程
-        val showCourseList =
+        val showList =
             courseList.filter { it.weekList.contains(showCurrentWeek) && it.day == showDay }
                 .sortedBy { it.startDayTime }
-        if (showCourseList.isEmpty()) {
+        if (showList.isEmpty()) {
             _todayCourse.value = emptyList()
             return
         }
         //合并相同课程
-        val resultCourseList = ArrayList<TodayCourseView>(showCourseList.size)
+        val resultList = ArrayList<TodayCourseView>(showList.size)
         //计算key与设置颜色
-        showCourseList.forEach {
+        showList.forEach {
             it.backgroundColor = colorMap[it.courseName] ?: ColorPool.hash(it.courseName)
             it.generateKey()
         }
-        showCourseList.groupBy { it.user.studentId }
+        showList.groupBy { it.user.studentId }
             .forEach { (_, list) ->
                 var last = list.first()
                 var lastKey = last.key
                 list.forEachIndexed { index, todayCourseView ->
                     if (index == 0) {
-                        resultCourseList.add(todayCourseView)
+                        resultList.add(todayCourseView)
                         return@forEachIndexed
                     }
                     val thisKey = todayCourseView.key
@@ -563,23 +469,23 @@ class MainViewModel : ComposeViewModel() {
                             last.endDayTime = todayCourseView.endDayTime
                         } else {
                             //两个课程相同但是节次不连续，不合并
-                            resultCourseList.add(todayCourseView)
+                            resultList.add(todayCourseView)
                             last = todayCourseView
                             lastKey = thisKey
                         }
                     } else {
-                        resultCourseList.add(todayCourseView)
+                        resultList.add(todayCourseView)
                         last = todayCourseView
                         lastKey = thisKey
                     }
                 }
-                if (resultCourseList.last() != last) {
-                    resultCourseList.add(last)
+                if (resultList.last() != last) {
+                    resultList.add(last)
                 }
             }
         //最后按照开始节次排序
         val now = LocalDateTime.now()
-        _todayCourse.value = resultCourseList.sortedBy { it.startDayTime }
+        _todayCourse.value = resultList.sortedBy { it.startDayTime }
             .map {
                 it.updateTime()
                 TodayCourseSheet(
@@ -597,6 +503,64 @@ class MainViewModel : ComposeViewModel() {
                     showDate,
                 ).calc(now)
             }
+    }
+
+    /**
+     * 复用的加载今日事项的方法
+     * @param thingList 事项列表
+     */
+    private suspend fun loadTodayThing(thingList: List<TodayThingView>) {
+        val showTomorrow = getConfigStore { showTomorrowCourseTime }
+            ?.let { LocalTime.now().isAfter(it) } ?: false
+        val showInstant: Instant
+        if (showTomorrow) {
+            //显示明天的事项，那么showInstant就是明天开始的时间
+            showInstant = LocalDate.now().plusDays(1).atStartOfDay().asInstant()
+        } else {
+            showInstant = Instant.now()
+        }
+        //过滤出今日或者明日的课程
+        val showList = thingList
+            .filter { it.showOnDay(showInstant) }
+            .sortedBy { it.sort }
+        if (showList.isEmpty()) {
+            _todayThing.value = emptyList()
+            return
+        }
+        _todayThing.value = showList.map {
+            val startDateTime = it.startTime.asLocalDateTime()
+            val endDateTime = it.endTime.asLocalDateTime()
+            val timeText = buildString {
+                if (it.allDay) {
+                    append(startDateTime.format(dateFormatter))
+                } else {
+                    append(startDateTime.format(thingDateTimeFormatter))
+                }
+                if (it.saveAsCountDown) {
+                    return@buildString
+                }
+                append(" - ")
+                if (it.allDay) {
+                    append(endDateTime.format(dateFormatter))
+                } else {
+                    append(endDateTime.format(thingDateTimeFormatter))
+                }
+            }
+            val remainDays =
+                Duration.between(LocalDate.now().atStartOfDay(), startDateTime).toDays()
+            TodayThingSheet(
+                it.title,
+                it.location,
+                it.allDay,
+                timeText,
+                it.remark,
+                it.color,
+                it.saveAsCountDown,
+                remainDays,
+                it.user.studentId,
+                it.user.info.name,
+            )
+        }
     }
 
     /**
@@ -712,23 +676,6 @@ class MainViewModel : ComposeViewModel() {
         _weekView.value = weekViewArray.toList()
     }
 
-    fun loadThingList(forceUpdate: Boolean = true) {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
-            Log.w(TAG, "load thing list failed", throwable)
-            _todayThing.value = emptyList()
-            toastMessage(throwable.message ?: throwable.javaClass.simpleName)
-        }) {
-            //加载自定义事项
-            loadTodayThing(getAllThingList(false))
-
-            //加载网络数据
-            if (forceUpdate) {
-                //加载自定义事项
-                loadTodayThing(getAllThingList(true))
-            }
-        }
-    }
-
     fun animeWeekView() {
         _showWeekView.value = !_showWeekView.value
     }
@@ -793,12 +740,6 @@ class MainViewModel : ComposeViewModel() {
         }
     }
 }
-
-data class CustomThingSheet(
-    val studentId: String,
-    val userName: String,
-    val thing: CustomThing,
-)
 
 data class CourseSheet(
     //显示标题
@@ -870,6 +811,19 @@ data class TodayCourseSheet(
         return this
     }
 }
+
+data class TodayThingSheet(
+    val title: String,
+    val location: String,
+    val allDay: Boolean,
+    val timeText: String,
+    val remark: String,
+    val color: Color,
+    val saveAsCountDown: Boolean,
+    val remainDays: Long,
+    val studentId: String,
+    val userName: String,
+)
 
 enum class CourseStatus(
     val title: String,

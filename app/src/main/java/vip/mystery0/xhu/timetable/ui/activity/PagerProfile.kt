@@ -135,43 +135,42 @@ val profileCourseContent: TabContent = @Composable { ext ->
         val menuList by viewModel.menu.collectAsState()
         val hasUnReadNotice by viewModel.hasUnReadNotice.collectAsState()
         val hasUnReadFeedback by viewModel.hasUnReadFeedback.collectAsState()
-        menuList.groupBy { it.groupSort }
-            .forEach { (_, list) ->
-                val iterator = list.iterator()
-                while (iterator.hasNext()) {
-                    val menu = iterator.next()
-                    val item = MenuItem.parseKey(menu.key.uppercase())
-                    val showBadge = when (item) {
-                        MenuItem.NOTICE -> hasUnReadNotice
-                        MenuItem.FEEDBACK -> hasUnReadFeedback
-                        else -> false
-                    }
-                    BuildProfileItem(
-                        painter = item.icon(),
-                        title = menu.title,
-                        showBadge = showBadge,
-                        click = {
-                            coroutineScope.launch {
-                                trackEvent("点击菜单 ${menu.key}")
-                                item.action(activity, menu)
-                            }
-                        })
-                    if (iterator.hasNext()) {
-                        Divider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(0.33.dp)
-                                .background(dividerSmall),
-                        )
-                    }
+        menuList.forEach {
+            val iterator = it.iterator()
+            while (iterator.hasNext()) {
+                val menu = iterator.next()
+                val item = MenuItem.parseKey(menu.key.uppercase())
+                val showBadge = when (item) {
+                    MenuItem.NOTICE -> hasUnReadNotice
+                    MenuItem.FEEDBACK -> hasUnReadFeedback
+                    else -> false
                 }
-                Divider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(6.dp)
-                        .background(divider),
-                )
+                BuildProfileItem(
+                    painter = item.icon(),
+                    title = menu.title,
+                    showBadge = showBadge,
+                    click = {
+                        coroutineScope.launch {
+                            trackEvent("点击菜单 ${menu.key}")
+                            item.action(activity, menu)
+                        }
+                    })
+                if (iterator.hasNext()) {
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(0.33.dp)
+                            .background(dividerSmall),
+                    )
+                }
             }
+            Divider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .background(divider),
+            )
+        }
     }
 }
 

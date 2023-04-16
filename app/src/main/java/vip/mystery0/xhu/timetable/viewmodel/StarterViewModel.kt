@@ -35,7 +35,6 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
         private const val TAG = "StarterViewModel"
     }
 
-    private val startRepo: StartRepo = getRepo()
     private val workManager: WorkManager by inject()
     private val alarmManager: AlarmManager by inject()
 
@@ -57,7 +56,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
 //            setTrigger(workManager)
 //            setAlarmTrigger(alarmManager)
 //            initPullWork()
-            val response = startRepo.init()
+            StartRepo.init()
             val hideTime = getConfigStore { hideSplashBefore }
             if (Instant.now().isBefore(hideTime)) {
                 //已经设置了隐藏时间，且当前时间还未到达隐藏时间

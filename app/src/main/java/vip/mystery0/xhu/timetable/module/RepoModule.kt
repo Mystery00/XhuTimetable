@@ -12,18 +12,14 @@ import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.repository.local.CourseLocalRepo
 import vip.mystery0.xhu.timetable.repository.local.CustomThingLocalRepo
 import vip.mystery0.xhu.timetable.repository.local.NoticeLocalRepo
-import vip.mystery0.xhu.timetable.repository.local.StartLocalRepo
 import vip.mystery0.xhu.timetable.repository.network.CourseNetworkRepo
 import vip.mystery0.xhu.timetable.repository.network.CustomThingNetworkRepo
 import vip.mystery0.xhu.timetable.repository.network.NoticeNetworkRepo
-import vip.mystery0.xhu.timetable.repository.network.StartNetworkRepo
 import vip.mystery0.xhu.timetable.repository.remote.CourseRemoteRepo
 import vip.mystery0.xhu.timetable.repository.remote.CustomThingRemoteRepo
 import vip.mystery0.xhu.timetable.repository.remote.NoticeRemoteRepo
-import vip.mystery0.xhu.timetable.repository.remote.StartRemoteRepo
 
 val repoModule = module {
-    injectRepo(StartLocalRepo(), StartRemoteRepo(), StartNetworkRepo)
     injectRepo(CourseLocalRepo(), CourseRemoteRepo(), CourseNetworkRepo)
     injectRepo(NoticeLocalRepo(), NoticeRemoteRepo(), NoticeNetworkRepo)
     injectRepo(CustomThingLocalRepo(), CustomThingRemoteRepo(), CustomThingNetworkRepo)

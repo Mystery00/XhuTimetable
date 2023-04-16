@@ -2,7 +2,7 @@ package vip.mystery0.xhu.timetable.model.event
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
-import vip.mystery0.xhu.timetable.model.response.Menu
+import vip.mystery0.xhu.timetable.config.store.Menu
 import vip.mystery0.xhu.timetable.toCustomTabs
 import vip.mystery0.xhu.timetable.ui.activity.AcademicReportActivity
 import vip.mystery0.xhu.timetable.ui.activity.AccountSettingsActivity
@@ -32,7 +32,7 @@ enum class MenuItem(
     ),
     QUERY_CET_SCORE(
         { XhuIcons.Profile.cetScore },
-        { it.link?.let { url -> toCustomTabs(url) } },
+        { toCustomTabs(it.link) },
     ),
     QUERY_FREE_ROOM(
         { XhuIcons.Profile.classroom },
