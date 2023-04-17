@@ -7,6 +7,7 @@ import retrofit2.http.Query
 import vip.mystery0.xhu.timetable.model.response.ExamResponse
 import vip.mystery0.xhu.timetable.model.response.ExperimentScoreResponse
 import vip.mystery0.xhu.timetable.model.response.ScoreResponse
+import vip.mystery0.xhu.timetable.model.transfer.PageResult
 
 interface ScoreApi {
     @GET("/api/rest/external/score/list")
@@ -14,12 +15,12 @@ interface ScoreApi {
         @Header("sessionToken") token: String,
         @Query("year") year: Int,
         @Query("term") term: Int,
-    ): Response<List<ScoreResponse>>
+    ): Response<PageResult<ScoreResponse>>
 
     @GET("/api/rest/external/score/experiment/list")
     suspend fun experimentScoreList(
         @Header("sessionToken") token: String,
         @Query("year") year: Int,
         @Query("term") term: Int,
-    ): Response<List<ExperimentScoreResponse>>
+    ): Response<PageResult<ExperimentScoreResponse>>
 }

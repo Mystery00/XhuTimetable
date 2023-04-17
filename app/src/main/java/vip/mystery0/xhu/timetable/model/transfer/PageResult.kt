@@ -4,19 +4,16 @@ data class PageResult<T>(
     val current: Int,
     val total: Long,
     val items: List<T>,
-    val lastId: Long,
+    val hasNext: Boolean,
 ) {
     val isEmpty: Boolean
         get() = items.isEmpty()
 
-    val hasNext: Boolean
-        get() = current * items.size < total
-
     fun <R> emptyMap(): PageResult<R> {
-        return PageResult(current, total, emptyList(), lastId)
+        return PageResult(current, total, emptyList(), hasNext)
     }
 
     fun <R> map(transform: (T) -> R): PageResult<R> {
-        return PageResult(current, total, items.map(transform), lastId)
+        return PageResult(current, total, items.map(transform), hasNext)
     }
 }

@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.AlertDialog
+import androidx.compose.material.BackdropScaffoldState
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.RadioButton
@@ -20,6 +23,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,8 +34,77 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
+import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
 abstract class BaseSelectComposeActivity : BaseComposeActivity() {
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    protected fun BuildSelectBackLayerContent(
+        scaffoldState: BackdropScaffoldState,
+        selectUserState: State<List<UserSelect>>,
+        selectYearState: State<List<YearSelect>>,
+        selectTermState: State<List<TermSelect>>,
+        showUserDialog: MutableState<Boolean>,
+        showYearDialog: MutableState<Boolean>,
+        showTermDialog: MutableState<Boolean>,
+        onDataLoad: suspend () -> Unit,
+    ) {
+        val scope = rememberCoroutineScope()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                    modifier = Modifier.weight(1F),
+                    onClick = {
+                        showUserDialog.value = true
+                    }) {
+                    val userSelect = selectUserState.value
+                    val userString = userSelect.firstOrNull { it.selected }?.title ?: "查询中"
+                    Text(text = "查询用户：$userString")
+                }
+                Button(
+                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
+                    onClick = {
+                        scope.launch {
+                            onDataLoad()
+                            scaffoldState.conceal()
+                        }
+                    }) {
+                    Icon(painter = XhuIcons.CustomCourse.pull, contentDescription = null)
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                    modifier = Modifier.weight(1F),
+                    onClick = {
+                        showYearDialog.value = true
+                    }) {
+                    val yearSelect = selectYearState.value
+                    val yearString =
+                        yearSelect.firstOrNull { it.selected }?.title ?: "查询中"
+                    Text(text = yearString)
+                }
+                OutlinedButton(
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                    modifier = Modifier.weight(1F),
+                    onClick = {
+                        showTermDialog.value = true
+                    }) {
+                    val termSelect = selectTermState.value
+                    val termString =
+                        termSelect.firstOrNull { it.selected }?.title ?: "查询中"
+                    Text(text = termString)
+                }
+            }
+        }
+    }
+
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     protected fun BuildSelectSheetLayout(
@@ -60,9 +133,7 @@ abstract class BaseSelectComposeActivity : BaseComposeActivity() {
                     showUserDialog.value = true
                 }) {
                 val userSelect = selectUserState.value
-                val selected = userSelect.firstOrNull { it.selected }
-                val userString =
-                    selected?.let { "${it.userName}(${it.studentId})" } ?: "查询中"
+                val userString = userSelect.firstOrNull { it.selected }?.title ?: "查询中"
                 Text(text = "查询用户：$userString")
             }
             OutlinedButton(
