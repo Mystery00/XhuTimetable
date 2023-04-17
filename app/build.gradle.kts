@@ -159,6 +159,9 @@ dependencies {
     implementation("androidx.compose.ui:ui:1.4.0")
     implementation("androidx.compose.material:material:1.4.0")
     debugImplementation("androidx.compose.ui:ui-tooling:1.4.0")
+    //paging3
+    implementation("androidx.paging:paging-runtime:3.1.1")
+    implementation("androidx.paging:paging-compose:1.0.0-alpha18")
     //accompanist
     val accompanistVersion = "0.25.1"
     implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")

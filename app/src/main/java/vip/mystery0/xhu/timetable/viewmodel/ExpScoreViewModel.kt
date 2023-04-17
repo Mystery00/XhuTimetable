@@ -50,7 +50,10 @@ class ExpScoreViewModel : ComposeViewModel(), KoinComponent {
                 _expScoreListState.value = ExpScoreListState(errorMessage = "选择用户为空，请重新选择")
                 return@launch
             }
-            val scoreList = ScoreRepo.fetchExpScoreList(selectedUser)
+            val year = getSelectedYear(_yearSelect.value)
+            val term = getSelectedTerm(_termSelect.value)
+            //TODO 改为分页
+            val scoreList = ScoreRepo.fetchExpScoreList(selectedUser, year, term).items
             _expScoreListState.value = ExpScoreListState(scoreList = scoreList)
         }
     }

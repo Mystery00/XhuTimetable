@@ -54,7 +54,8 @@ class ExamViewModel : ComposeViewModel() {
                 _examListState.value = ExamListState(errorMessage = "选择用户为空，请重新选择")
                 return@launch
             }
-            val examList = ExamRepo.fetchExamList(selectedUser)
+            //TODO 改为分页
+            val examList = ExamRepo.fetchExamList(selectedUser).items
             withContext(Dispatchers.Default) {
                 val now = Instant.now()
                 val resultList = examList.map {

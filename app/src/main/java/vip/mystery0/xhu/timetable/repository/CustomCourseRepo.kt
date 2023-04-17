@@ -1,93 +1,61 @@
 package vip.mystery0.xhu.timetable.repository
 
-import org.koin.java.KoinJavaComponent
-import vip.mystery0.xhu.timetable.api.ServerApi
-import vip.mystery0.xhu.timetable.api.checkLogin
-import vip.mystery0.xhu.timetable.config.ServerError
-import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLogin
+import androidx.annotation.AnyThread
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
+import kotlinx.coroutines.flow.Flow
+import org.koin.core.component.inject
+import vip.mystery0.xhu.timetable.api.CustomCourseApi
+import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.config.store.User
-import vip.mystery0.xhu.timetable.model.CustomCourse
-import vip.mystery0.xhu.timetable.model.request.CustomCourseRequest
+import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
+import vip.mystery0.xhu.timetable.model.response.CustomCourseResponse
 
-suspend fun getCustomCourseList(
-    user: User,
-    year: String,
-    term: Int,
-): List<CustomCourse> {
-    val serverApi = KoinJavaComponent.get<ServerApi>(ServerApi::class.java)
-    val response = user.withAutoLogin {
-        serverApi.customCourseList(it, year, term).checkLogin()
-    }
-    return response.first.onEach {
-        if (it.courseIndex.size == 1) {
-            it.courseIndex = listOf(it.courseIndex[0], it.courseIndex[0])
+object CustomCourseRepo : BaseDataRepo {
+    private val customCourseApi: CustomCourseApi by inject()
+
+    private val globalPagingConfig: PagingConfig
+        @AnyThread get() = PagingConfig(
+            pageSize = 10,
+        )
+
+    fun getCustomCourseListStream(
+        user: User,
+        year: Int,
+        term: Int
+    ): Flow<PagingData<CustomCourseResponse>> =
+        Pager(
+            config = globalPagingConfig,
+            pagingSourceFactory = { CustomCoursePageSource(customCourseApi, user, year, term) }
+        ).flow
+}
+
+class CustomCoursePageSource(
+    private val customCourseApi: CustomCourseApi,
+    private val user: User,
+    private val year: Int,
+    private val term: Int,
+) : PagingSource<Int, CustomCourseResponse>() {
+    override fun getRefreshKey(state: PagingState<Int, CustomCourseResponse>): Int? =
+        state.anchorPosition?.let {
+            val anchorPage = state.closestPageToPosition(it)
+            anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
         }
-    }
-}
 
-suspend fun createCustomCourse(
-    user: User,
-    year: String,
-    term: Int,
-    customCourse: CustomCourse,
-) {
-    val serverApi = KoinJavaComponent.get<ServerApi>(ServerApi::class.java)
-    val request = CustomCourseRequest(
-        customCourse.courseName,
-        customCourse.teacherName,
-        customCourse.week,
-        customCourse.location,
-        customCourse.courseIndex[0],
-        customCourse.courseIndex[1],
-        customCourse.day,
-        customCourse.extraData,
-        year,
-        term,
-    )
-    val response = user.withAutoLogin {
-        serverApi.createCustomCourse(it, request).checkLogin()
-    }
-    if (!response.first) {
-        throw ServerError("创建自定义课程失败")
-    }
-}
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CustomCourseResponse> {
+        CustomCourseRepo.checkForceLoadFromCloud(true)
 
-suspend fun updateCustomCourse(
-    user: User,
-    year: String,
-    term: Int,
-    customCourse: CustomCourse,
-) {
-    val serverApi = KoinJavaComponent.get<ServerApi>(ServerApi::class.java)
-    val request = CustomCourseRequest(
-        customCourse.courseName,
-        customCourse.teacherName,
-        customCourse.week,
-        customCourse.location,
-        customCourse.courseIndex[0],
-        customCourse.courseIndex[1],
-        customCourse.day,
-        customCourse.extraData,
-        year,
-        term,
-    )
-    val response = user.withAutoLogin {
-        serverApi.updateCustomCourse(it, customCourse.courseId, request).checkLogin()
-    }
-    if (!response.first) {
-        throw ServerError("更新自定义课程失败")
-    }
-}
-
-suspend fun deleteCustomCourse(
-    user: User,
-    courseId: Long,
-) {
-    val serverApi = KoinJavaComponent.get<ServerApi>(ServerApi::class.java)
-    val response = user.withAutoLogin {
-        serverApi.deleteCustomCourse(it, courseId).checkLogin()
-    }
-    if (!response.first) {
-        throw ServerError("删除自定义课程失败")
+        val index = params.key ?: 0
+        val response = user.withAutoLoginOnce {
+            customCourseApi.customCourseList(it, year, term, index, 10)
+        }
+        return LoadResult.Page(
+            data = response.items,
+            prevKey = null,// Only paging forward.
+            nextKey = response.hasNext.let { if (it) index + 1 else null },
+        )
     }
 }

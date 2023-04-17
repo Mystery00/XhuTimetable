@@ -25,6 +25,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemsIndexed
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.material.shimmer
@@ -32,9 +35,11 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.model.CustomCourse
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
+import vip.mystery0.xhu.timetable.model.response.CustomCourseResponse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.formatWeekString
@@ -45,7 +50,7 @@ import java.time.format.TextStyle
 import java.util.*
 
 @OptIn(ExperimentalMaterialApi::class)
-class CustomCourseActivity : BaseComposeActivity() {
+class CustomCourseActivity : BaseSelectComposeActivity() {
     private val viewModel: CustomCourseViewModel by viewModels()
 
     companion object {
@@ -59,6 +64,11 @@ class CustomCourseActivity : BaseComposeActivity() {
 
     @Composable
     override fun BuildContent() {
+        val pager = viewModel.pageState.collectAsLazyPagingItems()
+        val userSelectStatus = viewModel.userSelect.collectAsState()
+        val yearSelectStatus = viewModel.yearSelect.collectAsState()
+        val termSelectStatus = viewModel.termSelect.collectAsState()
+
         val customCourseListState by viewModel.customCourseListState.collectAsState()
         val saveCustomCourseState by viewModel.saveCustomCourseState.collectAsState()
 
@@ -68,7 +78,7 @@ class CustomCourseActivity : BaseComposeActivity() {
             })
         val initBackdropValue = if (intent.getBooleanExtra(INTENT_HIDE_SELECTOR, false)) {
             BackdropValue.Concealed
-        }else{
+        } else {
             BackdropValue.Revealed
         }
         val scaffoldState: BackdropScaffoldState =
@@ -174,62 +184,16 @@ class CustomCourseActivity : BaseComposeActivity() {
                     }
                 )
             }, backLayerContent = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                BuildSelectBackLayerContent(
+                    scaffoldState = scaffoldState,
+                    selectUserState = userSelectStatus,
+                    selectYearState = yearSelectStatus,
+                    selectTermState = termSelectStatus,
+                    showUserDialog = userDialog,
+                    showYearDialog = yearDialog,
+                    showTermDialog = termDialog,
                 ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                            modifier = Modifier.weight(1F),
-                            onClick = {
-                                userDialog.value = true
-                            }) {
-                            val userSelect by viewModel.userSelect.collectAsState()
-                            val selected = userSelect.firstOrNull { it.selected }
-                            val userString =
-                                selected?.let { "${it.userName}(${it.studentId})" } ?: "查询中"
-                            Text(text = "查询用户：$userString")
-                        }
-                        Button(
-                            colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
-                            onClick = {
-                                viewModel.loadCustomCourseList()
-                                scope.launch {
-                                    scaffoldState.conceal()
-                                }
-                            }) {
-                            Icon(painter = XhuIcons.CustomCourse.pull, contentDescription = null)
-                        }
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                            modifier = Modifier.weight(1F),
-                            onClick = {
-                                yearDialog.value = true
-                            }) {
-                            val yearSelect by viewModel.yearSelect.collectAsState()
-                            val yearString =
-                                yearSelect.firstOrNull { it.selected }?.let { "${it.year}学年" }
-                                    ?: "查询中"
-                            Text(text = yearString)
-                        }
-                        OutlinedButton(
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                            modifier = Modifier.weight(1F),
-                            onClick = {
-                                termDialog.value = true
-                            }) {
-                            val termSelect by viewModel.termSelect.collectAsState()
-                            val termString =
-                                termSelect.firstOrNull { it.selected }?.let { "第${it.term}学期" }
-                                    ?: "查询中"
-                            Text(text = termString)
-                        }
-                    }
+                    viewModel.loadCustomCourseList()
                 }
             }, frontLayerContent = {
                 ModalBottomSheetLayout(
@@ -713,42 +677,89 @@ class CustomCourseActivity : BaseComposeActivity() {
                             modifier = Modifier.fillMaxSize(),
                             state = rememberSwipeRefreshState(customCourseListState.loading),
                             onRefresh = {
+                                pager.refresh()
                             },
-                            swipeEnabled = false,
+//                            swipeEnabled = false,
                         ) {
-                            val list = customCourseListState.customCourseList
-                            if (customCourseListState.loading || list.isNotEmpty()) {
-                                LazyColumn(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(XhuColor.Common.grayBackground),
-                                    contentPadding = PaddingValues(4.dp),
-                                ) {
-                                    if (customCourseListState.loading) {
-                                        scope.launch {
-                                            showSelect.hide()
-                                        }
-                                        items(3) {
-                                            BuildItem(
-                                                CustomCourse.PLACEHOLDER,
-                                                true,
-                                            ) {}
-                                        }
-                                    } else {
-                                        items(list.size) { index ->
-                                            val item = list[index]
-                                            BuildItem(item) {
-                                                updateCustomCourse(item)
-                                                scope.launch {
-                                                    showSelect.show()
-                                                }
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(XhuColor.Common.grayBackground),
+                                contentPadding = PaddingValues(4.dp),
+                            ) {
+                                itemsIndexed(pager) { _, item ->//每个item的展示
+                                    item?.let {
+                                        BuildItem(it) {
+//                                        updateCustomCourse(item)
+                                            scope.launch {
+                                                showSelect.show()
                                             }
                                         }
                                     }
                                 }
-                            } else {
-                                BuildNoDataLayout()
+                                when (pager.loadState.append) {
+                                    is LoadState.Loading -> {//加载中的尾部item展示
+                                        item {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(50.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(text = "加载中。。。")
+                                            }
+                                        }
+                                    }
+
+                                    else -> {//加载完成或者加载错误展示的尾部item
+                                        item {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(50.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(text = "--加载完成或加载错误--")
+                                            }
+                                        }
+                                    }
+                                }
                             }
+
+
+//                            val list = customCourseListState.customCourseList
+//                            if (customCourseListState.loading || list.isNotEmpty()) {
+//                                LazyColumn(
+//                                    modifier = Modifier
+//                                        .fillMaxSize()
+//                                        .background(XhuColor.Common.grayBackground),
+//                                    contentPadding = PaddingValues(4.dp),
+//                                ) {
+//                                    if (customCourseListState.loading) {
+//                                        scope.launch {
+//                                            showSelect.hide()
+//                                        }
+//                                        items(3) {
+//                                            BuildItem(
+//                                                CustomCourse.PLACEHOLDER,
+//                                                true,
+//                                            ) {}
+//                                        }
+//                                    } else {
+//                                        items(list.size) { index ->
+//                                            val item = list[index]
+//                                            BuildItem(item) {
+//                                                updateCustomCourse(item)
+//                                                scope.launch {
+//                                                    showSelect.show()
+//                                                }
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            } else {
+//                                BuildNoDataLayout()
+//                            }
                         }
                         FloatingActionButton(
                             modifier = Modifier
@@ -771,9 +782,15 @@ class CustomCourseActivity : BaseComposeActivity() {
                     }
                 }
             })
-        ShowUserDialog(show = userDialog)
-        ShowYearDialog(show = yearDialog)
-        ShowTermDialog(show = termDialog)
+        ShowUserDialog(selectState = userSelectStatus, show = userDialog, onSelect = {
+            viewModel.selectUser(it.studentId)
+        })
+        ShowYearDialog(selectState = yearSelectStatus, show = yearDialog, onSelect = {
+            viewModel.selectYear(it.value)
+        })
+        ShowTermDialog(selectState = termSelectStatus, show = termDialog, onSelect = {
+            viewModel.selectTerm(it.value)
+        })
         ShowCourseIndexDialog(
             courseIndex = courseIndex,
             first = courseIndex1Dialog,
@@ -784,197 +801,12 @@ class CustomCourseActivity : BaseComposeActivity() {
         if (errorMessage.second.isNotBlank()) {
             errorMessage.second.toast(true)
         }
-        val init by viewModel.init.collectAsState()
-        if (init) {
-            LaunchedEffect(key1 = "init", block = {
-                viewModel.loadCustomCourseList()
-            })
-        }
-    }
-
-    @Composable
-    private fun ShowUserDialog(
-        show: MutableState<Boolean>,
-    ) {
-        val userSelect by viewModel.userSelect.collectAsState()
-        val selectedUser = userSelect.firstOrNull { it.selected } ?: return
-        if (show.value) {
-            var selected by remember { mutableStateOf(selectedUser) }
-            AlertDialog(
-                onDismissRequest = {
-                    show.value = false
-                },
-                title = {
-                    Text(text = "请选择要查询的学生")
-                },
-                text = {
-                    LazyColumn {
-                        items(userSelect.size) { index ->
-                            val item = userSelect[index]
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                    ) {
-                                        selected = item
-                                    },
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(selected = selected == item, onClick = null)
-                                Text(text = "${item.userName}(${item.studentId})")
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.selectUser(selected.studentId)
-                            show.value = false
-                        },
-                    ) {
-                        Text("确认")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            show.value = false
-                        }
-                    ) {
-                        Text("取消")
-                    }
-                }
-            )
-        }
-    }
-
-    @Composable
-    private fun ShowYearDialog(
-        show: MutableState<Boolean>,
-    ) {
-        val yearSelect by viewModel.yearSelect.collectAsState()
-        val selectedYear = yearSelect.firstOrNull { it.selected } ?: return
-        if (show.value) {
-            var selected by remember { mutableStateOf(selectedYear) }
-            AlertDialog(
-                onDismissRequest = {
-                    show.value = false
-                },
-                title = {
-                    Text(text = "请选择要查询的学生")
-                },
-                text = {
-                    Column {
-                        LazyColumn {
-                            items(yearSelect.size) { index ->
-                                val item = yearSelect[index]
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp)
-                                        .clickable(
-                                            indication = null,
-                                            interactionSource = remember { MutableInteractionSource() },
-                                        ) {
-                                            selected = item
-                                        },
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    RadioButton(selected = selected == item, onClick = null)
-                                    Text(text = item.year)
-                                }
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.selectYear(selected.year)
-                            show.value = false
-                        },
-                    ) {
-                        Text("确认")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            show.value = false
-                        }
-                    ) {
-                        Text("取消")
-                    }
-                }
-            )
-        }
-    }
-
-    @Composable
-    private fun ShowTermDialog(
-        show: MutableState<Boolean>,
-    ) {
-        val termSelect by viewModel.termSelect.collectAsState()
-        val selectedTerm = termSelect.firstOrNull { it.selected } ?: return
-        if (show.value) {
-            var selected by remember { mutableStateOf(selectedTerm) }
-            AlertDialog(
-                onDismissRequest = {
-                    show.value = false
-                },
-                title = {
-                    Text(text = "请选择要查询的学期")
-                },
-                text = {
-                    LazyColumn {
-                        items(termSelect.size) { index ->
-                            val item = termSelect[index]
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                    ) {
-                                        selected = item
-                                    },
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(selected = selected == item, onClick = null)
-                                Text(text = "${item.term}")
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.selectTerm(selected.term)
-                            show.value = false
-                        },
-                    ) {
-                        Text("确认")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            show.value = false
-                        }
-                    ) {
-                        Text("取消")
-                    }
-                }
-            )
-        }
+//        val init by viewModel.init.collectAsState()
+//        if (init) {
+//            LaunchedEffect(key1 = "init", block = {
+//                viewModel.loadCustomCourseList()
+//            })
+//        }
     }
 
     @Composable
@@ -1223,7 +1055,7 @@ class CustomCourseActivity : BaseComposeActivity() {
 
 @Composable
 private fun BuildItem(
-    item: CustomCourse,
+    item: CustomCourseResponse,
     placeHolder: Boolean = false,
     onClick: () -> Unit,
 ) {
@@ -1253,13 +1085,13 @@ private fun BuildItem(
                 fontWeight = FontWeight.Bold,
             )
             Spacer(modifier = Modifier.height(8.dp))
-            if (item.teacherName.isNotBlank()) {
+            if (item.teacher.isNotBlank()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Image(painter = XhuIcons.CustomCourse.teacher, contentDescription = null)
-                    Text(text = "教师名称：${item.teacherName}")
+                    Text(text = "教师名称：${item.teacher}")
                 }
             }
             Row(
@@ -1268,8 +1100,8 @@ private fun BuildItem(
             ) {
                 Image(painter = XhuIcons.CustomCourse.week, contentDescription = null)
                 Text(
-                    text = "上课星期：第${item.weekString} 每周${
-                        DayOfWeek.of(item.day).getDisplayName(TextStyle.SHORT, Locale.CHINA)
+                    text = "上课星期：第${item.weekStr} 每周${
+                        item.day.getDisplayName(TextStyle.SHORT, Locale.CHINA)
                     }"
                 )
             }
@@ -1287,11 +1119,7 @@ private fun BuildItem(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Image(painter = XhuIcons.CustomCourse.time, contentDescription = null)
-                var courseIndex = item.courseIndex
-                if (courseIndex.size == 1) {
-                    courseIndex = listOf(courseIndex[0], courseIndex[0])
-                }
-                Text(text = "上课时间：第 ${courseIndex[0]}-${courseIndex[1]} 节")
+                Text(text = "上课时间：第 ${item.startDayTime}-${item.endDayTime} 节")
             }
         }
     }
