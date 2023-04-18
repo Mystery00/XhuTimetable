@@ -45,6 +45,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -316,6 +317,18 @@ abstract class BaseComposeActivity(
 
         LaunchedEffect(Unit) {
             focusRequester.requestFocus()
+        }
+    }
+
+    @Composable
+    fun BuildPageFooter(text: String) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = text, fontSize = 14.sp)
         }
     }
 

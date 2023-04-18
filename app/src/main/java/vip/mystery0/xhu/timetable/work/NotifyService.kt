@@ -19,14 +19,14 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
-import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.setConfig
+import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.model.response.ExamItem
 import vip.mystery0.xhu.timetable.module.localRepo
-import vip.mystery0.xhu.timetable.repository.CourseRepo
+import vip.mystery0.xhu.timetable.repository.CourseRepo111
 import vip.mystery0.xhu.timetable.repository.getExamList
 import vip.mystery0.xhu.timetable.repository.getRawCourseColorList
 import vip.mystery0.xhu.timetable.setAlarmTrigger
@@ -54,7 +54,7 @@ class NotifyService : Service(), KoinComponent {
     private val scope = CoroutineScope(job)
 
     private val notificationManager: NotificationManager by inject()
-    private val courseLocalRepo: CourseRepo by localRepo()
+    private val courseLocalRepo: CourseRepo111 by localRepo()
     private val alarmManager: AlarmManager by inject()
     private val colorAccent = android.graphics.Color.parseColor("#2196F3")
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
