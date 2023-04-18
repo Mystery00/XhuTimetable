@@ -2,8 +2,6 @@ package vip.mystery0.xhu.timetable.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -14,33 +12,21 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
-import vip.mystery0.xhu.timetable.api.ServerApi
-import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.base.TermSelect
 import vip.mystery0.xhu.timetable.base.UserSelect
 import vip.mystery0.xhu.timetable.base.YearSelect
-import vip.mystery0.xhu.timetable.base.TermSelect
-import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLogin
-import vip.mystery0.xhu.timetable.config.store.User
-import vip.mystery0.xhu.timetable.config.store.UserStore
-import vip.mystery0.xhu.timetable.config.chinaZone
-import vip.mystery0.xhu.timetable.config.getConfig
-import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
-import vip.mystery0.xhu.timetable.model.CustomCourse
+import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.request.AllCourseRequest
+import vip.mystery0.xhu.timetable.model.request.CustomCourseRequest
+import vip.mystery0.xhu.timetable.model.response.AllCourseResponse
 import vip.mystery0.xhu.timetable.model.response.CustomCourseResponse
-import vip.mystery0.xhu.timetable.repository.CustomCoursePageSource
+import vip.mystery0.xhu.timetable.repository.CourseRepo
 import vip.mystery0.xhu.timetable.repository.CustomCourseRepo
-import vip.mystery0.xhu.timetable.repository.createCustomCourse
-import vip.mystery0.xhu.timetable.repository.deleteCustomCourse
-import vip.mystery0.xhu.timetable.repository.getCustomCourseList
-import vip.mystery0.xhu.timetable.repository.updateCustomCourse
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Month
+import java.time.DayOfWeek
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
     companion object {
         private const val TAG = "CustomCourseViewModel"
@@ -53,9 +39,8 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
     private val _termSelect = MutableStateFlow<List<TermSelect>>(emptyList())
     val termSelect: StateFlow<List<TermSelect>> = _termSelect
 
+    // 自定义课程分页数据
     private val pageRequestFlow = MutableStateFlow<PageRequest?>(null)
-
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val _pageState = pageRequestFlow
         .flatMapLatest {
             if (it == null) return@flatMapLatest flowOf(PagingData.empty())
@@ -63,21 +48,28 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
         }.cachedIn(viewModelScope)
     val pageState: Flow<PagingData<CustomCourseResponse>> = _pageState
 
-    private val serverApi: ServerApi by inject()
+    //蹭课列表分页数据
+    private val allCoursePageRequestFlow = MutableStateFlow<AllCoursePageRequest?>(null)
+    private val _allCoursePageState = allCoursePageRequestFlow
+        .flatMapLatest {
+            if (it == null) return@flatMapLatest flowOf(PagingData.empty())
+            val request = AllCourseRequest(
+                courseName = it.courseName,
+                teacherName = it.teacherName,
+                courseIndex = it.courseIndex,
+                day = it.day?.value,
+            )
+            CourseRepo.getAllCourseListStream(it.user, it.year, it.term, request)
+        }.cachedIn(viewModelScope)
+    val allCoursePageState: Flow<PagingData<AllCourseResponse>> = _allCoursePageState
 
     var changeCustomCourse = false
 
     private val _errorMessage = MutableStateFlow(Pair(System.currentTimeMillis(), ""))
     val errorMessage: StateFlow<Pair<Long, String>> = _errorMessage
 
-    private val _customCourseListState = MutableStateFlow(CustomCourseListState())
-    val customCourseListState: StateFlow<CustomCourseListState> = _customCourseListState
-
-    private val _saveCustomCourseState = MutableStateFlow(SaveCustomCourseState())
-    val saveCustomCourseState: StateFlow<SaveCustomCourseState> = _saveCustomCourseState
-
-    private val _searchCourseListState = MutableStateFlow(SearchCourseListState())
-    val searchCourseListState: StateFlow<SearchCourseListState> = _searchCourseListState
+    private val _saveLoadingState = MutableStateFlow(LoadingState())
+    val saveLoadingState: StateFlow<LoadingState> = _saveLoadingState
 
     init {
         viewModelScope.launch {
@@ -92,12 +84,15 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
     }
 
     fun loadCustomCourseList() {
+        fun failed(message: String) {
+            Log.w(TAG, "loadCustomCourseList failed: $message")
+            toastMessage(message)
+        }
+
         viewModelScope.launch {
             val selectedUser = getSelectedUser(_userSelect.value)
             if (selectedUser == null) {
-                Log.w(TAG, "loadScoreList: empty selected user")
-                _customCourseListState.value =
-                    CustomCourseListState(errorMessage = "选择用户为空，请重新选择")
+                failed("选择用户为空，请重新选择")
                 return@launch
             }
             val year = getSelectedYear(_yearSelect.value)
@@ -110,99 +105,96 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
         courseName: String?,
         teacherName: String?,
         courseIndex: Int?,
-        day: Int?
+        day: DayOfWeek?
     ) {
+        fun failed(message: String) {
+            Log.w(TAG, "loadSearchCourseList failed: $message")
+            toastMessage(message)
+        }
         viewModelScope.launch(serverExceptionHandler { throwable ->
             Log.w(TAG, "load search course list failed", throwable)
-            _searchCourseListState.value = SearchCourseListState()
-            toastMessage(throwable.message ?: throwable.javaClass.simpleName)
+            failed(throwable.message ?: throwable.javaClass.simpleName)
         }) {
-//            _searchCourseListState.value = SearchCourseListState(loading = true)
-//            val currentYear = getConfig { currentYear }
-//            val currentTerm = getConfig { currentTerm }
-//            val request = AllCourseRequest(
-//                currentYear,
-//                currentTerm,
-//                courseName,
-//                teacherName,
-//                courseIndex,
-//                day,
-//            )
-//            val list = UserStore.mainUser().withAutoLogin {
-//                serverApi.selectAllCourse(it, request).checkLogin()
-//            }.first
-//            val result = list.map {
-//                SearchCourse(
-//                    it.name,
-//                    it.teacher,
-//                    it.location,
-//                    it.weekString,
-//                    it.week,
-//                    it.time,
-//                    it.day,
-//                )
-//            }
-//            _searchCourseListState.value = SearchCourseListState(
-//                searchCourseList = result,
-//                loading = false
-//            )
+            val selectedUser = getSelectedUser(_userSelect.value)
+            if (selectedUser == null) {
+                failed("选择用户为空，请重新选择")
+                return@launch
+            }
+            val year = getSelectedYear(_yearSelect.value)
+            val term = getSelectedTerm(_termSelect.value)
+            allCoursePageRequestFlow.emit(
+                AllCoursePageRequest(
+                    selectedUser,
+                    year,
+                    term,
+                    courseName,
+                    teacherName,
+                    courseIndex,
+                    day,
+                )
+            )
         }
     }
 
     fun saveCustomCourse(
-        courseId: Long,
-        courseName: String,
-        teacherName: String,
-        week: List<Int>,
-        location: String,
-        courseIndex: List<Int>,
-        day: Int,
+        courseId: Long?,
+        request: CustomCourseRequest,
     ) {
+        fun failed(message: String) {
+            Log.w(TAG, "saveCustomCourse failed: $message")
+            toastMessage(message)
+            _saveLoadingState.value = LoadingState()
+        }
         viewModelScope.launch(serverExceptionHandler { throwable ->
             Log.w(TAG, "save custom course failed", throwable)
-            _saveCustomCourseState.value =
-                SaveCustomCourseState()
-            toastMessage(throwable.message ?: throwable.javaClass.simpleName)
+            failed(throwable.message ?: throwable.javaClass.simpleName)
         }) {
-//            _saveCustomCourseState.value = SaveCustomCourseState(loading = true)
-//
-//            val customCourse = CustomCourse(
-//                courseId,
-//                courseName,
-//                teacherName,
-//                "",
-//                week,
-//                location,
-//                courseIndex,
-//                day,
-//                "",
-//            )
-//            if (courseId == 0L) {
-//                createCustomCourse(currentUser, currentYear, currentTerm, customCourse)
-//            } else {
-//                updateCustomCourse(currentUser, currentYear, currentTerm, customCourse)
-//            }
-//            _saveCustomCourseState.value = SaveCustomCourseState()
-//            toastMessage("《$courseName》保存成功")
-//            changeCustomCourse = true
-//            loadCustomCourseList()
+            _saveLoadingState.value = LoadingState(loading = true)
+
+            val selectedUser = getSelectedUser(_userSelect.value)
+            if (selectedUser == null) {
+                failed("选择用户为空，请重新选择")
+                return@launch
+            }
+            val year = getSelectedYear(_yearSelect.value)
+            val term = getSelectedTerm(_termSelect.value)
+            request.year = year
+            request.term = term
+            if (courseId == null || courseId == 0L) {
+                CustomCourseRepo.createCustomCourse(selectedUser, request)
+            } else {
+                CustomCourseRepo.updateCustomCourse(selectedUser, courseId, request)
+            }
+            _saveLoadingState.value = LoadingState()
+            toastMessage("《${request.courseName}》保存成功")
+            changeCustomCourse = true
+            loadCustomCourseList()
         }
     }
 
-    fun delete(courseId: Long) {
+    fun deleteCustomCourse(courseId: Long) {
+        fun failed(message: String) {
+            Log.w(TAG, "deleteCustomCourse failed: $message")
+            toastMessage(message)
+            _saveLoadingState.value = LoadingState()
+        }
         viewModelScope.launch(serverExceptionHandler { throwable ->
             Log.w(TAG, "delete custom course failed", throwable)
-            _saveCustomCourseState.value =
-                SaveCustomCourseState()
-            toastMessage(throwable.message ?: throwable.javaClass.simpleName)
+            failed(throwable.message ?: throwable.javaClass.simpleName)
         }) {
-//            _saveCustomCourseState.value = SaveCustomCourseState(loading = true)
-//
-//            deleteCustomCourse(currentUser, courseId)
-//            _saveCustomCourseState.value = SaveCustomCourseState()
-//            toastMessage("删除成功")
-//            changeCustomCourse = true
-//            loadCustomCourseList()
+            _saveLoadingState.value = LoadingState(loading = true)
+
+            val selectedUser = getSelectedUser(_userSelect.value)
+            if (selectedUser == null) {
+                failed("选择用户为空，请重新选择")
+                return@launch
+            }
+
+            CustomCourseRepo.deleteCustomCourse(selectedUser, courseId)
+            _saveLoadingState.value = LoadingState()
+            toastMessage("删除成功")
+            changeCustomCourse = true
+            loadCustomCourseList()
         }
     }
 
@@ -223,50 +215,25 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
             _termSelect.value = setSelectedTerm(_termSelect.value, term)
         }
     }
-}
 
-data class PageRequest(
-    val user: User,
-    val year: Int,
-    val term: Int,
-)
+    internal data class PageRequest(
+        val user: User,
+        val year: Int,
+        val term: Int,
+        val requestTime: Long = System.currentTimeMillis(),
+    )
 
-data class CustomCourseListState(
-    val loading: Boolean = false,
-    val customCourseList: List<CustomCourse> = emptyList(),
-    val errorMessage: String = "",
-)
+    internal data class AllCoursePageRequest(
+        val user: User,
+        val year: Int,
+        val term: Int,
+        val courseName: String?,
+        val teacherName: String?,
+        val courseIndex: Int?,
+        val day: DayOfWeek?,
+    )
 
-data class SaveCustomCourseState(
-    val loading: Boolean = false,
-)
-
-data class SearchCourseListState(
-    val loading: Boolean = false,
-    val searchCourseList: List<SearchCourse> = emptyList(),
-)
-
-data class SearchCourse(
-    var name: String,
-    var teacher: String,
-    var location: String,
-    var weekString: String,
-    var week: List<Int>,
-    var time: List<Int>,
-    var day: Int,
-) {
-    companion object {
-        val PLACEHOLDER =
-            SearchCourse("课程名称", "教师名称", "上课地点", "第1周", listOf(1), listOf(1, 1), 1)
-        val EMPTY =
-            SearchCourse(
-                "",
-                "",
-                "",
-                "",
-                listOf(),
-                listOf(1, 1),
-                LocalDate.now().dayOfWeek.value,
-            )
-    }
+    data class LoadingState(
+        val loading: Boolean = false,
+    )
 }

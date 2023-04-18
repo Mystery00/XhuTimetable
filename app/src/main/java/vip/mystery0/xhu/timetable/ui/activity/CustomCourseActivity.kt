@@ -1,8 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import android.content.Intent
-import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
@@ -13,6 +11,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -34,17 +33,18 @@ import com.google.accompanist.placeholder.material.shimmer
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
-import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
-import vip.mystery0.xhu.timetable.model.CustomCourse
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
+import vip.mystery0.xhu.timetable.model.request.CustomCourseRequest
+import vip.mystery0.xhu.timetable.model.response.AllCourseResponse
 import vip.mystery0.xhu.timetable.model.response.CustomCourseResponse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.utils.asLocalDateTime
+import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
 import vip.mystery0.xhu.timetable.utils.formatWeekString
 import vip.mystery0.xhu.timetable.viewmodel.CustomCourseViewModel
-import vip.mystery0.xhu.timetable.viewmodel.SearchCourse
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.*
@@ -69,12 +69,15 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
         val yearSelectStatus = viewModel.yearSelect.collectAsState()
         val termSelectStatus = viewModel.termSelect.collectAsState()
 
-        val customCourseListState by viewModel.customCourseListState.collectAsState()
-        val saveCustomCourseState by viewModel.saveCustomCourseState.collectAsState()
+        val saveLoadingState by viewModel.saveLoadingState.collectAsState()
 
         val showSelect = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden,
             confirmValueChange = {
-                !customCourseListState.loading && !saveCustomCourseState.loading
+                when {
+                    pager.loadState.refresh is LoadState.Loading -> false
+                    saveLoadingState.loading -> false
+                    else -> true
+                }
             })
         val initBackdropValue = if (intent.getBooleanExtra(INTENT_HIDE_SELECTOR, false)) {
             BackdropValue.Concealed
@@ -85,7 +88,12 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
             rememberBackdropScaffoldState(
                 initialValue = initBackdropValue,
                 confirmStateChange = {
-                    !showSelect.isVisible && !customCourseListState.loading && !saveCustomCourseState.loading
+                    when {
+                        showSelect.isVisible -> false
+                        pager.loadState.refresh is LoadState.Loading -> false
+                        saveLoadingState.loading -> false
+                        else -> true
+                    }
                 })
         val scope = rememberCoroutineScope()
 
@@ -98,24 +106,28 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
         val courseIndex2Dialog = remember { mutableStateOf(false) }
         val weekDialog = remember { mutableStateOf(false) }
 
-        var customCourse by remember { mutableStateOf(CustomCourse.EMPTY) }
+        var customCourse by remember { mutableStateOf(CustomCourseResponse.init()) }
         var courseName by remember { mutableStateOf(customCourse.courseName) }
-        var teacherName by remember { mutableStateOf(customCourse.teacherName) }
-        var weekList by remember { mutableStateOf(customCourse.week) }
-        var location by remember { mutableStateOf(customCourse.location) }
-        val courseIndex = remember { mutableStateOf(customCourse.courseIndex) }
+        var weekList by remember { mutableStateOf(customCourse.weekList) }
         val day = remember { mutableStateOf(customCourse.day) }
+        val startDayTime = remember { mutableStateOf(customCourse.startDayTime) }
+        val endDayTime = remember { mutableStateOf(customCourse.endDayTime) }
+        var location by remember { mutableStateOf(customCourse.location) }
+        var teacher by remember { mutableStateOf(customCourse.teacher) }
 
-        var searchCourse by remember { mutableStateOf(SearchCourse.EMPTY) }
+        var searchCourse by remember { mutableStateOf<AllCourseResponse?>(null) }
 
-        fun updateCustomCourse(data: CustomCourse) {
-            customCourse = data
-            courseName = data.courseName
-            teacherName = data.teacherName
-            weekList = data.week
-            location = data.location
-            courseIndex.value = data.courseIndex
-            day.value = data.day
+        fun updateCustomCourse(data: CustomCourseResponse) {
+            scope.launch {
+                customCourse = data
+                courseName = data.courseName
+                weekList = data.weekList
+                day.value = data.day
+                startDayTime.value = data.startDayTime
+                endDayTime.value = data.endDayTime
+                location = data.location
+                teacher = data.teacher
+            }
         }
 
         fun onBack() {
@@ -218,46 +230,43 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                     contentDescription = null,
                                 )
                                 Spacer(modifier = Modifier.weight(1F))
-                                if (customCourse.courseId != 0L && !saveCustomCourseState.loading && createType == CreateType.INPUT) {
+                                if (customCourse.courseId != 0L && !saveLoadingState.loading && createType == CreateType.INPUT) {
                                     TextButton(
                                         onClick = {
-                                            viewModel.delete(customCourse.courseId)
+                                            viewModel.deleteCustomCourse(customCourse.courseId)
                                         }) {
                                         Text(text = "删除", color = Color.Red)
                                     }
                                 }
-                                if (!saveCustomCourseState.loading) {
+                                if (!saveLoadingState.loading) {
                                     TextButton(
                                         onClick = {
                                             if (createType == CreateType.INPUT) {
                                                 viewModel.saveCustomCourse(
                                                     customCourse.courseId,
-                                                    courseName,
-                                                    teacherName,
-                                                    weekList,
-                                                    location,
-                                                    courseIndex.value,
-                                                    day.value,
+                                                    CustomCourseRequest.buildOf(
+                                                        courseName,
+                                                        weekList,
+                                                        day.value,
+                                                        startDayTime.value,
+                                                        endDayTime.value,
+                                                        location,
+                                                        teacher,
+                                                    )
                                                 )
                                             } else {
-                                                viewModel.saveCustomCourse(
-                                                    0L,
-                                                    searchCourse.name,
-                                                    searchCourse.teacher,
-                                                    searchCourse.week,
-                                                    searchCourse.location,
-                                                    listOf(
-                                                        searchCourse.time.first(),
-                                                        searchCourse.time.last()
-                                                    ),
-                                                    searchCourse.day,
-                                                )
+                                                searchCourse?.let {
+                                                    viewModel.saveCustomCourse(
+                                                        null,
+                                                        CustomCourseRequest.buildOf(it)
+                                                    )
+                                                }
                                             }
                                         }) {
                                         Text(text = "保存")
                                     }
                                 }
-                                if (saveCustomCourseState.loading) {
+                                if (saveLoadingState.loading) {
                                     TextButton(
                                         enabled = false,
                                         onClick = {
@@ -342,7 +351,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                         ) {
                                             TextField(
                                                 modifier = Modifier.weight(1F),
-                                                value = teacherName,
+                                                value = teacher,
                                                 placeholder = {
                                                     Text(text = "（选填）")
                                                 },
@@ -355,7 +364,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                         contentDescription = null
                                                     )
                                                 },
-                                                onValueChange = { teacherName = it },
+                                                onValueChange = { teacher = it },
                                                 colors = TextFieldDefaults.textFieldColors(
                                                     backgroundColor = Color.Transparent,
                                                     unfocusedIndicatorColor = Color.Transparent,
@@ -464,7 +473,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                         indication = null,
                                                         interactionSource = MutableInteractionSource(),
                                                     ),
-                                                text = "第 ${courseIndex.value[0]}-${courseIndex.value[1]} 节",
+                                                text = "第 ${startDayTime.value}-${endDayTime.value} 节",
                                             )
                                             Text(
                                                 modifier = Modifier
@@ -476,8 +485,10 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                         indication = null,
                                                         interactionSource = MutableInteractionSource(),
                                                     ),
-                                                text = DayOfWeek.of(day.value)
-                                                    .getDisplayName(TextStyle.SHORT, Locale.CHINA),
+                                                text = day.value.getDisplayName(
+                                                    TextStyle.SHORT,
+                                                    Locale.CHINA
+                                                ),
                                             )
                                         }
                                     }
@@ -485,6 +496,9 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                 }
 
                                 CreateType.SELECT -> {
+                                    val allCoursePager =
+                                        viewModel.allCoursePageState.collectAsLazyPagingItems()
+
                                     var searchCourseName by remember { mutableStateOf("") }
                                     var searchTeacherName by remember { mutableStateOf("") }
                                     val searchCourseIndex = remember { mutableStateOf(0) }
@@ -492,8 +506,6 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
 
                                     val searchWeekDialog = remember { mutableStateOf(false) }
                                     val searchCourseIndexDialog = remember { mutableStateOf(false) }
-
-                                    val searchCourseListState by viewModel.searchCourseListState.collectAsState()
 
                                     Column {
                                         Row(
@@ -574,11 +586,16 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                     ),
                                                 text = courseIndexText,
                                             )
-                                            val dayText =
-                                                if (searchDay.value == 0) "选择星期" else DayOfWeek.of(
-                                                    searchDay.value
-                                                )
-                                                    .getDisplayName(TextStyle.SHORT, Locale.CHINA)
+                                            val dayText: String =
+                                                if (searchDay.value == 0) {
+                                                    "选择星期"
+                                                } else {
+                                                    val dayOfWeek = DayOfWeek.of(searchDay.value)
+                                                    dayOfWeek.getDisplayName(
+                                                        TextStyle.SHORT,
+                                                        Locale.CHINA
+                                                    ) ?: "选择星期"
+                                                }
                                             Text(
                                                 modifier = Modifier
                                                     .weight(1F)
@@ -600,21 +617,23 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                         ) {
                                             Text(
                                                 modifier = Modifier.weight(1F),
-                                                text = "从下面的列表中选择需要添加的课程\n当前结果数量：${searchCourseListState.searchCourseList.size}",
+                                                text = "从下面的列表中选择需要添加的课程\n当前结果数量：${allCoursePager.itemCount}",
                                             )
                                             OutlinedButton(
-                                                enabled = !searchCourseListState.loading,
+//                                                enabled = allCoursePager.loadState.refresh !is LoadState.Loading,
                                                 onClick = {
-                                                    searchCourse = SearchCourse.EMPTY
+                                                    searchCourse = null
                                                     val selectedCourseIndex =
                                                         if (searchCourseIndex.value == 0) null else searchCourseIndex.value
-                                                    val selectedDay =
-                                                        if (searchDay.value == 0) null else searchDay.value
+                                                    val dayOfWeek =
+                                                        if (searchDay.value == 0) null else DayOfWeek.of(
+                                                            searchDay.value
+                                                        )
                                                     viewModel.loadSearchCourseList(
                                                         searchCourseName,
                                                         searchTeacherName,
                                                         selectedCourseIndex,
-                                                        selectedDay,
+                                                        dayOfWeek,
                                                     )
                                                 }) {
                                                 Text(text = "查询")
@@ -633,26 +652,17 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                             .defaultMinSize(minHeight = 180.dp)
                                             .fillMaxWidth()
                                             .background(XhuColor.Common.grayBackground),
-                                        state = rememberSwipeRefreshState(searchCourseListState.loading),
+                                        state = rememberSwipeRefreshState(false),
                                         onRefresh = {
+                                            allCoursePager.refresh()
                                         },
                                         swipeEnabled = false,
                                     ) {
                                         LazyColumn(
                                             contentPadding = PaddingValues(4.dp),
                                         ) {
-                                            if (searchCourseListState.loading) {
-                                                items(3) {
-                                                    BuildSearchResultItem(
-                                                        item = SearchCourse.PLACEHOLDER,
-                                                        placeHolder = true,
-                                                        checked = false,
-                                                    ) {}
-                                                }
-                                            } else {
-                                                val list = searchCourseListState.searchCourseList
-                                                items(list.size) { index ->
-                                                    val item = list[index]
+                                            itemsIndexed(allCoursePager) { _, item ->
+                                                item?.let {
                                                     BuildSearchResultItem(
                                                         item,
                                                         checked = item == searchCourse
@@ -661,9 +671,22 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                     }
                                                 }
                                             }
+                                            when (pager.loadState.append) {
+                                                is LoadState.Loading -> {
+                                                    item { BuildPageFooter(text = "数据加载中，请稍后……") }
+                                                }
+
+                                                is LoadState.Error -> {
+                                                    item { BuildPageFooter(text = "数据加载失败，请重试") }
+                                                }
+
+                                                is LoadState.NotLoading -> {
+                                                    item { BuildPageFooter(text = "o(´^｀)o 再怎么滑也没有啦~") }
+                                                }
+                                            }
                                         }
                                     }
-                                    ShowWeekDialog(week = searchDay, show = searchWeekDialog)
+                                    ShowWeekDialog(day = searchDay, show = searchWeekDialog)
                                     ShowSearchCourseIndexDialog(
                                         courseIndex = searchCourseIndex,
                                         show = searchCourseIndexDialog
@@ -675,22 +698,26 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                     Box {
                         SwipeRefresh(
                             modifier = Modifier.fillMaxSize(),
-                            state = rememberSwipeRefreshState(customCourseListState.loading),
+                            state = rememberSwipeRefreshState(isRefreshing = false),
                             onRefresh = {
                                 pager.refresh()
                             },
-//                            swipeEnabled = false,
+                            swipeEnabled = false,
                         ) {
+                            if (pager.itemCount == 0) {
+                                BuildNoDataLayout()
+                                return@SwipeRefresh
+                            }
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .background(XhuColor.Common.grayBackground),
                                 contentPadding = PaddingValues(4.dp),
                             ) {
-                                itemsIndexed(pager) { _, item ->//每个item的展示
+                                itemsIndexed(pager) { _, item ->
                                     item?.let {
                                         BuildItem(it) {
-//                                        updateCustomCourse(item)
+                                            updateCustomCourse(item)
                                             scope.launch {
                                                 showSelect.show()
                                             }
@@ -698,76 +725,27 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                     }
                                 }
                                 when (pager.loadState.append) {
-                                    is LoadState.Loading -> {//加载中的尾部item展示
-                                        item {
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .height(50.dp),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Text(text = "加载中。。。")
-                                            }
-                                        }
+                                    is LoadState.Loading -> {
+                                        item { BuildPageFooter(text = "数据加载中，请稍后……") }
                                     }
 
-                                    else -> {//加载完成或者加载错误展示的尾部item
-                                        item {
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .height(50.dp),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Text(text = "--加载完成或加载错误--")
-                                            }
-                                        }
+                                    is LoadState.Error -> {
+                                        item { BuildPageFooter(text = "数据加载失败，请重试") }
+                                    }
+
+                                    is LoadState.NotLoading -> {
+                                        item { BuildPageFooter(text = "o(´^｀)o 再怎么滑也没有啦~") }
                                     }
                                 }
                             }
-
-
-//                            val list = customCourseListState.customCourseList
-//                            if (customCourseListState.loading || list.isNotEmpty()) {
-//                                LazyColumn(
-//                                    modifier = Modifier
-//                                        .fillMaxSize()
-//                                        .background(XhuColor.Common.grayBackground),
-//                                    contentPadding = PaddingValues(4.dp),
-//                                ) {
-//                                    if (customCourseListState.loading) {
-//                                        scope.launch {
-//                                            showSelect.hide()
-//                                        }
-//                                        items(3) {
-//                                            BuildItem(
-//                                                CustomCourse.PLACEHOLDER,
-//                                                true,
-//                                            ) {}
-//                                        }
-//                                    } else {
-//                                        items(list.size) { index ->
-//                                            val item = list[index]
-//                                            BuildItem(item) {
-//                                                updateCustomCourse(item)
-//                                                scope.launch {
-//                                                    showSelect.show()
-//                                                }
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            } else {
-//                                BuildNoDataLayout()
-//                            }
                         }
                         FloatingActionButton(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
                                 .padding(24.dp),
                             onClick = {
-                                if (!customCourseListState.loading) {
-                                    updateCustomCourse(CustomCourse.EMPTY)
+                                if (pager.loadState.refresh !is LoadState.Loading) {
+                                    updateCustomCourse(CustomCourseResponse.init())
                                     scope.launch {
                                         showSelect.show()
                                     }
@@ -792,11 +770,12 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
             viewModel.selectTerm(it.value)
         })
         ShowCourseIndexDialog(
-            courseIndex = courseIndex,
+            startDayTime = startDayTime,
+            endDayTime = endDayTime,
             first = courseIndex1Dialog,
             second = courseIndex2Dialog
         )
-        ShowWeekDialog(week = day, show = weekDialog)
+        ShowWeekDialog(dayOfWeek = day, show = weekDialog)
         val errorMessage by viewModel.errorMessage.collectAsState()
         if (errorMessage.second.isNotBlank()) {
             errorMessage.second.toast(true)
@@ -811,11 +790,12 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
 
     @Composable
     private fun ShowCourseIndexDialog(
-        courseIndex: MutableState<List<Int>>,
+        startDayTime: MutableState<Int>,
+        endDayTime: MutableState<Int>,
         first: MutableState<Boolean>,
         second: MutableState<Boolean>,
     ) {
-        var saveData by remember { mutableStateOf(courseIndex.value) }
+        var saveData by remember { mutableStateOf(listOf(startDayTime.value, endDayTime.value)) }
         if (first.value) {
             var selected by remember { mutableStateOf(1) }
             AlertDialog(
@@ -851,7 +831,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            saveData = listOf(selected, courseIndex.value[1])
+                            saveData = listOf(selected, endDayTime.value)
                             first.value = false
                         },
                     ) {
@@ -861,7 +841,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                 dismissButton = {
                     TextButton(
                         onClick = {
-                            saveData = courseIndex.value
+                            saveData = listOf(startDayTime.value, endDayTime.value)
                             first.value = false
                             second.value = false
                         }
@@ -915,7 +895,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                 dismissButton = {
                     TextButton(
                         onClick = {
-                            saveData = courseIndex.value
+                            saveData = listOf(startDayTime.value, endDayTime.value)
                             first.value = false
                             second.value = false
                         }
@@ -925,7 +905,8 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                 }
             )
         } else {
-            courseIndex.value = saveData
+            startDayTime.value = saveData[0]
+            endDayTime.value = saveData[1]
         }
     }
 
@@ -992,11 +973,16 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
 
     @Composable
     private fun ShowWeekDialog(
-        week: MutableState<Int>,
+        dayOfWeek: MutableState<DayOfWeek>? = null,
+        day: MutableState<Int>? = null,
         show: MutableState<Boolean>,
     ) {
-        val array = arrayOf("周一", "周二", "周三", "周四", "周五", "周六", "周日")
-        val selectedWeek = week.value
+        var selectedWeek: DayOfWeek? = null
+        if (dayOfWeek != null) {
+            selectedWeek = dayOfWeek.value
+        } else if (day != null && day.value != 0) {
+            selectedWeek = DayOfWeek.of(day.value)
+        }
         if (show.value) {
             var selected by remember { mutableStateOf(selectedWeek) }
             AlertDialog(
@@ -1008,8 +994,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                 },
                 text = {
                     LazyColumn {
-                        items(array.size) { index ->
-                            val item = index + 1
+                        items(DayOfWeek.values()) { item ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -1024,7 +1009,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 RadioButton(selected = selected == item, onClick = null)
-                                Text(text = array[index])
+                                Text(text = item.getDisplayName(TextStyle.SHORT, Locale.CHINA))
                             }
                         }
                     }
@@ -1032,7 +1017,13 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            week.value = selected
+                            selected?.let {
+                                if (dayOfWeek != null) {
+                                    dayOfWeek.value = it
+                                } else if (day != null) {
+                                    day.value = it.value
+                                }
+                            }
                             show.value = false
                         },
                     ) {
@@ -1100,9 +1091,13 @@ private fun BuildItem(
             ) {
                 Image(painter = XhuIcons.CustomCourse.week, contentDescription = null)
                 Text(
-                    text = "上课星期：第${item.weekStr} 每周${
-                        item.day.getDisplayName(TextStyle.SHORT, Locale.CHINA)
-                    }"
+                    text = buildString {
+                        append("上课星期：")
+                        append("第")
+                        append(item.weekStr)
+                        append(" 每周")
+                        append(item.day.getDisplayName(TextStyle.SHORT, Locale.CHINA))
+                    }
                 )
             }
             if (item.location.isNotBlank()) {
@@ -1121,13 +1116,19 @@ private fun BuildItem(
                 Image(painter = XhuIcons.CustomCourse.time, contentDescription = null)
                 Text(text = "上课时间：第 ${item.startDayTime}-${item.endDayTime} 节")
             }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(text = "创建时间：${item.createTime.asLocalDateTime().format(chinaDateTimeFormatter)}}")
+            }
         }
     }
 }
 
 @Composable
 private fun BuildSearchResultItem(
-    item: SearchCourse,
+    item: AllCourseResponse,
     placeHolder: Boolean = false,
     checked: Boolean,
     onClick: () -> Unit,
@@ -1156,7 +1157,7 @@ private fun BuildSearchResultItem(
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = item.name,
+                text = item.courseName,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
             )
@@ -1176,9 +1177,13 @@ private fun BuildSearchResultItem(
             ) {
                 Image(painter = XhuIcons.CustomCourse.week, contentDescription = null)
                 Text(
-                    text = "上课星期：第${item.weekString} 每周${
-                        DayOfWeek.of(item.day).getDisplayName(TextStyle.SHORT, Locale.CHINA)
-                    }"
+                    text = buildString {
+                        append("上课星期：")
+                        append("第")
+                        append(item.weekList.formatWeekString())
+                        append(" 每周")
+                        append(item.day.getDisplayName(TextStyle.SHORT, Locale.CHINA))
+                    }
                 )
             }
             if (item.location.isNotBlank()) {
@@ -1195,12 +1200,13 @@ private fun BuildSearchResultItem(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Image(painter = XhuIcons.CustomCourse.time, contentDescription = null)
-                val courseIndex: String = if (item.time.size == 1) {
-                    "${item.time[0]}"
-                } else {
-                    "${item.time.first()}-${item.time.last()}"
-                }
-                Text(text = "上课时间：第 $courseIndex 节")
+                Text(text = "上课时间：第 ${item.startDayTime}-${item.endDayTime} 节")
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(text = "更新时间：${item.updateTime.asLocalDateTime().format(chinaDateTimeFormatter)}}")
             }
         }
     }

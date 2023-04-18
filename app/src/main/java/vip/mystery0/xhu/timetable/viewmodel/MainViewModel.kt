@@ -16,8 +16,6 @@ import vip.mystery0.xhu.timetable.api.FeedbackApi
 import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.DataHolder
-import vip.mystery0.xhu.timetable.config.store.User
-import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.serverExceptionHandler
 import vip.mystery0.xhu.timetable.config.setConfig
@@ -25,6 +23,8 @@ import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.Menu
 import vip.mystery0.xhu.timetable.config.store.MenuStore
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
+import vip.mystery0.xhu.timetable.config.store.User
+import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.model.CustomUi
@@ -40,7 +40,7 @@ import vip.mystery0.xhu.timetable.module.betweenDays
 import vip.mystery0.xhu.timetable.module.getRepo
 import vip.mystery0.xhu.timetable.module.localRepo
 import vip.mystery0.xhu.timetable.repository.AggregationRepo
-import vip.mystery0.xhu.timetable.repository.CourseRepo
+import vip.mystery0.xhu.timetable.repository.CourseRepo111
 import vip.mystery0.xhu.timetable.repository.CustomThingRepo
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
 import vip.mystery0.xhu.timetable.repository.getRawCourseColorList
@@ -77,9 +77,9 @@ class MainViewModel : ComposeViewModel() {
 
     private val feedbackApi: FeedbackApi by inject()
 
-    private val courseRepo: CourseRepo = getRepo()
+    private val courseRepo: CourseRepo111 = getRepo()
 
-    private val courseLocalRepo: CourseRepo by localRepo()
+    private val courseLocalRepo: CourseRepo111 by localRepo()
 
     private val customThingRepo: CustomThingRepo = getRepo()
 

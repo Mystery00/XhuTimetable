@@ -7,8 +7,6 @@ import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.getConfig
-import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.Course
@@ -17,14 +15,14 @@ import vip.mystery0.xhu.timetable.model.entity.CourseType
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.module.localRepo
-import vip.mystery0.xhu.timetable.repository.CourseRepo
+import vip.mystery0.xhu.timetable.repository.CourseRepo111
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import kotlin.random.Random
 
 class CustomUiViewModel : ComposeViewModel() {
     private val eventBus: EventBus by inject()
-    private val courseLocalRepo: CourseRepo by localRepo()
+    private val courseLocalRepo: CourseRepo111 by localRepo()
 
     private val _randomCourse = MutableStateFlow<List<Course>>(emptyList())
     val randomCourse: StateFlow<List<Course>> = _randomCourse

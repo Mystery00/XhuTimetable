@@ -1,13 +1,19 @@
 package vip.mystery0.xhu.timetable.model.response
 
+import java.time.DayOfWeek
+import java.time.Instant
+
 data class AllCourseResponse(
-    var name: String,
-    var teacher: String,
-    var location: String,
-    var weekString: String,
-    var week: List<Int>,
-    var time: List<Int>,
-    var day: Int,
-    var createTime: Long,
-    var updateTime: Long,
+    val courseName: String,
+    val weekList: List<Int>,
+    val day: DayOfWeek,
+    val dayIndex: Int,
+    val startDayTime: Int,
+    val endDayTime: Int,
+    val location: String,
+    val teacher: String,
+    val year: Int,
+    val term: Int,
+    val createTime: Instant,
+    val updateTime: Instant,
 )

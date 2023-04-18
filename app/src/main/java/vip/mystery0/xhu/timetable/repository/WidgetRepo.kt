@@ -1,10 +1,10 @@
 package vip.mystery0.xhu.timetable.repository
 
 import androidx.compose.ui.graphics.Color
-import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.runOnCpu
+import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.response.OldCourseResponse
 import vip.mystery0.xhu.timetable.module.getLocalRepo
@@ -58,7 +58,7 @@ suspend fun getTimeTitle() =
     }
 
 suspend fun getTodayCourse(currentWeek: Int): List<CourseGlance> {
-    val courseRepo: CourseRepo = getLocalRepo()
+    val courseRepo: CourseRepo111 = getLocalRepo()
 
     fun convertCourseList(
         courseList: List<OldCourseResponse>,
@@ -174,7 +174,7 @@ suspend fun getTodayCourse(currentWeek: Int): List<CourseGlance> {
 }
 
 suspend fun getWeekCourse(currentWeek: Int): List<List<CourseSheet>> {
-    val courseRepo: CourseRepo = getLocalRepo()
+    val courseRepo: CourseRepo111 = getLocalRepo()
 
     fun convertCourseList(
         courseList: List<OldCourseResponse>,

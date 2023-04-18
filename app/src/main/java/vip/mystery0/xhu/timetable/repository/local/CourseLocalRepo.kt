@@ -4,17 +4,17 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.koin.core.component.inject
-import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.runOnIo
+import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.entity.CourseItem
 import vip.mystery0.xhu.timetable.model.entity.CourseSource
 import vip.mystery0.xhu.timetable.model.entity.CourseType
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
 import vip.mystery0.xhu.timetable.model.response.OldCourseResponse
-import vip.mystery0.xhu.timetable.repository.CourseRepo
+import vip.mystery0.xhu.timetable.repository.CourseRepo111
 import vip.mystery0.xhu.timetable.repository.db.dao.CourseDao
 
-class CourseLocalRepo : CourseRepo {
+class CourseLocalRepo : CourseRepo111 {
     private val moshi = Moshi.Builder()
         .addLast(KotlinJsonAdapterFactory())
         .build()
