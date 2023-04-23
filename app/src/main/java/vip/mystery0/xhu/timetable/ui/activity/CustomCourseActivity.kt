@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
-import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
@@ -21,6 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,7 +32,9 @@ import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.material.shimmer
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
@@ -53,15 +55,6 @@ import java.util.*
 class CustomCourseActivity : BaseSelectComposeActivity() {
     private val viewModel: CustomCourseViewModel by viewModels()
 
-    companion object {
-        private const val INTENT_HIDE_SELECTOR = "hideSelector"
-        fun hideSelector(): Intent.() -> Unit {
-            return {
-                putExtra(INTENT_HIDE_SELECTOR, true)
-            }
-        }
-    }
-
     @Composable
     override fun BuildContent() {
         val pager = viewModel.pageState.collectAsLazyPagingItems()
@@ -71,37 +64,16 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
 
         val saveLoadingState by viewModel.saveLoadingState.collectAsState()
 
-        val showSelect = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden,
-            confirmValueChange = {
-                when {
-                    pager.loadState.refresh is LoadState.Loading -> false
-                    saveLoadingState.loading -> false
-                    else -> true
-                }
-            })
-        val initBackdropValue = if (intent.getBooleanExtra(INTENT_HIDE_SELECTOR, false)) {
-            BackdropValue.Concealed
-        } else {
-            BackdropValue.Revealed
-        }
-        val scaffoldState: BackdropScaffoldState =
-            rememberBackdropScaffoldState(
-                initialValue = initBackdropValue,
-                confirmStateChange = {
-                    when {
-                        showSelect.isVisible -> false
-                        pager.loadState.refresh is LoadState.Loading -> false
-                        saveLoadingState.loading -> false
-                        else -> true
-                    }
-                })
+        val userDialog = remember { mutableStateOf(false) }
+        val yearDialog = remember { mutableStateOf(false) }
+        val termDialog = remember { mutableStateOf(false) }
+
+        val showSelect = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+        val scaffoldState = rememberBackdropScaffoldState(initialValue = BackdropValue.Concealed)
         val scope = rememberCoroutineScope()
 
         var createType by remember { mutableStateOf(CreateType.INPUT) }
 
-        val userDialog = remember { mutableStateOf(false) }
-        val yearDialog = remember { mutableStateOf(false) }
-        val termDialog = remember { mutableStateOf(false) }
         val courseIndex1Dialog = remember { mutableStateOf(false) }
         val courseIndex2Dialog = remember { mutableStateOf(false) }
         val weekDialog = remember { mutableStateOf(false) }
@@ -117,8 +89,8 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
 
         var searchCourse by remember { mutableStateOf<AllCourseResponse?>(null) }
 
-        fun updateCustomCourse(data: CustomCourseResponse) {
-            scope.launch {
+        suspend fun updateCustomCourse(data: CustomCourseResponse) {
+            withContext(Dispatchers.Default) {
                 customCourse = data
                 courseName = data.courseName
                 weekList = data.weekList
@@ -154,6 +126,16 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                 onBack()
             }
         )
+
+        if (!saveLoadingState.loading) {
+            val focusManager = LocalFocusManager.current
+            LaunchedEffect(key1 = "autoHideSheet", block = {
+                scope.launch {
+                    showSelect.hide()
+                    focusManager.clearFocus()
+                }
+            })
+        }
 
         BackdropScaffold(
             modifier = Modifier,
@@ -204,9 +186,10 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                     showUserDialog = userDialog,
                     showYearDialog = yearDialog,
                     showTermDialog = termDialog,
-                ) {
-                    viewModel.loadCustomCourseList()
-                }
+                    onDataLoad = {
+                        viewModel.loadCustomCourseList()
+                    }
+                )
             }, frontLayerContent = {
                 ModalBottomSheetLayout(
                     sheetState = showSelect,
@@ -218,10 +201,12 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                     .padding(8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
+                                val focusManager = LocalFocusManager.current
                                 Image(
                                     modifier = Modifier
                                         .padding(12.dp)
                                         .clickable {
+                                            focusManager.clearFocus()
                                             scope.launch {
                                                 showSelect.hide()
                                             }
@@ -620,7 +605,6 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                 text = "从下面的列表中选择需要添加的课程\n当前结果数量：${allCoursePager.itemCount}",
                                             )
                                             OutlinedButton(
-//                                                enabled = allCoursePager.loadState.refresh !is LoadState.Loading,
                                                 onClick = {
                                                     searchCourse = null
                                                     val selectedCourseIndex =
@@ -698,7 +682,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                     Box {
                         SwipeRefresh(
                             modifier = Modifier.fillMaxSize(),
-                            state = rememberSwipeRefreshState(isRefreshing = false),
+                            state = rememberSwipeRefreshState(isRefreshing = pager.loadState.refresh is LoadState.Loading),
                             onRefresh = {
                                 pager.refresh()
                             },
@@ -717,8 +701,8 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                 itemsIndexed(pager) { _, item ->
                                     item?.let {
                                         BuildItem(it) {
-                                            updateCustomCourse(item)
                                             scope.launch {
+                                                updateCustomCourse(item)
                                                 showSelect.show()
                                             }
                                         }
@@ -744,11 +728,9 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                 .align(Alignment.BottomEnd)
                                 .padding(24.dp),
                             onClick = {
-                                if (pager.loadState.refresh !is LoadState.Loading) {
+                                scope.launch {
                                     updateCustomCourse(CustomCourseResponse.init())
-                                    scope.launch {
-                                        showSelect.show()
-                                    }
+                                    showSelect.show()
                                 }
                             }) {
                             Icon(
@@ -780,12 +762,6 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
         if (errorMessage.second.isNotBlank()) {
             errorMessage.second.toast(true)
         }
-//        val init by viewModel.init.collectAsState()
-//        if (init) {
-//            LaunchedEffect(key1 = "init", block = {
-//                viewModel.loadCustomCourseList()
-//            })
-//        }
     }
 
     @Composable
@@ -1120,7 +1096,11 @@ private fun BuildItem(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(text = "创建时间：${item.createTime.asLocalDateTime().format(chinaDateTimeFormatter)}}")
+                Text(
+                    text = "创建时间：${
+                        item.createTime.asLocalDateTime().format(chinaDateTimeFormatter)
+                    }"
+                )
             }
         }
     }
@@ -1206,7 +1186,11 @@ private fun BuildSearchResultItem(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(text = "更新时间：${item.updateTime.asLocalDateTime().format(chinaDateTimeFormatter)}}")
+                Text(
+                    text = "更新时间：${
+                        item.updateTime.asLocalDateTime().format(chinaDateTimeFormatter)
+                    }"
+                )
             }
         }
     }

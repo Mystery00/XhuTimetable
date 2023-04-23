@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
-import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
@@ -17,9 +16,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemsIndexed
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.material.shimmer
@@ -34,85 +37,73 @@ import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.datetime.time.timepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import com.vanpra.composematerialdialogs.title
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import kotlinx.coroutines.withContext
+import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.model.CustomThing
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
+import vip.mystery0.xhu.timetable.model.request.CustomThingRequest
+import vip.mystery0.xhu.timetable.model.response.CustomThingResponse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.utils.asLocalDateTime
+import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
 import vip.mystery0.xhu.timetable.utils.dateFormatter
 import vip.mystery0.xhu.timetable.utils.dateWithWeekFormatter
 import vip.mystery0.xhu.timetable.utils.enTimeFormatter
+import vip.mystery0.xhu.timetable.utils.parseColorHexString
 import vip.mystery0.xhu.timetable.utils.thingDateTimeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.CustomThingViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterialApi::class)
-class CustomThingActivity : BaseComposeActivity() {
+class CustomThingActivity : BaseSelectComposeActivity() {
     private val viewModel: CustomThingViewModel by viewModels()
-
-    companion object {
-        private const val INTENT_HIDE_SELECTOR = "hideSelector"
-        fun hideSelector(): Intent.() -> Unit {
-            return {
-                putExtra(INTENT_HIDE_SELECTOR, true)
-            }
-        }
-    }
 
     @Composable
     override fun BuildContent() {
-        val customThingListState by viewModel.customThingListState.collectAsState()
-        val saveCustomThingState by viewModel.saveCustomThingState.collectAsState()
+        val pager = viewModel.pageState.collectAsLazyPagingItems()
+        val userSelectStatus = viewModel.userSelect.collectAsState()
 
-        val showSelect = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden,
-            confirmValueChange = {
-                !customThingListState.loading && !saveCustomThingState.loading
-            })
-        val initBackdropValue = if (intent.getBooleanExtra(INTENT_HIDE_SELECTOR, false)) {
-            BackdropValue.Concealed
-        }else{
-            BackdropValue.Revealed
-        }
-        val scaffoldState: BackdropScaffoldState =
-            rememberBackdropScaffoldState(
-                initialValue = initBackdropValue,
-                confirmStateChange = {
-                    !showSelect.isVisible && !customThingListState.loading && !saveCustomThingState.loading
-                })
-        val dialogState = rememberMaterialDialogState()
-        val scope = rememberCoroutineScope()
+        val saveLoadingState by viewModel.saveLoadingState.collectAsState()
 
         val userDialog = remember { mutableStateOf(false) }
-        val yearDialog = remember { mutableStateOf(false) }
-        val termDialog = remember { mutableStateOf(false) }
+
+        val showSelect = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+        val scaffoldState = rememberBackdropScaffoldState(initialValue = BackdropValue.Concealed)
+        val scope = rememberCoroutineScope()
+
         val startDateDialog = rememberMaterialDialogState()
         val endDateDialog = rememberMaterialDialogState()
         val startTimeDialog = rememberMaterialDialogState()
         val endTimeDialog = rememberMaterialDialogState()
+        val dialogState = rememberMaterialDialogState()
 
-        var customThing by remember { mutableStateOf(CustomThing.EMPTY) }
+        var customThing by remember { mutableStateOf(CustomThingResponse.init()) }
         var thingTitle by remember { mutableStateOf(customThing.title) }
         var location by remember { mutableStateOf(customThing.location) }
         var allDay by remember { mutableStateOf(customThing.allDay) }
         var saveAsCountdown by remember { mutableStateOf(customThing.saveAsCountDown) }
-        val startTime = remember { mutableStateOf(customThing.startTime) }
-        val endTime = remember { mutableStateOf(customThing.endTime) }
+        val startTime = remember { mutableStateOf(customThing.startTime.asLocalDateTime()) }
+        val endTime = remember { mutableStateOf(customThing.endTime.asLocalDateTime()) }
         var remark by remember { mutableStateOf(customThing.remark) }
-        val color = remember { mutableStateOf(customThing.color) }
+        val color = remember { mutableStateOf(customThing.color.parseColorHexString()) }
 
-        fun updateCustomThing(data: CustomThing) {
-            customThing = data
-            thingTitle = data.title
-            location = data.location
-            allDay = data.allDay
-            saveAsCountdown = data.saveAsCountDown
-            startTime.value = data.startTime
-            endTime.value = data.endTime
-            remark = data.remark
-            color.value = data.color
+        suspend fun updateCustomThing(data: CustomThingResponse) {
+            withContext(Dispatchers.Default) {
+                customThing = data
+                thingTitle = data.title
+                location = data.location
+                allDay = data.allDay
+                saveAsCountdown = data.saveAsCountDown
+                startTime.value = data.startTime.asLocalDateTime()
+                endTime.value = data.endTime.asLocalDateTime()
+                remark = data.remark
+                color.value = data.color.parseColorHexString()
+            }
         }
 
         fun onBack() {
@@ -139,6 +130,16 @@ class CustomThingActivity : BaseComposeActivity() {
                 onBack()
             }
         )
+
+        if (!saveLoadingState.init && !saveLoadingState.loading && saveLoadingState.actionSuccess) {
+            val focusManager = LocalFocusManager.current
+            LaunchedEffect(key1 = "autoHideSheet", block = {
+                scope.launch {
+                    showSelect.hide()
+                    focusManager.clearFocus()
+                }
+            })
+        }
 
         BackdropScaffold(
             modifier = Modifier,
@@ -187,55 +188,12 @@ class CustomThingActivity : BaseComposeActivity() {
                         .padding(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                            modifier = Modifier.weight(1F),
-                            onClick = {
-                                userDialog.value = true
-                            }) {
-                            val userSelect by viewModel.userSelect.collectAsState()
-                            val selected = userSelect.firstOrNull { it.selected }
-                            val userString =
-                                selected?.let { "${it.userName}(${it.studentId})" } ?: "查询中"
-                            Text(text = "查询用户：$userString")
-                        }
-                        Button(
-                            colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
-                            onClick = {
-                                viewModel.loadCustomThingList()
-                                scope.launch {
-                                    scaffoldState.conceal()
-                                }
-                            }) {
-                            Icon(painter = XhuIcons.CustomCourse.pull, contentDescription = null)
-                        }
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                            modifier = Modifier.weight(1F),
-                            onClick = {
-                                yearDialog.value = true
-                            }) {
-                            val yearSelect by viewModel.yearSelect.collectAsState()
-                            val yearString =
-                                yearSelect.firstOrNull { it.selected }?.let { "${it.year}学年" }
-                                    ?: "查询中"
-                            Text(text = yearString)
-                        }
-                        OutlinedButton(
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                            modifier = Modifier.weight(1F),
-                            onClick = {
-                                termDialog.value = true
-                            }) {
-                            val termSelect by viewModel.termSelect.collectAsState()
-                            val termString =
-                                termSelect.firstOrNull { it.selected }?.let { "第${it.term}学期" }
-                                    ?: "查询中"
-                            Text(text = termString)
-                        }
+                    BuildUserSelectBackLayerContent(
+                        scaffoldState = scaffoldState,
+                        selectUserState = userSelectStatus,
+                        showUserDialog = userDialog,
+                    ) {
+                        viewModel.loadCustomThingList()
                     }
                 }
             }, frontLayerContent = {
@@ -249,10 +207,12 @@ class CustomThingActivity : BaseComposeActivity() {
                                     .padding(8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
+                                val focusManager = LocalFocusManager.current
                                 Image(
                                     modifier = Modifier
                                         .padding(12.dp)
                                         .clickable {
+                                            focusManager.clearFocus()
                                             scope.launch {
                                                 showSelect.hide()
                                             }
@@ -261,43 +221,38 @@ class CustomThingActivity : BaseComposeActivity() {
                                     contentDescription = null,
                                 )
                                 Spacer(modifier = Modifier.weight(1F))
-                                if (customThing.thingId != 0L && !saveCustomThingState.loading) {
+                                if (customThing.thingId != 0L && !saveLoadingState.loading) {
                                     TextButton(
                                         onClick = {
-                                            viewModel.delete(customThing.thingId)
+                                            viewModel.deleteCustomThing(customThing.thingId)
                                         }) {
                                         Text(text = "删除", color = Color.Red)
                                     }
                                 }
-                                if (!saveCustomThingState.loading) {
+                                if (!saveLoadingState.loading) {
                                     TextButton(
                                         onClick = {
-                                            if (saveAsCountdown) {
-                                                //存储为倒计时，那么持续时间为一天
-                                                endTime.value = startTime.value.plusDays(1)
-                                            }
-                                            if (startTime.value.isAfter(endTime.value)) {
-                                                "开始时间不能晚于结束时间".toast(true)
-                                                return@TextButton
-                                            }
                                             viewModel.saveCustomThing(
                                                 customThing.thingId,
-                                                thingTitle,
-                                                location,
-                                                allDay,
-                                                startTime.value,
-                                                endTime.value,
-                                                remark,
-                                                color.value,
-                                                mapOf(
-                                                    CustomThing.Key.SAVE_AS_COUNT_DOWN to saveAsCountdown.toString()
-                                                )
+                                                CustomThingRequest.buildOf(
+                                                    thingTitle,
+                                                    location,
+                                                    allDay,
+                                                    startTime.value,
+                                                    endTime.value,
+                                                    remark,
+                                                    color.value,
+                                                    mapOf(
+                                                        CustomThing.Key.SAVE_AS_COUNT_DOWN to saveAsCountdown.toString()
+                                                    )
+                                                ),
+                                                saveAsCountdown,
                                             )
                                         }) {
                                         Text(text = "保存")
                                     }
                                 }
-                                if (saveCustomThingState.loading) {
+                                if (saveLoadingState.loading) {
                                     TextButton(
                                         enabled = false,
                                         onClick = {
@@ -535,43 +490,45 @@ class CustomThingActivity : BaseComposeActivity() {
                     Box {
                         SwipeRefresh(
                             modifier = Modifier.fillMaxSize(),
-                            state = rememberSwipeRefreshState(customThingListState.loading),
+                            state = rememberSwipeRefreshState(isRefreshing = false),
                             onRefresh = {
+                                pager.refresh()
                             },
                             swipeEnabled = false,
                         ) {
-                            val list = customThingListState.customThingList
-                            if (customThingListState.loading || list.isNotEmpty()) {
-                                LazyColumn(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(XhuColor.Common.grayBackground),
-                                    contentPadding = PaddingValues(4.dp),
-                                ) {
-                                    if (customThingListState.loading) {
-                                        scope.launch {
-                                            showSelect.hide()
-                                        }
-                                        items(3) {
-                                            BuildItem(
-                                                CustomThing.PLACEHOLDER,
-                                                true,
-                                            ) {}
-                                        }
-                                    } else {
-                                        items(list.size) { index ->
-                                            val item = list[index]
-                                            BuildItem(item) {
+                            if (pager.itemCount == 0) {
+                                BuildNoDataLayout()
+                                return@SwipeRefresh
+                            }
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(XhuColor.Common.grayBackground),
+                                contentPadding = PaddingValues(4.dp),
+                            ) {
+                                itemsIndexed(pager) { _, item ->
+                                    item?.let {
+                                        BuildItem(it) {
+                                            scope.launch {
                                                 updateCustomThing(item)
-                                                scope.launch {
-                                                    showSelect.show()
-                                                }
+                                                showSelect.show()
                                             }
                                         }
                                     }
                                 }
-                            } else {
-                                BuildNoDataLayout()
+                                when (pager.loadState.append) {
+                                    is LoadState.Loading -> {
+                                        item { BuildPageFooter(text = "数据加载中，请稍后……") }
+                                    }
+
+                                    is LoadState.Error -> {
+                                        item { BuildPageFooter(text = "数据加载失败，请重试") }
+                                    }
+
+                                    is LoadState.NotLoading -> {
+                                        item { BuildPageFooter(text = "o(´^｀)o 再怎么滑也没有啦~") }
+                                    }
+                                }
                             }
                         }
                         FloatingActionButton(
@@ -579,11 +536,9 @@ class CustomThingActivity : BaseComposeActivity() {
                                 .align(Alignment.BottomEnd)
                                 .padding(24.dp),
                             onClick = {
-                                if (!customThingListState.loading) {
-                                    updateCustomThing(CustomThing.EMPTY)
-                                    scope.launch {
-                                        showSelect.show()
-                                    }
+                                scope.launch {
+                                    updateCustomThing(CustomThingResponse.init())
+                                    showSelect.show()
                                 }
                             }) {
                             Icon(
@@ -595,9 +550,9 @@ class CustomThingActivity : BaseComposeActivity() {
                     }
                 }
             })
-        ShowUserDialog(show = userDialog)
-        ShowYearDialog(show = yearDialog)
-        ShowTermDialog(show = termDialog)
+        ShowUserDialog(selectState = userSelectStatus, show = userDialog, onSelect = {
+            viewModel.selectUser(it.studentId)
+        })
         BuildDateSelector(dialogState = startDateDialog, data = startTime)
         BuildTimeSelector(dialogState = startTimeDialog, data = startTime)
         BuildDateSelector(dialogState = endDateDialog, data = endTime)
@@ -610,197 +565,6 @@ class CustomThingActivity : BaseComposeActivity() {
         if (errorMessage.second.isNotBlank()) {
             errorMessage.second.toast(true)
         }
-        val init by viewModel.init.collectAsState()
-        if (init) {
-            LaunchedEffect(key1 = "init", block = {
-                viewModel.loadCustomThingList()
-            })
-        }
-    }
-
-    @Composable
-    private fun ShowUserDialog(
-        show: MutableState<Boolean>,
-    ) {
-        val userSelect by viewModel.userSelect.collectAsState()
-        val selectedUser = userSelect.firstOrNull { it.selected } ?: return
-        if (show.value) {
-            var selected by remember { mutableStateOf(selectedUser) }
-            AlertDialog(
-                onDismissRequest = {
-                    show.value = false
-                },
-                title = {
-                    Text(text = "请选择要查询的学生")
-                },
-                text = {
-                    LazyColumn {
-                        items(userSelect.size) { index ->
-                            val item = userSelect[index]
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                    ) {
-                                        selected = item
-                                    },
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(selected = selected == item, onClick = null)
-                                Text(text = "${item.userName}(${item.studentId})")
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.selectUser(selected.studentId)
-                            show.value = false
-                        },
-                    ) {
-                        Text("确认")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            show.value = false
-                        }
-                    ) {
-                        Text("取消")
-                    }
-                }
-            )
-        }
-    }
-
-    @Composable
-    private fun ShowYearDialog(
-        show: MutableState<Boolean>,
-    ) {
-        val yearSelect by viewModel.yearSelect.collectAsState()
-        val selectedYear = yearSelect.firstOrNull { it.selected } ?: return
-        if (show.value) {
-            var selected by remember { mutableStateOf(selectedYear) }
-            AlertDialog(
-                onDismissRequest = {
-                    show.value = false
-                },
-                title = {
-                    Text(text = "请选择要查询的学生")
-                },
-                text = {
-                    Column {
-                        LazyColumn {
-                            items(yearSelect.size) { index ->
-                                val item = yearSelect[index]
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp)
-                                        .clickable(
-                                            indication = null,
-                                            interactionSource = remember { MutableInteractionSource() },
-                                        ) {
-                                            selected = item
-                                        },
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    RadioButton(selected = selected == item, onClick = null)
-                                    Text(text = item.year)
-                                }
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.selectYear(selected.year)
-                            show.value = false
-                        },
-                    ) {
-                        Text("确认")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            show.value = false
-                        }
-                    ) {
-                        Text("取消")
-                    }
-                }
-            )
-        }
-    }
-
-    @Composable
-    private fun ShowTermDialog(
-        show: MutableState<Boolean>,
-    ) {
-        val termSelect by viewModel.termSelect.collectAsState()
-        val selectedTerm = termSelect.firstOrNull { it.selected } ?: return
-        if (show.value) {
-            var selected by remember { mutableStateOf(selectedTerm) }
-            AlertDialog(
-                onDismissRequest = {
-                    show.value = false
-                },
-                title = {
-                    Text(text = "请选择要查询的学期")
-                },
-                text = {
-                    LazyColumn {
-                        items(termSelect.size) { index ->
-                            val item = termSelect[index]
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                    ) {
-                                        selected = item
-                                    },
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(selected = selected == item, onClick = null)
-                                Text(text = "${item.term}")
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.selectTerm(selected.term)
-                            show.value = false
-                        },
-                    ) {
-                        Text("确认")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            show.value = false
-                        }
-                    ) {
-                        Text("取消")
-                    }
-                }
-            )
-        }
     }
 
     @Composable
@@ -809,12 +573,13 @@ class CustomThingActivity : BaseComposeActivity() {
         data: MutableState<LocalDateTime>,
     ) {
         val date = data.value.toLocalDate()
+        val time = data.value.toLocalTime()
         var selectedDate = date
         MaterialDialog(
             dialogState = dialogState,
             buttons = {
                 positiveButton("确定") {
-                    data.value = LocalDateTime.of(selectedDate, data.value.toLocalTime())
+                    data.value = LocalDateTime.of(selectedDate, time)
                 }
                 negativeButton("取消")
             }) {
@@ -833,13 +598,14 @@ class CustomThingActivity : BaseComposeActivity() {
         dialogState: MaterialDialogState,
         data: MutableState<LocalDateTime>,
     ) {
+        val date = data.value.toLocalDate()
         val time = data.value.toLocalTime()
         var selectedTime = time
         MaterialDialog(
             dialogState = dialogState,
             buttons = {
                 positiveButton("确定") {
-                    data.value = LocalDateTime.of(data.value.toLocalDate(), selectedTime)
+                    data.value = LocalDateTime.of(date, selectedTime)
                 }
                 negativeButton("取消")
             }) {
@@ -878,7 +644,7 @@ class CustomThingActivity : BaseComposeActivity() {
 
 @Composable
 private fun BuildItem(
-    item: CustomThing,
+    item: CustomThingResponse,
     placeHolder: Boolean = false,
     onClick: () -> Unit,
 ) {
@@ -909,7 +675,7 @@ private fun BuildItem(
                     shape = CircleShape,
                     modifier = Modifier
                         .size(24.dp),
-                    color = item.color
+                    color = item.color.parseColorHexString()
                 ) {}
                 Text(
                     modifier = Modifier.fillMaxWidth(),
@@ -925,9 +691,11 @@ private fun BuildItem(
             ) {
                 Image(painter = XhuIcons.CustomCourse.time, contentDescription = null)
                 val startText =
-                    item.startTime.format(if (item.allDay) dateFormatter else thingDateTimeFormatter)
+                    item.startTime.asLocalDateTime()
+                        .format(if (item.allDay) dateFormatter else thingDateTimeFormatter)
                 val endText =
-                    item.endTime.format(if (item.allDay) dateFormatter else thingDateTimeFormatter)
+                    item.endTime.asLocalDateTime()
+                        .format(if (item.allDay) dateFormatter else thingDateTimeFormatter)
                 val timeText = if (item.saveAsCountDown) startText else "$startText - $endText"
                 Text(
                     text = "时间：$timeText"
@@ -940,6 +708,16 @@ private fun BuildItem(
                 Image(painter = XhuIcons.CustomCourse.location, contentDescription = null)
                 Text(
                     text = "地点：${item.location}",
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "创建时间：${
+                        item.createTime.asLocalDateTime().format(chinaDateTimeFormatter)
+                    }"
                 )
             }
         }

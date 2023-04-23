@@ -16,10 +16,9 @@ import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
-import vip.mystery0.xhu.timetable.config.serverExceptionHandler
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.doClear
 import vip.mystery0.xhu.timetable.externalPictureDir
-import vip.mystery0.xhu.timetable.module.getRepo
 import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.utils.md5
 import vip.mystery0.xhu.timetable.utils.sha1
@@ -45,7 +44,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
     val isLoginState: StateFlow<Boolean> = _isLoginState
 
     init {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "init failed", throwable)
             _readyState.value =
                 ReadyState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)

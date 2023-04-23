@@ -11,7 +11,7 @@ import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.runOnIo
-import vip.mystery0.xhu.timetable.config.serverExceptionHandler
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.externalPictureDir
 import vip.mystery0.xhu.timetable.repository.getSchoolCalendarList
 import vip.mystery0.xhu.timetable.repository.getSchoolCalendarUrl
@@ -36,7 +36,7 @@ class SchoolCalendarViewModel : ComposeViewModel() {
     val schoolCalendarData: StateFlow<SchoolCalendarData> = _schoolCalendarData
 
     init {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "changeArea failed", throwable)
             _loading.value = LoadingState(
                 loading = false,
@@ -60,7 +60,7 @@ class SchoolCalendarViewModel : ComposeViewModel() {
     }
 
     fun changeArea(area: String) {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "changeArea failed", throwable)
             _loading.value = LoadingState(
                 loading = false,

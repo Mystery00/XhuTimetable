@@ -17,7 +17,7 @@ import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.getConfig
-import vip.mystery0.xhu.timetable.config.serverExceptionHandler
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.Menu
@@ -41,7 +41,6 @@ import vip.mystery0.xhu.timetable.module.getRepo
 import vip.mystery0.xhu.timetable.module.localRepo
 import vip.mystery0.xhu.timetable.repository.AggregationRepo
 import vip.mystery0.xhu.timetable.repository.CourseRepo111
-import vip.mystery0.xhu.timetable.repository.CustomThingRepo
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
 import vip.mystery0.xhu.timetable.repository.getRawCourseColorList
 import vip.mystery0.xhu.timetable.trackError
@@ -80,10 +79,6 @@ class MainViewModel : ComposeViewModel() {
     private val courseRepo: CourseRepo111 = getRepo()
 
     private val courseLocalRepo: CourseRepo111 by localRepo()
-
-    private val customThingRepo: CustomThingRepo = getRepo()
-
-    private val customThingLocalRepo: CustomThingRepo by localRepo()
 
     private val noticeRepo: NoticeRepo = getRepo()
 
@@ -339,7 +334,7 @@ class MainViewModel : ComposeViewModel() {
      * 初始化时候加载数据的方法
      */
     fun loadLocalDataToState() {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "load local course list failed", throwable)
             _loading.value = false
             toastMessage(throwable.message ?: throwable.javaClass.simpleName)
@@ -382,7 +377,7 @@ class MainViewModel : ComposeViewModel() {
      * 手动刷新加载数据的方法
      */
     fun refreshCloudDataToState() {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "load course list failed", throwable)
             _loading.value = false
             if (!GlobalConfigStore.showOldCourseWhenFailed) {

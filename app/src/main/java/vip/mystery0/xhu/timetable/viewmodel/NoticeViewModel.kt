@@ -9,7 +9,7 @@ import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.serverExceptionHandler
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.model.entity.Notice
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
@@ -34,7 +34,7 @@ class NoticeViewModel : ComposeViewModel(), KoinComponent {
     }
 
     fun loadNoticeList() {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "load notice list failed", throwable)
             _noticeListState.value =
                 NoticeListState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)

@@ -10,7 +10,7 @@ import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.UserSelect
 import vip.mystery0.xhu.timetable.base.YearSelect
 import vip.mystery0.xhu.timetable.base.TermSelect
-import vip.mystery0.xhu.timetable.config.serverExceptionHandler
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.model.response.ExperimentScoreResponse
 import vip.mystery0.xhu.timetable.repository.ScoreRepo
 
@@ -38,7 +38,7 @@ class ExpScoreViewModel : ComposeViewModel(), KoinComponent {
     }
 
     fun loadExpScoreList() {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "load exp score list failed", throwable)
             _expScoreListState.value =
                 ExpScoreListState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)

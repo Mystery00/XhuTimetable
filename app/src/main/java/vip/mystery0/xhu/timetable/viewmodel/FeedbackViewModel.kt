@@ -19,7 +19,7 @@ import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLogin
 import vip.mystery0.xhu.timetable.config.store.UserStore
-import vip.mystery0.xhu.timetable.config.serverExceptionHandler
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.model.response.Message
@@ -68,7 +68,7 @@ class FeedbackViewModel : ComposeViewModel() {
     }
 
     fun loadLastMessage(size: Int) {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "load message list failed", throwable)
             _loading.value = LoadingState(
                 loading = false,
