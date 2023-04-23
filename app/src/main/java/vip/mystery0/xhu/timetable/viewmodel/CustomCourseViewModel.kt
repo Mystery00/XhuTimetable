@@ -16,7 +16,7 @@ import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.TermSelect
 import vip.mystery0.xhu.timetable.base.UserSelect
 import vip.mystery0.xhu.timetable.base.YearSelect
-import vip.mystery0.xhu.timetable.config.serverExceptionHandler
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.request.AllCourseRequest
 import vip.mystery0.xhu.timetable.model.request.CustomCourseRequest
@@ -76,6 +76,7 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
             _userSelect.value = initUserSelect()
             _yearSelect.value = initYearSelect()
             _termSelect.value = initTermSelect()
+            loadCustomCourseList()
         }
     }
 
@@ -89,7 +90,10 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
             toastMessage(message)
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(networkErrorHandler { throwable ->
+            Log.w(TAG, "load custom course list failed", throwable)
+            failed(throwable.message ?: throwable.javaClass.simpleName)
+        }) {
             val selectedUser = getSelectedUser(_userSelect.value)
             if (selectedUser == null) {
                 failed("选择用户为空，请重新选择")
@@ -111,7 +115,7 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
             Log.w(TAG, "loadSearchCourseList failed: $message")
             toastMessage(message)
         }
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "load search course list failed", throwable)
             failed(throwable.message ?: throwable.javaClass.simpleName)
         }) {
@@ -145,7 +149,7 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
             toastMessage(message)
             _saveLoadingState.value = LoadingState()
         }
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "save custom course failed", throwable)
             failed(throwable.message ?: throwable.javaClass.simpleName)
         }) {
@@ -178,7 +182,7 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
             toastMessage(message)
             _saveLoadingState.value = LoadingState()
         }
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "delete custom course failed", throwable)
             failed(throwable.message ?: throwable.javaClass.simpleName)
         }) {

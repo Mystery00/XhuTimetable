@@ -484,15 +484,11 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             listItems(list = listOf("自定义课程", "自定义事项")) { index, _ ->
                 when (index) {
                     0 -> {
-                        intentTo(CustomCourseActivity::class) {
-                            CustomCourseActivity.hideSelector().invoke(it)
-                        }
+                        intentTo(CustomCourseActivity::class)
                     }
 
                     1 -> {
-                        intentTo(CustomThingActivity::class) {
-                            CustomThingActivity.hideSelector().invoke(it)
-                        }
+                        intentTo(CustomThingActivity::class)
                     }
                 }
             }

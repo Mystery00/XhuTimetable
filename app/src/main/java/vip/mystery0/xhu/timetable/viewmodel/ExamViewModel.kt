@@ -10,9 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.UserSelect
-import vip.mystery0.xhu.timetable.config.store.UserStore
-import vip.mystery0.xhu.timetable.config.runOnCpu
-import vip.mystery0.xhu.timetable.config.serverExceptionHandler
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.module.betweenDays
 import vip.mystery0.xhu.timetable.repository.ExamRepo
 import vip.mystery0.xhu.timetable.repository.getCourseColorByName
@@ -42,7 +40,7 @@ class ExamViewModel : ComposeViewModel() {
     }
 
     fun loadExamList() {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "load exam list failed", throwable)
             _examListState.value =
                 ExamListState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
@@ -172,16 +170,6 @@ data class Exam(
         )
     }
 }
-
-data class YearSelect(
-    val year: String,
-    val selected: Boolean,
-)
-
-data class TermSelect(
-    val term: Int,
-    val selected: Boolean,
-)
 
 enum class ExamStatus(
     val index: Int,

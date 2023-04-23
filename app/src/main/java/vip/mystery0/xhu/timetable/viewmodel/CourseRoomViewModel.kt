@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.store.UserStore
-import vip.mystery0.xhu.timetable.config.serverExceptionHandler
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.repository.getCourseRoomList
 
 class CourseRoomViewModel : ComposeViewModel() {
@@ -55,7 +55,7 @@ class CourseRoomViewModel : ComposeViewModel() {
     }
 
     fun search() {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "search course room failed", throwable)
             _courseRoomListState.value = CourseRoomListState(
                 loading = false,

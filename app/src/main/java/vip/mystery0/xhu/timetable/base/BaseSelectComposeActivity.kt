@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -39,6 +40,72 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 abstract class BaseSelectComposeActivity : BaseComposeActivity() {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
+    protected fun BuildUserSelectBackLayerContent(
+        scaffoldState: BackdropScaffoldState,
+        selectUserState: State<List<UserSelect>>,
+        showUserDialog: MutableState<Boolean>,
+        onDataLoad: suspend () -> Unit,
+    ) {
+        val scope = rememberCoroutineScope()
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                modifier = Modifier.weight(1F),
+                onClick = {
+                    showUserDialog.value = true
+                }) {
+                val userSelect = selectUserState.value
+                val userString = userSelect.firstOrNull { it.selected }?.title ?: "查询中"
+                Text(text = "查询用户：$userString")
+            }
+            Button(
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
+                onClick = {
+                    scope.launch {
+                        onDataLoad()
+                        scaffoldState.conceal()
+                    }
+                }) {
+                Icon(painter = XhuIcons.CustomCourse.pull, contentDescription = null)
+            }
+        }
+    }
+
+    @Composable
+    protected fun BuildYearAndTermSelectBackLayerContent(
+        selectYearState: State<List<YearSelect>>,
+        selectTermState: State<List<TermSelect>>,
+        showYearDialog: MutableState<Boolean>,
+        showTermDialog: MutableState<Boolean>,
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                modifier = Modifier.weight(1F),
+                onClick = {
+                    showYearDialog.value = true
+                }) {
+                val yearSelect = selectYearState.value
+                val yearString =
+                    yearSelect.firstOrNull { it.selected }?.title ?: "查询中"
+                Text(text = yearString)
+            }
+            OutlinedButton(
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                modifier = Modifier.weight(1F),
+                onClick = {
+                    showTermDialog.value = true
+                }) {
+                val termSelect = selectTermState.value
+                val termString =
+                    termSelect.firstOrNull { it.selected }?.title ?: "查询中"
+                Text(text = termString)
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
     protected fun BuildSelectBackLayerContent(
         scaffoldState: BackdropScaffoldState,
         selectUserState: State<List<UserSelect>>,
@@ -48,61 +115,28 @@ abstract class BaseSelectComposeActivity : BaseComposeActivity() {
         showYearDialog: MutableState<Boolean>,
         showTermDialog: MutableState<Boolean>,
         onDataLoad: suspend () -> Unit,
+        content: @Composable ColumnScope.() -> Unit = {
+            BuildUserSelectBackLayerContent(
+                scaffoldState = scaffoldState,
+                selectUserState = selectUserState,
+                showUserDialog = showUserDialog,
+                onDataLoad = onDataLoad,
+            )
+            BuildYearAndTermSelectBackLayerContent(
+                selectYearState = selectYearState,
+                selectTermState = selectTermState,
+                showYearDialog = showYearDialog,
+                showTermDialog = showTermDialog,
+            )
+        },
     ) {
-        val scope = rememberCoroutineScope()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                    modifier = Modifier.weight(1F),
-                    onClick = {
-                        showUserDialog.value = true
-                    }) {
-                    val userSelect = selectUserState.value
-                    val userString = userSelect.firstOrNull { it.selected }?.title ?: "查询中"
-                    Text(text = "查询用户：$userString")
-                }
-                Button(
-                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
-                    onClick = {
-                        scope.launch {
-                            onDataLoad()
-                            scaffoldState.conceal()
-                        }
-                    }) {
-                    Icon(painter = XhuIcons.CustomCourse.pull, contentDescription = null)
-                }
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                    modifier = Modifier.weight(1F),
-                    onClick = {
-                        showYearDialog.value = true
-                    }) {
-                    val yearSelect = selectYearState.value
-                    val yearString =
-                        yearSelect.firstOrNull { it.selected }?.title ?: "查询中"
-                    Text(text = yearString)
-                }
-                OutlinedButton(
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                    modifier = Modifier.weight(1F),
-                    onClick = {
-                        showTermDialog.value = true
-                    }) {
-                    val termSelect = selectTermState.value
-                    val termString =
-                        termSelect.firstOrNull { it.selected }?.title ?: "查询中"
-                    Text(text = termString)
-                }
-            }
-        }
+            content = content
+        )
     }
 
     @OptIn(ExperimentalMaterialApi::class)

@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.store.UserStore
-import vip.mystery0.xhu.timetable.config.serverExceptionHandler
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.model.response.UrgeItem
 import vip.mystery0.xhu.timetable.repository.doUrge
 import vip.mystery0.xhu.timetable.repository.getUrgeList
@@ -32,7 +32,7 @@ class UrgeViewModel : ComposeViewModel() {
     }
 
     fun loadUrgeList() {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "load urge list failed", throwable)
             _urgeListState.value =
                 UrgeListState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
@@ -54,7 +54,7 @@ class UrgeViewModel : ComposeViewModel() {
     }
 
     fun urge(urgeId: Long) {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "urge failed", throwable)
             _urgeLoading.value = false
             _urgeListState.value =

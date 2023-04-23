@@ -1,11 +1,8 @@
 package vip.mystery0.xhu.timetable.config
 
-import android.util.Log
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineExceptionHandler
-import retrofit2.HttpException
 import retrofit2.Response
 import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
 import vip.mystery0.xhu.timetable.isOnline
@@ -22,31 +19,14 @@ class ServerError(override val message: String) : RuntimeException(message)
 private val errorMessageMoshi: JsonAdapter<ErrorMessage> =
     Moshi.Builder().registerAdapter().build().adapter(ErrorMessage::class.java)
 
-fun serverExceptionHandler(
-    messageHandler: (ErrorMessage) -> Boolean = { false },
-    handler: (Throwable) -> Unit
-): CoroutineExceptionHandler =
+fun networkErrorHandler(handler: (Throwable) -> Unit): CoroutineExceptionHandler =
     CoroutineExceptionHandler { _, throwable ->
-        Log.i("TAG", "serverExceptionHandler: ${throwable.message}}")
         if (!isOnline()) {
+            //没有网络，统一报错 网络连接失败
             handler(NetworkNotConnectException())
             return@CoroutineExceptionHandler
         }
-        var exception: Throwable = throwable
-        if (exception is HttpException) {
-            val response = exception.response()?.errorBody()?.string()
-            if (response != null) {
-                parseServerError(exception.code(), response)?.let {
-                    Log.d("serverExceptionHandler", it.toString())
-                    val result = messageHandler(it)
-                    if (result) {
-                        return@CoroutineExceptionHandler
-                    }
-                    exception = ServerError(it.message)
-                }
-            }
-        }
-        handler(exception)
+        handler(throwable)
     }
 
 class CoroutineStopException(override val message: String) : RuntimeException(message)

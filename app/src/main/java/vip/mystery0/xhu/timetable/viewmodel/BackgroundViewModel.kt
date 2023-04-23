@@ -21,7 +21,7 @@ import vip.mystery0.xhu.timetable.config.interceptor.FileDownloadProgressInterce
 import vip.mystery0.xhu.timetable.config.interceptor.FileDownloadProgressState
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.runOnIo
-import vip.mystery0.xhu.timetable.config.serverExceptionHandler
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.customImageDir
 import vip.mystery0.xhu.timetable.externalPictureDir
@@ -71,7 +71,7 @@ class BackgroundViewModel : ComposeViewModel() {
     val progressState: StateFlow<DownloadProgressState> = _progressState
 
     init {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "load background list failed", throwable)
             _backgroundListState.value = BackgroundListState(
                 loading = false,
@@ -132,7 +132,7 @@ class BackgroundViewModel : ComposeViewModel() {
     }
 
     fun setCustomBackground(file: File) {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "set custom background failed", throwable)
             _backgroundListState.value = _backgroundListState.value.replaceMessage(
                 throwable.message ?: throwable.javaClass.simpleName
@@ -147,7 +147,7 @@ class BackgroundViewModel : ComposeViewModel() {
     }
 
     fun setBackground(backgroundId: Long) {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "set background failed", throwable)
             _backgroundListState.value = _backgroundListState.value.replaceMessage(
                 throwable.message ?: throwable.javaClass.simpleName

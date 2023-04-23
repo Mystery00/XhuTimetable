@@ -13,7 +13,7 @@ import vip.mystery0.xhu.timetable.config.CoroutineStopException
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.runOnCpu
-import vip.mystery0.xhu.timetable.config.serverExceptionHandler
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.repository.doLogin
@@ -34,7 +34,7 @@ class LoginViewModel : ComposeViewModel() {
         username: String,
         password: String,
     ) {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "login failed", throwable)
             _loginState.value =
                 LoginState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)

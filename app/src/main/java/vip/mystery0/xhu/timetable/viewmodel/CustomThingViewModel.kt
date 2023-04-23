@@ -1,72 +1,60 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
 import android.util.Log
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.UserSelect
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.User
-import vip.mystery0.xhu.timetable.config.store.UserStore
-import vip.mystery0.xhu.timetable.config.chinaZone
-import vip.mystery0.xhu.timetable.config.getConfig
-import vip.mystery0.xhu.timetable.config.runOnCpu
-import vip.mystery0.xhu.timetable.config.serverExceptionHandler
-import vip.mystery0.xhu.timetable.model.CustomThing
-import vip.mystery0.xhu.timetable.module.remoteRepo
+import vip.mystery0.xhu.timetable.model.request.CustomThingRequest
+import vip.mystery0.xhu.timetable.model.response.CustomThingResponse
 import vip.mystery0.xhu.timetable.repository.CustomThingRepo
-import java.time.LocalDateTime
-import java.time.Month
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CustomThingViewModel : ComposeViewModel(), KoinComponent {
     companion object {
         private const val TAG = "CustomThingViewModel"
     }
 
-    private val customThingRemoteRepo: CustomThingRepo by remoteRepo()
+    private val _userSelect = MutableStateFlow<List<UserSelect>>(emptyList())
+    val userSelect: StateFlow<List<UserSelect>> = _userSelect
+
+    // 自定义课程分页数据
+    private val pageRequestFlow = MutableStateFlow<PageRequest?>(null)
+    private val _pageState = pageRequestFlow
+        .flatMapLatest {
+            if (it == null) return@flatMapLatest flowOf(PagingData.empty())
+            CustomThingRepo.getCustomThingListStream(it.user)
+        }.cachedIn(viewModelScope)
+    val pageState: Flow<PagingData<CustomThingResponse>> = _pageState
 
     var changeCustomThing = false
 
     private val _errorMessage = MutableStateFlow(Pair(System.currentTimeMillis(), ""))
     val errorMessage: StateFlow<Pair<Long, String>> = _errorMessage
 
+    private val _saveLoadingState = MutableStateFlow(LoadingState(init = true))
+    val saveLoadingState: StateFlow<LoadingState> = _saveLoadingState
+
     private val _init = MutableStateFlow(false)
     val init: StateFlow<Boolean> = _init
 
-    private val _userSelect = MutableStateFlow<List<UserSelect>>(emptyList())
-    val userSelect: StateFlow<List<UserSelect>> = _userSelect
-    private val _yearSelect = MutableStateFlow<List<YearSelect>>(emptyList())
-    val yearSelect: StateFlow<List<YearSelect>> = _yearSelect
-    private val _termSelect = MutableStateFlow<List<TermSelect>>(emptyList())
-    val termSelect: StateFlow<List<TermSelect>> = _termSelect
-
-    private lateinit var currentUser: User
-    private lateinit var currentYear: String
-    private var currentTerm: Int = 1
-
-    private val _customThingListState = MutableStateFlow(CustomThingListState())
-    val customThingListState: StateFlow<CustomThingListState> = _customThingListState
-
-    private val _saveCustomThingState = MutableStateFlow(SaveCustomThingState())
-    val saveCustomThingState: StateFlow<SaveCustomThingState> = _saveCustomThingState
-
     init {
         viewModelScope.launch {
-            val loggedUserList = UserStore.loggedUserList()
-            val mainUserId = UserStore.mainUserId()
-            _userSelect.value = loggedUserList.map {
-                UserSelect(it.studentId, it.info.name, it.studentId == mainUserId)
-            }
-            currentUser = loggedUserList.find { it.studentId == mainUserId }!!
-            currentYear = getConfig { currentYear }
-            currentTerm = getConfig { currentTerm }
-
-            _yearSelect.value = buildYearSelect(currentYear)
-            _termSelect.value = buildTermSelect(currentTerm)
-            _init.value = true
+            _userSelect.value = initUserSelect()
+            loadCustomThingList()
         }
     }
 
@@ -74,125 +62,87 @@ class CustomThingViewModel : ComposeViewModel(), KoinComponent {
         _errorMessage.value = System.currentTimeMillis() to message
     }
 
-    private suspend fun buildYearSelect(selectedYear: String): List<YearSelect> = runOnCpu {
-        val loggedUserList = UserStore.loggedUserList()
-        val startYear = loggedUserList.minByOrNull { it.info.xhuGrade }!!.info.xhuGrade
-        val time = LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone)
-        val endYear = if (time.month < Month.JUNE) time.year - 1 else time.year
-        (startYear..endYear).map {
-            val year = "${it}-${it + 1}"
-            YearSelect(year, selectedYear == year)
-        }
-    }
-
-    private suspend fun buildTermSelect(selectedTerm: Int): List<TermSelect> = runOnCpu {
-        Array(2) {
-            val term = it + 1
-            TermSelect(term, term == selectedTerm)
-        }.toList()
-    }
-
     fun loadCustomThingList() {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        fun failed(message: String) {
+            Log.w(TAG, "loadCustomThingList failed: $message")
+            toastMessage(message)
+        }
+
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "load custom thing list failed", throwable)
-            _customThingListState.value = CustomThingListState()
-            toastMessage(throwable.message ?: throwable.javaClass.simpleName)
+            failed(throwable.message ?: throwable.javaClass.simpleName)
         }) {
-            _customThingListState.value = CustomThingListState(loading = true)
-            val selected = runOnCpu { _userSelect.value.first { it.selected }.studentId }
-            val selectUser = UserStore.userByStudentId(selected)
-
-            currentUser = selectUser
-
-            //TODO
-            val response =
-                customThingRemoteRepo.fetchCustomThingList(currentUser,0,0)
-            _customThingListState.value = CustomThingListState(
-                customThingList = response.items,
-                loading = false
-            )
+            val selectedUser = getSelectedUser(_userSelect.value)
+            if (selectedUser == null) {
+                failed("选择用户为空，请重新选择")
+                return@launch
+            }
+            pageRequestFlow.emit(PageRequest(selectedUser))
         }
     }
 
     fun saveCustomThing(
-        thingId: Long,
-        title: String,
-        location: String,
-        allDay: Boolean,
-        startTime: LocalDateTime,
-        endTime: LocalDateTime,
-        remark: String,
-        color: Color,
-        map: Map<String, String>,
+        thingId: Long?,
+        request: CustomThingRequest,
+        saveAsCountdown: Boolean,
     ) {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+        fun failed(message: String) {
+            Log.w(TAG, "saveCustomThing failed: $message")
+            toastMessage(message)
+            _saveLoadingState.value = LoadingState(actionSuccess = false)
+        }
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "save custom thing failed", throwable)
-            _saveCustomThingState.value =
-                SaveCustomThingState()
-            toastMessage(throwable.message ?: throwable.javaClass.simpleName)
+            failed(throwable.message ?: throwable.javaClass.simpleName)
         }) {
-            _saveCustomThingState.value = SaveCustomThingState(loading = true)
+            _saveLoadingState.value = LoadingState(loading = true)
+            if (saveAsCountdown) {
+                //存储为倒计时，那么持续时间为一天
+                request.endTime =
+                    Instant.ofEpochMilli(request.endTime).plus(1, ChronoUnit.DAYS).toEpochMilli()
+            }
+            if (request.startTime > request.endTime) {
+                failed("开始时间不能晚于结束时间")
+                return@launch
+            }
 
-            val start = if (allDay) {
-                startTime.toLocalDate().atStartOfDay()
-            } else {
-                startTime
+            val selectedUser = getSelectedUser(_userSelect.value)
+            if (selectedUser == null) {
+                failed("选择用户为空，请重新选择")
+                return@launch
             }
-            val end = if (allDay) {
-                endTime.toLocalDate().atStartOfDay()
+            if (thingId == null || thingId == 0L) {
+                CustomThingRepo.createCustomThing(selectedUser, request)
             } else {
-                endTime
+                CustomThingRepo.updateCustomThing(selectedUser, thingId, request)
             }
-            val customThing = CustomThing(
-                thingId,
-                title,
-                location,
-                allDay,
-                start,
-                end,
-                remark,
-                "",
-                color,
-                CustomThing.extraDataToJson(map),
-            )
-            if (thingId == 0L) {
-                customThingRemoteRepo.createCustomThing(
-                    currentUser,
-                    currentYear,
-                    currentTerm,
-                    customThing
-                )
-            } else {
-                customThingRemoteRepo.updateCustomThing(
-                    currentUser,
-                    currentYear,
-                    currentTerm,
-                    customThing
-                )
-            }
-            _saveCustomThingState.value = SaveCustomThingState()
-            toastMessage("《$title》保存成功")
+            _saveLoadingState.value = LoadingState()
+            toastMessage("《${request.title}》保存成功")
             changeCustomThing = true
             loadCustomThingList()
         }
     }
 
-    fun delete(thingId: Long) {
-        viewModelScope.launch(serverExceptionHandler { throwable ->
+    fun deleteCustomThing(thingId: Long) {
+        fun failed(message: String) {
+            Log.w(TAG, "deleteCustomThing failed: $message")
+            toastMessage(message)
+            _saveLoadingState.value = LoadingState(actionSuccess = false)
+        }
+        viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "delete custom thing failed", throwable)
-            _saveCustomThingState.value =
-                SaveCustomThingState()
-            toastMessage(throwable.message ?: throwable.javaClass.simpleName)
+            failed(throwable.message ?: throwable.javaClass.simpleName)
         }) {
-            _saveCustomThingState.value = SaveCustomThingState(loading = true)
+            _saveLoadingState.value = LoadingState(loading = true)
 
-            customThingRemoteRepo.deleteCustomThing(
-                currentUser,
-                currentYear,
-                currentTerm,
-                thingId
-            )
-            _saveCustomThingState.value = SaveCustomThingState()
+            val selectedUser = getSelectedUser(_userSelect.value)
+            if (selectedUser == null) {
+                failed("选择用户为空，请重新选择")
+                return@launch
+            }
+
+            CustomThingRepo.deleteCustomThing(selectedUser, thingId)
+            _saveLoadingState.value = LoadingState()
             toastMessage("删除成功")
             changeCustomThing = true
             loadCustomThingList()
@@ -201,41 +151,18 @@ class CustomThingViewModel : ComposeViewModel(), KoinComponent {
 
     fun selectUser(studentId: String) {
         viewModelScope.launch {
-            if (_userSelect.value.first { it.selected }.studentId == studentId) {
-                return@launch
-            }
-            _userSelect.value = runOnCpu {
-                UserStore.loggedUserList().map {
-                    UserSelect(it.studentId, it.info.name, it.studentId == studentId)
-                }
-            }
+            _userSelect.value = setSelectedUser(_userSelect.value, studentId).first
         }
     }
 
-    fun selectYear(year: String) {
-        viewModelScope.launch {
-            if (_yearSelect.value.first { it.selected }.year == year) {
-                return@launch
-            }
-            _yearSelect.value = buildYearSelect(year)
-        }
-    }
+    internal data class PageRequest(
+        val user: User,
+        val requestTime: Long = System.currentTimeMillis(),
+    )
 
-    fun selectTerm(term: Int) {
-        viewModelScope.launch {
-            if (_termSelect.value.first { it.selected }.term == term) {
-                return@launch
-            }
-            _termSelect.value = buildTermSelect(term)
-        }
-    }
+    data class LoadingState(
+        val init: Boolean = false,
+        val loading: Boolean = false,
+        val actionSuccess: Boolean = true,
+    )
 }
-
-data class CustomThingListState(
-    val loading: Boolean = false,
-    val customThingList: List<CustomThing> = emptyList(),
-)
-
-data class SaveCustomThingState(
-    val loading: Boolean = false,
-)
