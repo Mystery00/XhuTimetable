@@ -10,8 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.NoticeApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
-import vip.mystery0.xhu.timetable.config.store.User
-import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
@@ -34,9 +32,8 @@ object NoticeRepo : BaseDataRepo {
     suspend fun checkNotice(): Boolean {
         checkForceLoadFromCloud(true)
 
-        val user = UserStore.mainUser()
         val lastNoticeId = getCacheStore { lastNoticeId }
-        return user.withAutoLoginOnce {
+        return mainUser().withAutoLoginOnce {
             noticeApi.checkNotice(it, lastNoticeId)
         }
     }
@@ -53,9 +50,8 @@ object NoticeRepo : BaseDataRepo {
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, NoticeResponse> {
             checkForceLoadFromCloud(true)
 
-            val user = UserStore.mainUser()
             val index = params.key ?: 0
-            val response = user.withAutoLoginOnce {
+            val response = mainUser().withAutoLoginOnce {
                 noticeApi.noticeList(it, index = index, size = params.loadSize)
             }
             setCacheStore { lastNoticeId = response.items.maxOfOrNull { it.noticeId } ?: 0 }

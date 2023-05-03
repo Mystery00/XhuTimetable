@@ -44,6 +44,7 @@ import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.model.TitleTemplate
+import vip.mystery0.xhu.timetable.model.format
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
@@ -152,7 +153,7 @@ class CustomUiActivity : BaseComposeActivity() {
                                                     else course.format(customUi.weekNotTitleTemplate)
                                                 BuildWeekItem(
                                                     customUi = customUi,
-                                                    backgroundColor = course.color,
+                                                    backgroundColor = course.backgroundColor,
                                                     itemStep = step,
                                                     title = title,
                                                     textColor = if (course.thisWeek) Color.White else Color.Gray,

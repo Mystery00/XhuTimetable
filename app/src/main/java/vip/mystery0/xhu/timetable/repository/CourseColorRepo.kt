@@ -9,6 +9,10 @@ import vip.mystery0.xhu.timetable.repository.db.dao.CourseColorDao
 import vip.mystery0.xhu.timetable.repository.db.dao.CourseDao
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 
+object CourseColorRepo {
+
+}
+
 private val courseDao by lazy {
     KoinJavaComponent.get<CourseDao>(CourseDao::class.java)
 }
@@ -42,7 +46,7 @@ suspend fun getCourseColorList(keywords: String): List<Pair<String, Color>> {
             map[it.courseName] = Color(color)
         }
         courseList.map {
-            Pair(it.courseName, map[it.courseName] ?: ColorPool.hash(it.courseName))
+            Pair(it, map[it] ?: ColorPool.hash(it))
         }
     }
 }

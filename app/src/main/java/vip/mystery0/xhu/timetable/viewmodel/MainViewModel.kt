@@ -27,6 +27,7 @@ import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.TodayCourseView
@@ -37,12 +38,9 @@ import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.model.response.Version
 import vip.mystery0.xhu.timetable.model.transfer.AggregationView
 import vip.mystery0.xhu.timetable.module.Feature
-import vip.mystery0.xhu.timetable.module.betweenDays
-import vip.mystery0.xhu.timetable.module.getRepo
-import vip.mystery0.xhu.timetable.module.localRepo
 import vip.mystery0.xhu.timetable.repository.AggregationRepo
-import vip.mystery0.xhu.timetable.repository.CourseRepo111
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
+import vip.mystery0.xhu.timetable.repository.WidgetRepo
 import vip.mystery0.xhu.timetable.repository.getRawCourseColorList
 import vip.mystery0.xhu.timetable.trackError
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
@@ -61,9 +59,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
 import java.time.temporal.WeekFields
-import java.util.Locale
 import java.util.TreeSet
 
 class MainViewModel : ComposeViewModel() {
@@ -74,10 +70,6 @@ class MainViewModel : ComposeViewModel() {
     private val poemsApi: PoemsApi by inject()
 
     private val feedbackApi: FeedbackApi by inject()
-
-    private val courseRepo: CourseRepo111 = getRepo()
-
-    private val courseLocalRepo: CourseRepo111 by localRepo()
 
     private val workManager: WorkManager by inject()
 
@@ -248,37 +240,17 @@ class MainViewModel : ComposeViewModel() {
                 LocalTime.now().isAfter(it)
             } ?: false
 
-            val termStartDate = getConfigStore { termStartDate }
-            withContext(Dispatchers.Default) {
-                val now = LocalDate.now()
-                val todayWeekIndex =
-                    now.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.CHINESE)
-                if (now.isBefore(termStartDate)) {
-                    //开学之前，那么计算剩余时间
-                    val remainDays = betweenDays(now, termStartDate)
-                    _todayTitle.value = "距离开学还有${remainDays}天 $todayWeekIndex"
-                    return@withContext
-                }
-                val date = if (showTomorrow) now.plusDays(1) else now
-                val days = betweenDays(termStartDate, date)
-                val weekIndex = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.CHINESE)
-                val week = (days / 7) + 1
-                if (week > 20) {
-                    _todayTitle.value = "本学期已结束"
-                } else {
-                    _todayTitle.value = "第${week}周 $weekIndex"
-                }
-            }
+            _todayTitle.value = WidgetRepo.calculateDateTitle(showTomorrow)
         }
     }
 
     private fun calculateWeek() {
         viewModelScope.launch {
-            _week.value = calculateWeekInternal()
+            _week.value = WidgetRepo.calculateWeek()
             //切换周时同步切换课表
             _week.collect {
                 val termStartDate = getConfigStore { termStartDate }
-                val currentWeek = calculateWeekInternal()
+                val currentWeek = WidgetRepo.calculateWeek()
                 //获取缓存的课程数据
                 val data = getMainPageData(false)
                 val weekList = data.weekViewList
@@ -290,29 +262,16 @@ class MainViewModel : ComposeViewModel() {
         }
     }
 
-    /**
-     * 计算当前周数，如果未开学，该方法返回0
-     */
-    private suspend fun calculateWeekInternal(date: LocalDate = LocalDate.now()): Int {
-        val termStartDate = getConfigStore { termStartDate }
-        return withContext(Dispatchers.Default) {
-            val days = betweenDays(termStartDate, date)
-            var week = ((days / 7) + 1)
-            if (days < 0 && week > 0) {
-                week = 0
-            }
-            return@withContext week
-        }
-    }
-
     private suspend fun getMainPageData(forceLoadFromCloud: Boolean): AggregationView {
         val showCustomCourse = getConfigStore { showCustomCourseOnWeek }
         val showCustomThing = getConfigStore { showCustomThing }
-        return AggregationRepo.fetchAggregationMainPage(
+        val view = AggregationRepo.fetchAggregationMainPage(
             forceLoadFromCloud,
             showCustomCourse,
             showCustomThing,
         )
+        setCacheStore { lastSyncCourse = LocalDate.now() }
+        return view
     }
 
     /**
@@ -400,7 +359,7 @@ class MainViewModel : ComposeViewModel() {
         if (!loadFromCloud) {
             loadFromCloud = getCacheStore { lastSyncCourse }.isBefore(LocalDate.now())
         }
-        val currentWeek = calculateWeekInternal()
+        val currentWeek = WidgetRepo.calculateWeek()
         _week.value = currentWeek
 
         return currentWeek to loadFromCloud
@@ -427,7 +386,7 @@ class MainViewModel : ComposeViewModel() {
             //显示明天的课程，那么showDate就是明天对应的日期
             showDate = today.plusDays(1)
             showDay = showDate.dayOfWeek
-            showCurrentWeek = calculateWeekInternal(showDate)
+            showCurrentWeek = WidgetRepo.calculateWeek(showDate)
         } else {
             showDate = today
             showDay = today.dayOfWeek
@@ -766,9 +725,7 @@ data class CourseSheet(
         other as CourseSheet
 
         if (showTitle != other.showTitle) return false
-        if (course != other.course) return false
-
-        return true
+        return course == other.course
     }
 
     override fun hashCode(): Int {

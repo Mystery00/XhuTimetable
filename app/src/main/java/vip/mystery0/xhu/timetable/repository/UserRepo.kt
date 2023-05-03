@@ -6,7 +6,6 @@ import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.api.UserApi
 import vip.mystery0.xhu.timetable.config.store.User
-import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.model.request.LoginRequest
 import vip.mystery0.xhu.timetable.model.response.LoginResponse
 import java.security.KeyFactory

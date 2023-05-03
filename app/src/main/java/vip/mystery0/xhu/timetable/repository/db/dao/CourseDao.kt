@@ -4,28 +4,29 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import vip.mystery0.xhu.timetable.model.entity.CourseItem
-import vip.mystery0.xhu.timetable.model.entity.CourseSource
+import vip.mystery0.xhu.timetable.model.entity.CourseEntity
 
 @Dao
 interface CourseDao {
     @Insert
-    fun saveCourseItem(courseItem: CourseItem)
+    suspend fun insert(entity: CourseEntity)
 
     @Delete
-    fun deleteCourseItem(courseItem: CourseItem)
+    suspend fun delete(entity: CourseEntity)
 
-    @Query("select * from tb_course_item where studentId = :username and year = :year and term = :term and source = :courseSource")
-    suspend fun queryCourseList(
+    @Query("select * from tb_course where studentId = :username and year = :year and term = :term")
+    suspend fun queryList(
         username: String,
-        year: String,
+        year: Int,
         term: Int,
-        courseSource: CourseSource = CourseSource.JWC,
-    ): List<CourseItem>
+    ): List<CourseEntity>
 
-    @Query("select * from tb_course_item group by courseName")
-    suspend fun queryDistinctCourseByUsernameAndTerm(): List<CourseItem>
+    @Query("select * from tb_course group by courseName limit :size")
+    suspend fun queryRandomList(size: Int): List<CourseEntity>
 
-    @Query("select * from tb_course_item where courseName like :keywords group by courseName")
-    suspend fun queryDistinctCourseByKeywordsAndUsernameAndTerm(keywords: String): List<CourseItem>
+    @Query("select courseName from tb_course group by courseName")
+    suspend fun queryDistinctCourseByUsernameAndTerm(): List<String>
+
+    @Query("select courseName from tb_course where courseName like :keywords group by courseName")
+    suspend fun queryDistinctCourseByKeywordsAndUsernameAndTerm(keywords: String): List<String>
 }

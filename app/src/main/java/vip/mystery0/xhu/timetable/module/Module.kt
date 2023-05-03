@@ -17,7 +17,6 @@ fun moduleList(): List<Module> =
         databaseModule,
         workModule,
         networkModule,
-        repoModule,
         featureModule,
     )
 

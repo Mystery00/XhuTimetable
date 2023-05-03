@@ -28,8 +28,10 @@ data class TodayCourseView(
 ) {
     //上课节次
     var courseDayTime: String = ""
+
     //上课时间
     var courseTime: Pair<String, String> = Pair("", "")
+
     //课程颜色
     var backgroundColor = Color.Transparent
 
@@ -50,7 +52,7 @@ data class TodayCourseView(
         }.sha512()
     }
 
-    fun updateTime(){
+    fun updateTime() {
         courseDayTime = if (startDayTime == endDayTime) {
             "第${startDayTime}节"
         } else {
