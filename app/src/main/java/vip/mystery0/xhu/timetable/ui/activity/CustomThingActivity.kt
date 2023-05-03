@@ -119,20 +119,15 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                 }
                 return
             }
-            if (viewModel.changeCustomThing) {
-                eventBus.post(UIEvent(EventType.CHANGE_SHOW_CUSTOM_THING))
-            }
             finish()
         }
 
-        BackHandler(
-            onBack = {
-                onBack()
-            }
-        )
+        BackHandler {
+            onBack()
+        }
 
+        val focusManager = LocalFocusManager.current
         if (!saveLoadingState.init && !saveLoadingState.loading && saveLoadingState.actionSuccess) {
-            val focusManager = LocalFocusManager.current
             LaunchedEffect(key1 = "autoHideSheet", block = {
                 scope.launch {
                     showSelect.hide()
@@ -207,7 +202,6 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                     .padding(8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                val focusManager = LocalFocusManager.current
                                 Image(
                                     modifier = Modifier
                                         .padding(12.dp)
@@ -639,6 +633,13 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                 selectedColor = it
             }
         }
+    }
+
+    override fun onStop() {
+        if (viewModel.changeCustomThing) {
+            eventBus.post(UIEvent(EventType.CHANGE_SHOW_CUSTOM_THING))
+        }
+        super.onStop()
     }
 }
 
