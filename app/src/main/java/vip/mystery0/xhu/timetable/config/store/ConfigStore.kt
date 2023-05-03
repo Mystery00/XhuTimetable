@@ -48,6 +48,11 @@ class ConfigStore internal constructor() {
         get() = customTermStartDate.data
     var customTermStartDate: Customisable<LocalDate>
         set(value) {
+            if (!value.custom && value.data == LocalDate.MIN) {
+                //清除自定义值
+                kv.remove(Customisable.customKey(termStartDateKey))
+                return
+            }
             val key = value.mapKey(termStartDateKey)
             val saveValue = value.data.format(Formatter.DATE)
             kv.encode(key, saveValue)
@@ -71,6 +76,11 @@ class ConfigStore internal constructor() {
         get() = customNowYear.data
     var customNowYear: Customisable<Int>
         set(value) {
+            if (!value.custom && value.data == -1) {
+                //清除自定义值
+                kv.remove(Customisable.customKey(nowYearKey))
+                return
+            }
             val key = value.mapKey(nowYearKey)
             val saveValue = value.data
             kv.encode(key, saveValue)
@@ -94,6 +104,11 @@ class ConfigStore internal constructor() {
         get() = customNowTerm.data
     var customNowTerm: Customisable<Int>
         set(value) {
+            if (!value.custom && value.data == -1) {
+                //清除自定义值
+                kv.remove(Customisable.customKey(nowTermKey))
+                return
+            }
             val key = value.mapKey(nowTermKey)
             val saveValue = value.data
             kv.encode(key, saveValue)

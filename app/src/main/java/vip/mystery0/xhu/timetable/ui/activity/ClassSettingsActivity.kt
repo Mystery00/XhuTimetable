@@ -30,6 +30,7 @@ import com.vanpra.composematerialdialogs.title
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.config.Customisable
 import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.model.event.EventType
@@ -159,10 +160,10 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                         subtitle = {
                             val text = buildString {
                                 append("当前学期：")
-                                append("${currentYear.first}学年")
+                                append("${currentYear.data}学年")
                                 append(" ")
-                                append("第${currentTerm.first}学期")
-                                if (!currentYear.second && !currentTerm.second) {
+                                append("第${currentTerm.data}学期")
+                                if (!currentYear.custom && !currentTerm.custom) {
                                     appendLine()
                                     append("【根据当前时间自动计算所得】")
                                 }
@@ -185,8 +186,8 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                         subtitle = {
                             val text = buildString {
                                 append("当前开学时间：")
-                                append(currentTermStartTime.first.format(dateFormatter))
-                                if (!currentTermStartTime.second) {
+                                append(currentTermStartTime.data.format(dateFormatter))
+                                if (!currentTermStartTime.custom) {
                                     appendLine()
                                     append("【从云端自动获取】")
                                 }
@@ -333,7 +334,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
         )
         BuildTermStartTimeSelector(
             dialogState = termStartTimeState,
-            initDate = currentTermStartTime.first,
+            initDate = currentTermStartTime.data,
         )
         val errorMessage by viewModel.errorMessage.collectAsState()
         if (errorMessage.isNotBlank()) {
@@ -369,12 +370,13 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
     private fun BuildYearAndTermSelector(
         dialogState: MaterialDialogState,
         selectList: List<String>,
-        currentYear: Pair<String, Boolean>,
-        currentTerm: Pair<Int, Boolean>,
+        currentYear: Customisable<Int>,
+        currentTerm: Customisable<Int>,
     ) {
-        val currentString = "${currentYear.first}学年 第${currentTerm.first}学期"
+        val currentString =
+            "${currentYear.data}-${currentYear.data + 1}学年 第${currentTerm.data}学期"
         var selectedIndex =
-            if (currentYear.second || currentTerm.second)
+            if (currentYear.custom || currentTerm.custom)
                 selectList.indexOf(currentString)
             else
                 0
@@ -383,12 +385,12 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
             buttons = {
                 positiveButton("确定") {
                     if (selectedIndex == 0) {
-                        viewModel.updateCurrentYearTerm()
+                        viewModel.updateCurrentYearTerm(custom = false)
                     } else {
                         val select = selectList[selectedIndex]
-                        val year = select.substring(0, 9)
+                        val year = select.substring(0, 4)
                         val term = select.substring(13, 14)
-                        viewModel.updateCurrentYearTerm(year, term.toInt())
+                        viewModel.updateCurrentYearTerm(custom = true, year.toInt(), term.toInt())
                     }
                 }
                 negativeButton("取消")
@@ -413,10 +415,10 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
             dialogState = dialogState,
             buttons = {
                 positiveButton("确定") {
-                    viewModel.updateTermStartTime(selectedDate)
+                    viewModel.updateTermStartTime(true, selectedDate)
                 }
                 negativeButton("自动获取") {
-                    viewModel.updateTermStartTime(LocalDate.MIN)
+                    viewModel.updateTermStartTime(false, LocalDate.MIN)
                 }
             }) {
             datepicker(
