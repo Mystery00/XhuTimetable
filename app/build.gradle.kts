@@ -47,14 +47,8 @@ android {
                 cppFlags += ""
             }
         }
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += mapOf(
-                    "room.schemaLocation" to "$projectDir/schemas",
-                    "room.incremental" to "true",
-                    "room.expandProjection" to "true"
-                )
-            }
+        ksp {
+            arg(RoomSchemaArgProvider(File(projectDir, "schemas")))
         }
         resourceConfigurations.add("en")
         resourceConfigurations.add("zh")

@@ -32,22 +32,4 @@ data class CustomThing(
     val term: Int,
     //学号
     val studentId: String,
-) {
-    fun toModel(): vip.mystery0.xhu.timetable.model.CustomThing {
-        val start = Instant.ofEpochMilli(startTime).atZone(chinaZone).toLocalDateTime()
-        val end = Instant.ofEpochMilli(endTime).atZone(chinaZone).toLocalDateTime()
-        val parseColor = android.graphics.Color.parseColor(color)
-        return vip.mystery0.xhu.timetable.model.CustomThing(
-            thingId,
-            title,
-            location,
-            allDay,
-            start,
-            end,
-            remark,
-            color,
-            Color(parseColor),
-            extraData,
-        )
-    }
-}
+)

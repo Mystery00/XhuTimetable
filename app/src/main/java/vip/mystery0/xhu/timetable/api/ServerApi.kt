@@ -2,12 +2,9 @@ package vip.mystery0.xhu.timetable.api
 
 import retrofit2.Response
 import retrofit2.http.*
-import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.ServerError
 import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
 import vip.mystery0.xhu.timetable.config.parseServerError
-import vip.mystery0.xhu.timetable.model.CustomCourse
-import vip.mystery0.xhu.timetable.model.UserInfo
 import vip.mystery0.xhu.timetable.model.request.*
 import vip.mystery0.xhu.timetable.model.response.*
 
@@ -34,64 +31,6 @@ interface ServerApi {
         @Header("sessionToken") token: String,
         @Query("resourceId") resourceId: Long,
     ): Response<ResourceUrlResponse>
-
-    @GET("/api/rest/xhu-timetable/server/customCourse")
-    suspend fun customCourseList(
-        @Header("sessionToken") token: String,
-        @Query("year") year: String,
-        @Query("term") term: Int,
-    ): Response<List<CustomCourse>>
-
-    @POST("/api/rest/xhu-timetable/server/customCourse")
-    suspend fun createCustomCourse(
-        @Header("sessionToken") token: String,
-        @Body customCourseRequest: CustomCourseRequest
-    ): Response<Boolean>
-
-    @PUT("/api/rest/xhu-timetable/server/customCourse")
-    suspend fun updateCustomCourse(
-        @Header("sessionToken") token: String,
-        @Query("id") id: Long,
-        @Body customCourseRequest: CustomCourseRequest
-    ): Response<Boolean>
-
-    @DELETE("/api/rest/xhu-timetable/server/customCourse")
-    suspend fun deleteCustomCourse(
-        @Header("sessionToken") token: String,
-        @Query("id") id: Long,
-    ): Response<Boolean>
-
-    @GET("/api/rest/xhu-timetable/server/customThing")
-    suspend fun customThingList(
-        @Header("sessionToken") token: String,
-        @Query("year") year: String,
-        @Query("term") term: Int,
-    ): Response<List<CustomThingResponse>>
-
-    @POST("/api/rest/xhu-timetable/server/customThing")
-    suspend fun createCustomThing(
-        @Header("sessionToken") token: String,
-        @Body customThingRequest: CustomThingRequest
-    ): Response<Boolean>
-
-    @PUT("/api/rest/xhu-timetable/server/customThing")
-    suspend fun updateCustomThing(
-        @Header("sessionToken") token: String,
-        @Query("id") id: Long,
-        @Body customThingRequest: CustomThingRequest
-    ): Response<Boolean>
-
-    @DELETE("/api/rest/xhu-timetable/server/customThing")
-    suspend fun deleteCustomThing(
-        @Header("sessionToken") token: String,
-        @Query("id") id: Long,
-    ): Response<Boolean>
-
-    @POST("/api/rest/xhu-timetable/server/allCourse")
-    suspend fun selectAllCourse(
-        @Header("sessionToken") token: String,
-        @Body allCourseRequest: AllCourseRequest,
-    ): Response<List<AllCourseResponse>>
 
     @GET("/api/rest/xhu-timetable/server/background")
     suspend fun selectAllBackground(

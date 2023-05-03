@@ -21,22 +21,13 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.getConfig
-import vip.mystery0.xhu.timetable.config.runOnCpu
-import vip.mystery0.xhu.timetable.config.setConfig
-import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.model.response.ExamItem
-import vip.mystery0.xhu.timetable.module.localRepo
-import vip.mystery0.xhu.timetable.repository.CourseRepo111
-import vip.mystery0.xhu.timetable.repository.getExamList
-import vip.mystery0.xhu.timetable.repository.getRawCourseColorList
 import vip.mystery0.xhu.timetable.setAlarmTrigger
 import vip.mystery0.xhu.timetable.ui.activity.ExamActivity
 import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_DEFAULT
 import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_TOMORROW
 import vip.mystery0.xhu.timetable.ui.notification.NotificationId
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
-import java.time.DayOfWeek
-import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -54,65 +45,65 @@ class NotifyService : Service(), KoinComponent {
     private val scope = CoroutineScope(job)
 
     private val notificationManager: NotificationManager by inject()
-    private val courseLocalRepo: CourseRepo111 by localRepo()
+//    private val courseLocalRepo: CourseRepo111 by localRepo()
     private val alarmManager: AlarmManager by inject()
     private val colorAccent = android.graphics.Color.parseColor("#2196F3")
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     private suspend fun doWork() {
-        setConfig { notifyWorkLastExecuteTime = Instant.now() }
-        try {
-            val currentYear = getConfig { currentYear }
-            val currentTerm = getConfig { currentTerm }
-            val mainUser = UserStore.getMainUser() ?: return complete()
-            val tomorrow = LocalDate.now().plusDays(1)
-            val currentWeek = runOnCpu {
-                //计算当前周
-                val startDate =
-                    LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone).toLocalDate()
-                val days =
-                    Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay())
-                        .toDays()
-                var week = ((days / 7) + 1).toInt()
-                if (days < 0 && week > 0) {
-                    week = 0
-                }
-                week
-            }
-            val tomorrowWeek =
-                if (tomorrow.dayOfWeek == DayOfWeek.SUNDAY) currentWeek + 1 else currentWeek
-            val examResponse = getExamList(mainUser)
-            val examList = runOnCpu {
-                examResponse.list.filter {
-                    tomorrow == LocalDateTime.ofInstant(
-                        Instant.ofEpochMilli(it.startTime),
-                        chinaZone
-                    )
-                        .toLocalDate()
-                }
-            }
-            notifyTest(examList.sortedBy { it.startTime })
-            if (currentWeek > 0) {
-                //获取自定义颜色列表
-                val colorMap = getRawCourseColorList()
-                val list = courseLocalRepo.getCourseList(mainUser, currentYear, currentTerm)
-                    .filter {
-                        it.week.contains(tomorrowWeek) && it.day == tomorrow.dayOfWeek.value
-                    }
-                val tomorrowCourseList = list.map {
-                    Course(
-                        it.name,
-                        it.location,
-                        "it.time.formatTime()",
-                        it.time.first(),
-                        color = colorMap[it.name] ?: ColorPool.hash(it.name),
-                    )
-                }
-                notifyCourse(tomorrowCourseList.sortedBy { it.firstTime })
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "doWork failed", e)
-        }
+//        setConfig { notifyWorkLastExecuteTime = Instant.now() }
+//        try {
+//            val currentYear = getConfig { currentYear }
+//            val currentTerm = getConfig { currentTerm }
+//            val mainUser = UserStore.getMainUser() ?: return complete()
+//            val tomorrow = LocalDate.now().plusDays(1)
+//            val currentWeek = runOnCpu {
+//                //计算当前周
+//                val startDate =
+//                    LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone).toLocalDate()
+//                val days =
+//                    Duration.between(startDate.atStartOfDay(), LocalDate.now().atStartOfDay())
+//                        .toDays()
+//                var week = ((days / 7) + 1).toInt()
+//                if (days < 0 && week > 0) {
+//                    week = 0
+//                }
+//                week
+//            }
+//            val tomorrowWeek =
+//                if (tomorrow.dayOfWeek == DayOfWeek.SUNDAY) currentWeek + 1 else currentWeek
+//            val examResponse = getExamList(mainUser)
+//            val examList = runOnCpu {
+//                examResponse.list.filter {
+//                    tomorrow == LocalDateTime.ofInstant(
+//                        Instant.ofEpochMilli(it.startTime),
+//                        chinaZone
+//                    )
+//                        .toLocalDate()
+//                }
+//            }
+//            notifyTest(examList.sortedBy { it.startTime })
+//            if (currentWeek > 0) {
+//                //获取自定义颜色列表
+//                val colorMap = getRawCourseColorList()
+//                val list = courseLocalRepo.getCourseList(mainUser, currentYear, currentTerm)
+//                    .filter {
+//                        it.week.contains(tomorrowWeek) && it.day == tomorrow.dayOfWeek.value
+//                    }
+//                val tomorrowCourseList = list.map {
+//                    Course(
+//                        it.name,
+//                        it.location,
+//                        "it.time.formatTime()",
+//                        it.time.first(),
+//                        color = colorMap[it.name] ?: ColorPool.hash(it.name),
+//                    )
+//                }
+//                notifyCourse(tomorrowCourseList.sortedBy { it.firstTime })
+//            }
+//        } catch (e: Exception) {
+//            Log.w(TAG, "doWork failed", e)
+//        }
         return complete()
     }
 

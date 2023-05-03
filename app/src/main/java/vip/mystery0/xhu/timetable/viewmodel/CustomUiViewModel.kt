@@ -9,23 +9,17 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
-import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.CustomUi
-import vip.mystery0.xhu.timetable.model.entity.CourseType
+import vip.mystery0.xhu.timetable.model.WeekCourseView
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
-import vip.mystery0.xhu.timetable.module.localRepo
-import vip.mystery0.xhu.timetable.repository.CourseRepo111
-import vip.mystery0.xhu.timetable.ui.theme.ColorPool
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
-import kotlin.random.Random
+import vip.mystery0.xhu.timetable.repository.local.AggregationLocalRepo
 
 class CustomUiViewModel : ComposeViewModel() {
     private val eventBus: EventBus by inject()
-    private val courseLocalRepo: CourseRepo111 by localRepo()
 
-    private val _randomCourse = MutableStateFlow<List<Course>>(emptyList())
-    val randomCourse: StateFlow<List<Course>> = _randomCourse
+    private val _randomCourse = MutableStateFlow<List<WeekCourseView>>(emptyList())
+    val randomCourse: StateFlow<List<WeekCourseView>> = _randomCourse
 
     private val _customUi = MutableStateFlow(CustomUi.DEFAULT)
     val customUi: StateFlow<CustomUi> = _customUi
@@ -59,29 +53,7 @@ class CustomUiViewModel : ComposeViewModel() {
 
     fun refreshRandomCourse() {
         viewModelScope.launch {
-            val courseList = courseLocalRepo.getRandomCourseList(6)
-            _randomCourse.value = courseList.map {
-                val thisWeek = Random.nextBoolean()
-                Course(
-                    courseName = it.name,
-                    teacherName = it.teacher,
-                    location = it.location,
-                    weekSet = emptyList(),
-                    weekString = "",
-                    type = CourseType.ALL,
-                    timeSet = emptyList(),
-                    timeString = "",
-                    time = "",
-                    day = it.day,
-                    extraData = it.extraData,
-                    thisWeek = thisWeek,
-                    today = false,
-                    tomorrow = false,
-                    color = if (thisWeek) ColorPool.hash(it.name) else XhuColor.notThisWeekBackgroundColor,
-                    studentId = "",
-                    userName = "",
-                )
-            }
+            _randomCourse.value = AggregationLocalRepo.getRandomCourseList(6)
         }
     }
 

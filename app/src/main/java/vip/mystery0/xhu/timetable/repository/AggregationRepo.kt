@@ -11,6 +11,7 @@ import vip.mystery0.xhu.timetable.model.TodayCourseView
 import vip.mystery0.xhu.timetable.model.TodayThingView
 import vip.mystery0.xhu.timetable.model.WeekCourseView
 import vip.mystery0.xhu.timetable.model.transfer.AggregationView
+import vip.mystery0.xhu.timetable.repository.local.AggregationLocalRepo
 
 object AggregationRepo : BaseDataRepo {
     private val aggregationApi: AggregationApi by inject()
@@ -58,11 +59,34 @@ object AggregationRepo : BaseDataRepo {
                         todayThingList.add(TodayThingView.valueOf(customThing, user))
                     }
                     //保存数据到数据库
-                    //TODO
+                    AggregationLocalRepo.saveResponse(nowYear, nowTerm, user, response)
                 }
             }
         } else {
-
+            userList.forEach { user ->
+                val response = AggregationLocalRepo.fetchAggregationMainPage(
+                    nowYear,
+                    nowTerm,
+                    user,
+                    showCustomCourse,
+                    showCustomThing,
+                )
+                response.courseList.forEach { course ->
+                    todayViewList.add(TodayCourseView.valueOf(course, user))
+                    weekViewList.add(WeekCourseView.valueOf(course, user))
+                }
+                response.experimentCourseList.forEach { experimentCourse ->
+                    todayViewList.add(TodayCourseView.valueOf(experimentCourse, user))
+                    weekViewList.add(WeekCourseView.valueOf(experimentCourse, user))
+                }
+                response.customCourseList.forEach { customCourse ->
+                    todayViewList.add(TodayCourseView.valueOf(customCourse, user))
+                    weekViewList.add(WeekCourseView.valueOf(customCourse, user))
+                }
+                response.customThingList.forEach { customThing ->
+                    todayThingList.add(TodayThingView.valueOf(customThing, user))
+                }
+            }
         }
         return AggregationView(todayViewList, weekViewList, todayThingList)
     }

@@ -6,8 +6,7 @@ import androidx.glance.state.GlanceStateDefinition
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
-import vip.mystery0.xhu.timetable.repository.getCurrentWeek
-import vip.mystery0.xhu.timetable.repository.getTimeTitle
+import vip.mystery0.xhu.timetable.repository.WidgetRepo
 import vip.mystery0.xhu.timetable.repository.getWeekCourse
 import vip.mystery0.xhu.timetable.ui.widget.widgetDataStoreFile
 import vip.mystery0.xhu.timetable.viewmodel.CourseSheet
@@ -29,9 +28,9 @@ class WeekCourseDataStore : DataStore<WeekCourseStateGlance> {
     private val dataFlow = MutableStateFlow(WeekCourseStateGlance.EMPTY)
 
     override val data: Flow<WeekCourseStateGlance> = flow {
-        val currentWeek = getCurrentWeek()
+        val currentWeek = WidgetRepo.calculateWeek()
         val weekCourseList = getWeekCourse(currentWeek)
-        val timeTitle = getTimeTitle()
+        val timeTitle = WidgetRepo.calculateDateTitle(false)
         val now = LocalDate.now()
         val startDate = now.minusDays(now.dayOfWeek.value.toLong() - 1)
         emit(
