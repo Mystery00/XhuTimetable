@@ -5,13 +5,21 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Query
 import vip.mystery0.xhu.timetable.model.response.NoticeResponse
+import vip.mystery0.xhu.timetable.model.transfer.PageResult
 
 interface NoticeApi {
     @GET("/api/rest/external/notice/list")
     suspend fun noticeList(
         @Header("sessionToken") token: String,
         @Query("platform") platform: String = "ANDROID",
-        @Query("lastId") lastId: Long = 0,
-        @Query("size") size: Int = 20,
-    ): Response<List<NoticeResponse>>
+        @Query("index") index: Int,
+        @Query("size") size: Int,
+    ): Response<PageResult<NoticeResponse>>
+
+    @GET("/api/rest/external/notice/check")
+    suspend fun checkNotice(
+        @Header("sessionToken") token: String,
+        @Query("lastNoticeId") lastNoticeId: Int,
+        @Query("platform") platform: String = "ANDROID",
+    ): Response<Boolean>
 }

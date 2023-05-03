@@ -1,6 +1,8 @@
 package vip.mystery0.xhu.timetable.repository
 
 import android.util.Base64
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.api.UserApi
 import vip.mystery0.xhu.timetable.config.store.User
@@ -16,14 +18,19 @@ suspend fun doLogin(user: User): LoginResponse =
 
 suspend fun doLogin(username: String, password: String): LoginResponse {
     val userApi = KoinJavaComponent.get<UserApi>(UserApi::class.java)
-    val publicKey = userApi.publicKey().publicKey
-    val decodedPublicKey = Base64.decode(publicKey, Base64.DEFAULT)
-    val key =
-        KeyFactory.getInstance("RSA").generatePublic(X509EncodedKeySpec(decodedPublicKey))
-    val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
-    cipher.init(Cipher.ENCRYPT_MODE, key)
-    val encryptPassword =
+    val publicKey = withContext(Dispatchers.IO) {
+        userApi.publicKey().publicKey
+    }
+    val encryptPassword = withContext(Dispatchers.Default) {
+        val decodedPublicKey = Base64.decode(publicKey, Base64.DEFAULT)
+        val key =
+            KeyFactory.getInstance("RSA").generatePublic(X509EncodedKeySpec(decodedPublicKey))
+        val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
+        cipher.init(Cipher.ENCRYPT_MODE, key)
         Base64.encodeToString(cipher.doFinal(password.toByteArray()), Base64.DEFAULT)
+    }
     val loginRequest = LoginRequest(username, encryptPassword, publicKey)
-    return userApi.login(loginRequest)
+    return withContext(Dispatchers.IO) {
+        userApi.login(loginRequest)
+    }
 }

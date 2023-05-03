@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import java.io.File
@@ -46,7 +47,7 @@ class SplashImageViewModel : ComposeViewModel(), KoinComponent {
         splashId: Long,
     ) {
         viewModelScope.launch {
-            val splashList = getConfigStore { splashList }
+            val splashList = getCacheStore { splashList }
             val splash = splashList.firstOrNull() { it.splashId == splashId }
             if (splash == null) {
                 _timerState.value = 0

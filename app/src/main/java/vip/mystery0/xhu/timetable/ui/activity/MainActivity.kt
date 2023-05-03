@@ -571,14 +571,6 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.checkUnRead {
-            viewModel.checkUnReadNotice()
-            viewModel.checkUnReadFeedback()
-        }
-    }
-
     @Subscribe(threadMode = ThreadMode.MAIN_ORDERED)
     fun updateUIFromConfig(uiEvent: UIEvent) {
         viewModel.loadConfig()
@@ -615,9 +607,14 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                 viewModel.loadBackground()
             }
 
-            EventType.READ_NOTICE -> {
-                viewModel.clearLastCheckUnreadTime()
+            EventType.UPDATE_NOTICE_CHECK -> {
+                viewModel.checkUnReadNotice()
             }
+
+            EventType.UPDATE_FEEDBACK_CHECK -> {
+                viewModel.checkUnReadFeedback()
+            }
+
 
             else -> {
             }

@@ -11,7 +11,6 @@ import retrofit2.Response
 import vip.mystery0.xhu.timetable.api.UserApi
 import vip.mystery0.xhu.timetable.config.checkNeedLogin
 import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
-import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.model.UserInfo
 import vip.mystery0.xhu.timetable.module.registerAdapter
@@ -44,10 +43,10 @@ object UserStore {
 
     suspend fun setMainUser(studentId: String) {
         Log.i(TAG, "setMainUser: $studentId")
-        runOnIo { kv.encode(MAIN_USER, studentId) }
+        withContext(Dispatchers.IO) { kv.encode(MAIN_USER, studentId) }
     }
 
-    suspend fun getMainUserId(): String? = runOnIo { kv.decodeString(MAIN_USER) }
+    suspend fun getMainUserId(): String? = withContext(Dispatchers.IO) { kv.decodeString(MAIN_USER) }
 
     suspend fun mainUserId(): String = getMainUserId()!!
 
@@ -74,18 +73,18 @@ object UserStore {
 
     suspend fun getUserByStudentId(studentId: String): User? {
         val key = studentId.userMapKey()
-        val json = runOnIo { kv.decodeString(key) } ?: return null
+        val json = withContext(Dispatchers.IO) { kv.decodeString(key) } ?: return null
         return userMoshi.fromJson(json)
     }
 
     suspend fun userByStudentId(studentId: String): User = getUserByStudentId(studentId)!!
 
     suspend fun loggedUserList(): List<User> {
-        val list = runOnIo { kv.decodeStringSet(LOGGED_USER_LIST) } ?: emptySet()
+        val list = withContext(Dispatchers.IO) { kv.decodeStringSet(LOGGED_USER_LIST) } ?: emptySet()
         if (list.isEmpty()) return emptyList()
         return list.mapNotNull { studentId ->
             val key = studentId.userMapKey()
-            val json = runOnIo { kv.decodeString(key) } ?: return@mapNotNull null
+            val json = withContext(Dispatchers.IO) { kv.decodeString(key) } ?: return@mapNotNull null
             val user = userMoshi.fromJson(json) ?: return@mapNotNull null
             user
         }
@@ -95,7 +94,7 @@ object UserStore {
         Log.i(TAG, "login: $user")
         val key = user.mapKey()
         val json = userMoshi.toJson(user)
-        runOnIo {
+        withContext(Dispatchers.IO) {
             kv.encode(key, json)
             updateLoggedUserList { it + user.studentId }
         }
@@ -109,7 +108,7 @@ object UserStore {
         Log.i(TAG, "logout: $studentId")
         val mainUserId = getMainUserId()
         val key = studentId.userMapKey()
-        runOnIo {
+        withContext(Dispatchers.IO) {
             kv.removeValueForKey(key)
             updateLoggedUserList { it - studentId }
         }
@@ -129,10 +128,10 @@ object UserStore {
         Log.i(TAG, "updateUser: $user")
         val key = user.mapKey()
         val json = userMoshi.toJson(user)
-        runOnIo { kv.encode(key, json) }
+        withContext(Dispatchers.IO) { kv.encode(key, json) }
     }
 
-    private suspend fun updateLoggedUserList(func: (Set<String>) -> Set<String>) = runOnIo {
+    private suspend fun updateLoggedUserList(func: (Set<String>) -> Set<String>) = withContext(Dispatchers.IO) {
         val list = kv.decodeStringSet(LOGGED_USER_LIST) ?: emptySet()
         kv.encode(LOGGED_USER_LIST, func(list))
     }
@@ -141,18 +140,29 @@ object UserStore {
     private fun User.mapKey() = studentId.userMapKey()
 
     suspend fun <R> User.withAutoLoginOnce(block: suspend (String) -> Response<R>): R =
-        withContext(Dispatchers.IO) {
+        withContext(Dispatchers.Default) {
             try {
-                return@withContext block(token).checkNeedLogin()
+                val r = withContext(Dispatchers.IO) {
+                    block(token)
+                }
+                return@withContext withContext(Dispatchers.Default) {
+                    r.checkNeedLogin()
+                }
             } catch (exception: ServerNeedLoginException) {
                 //做一次登录
                 val loginResponse = doLogin(this@withAutoLoginOnce)
                 //获取用户信息
                 val userApi = KoinJavaComponent.get<UserApi>(UserApi::class.java)
                 val userInfo = userApi.getUserInfo(loginResponse.sessionToken)
-                val user = this@withAutoLoginOnce.copy(token = loginResponse.sessionToken, info = userInfo)
+                val user =
+                    this@withAutoLoginOnce.copy(token = loginResponse.sessionToken, info = userInfo)
                 updateUser(user)
-                return@withContext block(loginResponse.sessionToken).checkNeedLogin()
+                val r = withContext(Dispatchers.IO) {
+                    block(token)
+                }
+                return@withContext withContext(Dispatchers.Default) {
+                    r.checkNeedLogin()
+                }
             }
         }
 

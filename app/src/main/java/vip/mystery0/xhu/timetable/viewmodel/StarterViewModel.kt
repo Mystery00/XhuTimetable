@@ -17,6 +17,7 @@ import vip.mystery0.xhu.timetable.config.SessionManager
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
+import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.doClear
 import vip.mystery0.xhu.timetable.externalPictureDir
 import vip.mystery0.xhu.timetable.repository.StartRepo
@@ -70,7 +71,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
 //                DataHolder.mainUserName = SessionManager.mainUserOrNull()?.info?.name ?: "未登录"
             val dir = File(externalPictureDir, "splash")
             val now = Instant.now()
-            val splashList = getConfigStore { splashList }
+            val splashList = getCacheStore { splashList }
                 .filter { now >= it.startShowTime && now <= it.endShowTime }
                 .map {
                     val extension = it.imageUrl.substringAfterLast(".")

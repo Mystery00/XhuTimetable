@@ -17,8 +17,6 @@ val databaseModule = module {
     }
     single { get<DB>().courseDao() }
     single { get<DB>().courseColorDao() }
-    single { get<DB>().noticeDao() }
-    single { get<DB>().customThingDao() }
 }
 
 private val MIGRATION_1_2: Migration = object : Migration(1, 2) {

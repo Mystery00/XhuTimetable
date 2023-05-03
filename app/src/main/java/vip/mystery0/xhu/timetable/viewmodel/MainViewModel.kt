@@ -25,6 +25,7 @@ import vip.mystery0.xhu.timetable.config.store.MenuStore
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore
+import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.model.CustomUi
@@ -70,8 +71,6 @@ class MainViewModel : ComposeViewModel() {
         private const val TAG = "MainViewModel"
     }
 
-    private var lastCheckUnreadTime = Instant.MIN
-
     private val poemsApi: PoemsApi by inject()
 
     private val feedbackApi: FeedbackApi by inject()
@@ -79,8 +78,6 @@ class MainViewModel : ComposeViewModel() {
     private val courseRepo: CourseRepo111 = getRepo()
 
     private val courseLocalRepo: CourseRepo111 by localRepo()
-
-    private val noticeRepo: NoticeRepo = getRepo()
 
     private val workManager: WorkManager by inject()
 
@@ -205,18 +202,6 @@ class MainViewModel : ComposeViewModel() {
                     getConfig { backgroundImage } ?: XhuImages.defaultBackgroundImage
             }
             _backgroundImageBlur.value = getConfig { customUi }.backgroundImageBlur
-        }
-    }
-
-    fun clearLastCheckUnreadTime() {
-        lastCheckUnreadTime = Instant.MIN
-    }
-
-    fun checkUnRead(block: () -> Unit) {
-        val now = Instant.now()
-        if (Duration.between(lastCheckUnreadTime, now) > Duration.ofMinutes(1)) {
-            block()
-            lastCheckUnreadTime = now
         }
     }
 
@@ -392,7 +377,7 @@ class MainViewModel : ComposeViewModel() {
             val currentWeek = pair.first
             //从云端加载数据
             val cloudData = getMainPageData(true)
-            withContext(Dispatchers.Default){
+            withContext(Dispatchers.Default) {
                 //加载今日列表的数据
                 loadTodayCourse(currentWeek, cloudData.todayViewList)
                 //加载今日事项
@@ -413,7 +398,7 @@ class MainViewModel : ComposeViewModel() {
         _multiAccountMode.value = getConfigStore { multiAccountMode }
         var loadFromCloud = forceUpdate
         if (!loadFromCloud) {
-            loadFromCloud = getConfigStore { lastSyncCourse }.isBefore(LocalDate.now())
+            loadFromCloud = getCacheStore { lastSyncCourse }.isBefore(LocalDate.now())
         }
         val currentWeek = calculateWeekInternal()
         _week.value = currentWeek
@@ -699,13 +684,12 @@ class MainViewModel : ComposeViewModel() {
     }
 
     fun checkUnReadNotice() {
-//        viewModelScope.launch(serverExceptionHandler { throwable ->
-//            Log.w(TAG, "load notice list failed", throwable)
-//            toastMessage(throwable.message ?: throwable.javaClass.simpleName)
-//        }) {
-//            if (UserStore.getMainUser() == null) return@launch
-//            _hasUnReadNotice.value = noticeRepo.hasUnReadNotice()
-//        }
+        viewModelScope.launch(networkErrorHandler {
+            Log.w(TAG, "check unread notice failed", it)
+        }) {
+            if (!UserStore.isLogin()) return@launch
+            _hasUnReadNotice.value = NoticeRepo.checkNotice()
+        }
     }
 
     fun checkUnReadFeedback() {
