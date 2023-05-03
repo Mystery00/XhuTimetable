@@ -48,9 +48,6 @@ class CustomThingViewModel : ComposeViewModel(), KoinComponent {
     private val _saveLoadingState = MutableStateFlow(LoadingState(init = true))
     val saveLoadingState: StateFlow<LoadingState> = _saveLoadingState
 
-    private val _init = MutableStateFlow(false)
-    val init: StateFlow<Boolean> = _init
-
     init {
         viewModelScope.launch {
             _userSelect.value = initUserSelect()
@@ -99,7 +96,7 @@ class CustomThingViewModel : ComposeViewModel(), KoinComponent {
             if (saveAsCountdown) {
                 //存储为倒计时，那么持续时间为一天
                 request.endTime =
-                    Instant.ofEpochMilli(request.endTime).plus(1, ChronoUnit.DAYS).toEpochMilli()
+                    Instant.ofEpochMilli(request.startTime).plus(1, ChronoUnit.DAYS).toEpochMilli()
             }
             if (request.startTime > request.endTime) {
                 failed("开始时间不能晚于结束时间")

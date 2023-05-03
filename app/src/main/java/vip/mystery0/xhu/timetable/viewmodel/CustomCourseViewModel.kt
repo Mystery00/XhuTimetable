@@ -238,6 +238,8 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
     )
 
     data class LoadingState(
+        val init: Boolean = false,
         val loading: Boolean = false,
+        val actionSuccess: Boolean = true,
     )
 }

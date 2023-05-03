@@ -115,20 +115,15 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                 }
                 return
             }
-            if (viewModel.changeCustomCourse) {
-                eventBus.post(UIEvent(EventType.CHANGE_SHOW_CUSTOM_COURSE))
-            }
             finish()
         }
 
-        BackHandler(
-            onBack = {
-                onBack()
-            }
-        )
+        BackHandler {
+            onBack()
+        }
 
+        val focusManager = LocalFocusManager.current
         if (!saveLoadingState.loading) {
-            val focusManager = LocalFocusManager.current
             LaunchedEffect(key1 = "autoHideSheet", block = {
                 scope.launch {
                     showSelect.hide()
@@ -201,7 +196,6 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                     .padding(8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                val focusManager = LocalFocusManager.current
                                 Image(
                                     modifier = Modifier
                                         .padding(12.dp)
@@ -1017,6 +1011,13 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                 }
             )
         }
+    }
+
+    override fun onStop() {
+        if (viewModel.changeCustomCourse) {
+            eventBus.post(UIEvent(EventType.CHANGE_SHOW_CUSTOM_COURSE))
+        }
+        super.onStop()
     }
 }
 
