@@ -67,7 +67,7 @@ object WidgetRepo {
             AggregationRepo.fetchAggregationMainPage(false, showCustomCourse, showCustomThing)
 
         //获取自定义颜色列表
-        val colorMap = getRawCourseColorList()
+        val colorMap = CourseColorRepo.getRawCourseColorList()
         val resultList = ArrayList<WidgetTodayItem>()
 
         resultList.addAll(loadTodayCourseList(currentWeek, view.todayViewList, colorMap))

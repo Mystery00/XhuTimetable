@@ -39,9 +39,9 @@ import vip.mystery0.xhu.timetable.model.response.Version
 import vip.mystery0.xhu.timetable.model.transfer.AggregationView
 import vip.mystery0.xhu.timetable.module.Feature
 import vip.mystery0.xhu.timetable.repository.AggregationRepo
+import vip.mystery0.xhu.timetable.repository.CourseColorRepo
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
 import vip.mystery0.xhu.timetable.repository.WidgetRepo
-import vip.mystery0.xhu.timetable.repository.getRawCourseColorList
 import vip.mystery0.xhu.timetable.trackError
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
@@ -375,7 +375,7 @@ class MainViewModel : ComposeViewModel() {
         courseList: List<TodayCourseView>,
     ) {
         //获取自定义颜色列表
-        val colorMap = getRawCourseColorList()
+        val colorMap = CourseColorRepo.getRawCourseColorList()
         val today = LocalDate.now()
         val showTomorrow = getConfigStore { showTomorrowCourseTime }
             ?.let { LocalTime.now().isAfter(it) } ?: false
@@ -531,7 +531,7 @@ class MainViewModel : ComposeViewModel() {
         changeWeekOnly: Boolean = false,
     ) {
         //获取自定义颜色列表
-        val colorMap = getRawCourseColorList()
+        val colorMap = CourseColorRepo.getRawCourseColorList()
         //设置是否本周以及课程颜色
         courseList.forEach {
             it.thisWeek = it.weekList.contains(showWeek)

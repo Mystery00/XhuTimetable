@@ -12,8 +12,8 @@ import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.UserSelect
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.module.betweenDays
+import vip.mystery0.xhu.timetable.repository.CourseColorRepo
 import vip.mystery0.xhu.timetable.repository.ExamRepo
-import vip.mystery0.xhu.timetable.repository.getCourseColorByName
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.utils.enTimeFormatter
 import java.time.Duration
@@ -98,7 +98,7 @@ class ExamViewModel : ComposeViewModel() {
                         }
                     }
                     Exam(
-                        getCourseColorByName(it.courseName),
+                        CourseColorRepo.getCourseColorByName(it.courseName),
                         it.examDay,
                         it.examDay.format(DateTimeFormatter.ISO_LOCAL_DATE),
                         it.seatNo,

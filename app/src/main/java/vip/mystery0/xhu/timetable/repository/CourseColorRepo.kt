@@ -1,6 +1,10 @@
 package vip.mystery0.xhu.timetable.repository
 
 import androidx.compose.ui.graphics.Color
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.runOnIo
@@ -9,80 +13,88 @@ import vip.mystery0.xhu.timetable.repository.db.dao.CourseColorDao
 import vip.mystery0.xhu.timetable.repository.db.dao.CourseDao
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 
-object CourseColorRepo {
+object CourseColorRepo : KoinComponent {
+    private val courseDao: CourseDao by inject()
+    private val courseColorDao: CourseColorDao by inject()
 
-}
-
-private val courseDao by lazy {
-    KoinJavaComponent.get<CourseDao>(CourseDao::class.java)
-}
-private val courseColorDao by lazy {
-    KoinJavaComponent.get<CourseColorDao>(CourseColorDao::class.java)
-}
-
-suspend fun getRawCourseColorList(): Map<String, Color> {
-    val colorList = runOnIo { courseColorDao.queryAllCourseColorList() }
-    val map = HashMap<String, Color>(colorList.size)
-    colorList.forEach {
-        val color = android.graphics.Color.parseColor(it.color)
-        map[it.courseName] = Color(color)
-    }
-    return map
-}
-
-suspend fun getCourseColorList(keywords: String): List<Pair<String, Color>> {
-    val courseList = runOnIo {
-        if (keywords.isBlank()) {
-            courseDao.queryDistinctCourseByUsernameAndTerm()
-        } else {
-            courseDao.queryDistinctCourseByKeywordsAndUsernameAndTerm("%${keywords}%")
+    suspend fun getRawCourseColorList(): Map<String, Color> {
+        val colorList = withContext(Dispatchers.IO) {
+            courseColorDao.queryAllCourseColorList()
+        }
+        return withContext(Dispatchers.Default) {
+            val map = HashMap<String, Color>(colorList.size)
+            colorList.forEach {
+                val color = android.graphics.Color.parseColor(it.color)
+                map[it.courseName] = Color(color)
+            }
+            map
         }
     }
-    val colorList = runOnIo { courseColorDao.queryAllCourseColorList() }
-    return runOnCpu {
-        val map = HashMap<String, Color>(colorList.size)
-        colorList.forEach {
-            val color = android.graphics.Color.parseColor(it.color)
-            map[it.courseName] = Color(color)
+
+    suspend fun getCourseColorList(keywords: String): List<Pair<String, Color>> {
+        val courseList = withContext(Dispatchers.IO) {
+            if (keywords.isBlank()) {
+                courseDao.queryDistinctCourseByUsernameAndTerm()
+            } else {
+                courseDao.queryDistinctCourseByKeywordsAndUsernameAndTerm("%${keywords}%")
+            }
         }
-        courseList.map {
-            Pair(it, map[it] ?: ColorPool.hash(it))
+        val colorList = withContext(Dispatchers.IO) {
+            courseColorDao.queryAllCourseColorList()
+        }
+        return withContext(Dispatchers.Default) {
+            val map = HashMap<String, Color>(colorList.size)
+            colorList.forEach {
+                val color = android.graphics.Color.parseColor(it.color)
+                map[it.courseName] = Color(color)
+            }
+            courseList.map {
+                Pair(it, map[it] ?: ColorPool.hash(it))
+            }
         }
     }
-}
 
-suspend fun updateCourseColor(courseName: String, color: String?) {
-    runOnIo {
-        val saved = courseColorDao.selectCourseColor(courseName)
+    suspend fun updateCourseColor(courseName: String, color: String?) {
+        val saved = withContext(Dispatchers.IO) {
+            courseColorDao.selectCourseColor(courseName)
+        }
         if (saved != null) {
             if (color == null) {
-                courseColorDao.delete(saved)
+                withContext(Dispatchers.IO) {
+                    courseColorDao.delete(saved)
+                }
             } else {
                 saved.color = color
-                courseColorDao.update(saved)
+                withContext(Dispatchers.IO) {
+                    courseColorDao.update(saved)
+                }
             }
         } else {
             if (color != null) {
-                courseColorDao.save(CourseColor(courseName, color))
+                withContext(Dispatchers.IO) {
+                    courseColorDao.save(CourseColor(courseName, color))
+                }
             }
         }
     }
-}
 
-suspend fun deleteAllCourseColor() {
-    runOnIo {
-        courseColorDao.queryAllCourseColorList().forEach {
-            courseColorDao.delete(it)
+    suspend fun deleteAllCourseColor() {
+        withContext(Dispatchers.IO) {
+            courseColorDao.queryAllCourseColorList().forEach {
+                courseColorDao.delete(it)
+            }
         }
     }
-}
 
-suspend fun getCourseColorByName(courseName: String): Color {
-    val saved = courseColorDao.selectCourseColor(courseName)
-    return if (saved != null) {
-        val color = android.graphics.Color.parseColor(saved.color)
-        Color(color)
-    } else {
-        ColorPool.hash(courseName)
+    suspend fun getCourseColorByName(courseName: String): Color {
+        val saved = withContext(Dispatchers.IO) { courseColorDao.selectCourseColor(courseName) }
+        return withContext(Dispatchers.Default) {
+            if (saved != null) {
+                val color = android.graphics.Color.parseColor(saved.color)
+                Color(color)
+            } else {
+                ColorPool.hash(courseName)
+            }
+        }
     }
 }

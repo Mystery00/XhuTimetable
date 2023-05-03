@@ -11,8 +11,7 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
-import vip.mystery0.xhu.timetable.repository.getCourseColorList
-import vip.mystery0.xhu.timetable.repository.updateCourseColor
+import vip.mystery0.xhu.timetable.repository.CourseColorRepo
 import java.text.Collator
 import java.util.Locale
 
@@ -32,7 +31,7 @@ class CustomCourseColorViewModel : ComposeViewModel(), KoinComponent {
 
     fun loadList(keywords: String) {
         viewModelScope.launch {
-            _listState.value = getCourseColorList(keywords)
+            _listState.value = CourseColorRepo.getCourseColorList(keywords)
                 .sortedWith { o1, o2 -> comparator.compare(o1.first, o2.first) }
         }
     }
@@ -41,9 +40,9 @@ class CustomCourseColorViewModel : ComposeViewModel(), KoinComponent {
         viewModelScope.launch {
             if (selectedColor != null) {
                 val color = toColorString(selectedColor)
-                updateCourseColor(courseName, color)
+                CourseColorRepo.updateCourseColor(courseName, color)
             } else {
-                updateCourseColor(courseName, null)
+                CourseColorRepo.updateCourseColor(courseName, null)
             }
             loadList("")
             eventBus.post(UIEvent(EventType.CHANGE_TERM_START_TIME))
