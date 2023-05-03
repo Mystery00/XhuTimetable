@@ -7,6 +7,7 @@ data class Customisable<T>(
     companion object {
         fun <T> custom(data: T) = Customisable(data, true)
         fun <T> serverDetect(data: T) = Customisable(data, false)
+        fun <T> clearCustom(data: T) = Customisable(data, false)
 
         fun customKey(key: String): String = "${key}-custom"
     }

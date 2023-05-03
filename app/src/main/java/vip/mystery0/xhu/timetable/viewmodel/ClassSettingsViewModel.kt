@@ -7,12 +7,16 @@ import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.Customisable
 import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.setConfig
+import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
+import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import java.time.Instant
@@ -31,15 +35,14 @@ class ClassSettingsViewModel : ComposeViewModel() {
     private val _selectYearAndTermList = MutableStateFlow<List<String>>(emptyList())
     val selectYearAndTermList: StateFlow<List<String>> = _selectYearAndTermList
 
-    private val _currentYearData = MutableStateFlow(GlobalConfig.currentYearData)
-    val currentYearData: StateFlow<Pair<String, Boolean>> = _currentYearData
-    private val _currentTermData = MutableStateFlow(GlobalConfig.currentTermData)
-    val currentTermData: StateFlow<Pair<Int, Boolean>> = _currentTermData
+    private val _currentYearData = MutableStateFlow(GlobalConfigStore.customNowYear)
+    val currentYearData: StateFlow<Customisable<Int>> = _currentYearData
+    private val _currentTermData = MutableStateFlow(GlobalConfigStore.customNowTerm)
+    val currentTermData: StateFlow<Customisable<Int>> = _currentTermData
     private val _showTomorrowCourseTimeData = MutableStateFlow<LocalTime?>(null)
     val showTomorrowCourseTimeData: StateFlow<LocalTime?> = _showTomorrowCourseTimeData
-    private val _currentTermStartTime =
-        MutableStateFlow(Pair<LocalDate, Boolean>(LocalDate.now(), false))
-    val currentTermStartTime: StateFlow<Pair<LocalDate, Boolean>> = _currentTermStartTime
+    private val _currentTermStartTime = MutableStateFlow(GlobalConfigStore.customTermStartDate)
+    val currentTermStartTime: StateFlow<Customisable<LocalDate>> = _currentTermStartTime
     private val _showCustomCourseData = MutableStateFlow(false)
     val showCustomCourseData: StateFlow<Boolean> = _showCustomCourseData
     private val _showCustomThingData = MutableStateFlow(false)
@@ -49,11 +52,6 @@ class ClassSettingsViewModel : ComposeViewModel() {
         viewModelScope.launch {
             _showTomorrowCourseTimeData.value = getConfig { showTomorrowCourseTime }
             val customTermStartTime = getConfig { customTermStartTime }
-            _currentTermStartTime.value =
-                Pair(
-                    customTermStartTime.first.atZone(chinaZone).toLocalDate(),
-                    customTermStartTime.second
-                )
             _showCustomCourseData.value = getConfig { showCustomCourseOnWeek }
             _showCustomThingData.value = getConfig { showCustomThing }
 
@@ -93,34 +91,27 @@ class ClassSettingsViewModel : ComposeViewModel() {
         }
     }
 
-    fun updateCurrentYearTerm(year: String = "", term: Int = -1) {
+    fun updateCurrentYearTerm(custom: Boolean, year: Int = -1, term: Int = -1) {
         viewModelScope.launch {
-            setConfig {
-                currentYearData = year to (year != "")
-                currentTermData = term to (term != -1)
+            setConfigStore {
+                customNowYear =
+                    if (custom) Customisable.custom(year) else Customisable.clearCustom(-1)
+                customNowTerm =
+                    if (custom) Customisable.custom(term) else Customisable.clearCustom(-1)
             }
-            _currentYearData.value = getConfig { currentYearData }
-            _currentTermData.value = getConfig { currentTermData }
+            _currentYearData.value = getConfigStore { customNowYear }
+            _currentTermData.value = getConfigStore { customNowTerm }
             eventBus.post(UIEvent(EventType.CHANGE_CURRENT_YEAR_AND_TERM))
         }
     }
 
-    fun updateTermStartTime(date: LocalDate) {
+    fun updateTermStartTime(custom: Boolean, date: LocalDate) {
         viewModelScope.launch {
-            val customDate =
-                if (date == LocalDate.MIN)
-                    Instant.ofEpochMilli(0L)
-                else
-                    date.atStartOfDay(chinaZone).toInstant()
-            setConfig {
-                customTermStartTime = customDate to true
+            setConfigStore {
+                customTermStartDate =
+                    if (custom) Customisable.custom(date) else Customisable.clearCustom(LocalDate.MIN)
             }
-            val customTermStartTime = getConfig { customTermStartTime }
-            _currentTermStartTime.value =
-                Pair(
-                    customTermStartTime.first.atZone(chinaZone).toLocalDate(),
-                    customTermStartTime.second
-                )
+            _currentTermStartTime.value = getConfigStore { customTermStartDate }
             eventBus.post(UIEvent(EventType.CHANGE_TERM_START_TIME))
         }
     }
