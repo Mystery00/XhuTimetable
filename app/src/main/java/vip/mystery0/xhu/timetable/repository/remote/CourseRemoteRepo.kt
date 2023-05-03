@@ -6,6 +6,7 @@ import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.response.CourseResponse
 import vip.mystery0.xhu.timetable.model.response.OldCourseResponse
@@ -25,7 +26,7 @@ class CourseRemoteRepo : CourseRepo111 {
             courseApi.courseList(it, year, term, showCustomCourseOnWeek)
         }
         local.saveCourseList(user, year, term, courseResponse)
-        setConfigStore { lastSyncCourse = LocalDate.now() }
+        setCacheStore { lastSyncCourse = LocalDate.now() }
         return courseResponse
     }
 

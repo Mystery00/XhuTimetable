@@ -34,12 +34,15 @@ class ConfigStore internal constructor() {
     private val kv = MMKV.mmkvWithID("ConfigStore")
     private val moshi = Moshi.Builder().registerAdapter().build()
 
+    // 用户信息存储密钥
     private val userStoreSecretKey = "userStoreSecret"
     var userStoreSecret: String
         set(value) {
             kv.encode(userStoreSecretKey, value)
         }
         get() = kv.decodeString(userStoreSecretKey) ?: ""
+
+    //开学时间
     private val termStartDateKey = "termStartDate"
     val termStartDate: LocalDate
         get() = customTermStartDate.data
@@ -62,6 +65,7 @@ class ConfigStore internal constructor() {
             return Customisable(LocalDate.of(2023, 2, 20), false)
         }
 
+    //当前学年
     private val nowYearKey = "nowYear"
     val nowYear: Int
         get() = customNowYear.data
@@ -84,6 +88,7 @@ class ConfigStore internal constructor() {
             return Customisable(2022, false)
         }
 
+    //当前学期
     private val nowTermKey = "nowTerm"
     val nowTerm: Int
         get() = customNowTerm.data
@@ -106,21 +111,7 @@ class ConfigStore internal constructor() {
             return Customisable(2, false)
         }
 
-    private val splashListMoshi = moshi.adapter<List<Splash>>(
-        Types.newParameterizedType(
-            List::class.java,
-            Splash::class.java
-        )
-    )
-    private val splashListKey = "splashList"
-    var splashList: List<Splash>
-        set(value) {
-            kv.encode(splashListKey, splashListMoshi.toJson(value))
-        }
-        get() {
-            val saveValue = kv.decodeString(splashListKey) ?: "[]"
-            return splashListMoshi.fromJson(saveValue) ?: emptyList()
-        }
+    //结束隐藏启动页的时间
     private val hideSplashBeforeKey = "hideSplashBefore"
     var hideSplashBefore: Instant
         set(value) {
@@ -130,36 +121,32 @@ class ConfigStore internal constructor() {
             val time = kv.decodeLong(hideSplashBeforeKey, 0L)
             return Instant.ofEpochMilli(time)
         }
+
+    //在周课表中显示自定义课程
     private val showCustomCourseOnWeekKey = "showCustomCourseOnWeek"
     var showCustomCourseOnWeek: Boolean
         set(value) {
             kv.encode(showCustomCourseOnWeekKey, value)
         }
         get() = kv.decodeBool(showCustomCourseOnWeekKey, true)
-    private val lastSyncCourseKey = "lastSyncCourse"
-    var lastSyncCourse: LocalDate
-        set(value) {
-            kv.encode(lastSyncCourseKey, value.format(Formatter.DATE))
-        }
-        get() {
-            val value = kv.decodeString(lastSyncCourseKey)
-            if (value.isNullOrBlank()) {
-                return LocalDate.MIN
-            }
-            return LocalDate.parse(value, Formatter.DATE)
-        }
+
+    //多用户模式
     private val multiAccountModeKey = "multiAccountMode"
     var multiAccountMode: Boolean
         set(value) {
             kv.encode(multiAccountModeKey, value)
         }
         get() = kv.decodeBool(multiAccountModeKey, false)
+
+    //显示非本周课程
     private val showNotThisWeekKey = "showNotThisWeek"
     var showNotThisWeek: Boolean
         set(value) {
             kv.encode(showNotThisWeekKey, value)
         }
         get() = kv.decodeBool(showNotThisWeekKey, true)
+
+    //到达指定时间之后显示明日的课程
     private val showTomorrowCourseTimeKey = "showTomorrowCourseTime"
     var showTomorrowCourseTime: LocalTime?
         set(value) {
@@ -167,12 +154,16 @@ class ConfigStore internal constructor() {
         }
         get() = kv.decodeString(showTomorrowCourseTimeKey)
             ?.let { LocalTime.parse(it, Formatter.TIME) }
+
+    //显示课程状态
     private val showStatusKey = "showStatus"
     var showStatus: Boolean
         set(value) {
             kv.encode(showStatusKey, value)
         }
         get() = kv.decodeBool(showStatusKey, true)
+
+    //自定义课表格子
     private val customUiKey = "customUi"
     var customUi: CustomUi
         set(value) {
@@ -183,18 +174,24 @@ class ConfigStore internal constructor() {
             return if (save.isNullOrBlank()) CustomUi.DEFAULT
             else moshi.adapter(CustomUi::class.java).fromJson(save)!!
         }
+
+    //当加载失败时显示旧数据
     private val showOldCourseWhenFailedKey = "showOldCourseWhenFailed"
     var showOldCourseWhenFailed: Boolean
         set(value) {
             kv.encode(showOldCourseWhenFailedKey, value)
         }
         get() = kv.decodeBool(showOldCourseWhenFailedKey, true)
+
+    //在今日课程页面显示自定义事项
     private val showCustomThingKey = "showCustomThing"
     var showCustomThing: Boolean
         set(value) {
             kv.encode(showCustomThingKey, value)
         }
         get() = kv.decodeBool(showCustomThingKey, true)
+
+    //版本更新渠道
     private val versionChannelKey = "versionChannel"
     var versionChannel: VersionChannel
         set(value) {

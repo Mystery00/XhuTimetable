@@ -17,6 +17,7 @@ import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
+import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.contentResolver
 import vip.mystery0.xhu.timetable.externalDocumentsDir
@@ -74,7 +75,7 @@ class SettingsViewModel : ComposeViewModel() {
             Theme.nightMode.value = getConfig { nightMode }
             _notifyTimeData.value = getConfig { notifyTime }
             debugMode.value = getConfig { debugMode }
-            _splashList.value = getConfigStore { splashList }
+            _splashList.value = getCacheStore { splashList }
             _serverUrl.value = getConfig { serverUrl }
             _versionChannel.value = getConfig { versionChannel }
             try {

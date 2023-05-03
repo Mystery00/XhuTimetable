@@ -19,8 +19,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
@@ -31,22 +29,25 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemsIndexed
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.material.shimmer
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
-import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.loadInBrowser
-import vip.mystery0.xhu.timetable.model.entity.Notice
+import vip.mystery0.xhu.timetable.model.event.EventType
+import vip.mystery0.xhu.timetable.model.event.UIEvent
+import vip.mystery0.xhu.timetable.model.response.NoticeResponse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuFonts
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.NoticeViewModel
-import java.time.Instant
-import java.time.LocalDateTime
 
 class NoticeActivity : BaseComposeActivity() {
     private val viewModel: NoticeViewModel by viewModels()
@@ -55,7 +56,8 @@ class NoticeActivity : BaseComposeActivity() {
 
     @Composable
     override fun BuildContent() {
-        val noticeListState by viewModel.noticeListState.collectAsState()
+        val pager = viewModel.pageState.collectAsLazyPagingItems()
+
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -79,41 +81,45 @@ class NoticeActivity : BaseComposeActivity() {
                 modifier = Modifier
                     .padding(paddingValues)
                     .fillMaxSize(),
-                state = rememberSwipeRefreshState(noticeListState.loading),
-                onRefresh = { viewModel.loadNoticeList() },
+                state = rememberSwipeRefreshState(isRefreshing = pager.loadState.refresh is LoadState.Loading),
+                onRefresh = { pager.refresh() },
+                swipeEnabled = false,
             ) {
-                val list = noticeListState.noticeList
-                if (noticeListState.loading || list.isNotEmpty()) {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(XhuColor.Common.grayBackground),
-                        contentPadding = PaddingValues(4.dp),
-                    ) {
-                        if (noticeListState.loading) {
-                            items(3) {
-                                BuildLoadingItem()
-                            }
-                        } else {
-                            if (list.isNotEmpty()) {
-                                items(list.size) { index ->
-                                    BuildItem(notice = list[index])
-                                }
-                            }
+                if (pager.itemCount == 0) {
+                    BuildNoDataLayout()
+                    return@SwipeRefresh
+                }
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(XhuColor.Common.grayBackground),
+                    contentPadding = PaddingValues(4.dp),
+                ) {
+                    itemsIndexed(pager) { _, item ->
+                        item?.let {
+                            BuildItem(it)
                         }
                     }
-                } else {
-                    BuildNoDataLayout()
+                    when (pager.loadState.append) {
+                        is LoadState.Loading -> {
+                            item { BuildPageFooter(text = "数据加载中，请稍后……") }
+                        }
+
+                        is LoadState.Error -> {
+                            item { BuildPageFooter(text = "数据加载失败，请重试") }
+                        }
+
+                        is LoadState.NotLoading -> {
+                            item { BuildPageFooter(text = "o(´^｀)o 再怎么滑也没有啦~") }
+                        }
+                    }
                 }
             }
-        }
-        if (noticeListState.errorMessage.isNotBlank()) {
-            noticeListState.errorMessage.toast(true)
         }
     }
 
     @Composable
-    fun BuildItem(notice: Notice) {
+    fun BuildItem(notice: NoticeResponse) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -133,10 +139,7 @@ class NoticeActivity : BaseComposeActivity() {
                 )
                 Text(
                     text = "发布于 ${
-                        LocalDateTime.ofInstant(
-                            Instant.ofEpochMilli(notice.createTime),
-                            chinaZone
-                        ).format(chinaDateTimeFormatter)
+                        notice.createTime.asLocalDateTime().format(chinaDateTimeFormatter)
                     }",
                     fontSize = 12.sp,
                     modifier = Modifier
@@ -200,32 +203,9 @@ class NoticeActivity : BaseComposeActivity() {
             )
         }
     }
-}
 
-@Composable
-private fun BuildLoadingItem() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .placeholder(
-                visible = true,
-                highlight = PlaceholderHighlight.shimmer(),
-            )
-    ) {
-        Column(
-            modifier = Modifier.padding(4.dp)
-        ) {
-            Text(
-                text = "占位符标题",
-            )
-            Text(
-                text = "公告内容，\n总共\n三行",
-            )
-            Text(
-                text = "2021-10-01",
-                fontSize = 12.sp,
-            )
-        }
+    override fun onStop() {
+        eventBus.post(UIEvent(EventType.UPDATE_NOTICE_CHECK))
+        super.onStop()
     }
 }
