@@ -233,7 +233,7 @@ abstract class BaseSelectComposeActivity : BaseComposeActivity() {
     }
 
     @Composable
-    private fun <T : Selectable> ShowSelectDialog(
+    protected fun <T : Selectable> ShowSelectDialog(
         dialogTitle: String,
         selectState: State<List<T>>,
         show: MutableState<Boolean>,

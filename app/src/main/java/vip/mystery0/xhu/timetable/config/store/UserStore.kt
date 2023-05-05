@@ -5,6 +5,9 @@ import android.widget.Toast
 import com.squareup.moshi.Moshi
 import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent
 import retrofit2.Response
@@ -34,6 +37,7 @@ object UserStore {
         }
     private val kv = MMKV.mmkvWithID("UserStore", MMKV.SINGLE_PROCESS_MODE, secret)
     private val userMoshi = Moshi.Builder().registerAdapter().build().adapter(User::class.java)
+    private val mutex = Mutex()
 
     suspend fun isLogin(): Boolean = getMainUser() != null
 
@@ -46,7 +50,8 @@ object UserStore {
         withContext(Dispatchers.IO) { kv.encode(MAIN_USER, studentId) }
     }
 
-    suspend fun getMainUserId(): String? = withContext(Dispatchers.IO) { kv.decodeString(MAIN_USER) }
+    suspend fun getMainUserId(): String? =
+        withContext(Dispatchers.IO) { kv.decodeString(MAIN_USER) }
 
     suspend fun mainUserId(): String = getMainUserId()!!
 
@@ -80,11 +85,13 @@ object UserStore {
     suspend fun userByStudentId(studentId: String): User = getUserByStudentId(studentId)!!
 
     suspend fun loggedUserList(): List<User> {
-        val list = withContext(Dispatchers.IO) { kv.decodeStringSet(LOGGED_USER_LIST) } ?: emptySet()
+        val list =
+            withContext(Dispatchers.IO) { kv.decodeStringSet(LOGGED_USER_LIST) } ?: emptySet()
         if (list.isEmpty()) return emptyList()
         return list.mapNotNull { studentId ->
             val key = studentId.userMapKey()
-            val json = withContext(Dispatchers.IO) { kv.decodeString(key) } ?: return@mapNotNull null
+            val json =
+                withContext(Dispatchers.IO) { kv.decodeString(key) } ?: return@mapNotNull null
             val user = userMoshi.fromJson(json) ?: return@mapNotNull null
             user
         }
@@ -131,10 +138,11 @@ object UserStore {
         withContext(Dispatchers.IO) { kv.encode(key, json) }
     }
 
-    private suspend fun updateLoggedUserList(func: (Set<String>) -> Set<String>) = withContext(Dispatchers.IO) {
-        val list = kv.decodeStringSet(LOGGED_USER_LIST) ?: emptySet()
-        kv.encode(LOGGED_USER_LIST, func(list))
-    }
+    private suspend fun updateLoggedUserList(func: (Set<String>) -> Set<String>) =
+        withContext(Dispatchers.IO) {
+            val list = kv.decodeStringSet(LOGGED_USER_LIST) ?: emptySet()
+            kv.encode(LOGGED_USER_LIST, func(list))
+        }
 
     private fun String.userMapKey() = "user_$this"
     private fun User.mapKey() = studentId.userMapKey()
@@ -149,14 +157,26 @@ object UserStore {
                     r.checkNeedLogin()
                 }
             } catch (exception: ServerNeedLoginException) {
-                //做一次登录
-                val loginResponse = doLogin(this@withAutoLoginOnce)
-                //获取用户信息
-                val userApi = KoinJavaComponent.get<UserApi>(UserApi::class.java)
-                val userInfo = userApi.getUserInfo(loginResponse.sessionToken)
-                val user =
-                    this@withAutoLoginOnce.copy(token = loginResponse.sessionToken, info = userInfo)
-                updateUser(user)
+                var lock = mutex.tryLock()
+                while (!lock) {
+                    delay(500)
+                    lock = mutex.tryLock()
+                }
+                val newUser = userByStudentId(studentId)
+                val updated = this@withAutoLoginOnce.token != newUser.token
+                if (!updated) {
+                    //做一次登录
+                    val loginResponse = doLogin(this@withAutoLoginOnce)
+                    //获取用户信息
+                    val userApi = KoinJavaComponent.get<UserApi>(UserApi::class.java)
+                    val userInfo = userApi.getUserInfo(loginResponse.sessionToken)
+                    val user =
+                        this@withAutoLoginOnce.copy(
+                            token = loginResponse.sessionToken,
+                            info = userInfo
+                        )
+                    updateUser(user)
+                }
                 val r = withContext(Dispatchers.IO) {
                     block(token)
                 }

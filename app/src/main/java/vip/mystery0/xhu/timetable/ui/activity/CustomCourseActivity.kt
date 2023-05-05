@@ -1024,17 +1024,12 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
 @Composable
 private fun BuildItem(
     item: CustomCourseResponse,
-    placeHolder: Boolean = false,
     onClick: () -> Unit,
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
-            .placeholder(
-                visible = placeHolder,
-                highlight = PlaceholderHighlight.shimmer(),
-            )
             .clickable(
                 onClick = onClick,
                 indication = null,
@@ -1110,7 +1105,6 @@ private fun BuildItem(
 @Composable
 private fun BuildSearchResultItem(
     item: AllCourseResponse,
-    placeHolder: Boolean = false,
     checked: Boolean,
     onClick: () -> Unit,
 ) {
@@ -1120,10 +1114,6 @@ private fun BuildSearchResultItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 4.dp, vertical = 2.dp)
-            .placeholder(
-                visible = placeHolder,
-                highlight = PlaceholderHighlight.shimmer(),
-            )
             .clickable(
                 onClick = onClick,
                 indication = null,
