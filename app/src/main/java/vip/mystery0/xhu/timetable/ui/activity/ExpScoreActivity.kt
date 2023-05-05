@@ -214,10 +214,7 @@ private fun BuildItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
-            .placeholder(
-                visible = placeHolder,
-                highlight = PlaceholderHighlight.shimmer(),
-            ),
+            ,
         backgroundColor = XhuColor.cardBackground,
     ) {
         Column(

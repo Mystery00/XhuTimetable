@@ -3,6 +3,7 @@ package vip.mystery0.xhu.timetable.config
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.context
@@ -24,8 +25,11 @@ class ApplicationExceptionCatcher : Thread.UncaughtExceptionHandler {
     }
 
     override fun uncaughtException(t: Thread, e: Throwable) {
+        if (e is ServerError) {
+            Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
+            return
+        }
         val logFile = dumpExceptionToFile(e)
-        e.printStackTrace()
         finishAllActivity()
         showErrorReport(e, logFile)
     }

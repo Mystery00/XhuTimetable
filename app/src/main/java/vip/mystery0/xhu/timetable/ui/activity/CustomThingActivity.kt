@@ -646,17 +646,12 @@ class CustomThingActivity : BaseSelectComposeActivity() {
 @Composable
 private fun BuildItem(
     item: CustomThingResponse,
-    placeHolder: Boolean = false,
     onClick: () -> Unit,
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
-            .placeholder(
-                visible = placeHolder,
-                highlight = PlaceholderHighlight.shimmer(),
-            )
             .clickable(
                 onClick = onClick,
                 indication = null,

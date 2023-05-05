@@ -12,19 +12,22 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.material.placeholder
-import com.google.accompanist.placeholder.material.shimmer
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemsIndexed
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.model.response.ClassroomResponse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.formatWeekString
-import vip.mystery0.xhu.timetable.viewmodel.CourseRoom
+import vip.mystery0.xhu.timetable.viewmodel.AreaSelect
 import vip.mystery0.xhu.timetable.viewmodel.CourseRoomViewModel
+import vip.mystery0.xhu.timetable.viewmodel.IntSelect
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.*
@@ -35,31 +38,34 @@ class CourseRoomActivity : BaseComposeActivity() {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun BuildContent() {
-        val courseRoomListState by viewModel.courseRoomListState.collectAsState()
+        val pager = viewModel.pageState.collectAsLazyPagingItems()
 
-        val scope = rememberCoroutineScope()
-        val scaffoldState: BackdropScaffoldState =
-            rememberBackdropScaffoldState(initialValue = BackdropValue.Revealed)
+        val areaSelectStatus = viewModel.areaSelect.collectAsState()
+        val weekSelectStatus = viewModel.weekSelect.collectAsState()
+        val daySelectStatus = viewModel.daySelect.collectAsState()
+        val timeSelectStatus = viewModel.timeSelect.collectAsState()
 
         val areaDialog = remember { mutableStateOf(false) }
         val weekDialog = remember { mutableStateOf(false) }
         val dayDialog = remember { mutableStateOf(false) }
         val timeDialog = remember { mutableStateOf(false) }
 
+        val scaffoldState = rememberBackdropScaffoldState(initialValue = BackdropValue.Revealed)
+        val scope = rememberCoroutineScope()
+
         fun onBack() {
-            if (scaffoldState.isConcealed) {
-                finish()
-            } else {
+            if (scaffoldState.isRevealed) {
                 scope.launch {
                     scaffoldState.conceal()
                 }
+                return
             }
+            finish()
         }
-        BackHandler(
-            onBack = {
-                onBack()
-            }
-        )
+
+        BackHandler {
+            onBack()
+        }
 
         BackdropScaffold(
             modifier = Modifier,
@@ -105,9 +111,8 @@ class CourseRoomActivity : BaseComposeActivity() {
                         onClick = {
                             areaDialog.value = true
                         }) {
-                        val select by viewModel.areaSelect.collectAsState()
-                        val selected = select.firstOrNull { it.selected }
-                        val text = selected?.let { "查询区域：${it.area}" } ?: "请选择要查询的区域"
+                        val selected = areaSelectStatus.value.firstOrNull { it.selected }
+                        val text = selected?.let { "查询区域：${it.title}" } ?: "请选择要查询的区域"
                         Text(text = text)
                     }
                     OutlinedButton(
@@ -116,9 +121,10 @@ class CourseRoomActivity : BaseComposeActivity() {
                         onClick = {
                             weekDialog.value = true
                         }) {
-                        val week by viewModel.week.collectAsState()
-                        val text =
-                            if (week.isEmpty()) "请选择要查询的周次" else "查询周次：${week.formatWeekString()}"
+                        val weekList =
+                            weekSelectStatus.value.filter { it.selected }.map { it.value }
+                        val text = if (weekList.isEmpty()) "请选择要查询的周次"
+                        else "查询周次：${weekList.formatWeekString()}"
                         Text(text = text)
                     }
                     OutlinedButton(
@@ -127,16 +133,12 @@ class CourseRoomActivity : BaseComposeActivity() {
                         onClick = {
                             dayDialog.value = true
                         }) {
-                        val day by viewModel.day.collectAsState()
-                        val text =
-                            if (day.isEmpty()) "请选择要查询的星期" else "查询星期：${
-                                day.joinToString(separator = ",") {
-                                    DayOfWeek.of(it).getDisplayName(
-                                        TextStyle.SHORT,
-                                        Locale.CHINA
-                                    )
-                                }
-                            }"
+                        val dayList = daySelectStatus.value.filter { it.selected }.map {
+                            DayOfWeek.of(it.value)
+                                .getDisplayName(TextStyle.SHORT, Locale.CHINA)
+                        }
+                        val text = if (dayList.isEmpty()) "请选择要查询的星期"
+                        else "查询星期：${dayList.joinToString(separator = ",")}"
                         Text(text = text)
                     }
                     OutlinedButton(
@@ -145,16 +147,20 @@ class CourseRoomActivity : BaseComposeActivity() {
                         onClick = {
                             timeDialog.value = true
                         }) {
-                        val time by viewModel.time.collectAsState()
-                        val text =
-                            if (time.isEmpty()) "请选择要查询的节次" else "查询节次：第${time.joinToString(",")}节"
+                        val timeList =
+                            timeSelectStatus.value.filter { it.selected }.map { it.value }
+                        val text = if (timeList.isEmpty()) "请选择要查询的节次"
+                        else "查询节次：第${timeList.joinToString(",")}节"
                         Text(text = text)
                     }
                     Button(
                         colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
-                            viewModel.search()
+                            scope.launch {
+                                viewModel.search()
+                                scaffoldState.conceal()
+                            }
                         }) {
                         Text(text = "查询")
                     }
@@ -162,81 +168,71 @@ class CourseRoomActivity : BaseComposeActivity() {
             }, frontLayerContent = {
                 SwipeRefresh(
                     modifier = Modifier.fillMaxSize(),
-                    state = rememberSwipeRefreshState(courseRoomListState.loading),
-                    onRefresh = { },
+                    state = rememberSwipeRefreshState(isRefreshing = !viewModel.init && pager.loadState.refresh is LoadState.Loading),
+                    onRefresh = {
+                        pager.refresh()
+                    },
                     swipeEnabled = false,
                 ) {
-                    val list = courseRoomListState.courseRoomList
-                    if (courseRoomListState.loading || list.isNotEmpty()) {
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(XhuColor.Common.grayBackground),
-                            contentPadding = PaddingValues(4.dp),
-                        ) {
-                            if (courseRoomListState.loading) {
-                                items(3) {
-                                    BuildItem(
-                                        CourseRoom.PLACEHOLDER,
-                                        true,
-                                    )
-                                }
-                            } else {
-                                items(list.size) { index ->
-                                    val item = list[index]
-                                    BuildItem(item)
-                                }
+                    if (pager.itemCount == 0) {
+                        BuildNoDataLayout()
+                        return@SwipeRefresh
+                    }
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(XhuColor.Common.grayBackground),
+                        contentPadding = PaddingValues(4.dp),
+                    ) {
+                        itemsIndexed(pager) { _, item ->
+                            item?.let {
+                                BuildItem(it)
                             }
                         }
-                    } else {
-                        BuildNoDataLayout()
+                        when (pager.loadState.append) {
+                            is LoadState.Loading -> {
+                                item { BuildPageFooter(text = "数据加载中，请稍后……") }
+                            }
+
+                            is LoadState.Error -> {
+                                item { BuildPageFooter(text = "数据加载失败，请重试") }
+                            }
+
+                            is LoadState.NotLoading -> {
+                                item { BuildPageFooter(text = "o(´^｀)o 再怎么滑也没有啦~") }
+                            }
+                        }
                     }
                 }
             })
-        ShowAreaDialog(show = areaDialog)
-        val week by viewModel.week.collectAsState()
-        ShowListDialog(
-            show = weekDialog,
-            list = week,
-            title = "请选择要查询的周次",
-            itemSize = 20,
-            block = { item -> "第${item}周" },
-            onConfirm = {
-                viewModel.changeWeek(it)
-            })
-        val day by viewModel.day.collectAsState()
-        ShowListDialog(
-            show = dayDialog,
-            list = day,
-            title = "请选择要查询的星期",
-            itemSize = 7,
-            block = { item -> DayOfWeek.of(item).getDisplayName(TextStyle.FULL, Locale.CHINA) },
-            onConfirm = {
-                viewModel.changeDay(it)
-            })
-        val time by viewModel.time.collectAsState()
-        ShowListDialog(
-            show = timeDialog,
-            list = time,
-            title = "请选择要查询的节次",
-            itemSize = 11,
-            block = { item -> "第${item}节" },
-            onConfirm = {
-                viewModel.changeTime(it)
-            })
-        if (courseRoomListState.errorMessage.isNotBlank()) {
-            courseRoomListState.errorMessage.toast(true)
+        ShowAreaDialog(areaSelectStatus, areaDialog) {
+            viewModel.changeArea(it.value)
+        }
+        ShowListDialog(weekSelectStatus, weekDialog, "请选择要查询的周次", 2) {
+            viewModel.changeWeek(it)
+        }
+        ShowListDialog(daySelectStatus, dayDialog, "请选择要查询的星期", 1) {
+            viewModel.changeDay(it)
+        }
+        ShowListDialog(timeSelectStatus, timeDialog, "请选择要查询的节次", 1) {
+            viewModel.changeTime(it)
+        }
+        val errorMessage by viewModel.errorMessage.collectAsState()
+        if (errorMessage.second.isNotBlank()) {
+            errorMessage.second.toast(true)
         }
     }
 
     @Composable
     private fun ShowAreaDialog(
+        selectState: State<List<AreaSelect>>,
         show: MutableState<Boolean>,
+        onSelect: (AreaSelect) -> Unit,
     ) {
-        val areaSelect by viewModel.areaSelect.collectAsState()
-        val selectedArea = areaSelect.firstOrNull { it.selected } ?: return
+        val select = selectState.value
+        val selectedValue = select.firstOrNull { it.selected } ?: select.first()
+        var selected by remember { mutableStateOf(selectedValue) }
         if (show.value) {
-            var selected by remember { mutableStateOf(selectedArea) }
             AlertDialog(
                 onDismissRequest = {
                     show.value = false
@@ -247,8 +243,8 @@ class CourseRoomActivity : BaseComposeActivity() {
                 text = {
                     Column {
                         LazyColumn {
-                            items(areaSelect.size) { index ->
-                                val item = areaSelect[index]
+                            items(select.size) { index ->
+                                val item = select[index]
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -263,7 +259,7 @@ class CourseRoomActivity : BaseComposeActivity() {
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     RadioButton(selected = selected == item, onClick = null)
-                                    Text(text = item.area)
+                                    Text(text = item.title)
                                 }
                             }
                         }
@@ -272,7 +268,7 @@ class CourseRoomActivity : BaseComposeActivity() {
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            viewModel.changeArea(selected.area)
+                            onSelect(selected)
                             show.value = false
                         },
                     ) {
@@ -294,14 +290,14 @@ class CourseRoomActivity : BaseComposeActivity() {
 
     @Composable
     private fun ShowListDialog(
+        selectState: State<List<IntSelect>>,
         show: MutableState<Boolean>,
-        list: List<Int>,
         title: String,
-        itemSize: Int,
-        block: (Int) -> String,
-        onConfirm: (List<Int>) -> Unit,
+        columnSize: Int,
+        onSelect: (List<Int>) -> Unit,
     ) {
-        val array = Array(itemSize) { i -> list.contains(i + 1) }
+        val selectList = selectState.value.filter { it.selected }.map { it.value }
+        var selected by remember { mutableStateOf(selectList) }
         if (show.value) {
             AlertDialog(
                 onDismissRequest = {
@@ -313,28 +309,33 @@ class CourseRoomActivity : BaseComposeActivity() {
                 text = {
                     Column {
                         LazyColumn {
-                            val line = if (itemSize > 12) itemSize / 2 else itemSize
-                            val panelSize = if (itemSize > 12) 2 else 1
+                            val itemSize = selectState.value.size
+                            val line = itemSize / columnSize
                             items(line) { index ->
                                 Row {
-                                    for (i in 0 until panelSize) {
-                                        val item = index * panelSize + i
-                                        if (item < itemSize) {
-                                            var selected by remember { mutableStateOf(array[item]) }
+                                    for (i in 0 until columnSize) {
+                                        val itemIndex = index * columnSize + i
+                                        if (itemIndex < itemSize) {
                                             Row(
                                                 modifier = Modifier
                                                     .weight(1F),
                                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                                                 verticalAlignment = Alignment.CenterVertically,
                                             ) {
+                                                val value = selectState.value[itemIndex]
                                                 Checkbox(
-                                                    checked = selected,
+                                                    checked = selected.contains(value.value),
                                                     onCheckedChange = {
-                                                        selected = it
-                                                        array[item] = it
+                                                        selected = if (it) {
+                                                            //选中
+                                                            selected + value.value
+                                                        } else {
+                                                            //取消选中
+                                                            selected - value.value
+                                                        }
                                                     },
                                                 )
-                                                Text(text = block(item + 1))
+                                                Text(text = value.title)
                                             }
                                         }
                                     }
@@ -346,8 +347,7 @@ class CourseRoomActivity : BaseComposeActivity() {
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            onConfirm(array.mapIndexed { index, b -> if (b) index + 1 else null }
-                                .filterNotNull())
+                            onSelect(selected)
                             show.value = false
                         },
                     ) {
@@ -370,17 +370,12 @@ class CourseRoomActivity : BaseComposeActivity() {
 
 @Composable
 private fun BuildItem(
-    item: CourseRoom,
-    placeHolder: Boolean = false,
+    item: ClassroomResponse,
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .placeholder(
-                visible = placeHolder,
-                highlight = PlaceholderHighlight.shimmer(),
-            ),
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         backgroundColor = XhuColor.cardBackground,
     ) {
         Column(
@@ -405,42 +400,42 @@ private fun BuildItem(
                     Text(text = "教室名称：${item.roomName}")
                 }
             }
-            if (item.seat.isNotBlank()) {
+            if (item.seatCount.isNotBlank()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Image(painter = XhuIcons.CourseRoom.seat, contentDescription = null)
                     Text(
-                        text = "座位数：${item.seat}"
+                        text = "座位数：${item.seatCount}"
                     )
                 }
             }
-            if (item.region.isNotBlank()) {
+            if (item.campus.isNotBlank()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Image(painter = XhuIcons.CourseRoom.region, contentDescription = null)
-                    Text(text = "所在地区：${item.region}")
+                    Text(text = "校区：${item.campus}")
                 }
             }
-            if (item.type.isNotBlank()) {
+            if (item.roomType.isNotBlank()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Image(painter = XhuIcons.CourseRoom.type, contentDescription = null)
-                    Text(text = "教室类型：${item.type}")
+                    Text(text = "场地类型：${item.roomType}")
                 }
             }
-            if (item.remark.isNotBlank()) {
+            if (item.roomRemark.isNotBlank()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Image(painter = XhuIcons.CourseRoom.remark, contentDescription = null)
-                    Text(text = "备注：${item.remark}")
+                    Text(text = "备注：${item.roomRemark}")
                 }
             }
         }

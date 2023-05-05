@@ -45,17 +45,21 @@ abstract class ComposeViewModel : ViewModel(), KoinComponent {
             //如果为空，返回主用户，当然如果用户全部为空，该方法也返回空
             return UserStore.getMainUser()
         }
-        val selectedId =
-            withContext(Dispatchers.Default) { list.firstOrNull { it.selected }?.studentId }
-                ?: return UserStore.getMainUser()
+        val selectedId = withContext(Dispatchers.Default) {
+            list.firstOrNull { it.selected }?.studentId
+        } ?: return UserStore.getMainUser()
         return UserStore.getUserByStudentId(selectedId)
     }
 
     protected fun getSelectedYear(list: List<YearSelect>): Int =
-        list.first { it.selected }.value
+        getSelected(list)!!.value
 
     protected fun getSelectedTerm(list: List<TermSelect>): Int =
-        list.first { it.selected }.value
+        getSelected(list)!!.value
+
+    protected fun <T : Selectable> getSelected(list: List<T>): T? {
+        return list.firstOrNull { it.selected }
+    }
 
     protected suspend fun setSelectedUser(
         list: List<UserSelect>,
