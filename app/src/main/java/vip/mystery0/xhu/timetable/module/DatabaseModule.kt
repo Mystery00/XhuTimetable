@@ -3,7 +3,6 @@ package vip.mystery0.xhu.timetable.module
 import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import androidx.work.impl.Migration_8_9
 import org.koin.android.ext.koin.androidApplication
 import org.koin.dsl.module
 import vip.mystery0.xhu.timetable.repository.db.DB

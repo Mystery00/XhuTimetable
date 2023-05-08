@@ -4,12 +4,11 @@ import androidx.annotation.AnyThread
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.PagingSource
-import androidx.paging.PagingState
 import kotlinx.coroutines.flow.Flow
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.CustomThingApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
+import vip.mystery0.xhu.timetable.base.buildPageSource
 import vip.mystery0.xhu.timetable.config.ServerError
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
@@ -30,7 +29,15 @@ object CustomThingRepo : BaseDataRepo {
     ): Flow<PagingData<CustomThingResponse>> =
         Pager(
             config = globalPagingConfig,
-            pagingSourceFactory = { CustomThingPageSource(customThingApi, user) }
+            pagingSourceFactory = {
+                buildPageSource { index, size ->
+                    checkForceLoadFromCloud(true)
+
+                    user.withAutoLoginOnce {
+                        customThingApi.customThingList(it, index, size)
+                    }
+                }
+            }
         ).flow
 
     suspend fun createCustomThing(
@@ -67,31 +74,6 @@ object CustomThingRepo : BaseDataRepo {
         }
         if (!response) {
             throw ServerError("删除自定义事项失败")
-        }
-    }
-
-    internal class CustomThingPageSource(
-        private val customThingApi: CustomThingApi,
-        private val user: User,
-    ) : PagingSource<Int, CustomThingResponse>() {
-        override fun getRefreshKey(state: PagingState<Int, CustomThingResponse>): Int? =
-            state.anchorPosition?.let {
-                val anchorPage = state.closestPageToPosition(it)
-                anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
-            }
-
-        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CustomThingResponse> {
-            checkForceLoadFromCloud(true)
-
-            val index = params.key ?: 0
-            val response = user.withAutoLoginOnce {
-                customThingApi.customThingList(it, index, params.loadSize)
-            }
-            return LoadResult.Page(
-                data = response.items,
-                prevKey = null,
-                nextKey = response.hasNext.let { if (it) index + 1 else null },
-            )
         }
     }
 }

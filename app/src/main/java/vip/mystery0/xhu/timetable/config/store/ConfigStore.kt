@@ -1,15 +1,12 @@
 package vip.mystery0.xhu.timetable.config.store
 
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.config.Customisable
-import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
-import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.module.registerAdapter
 import java.time.Instant
 import java.time.LocalDate

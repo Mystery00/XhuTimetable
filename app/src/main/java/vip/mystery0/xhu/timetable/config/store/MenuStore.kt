@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.config.store
 
-import android.util.Log
 import com.squareup.moshi.Moshi
 import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.Dispatchers

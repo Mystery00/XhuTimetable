@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.response.CustomThingResponse
 import vip.mystery0.xhu.timetable.module.registerAdapter

@@ -1,10 +1,7 @@
 package vip.mystery0.xhu.timetable.model.entity
 
-import androidx.compose.ui.graphics.Color
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import vip.mystery0.xhu.timetable.config.chinaZone
-import java.time.Instant
 
 @Entity(tableName = "tb_custom_thing")
 data class CustomThing(

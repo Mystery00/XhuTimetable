@@ -14,10 +14,10 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.config.store.UserStore
-import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
+import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
+import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.doClear
 import vip.mystery0.xhu.timetable.externalPictureDir
 import vip.mystery0.xhu.timetable.repository.StartRepo

@@ -1,13 +1,6 @@
 package vip.mystery0.xhu.timetable.model
 
 import androidx.compose.ui.graphics.Color
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import vip.mystery0.xhu.timetable.config.chinaZone
-import vip.mystery0.xhu.timetable.ui.theme.ColorPool
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class CustomThing(

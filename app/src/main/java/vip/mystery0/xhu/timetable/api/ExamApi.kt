@@ -13,5 +13,7 @@ interface ExamApi {
         @Header("sessionToken") token: String,
         @Query("year") year: Int,
         @Query("term") term: Int,
+        @Query("index") index: Int,
+        @Query("size") size: Int,
     ): Response<PageResult<ExamResponse>>
 }

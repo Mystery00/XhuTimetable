@@ -11,12 +11,8 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
 import androidx.core.animation.doOnEnd
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
-import vip.mystery0.xhu.timetable.config.DataHolder
-import vip.mystery0.xhu.timetable.config.SessionManager
-import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.registerAppCenter
 import vip.mystery0.xhu.timetable.viewmodel.StarterViewModel
 import java.io.File

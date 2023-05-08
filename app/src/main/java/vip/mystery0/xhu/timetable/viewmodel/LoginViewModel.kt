@@ -10,10 +10,10 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.UserApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.CoroutineStopException
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
+import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore
-import vip.mystery0.xhu.timetable.config.runOnCpu
-import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.repository.doLogin

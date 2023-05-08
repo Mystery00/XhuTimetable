@@ -16,4 +16,12 @@ data class PageResult<T>(
     fun <R> map(transform: (T) -> R): PageResult<R> {
         return PageResult(current, total, items.map(transform), hasNext)
     }
+
+    suspend fun <R> suspendMap(transform: suspend (T) -> R): PageResult<R> {
+        return PageResult(current, total, items.map { transform(it) }, hasNext)
+    }
+
+    fun <R> flatMap(transform: (T) -> Iterable<R>): PageResult<R> {
+        return PageResult(current, total, items.flatMap(transform), hasNext)
+    }
 }

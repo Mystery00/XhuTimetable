@@ -17,10 +17,10 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.FeedbackApi
 import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLogin
-import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.setConfig
+import vip.mystery0.xhu.timetable.config.store.UserStore
+import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLogin
 import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.model.response.Message
 import vip.mystery0.xhu.timetable.module.HINT_NETWORK
