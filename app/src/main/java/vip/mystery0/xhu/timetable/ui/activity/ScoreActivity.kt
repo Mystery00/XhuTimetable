@@ -70,7 +70,7 @@ class ScoreActivity : BaseSelectComposeActivity() {
         val yearSelectStatus = viewModel.yearSelect.collectAsState()
         val termSelectStatus = viewModel.termSelect.collectAsState()
 
-        val showSelect = rememberModalBottomSheetState(ModalBottomSheetValue.Expanded)
+        val showSelect = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
         val scope = rememberCoroutineScope()
 
         var showOption by remember { mutableStateOf(false) }

@@ -11,6 +11,11 @@ import android.widget.ImageView
 import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -155,8 +160,10 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val permissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
             if (permissionState.status != PermissionStatus.Granted) {
-                coroutineScope.launch {
-                    permissionState.launchPermissionRequest()
+                LaunchedEffect("init permission") {
+                    coroutineScope.launch {
+                        permissionState.launchPermissionRequest()
+                    }
                 }
             }
         }
@@ -165,11 +172,18 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         addDialogState = rememberMaterialDialogState()
         detectDialogState = rememberMaterialDialogState()
 
+        val showWeekView by viewModel.showWeekView.collectAsState()
+        val weekView by viewModel.weekView.collectAsState()
+        val currentWeek by viewModel.week.collectAsState()
+
+        val backgroundImage by viewModel.backgroundImage.collectAsState()
+        val backgroundImageBlur by viewModel.backgroundImageBlur.collectAsState()
+
         val isDarkMode = isDarkMode()
 
-        LaunchedEffect(key1 = "init", block = {
+        LaunchedEffect("init") {
             viewModel.loadBackground(isDarkMode)
-        })
+        }
         LaunchedEffect(pagerState) {
             snapshotFlow { pagerState.currentPage }.collect {
                 viewModel.dismissWeekView()
@@ -353,8 +367,6 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                 }
             ) { paddingValues ->
                 Box {
-                    val backgroundImage by viewModel.backgroundImage.collectAsState()
-                    val backgroundImageBlur by viewModel.backgroundImageBlur.collectAsState()
                     if (backgroundImage != Unit) {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
@@ -396,14 +408,11 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                             }
                         }
                     }
-                    val showWeekView by viewModel.showWeekView.collectAsState()
-                    val weekView by viewModel.weekView.collectAsState()
                     AnimatedVisibility(
                         visible = showWeekView,
                         enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
                         exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
                     ) {
-                        val currentWeek by viewModel.week.collectAsState()
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(2.dp),
                             modifier = Modifier

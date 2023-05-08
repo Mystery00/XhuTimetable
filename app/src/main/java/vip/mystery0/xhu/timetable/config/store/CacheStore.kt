@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.module.registerAdapter
+import java.time.Instant
 import java.time.LocalDate
 
 
@@ -60,4 +61,15 @@ class CacheStore {
             kv.encode(latestNoticeIdKey, value)
         }
         get() = kv.decodeInt(latestNoticeIdKey, 0)
+
+    //课程提醒上一次执行时间
+    private val notifyWorkLastExecuteTimeKey = "notifyWorkLastExecuteTime"
+    var notifyWorkLastExecuteTime: Instant
+        set(value) {
+            kv.encode(notifyWorkLastExecuteTimeKey, value.toEpochMilli())
+        }
+        get() {
+            val time = kv.decodeLong(notifyWorkLastExecuteTimeKey, 0L)
+            return Instant.ofEpochMilli(time)
+        }
 }

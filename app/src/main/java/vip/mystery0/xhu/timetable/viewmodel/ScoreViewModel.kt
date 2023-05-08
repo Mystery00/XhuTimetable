@@ -35,6 +35,7 @@ class ScoreViewModel : PagingComposeViewModel<PageRequest, ScoreResponse>(
             _userSelect.value = initUserSelect()
             _yearSelect.value = initYearSelect()
             _termSelect.value = initTermSelect()
+            loadScoreList()
         }
     }
 
