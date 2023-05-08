@@ -5,16 +5,20 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.base.PageRequest
+import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
+import vip.mystery0.xhu.timetable.base.TermSelect
 import vip.mystery0.xhu.timetable.base.UserSelect
 import vip.mystery0.xhu.timetable.base.YearSelect
-import vip.mystery0.xhu.timetable.base.TermSelect
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.model.response.ScoreResponse
 import vip.mystery0.xhu.timetable.repository.ScoreRepo
 
-class ScoreViewModel : ComposeViewModel(), KoinComponent {
+class ScoreViewModel : PagingComposeViewModel<PageRequest, ScoreResponse>(
+    {
+        ScoreRepo.getScoreListStream(it.user, it.year, it.term)
+    }
+) {
     companion object {
         private const val TAG = "ScoreViewModel"
     }
@@ -26,9 +30,6 @@ class ScoreViewModel : ComposeViewModel(), KoinComponent {
     private val _termSelect = MutableStateFlow<List<TermSelect>>(emptyList())
     val termSelect: StateFlow<List<TermSelect>> = _termSelect
 
-    private val _scoreListState = MutableStateFlow(ScoreListState())
-    val scoreListState: StateFlow<ScoreListState> = _scoreListState
-
     init {
         viewModelScope.launch {
             _userSelect.value = initUserSelect()
@@ -38,23 +39,22 @@ class ScoreViewModel : ComposeViewModel(), KoinComponent {
     }
 
     fun loadScoreList() {
+        fun failed(message: String) {
+            Log.w(TAG, "load score list failed, $message")
+            toastMessage(message)
+        }
         viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "load score list failed", throwable)
-            _scoreListState.value =
-                ScoreListState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
+            failed(throwable.message ?: throwable.javaClass.simpleName)
         }) {
-            _scoreListState.value = ScoreListState(loading = true)
             val selectedUser = getSelectedUser(_userSelect.value)
             if (selectedUser == null) {
-                Log.w(TAG, "loadScoreList: empty selected user")
-                _scoreListState.value = ScoreListState(errorMessage = "选择用户为空，请重新选择")
+                failed("选择用户为空，请重新选择")
                 return@launch
             }
             val year = getSelectedYear(_yearSelect.value)
             val term = getSelectedTerm(_termSelect.value)
-            //TODO 改为分页
-            val scoreList = ScoreRepo.fetchScoreList(selectedUser, year, term).items
-            _scoreListState.value = ScoreListState(scoreList = scoreList)
+            pageRequestFlow.emit(PageRequest(selectedUser, year, term))
         }
     }
 
@@ -76,9 +76,3 @@ class ScoreViewModel : ComposeViewModel(), KoinComponent {
         }
     }
 }
-
-data class ScoreListState(
-    val loading: Boolean = false,
-    val scoreList: List<ScoreResponse> = emptyList(),
-    val errorMessage: String = "",
-)

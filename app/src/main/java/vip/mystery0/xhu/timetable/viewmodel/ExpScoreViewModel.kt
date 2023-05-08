@@ -7,9 +7,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.base.TermSelect
 import vip.mystery0.xhu.timetable.base.UserSelect
 import vip.mystery0.xhu.timetable.base.YearSelect
-import vip.mystery0.xhu.timetable.base.TermSelect
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.model.response.ExperimentScoreResponse
 import vip.mystery0.xhu.timetable.repository.ScoreRepo
@@ -52,8 +52,7 @@ class ExpScoreViewModel : ComposeViewModel(), KoinComponent {
             }
             val year = getSelectedYear(_yearSelect.value)
             val term = getSelectedTerm(_termSelect.value)
-            //TODO 改为分页
-            val scoreList = ScoreRepo.fetchExpScoreList(selectedUser, year, term).items
+            val scoreList = ScoreRepo.fetchExpScoreList(selectedUser, year, term)
             _expScoreListState.value = ExpScoreListState(scoreList = scoreList)
         }
     }

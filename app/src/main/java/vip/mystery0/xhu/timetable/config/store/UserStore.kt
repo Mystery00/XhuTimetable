@@ -5,7 +5,6 @@ import android.widget.Toast
 import com.squareup.moshi.Moshi
 import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -157,25 +156,22 @@ object UserStore {
                     r.checkNeedLogin()
                 }
             } catch (exception: ServerNeedLoginException) {
-                var lock = mutex.tryLock()
-                while (!lock) {
-                    delay(500)
-                    lock = mutex.tryLock()
-                }
-                val newUser = userByStudentId(studentId)
-                val updated = this@withAutoLoginOnce.token != newUser.token
-                if (!updated) {
-                    //做一次登录
-                    val loginResponse = doLogin(this@withAutoLoginOnce)
-                    //获取用户信息
-                    val userApi = KoinJavaComponent.get<UserApi>(UserApi::class.java)
-                    val userInfo = userApi.getUserInfo(loginResponse.sessionToken)
-                    val user =
-                        this@withAutoLoginOnce.copy(
-                            token = loginResponse.sessionToken,
-                            info = userInfo
-                        )
-                    updateUser(user)
+                mutex.withLock {
+                    val newUser = userByStudentId(studentId)
+                    val updated = this@withAutoLoginOnce.token != newUser.token
+                    if (!updated) {
+                        //做一次登录
+                        val loginResponse = doLogin(this@withAutoLoginOnce)
+                        //获取用户信息
+                        val userApi = KoinJavaComponent.get<UserApi>(UserApi::class.java)
+                        val userInfo = userApi.getUserInfo(loginResponse.sessionToken)
+                        val user =
+                            this@withAutoLoginOnce.copy(
+                                token = loginResponse.sessionToken,
+                                info = userInfo
+                            )
+                        updateUser(user)
+                    }
                 }
                 val r = withContext(Dispatchers.IO) {
                     block(token)

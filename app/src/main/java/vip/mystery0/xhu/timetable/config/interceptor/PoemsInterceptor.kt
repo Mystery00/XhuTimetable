@@ -2,7 +2,6 @@ package vip.mystery0.xhu.timetable.config.interceptor
 
 import okhttp3.Interceptor
 import okhttp3.Response
-import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
 
 class PoemsInterceptor : Interceptor {

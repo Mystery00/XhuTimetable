@@ -2,17 +2,10 @@ package vip.mystery0.xhu.timetable.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
 import vip.mystery0.xhu.timetable.base.UserSelect
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.User
@@ -22,8 +15,11 @@ import vip.mystery0.xhu.timetable.repository.CustomThingRepo
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-@OptIn(ExperimentalCoroutinesApi::class)
-class CustomThingViewModel : ComposeViewModel(), KoinComponent {
+class CustomThingViewModel : PagingComposeViewModel<User, CustomThingResponse>(
+    {
+        CustomThingRepo.getCustomThingListStream(it)
+    }
+) {
     companion object {
         private const val TAG = "CustomThingViewModel"
     }
@@ -31,19 +27,7 @@ class CustomThingViewModel : ComposeViewModel(), KoinComponent {
     private val _userSelect = MutableStateFlow<List<UserSelect>>(emptyList())
     val userSelect: StateFlow<List<UserSelect>> = _userSelect
 
-    // 自定义课程分页数据
-    private val pageRequestFlow = MutableStateFlow<PageRequest?>(null)
-    private val _pageState = pageRequestFlow
-        .flatMapLatest {
-            if (it == null) return@flatMapLatest flowOf(PagingData.empty())
-            CustomThingRepo.getCustomThingListStream(it.user)
-        }.cachedIn(viewModelScope)
-    val pageState: Flow<PagingData<CustomThingResponse>> = _pageState
-
     var changeCustomThing = false
-
-    private val _errorMessage = MutableStateFlow(Pair(System.currentTimeMillis(), ""))
-    val errorMessage: StateFlow<Pair<Long, String>> = _errorMessage
 
     private val _saveLoadingState = MutableStateFlow(LoadingState(init = true))
     val saveLoadingState: StateFlow<LoadingState> = _saveLoadingState
@@ -53,10 +37,6 @@ class CustomThingViewModel : ComposeViewModel(), KoinComponent {
             _userSelect.value = initUserSelect()
             loadCustomThingList()
         }
-    }
-
-    private fun toastMessage(message: String) {
-        _errorMessage.value = System.currentTimeMillis() to message
     }
 
     fun loadCustomThingList() {
@@ -74,7 +54,7 @@ class CustomThingViewModel : ComposeViewModel(), KoinComponent {
                 failed("选择用户为空，请重新选择")
                 return@launch
             }
-            pageRequestFlow.emit(PageRequest(selectedUser))
+            pageRequestFlow.emit(selectedUser)
         }
     }
 
@@ -151,11 +131,6 @@ class CustomThingViewModel : ComposeViewModel(), KoinComponent {
             _userSelect.value = setSelectedUser(_userSelect.value, studentId).first
         }
     }
-
-    internal data class PageRequest(
-        val user: User,
-        val requestTime: Long = System.currentTimeMillis(),
-    )
 
     data class LoadingState(
         val init: Boolean = false,

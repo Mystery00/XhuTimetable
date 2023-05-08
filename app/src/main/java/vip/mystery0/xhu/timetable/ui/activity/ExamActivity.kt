@@ -42,9 +42,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.material.placeholder
-import com.google.accompanist.placeholder.material.shimmer
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemsIndexed
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import vip.mystery0.xhu.timetable.R
@@ -59,8 +59,10 @@ class ExamActivity : BaseComposeActivity() {
 
     @Composable
     override fun BuildContent() {
+        val pager = viewModel.pageState.collectAsLazyPagingItems()
+
         val userSelect by viewModel.userSelect.collectAsState()
-        val examListState by viewModel.examListState.collectAsState()
+
         var showUserSelect by remember { mutableStateOf(false) }
 
         fun onBack() {
@@ -69,6 +71,10 @@ class ExamActivity : BaseComposeActivity() {
                 return
             }
             finish()
+        }
+
+        BackHandler {
+            onBack()
         }
 
         Scaffold(
@@ -106,31 +112,37 @@ class ExamActivity : BaseComposeActivity() {
                     modifier = Modifier
                         .padding(paddingValues)
                         .fillMaxSize(),
-                    state = rememberSwipeRefreshState(examListState.loading),
-                    onRefresh = { viewModel.loadExamList() },
+                    state = rememberSwipeRefreshState(isRefreshing = pager.loadState.refresh is LoadState.Loading),
+                    onRefresh = { pager.refresh() },
                 ) {
-                    val list = examListState.examList
-                    if (examListState.loading || list.isNotEmpty()) {
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(XhuColor.Common.grayBackground),
-                            contentPadding = PaddingValues(4.dp),
-                        ) {
-                            if (examListState.loading) {
-                                items(3) {
-                                    BuildItem(item = Exam.EMPTY, placeholder = true)
-                                }
-                            } else {
-                                if (list.isNotEmpty()) {
-                                    items(list.size) { index ->
-                                        BuildItem(item = list[index])
-                                    }
-                                }
+                    if (pager.itemCount == 0) {
+                        BuildNoDataLayout()
+                        return@SwipeRefresh
+                    }
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(XhuColor.Common.grayBackground),
+                        contentPadding = PaddingValues(4.dp),
+                    ) {
+                        itemsIndexed(pager) { _, item ->
+                            item?.let {
+                                BuildItem(it)
                             }
                         }
-                    } else {
-                        BuildNoDataLayout()
+                        when (pager.loadState.append) {
+                            is LoadState.Loading -> {
+                                item { BuildPageFooter(text = "数据加载中，请稍后……") }
+                            }
+
+                            is LoadState.Error -> {
+                                item { BuildPageFooter(text = "数据加载失败，请重试") }
+                            }
+
+                            is LoadState.NotLoading -> {
+                                item { BuildPageFooter(text = "o(´^｀)o 再怎么滑也没有啦~") }
+                            }
+                        }
                     }
                 }
                 AnimatedVisibility(
@@ -162,15 +174,10 @@ class ExamActivity : BaseComposeActivity() {
                 }
             }
         }
-        if (examListState.errorMessage.isNotBlank()) {
-            examListState.errorMessage.toast(true)
+        val errorMessage by viewModel.errorMessage.collectAsState()
+        if (errorMessage.second.isNotBlank()) {
+            errorMessage.second.toast(true)
         }
-        BackHandler(
-            enabled = showUserSelect,
-            onBack = {
-                onBack()
-            }
-        )
     }
 
     override fun onStart() {
@@ -182,16 +189,11 @@ class ExamActivity : BaseComposeActivity() {
 @Composable
 private fun BuildItem(
     item: Exam,
-    placeholder: Boolean = false,
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .placeholder(
-                visible = placeholder,
-                highlight = PlaceholderHighlight.shimmer(),
-            ),
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         border = BorderStroke(
             item.examStatus.strokeWidth.dp,
             color = item.examStatus.color

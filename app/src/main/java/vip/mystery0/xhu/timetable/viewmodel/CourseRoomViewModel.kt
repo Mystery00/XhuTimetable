@@ -2,16 +2,11 @@ package vip.mystery0.xhu.timetable.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
 import vip.mystery0.xhu.timetable.base.Selectable
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.model.request.ClassroomRequest
@@ -22,7 +17,11 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class CourseRoomViewModel : ComposeViewModel() {
+class CourseRoomViewModel : PagingComposeViewModel<ClassroomRequest,ClassroomResponse>(
+    {
+        ClassroomRepo.getClassroomListStream(it)
+    }
+) {
     companion object {
         private const val TAG = "CourseRoomViewModel"
     }
@@ -36,19 +35,8 @@ class CourseRoomViewModel : ComposeViewModel() {
     private val _timeSelect = MutableStateFlow<List<IntSelect>>(emptyList())
     val timeSelect: StateFlow<List<IntSelect>> = _timeSelect
 
-    // 空闲教室分页数据
-    private val pageRequestFlow = MutableStateFlow<ClassroomRequest?>(null)
-    private val _pageState = pageRequestFlow
-        .flatMapLatest {
-            if (it == null) return@flatMapLatest flowOf(PagingData.empty())
-            ClassroomRepo.getClassroomListStream(it)
-        }.cachedIn(viewModelScope)
-    val pageState: Flow<PagingData<ClassroomResponse>> = _pageState
     val init: Boolean
         get() = pageRequestFlow.value == null
-
-    private val _errorMessage = MutableStateFlow(Pair(System.currentTimeMillis(), ""))
-    val errorMessage: StateFlow<Pair<Long, String>> = _errorMessage
 
     init {
         viewModelScope.launch {
@@ -59,10 +47,6 @@ class CourseRoomViewModel : ComposeViewModel() {
             }
             _timeSelect.value = initIntSelect(1, 12) { "第${it}节" }
         }
-    }
-
-    private fun toastMessage(message: String) {
-        _errorMessage.value = System.currentTimeMillis() to message
     }
 
     fun changeArea(area: String) {

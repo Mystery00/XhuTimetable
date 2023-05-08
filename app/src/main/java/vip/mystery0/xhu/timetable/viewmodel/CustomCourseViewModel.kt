@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.base.PageRequest
+import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
 import vip.mystery0.xhu.timetable.base.TermSelect
 import vip.mystery0.xhu.timetable.base.UserSelect
 import vip.mystery0.xhu.timetable.base.YearSelect
@@ -27,7 +27,11 @@ import vip.mystery0.xhu.timetable.repository.CustomCourseRepo
 import java.time.DayOfWeek
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
+class CustomCourseViewModel : PagingComposeViewModel<PageRequest,CustomCourseResponse>(
+    {
+        CustomCourseRepo.getCustomCourseListStream(it.user, it.year, it.term)
+    }
+) {
     companion object {
         private const val TAG = "CustomCourseViewModel"
     }
@@ -38,15 +42,6 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
     val yearSelect: StateFlow<List<YearSelect>> = _yearSelect
     private val _termSelect = MutableStateFlow<List<TermSelect>>(emptyList())
     val termSelect: StateFlow<List<TermSelect>> = _termSelect
-
-    // 自定义课程分页数据
-    private val pageRequestFlow = MutableStateFlow<PageRequest?>(null)
-    private val _pageState = pageRequestFlow
-        .flatMapLatest {
-            if (it == null) return@flatMapLatest flowOf(PagingData.empty())
-            CustomCourseRepo.getCustomCourseListStream(it.user, it.year, it.term)
-        }.cachedIn(viewModelScope)
-    val pageState: Flow<PagingData<CustomCourseResponse>> = _pageState
 
     //蹭课列表分页数据
     private val allCoursePageRequestFlow = MutableStateFlow<AllCoursePageRequest?>(null)
@@ -65,9 +60,6 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
 
     var changeCustomCourse = false
 
-    private val _errorMessage = MutableStateFlow(Pair(System.currentTimeMillis(), ""))
-    val errorMessage: StateFlow<Pair<Long, String>> = _errorMessage
-
     private val _saveLoadingState = MutableStateFlow(LoadingState())
     val saveLoadingState: StateFlow<LoadingState> = _saveLoadingState
 
@@ -78,10 +70,6 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
             _termSelect.value = initTermSelect()
             loadCustomCourseList()
         }
-    }
-
-    private fun toastMessage(message: String) {
-        _errorMessage.value = System.currentTimeMillis() to message
     }
 
     fun loadCustomCourseList() {
@@ -219,13 +207,6 @@ class CustomCourseViewModel : ComposeViewModel(), KoinComponent {
             _termSelect.value = setSelectedTerm(_termSelect.value, term)
         }
     }
-
-    internal data class PageRequest(
-        val user: User,
-        val year: Int,
-        val term: Int,
-        val requestTime: Long = System.currentTimeMillis(),
-    )
 
     internal data class AllCoursePageRequest(
         val user: User,
