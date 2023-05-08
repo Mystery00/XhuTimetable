@@ -15,14 +15,6 @@ interface ServerApi {
         @Query("betaVersion") betaVersion: Boolean,
     ): VersionUrl
 
-    @GET("/api/rest/external/notice/list")
-    suspend fun noticeList(
-        @Header("sessionToken") token: String,
-        @Query("platform") platform: String = "ANDROID",
-        @Query("lastId") lastId: Long = 0,
-        @Query("size") size: Int = 20,
-    ): Response<List<NoticeResponse>>
-
     @GET("/api/rest/xhu-timetable/server/schoolCalendar")
     suspend fun schoolCalendarList(@Header("sessionToken") token: String): Response<List<SchoolCalendarResponse>>
 
@@ -68,9 +60,6 @@ interface ServerApi {
 
     @GET("/api/rest/xhu-timetable/health/detect")
     suspend fun serverDetect(): Response<List<DetectResponse>>
-
-    @GET("/api/rest/xhu-timetable/push/fetch")
-    suspend fun fetchPush(@Header("sessionToken") token: String): Response<List<PushResponse>>
 
     @POST("/api/rest/xhu-timetable/server/academicReport")
     suspend fun getAcademicReportList(

@@ -131,7 +131,7 @@ object WidgetRepo {
             it.updateTime()
             val timeText = it.courseTime
             val startTime =
-                LocalTime.parse(timeText.first, timeFormatter).atDate(showDate).asInstant()
+                LocalTime.parse(timeText.first, enTimeFormatter).atDate(showDate).asInstant()
             WidgetTodayItem(
                 it.courseName,
                 listOf(
@@ -161,10 +161,12 @@ object WidgetRepo {
                 val remainDays =
                     Duration.between(LocalDate.now().atStartOfDay(), startDateTime).toDays()
                 val showTime = ArrayList<String>()
-                showTime.add(startDateTime.format(enTimeFormatter))
-                showTime.add(endDateTime.format(enTimeFormatter))
                 if (it.saveAsCountDown){
-                    showTime.add("+${remainDays}D")
+                    showTime.add("还剩")
+                    showTime.add("${remainDays}天")
+                }else {
+                    showTime.add(startDateTime.format(enTimeFormatter))
+                    showTime.add(endDateTime.format(enTimeFormatter))
                 }
                 WidgetTodayItem(
                     it.title,

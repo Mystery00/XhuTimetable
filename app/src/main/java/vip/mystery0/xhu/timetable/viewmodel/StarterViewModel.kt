@@ -3,9 +3,7 @@ package vip.mystery0.xhu.timetable.viewmodel
 import android.app.AlarmManager
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,10 +23,8 @@ import vip.mystery0.xhu.timetable.utils.md5
 import vip.mystery0.xhu.timetable.utils.sha1
 import vip.mystery0.xhu.timetable.utils.sha256
 import vip.mystery0.xhu.timetable.work.DownloadSplashWork
-import vip.mystery0.xhu.timetable.work.PullWork
 import java.io.File
 import java.time.Instant
-import java.util.concurrent.TimeUnit
 
 class StarterViewModel : ComposeViewModel(), KoinComponent {
     companion object {
@@ -101,17 +97,6 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
                 )
             )
         }
-    }
-
-    private fun initPullWork() {
-        val uniqueWorkName = PullWork::class.java.name
-//        workManager.cancelUniqueWork(uniqueWorkName)
-        workManager.enqueueUniquePeriodicWork(
-            uniqueWorkName,
-            ExistingPeriodicWorkPolicy.KEEP,
-            PeriodicWorkRequestBuilder<PullWork>(4, TimeUnit.HOURS)
-                .build()
-        )
     }
 }
 
