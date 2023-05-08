@@ -49,6 +49,7 @@ import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
 import vip.mystery0.xhu.timetable.model.Course
 import vip.mystery0.xhu.timetable.model.CustomUi
+import vip.mystery0.xhu.timetable.model.WeekCourseView
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import java.text.DecimalFormat
@@ -59,6 +60,11 @@ import java.util.Locale
 val weekCourseTitle: TabTitle = @Composable { ext ->
     val viewModel = ext.viewModel
     val week = viewModel.week.collectAsState()
+    val showWeekView by viewModel.showWeekView.collectAsState()
+    val rotationAngle by animateFloatAsState(
+        targetValue = if (showWeekView) 180F else 0F, label = "weekViewRotationAngle"
+    )
+
     Row(
         modifier = Modifier
             .align(Alignment.Center)
@@ -77,10 +83,6 @@ val weekCourseTitle: TabTitle = @Composable { ext ->
             else -> "第${week.value}周"
         }
         Text(text = title)
-        val showWeekView by viewModel.showWeekView.collectAsState()
-        val rotationAngle by animateFloatAsState(
-            targetValue = if (showWeekView) 180F else 0F,
-        )
         Icon(
             imageVector = MaterialIcons.TwoTone.ArrowDropUp,
             contentDescription = null,
@@ -92,7 +94,7 @@ val weekCourseTitle: TabTitle = @Composable { ext ->
 @OptIn(ExperimentalComposeUiApi::class)
 val weekCourseContent: TabContent = @Composable { ext ->
     val viewModel = ext.viewModel
-    val courseDialogState = remember { mutableStateOf<List<Course>>(emptyList()) }
+    val courseDialogState = remember { mutableStateOf<List<WeekCourseView>>(emptyList()) }
     val tableCourse by viewModel.tableCourse.collectAsState()
     val multiAccountMode by viewModel.multiAccountMode.collectAsState()
     val customUi by viewModel.customUi.collectAsState()
@@ -151,7 +153,7 @@ val weekCourseContent: TabContent = @Composable { ext ->
                                         textColor = sheet.textColor,
                                         showMore = sheet.course.size > 1,
                                     ) {
-//                                        courseDialogState.value = sheet.course
+                                        courseDialogState.value = sheet.course
                                     }
                                 } else {
                                     Spacer(
@@ -248,7 +250,7 @@ private fun BuildTimeItem(time: Int, itemHeight: Dp) {
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun BoxScope.ShowCourseDialog(
-    dialogState: MutableState<List<Course>>,
+    dialogState: MutableState<List<WeekCourseView>>,
     multiAccountMode: Boolean,
 ) {
     val showList = dialogState.value
@@ -275,7 +277,7 @@ private fun BoxScope.ShowCourseDialog(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 36.dp, vertical = 8.dp)
-                        .background(course.color.copy(0.8F), RoundedCornerShape(12.dp)),
+                        .background(course.backgroundColor.copy(0.8F), RoundedCornerShape(12.dp)),
                 ) {
                     SelectionContainer {
                         Column(
@@ -297,7 +299,7 @@ private fun BoxScope.ShowCourseDialog(
                                 ),
                             )
                             Text(
-                                text = course.teacherName,
+                                text = course.teacher,
                                 color = Color.White,
                             )
                             Text(
@@ -305,11 +307,11 @@ private fun BoxScope.ShowCourseDialog(
                                 color = Color.White,
                             )
                             Text(
-                                text = course.weekString,
+                                text = course.weekStr,
                                 color = Color.White,
                             )
                             Text(
-                                text = course.time,
+                                text = course.courseTime,
                                 color = Color.White,
                             )
                             if (course.extraData.isNotEmpty()) {
@@ -322,7 +324,7 @@ private fun BoxScope.ShowCourseDialog(
                             }
                             if (multiAccountMode) {
                                 Text(
-                                    text = "${course.studentId}(${course.userName})",
+                                    text = "${course.user.studentId}(${course.user.info.name})",
                                     fontSize = 12.sp,
                                     color = MaterialTheme.colors.onSecondary,
                                     modifier = Modifier
