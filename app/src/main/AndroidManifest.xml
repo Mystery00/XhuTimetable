@@ -161,7 +161,8 @@
         <receiver
             android:name=".ui.widget.receiver.TodayGlanceWidgetReceiver"
             android:enabled="@bool/glance_appwidget_available"
-            android:exported="false">
+            android:exported="false"
+            android:label="@string/title_widget_today_course">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -173,7 +174,8 @@
         <receiver
             android:name=".ui.widget.receiver.WeekGlanceWidgetReceiver"
             android:enabled="@bool/glance_appwidget_available"
-            android:exported="false">
+            android:exported="false"
+            android:label="@string/title_widget_week_course">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
