@@ -16,6 +16,7 @@ import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.lazy.LazyColumn
+import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
@@ -54,8 +55,14 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
     override val stateDefinition: GlanceStateDefinition<WeekCourseStateGlance> =
         WeekGlanceStateDefinition()
 
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        provideContent {
+            Content()
+        }
+    }
+
     @Composable
-    override fun Content() {
+    private fun Content() {
         val stateGlance = currentState<WeekCourseStateGlance>()
 
         Box(
