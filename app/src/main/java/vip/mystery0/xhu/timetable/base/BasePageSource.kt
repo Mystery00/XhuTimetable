@@ -13,12 +13,16 @@ abstract class BasePageSource<T : Any> : PagingSource<Int, T>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, T> {
         val index = params.key ?: 0
-        val response = loadPageData(index, params.loadSize)
-        return LoadResult.Page(
-            data = response.items,
-            prevKey = null,
-            nextKey = response.hasNext.let { if (it) index + 1 else null },
-        )
+        try {
+            val response = loadPageData(index, params.loadSize)
+            return LoadResult.Page(
+                data = response.items,
+                prevKey = null,
+                nextKey = response.hasNext.let { if (it) index + 1 else null },
+            )
+        } catch (e: Exception) {
+            return LoadResult.Error(e)
+        }
     }
 
     abstract suspend fun loadPageData(index: Int, size: Int): PageResult<T>

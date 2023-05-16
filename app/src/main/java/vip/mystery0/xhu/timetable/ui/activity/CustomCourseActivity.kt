@@ -67,9 +67,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemsIndexed
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -662,17 +659,12 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                             .padding(top = 8.dp, bottom = 4.dp),
                                         color = XhuColor.Common.divider,
                                     )
-                                    SwipeRefresh(
+                                    Box(
                                         modifier = Modifier
                                             .weight(1F)
                                             .defaultMinSize(minHeight = 180.dp)
                                             .fillMaxWidth()
                                             .background(XhuColor.Common.grayBackground),
-                                        state = rememberSwipeRefreshState(false),
-                                        onRefresh = {
-                                            allCoursePager.refresh()
-                                        },
-                                        swipeEnabled = false,
                                     ) {
                                         LazyColumn(
                                             contentPadding = PaddingValues(4.dp),
@@ -711,50 +703,22 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                             }
                         }
                     }) {
-                    Box {
-                        SwipeRefresh(
-                            modifier = Modifier.fillMaxSize(),
-                            state = rememberSwipeRefreshState(isRefreshing = pager.loadState.refresh is LoadState.Loading),
-                            onRefresh = {
-                                pager.refresh()
-                            },
-                            swipeEnabled = false,
-                        ) {
-                            if (pager.itemCount == 0) {
-                                BuildNoDataLayout()
-                                return@SwipeRefresh
-                            }
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(XhuColor.Common.grayBackground),
-                                contentPadding = PaddingValues(4.dp),
-                            ) {
-                                itemsIndexed(pager) { _, item ->
-                                    item?.let {
-                                        BuildItem(it) {
-                                            scope.launch {
-                                                updateCustomCourse(item)
-                                                showSelect.show()
-                                            }
-                                        }
-                                    }
-                                }
-                                when (pager.loadState.append) {
-                                    is LoadState.Loading -> {
-                                        item { BuildPageFooter(text = "数据加载中，请稍后……") }
-                                    }
-
-                                    is LoadState.Error -> {
-                                        item { BuildPageFooter(text = "数据加载失败，请重试") }
-                                    }
-
-                                    is LoadState.NotLoading -> {
-                                        item { BuildPageFooter(text = "o(´^｀)o 再怎么滑也没有啦~") }
+                    val refreshing by viewModel.refreshing.collectAsState()
+                    BuildPaging(
+                        paddingValues = PaddingValues(4.dp),
+                        pager = pager,
+                        refreshing = refreshing,
+                        itemContent = { item ->
+                            item?.let {
+                                BuildItem(it) {
+                                    scope.launch {
+                                        updateCustomCourse(it)
+                                        showSelect.show()
                                     }
                                 }
                             }
                         }
+                    ) {
                         FloatingActionButton(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)

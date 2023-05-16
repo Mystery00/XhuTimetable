@@ -11,10 +11,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -42,19 +40,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemsIndexed
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import vip.mystery0.xhu.timetable.R
-import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.base.BasePageComposeActivity
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.Exam
 import vip.mystery0.xhu.timetable.viewmodel.ExamViewModel
 
-class ExamActivity : BaseComposeActivity() {
+class ExamActivity : BasePageComposeActivity() {
     private val viewModel: ExamViewModel by viewModels()
 
     @Composable
@@ -107,44 +101,17 @@ class ExamActivity : BaseComposeActivity() {
                 )
             },
         ) { paddingValues ->
-            Box {
-                SwipeRefresh(
-                    modifier = Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize(),
-                    state = rememberSwipeRefreshState(isRefreshing = pager.loadState.refresh is LoadState.Loading),
-                    onRefresh = { pager.refresh() },
-                ) {
-                    if (pager.itemCount == 0) {
-                        BuildNoDataLayout()
-                        return@SwipeRefresh
-                    }
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(XhuColor.Common.grayBackground),
-                        contentPadding = PaddingValues(4.dp),
-                    ) {
-                        itemsIndexed(pager) { _, item ->
-                            item?.let {
-                                BuildItem(it)
-                            }
-                        }
-                        when (pager.loadState.append) {
-                            is LoadState.Loading -> {
-                                item { BuildPageFooter(text = "数据加载中，请稍后……") }
-                            }
-
-                            is LoadState.Error -> {
-                                item { BuildPageFooter(text = "数据加载失败，请重试") }
-                            }
-
-                            is LoadState.NotLoading -> {
-                                item { BuildPageFooter(text = "o(´^｀)o 再怎么滑也没有啦~") }
-                            }
-                        }
+            val refreshing by viewModel.refreshing.collectAsState()
+            BuildPaging(
+                paddingValues = paddingValues,
+                pager = pager,
+                refreshing = refreshing,
+                itemContent = { item ->
+                    item?.let {
+                        BuildItem(it)
                     }
                 }
+            ) {
                 AnimatedVisibility(
                     modifier = Modifier.align(Alignment.TopEnd),
                     visible = showUserSelect,

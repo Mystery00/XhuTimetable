@@ -186,7 +186,31 @@ object AggregationLocalRepo : KoinComponent {
         term: Int,
         user: User,
         response: AggregationMainPageResponse,
+        containCustomCourse: Boolean,
+        containCustomThing: Boolean,
     ) {
+        //删除所有旧数据
+        withContext(Dispatchers.IO) {
+            courseDao.queryList(user.studentId, year, term).forEach {
+                courseDao.delete(it)
+            }
+            practicalCourseDao.queryList(user.studentId, year, term).forEach {
+                practicalCourseDao.delete(it)
+            }
+            experimentCourseDao.queryList(user.studentId, year, term).forEach {
+                experimentCourseDao.delete(it)
+            }
+            if (containCustomCourse) {
+                customCourseDao.queryList(user.studentId, year, term).forEach {
+                    customCourseDao.delete(it)
+                }
+            }
+            if (containCustomThing) {
+                customThingDao.queryList(user.studentId).forEach {
+                    customThingDao.delete(it)
+                }
+            }
+        }
         response.courseList.forEach {
             val entity = CourseEntity(
                 courseName = it.courseName,
