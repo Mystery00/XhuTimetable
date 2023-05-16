@@ -4,9 +4,11 @@ import android.content.Context
 import androidx.compose.ui.graphics.Color
 import androidx.datastore.core.DataStore
 import androidx.glance.state.GlanceStateDefinition
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.repository.WidgetRepo
 import vip.mystery0.xhu.timetable.ui.widget.widgetDataStoreFile
 import java.io.File
@@ -27,9 +29,10 @@ class TodayCourseDataStore : DataStore<TodayCourseStateGlance> {
     private val dataFlow = MutableStateFlow(TodayCourseStateGlance.EMPTY)
 
     override val data: Flow<TodayCourseStateGlance> = flow {
-        val currentWeek = WidgetRepo.calculateWeek()
-        val todayCourseList = WidgetRepo.getTodayList(currentWeek)
-        val timeTitle = WidgetRepo.calculateDateTitle(false)
+        val currentWeek = withContext(Dispatchers.Default) { WidgetRepo.calculateWeek() }
+        val todayCourseList =
+            withContext(Dispatchers.Default) { WidgetRepo.getTodayList(currentWeek) }
+        val timeTitle = withContext(Dispatchers.Default) { WidgetRepo.calculateDateTitle(false) }
         emit(
             TodayCourseStateGlance(
                 timeTitle,

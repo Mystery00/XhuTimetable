@@ -59,7 +59,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
         val stateGlance = currentState<WeekCourseStateGlance>()
 
         Box(
-            modifier = GlanceModifier.padding(8.dp)
+            modifier = GlanceModifier.padding(16.dp)
                 .fillMaxSize()
                 .background(color = Color.White),
         ) {
