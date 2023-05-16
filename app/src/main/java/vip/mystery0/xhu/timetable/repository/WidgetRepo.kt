@@ -4,16 +4,21 @@ import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.TodayCourseView
 import vip.mystery0.xhu.timetable.model.TodayThingView
+import vip.mystery0.xhu.timetable.model.WeekCourseView
 import vip.mystery0.xhu.timetable.model.WidgetTodayItem
+import vip.mystery0.xhu.timetable.model.WidgetWeekItem
+import vip.mystery0.xhu.timetable.model.format
 import vip.mystery0.xhu.timetable.module.betweenDays
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
+import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.utils.asInstant
 import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import vip.mystery0.xhu.timetable.utils.enTimeFormatter
-import vip.mystery0.xhu.timetable.utils.timeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.CourseSheet
+import java.time.DayOfWeek
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -161,10 +166,10 @@ object WidgetRepo {
                 val remainDays =
                     Duration.between(LocalDate.now().atStartOfDay(), startDateTime).toDays()
                 val showTime = ArrayList<String>()
-                if (it.saveAsCountDown){
+                if (it.saveAsCountDown) {
                     showTime.add("还剩")
                     showTime.add("${remainDays}天")
-                }else {
+                } else {
                     showTime.add(startDateTime.format(enTimeFormatter))
                     showTime.add(endDateTime.format(enTimeFormatter))
                 }
@@ -178,152 +183,98 @@ object WidgetRepo {
             }
         }
 
-    private suspend fun loadWeekCourseList(){
+    suspend fun getWeekList(currentWeek: Int): List<List<WidgetWeekItem>> {
+        val showCustomCourse = getConfigStore { showCustomCourseOnWeek }
+        //周课表页面不显示自定义事项
+        val view = AggregationRepo.fetchAggregationMainPage(false, showCustomCourse, false)
 
+        //获取自定义颜色列表
+        val colorMap = CourseColorRepo.getRawCourseColorList()
+        //自定义UI
+        val customUi = getConfigStore { customUi }
+        return loadWeekCourseList(currentWeek, view.weekViewList, colorMap, customUi)
     }
-}
 
-suspend fun getWeekCourse(currentWeek: Int): List<List<CourseSheet>> {
-    TODO()
-//    val courseRepo: CourseRepo111 = getLocalRepo()
-//
-//    fun convertCourseList(
-//        courseList: List<OldCourseResponse>,
-//        colorMap: Map<String, Color>,
-//        currentWeek: Int,
-//        today: LocalDate,
-//    ) = courseList.map {
-//        val thisWeek = it.week.contains(currentWeek)
-//        val timeString = "it.time.formatTimeString()"
-//        val isToday = thisWeek && it.day == today.dayOfWeek.value
-//        Course(
-//            it.name,
-//            it.teacher,
-//            it.location,
-//            it.week,
-//            it.weekString,
-//            it.type,
-//            it.time,
-//            timeString,
-////            it.time.formatTime(),
-//            "",
-//            it.day,
-//            it.extraData,
-//            thisWeek,
-//            isToday,
-//            false,
-//            colorMap[it.name] ?: ColorPool.hash(it.name),
-//            it.user.studentId,
-//            it.user.info.name,
-//        )
-//    }
-//
-//    //获取当前学期信息
-//    val currentYear = getConfig { currentYear }
-//    val currentTerm = getConfig { currentTerm }
-//
-//    //获取所有课程列表
-//    val courseList: List<OldCourseResponse> =
-//        if (getConfig { multiAccountMode }) {
-//            val list = ArrayList<OldCourseResponse>()
-//            UserStore.loggedUserList().forEach { user ->
-//                list.addAll(
-//                    courseRepo.getCourseList(user, currentYear, currentTerm)
-//                )
-//            }
-//            list
-//        } else {
-//            val user = UserStore.mainUser()
-//            courseRepo.getCourseList(user, currentYear, currentTerm)
-//        }
-//
-//    //获取自定义颜色列表
-//    val colorMap = getRawCourseColorList()
-//
-//    return runOnCpu {
-//        //转换对象
-//        val allCourseList = convertCourseList(courseList, colorMap, currentWeek, LocalDate.now())
-//
-//        //组建表格的数据结构
-//        val expandTableCourse = Array(7) { day ->
-//            Array(11) { index ->
-//                CourseSheet.empty(1, index + 1, day + 1)
-//            }
-//        }
-//        //展开的列表，key为 当前课程的唯一标识，用于合并，value为课程信息，用于后续生成格子信息
-//        val expandItemMap = HashMap<String, Course>(allCourseList.size)
-//        //生成key
-//        allCourseList.forEach {
-//            it.generateKey()
-//            expandItemMap[it.key] = it
-//        }
-//        //平铺课程
-//        allCourseList.forEach { course ->
-//            course.timeSet.forEach { time ->
-//                //填充表格
-////                expandTableCourse[course.day - 1][time - 1].course.add(course)
-//            }
-//        }
-//        //合并相同的格子
-//        val tableCourse = Array<ArrayList<CourseSheet>>(7) { ArrayList(11) }
-//        expandTableCourse.forEachIndexed { index, dayArray ->
-//            val first = dayArray.first()
-//            var lastKey = first.course.joinToString { it.key }
-//            var lastSheet = first
-//            for (i in 1 until dayArray.size) {
-//                val thisSheet = dayArray[i]
-//                val thisKey = thisSheet.course.joinToString { it.key }
-//                if (lastKey != thisKey) {
-//                    //键不相等，那么添加这个sheet
-//                    tableCourse[index].add(lastSheet)
-//                    lastKey = thisKey
-//                    lastSheet = thisSheet
-//                } else {
-//                    //键相等，合并
-//                    lastSheet.step++
-//                }
-//            }
-//            if (tableCourse[index].lastOrNull() != lastSheet) {
-//                tableCourse[index].add(lastSheet)
-//            }
-//        }
-//        //填充显示的信息
-//        val tableCourseList = tableCourse.map { array ->
-//            array.map { courseSheet ->
-////                if (courseSheet.course.isNotEmpty()) {
-////                    val list = courseSheet.course.sortedWith { o1, o2 ->
-////                        if (o1.thisWeek == o2.thisWeek) {
-////                            if (o1.type != o2.type) {
-////                                o2.type.type.compareTo(o1.type.type)
-////                            } else {
-////                                o1.weekSet.first().compareTo(o2.weekSet.first())
-////                            }
-////                        } else {
-////                            o2.thisWeek.compareTo(o1.thisWeek)
-////                        }
-////                    }
-////                    val show = list.first()
-////                    courseSheet.showTitle =
-////                        if (show.thisWeek) show.format("{courseName}@{location}")
-////                        else show.format("[非本周]\n{courseName}@{location}")
-////                    courseSheet.course =
-////                        ArrayList(courseSheet.course.distinct().sortedBy { it.weekSet.first() })
-////                    courseSheet.color =
-////                        if (show.thisWeek) colorMap[show.courseName]
-////                            ?: ColorPool.hash(show.courseName) else XhuColor.notThisWeekBackgroundColor
-////                    courseSheet.textColor = if (show.thisWeek) Color.White else Color.Gray
-////                }
-//                courseSheet
-//            }
-//        }
-//        val showNotThisWeek = getConfig { showNotThisWeek }
-//        if (!showNotThisWeek) {
-//            tableCourseList.forEach { array ->
-//                array.forEach { sheet ->
-//                    sheet.course.removeIf { !it.thisWeek }
-//                }
-//            }
-//        }
-//        tableCourseList
-//}
+    private suspend fun loadWeekCourseList(
+        currentWeek: Int,
+        weekViewList: List<WeekCourseView>,
+        colorMap: Map<String, Color>,
+        customUi: CustomUi,
+    ): List<List<WidgetWeekItem>> {
+        //设置是否本周以及课程颜色
+        weekViewList.forEach {
+            it.thisWeek = it.weekList.contains(currentWeek)
+            it.backgroundColor = colorMap[it.courseName] ?: ColorPool.hash(it.courseName)
+            it.generateKey()
+        }
+        //组建表格的数据结构
+        val expandTableCourse = Array(7) { day ->
+            Array(11) { index ->
+                WidgetWeekItem.empty(1, index + 1, DayOfWeek.of(day + 1))
+            }
+        }
+        //平铺课程
+        weekViewList.forEach { course ->
+            val day = course.day.value - 1
+            (course.startDayTime..course.endDayTime).forEach { time ->
+                //填充表格
+                expandTableCourse[day][time - 1].course.add(course)
+            }
+        }
+        //使用key判断格子内容是否相同，相同则合并
+        val tableCourse = Array(7) { day ->
+            val dayArray = expandTableCourse[day]
+            val first = dayArray.first()
+            val result = ArrayList<WidgetWeekItem>(dayArray.size)
+            var last = first
+            var lastKey = first.course.sortedBy { it.key }.joinToString { it.key }
+            dayArray.forEachIndexed { index, widgetWeekItem ->
+                if (index == 0) {
+                    return@forEachIndexed
+                }
+                val thisKey = widgetWeekItem.course.sortedBy { it.key }.joinToString { it.key }
+                if (lastKey == thisKey) {
+                    last.step++
+                } else {
+                    result.add(last)
+                    last = widgetWeekItem
+                    lastKey = thisKey
+                }
+            }
+            if (result.last() != last) {
+                result.add(last)
+            }
+            result
+        }
+        //处理显示的信息
+        tableCourse.forEach { array ->
+            array.forEach { weekItem ->
+                if (weekItem.course.isNotEmpty()) {
+                    weekItem.course.sort()
+                    val show = weekItem.course.first()
+                    weekItem.course = ArrayList(weekItem.course.sortedBy { it.weekList.first() })
+                    if (show.thisWeek) {
+                        weekItem.showTitle = show.format(customUi.weekTitleTemplate)
+                        weekItem.color =
+                            colorMap[show.courseName] ?: ColorPool.hash(show.courseName)
+                        weekItem.textColor = Color.White
+                    } else {
+                        weekItem.showTitle = show.format(customUi.weekNotTitleTemplate)
+                        weekItem.color = XhuColor.notThisWeekBackgroundColor
+                        weekItem.textColor = Color.Gray
+                    }
+                }
+            }
+        }
+        //过滤非本周课程
+        val showNotThisWeek = getConfigStore { showNotThisWeek }
+        if (!showNotThisWeek) {
+            tableCourse.forEach { array ->
+                array.forEach { sheet ->
+                    sheet.course.removeIf { !it.thisWeek }
+                }
+            }
+        }
+        return tableCourse.toList()
+    }
 }

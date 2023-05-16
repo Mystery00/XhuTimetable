@@ -3,13 +3,14 @@ package vip.mystery0.xhu.timetable.ui.widget.state
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.glance.state.GlanceStateDefinition
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
+import vip.mystery0.xhu.timetable.model.WidgetWeekItem
 import vip.mystery0.xhu.timetable.repository.WidgetRepo
-import vip.mystery0.xhu.timetable.repository.getWeekCourse
 import vip.mystery0.xhu.timetable.ui.widget.widgetDataStoreFile
-import vip.mystery0.xhu.timetable.viewmodel.CourseSheet
 import java.io.File
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -28,9 +29,10 @@ class WeekCourseDataStore : DataStore<WeekCourseStateGlance> {
     private val dataFlow = MutableStateFlow(WeekCourseStateGlance.EMPTY)
 
     override val data: Flow<WeekCourseStateGlance> = flow {
-        val currentWeek = WidgetRepo.calculateWeek()
-        val weekCourseList = getWeekCourse(currentWeek)
-        val timeTitle = WidgetRepo.calculateDateTitle(false)
+        val currentWeek = withContext(Dispatchers.Default) { WidgetRepo.calculateWeek() }
+        val weekCourseList =
+            withContext(Dispatchers.Default) { WidgetRepo.getWeekList(currentWeek) }
+        val timeTitle = withContext(Dispatchers.Default) { WidgetRepo.calculateDateTitle(false) }
         val now = LocalDate.now()
         val startDate = now.minusDays(now.dayOfWeek.value.toLong() - 1)
         emit(
@@ -52,7 +54,7 @@ data class WeekCourseStateGlance(
     val timeTitle: String,
     val date: LocalDate,
     val currentWeek: Int,
-    val weekCourseList: List<List<CourseSheet>>,
+    val weekCourseList: List<List<WidgetWeekItem>>,
     val startDate: LocalDate,
     val week: DayOfWeek = date.dayOfWeek,
 ) {
