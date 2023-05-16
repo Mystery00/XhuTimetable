@@ -89,7 +89,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest,CustomCourseRes
             }
             val year = getSelectedYear(_yearSelect.value)
             val term = getSelectedTerm(_termSelect.value)
-            pageRequestFlow.emit(PageRequest(selectedUser, year, term))
+            loadData(PageRequest(selectedUser, year, term))
         }
     }
 

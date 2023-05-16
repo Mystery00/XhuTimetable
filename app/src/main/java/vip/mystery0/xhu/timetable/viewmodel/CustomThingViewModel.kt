@@ -54,7 +54,7 @@ class CustomThingViewModel : PagingComposeViewModel<User, CustomThingResponse>(
                 failed("选择用户为空，请重新选择")
                 return@launch
             }
-            pageRequestFlow.emit(selectedUser)
+            loadData(selectedUser)
         }
     }
 

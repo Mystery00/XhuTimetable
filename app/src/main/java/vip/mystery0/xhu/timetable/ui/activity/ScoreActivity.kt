@@ -10,15 +10,11 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Card
 import androidx.compose.material.Checkbox
 import androidx.compose.material.ExperimentalMaterialApi
@@ -44,11 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemsIndexed
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
@@ -147,42 +139,30 @@ class ScoreActivity : BaseSelectComposeActivity() {
                 )
             },
         ) { paddingValues ->
-            Box {
-                var showMoreInfo by remember { mutableStateOf(true) }
-                ModalBottomSheetLayout(
-                    sheetState = showSelect,
-                    scrimColor = Color.Black.copy(alpha = 0.32f),
-                    sheetContent = {
-                        BuildSelectSheetLayout(
-                            bottomSheetState = showSelect,
-                            selectUserState = userSelectStatus,
-                            selectYearState = yearSelectStatus,
-                            selectTermState = termSelectStatus,
-                            showUserDialog = userDialog,
-                            showYearDialog = yearDialog,
-                            showTermDialog = termDialog,
-                        ) {
-                            viewModel.loadScoreList()
-                        }
-                    }
-                ) {
-                    SwipeRefresh(
-                        modifier = Modifier
-                            .padding(paddingValues)
-                            .fillMaxSize(),
-                        state = rememberSwipeRefreshState(isRefreshing = pager.loadState.refresh is LoadState.Loading),
-                        onRefresh = { pager.refresh() },
+            var showMoreInfo by remember { mutableStateOf(true) }
+            ModalBottomSheetLayout(
+                sheetState = showSelect,
+                scrimColor = Color.Black.copy(alpha = 0.32f),
+                sheetContent = {
+                    BuildSelectSheetLayout(
+                        bottomSheetState = showSelect,
+                        selectUserState = userSelectStatus,
+                        selectYearState = yearSelectStatus,
+                        selectTermState = termSelectStatus,
+                        showUserDialog = userDialog,
+                        showYearDialog = yearDialog,
+                        showTermDialog = termDialog,
                     ) {
-                        if (pager.itemCount == 0) {
-                            BuildNoDataLayout()
-                            return@SwipeRefresh
-                        }
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(XhuColor.Common.grayBackground),
-                            contentPadding = PaddingValues(4.dp),
-                        ) {
+                        viewModel.loadScoreList()
+                    }
+                }
+            ) {
+                val refreshing by viewModel.refreshing.collectAsState()
+                BuildPaging(
+                    paddingValues = paddingValues,
+                    pager = pager,
+                    refreshing = refreshing,
+                    listContent = {
 //                            stickyHeader {
 //                                Text(
 //                                    text = "学期总览",
@@ -195,56 +175,43 @@ class ScoreActivity : BaseSelectComposeActivity() {
 //                            item {
 //                                BuildTermInfo(scoreList)
 //                            }
-                            stickyHeader {
-                                Text(
-                                    text = "课程成绩列表",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .background(XhuColor.Common.whiteBackground)
-                                        .padding(12.dp),
-                                )
-                            }
-                            itemsIndexed(pager) { _, item ->
-                                item?.let {
-                                    BuildItem(showMoreInfo, item)
-                                }
-                            }
-                            when (pager.loadState.append) {
-                                is LoadState.Loading -> {
-                                    item { BuildPageFooter(text = "数据加载中，请稍后……") }
-                                }
-
-                                is LoadState.Error -> {
-                                    item { BuildPageFooter(text = "数据加载失败，请重试") }
-                                }
-
-                                is LoadState.NotLoading -> {
-                                    item { BuildPageFooter(text = "o(´^｀)o 再怎么滑也没有啦~") }
-                                }
+                        stickyHeader {
+                            Text(
+                                text = "课程成绩列表",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(XhuColor.Common.whiteBackground)
+                                    .padding(12.dp),
+                            )
+                        }
+                        itemsIndexed(pager) { _, item ->
+                            item?.let {
+                                BuildItem(showMoreInfo, it)
                             }
                         }
                     }
-                }
-                AnimatedVisibility(
-                    modifier = Modifier.align(Alignment.TopEnd),
-                    visible = showOption,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
                 ) {
-                    Card(
-                        modifier = Modifier
-                            .padding(4.dp),
-                        elevation = 4.dp,
+                    AnimatedVisibility(
+                        modifier = Modifier.align(Alignment.TopEnd),
+                        visible = showOption,
+                        enter = fadeIn(),
+                        exit = fadeOut(),
                     ) {
-                        Column {
-                            Row(modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    showMoreInfo = !showMoreInfo
-                                    showOption = false
-                                }) {
-                                Checkbox(checked = showMoreInfo, onCheckedChange = null)
-                                Text(text = "显示更多信息")
+                        Card(
+                            modifier = Modifier
+                                .padding(4.dp),
+                            elevation = 4.dp,
+                        ) {
+                            Column {
+                                Row(modifier = Modifier
+                                    .padding(8.dp)
+                                    .clickable {
+                                        showMoreInfo = !showMoreInfo
+                                        showOption = false
+                                    }) {
+                                    Checkbox(checked = showMoreInfo, onCheckedChange = null)
+                                    Text(text = "显示更多信息")
+                                }
                             }
                         }
                     }

@@ -24,6 +24,8 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -37,8 +39,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.material.shimmer
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
@@ -131,63 +134,67 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
                         }
                     }
                 ) {
-                    SwipeRefresh(
+                    Box(
                         modifier = Modifier
                             .padding(paddingValues)
                             .fillMaxSize(),
-                        state = rememberSwipeRefreshState(expScoreListState.loading),
-                        onRefresh = { },
-                        swipeEnabled = false,
                     ) {
-                        val scoreList = expScoreListState.scoreList
-                        if (expScoreListState.loading || scoreList.isNotEmpty()) {
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(XhuColor.Common.grayBackground),
-                                contentPadding = PaddingValues(4.dp),
-                            ) {
-                                if (expScoreListState.loading) {
-                                    val placeHolder = ExperimentScoreResponse.PLACEHOLDER
-                                    stickyHeader {
-                                        Row(
-                                            modifier = Modifier
-                                                .background(XhuColor.Common.whiteBackground)
-                                                .padding(12.dp),
-                                        ) {
-                                            Text(text = placeHolder.courseName)
-                                            Spacer(modifier = Modifier.weight(1f))
-                                            Text(text = "${placeHolder.totalScore}分")
-                                        }
-                                    }
-                                    items(3) {
-                                        BuildItem(
-                                            ExperimentScoreItemResponse.PLACEHOLDER,
-                                            true,
-                                        )
-                                    }
-                                } else {
-                                    scoreList.forEach {
+                        val pullRefreshState = rememberPullRefreshState(
+                            refreshing = expScoreListState.loading,
+                            onRefresh = { },
+                        )
+
+                        Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+                            val scoreList = expScoreListState.scoreList
+                            if (expScoreListState.loading || scoreList.isNotEmpty()) {
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(XhuColor.Common.grayBackground),
+                                    contentPadding = PaddingValues(4.dp),
+                                ) {
+                                    if (expScoreListState.loading) {
+                                        val placeHolder = ExperimentScoreResponse.PLACEHOLDER
                                         stickyHeader {
                                             Row(
                                                 modifier = Modifier
                                                     .background(XhuColor.Common.whiteBackground)
                                                     .padding(12.dp),
                                             ) {
-                                                Text(text = it.courseName)
+                                                Text(text = placeHolder.courseName)
                                                 Spacer(modifier = Modifier.weight(1f))
-                                                Text(text = "${it.totalScore}分")
+                                                Text(text = "${placeHolder.totalScore}分")
                                             }
                                         }
-                                        items(it.itemList.size) { index ->
-                                            val item = it.itemList[index]
-                                            BuildItem(item)
+                                        items(3) {
+                                            BuildItem(
+                                                ExperimentScoreItemResponse.PLACEHOLDER,
+                                                true,
+                                            )
+                                        }
+                                    } else {
+                                        scoreList.forEach {
+                                            stickyHeader {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .background(XhuColor.Common.whiteBackground)
+                                                        .padding(12.dp),
+                                                ) {
+                                                    Text(text = it.courseName)
+                                                    Spacer(modifier = Modifier.weight(1f))
+                                                    Text(text = "${it.totalScore}分")
+                                                }
+                                            }
+                                            items(it.itemList.size) { index ->
+                                                val item = it.itemList[index]
+                                                BuildItem(item)
+                                            }
                                         }
                                     }
                                 }
+                            } else {
+                                BuildNoDataLayout()
                             }
-                        } else {
-                            BuildNoDataLayout()
                         }
                     }
                 }
@@ -229,7 +236,10 @@ private fun BuildItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
-            ,
+            .placeholder(
+                visible = placeHolder,
+                highlight = PlaceholderHighlight.shimmer(),
+            ),
         backgroundColor = XhuColor.cardBackground,
     ) {
         Column(

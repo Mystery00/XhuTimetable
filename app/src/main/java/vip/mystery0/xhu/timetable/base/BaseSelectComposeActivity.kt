@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
-abstract class BaseSelectComposeActivity : BaseComposeActivity() {
+abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     protected fun BuildUserSelectBackLayerContent(

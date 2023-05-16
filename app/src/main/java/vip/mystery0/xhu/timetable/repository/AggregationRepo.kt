@@ -59,7 +59,14 @@ object AggregationRepo : BaseDataRepo {
                         todayThingList.add(TodayThingView.valueOf(customThing, user))
                     }
                     //保存数据到数据库
-                    AggregationLocalRepo.saveResponse(nowYear, nowTerm, user, response)
+                    AggregationLocalRepo.saveResponse(
+                        nowYear,
+                        nowTerm,
+                        user,
+                        response,
+                        showCustomCourse,
+                        showCustomThing,
+                    )
                 }
             }
         } else {

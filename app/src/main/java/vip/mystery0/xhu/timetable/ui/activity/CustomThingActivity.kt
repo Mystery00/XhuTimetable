@@ -3,11 +3,9 @@ package vip.mystery0.xhu.timetable.ui.activity
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BackdropScaffold
 import androidx.compose.material.BackdropValue
@@ -57,11 +54,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemsIndexed
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.MaterialDialogState
 import com.vanpra.composematerialdialogs.color.ARGBPickerState
@@ -515,50 +508,22 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                             Spacer(modifier = Modifier.weight(1F))
                         }
                     }) {
-                    Box {
-                        SwipeRefresh(
-                            modifier = Modifier.fillMaxSize(),
-                            state = rememberSwipeRefreshState(isRefreshing = false),
-                            onRefresh = {
-                                pager.refresh()
-                            },
-                            swipeEnabled = false,
-                        ) {
-                            if (pager.itemCount == 0) {
-                                BuildNoDataLayout()
-                                return@SwipeRefresh
-                            }
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(XhuColor.Common.grayBackground),
-                                contentPadding = PaddingValues(4.dp),
-                            ) {
-                                itemsIndexed(pager) { _, item ->
-                                    item?.let {
-                                        BuildItem(it) {
-                                            scope.launch {
-                                                updateCustomThing(item)
-                                                showSelect.show()
-                                            }
-                                        }
-                                    }
-                                }
-                                when (pager.loadState.append) {
-                                    is LoadState.Loading -> {
-                                        item { BuildPageFooter(text = "数据加载中，请稍后……") }
-                                    }
-
-                                    is LoadState.Error -> {
-                                        item { BuildPageFooter(text = "数据加载失败，请重试") }
-                                    }
-
-                                    is LoadState.NotLoading -> {
-                                        item { BuildPageFooter(text = "o(´^｀)o 再怎么滑也没有啦~") }
+                    val refreshing by viewModel.refreshing.collectAsState()
+                    BuildPaging(
+                        paddingValues = PaddingValues(4.dp),
+                        pager = pager,
+                        refreshing = refreshing,
+                        itemContent = { item ->
+                            item?.let {
+                                BuildItem(it) {
+                                    scope.launch {
+                                        updateCustomThing(it)
+                                        showSelect.show()
                                     }
                                 }
                             }
                         }
+                    ) {
                         FloatingActionButton(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
