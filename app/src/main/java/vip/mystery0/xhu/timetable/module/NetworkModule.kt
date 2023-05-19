@@ -16,7 +16,6 @@ import vip.mystery0.xhu.timetable.api.CustomThingApi
 import vip.mystery0.xhu.timetable.api.ExamApi
 import vip.mystery0.xhu.timetable.api.FeedbackApi
 import vip.mystery0.xhu.timetable.api.FileApi
-import vip.mystery0.xhu.timetable.api.JwcApi
 import vip.mystery0.xhu.timetable.api.MenuApi
 import vip.mystery0.xhu.timetable.api.NoticeApi
 import vip.mystery0.xhu.timetable.api.PoemsApi
@@ -95,7 +94,6 @@ val networkModule = module {
     }
 
     serverApi<ServerApi>()
-    serverApi<JwcApi>()
 
     serverApi<CommonApi>()
     serverApi<MenuApi>()
