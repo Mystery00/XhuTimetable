@@ -15,29 +15,6 @@ interface ServerApi {
         @Query("betaVersion") betaVersion: Boolean,
     ): VersionUrl
 
-    @GET("/api/rest/xhu-timetable/server/schoolCalendar")
-    suspend fun schoolCalendarList(@Header("sessionToken") token: String): Response<List<SchoolCalendarResponse>>
-
-    @GET("/api/rest/xhu-timetable/server/schoolCalendarUrl")
-    suspend fun schoolCalendarUrl(
-        @Header("sessionToken") token: String,
-        @Query("resourceId") resourceId: Long,
-    ): Response<ResourceUrlResponse>
-
-    @GET("/api/rest/xhu-timetable/server/background")
-    suspend fun selectAllBackground(
-        @Header("sessionToken") token: String,
-    ): Response<List<BackgroundResponse>>
-
-    @GET("/api/rest/xhu-timetable/server/background/url")
-    suspend fun getBackgroundUrl(
-        @Header("sessionToken") token: String,
-        @Query("resourceId") resourceId: Long,
-    ): Response<ResourceUrlResponse>
-
-    @GET("/api/rest/xhu-timetable/common/teamMember")
-    suspend fun getTeamMemberList(): List<TeamMemberResponse>
-
     @GET("/api/rest/xhu-timetable/server/calendar")
     suspend fun getCalendarEventList(
         @Header("sessionToken") token: String,

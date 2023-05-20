@@ -1,7 +1,12 @@
 package vip.mystery0.xhu.timetable.model.response
 
 data class BackgroundResponse(
-    var backgroundId: Long,
-    var resourceId: Long,
-    var thumbnailUrl: String,
+    val backgroundId: Long,
+    val resourceId: Long,
+    val thumbnailUrl: String,
+    val imageUrl: String,
+)
+
+data class ResourceUrlResponse(
+    val url: String,
 )

@@ -24,6 +24,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberBackdropScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -161,28 +163,30 @@ class SchoolCalendarActivity : BaseComposeActivity() {
                     }
                 }
             }, frontLayerContent = {
-                SwipeRefresh(
-                    modifier = Modifier.fillMaxSize(),
-                    state = rememberSwipeRefreshState(loading.loading),
-                    onRefresh = { },
-                ) {
-                    SubcomposeAsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(schoolCalendarData.imageUrl)
-                            .memoryCachePolicy(CachePolicy.ENABLED)
-                            .diskCachePolicy(CachePolicy.ENABLED)
-                            .listener(onError = { _, result ->
-                                result.throwable.message ?: "加载失败".toast(true)
-                            })
-                            .build(),
-                        loading = {
-                            Box(contentAlignment = Alignment.Center) {
-                                CircularProgressIndicator(modifier = Modifier.size(48.dp))
-                            }
-                        },
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
+                Box(modifier = Modifier.fillMaxSize()) {
+                    val pullRefreshState = rememberPullRefreshState(
+                        refreshing = loading.loading,
+                        onRefresh = { },
                     )
+                    Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+                        SubcomposeAsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(schoolCalendarData.imageUrl)
+                                .memoryCachePolicy(CachePolicy.ENABLED)
+                                .diskCachePolicy(CachePolicy.ENABLED)
+                                .listener(onError = { _, result ->
+                                    result.throwable.message ?: "加载失败".toast(true)
+                                })
+                                .build(),
+                            loading = {
+                                Box(contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                                }
+                            },
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
                 }
             })
         if (loading.errorMessage.isNotBlank()) {

@@ -2,32 +2,32 @@ package vip.mystery0.xhu.timetable.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.inject
 import retrofit2.Retrofit
 import vip.mystery0.xhu.timetable.R
+import vip.mystery0.xhu.timetable.api.BackgroundApi
 import vip.mystery0.xhu.timetable.api.FileApi
-import vip.mystery0.xhu.timetable.api.ServerApi
-import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.interceptor.FileDownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.FileDownloadProgressState
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
-import vip.mystery0.xhu.timetable.config.runOnCpu
-import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.config.setConfig
-import vip.mystery0.xhu.timetable.config.store.UserStore
-import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLogin
+import vip.mystery0.xhu.timetable.config.store.UserStore.mainUser
+import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.customImageDir
 import vip.mystery0.xhu.timetable.externalPictureDir
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.model.response.BackgroundResponse
+import vip.mystery0.xhu.timetable.repository.BackgroundRepo
 import vip.mystery0.xhu.timetable.ui.activity.formatFileSize
 import vip.mystery0.xhu.timetable.utils.md5
 import vip.mystery0.xhu.timetable.utils.sha1
@@ -43,7 +43,6 @@ class BackgroundViewModel : ComposeViewModel() {
 
     private val eventBus: EventBus by inject()
 
-    private val serverApi: ServerApi by inject()
     private val fileApi: FileApi by lazy {
         val client = OkHttpClient.Builder()
             .addInterceptor(FileDownloadProgressInterceptor { progress ->
@@ -81,9 +80,8 @@ class BackgroundViewModel : ComposeViewModel() {
             _progressState.value =
                 DownloadProgressState(FileDownloadProgressState(), finished = true)
             _backgroundListState.value = BackgroundListState(loading = true)
-            val list = UserStore.mainUser().withAutoLogin {
-                serverApi.selectAllBackground(it).checkLogin()
-            }.first
+            val list = BackgroundRepo.getList()
+
             backgroundList.clear()
             backgroundList.addAll(list)
             _backgroundListState.value = BackgroundListState(backgroundList = generateList())
@@ -97,7 +95,8 @@ class BackgroundViewModel : ComposeViewModel() {
                 Background(
                     it.backgroundId,
                     it.resourceId,
-                    thumbnailUrl = it.thumbnailUrl
+                    thumbnailUrl = it.thumbnailUrl,
+                    imageUrl = it.imageUrl,
                 )
             })
         resultList.add(
@@ -117,9 +116,11 @@ class BackgroundViewModel : ComposeViewModel() {
             backgroundFile == null -> {
                 resultList[0].checked = true
             }
+
             backgroundFile.absolutePath.startsWith(customImageDir.absolutePath) -> {
                 resultList[1].checked = true
             }
+
             else -> {
                 val fileName = backgroundFile.nameWithoutExtension
                 resultList.forEach {
@@ -141,7 +142,10 @@ class BackgroundViewModel : ComposeViewModel() {
             _backgroundListState.value = _backgroundListState.value.loadWithList(true)
             setConfig { backgroundImage = file }
             _backgroundListState.value =
-                BackgroundListState(backgroundList = generateList(), errorMessage = "背景图设置成功")
+                BackgroundListState(
+                    backgroundList = generateList(),
+                    errorMessage = "背景图设置成功"
+                )
             eventBus.post(UIEvent(EventType.CHANGE_MAIN_BACKGROUND))
         }
     }
@@ -171,11 +175,12 @@ class BackgroundViewModel : ComposeViewModel() {
                 -1L -> return@launch
                 else -> {
                     _progressState.value =
-                        DownloadProgressState(FileDownloadProgressState(), text = "正在获取下载地址")
-                    val url = UserStore.mainUser().withAutoLogin {
-                        serverApi.getBackgroundUrl(it, selected.resourceId).checkLogin()
-                    }.first.url
-                    val file = runOnCpu {
+                        DownloadProgressState(
+                            FileDownloadProgressState(),
+                            text = "正在获取下载地址"
+                        )
+                    val url = selected.thumbnailUrl
+                    val file = withContext(Dispatchers.Default) {
                         val dir = File(externalPictureDir, "background")
                         if (!dir.exists()) {
                             dir.mkdirs()
@@ -187,7 +192,7 @@ class BackgroundViewModel : ComposeViewModel() {
                             }-${selected.thumbnailUrl.md5()}+${selected.resourceId}"
                         File(dir, "${name.sha256()}.${extension}")
                     }
-                    runOnIo {
+                    withContext(Dispatchers.IO) {
                         val response = fileApi.downloadFile(url)
                         response.byteStream().use { input ->
                             FileOutputStream(file).use { output ->
@@ -204,7 +209,10 @@ class BackgroundViewModel : ComposeViewModel() {
                 }
             }
             _backgroundListState.value =
-                BackgroundListState(backgroundList = generateList(), errorMessage = "背景图设置成功")
+                BackgroundListState(
+                    backgroundList = generateList(),
+                    errorMessage = "背景图设置成功"
+                )
             eventBus.post(UIEvent(EventType.CHANGE_MAIN_BACKGROUND))
         }
     }
@@ -232,6 +240,7 @@ data class Background(
     var backgroundId: Long,
     var resourceId: Long,
     var thumbnailUrl: String = "",
+    var imageUrl: String = "",
     var imageResId: Int = 0,
     var checked: Boolean = false,
 ) {

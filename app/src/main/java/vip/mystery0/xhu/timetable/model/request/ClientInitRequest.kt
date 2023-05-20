@@ -4,9 +4,9 @@ import android.os.Build
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 
 data class ClientInitRequest(
-    val systemVersion: String = "Android ${Build.VERSION.RELEASE}-${Build.VERSION.SDK_INT}",
-    val factory: String = Build.MANUFACTURER,
-    val model: String = Build.MODEL,
-    val rom: String = Build.DISPLAY,
+    val versionSys: String = "Android ${Build.VERSION.RELEASE}-${Build.VERSION.SDK_INT}",
+    val deviceFactory: String = Build.MANUFACTURER,
+    val deviceModel: String = Build.MODEL,
+    val deviceRom: String = Build.DISPLAY,
     val checkBetaVersion: Boolean = GlobalConfigStore.versionChannel.isBeta(),
 )
