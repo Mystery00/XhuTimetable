@@ -2,19 +2,17 @@ package vip.mystery0.xhu.timetable.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.FileApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
-import vip.mystery0.xhu.timetable.config.runOnCpu
-import vip.mystery0.xhu.timetable.config.runOnIo
-import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.externalPictureDir
-import vip.mystery0.xhu.timetable.repository.getSchoolCalendarList
-import vip.mystery0.xhu.timetable.repository.getSchoolCalendarUrl
+import vip.mystery0.xhu.timetable.repository.SchoolCalendarRepo
 import vip.mystery0.xhu.timetable.utils.sha256
 import java.io.File
 import java.io.FileOutputStream
@@ -29,74 +27,38 @@ class SchoolCalendarViewModel : ComposeViewModel() {
     private val _loading = MutableStateFlow(LoadingState())
     val loading: StateFlow<LoadingState> = _loading
 
-    private val _area = MutableStateFlow<List<Area>>(emptyList())
-    val area: StateFlow<List<Area>> = _area
+    private val _area = MutableStateFlow<List<SchoolCalendarData>>(emptyList())
+    val area: StateFlow<List<SchoolCalendarData>> = _area
 
     private val _schoolCalendarData = MutableStateFlow(SchoolCalendarData())
     val schoolCalendarData: StateFlow<SchoolCalendarData> = _schoolCalendarData
 
     init {
+        fun failed(message: String) {
+            Log.w(TAG, "load exp score list failed, $message")
+            _loading.value = LoadingState(false, message)
+        }
+
         viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "changeArea failed", throwable)
-            _loading.value = LoadingState(
-                loading = false,
-                errorMessage = throwable.message ?: throwable.javaClass.simpleName
-            )
+            failed(throwable.message ?: throwable.javaClass.simpleName)
         }) {
             _loading.value = LoadingState(true)
-            val mainUser = UserStore.getMainUser()
-            if (mainUser == null) {
-                _loading.value = LoadingState(loading = false, errorMessage = "用户未登录")
-                return@launch
-            }
-            getSchoolCalendarList(mainUser).map {
-                Area(it.area, it.resourceId)
-            }.let {
-                _area.value = it
-                _loading.value = LoadingState(loading = false)
-            }
-            changeArea(_area.value[0].area)
+            _area.value = SchoolCalendarRepo.getList()
+                .map { SchoolCalendarData(it.area, it.imageUrl) }
+            _loading.value = LoadingState(false)
+            changeArea(_area.value.first().area)
         }
     }
 
     fun changeArea(area: String) {
-        viewModelScope.launch(networkErrorHandler { throwable ->
-            Log.w(TAG, "changeArea failed", throwable)
-            _loading.value = LoadingState(
-                loading = false,
-                errorMessage = throwable.message ?: throwable.javaClass.simpleName
-            )
-        }) {
-            _loading.value = LoadingState(true)
-            val mainUser = UserStore.getMainUser()
-            if (mainUser == null) {
-                _loading.value = LoadingState(loading = false, errorMessage = "用户未登录")
-                return@launch
+        viewModelScope.launch {
+            _area.value.first { it.area == area }.let {
+                _schoolCalendarData.value = it.doCache(fileApi)
             }
-            val pair = _area.value.firstOrNull { it.area == area }
-            if (pair == null) {
-                _loading.value = LoadingState(loading = false, errorMessage = "无效的校区")
-                return@launch
-            }
-            if (pair.url.isNotBlank()) {
-                _schoolCalendarData.value =
-                    SchoolCalendarData(area = area, imageUrl = pair.url).doCache(fileApi)
-            } else {
-                getSchoolCalendarUrl(mainUser, pair.resourceId).let {
-                    _schoolCalendarData.value =
-                        SchoolCalendarData(area = area, imageUrl = it).doCache(fileApi)
-                }
-            }
-            _loading.value = LoadingState(false)
         }
     }
 }
-
-data class Area(
-    val area: String,
-    val resourceId: Long,
-    var url: String = "",
-)
 
 data class SchoolCalendarData(
     val area: String = "",
@@ -113,11 +75,12 @@ data class SchoolCalendarData(
         }
 
     suspend fun doCache(fileApi: FileApi): SchoolCalendarData {
-        val file = runOnCpu {
-            cacheFile
-        }
-        Log.i("SchoolCalendarData", "doCache: save school calendar cache to ${file.absolutePath}")
-        runOnIo {
+        val file = withContext(Dispatchers.Default) { cacheFile }
+        Log.i(
+            "SchoolCalendarData",
+            "doCache: save school calendar cache to ${file.absolutePath}"
+        )
+        withContext(Dispatchers.IO) {
             val response = fileApi.downloadFile(imageUrl)
             response.byteStream().use { input ->
                 FileOutputStream(file).use { output ->

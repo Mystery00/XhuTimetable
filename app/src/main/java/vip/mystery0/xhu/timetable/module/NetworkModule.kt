@@ -8,6 +8,8 @@ import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import vip.mystery0.xhu.timetable.api.AggregationApi
+import vip.mystery0.xhu.timetable.api.BackgroundApi
+import vip.mystery0.xhu.timetable.api.CalendarApi
 import vip.mystery0.xhu.timetable.api.ClassroomApi
 import vip.mystery0.xhu.timetable.api.CommonApi
 import vip.mystery0.xhu.timetable.api.CourseApi
@@ -107,6 +109,8 @@ val networkModule = module {
     serverApi<CustomThingApi>()
     serverApi<NoticeApi>()
     serverApi<ClassroomApi>()
+    serverApi<CalendarApi>()
+    serverApi<BackgroundApi>()
 
     single { get<Retrofit>(named(RETROFIT_POEMS)).create(PoemsApi::class.java) }
     single { get<Retrofit>(named(RETROFIT_FILE)).create(FileApi::class.java) }

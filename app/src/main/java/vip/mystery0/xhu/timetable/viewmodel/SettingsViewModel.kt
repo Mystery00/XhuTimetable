@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.inject
+import vip.mystery0.xhu.timetable.api.CommonApi
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.startUniqueWork
@@ -41,6 +42,7 @@ class SettingsViewModel : ComposeViewModel() {
     private val workManager: WorkManager by inject()
     private val alarmManager: AlarmManager by inject()
     private val serverApi: ServerApi by inject()
+    private val commonApi: CommonApi by inject()
 
     private val _errorMessage = MutableStateFlow("")
     val errorMessage: StateFlow<String> = _errorMessage
@@ -75,7 +77,7 @@ class SettingsViewModel : ComposeViewModel() {
             _serverUrl.value = getConfig { serverUrl }
             _versionChannel.value = getConfig { versionChannel }
             try {
-                _teamMemberData.value = serverApi.getTeamMemberList()
+                _teamMemberData.value = commonApi.getTeamMemberList()
             } catch (e: Exception) {
                 Log.w(TAG, "load team member list", e)
             }

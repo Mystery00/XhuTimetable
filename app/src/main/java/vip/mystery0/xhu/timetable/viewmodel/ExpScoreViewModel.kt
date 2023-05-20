@@ -38,16 +38,19 @@ class ExpScoreViewModel : ComposeViewModel(), KoinComponent {
     }
 
     fun loadExpScoreList() {
+        fun failed(message: String) {
+            Log.w(TAG, "load exp score list failed, $message")
+            _expScoreListState.value = ExpScoreListState(errorMessage = message)
+        }
+
         viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "load exp score list failed", throwable)
-            _expScoreListState.value =
-                ExpScoreListState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
+            failed(throwable.message ?: throwable.javaClass.simpleName)
         }) {
             _expScoreListState.value = ExpScoreListState(loading = true)
             val selectedUser = getSelectedUser(_userSelect.value)
             if (selectedUser == null) {
-                Log.w(TAG, "loadExpScoreList: empty selected user")
-                _expScoreListState.value = ExpScoreListState(errorMessage = "选择用户为空，请重新选择")
+                failed("选择用户为空，请重新选择")
                 return@launch
             }
             val year = getSelectedYear(_yearSelect.value)
