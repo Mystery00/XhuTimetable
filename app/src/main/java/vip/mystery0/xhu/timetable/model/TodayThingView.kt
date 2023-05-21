@@ -2,11 +2,9 @@ package vip.mystery0.xhu.timetable.model
 
 import androidx.compose.ui.graphics.Color
 import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.response.CustomThingResponse
-import vip.mystery0.xhu.timetable.module.registerAdapter
+import vip.mystery0.xhu.timetable.module.moshiTypeAdapter
 import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import java.time.Instant
 
@@ -49,15 +47,11 @@ data class TodayThingView(
     }
 
     companion object {
-        private val metadataMoshi: JsonAdapter<Map<String, String>> =
-            Moshi.Builder().registerAdapter().build()
-                .adapter(
-                    Types.newParameterizedType(
-                        Map::class.java,
-                        String::class.java,
-                        String::class.java,
-                    )
-                )
+        private val metadataMoshi: JsonAdapter<Map<String, String>> = moshiTypeAdapter(
+            Map::class.java,
+            String::class.java,
+            String::class.java,
+        )
 
         fun valueOf(thing: CustomThingResponse, user: User): TodayThingView {
             val metadataMap =

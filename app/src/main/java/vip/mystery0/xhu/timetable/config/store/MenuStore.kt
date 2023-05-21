@@ -1,17 +1,15 @@
 package vip.mystery0.xhu.timetable.config.store
 
-import com.squareup.moshi.Moshi
 import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import vip.mystery0.xhu.timetable.module.registerAdapter
+import vip.mystery0.xhu.timetable.module.moshiAdapter
 import java.util.TreeMap
 
 object MenuStore {
-    private const val TAG = "MenuStore"
     private const val MENU_LIST = "menuList"
     private val kv = MMKV.mmkvWithID("MenuStore", MMKV.SINGLE_PROCESS_MODE)
-    private val menuMoshi = Moshi.Builder().registerAdapter().build().adapter(Menu::class.java)
+    private val menuMoshi = moshiAdapter<Menu>()
 
     suspend fun loadAllMenu(): List<List<Menu>> {
         val list = withContext(Dispatchers.IO) { kv.decodeStringSet(MENU_LIST) } ?: emptySet()

@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import vip.mystery0.xhu.timetable.module.moshiTypeAdapter
 import vip.mystery0.xhu.timetable.module.registerAdapter
 import vip.mystery0.xhu.timetable.utils.asInstant
 import vip.mystery0.xhu.timetable.utils.toHexString
@@ -23,14 +24,11 @@ data class CustomThingRequest(
         private fun extraDataToJson(map: Map<String, String>): String = MOSHI.toJson(map)
 
         private val MOSHI: JsonAdapter<Map<String, String>> by lazy {
-            Moshi.Builder().registerAdapter().build()
-                .adapter(
-                    Types.newParameterizedType(
-                        Map::class.java,
-                        String::class.java,
-                        String::class.java,
-                    )
-                )
+            moshiTypeAdapter(
+                Map::class.java,
+                String::class.java,
+                String::class.java,
+            )
         }
 
         fun buildOf(
