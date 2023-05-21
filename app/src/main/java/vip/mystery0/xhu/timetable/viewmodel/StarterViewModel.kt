@@ -67,12 +67,6 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
                 _readyState.emit(ReadyState())
                 return@launch
             }
-//                var version = response.latestVersion
-//                if (getConfig { ignoreVersionList }.contains("${version?.versionName}-${version?.versionCode}")) {
-//                    version = null
-//                }
-//                DataHolder.version = version
-//                DataHolder.mainUserName = SessionManager.mainUserOrNull()?.info?.name ?: "未登录"
             val dir = File(externalPictureDir, "splash")
             val now = Instant.now()
             val splashList = getCacheStore { splashList }

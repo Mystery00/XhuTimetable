@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowRow
+import androidx.compose.foundation.layout.FlowRow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +29,7 @@ import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.appVersionCodeNumber
 import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
-import vip.mystery0.xhu.timetable.model.response.Version
+import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.utils.finishAllActivity
 import java.text.DecimalFormat
 import java.util.TreeMap
@@ -105,9 +106,10 @@ suspend fun updateStatus(
 }
 
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CheckUpdate(
-    version: Version?,
+    version: ClientVersion?,
     onDownload: (Boolean) -> Unit,
     onIgnore: () -> Unit,
 ) {
@@ -121,6 +123,7 @@ fun CheckUpdate(
             GlobalConfigStore.debugMode && GlobalCacheStore.alwaysShowNewVersion -> {
                 dialogState = false
             }
+
             !version.forceUpdate -> {
                 dialogState = false
             }
@@ -155,21 +158,19 @@ fun CheckUpdate(
                 }
             }
         }, confirmButton = {
-            FlowRow {
-                if (version.lastVersionCode == appVersionCodeNumber) {
-                    TextButton(onClick = {
-                        onDownload(false)
-                        onCloseListener()
-                    }) {
-                        Text(text = "下载增量包(${version.patchSize.formatFileSize()})")
-                    }
-                }
+            if (version.showPatch) {
                 TextButton(onClick = {
-                    onDownload(true)
+                    onDownload(false)
                     onCloseListener()
                 }) {
-                    Text(text = "下载APK(${version.apkSize.formatFileSize()})")
+                    Text(text = "下载增量包(${version.patchSize.formatFileSize()})")
                 }
+            }
+            TextButton(onClick = {
+                onDownload(true)
+                onCloseListener()
+            }) {
+                Text(text = "下载APK(${version.apkSize.formatFileSize()})")
             }
         }, dismissButton = {
             if (version.forceUpdate) {

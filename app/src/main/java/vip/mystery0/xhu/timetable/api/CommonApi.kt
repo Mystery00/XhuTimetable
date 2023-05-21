@@ -9,6 +9,7 @@ import vip.mystery0.xhu.timetable.model.request.ClientInitRequest
 import vip.mystery0.xhu.timetable.model.response.ClientInitResponse
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
+import vip.mystery0.xhu.timetable.model.response.VersionUrl
 
 interface CommonApi {
     @POST("/api/rest/external/common/client/init")
@@ -16,6 +17,9 @@ interface CommonApi {
 
     @GET("/api/rest/external/common/version")
     suspend fun checkVersion(@Query("checkBeta") checkBeta: Boolean = GlobalConfigStore.versionChannel.isBeta()): ClientVersion?
+
+    @GET("/api/rest/external/common/version/url")
+    suspend fun getVersionUrl(@Query("versionId") versionId: Long): VersionUrl
 
     @GET("/api/rest/external/common/team")
     suspend fun getTeamMemberList(): List<TeamMemberResponse>

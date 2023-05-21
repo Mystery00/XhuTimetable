@@ -23,7 +23,6 @@ import vip.mystery0.xhu.timetable.api.NoticeApi
 import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.api.ScoreApi
 import vip.mystery0.xhu.timetable.api.ServerApi
-import vip.mystery0.xhu.timetable.api.ThingApi
 import vip.mystery0.xhu.timetable.api.UserApi
 import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.PoemsInterceptor
@@ -101,7 +100,6 @@ val networkModule = module {
     serverApi<UserApi>()
     serverApi<AggregationApi>()
     serverApi<CourseApi>()
-    serverApi<ThingApi>()
     serverApi<ExamApi>()
     serverApi<ScoreApi>()
     serverApi<CustomCourseApi>()
