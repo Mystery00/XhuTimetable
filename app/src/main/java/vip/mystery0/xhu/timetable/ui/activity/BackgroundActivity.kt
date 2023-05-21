@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
@@ -29,6 +29,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -42,8 +44,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
@@ -96,7 +96,7 @@ class BackgroundActivity : BaseComposeActivity() {
             }
         }
 
-    @OptIn(ExperimentalFoundationApi::class)
+    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun BuildContent() {
         val backgroundListState by viewModel.backgroundListState.collectAsState()
@@ -143,20 +143,23 @@ class BackgroundActivity : BaseComposeActivity() {
                 )
             },
         ) { paddingValues ->
-            SwipeRefresh(
+            Box(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .fillMaxSize(),
-                state = rememberSwipeRefreshState(backgroundListState.loading),
-                onRefresh = { },
-                swipeEnabled = false,
+                    .fillMaxSize()
             ) {
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 120.dp),
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    items(backgroundListState.backgroundList) { background ->
-                        PhotoItem(background)
+                val pullRefreshState = rememberPullRefreshState(
+                    refreshing = backgroundListState.loading,
+                    onRefresh = { },
+                )
+                Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 120.dp),
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        items(backgroundListState.backgroundList) { background ->
+                            PhotoItem(background)
+                        }
                     }
                 }
             }

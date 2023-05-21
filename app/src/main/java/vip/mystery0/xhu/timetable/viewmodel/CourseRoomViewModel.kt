@@ -16,7 +16,6 @@ import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class CourseRoomViewModel : PagingComposeViewModel<ClassroomRequest,ClassroomResponse>(
     {
         ClassroomRepo.getClassroomListStream(it)

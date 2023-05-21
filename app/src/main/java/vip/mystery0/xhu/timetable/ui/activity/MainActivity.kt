@@ -16,6 +16,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -35,6 +36,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -75,11 +79,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.calculateCurrentOffsetForPage
-import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -112,7 +111,6 @@ import vip.mystery0.xhu.timetable.ui.theme.isDarkMode
 import vip.mystery0.xhu.timetable.ui.theme.stateOf
 import vip.mystery0.xhu.timetable.utils.isTwiceClick
 import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
-import kotlin.math.absoluteValue
 import kotlin.math.min
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -137,7 +135,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         }
     }
 
-    @OptIn(ExperimentalPagerApi::class, ExperimentalPermissionsApi::class)
+    @OptIn(ExperimentalPermissionsApi::class, ExperimentalFoundationApi::class)
     @Composable
     override fun BuildContent() {
         val systemUiController = rememberSystemUiController()
@@ -378,16 +376,15 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                         )
                     }
                     HorizontalPager(
-                        count = 3,
+                        pageCount = 3,
                         state = pagerState,
-                        modifier = Modifier
-                            .padding(paddingValues),
+                        modifier = Modifier.padding(paddingValues),
                     ) { page ->
                         Column(
                             modifier = Modifier
                                 .graphicsLayer {
                                     val pageOffset =
-                                        calculateCurrentOffsetForPage(page).absoluteValue
+                                        (pagerState.currentPage - page + pagerState.currentPageOffsetFraction)
                                     lerp(0.85f, 1f, 1f - pageOffset.coerceIn(0f, 1f))
                                         .also { scale ->
                                             scaleX = scale
@@ -563,7 +560,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         }
     }
 
-    @OptIn(ExperimentalPagerApi::class)
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun RowScope.DrawNavigationItem(
         state: PagerState,

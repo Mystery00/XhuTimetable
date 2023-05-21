@@ -89,7 +89,6 @@ class SettingsActivity : BaseComposeActivity() {
 
         val showNightModeState = rememberMaterialDialogState()
         val showNotifyTimeState = rememberMaterialDialogState()
-        val showServerUrlState = rememberMaterialDialogState()
         val showUpdateLogState = rememberMaterialDialogState()
         val checkVersionChannelState = rememberMaterialDialogState()
 
