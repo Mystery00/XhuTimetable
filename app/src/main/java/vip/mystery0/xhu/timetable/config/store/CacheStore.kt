@@ -10,8 +10,8 @@ import vip.mystery0.xhu.timetable.module.registerAdapter
 import java.time.Instant
 import java.time.LocalDate
 
-
 private val instance = CacheStore()
+val GlobalCacheStore = instance
 
 suspend fun <T> getCacheStore(block: CacheStore.() -> T) =
     withContext(Dispatchers.IO) { block(instance) }
@@ -72,4 +72,47 @@ class CacheStore {
             val time = kv.decodeLong(notifyWorkLastExecuteTimeKey, 0L)
             return Instant.ofEpochMilli(time)
         }
+
+    //隐藏启动图到指定日期
+    private val hideSplashBeforeKey = "hideSplashBefore"
+    var hideSplashBefore: LocalDate
+        set(value) {
+            if (value == LocalDate.MIN) {
+                kv.remove(hideSplashBeforeKey)
+                return
+            }
+            val saveValue = value.format(Formatter.DATE)
+            kv.encode(hideSplashBeforeKey, saveValue)
+        }
+        get() {
+            val date = kv.decodeString(hideSplashBeforeKey)
+            if (date.isNullOrBlank()) {
+                return LocalDate.MIN
+            }
+            return LocalDate.parse(date, Formatter.DATE)
+        }
+
+    //始终显示新版本提醒
+    private val alwaysShowNewVersionKey = "alwaysShowNewVersion"
+    var alwaysShowNewVersion: Boolean
+        set(value) {
+            kv.encode(alwaysShowNewVersionKey, value)
+        }
+        get() = kv.decodeBool(alwaysShowNewVersionKey, false)
+
+    //忽略的版本
+    private val ignoreVersionListKey = "ignoreVersionList"
+    var ignoreVersionList: Set<String>
+        set(value) {
+            kv.encode(ignoreVersionListKey, value)
+        }
+        get() = kv.decodeStringSet(ignoreVersionListKey) ?: emptySet()
+
+    //意见反馈的消息id
+    private val firstFeedbackMessageIdKey = "firstFeedbackMessageId"
+    var firstFeedbackMessageId: Long
+        set(value) {
+            kv.encode(firstFeedbackMessageIdKey, value)
+        }
+        get() = kv.decodeLong(firstFeedbackMessageIdKey, 0L)
 }

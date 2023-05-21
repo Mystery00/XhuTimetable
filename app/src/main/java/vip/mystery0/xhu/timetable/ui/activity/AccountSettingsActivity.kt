@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
-import vip.mystery0.xhu.timetable.config.GlobalConfig
+import vip.mystery0.xhu.timetable.config.store.ConfigStore
 import vip.mystery0.xhu.timetable.model.Gender
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
@@ -102,7 +102,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                 }) {
                     ConfigSettingsCheckbox(
                         modifier = Modifier.padding(vertical = 8.dp),
-                        config = GlobalConfig::multiAccountMode,
+                        config = ConfigStore::multiAccountMode,
                         icon = {
                             Icon(
                                 painter = XhuIcons.multiUser,
@@ -112,8 +112,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                         },
                         title = { Text(text = "启用情侣模式") },
                         subtitle = { Text(text = "注意：如果多个用户的课表存在冲突的情况，表格可能会变得很乱，请确定您开启这个模式的意义！") },
-                        onCheckedChange = { newValue -> viewModel.changeMultiAccountMode(newValue) },
-                    )
+                    ) { newValue -> viewModel.changeMultiAccountMode(newValue) }
                 }
                 XhuSettingsGroup(title = {
                     Text(text = "账号管理")

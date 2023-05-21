@@ -25,7 +25,6 @@ import vip.mystery0.xhu.timetable.api.ScoreApi
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.api.ThingApi
 import vip.mystery0.xhu.timetable.api.UserApi
-import vip.mystery0.xhu.timetable.config.GlobalConfig
 import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.PoemsInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.ServerApiInterceptor
@@ -58,7 +57,7 @@ val networkModule = module {
 
     single(named(RETROFIT)) {
         Retrofit.Builder()
-            .baseUrl(GlobalConfig.serverUrl)
+            .baseUrl("https://xgkb.api.mystery0.vip")
             .client(get(named(HTTP_CLIENT)))
             .addConverterFactory(
                 MoshiConverterFactory.create(Moshi.Builder().registerAdapter().build())

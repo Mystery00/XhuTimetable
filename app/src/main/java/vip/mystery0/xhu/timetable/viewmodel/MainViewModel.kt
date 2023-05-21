@@ -16,9 +16,7 @@ import vip.mystery0.xhu.timetable.api.FeedbackApi
 import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.DataHolder
-import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
-import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.Menu
 import vip.mystery0.xhu.timetable.config.store.MenuStore
@@ -184,16 +182,16 @@ class MainViewModel : ComposeViewModel() {
     fun loadBackground(isDarkModeValue: Boolean = isDarkMode.value) {
         viewModelScope.launch {
             isDarkMode.value = isDarkModeValue
-            val disable = getConfig { disableBackgroundWhenNight }
+            val disable = getConfigStore { disableBackgroundWhenNight }
             val isNight = isDarkMode.value
             if (disable && isNight) {
                 _backgroundImage.value = Unit
                 return@launch
             } else {
-                _backgroundImage.value =
-                    getConfig { backgroundImage } ?: XhuImages.defaultBackgroundImage
+                _backgroundImage.value = getConfigStore { backgroundImage }
+                    ?: XhuImages.defaultBackgroundImage
             }
-            _backgroundImageBlur.value = getConfig { customUi }.backgroundImageBlur
+            _backgroundImageBlur.value = getConfigStore { customUi }.backgroundImageBlur
         }
     }
 
@@ -687,9 +685,9 @@ class MainViewModel : ComposeViewModel() {
 
     fun ignoreVersion(version: Version) {
         viewModelScope.launch {
-            val ignore = getConfig { ignoreVersionList }
-            ignore.add("${version.versionName}-${version.versionCode}")
-            setConfig { ignoreVersionList = ignore }
+            val ignore = getCacheStore { ignoreVersionList }
+            val list = ignore + "${version.versionName}-${version.versionCode}"
+            setCacheStore { ignoreVersionList = list }
         }
     }
 }

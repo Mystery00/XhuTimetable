@@ -11,11 +11,6 @@ import android.widget.ImageView
 import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -106,7 +101,8 @@ import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.appVersionCodeNumber
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
-import vip.mystery0.xhu.timetable.config.GlobalConfig
+import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
+import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.trackEvent
@@ -512,7 +508,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         val version by viewModel.version.collectAsState()
         val newVersion = version ?: return
         var show = newVersion.versionCode > appVersionCodeNumber
-        if (GlobalConfig.debugMode && GlobalConfig.alwaysShowNewVersion) {
+        if (GlobalConfigStore.debugMode && GlobalCacheStore.alwaysShowNewVersion) {
             show = true
         }
         if (!show) return

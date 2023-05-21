@@ -7,9 +7,9 @@ import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.getConfig
-import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.config.store.UserStore
+import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.Gender
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
@@ -63,11 +63,11 @@ class AccountManagementViewModel : ComposeViewModel() {
 
     fun changeMultiAccountMode(enable: Boolean) {
         viewModelScope.launch {
-            val multiAccountMode = getConfig { multiAccountMode }
+            val multiAccountMode = getConfigStore { multiAccountMode }
             if (multiAccountMode == enable) {
                 return@launch
             }
-            setConfig { this.multiAccountMode = enable }
+            setConfigStore { this.multiAccountMode = enable }
             eventBus.post(UIEvent(EventType.CHANGE_MAIN_USER))
         }
     }

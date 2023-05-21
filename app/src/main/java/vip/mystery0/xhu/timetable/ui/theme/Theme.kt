@@ -10,7 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.MutableStateFlow
-import vip.mystery0.xhu.timetable.config.GlobalConfig
+import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 
 private val DarkColorPalette = darkColors()
@@ -51,5 +51,5 @@ fun XhuTimetableTheme(
 }
 
 object Theme {
-    val nightMode = MutableStateFlow(GlobalConfig.nightMode)
+    val nightMode = MutableStateFlow(GlobalConfigStore.nightMode)
 }

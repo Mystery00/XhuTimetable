@@ -12,16 +12,13 @@ import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.inject
 import retrofit2.Retrofit
 import vip.mystery0.xhu.timetable.R
-import vip.mystery0.xhu.timetable.api.BackgroundApi
 import vip.mystery0.xhu.timetable.api.FileApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.interceptor.FileDownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.FileDownloadProgressState
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
-import vip.mystery0.xhu.timetable.config.setConfig
-import vip.mystery0.xhu.timetable.config.store.UserStore.mainUser
-import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
+import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.customImageDir
 import vip.mystery0.xhu.timetable.externalPictureDir
 import vip.mystery0.xhu.timetable.model.event.EventType
@@ -89,7 +86,7 @@ class BackgroundViewModel : ComposeViewModel() {
     }
 
     private suspend fun generateList(): List<Background> {
-        val backgroundFile = getConfig { backgroundImage }
+        val backgroundFile = getConfigStore { backgroundImage }
         val resultList =
             ArrayList(backgroundList.map {
                 Background(
@@ -140,7 +137,7 @@ class BackgroundViewModel : ComposeViewModel() {
             )
         }) {
             _backgroundListState.value = _backgroundListState.value.loadWithList(true)
-            setConfig { backgroundImage = file }
+            setConfigStore { backgroundImage = file }
             _backgroundListState.value =
                 BackgroundListState(
                     backgroundList = generateList(),
@@ -171,7 +168,7 @@ class BackgroundViewModel : ComposeViewModel() {
                 return@launch
             }
             when (backgroundId) {
-                0L -> setConfig { backgroundImage = null }
+                0L -> setConfigStore { backgroundImage = null }
                 -1L -> return@launch
                 else -> {
                     _progressState.value =
@@ -200,7 +197,7 @@ class BackgroundViewModel : ComposeViewModel() {
                             }
                         }
                     }
-                    setConfig { backgroundImage = file }
+                    setConfigStore { backgroundImage = file }
                     _progressState.value =
                         DownloadProgressState(
                             FileDownloadProgressState(),

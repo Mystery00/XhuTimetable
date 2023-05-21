@@ -8,11 +8,11 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLogin
 import vip.mystery0.xhu.timetable.model.AcademicReport
 import vip.mystery0.xhu.timetable.model.request.AcademicReportRequest
+import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import java.time.Instant
 
 class AcademicReportViewModel : ComposeViewModel() {
@@ -35,7 +35,7 @@ class AcademicReportViewModel : ComposeViewModel() {
                 .map {
                     AcademicReport(
                         it.title,
-                        Instant.ofEpochMilli(it.reportTime).atZone(chinaZone).toLocalDateTime(),
+                        Instant.ofEpochMilli(it.reportTime).asLocalDateTime(),
                         it.location,
                         it.speaker,
                         it.organizer,

@@ -11,6 +11,7 @@ object PoemsStore {
             kv.encode(disablePoemsKey, value)
         }
         get() = kv.decodeBool(disablePoemsKey, false)
+
     private const val tokenKey = "token"
     var token: String?
         get() = kv.decodeString(tokenKey)
@@ -21,6 +22,7 @@ object PoemsStore {
             }
             kv.encode(tokenKey, value)
         }
+
     private const val showPoemsTranslateKey = "showPoemsTranslate"
     var showPoemsTranslate: Boolean
         set(value) {

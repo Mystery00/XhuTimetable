@@ -29,30 +29,37 @@ import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.microsoft.appcenter.crashes.model.TestCrashException
 import com.vanpra.composematerialdialogs.*
 import com.vanpra.composematerialdialogs.datetime.time.timepicker
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.*
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.DataHolder
-import vip.mystery0.xhu.timetable.config.GlobalConfig
-import vip.mystery0.xhu.timetable.config.chinaZone
-import vip.mystery0.xhu.timetable.config.setConfig
+import vip.mystery0.xhu.timetable.config.store.CacheStore
+import vip.mystery0.xhu.timetable.config.store.ConfigStore
+import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
+import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
+import vip.mystery0.xhu.timetable.config.store.setCacheStore
+import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.ui.activity.contract.FontFileResultContract
+import vip.mystery0.xhu.timetable.ui.preference.CacheSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
+import vip.mystery0.xhu.timetable.ui.preference.PoemsSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.XhuFoldSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
 import vip.mystery0.xhu.timetable.utils.timeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.SettingsViewModel
-import java.time.Instant
-import java.time.LocalDateTime
+import java.time.LocalDate
 import java.time.LocalTime
 
 
@@ -78,7 +85,6 @@ class SettingsActivity : BaseComposeActivity() {
         val scope = rememberCoroutineScope()
 
         val nightMode by viewModel.nightMode.collectAsState()
-        val serverUrl by viewModel.serverUrl.collectAsState()
         val versionChannel by viewModel.versionChannel.collectAsState()
 
         val showNightModeState = rememberMaterialDialogState()
@@ -130,7 +136,7 @@ class SettingsActivity : BaseComposeActivity() {
                         }
                     )
                     ConfigSettingsCheckbox(
-                        config = GlobalConfig::disableBackgroundWhenNight,
+                        config = ConfigStore::disableBackgroundWhenNight,
                         scope = scope,
                         icon = {
                             Icon(
@@ -142,12 +148,10 @@ class SettingsActivity : BaseComposeActivity() {
                         title = { Text(text = "夜间模式时自动禁用背景图") },
                         subtitle = {
                             Text(text = "当夜间模式开启时，自动禁用背景图片")
-                        },
-                        onCheckedChange = {
-                            setConfig { disableBackgroundWhenNight = it }
-                            eventBus.post(UIEvent(EventType.CHANGE_MAIN_BACKGROUND))
                         }
-                    )
+                    ) {
+                        eventBus.post(UIEvent(EventType.CHANGE_MAIN_BACKGROUND))
+                    }
                     SettingsMenuLink(
                         icon = {
                             Icon(
@@ -172,7 +176,7 @@ class SettingsActivity : BaseComposeActivity() {
                         title = { Text(text = "清除启动图隐藏设置") },
                         onClick = {
                             scope.launch {
-                                setConfig { hideSplashBefore = Instant.ofEpochMilli(0L) }
+                                setCacheStore { hideSplashBefore = LocalDate.MIN }
                                 "清理成功".toast()
                             }
                         }
@@ -211,7 +215,7 @@ class SettingsActivity : BaseComposeActivity() {
                     Text(text = "通知设置")
                 }) {
                     ConfigSettingsCheckbox(
-                        config = GlobalConfig::notifyCourse,
+                        config = ConfigStore::notifyCourse,
                         scope = scope,
                         icon = {
                             Icon(
@@ -220,13 +224,10 @@ class SettingsActivity : BaseComposeActivity() {
                                 tint = XhuColor.Common.blackText,
                             )
                         },
-                        title = { Text(text = "课程提醒") },
-                        onCheckedChange = {
-                            setConfig { notifyCourse = it }
-                        }
+                        title = { Text(text = "课程提醒") }
                     )
                     ConfigSettingsCheckbox(
-                        config = GlobalConfig::notifyExam,
+                        config = ConfigStore::notifyExam,
                         scope = scope,
                         icon = {
                             Icon(
@@ -235,10 +236,7 @@ class SettingsActivity : BaseComposeActivity() {
                                 tint = XhuColor.Common.blackText,
                             )
                         },
-                        title = { Text(text = "考试提醒") },
-                        onCheckedChange = {
-                            setConfig { notifyExam = it }
-                        }
+                        title = { Text(text = "考试提醒") }
                     )
                     SettingsMenuLink(
                         title = { Text(text = "提醒时间") },
@@ -292,24 +290,30 @@ class SettingsActivity : BaseComposeActivity() {
                 XhuSettingsGroup(title = {
                     Text(text = "诗词设置")
                 }) {
-                    ConfigSettingsCheckbox(
-                        config = GlobalConfig::disablePoems,
+                    PoemsSettingsCheckbox(
+                        config = PoemsStore::disablePoems,
                         scope = scope,
-                        title = { Text(text = "禁用今日诗词") },
-                        onCheckedChange = {
-                            PoemsStore.disablePoems = it
-                            "重启应用后生效".toast()
+                        title = { Text(text = "禁用今日诗词") }
+                    ) {
+                        scope.launch {
+                            withContext(Dispatchers.IO) {
+                                PoemsStore.disablePoems = it
+                            }
                         }
-                    )
-                    ConfigSettingsCheckbox(
-                        config = GlobalConfig::showPoemsTranslate,
+                        "重启应用后生效".toast()
+                    }
+                    PoemsSettingsCheckbox(
+                        config = PoemsStore::showPoemsTranslate,
                         scope = scope,
-                        title = { Text(text = "显示诗词大意") },
-                        onCheckedChange = {
-                            PoemsStore.showPoemsTranslate = it
-                            "重启应用后生效".toast()
+                        title = { Text(text = "显示诗词大意") }
+                    ) {
+                        scope.launch {
+                            withContext(Dispatchers.IO) {
+                                PoemsStore.showPoemsTranslate = it
+                            }
                         }
-                    )
+                        "重启应用后生效".toast()
+                    }
                     SettingsMenuLink(
                         title = { Text(text = "重置Token") },
                         subtitle = { Text(text = "如果一直无法显示今日诗词，可能是缓存的Token出现了问题，点击此处可以进行重置") },
@@ -340,15 +344,6 @@ class SettingsActivity : BaseComposeActivity() {
                         }
                     )
                     ConfigSettingsCheckbox(
-                        config = GlobalConfig::showOldCourseWhenFailed,
-                        scope = scope,
-                        title = { Text(text = "当加载课表的新数据失败时，显示缓存的旧数据") },
-                        subtitle = { Text(text = "在一定程度上，可能会有点作用？！") },
-                        onCheckedChange = {
-                            setConfig { showOldCourseWhenFailed = it }
-                        }
-                    )
-                    ConfigSettingsCheckbox(
                         icon = {
                             Icon(
                                 painter = XhuIcons.allowUploadCrash,
@@ -356,14 +351,11 @@ class SettingsActivity : BaseComposeActivity() {
                                 tint = XhuColor.Common.blackText,
                             )
                         },
-                        config = GlobalConfig::allowSendCrashReport,
+                        config = ConfigStore::allowSendCrashReport,
                         scope = scope,
                         title = { Text(text = "发送错误报告") },
                         subtitle = {
                             Text(text = "这将帮助我们更快的发现并解决问题")
-                        },
-                        onCheckedChange = {
-                            setConfig { allowSendCrashReport = it }
                         }
                     )
                     SettingsMenuLink(
@@ -400,7 +392,7 @@ class SettingsActivity : BaseComposeActivity() {
                         title = { Text(text = "重置背景图片") },
                         onClick = {
                             scope.launch {
-                                setConfig { backgroundImage = null }
+                                setConfigStore { backgroundImage = null }
                                 "背景图已重置".toast()
                             }
                         }
@@ -555,13 +547,10 @@ class SettingsActivity : BaseComposeActivity() {
                             onClick = {
                             },
                         )
-                        ConfigSettingsCheckbox(
-                            config = GlobalConfig::alwaysShowNewVersion,
+                        CacheSettingsCheckbox(
+                            config = CacheStore::alwaysShowNewVersion,
                             scope = scope,
-                            title = { Text(text = "始终显示新版本弹窗") },
-                            onCheckedChange = {
-                                setConfig { alwaysShowNewVersion = it }
-                            }
+                            title = { Text(text = "始终显示新版本弹窗") }
                         )
                         SettingsMenuLink(
                             title = { Text(text = "测试下载最新安装包") },
@@ -586,34 +575,11 @@ class SettingsActivity : BaseComposeActivity() {
                             },
                         )
                         SettingsMenuLink(
-                            title = { Text(text = "服务器地址") },
-                            subtitle = {
-                                Text(text = serverUrl)
-                            },
-                            onClick = {
-                                showServerUrlState.show()
-                            },
-                        )
-                        SettingsMenuLink(
                             title = { Text(text = "NotifyWork 上一次执行时间") },
                             subtitle = {
                                 Text(
-                                    text = LocalDateTime.ofInstant(
-                                        GlobalConfig.notifyWorkLastExecuteTime,
-                                        chinaZone
-                                    ).format(chinaDateTimeFormatter)
-                                )
-                            },
-                            onClick = {
-                            }
-                        )
-                        SettingsMenuLink(
-                            title = { Text(text = "PullWork 上一次执行时间") },
-                            subtitle = {
-                                Text(
-                                    text = GlobalConfig.pullWorkLastExecuteTimeListRead.joinToString(
-                                        "\n"
-                                    ),
+                                    text = GlobalCacheStore.notifyWorkLastExecuteTime.asLocalDateTime()
+                                        .format(chinaDateTimeFormatter)
                                 )
                             },
                             onClick = {
@@ -634,10 +600,6 @@ class SettingsActivity : BaseComposeActivity() {
         BuildTimeSelector(
             dialogState = showNotifyTimeState,
             initTime = notifyTime ?: LocalTime.now(),
-        )
-        BuildServerUrlInputDialog(
-            dialogState = showServerUrlState,
-            serverUrl = serverUrl
         )
         BuildUpdateLogDialog(
             dialogState = showUpdateLogState
@@ -700,27 +662,6 @@ class SettingsActivity : BaseComposeActivity() {
     }
 
     @Composable
-    private fun BuildServerUrlInputDialog(
-        dialogState: MaterialDialogState,
-        serverUrl: String,
-    ) {
-        var input = serverUrl
-        MaterialDialog(
-            dialogState = dialogState,
-            buttons = {
-                positiveButton("确定") {
-                    viewModel.updateServerUrl(input)
-                }
-                negativeButton("取消")
-            }) {
-            title("请输入服务器地址")
-            input(label = "服务器地址", placeholder = serverUrl) { inputString ->
-                input = inputString
-            }
-        }
-    }
-
-    @Composable
     private fun BuildUpdateLogDialog(dialogState: MaterialDialogState) {
         if (!dialogState.showing) {
             return
@@ -778,7 +719,7 @@ class SettingsActivity : BaseComposeActivity() {
         val version by viewModel.version.collectAsState()
         val newVersion = version ?: return
         var show = newVersion.versionCode > appVersionCodeNumber
-        if (GlobalConfig.debugMode && GlobalConfig.alwaysShowNewVersion) {
+        if (GlobalConfigStore.debugMode && GlobalCacheStore.alwaysShowNewVersion) {
             show = true
         }
         if (!show) return "检查更新完成，当前暂无新版本".toast()

@@ -38,6 +38,17 @@ object UserStore {
     private val userMoshi = Moshi.Builder().registerAdapter().build().adapter(User::class.java)
     private val mutex = Mutex()
 
+    fun blockLoggedUserList(): List<User> {
+        val list = kv.decodeStringSet(LOGGED_USER_LIST) ?: emptySet()
+        if (list.isEmpty()) return emptyList()
+        return list.mapNotNull { studentId ->
+            val key = studentId.userMapKey()
+            val json = kv.decodeString(key) ?: return@mapNotNull null
+            val user = userMoshi.fromJson(json) ?: return@mapNotNull null
+            user
+        }
+    }
+
     suspend fun isLogin(): Boolean = getMainUser() != null
 
     suspend fun setMainUser(user: User) {

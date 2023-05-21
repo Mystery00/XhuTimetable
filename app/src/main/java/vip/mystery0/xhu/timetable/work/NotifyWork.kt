@@ -15,8 +15,7 @@ import androidx.work.WorkerParameters
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
-import vip.mystery0.xhu.timetable.config.chinaZone
-import vip.mystery0.xhu.timetable.config.getConfig
+import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.model.response.ExamItem
 import vip.mystery0.xhu.timetable.packageName
 import vip.mystery0.xhu.timetable.setTrigger
@@ -24,9 +23,9 @@ import vip.mystery0.xhu.timetable.ui.activity.ExamActivity
 import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_TOMORROW
 import vip.mystery0.xhu.timetable.ui.notification.NotificationId
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
+import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class NotifyWork(private val appContext: Context, workerParams: WorkerParameters) :
@@ -99,7 +98,7 @@ class NotifyWork(private val appContext: Context, workerParams: WorkerParameters
     }
 
     private suspend fun complete(): Result {
-        getConfig { notifyTime }?.let {
+        getConfigStore { notifyTime }?.let {
             setTrigger(workManager, it.atDate(LocalDate.now().plusDays(1)))
         }
         return Result.success()
@@ -132,10 +131,8 @@ class NotifyWork(private val appContext: Context, workerParams: WorkerParameters
                 courseItem.length,
                 0
             )
-            val startTime =
-                LocalDateTime.ofInstant(Instant.ofEpochMilli(it.startTime), chinaZone)
-            val endTime =
-                LocalDateTime.ofInstant(Instant.ofEpochMilli(it.endTime), chinaZone)
+            val startTime = Instant.ofEpochMilli(it.startTime).asLocalDateTime()
+            val endTime = Instant.ofEpochMilli(it.endTime).asLocalDateTime()
             val time =
                 "${timeFormatter.format(startTime)} - ${timeFormatter.format(endTime)}"
             courseItem.append(" 时间：$time 地点：${it.location}")

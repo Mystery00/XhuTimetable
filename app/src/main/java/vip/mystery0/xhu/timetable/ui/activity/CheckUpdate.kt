@@ -26,7 +26,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.appVersionCodeNumber
-import vip.mystery0.xhu.timetable.config.GlobalConfig
+import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
+import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.model.response.Version
 import vip.mystery0.xhu.timetable.utils.finishAllActivity
 import java.text.DecimalFormat
@@ -117,7 +118,7 @@ fun CheckUpdate(
     val downloadProgress by downloadStateFlow.collectAsState()
     val onCloseListener = {
         when {
-            GlobalConfig.debugMode && GlobalConfig.alwaysShowNewVersion -> {
+            GlobalConfigStore.debugMode && GlobalCacheStore.alwaysShowNewVersion -> {
                 dialogState = false
             }
             !version.forceUpdate -> {

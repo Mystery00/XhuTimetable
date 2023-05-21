@@ -4,8 +4,8 @@ import androidx.compose.ui.graphics.Color
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.module.registerAdapter
+import vip.mystery0.xhu.timetable.utils.asInstant
 import vip.mystery0.xhu.timetable.utils.toHexString
 import java.time.LocalDateTime
 
@@ -46,8 +46,8 @@ data class CustomThingRequest(
             title,
             location,
             allDay,
-            startTime.atZone(chinaZone).toInstant().toEpochMilli(),
-            endTime.atZone(chinaZone).toInstant().toEpochMilli(),
+            startTime.asInstant().toEpochMilli(),
+            endTime.asInstant().toEpochMilli(),
             remark,
             color.toHexString(),
             extraDataToJson(map),
