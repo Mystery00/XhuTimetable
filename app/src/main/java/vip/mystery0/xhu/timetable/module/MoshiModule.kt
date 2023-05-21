@@ -4,7 +4,9 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import java.lang.reflect.Type
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -17,6 +19,18 @@ fun Moshi.Builder.registerAdapter(): Moshi.Builder {
     addLast(KotlinJsonAdapterFactory())
     return this
 }
+
+inline fun <reified T : Any> moshiAdapter(): JsonAdapter<T> =
+    Moshi.Builder()
+        .registerAdapter()
+        .build()
+        .adapter(T::class.java)
+
+fun <T> moshiTypeAdapter(rawType: Type, vararg typeArguments: Type): JsonAdapter<T> =
+    Moshi.Builder()
+        .registerAdapter()
+        .build()
+        .adapter(Types.newParameterizedType(rawType, *typeArguments))
 
 class LocalDateAdapter : JsonAdapter<LocalDate>() {
     private val formatter = DateTimeFormatter.ISO_LOCAL_DATE

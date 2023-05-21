@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.inject
-import vip.mystery0.xhu.timetable.api.FeedbackApi
 import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.DataHolder
@@ -38,6 +37,7 @@ import vip.mystery0.xhu.timetable.model.transfer.AggregationView
 import vip.mystery0.xhu.timetable.module.Feature
 import vip.mystery0.xhu.timetable.repository.AggregationRepo
 import vip.mystery0.xhu.timetable.repository.CourseColorRepo
+import vip.mystery0.xhu.timetable.repository.FeedbackRepo
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
 import vip.mystery0.xhu.timetable.repository.WidgetRepo
 import vip.mystery0.xhu.timetable.trackError
@@ -66,8 +66,6 @@ class MainViewModel : ComposeViewModel() {
     }
 
     private val poemsApi: PoemsApi by inject()
-
-    private val feedbackApi: FeedbackApi by inject()
 
     private val workManager: WorkManager by inject()
 
@@ -650,19 +648,12 @@ class MainViewModel : ComposeViewModel() {
     }
 
     fun checkUnReadFeedback() {
-//        if (!isOnline()) {
-//            return
-//        }
-//        viewModelScope.launch(serverExceptionHandler { throwable ->
-//            Log.w(TAG, "check unread feedback failed", throwable)
-//        }) {
-//            if (UserStore.getMainUser() == null) return@launch
-//            val firstFeedbackMessageId = getConfig { firstFeedbackMessageId }
-//            val response = UserStore.mainUser().withAutoLogin {
-//                feedbackApi.checkMessage(it, firstFeedbackMessageId).checkLogin()
-//            }
-//            _hasUnReadFeedback.value = response.first.newResult
-//        }
+        viewModelScope.launch(networkErrorHandler {
+            Log.w(TAG, "check unread feedback failed", it)
+        }) {
+            if (!UserStore.isLogin()) return@launch
+            _hasUnReadFeedback.value = FeedbackRepo.checkUnReadFeedback()
+        }
     }
 
     fun downloadApk() {

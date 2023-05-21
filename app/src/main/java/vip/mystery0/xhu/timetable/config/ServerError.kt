@@ -7,7 +7,7 @@ import retrofit2.Response
 import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
 import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.module.NetworkNotConnectException
-import vip.mystery0.xhu.timetable.module.registerAdapter
+import vip.mystery0.xhu.timetable.module.moshiAdapter
 
 data class ErrorMessage(
     val code: Int,
@@ -16,8 +16,7 @@ data class ErrorMessage(
 
 class ServerError(override val message: String) : RuntimeException(message)
 
-private val errorMessageMoshi: JsonAdapter<ErrorMessage> =
-    Moshi.Builder().registerAdapter().build().adapter(ErrorMessage::class.java)
+private val errorMessageMoshi = moshiAdapter<ErrorMessage>()
 
 fun networkErrorHandler(handler: (Throwable) -> Unit): CoroutineExceptionHandler =
     CoroutineExceptionHandler { _, throwable ->

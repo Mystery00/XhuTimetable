@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
@@ -28,6 +30,8 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -57,8 +61,8 @@ import java.time.Instant
 
 class FeedbackActivity : BaseComposeActivity(), KoinComponent {
     private val viewModel: FeedbackViewModel by viewModels()
-    private val regex = Regex("!!!([\\d]+)!!!([a-zA-Z0-9]+)!!!")
 
+    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun BuildContent() {
         val loading by viewModel.loading.collectAsState()
@@ -97,6 +101,7 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                                 WebSocketStatus.CONNECTED, WebSocketStatus.CONNECTING -> LocalContentColor.current.copy(
                                     alpha = LocalContentAlpha.current
                                 )
+
                                 WebSocketStatus.DISCONNECTED, WebSocketStatus.FAILED -> Color.Unspecified
                             }
                             Icon(
@@ -109,79 +114,73 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                 )
             },
         ) { paddingValues ->
-            SwipeRefresh(
+            Box(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .fillMaxSize(),
-                state = rememberSwipeRefreshState(loading.loading),
-                onRefresh = { viewModel.loadLastMessage(10) },
+                    .fillMaxSize()
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                ) {
-                    LazyColumn(
-                        reverseLayout = true,
-                        contentPadding = WindowInsets.statusBars.add(WindowInsets(top = 90.dp))
-                            .asPaddingValues(),
-                        modifier = Modifier.weight(1F),
-                        state = lazyListState,
-                    ) {
-                        val messages = viewModel.messageState.messages
-                        for (index in messages.indices) {
-                            val msg = messages[index]
-                            val lastMsg = messages.getOrNull(index - 1)
-                            val nextMsg = messages.getOrNull(index + 1)
+                val pullRefreshState = rememberPullRefreshState(
+                    refreshing = loading.loading,
+                    onRefresh = { viewModel.loadLastMessage(10) },
+                )
+                Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        LazyColumn(
+                            reverseLayout = true,
+                            contentPadding = WindowInsets.statusBars.add(WindowInsets(top = 90.dp))
+                                .asPaddingValues(),
+                            modifier = Modifier.weight(1F),
+                            state = lazyListState,
+                        ) {
+                            val messages = viewModel.messageState.messages
+                            for (index in messages.indices) {
+                                val msg = messages[index]
+                                val lastMsg = messages.getOrNull(index - 1)
+                                val nextMsg = messages.getOrNull(index + 1)
 
-                            val isFirstMessage = lastMsg?.isMe != msg.isMe
-                            val isLastMessage = nextMsg?.isMe != msg.isMe
-                            val nextTime = nextMsg?.sendTime ?: Instant.ofEpochMilli(0L)
-                            val thisTime = msg.sendTime
-                            val nextDate = nextTime.atZone(Formatter.ZONE_CHINA).toLocalDate()
-                            val thisDate = thisTime.atZone(Formatter.ZONE_CHINA).toLocalDate()
+                                val isFirstMessage = lastMsg?.isMe != msg.isMe
+                                val isLastMessage = nextMsg?.isMe != msg.isMe
+                                val nextTime = nextMsg?.sendTime ?: Instant.ofEpochMilli(0L)
+                                val thisTime = msg.sendTime
+                                val nextDate = nextTime.atZone(Formatter.ZONE_CHINA).toLocalDate()
+                                val thisDate = thisTime.atZone(Formatter.ZONE_CHINA).toLocalDate()
 
-                            item {
-                                Message(
-                                    modifier = Modifier.fillParentMaxWidth(),
-                                    msg = msg,
-                                    isFirstMessage = isFirstMessage,
-                                    isLastMessage = isLastMessage,
-                                )
-                            }
-                            if (!nextDate.equals(thisDate)) {
                                 item {
-                                    DayHeader(dayString = thisDate.format(enDateFormatter))
-                                }
-                            } else if (Duration.between(nextTime, thisTime).toMinutes() > 5) {
-                                item {
-                                    DayHeader(
-                                        dayString = thisTime.atZone(Formatter.ZONE_CHINA)
-                                            .format(enTimeFormatter)
+                                    Message(
+                                        modifier = Modifier.fillParentMaxWidth(),
+                                        msg = msg,
+                                        isFirstMessage = isFirstMessage,
+                                        isLastMessage = isLastMessage,
                                     )
+                                }
+                                if (!nextDate.equals(thisDate)) {
+                                    item {
+                                        DayHeader(dayString = thisDate.format(enDateFormatter))
+                                    }
+                                } else if (Duration.between(nextTime, thisTime).toMinutes() > 5) {
+                                    item {
+                                        DayHeader(
+                                            dayString = thisTime.atZone(Formatter.ZONE_CHINA)
+                                                .format(enTimeFormatter)
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
-                    UserInput(
-                        onMessageSent = { content ->
-                            val result = regex.matchEntire(content)
-                            if (result != null) {
-                                val targetUserId = result.groupValues[1]
-                                val token = result.groupValues[2]
-                                viewModel.changeToken(token, targetUserId)
-                            } else {
+                        UserInput(
+                            onMessageSent = { content ->
                                 viewModel.sendMessage(content)
-                            }
-                        },
-                        resetScroll = {
-                            scope.launch {
-                                lazyListState.scrollToItem(0)
-                            }
-                        },
-                        modifier = Modifier
-                            .navigationBarsPadding()
-                            .imePadding(),
-                    )
+                            },
+                            resetScroll = {
+                                scope.launch {
+                                    lazyListState.scrollToItem(0)
+                                }
+                            },
+                            modifier = Modifier
+                                .navigationBarsPadding()
+                                .imePadding(),
+                        )
+                    }
                 }
             }
             if (loading.errorMessage.isNotBlank()) {

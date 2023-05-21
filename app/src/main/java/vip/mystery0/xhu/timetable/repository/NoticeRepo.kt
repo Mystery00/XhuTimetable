@@ -36,7 +36,9 @@ object NoticeRepo : BaseDataRepo {
     ).flow
 
     suspend fun checkNotice(): Boolean {
-        checkForceLoadFromCloud(true)
+        if (!isOnline) {
+            return false
+        }
 
         val lastNoticeId = getCacheStore { lastNoticeId }
         return mainUser().withAutoLoginOnce {

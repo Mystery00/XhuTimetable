@@ -2,7 +2,6 @@ package vip.mystery0.xhu.timetable.config.store
 
 import android.util.Log
 import android.widget.Toast
-import com.squareup.moshi.Moshi
 import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -15,7 +14,7 @@ import vip.mystery0.xhu.timetable.config.checkNeedLogin
 import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
 import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.model.UserInfo
-import vip.mystery0.xhu.timetable.module.registerAdapter
+import vip.mystery0.xhu.timetable.module.moshiAdapter
 import vip.mystery0.xhu.timetable.repository.doLogin
 import kotlin.random.Random
 import kotlin.system.exitProcess
@@ -35,7 +34,7 @@ object UserStore {
             return value
         }
     private val kv = MMKV.mmkvWithID("UserStore", MMKV.SINGLE_PROCESS_MODE, secret)
-    private val userMoshi = Moshi.Builder().registerAdapter().build().adapter(User::class.java)
+    private val userMoshi = moshiAdapter<User>()
     private val mutex = Mutex()
 
     fun blockLoggedUserList(): List<User> {
