@@ -31,8 +31,8 @@ import vip.mystery0.xhu.timetable.model.TodayCourseView
 import vip.mystery0.xhu.timetable.model.TodayThingView
 import vip.mystery0.xhu.timetable.model.WeekCourseView
 import vip.mystery0.xhu.timetable.model.format
+import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.model.response.Poems
-import vip.mystery0.xhu.timetable.model.response.Version
 import vip.mystery0.xhu.timetable.model.transfer.AggregationView
 import vip.mystery0.xhu.timetable.module.Feature
 import vip.mystery0.xhu.timetable.repository.AggregationRepo
@@ -674,7 +674,7 @@ class MainViewModel : ComposeViewModel() {
         }
     }
 
-    fun ignoreVersion(version: Version) {
+    fun ignoreVersion(version: ClientVersion) {
         viewModelScope.launch {
             val ignore = getCacheStore { ignoreVersionList }
             val list = ignore + "${version.versionName}-${version.versionCode}"

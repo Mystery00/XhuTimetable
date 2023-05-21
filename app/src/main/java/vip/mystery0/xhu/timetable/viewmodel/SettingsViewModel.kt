@@ -23,9 +23,9 @@ import vip.mystery0.xhu.timetable.contentResolver
 import vip.mystery0.xhu.timetable.externalDocumentsDir
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
+import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
-import vip.mystery0.xhu.timetable.model.response.Version
 import vip.mystery0.xhu.timetable.setAlarmTrigger
 import vip.mystery0.xhu.timetable.ui.theme.Theme
 import vip.mystery0.xhu.timetable.work.DownloadApkWork
@@ -63,7 +63,7 @@ class SettingsViewModel : ComposeViewModel() {
     private val _versionChannel = MutableStateFlow(VersionChannel.STABLE)
     val versionChannel: StateFlow<VersionChannel> = _versionChannel
 
-    val version = MutableStateFlow<Version?>(null)
+    val version = MutableStateFlow<ClientVersion?>(null)
 
     init {
         viewModelScope.launch {

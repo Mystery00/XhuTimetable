@@ -26,4 +26,7 @@ data class ClientVersion(
     val showPatch: Boolean,
     val forceUpdate: Boolean,
     val publishTime: Instant,
-)
+) {
+    val checkMd5: Boolean
+        get() = lastVersionCode != 0L
+}

@@ -22,8 +22,9 @@ import vip.mystery0.xhu.timetable.base.XhuCoroutineWorker
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.externalCacheDownloadDir
-import vip.mystery0.xhu.timetable.model.response.Version
+import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.packageName
+import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.ui.activity.DownloadUpdateState
 import vip.mystery0.xhu.timetable.ui.activity.addDownloadObserver
 import vip.mystery0.xhu.timetable.ui.activity.formatFileSize
@@ -45,7 +46,6 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
     }
 
     private val notificationManager: NotificationManager by inject()
-    private val serverApi: ServerApi by inject()
     private val fileApi: FileApi by inject()
 
     private var lastUpdateProgressTime = 0L
@@ -73,8 +73,10 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
             file
         }
         setForeground(getDownloadUrl(version))
+
         //获取下载地址
-        val versionUrl = serverApi.versionUrl(version.versionId, false)
+        val versionUrl = StartRepo.getVersionUrl(version.versionId)
+
         withContext(Dispatchers.IO) {
             val response =
                 fileApi.download(versionUrl.patchUrl, DownloadProgressInterceptor.buildTag(true))
@@ -152,7 +154,7 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
             .setAutoCancel(true)
             .setContentText(null)
 
-    private suspend fun startForeground(version: Version) =
+    private suspend fun startForeground(version: ClientVersion) =
         setForeground(
             ForegroundInfo(
                 NOTIFICATION_ID,
@@ -163,7 +165,7 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
             )
         )
 
-    private fun getDownloadUrl(version: Version): ForegroundInfo =
+    private fun getDownloadUrl(version: ClientVersion): ForegroundInfo =
         ForegroundInfo(
             NOTIFICATION_ID,
             notificationBuilder

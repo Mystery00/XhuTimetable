@@ -9,12 +9,6 @@ import vip.mystery0.xhu.timetable.model.request.*
 import vip.mystery0.xhu.timetable.model.response.*
 
 interface ServerApi {
-    @GET("/api/rest/xhu-timetable/common/version/url")
-    suspend fun versionUrl(
-        @Query("versionId") versionId: Long,
-        @Query("betaVersion") betaVersion: Boolean,
-    ): VersionUrl
-
     @GET("/api/rest/xhu-timetable/server/calendar")
     suspend fun getCalendarEventList(
         @Header("sessionToken") token: String,

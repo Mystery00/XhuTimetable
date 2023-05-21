@@ -16,14 +16,14 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.api.FileApi
-import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.base.DownloadError
 import vip.mystery0.xhu.timetable.base.XhuCoroutineWorker
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.externalCacheDownloadDir
-import vip.mystery0.xhu.timetable.model.response.Version
+import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.packageName
+import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.ui.activity.DownloadUpdateState
 import vip.mystery0.xhu.timetable.ui.activity.addDownloadObserver
 import vip.mystery0.xhu.timetable.ui.activity.formatFileSize
@@ -44,7 +44,6 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
     }
 
     private val notificationManager: NotificationManager by inject()
-    private val serverApi: ServerApi by inject()
     private val fileApi: FileApi by inject()
 
     private var lastUpdateProgressTime = 0L
@@ -72,8 +71,9 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
             file
         }
         setForeground(getDownloadUrl(version))
+
         //获取下载地址
-        val versionUrl = serverApi.versionUrl(version.versionId, version.beta)
+        val versionUrl = StartRepo.getVersionUrl(version.versionId)
 
         withContext(Dispatchers.IO) {
             val response =
@@ -91,7 +91,7 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
             file.md5()
         }
         updateStatus(status = "文件处理中", patch = false, progress = 100)
-        if (!version.beta && !md5.equals(versionUrl.apkMd5, ignoreCase = true)) {
+        if (version.checkMd5 && !md5.equals(versionUrl.apkMd5, ignoreCase = true)) {
             throw DownloadError.MD5CheckFailed()
         }
         //md5校验通过，安装应用
@@ -138,7 +138,7 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
             .setAutoCancel(true)
             .setContentText(null)
 
-    private suspend fun startForeground(version: Version) =
+    private suspend fun startForeground(version: ClientVersion) =
         setForeground(
             ForegroundInfo(
                 NOTIFICATION_ID,
@@ -149,7 +149,7 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
             )
         )
 
-    private fun getDownloadUrl(version: Version): ForegroundInfo =
+    private fun getDownloadUrl(version: ClientVersion): ForegroundInfo =
         ForegroundInfo(
             NOTIFICATION_ID,
             notificationBuilder
