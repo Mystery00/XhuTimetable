@@ -3,14 +3,12 @@ package vip.mystery0.xhu.timetable.ui.activity
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -46,11 +44,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemsIndexed
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
-import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.base.BasePageComposeActivity
 import vip.mystery0.xhu.timetable.model.response.ClassroomResponse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
@@ -62,7 +57,7 @@ import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
 
-class CourseRoomActivity : BaseComposeActivity() {
+class CourseRoomActivity : BasePageComposeActivity() {
     private val viewModel: CourseRoomViewModel by viewModels()
 
     @OptIn(ExperimentalMaterialApi::class)
@@ -196,44 +191,16 @@ class CourseRoomActivity : BaseComposeActivity() {
                     }
                 }
             }, frontLayerContent = {
-                SwipeRefresh(
-                    modifier = Modifier.fillMaxSize(),
-                    state = rememberSwipeRefreshState(isRefreshing = !viewModel.init && pager.loadState.refresh is LoadState.Loading),
-                    onRefresh = {
-                        pager.refresh()
-                    },
-                    swipeEnabled = false,
-                ) {
-                    if (pager.itemCount == 0) {
-                        BuildNoDataLayout()
-                        return@SwipeRefresh
-                    }
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(XhuColor.Common.grayBackground),
-                        contentPadding = PaddingValues(4.dp),
-                    ) {
-                        itemsIndexed(pager) { _, item ->
-                            item?.let {
-                                BuildItem(it)
-                            }
-                        }
-                        when (pager.loadState.append) {
-                            is LoadState.Loading -> {
-                                item { BuildPageFooter(text = "数据加载中，请稍后……") }
-                            }
-
-                            is LoadState.Error -> {
-                                item { BuildPageFooter(text = "数据加载失败，请重试") }
-                            }
-
-                            is LoadState.NotLoading -> {
-                                item { BuildPageFooter(text = "o(´^｀)o 再怎么滑也没有啦~") }
-                            }
+                BuildPaging(
+                    paddingValues = PaddingValues(4.dp),
+                    pager = pager,
+                    refreshing = !viewModel.init && pager.loadState.refresh is LoadState.Loading,
+                    itemContent = { item ->
+                        item?.let {
+                            BuildItem(it)
                         }
                     }
-                }
+                )
             })
         ShowAreaDialog(areaSelectStatus, areaDialog) {
             viewModel.changeArea(it.value)

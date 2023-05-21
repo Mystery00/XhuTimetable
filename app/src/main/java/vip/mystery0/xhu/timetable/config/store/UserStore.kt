@@ -48,6 +48,8 @@ object UserStore {
         }
     }
 
+    fun blockIsLogin(): Boolean = kv.decodeString(MAIN_USER) != null
+
     suspend fun isLogin(): Boolean = getMainUser() != null
 
     suspend fun setMainUser(user: User) {

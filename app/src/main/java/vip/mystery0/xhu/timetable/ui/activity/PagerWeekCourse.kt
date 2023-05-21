@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -43,10 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
-import com.google.accompanist.pager.rememberPagerState
 import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.WeekCourseView
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
@@ -245,8 +245,8 @@ private fun BuildTimeItem(time: Int, itemHeight: Dp) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalComposeUiApi
-@OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun BoxScope.ShowCourseDialog(
     dialogState: MutableState<List<WeekCourseView>>,
@@ -266,10 +266,9 @@ private fun BoxScope.ShowCourseDialog(
                 .align(Alignment.Center)
         ) {
             HorizontalPager(
-                count = showList.size,
+                pageCount = showList.size,
                 state = pagerState,
-                modifier = Modifier
-                    .height(240.dp),
+                modifier = Modifier.height(240.dp),
             ) { page ->
                 val course = showList[page]
                 Column(
@@ -339,9 +338,9 @@ private fun BoxScope.ShowCourseDialog(
                 }
             }
             HorizontalPagerIndicator(
+                pageCount = showList.size,
                 pagerState = pagerState,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally),
+                modifier = Modifier.align(Alignment.CenterHorizontally),
                 activeColor = Color.LightGray,
                 indicatorWidth = 8.dp,
                 indicatorHeight = 8.dp,

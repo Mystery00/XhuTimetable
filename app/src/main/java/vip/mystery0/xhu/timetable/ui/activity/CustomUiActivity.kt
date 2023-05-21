@@ -40,7 +40,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.alorma.compose.settings.ui.SettingsMenuLink
-import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.model.TitleTemplate
@@ -303,11 +302,11 @@ class CustomUiActivity : BaseComposeActivity() {
                 Text(text = "请输入模板内容")
             },
             text = {
-                Column {
+                Column(modifier = Modifier.padding(4.dp)) {
                     OutlinedTextField(value = valueState.value, onValueChange = {
                         valueState.value = it
                     })
-                    FlowRow {
+                    Row {
                         Text(text = "课程名称",
                             color = MaterialTheme.colors.primary,
                             modifier = Modifier

@@ -70,13 +70,14 @@ val todayCourseTitleBar: TabTitle = @Composable { ext ->
             .align(Alignment.CenterEnd)
     ) {
         if (loading) {
-            val infiniteTransition = rememberInfiniteTransition()
+            val infiniteTransition = rememberInfiniteTransition(label = "dataRefresh")
             val angle by infiniteTransition.animateFloat(
                 initialValue = 0F,
                 targetValue = 360F,
                 animationSpec = infiniteRepeatable(
                     animation = tween(1000, easing = LinearEasing)
-                )
+                ),
+                label = "dataRefresh"
             )
             IconButton(
                 onClick = { },

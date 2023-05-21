@@ -46,8 +46,10 @@ import com.zyao89.view.zloading.Z_TYPE
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
+import vip.mystery0.xhu.timetable.utils.finishAllActivity
 import vip.mystery0.xhu.timetable.viewmodel.LoginViewModel
 
 class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
@@ -243,11 +245,13 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                 "用户名不能为空".toast()
                 return false
             }
+
             password.isBlank() -> {
                 passwordFocusRequester.requestFocus()
                 "密码不能为空".toast()
                 return false
             }
+
             else -> viewModel.login(username, password)
         }
         return true
@@ -271,8 +275,8 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
 
     override fun onDestroy() {
         super.onDestroy()
-//        if (!SessionManager.isLogin()) {
-//            finishAllActivity()
-//        }
+        if (!UserStore.blockIsLogin()) {
+            finishAllActivity()
+        }
     }
 }
