@@ -17,7 +17,6 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.utils.asInstant
 import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import vip.mystery0.xhu.timetable.utils.enTimeFormatter
-import vip.mystery0.xhu.timetable.viewmodel.CourseSheet
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.Instant

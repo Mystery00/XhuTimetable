@@ -40,14 +40,13 @@ import com.zyao89.view.zloading.Z_TYPE
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.DataHolder
-import vip.mystery0.xhu.timetable.config.chinaZone
 import vip.mystery0.xhu.timetable.model.response.UrgeItem
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.UrgeViewModel
 import java.time.Instant
-import java.time.LocalDateTime
 
 class UrgeActivity : BaseComposeActivity() {
     private val viewModel: UrgeViewModel by viewModels()
@@ -208,10 +207,8 @@ private fun BuildItem(
                 }
                 Text(
                     text = "发布于 ${
-                        LocalDateTime.ofInstant(
-                            Instant.ofEpochMilli(urgeItem.createTime),
-                            chinaZone
-                        ).format(chinaDateTimeFormatter)
+                        Instant.ofEpochMilli(urgeItem.createTime).asLocalDateTime()
+                            .format(chinaDateTimeFormatter)
                     }",
                     fontSize = 12.sp,
                     modifier = Modifier
@@ -221,10 +218,8 @@ private fun BuildItem(
                 if (showDetail) {
                     Text(
                         text = "更新于 ${
-                            LocalDateTime.ofInstant(
-                                Instant.ofEpochMilli(urgeItem.updateTime),
-                                chinaZone
-                            ).format(chinaDateTimeFormatter)
+                            Instant.ofEpochMilli(urgeItem.updateTime).asLocalDateTime()
+                                .format(chinaDateTimeFormatter)
                         }",
                         fontSize = 12.sp,
                         modifier = Modifier

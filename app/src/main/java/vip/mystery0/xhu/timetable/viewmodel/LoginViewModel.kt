@@ -2,16 +2,17 @@ package vip.mystery0.xhu.timetable.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.UserApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.CoroutineStopException
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
-import vip.mystery0.xhu.timetable.config.runOnCpu
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.model.event.EventType
@@ -40,7 +41,7 @@ class LoginViewModel : ComposeViewModel() {
                 LoginState(errorMessage = throwable.message ?: throwable.javaClass.simpleName)
         }) {
             _loginState.value = LoginState(loading = true)
-            runOnCpu {
+            withContext(Dispatchers.Default) {
                 if (UserStore.getUserByStudentId(username) != null) {
                     //账号已登录，不允许二次登陆
                     throw CoroutineStopException("该用户已登录！")

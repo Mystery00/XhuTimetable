@@ -6,18 +6,19 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.CommonApi
-import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.startUniqueWork
-import vip.mystery0.xhu.timetable.config.getConfig
-import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
+import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.contentResolver
 import vip.mystery0.xhu.timetable.externalDocumentsDir
 import vip.mystery0.xhu.timetable.model.entity.NightMode
@@ -41,7 +42,6 @@ class SettingsViewModel : ComposeViewModel() {
 
     private val workManager: WorkManager by inject()
     private val alarmManager: AlarmManager by inject()
-    private val serverApi: ServerApi by inject()
     private val commonApi: CommonApi by inject()
 
     private val _errorMessage = MutableStateFlow("")
@@ -60,9 +60,6 @@ class SettingsViewModel : ComposeViewModel() {
     private val _splashList = MutableStateFlow<List<Splash>>(emptyList())
     val splashList: StateFlow<List<Splash>> = _splashList
 
-    private val _serverUrl = MutableStateFlow("")
-    val serverUrl: StateFlow<String> = _serverUrl
-
     private val _versionChannel = MutableStateFlow(VersionChannel.STABLE)
     val versionChannel: StateFlow<VersionChannel> = _versionChannel
 
@@ -70,12 +67,11 @@ class SettingsViewModel : ComposeViewModel() {
 
     init {
         viewModelScope.launch {
-            Theme.nightMode.value = getConfig { nightMode }
-            _notifyTimeData.value = getConfig { notifyTime }
-            debugMode.value = getConfig { debugMode }
+            Theme.nightMode.value = getConfigStore { nightMode }
+            _notifyTimeData.value = getConfigStore { notifyTime }
+            debugMode.value = getConfigStore { debugMode }
             _splashList.value = getCacheStore { splashList }
-            _serverUrl.value = getConfig { serverUrl }
-            _versionChannel.value = getConfig { versionChannel }
+            _versionChannel.value = getConfigStore { versionChannel }
             try {
                 _teamMemberData.value = commonApi.getTeamMemberList()
             } catch (e: Exception) {
@@ -86,19 +82,15 @@ class SettingsViewModel : ComposeViewModel() {
 
     fun updateNightMode(nightMode: NightMode) {
         viewModelScope.launch {
-            setConfig {
-                this.nightMode = nightMode
-            }
-            Theme.nightMode.value = getConfig { nightMode }
+            setConfigStore { this.nightMode = nightMode }
+            Theme.nightMode.value = getConfigStore { nightMode }
         }
     }
 
     fun updateNotifyTime(time: LocalTime?) {
         viewModelScope.launch {
-            setConfig {
-                notifyTime = time
-            }
-            _notifyTimeData.value = getConfig { notifyTime }
+            setConfigStore { notifyTime = time }
+            _notifyTimeData.value = getConfigStore { notifyTime }
             setAlarmTrigger(alarmManager)
 //            //取消旧的任务
 //            workManager.cancelUniqueWork(NotifyWork::class.java.name)
@@ -106,37 +98,23 @@ class SettingsViewModel : ComposeViewModel() {
         }
     }
 
-    fun updateServerUrl(url: String) {
-        if (url.isBlank()) {
-            return
-        }
-        viewModelScope.launch {
-            setConfig {
-                serverUrl = url
-            }
-            _serverUrl.value = getConfig { serverUrl }
-        }
-    }
-
     fun updateVersionChannel(versionChannel: VersionChannel) {
         viewModelScope.launch {
-            setConfig {
-                this.versionChannel = versionChannel
-            }
-            _versionChannel.value = getConfig { versionChannel }
+            setConfigStore { this.versionChannel = versionChannel }
+            _versionChannel.value = getConfigStore { versionChannel }
         }
     }
 
     fun enableDebugMode() {
         viewModelScope.launch {
-            setConfig { debugMode = true }
+            setConfigStore { debugMode = true }
             debugMode.value = true
         }
     }
 
     fun disableDebugMode() {
         viewModelScope.launch {
-            setConfig { debugMode = false }
+            setConfigStore { debugMode = false }
             debugMode.value = false
         }
     }
@@ -166,7 +144,7 @@ class SettingsViewModel : ComposeViewModel() {
     fun setCustomFont(uri: Uri?) {
         viewModelScope.launch {
             if (uri == null) {
-                setConfig { customFontFile = null }
+                setConfigStore { customFontFile = null }
                 return@launch
             }
             val fontFile = File(externalDocumentsDir, "custom.font")
@@ -175,7 +153,7 @@ class SettingsViewModel : ComposeViewModel() {
                     input?.copyTo(output)
                 }
             }
-            setConfig { customFontFile = fontFile }
+            setConfigStore { customFontFile = fontFile }
         }
     }
 
@@ -189,7 +167,9 @@ class SettingsViewModel : ComposeViewModel() {
 
     fun resetPoemsToken() {
         viewModelScope.launch {
-            PoemsStore.token = null
+            withContext(Dispatchers.IO) {
+                PoemsStore.token = null
+            }
         }
     }
 }

@@ -10,6 +10,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
@@ -19,7 +21,6 @@ import vip.mystery0.xhu.timetable.base.DownloadError
 import vip.mystery0.xhu.timetable.base.XhuCoroutineWorker
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
-import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.externalCacheDownloadDir
 import vip.mystery0.xhu.timetable.model.response.Version
 import vip.mystery0.xhu.timetable.packageName
@@ -60,18 +61,21 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
     override suspend fun doWork(): Result {
         val version = DataHolder.version ?: return Result.success()
         startForeground(version)
-        val dir = File(externalCacheDownloadDir, "patch")
-        if (!dir.exists()) {
-            dir.mkdirs()
-        }
-        val file = File(dir, "${version.versionName}-${version.versionCode}.patch")
-        if (file.exists()) {
-            file.delete()
+        val file = withContext(Dispatchers.IO) {
+            val dir = File(externalCacheDownloadDir, "patch")
+            if (!dir.exists()) {
+                dir.mkdirs()
+            }
+            val file = File(dir, "${version.versionName}-${version.versionCode}.patch")
+            if (file.exists()) {
+                file.delete()
+            }
+            file
         }
         setForeground(getDownloadUrl(version))
         //获取下载地址
         val versionUrl = serverApi.versionUrl(version.versionId, false)
-        val md5 = runOnIo {
+        withContext(Dispatchers.IO) {
             val response =
                 fileApi.download(versionUrl.patchUrl, DownloadProgressInterceptor.buildTag(true))
             Log.i(TAG, "save patch to ${file.absolutePath}")
@@ -80,8 +84,10 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
                     input.copyTo(output)
                 }
             }
-            //检查md5
-            setForeground(md5Checking())
+        }
+        setForeground(md5Checking())
+        //检查md5
+        val md5 = withContext(Dispatchers.Default) {
             file.md5()
         }
         updateStatus(status = "文件处理中", patch = true, progress = 100)

@@ -3,7 +3,7 @@ package vip.mystery0.xhu.timetable.model
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import vip.mystery0.xhu.timetable.appName
-import vip.mystery0.xhu.timetable.config.GlobalConfig
+import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import java.time.Instant
 
@@ -25,10 +25,10 @@ data class CalendarAccount(
     }
 
     val displayName: String
-        get() = "${studentName}(${GlobalConfig.currentYear}-${GlobalConfig.currentTerm})@$appName"
+        get() = "${studentName}(${GlobalConfigStore.nowYear}-${GlobalConfigStore.nowTerm})@$appName"
 
     fun generateAccountName(): String {
-        val name = "${studentId}(${GlobalConfig.currentYear}-${GlobalConfig.currentTerm})@$appName"
+        val name = "${studentId}(${GlobalConfigStore.nowYear}-${GlobalConfigStore.nowTerm})@$appName"
         accountName = name
         return name
     }

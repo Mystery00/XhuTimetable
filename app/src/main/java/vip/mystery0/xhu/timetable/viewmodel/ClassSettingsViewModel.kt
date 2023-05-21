@@ -1,17 +1,15 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.Customisable
-import vip.mystery0.xhu.timetable.config.chinaZone
-import vip.mystery0.xhu.timetable.config.getConfig
-import vip.mystery0.xhu.timetable.config.runOnCpu
-import vip.mystery0.xhu.timetable.config.setConfig
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
@@ -19,10 +17,8 @@ import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.Month
-import kotlin.math.max
 
 class ClassSettingsViewModel : ComposeViewModel() {
     private val eventBus: EventBus by inject()
@@ -48,27 +44,18 @@ class ClassSettingsViewModel : ComposeViewModel() {
 
     init {
         viewModelScope.launch {
-            _showTomorrowCourseTimeData.value = getConfig { showTomorrowCourseTime }
-            val customTermStartTime = getConfig { customTermStartTime }
-            _showCustomCourseData.value = getConfig { showCustomCourseOnWeek }
-            _showCustomThingData.value = getConfig { showCustomThing }
+            _showTomorrowCourseTimeData.value = getConfigStore { showTomorrowCourseTime }
+            _showCustomCourseData.value = getConfigStore { showCustomCourseOnWeek }
+            _showCustomThingData.value = getConfigStore { showCustomThing }
 
-            val loggedUserList = UserStore.loggedUserList()
-            _selectYearAndTermList.value = runOnCpu {
-                var startGrade = loggedUserList.minByOrNull { it.info.xhuGrade }?.info?.xhuGrade
-                var endGrade = loggedUserList.maxByOrNull { it.info.xhuGrade }?.info?.xhuGrade
-                if (startGrade == null) {
-                    startGrade = 2019
-                }
-                val startYear = startGrade.toInt()
-                val time = LocalDateTime.ofInstant(getConfig { termStartTime }, chinaZone)
-                val nowEndYear = if (time.month < Month.JUNE) time.year - 1 else time.year
-                if (endGrade == null) {
-                    endGrade = nowEndYear
-                }
-                val endYear = endGrade.toInt() + 3
+            _selectYearAndTermList.value = withContext(Dispatchers.Default) {
+                val loggedUserList = UserStore.loggedUserList()
+                val startYear =
+                    loggedUserList.minByOrNull { it.info.xhuGrade }?.info?.xhuGrade ?: 2019
+                val termStartDate = getConfigStore { termStartDate }
+                val endYear = if (termStartDate.month < Month.JUNE) termStartDate.year - 1 else termStartDate.year
                 val tempArrayList = ArrayList<String>()
-                for (it in startYear..max(nowEndYear, endYear)) {
+                for (it in startYear..endYear) {
                     tempArrayList.add("${it}-${it + 1}学年 第1学期")
                     tempArrayList.add("${it}-${it + 1}学年 第2学期")
                 }
@@ -81,10 +68,8 @@ class ClassSettingsViewModel : ComposeViewModel() {
 
     fun updateShowTomorrowCourseTime(time: LocalTime?) {
         viewModelScope.launch {
-            setConfig {
-                showTomorrowCourseTime = time
-            }
-            _showTomorrowCourseTimeData.value = getConfig { showTomorrowCourseTime }
+            setConfigStore { showTomorrowCourseTime = time }
+            _showTomorrowCourseTimeData.value = getConfigStore { showTomorrowCourseTime }
             eventBus.post(UIEvent(EventType.CHANGE_AUTO_SHOW_TOMORROW_COURSE))
         }
     }
@@ -116,20 +101,16 @@ class ClassSettingsViewModel : ComposeViewModel() {
 
     fun updateShowCustomCourse(showCustomCourseData: Boolean) {
         viewModelScope.launch {
-            setConfig {
-                showCustomCourseOnWeek = showCustomCourseData
-            }
-            _showCustomCourseData.value = getConfig { showCustomCourseOnWeek }
+            setConfigStore { showCustomCourseOnWeek = showCustomCourseData }
+            _showCustomCourseData.value = getConfigStore { showCustomCourseOnWeek }
             eventBus.post(UIEvent(EventType.CHANGE_SHOW_CUSTOM_COURSE))
         }
     }
 
     fun updateShowCustomThing(showCustomThingData: Boolean) {
         viewModelScope.launch {
-            setConfig {
-                showCustomThing = showCustomThingData
-            }
-            _showCustomThingData.value = getConfig { showCustomThing }
+            setConfigStore { showCustomThing = showCustomThingData }
+            _showCustomThingData.value = getConfigStore { showCustomThing }
             eventBus.post(UIEvent(EventType.CHANGE_SHOW_CUSTOM_THING))
         }
     }

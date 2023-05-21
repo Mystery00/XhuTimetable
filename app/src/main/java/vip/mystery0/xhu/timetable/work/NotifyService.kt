@@ -19,8 +19,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
-import vip.mystery0.xhu.timetable.config.chinaZone
-import vip.mystery0.xhu.timetable.config.getConfig
+import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.model.response.ExamItem
 import vip.mystery0.xhu.timetable.setAlarmTrigger
 import vip.mystery0.xhu.timetable.ui.activity.ExamActivity
@@ -28,9 +27,9 @@ import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_DEFAUL
 import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_TOMORROW
 import vip.mystery0.xhu.timetable.ui.notification.NotificationId
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
+import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class NotifyService : Service(), KoinComponent {
@@ -45,7 +44,8 @@ class NotifyService : Service(), KoinComponent {
     private val scope = CoroutineScope(job)
 
     private val notificationManager: NotificationManager by inject()
-//    private val courseLocalRepo: CourseRepo111 by localRepo()
+
+    //    private val courseLocalRepo: CourseRepo111 by localRepo()
     private val alarmManager: AlarmManager by inject()
     private val colorAccent = android.graphics.Color.parseColor("#2196F3")
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
@@ -108,7 +108,7 @@ class NotifyService : Service(), KoinComponent {
     }
 
     private suspend fun complete() {
-        getConfig { notifyTime }?.let {
+        getConfigStore { notifyTime }?.let {
             setAlarmTrigger(alarmManager, it.atDate(LocalDate.now().plusDays(1)))
         }
     }
@@ -140,10 +140,8 @@ class NotifyService : Service(), KoinComponent {
                 courseItem.length,
                 0
             )
-            val startTime =
-                LocalDateTime.ofInstant(Instant.ofEpochMilli(it.startTime), chinaZone)
-            val endTime =
-                LocalDateTime.ofInstant(Instant.ofEpochMilli(it.endTime), chinaZone)
+            val startTime = Instant.ofEpochMilli(it.startTime).asLocalDateTime()
+            val endTime = Instant.ofEpochMilli(it.endTime).asLocalDateTime()
             val time =
                 "${timeFormatter.format(startTime)} - ${timeFormatter.format(endTime)}"
             courseItem.append(" 时间：$time 地点：${it.location}")

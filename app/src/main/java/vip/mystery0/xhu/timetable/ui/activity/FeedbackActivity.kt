@@ -42,7 +42,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
-import vip.mystery0.xhu.timetable.config.chinaZone
+import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.model.response.Message
 import vip.mystery0.xhu.timetable.ui.activity.feedback.SymbolAnnotationType
 import vip.mystery0.xhu.timetable.ui.activity.feedback.UserInput
@@ -137,8 +137,8 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                             val isLastMessage = nextMsg?.isMe != msg.isMe
                             val nextTime = nextMsg?.sendTime ?: Instant.ofEpochMilli(0L)
                             val thisTime = msg.sendTime
-                            val nextDate = nextTime.atZone(chinaZone).toLocalDate()
-                            val thisDate = thisTime.atZone(chinaZone).toLocalDate()
+                            val nextDate = nextTime.atZone(Formatter.ZONE_CHINA).toLocalDate()
+                            val thisDate = thisTime.atZone(Formatter.ZONE_CHINA).toLocalDate()
 
                             item {
                                 Message(
@@ -155,7 +155,7 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                             } else if (Duration.between(nextTime, thisTime).toMinutes() > 5) {
                                 item {
                                     DayHeader(
-                                        dayString = thisTime.atZone(chinaZone)
+                                        dayString = thisTime.atZone(Formatter.ZONE_CHINA)
                                             .format(enTimeFormatter)
                                     )
                                 }

@@ -4,18 +4,23 @@ import com.squareup.moshi.Moshi
 import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import vip.mystery0.xhu.timetable.BuildConfig
 import vip.mystery0.xhu.timetable.config.Customisable
 import vip.mystery0.xhu.timetable.model.CustomUi
+import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.module.registerAdapter
-import java.time.Instant
+import java.io.File
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 object Formatter {
-    val DATE = DateTimeFormatter.ISO_LOCAL_DATE
-    val TIME = DateTimeFormatter.ISO_LOCAL_TIME
+    val ZONE_CHINA: ZoneId = ZoneId.of("Asia/Shanghai")
+
+    val DATE: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
+    val TIME: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_TIME
 }
 
 private val instance = ConfigStore()
@@ -123,17 +128,6 @@ class ConfigStore internal constructor() {
             return Customisable(2, false)
         }
 
-    //结束隐藏启动页的时间
-    private val hideSplashBeforeKey = "hideSplashBefore"
-    var hideSplashBefore: Instant
-        set(value) {
-            kv.encode(hideSplashBeforeKey, value.toEpochMilli())
-        }
-        get() {
-            val time = kv.decodeLong(hideSplashBeforeKey, 0L)
-            return Instant.ofEpochMilli(time)
-        }
-
     //在周课表中显示自定义课程
     private val showCustomCourseOnWeekKey = "showCustomCourseOnWeek"
     var showCustomCourseOnWeek: Boolean
@@ -212,5 +206,104 @@ class ConfigStore internal constructor() {
         get() {
             val save = kv.decodeInt(versionChannelKey, VersionChannel.STABLE.value)
             return VersionChannel.parse(save)
+        }
+
+    //夜间模式禁用背景图
+    private val disableBackgroundWhenNightKey = "disableBackgroundWhenNight"
+    var disableBackgroundWhenNight: Boolean
+        set(value) {
+            kv.encode(disableBackgroundWhenNightKey, value)
+        }
+        get() = kv.decodeBool(disableBackgroundWhenNightKey, true)
+
+    //课程提醒开关
+    private val notifyCourseKey = "notifyCourse"
+    var notifyCourse: Boolean
+        set(value) {
+            kv.encode(notifyCourseKey, value)
+        }
+        get() = kv.decodeBool(notifyCourseKey, true)
+
+    //考试提醒开关
+    private val notifyExamKey = "notifyExam"
+    var notifyExam: Boolean
+        set(value) {
+            kv.encode(notifyExamKey, value)
+        }
+        get() = kv.decodeBool(notifyExamKey, true)
+
+    //提醒时间
+    private val notifyTimeKey = "notifyTime"
+    var notifyTime: LocalTime?
+        set(value) {
+            if (value == null) {
+                kv.remove(notifyTimeKey)
+                return
+            }
+            kv.encode(notifyTimeKey, value.format(Formatter.TIME))
+        }
+        get() {
+            val date = kv.decodeString(notifyTimeKey)
+            if (date.isNullOrBlank()) {
+                return null
+            }
+            return LocalTime.parse(date, Formatter.TIME)
+        }
+
+    //发送错误报告
+    private val allowSendCrashReportKey = "allowSendCrashReport"
+    var allowSendCrashReport: Boolean
+        set(value) {
+            kv.encode(allowSendCrashReportKey, value)
+        }
+        get() = kv.decodeBool(allowSendCrashReportKey, !BuildConfig.DEBUG)
+
+    //夜间模式
+    private val nightModeKey = "nightMode"
+    var nightMode: NightMode
+        set(value) {
+            kv.encode(nightModeKey, value.value)
+        }
+        get() {
+            val value = kv.decodeInt(nightModeKey, NightMode.AUTO.value)
+            return NightMode.values().first { it.value == value }
+        }
+
+    //开发者模式
+    private val debugModeKey = "debugMode"
+    var debugMode: Boolean
+        set(value) {
+            kv.encode(debugModeKey, value)
+        }
+        get() = kv.decodeBool(debugModeKey, false)
+
+    //自定义课表背景图
+    private val backgroundImageKey = "backgroundImage"
+    var backgroundImage: File?
+        set(value) {
+            if (value != null) {
+                kv.encode(backgroundImageKey, value.absolutePath)
+            } else {
+                kv.remove(backgroundImageKey)
+            }
+        }
+        get() {
+            val image = kv.decodeString(backgroundImageKey)
+            return if (image.isNullOrBlank()) null else File(image)
+        }
+
+    //自定义字体文件
+    private val customFontFileKey = "customFontFile"
+    var customFontFile: File?
+        set(value) {
+            kv.encode(customFontFileKey, value?.absolutePath)
+        }
+        get() {
+            val save = kv.getString(customFontFileKey, null) ?: return null
+            val file = File(save)
+            if (!file.exists()) {
+                return null
+            }
+            return file
         }
 }

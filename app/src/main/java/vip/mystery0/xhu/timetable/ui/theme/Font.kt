@@ -1,18 +1,15 @@
 package vip.mystery0.xhu.timetable.ui.theme
 
-import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import vip.mystery0.xhu.timetable.config.GlobalConfig
+import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 
 object XhuFonts {
     val DEFAULT: FontFamily = custom ?: FontFamily.Default
 
-
-    @OptIn(ExperimentalTextApi::class)
     val custom: FontFamily?
         get() {
-            val fontFile = GlobalConfig.customFontFile ?: return null
+            val fontFile = GlobalConfigStore.customFontFile ?: return null
             return FontFamily(Font(fontFile))
         }
 }

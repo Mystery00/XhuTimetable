@@ -27,9 +27,10 @@ import com.microsoft.appcenter.crashes.ingestion.models.ErrorAttachmentLog
 import com.microsoft.appcenter.crashes.model.ErrorReport
 import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
-import vip.mystery0.xhu.timetable.config.GlobalConfig
-import vip.mystery0.xhu.timetable.config.chinaZone
-import vip.mystery0.xhu.timetable.config.getConfig
+import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
+import vip.mystery0.xhu.timetable.config.store.UserStore
+import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.utils.asInstant
 import vip.mystery0.xhu.timetable.work.NotifyService
 import vip.mystery0.xhu.timetable.work.NotifyWork
 import java.io.File
@@ -37,7 +38,6 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
-
 
 @SuppressLint("StaticFieldLeak")
 internal lateinit var context: Context
@@ -135,19 +135,18 @@ fun BaseComposeActivity.loadInBrowser(url: String) {
 }
 
 fun registerAppCenter(application: Application) {
-    if (GlobalConfig.allowSendCrashReport) {
+    if (GlobalConfigStore.allowSendCrashReport) {
         if (BuildConfig.DEBUG) {
             AppCenter.setLogLevel(Log.VERBOSE)
         }
         Crashes.setListener(object : AbstractCrashesListener() {
             override fun getErrorAttachments(report: ErrorReport): MutableIterable<ErrorAttachmentLog> {
                 try {
-                    val loggedUserList = GlobalConfig.userList
+                    val loggedUserList = UserStore.blockLoggedUserList()
                     val list = loggedUserList.map {
                         mapOf(
                             "studentId" to it.studentId,
                             "token" to it.token,
-                            "main" to it.main,
                         )
                     }
                     val attachment = ErrorAttachmentLog.attachmentWithText(
@@ -172,13 +171,13 @@ fun registerAppCenter(application: Application) {
 }
 
 fun trackEvent(event: String) {
-    if (AppCenter.isConfigured() && GlobalConfig.allowSendCrashReport) {
+    if (AppCenter.isConfigured() && GlobalConfigStore.allowSendCrashReport) {
         Analytics.trackEvent(event)
     }
 }
 
 fun trackError(error: Throwable) {
-    if (AppCenter.isConfigured() && GlobalConfig.allowSendCrashReport) {
+    if (AppCenter.isConfigured() && GlobalConfigStore.allowSendCrashReport) {
         Crashes.trackError(error)
     }
 }
@@ -199,8 +198,8 @@ suspend fun setAlarmTrigger(
     alarmManager: AlarmManager,
     executeTime: LocalDateTime? = null,
 ) {
-    val notifyCourse = getConfig { notifyCourse }
-    val notifyExam = getConfig { notifyExam }
+    val notifyCourse = getConfigStore { notifyCourse }
+    val notifyExam = getConfigStore { notifyExam }
     if (!notifyCourse && !notifyExam) {
         return
     }
@@ -216,7 +215,7 @@ suspend fun setAlarmTrigger(
 
     val now = LocalDateTime.now()
     val nextExecuteTime = if (executeTime == null) {
-        val notifyTime = getConfig { notifyTime } ?: return
+        val notifyTime = getConfigStore { notifyTime } ?: return
         var time = notifyTime.atDate(LocalDate.now())
         if (time.isBefore(now)) {
             //当天计算出来的时间比当前时间早，那么调度时间改成明天
@@ -230,15 +229,15 @@ suspend fun setAlarmTrigger(
     alarmManager.cancel(pendingIntent)
     alarmManager.set(
         AlarmManager.RTC_WAKEUP,
-        nextExecuteTime.atZone(chinaZone).toInstant().toEpochMilli(),
+        nextExecuteTime.asInstant().toEpochMilli(),
         pendingIntent
     )
     Log.i("ApplicationExt", "set alarm trigger success, next execute time: $nextExecuteTime")
 }
 
 suspend fun setTrigger(workManager: WorkManager, executeTime: LocalDateTime? = null) {
-    val notifyCourse = getConfig { notifyCourse }
-    val notifyExam = getConfig { notifyExam }
+    val notifyCourse = getConfigStore { notifyCourse }
+    val notifyExam = getConfigStore { notifyExam }
     if (!notifyCourse && !notifyExam) {
         return
     }
@@ -249,7 +248,7 @@ suspend fun setTrigger(workManager: WorkManager, executeTime: LocalDateTime? = n
 
     val now = LocalDateTime.now()
     val nextExecuteTime = if (executeTime == null) {
-        val notifyTime = getConfig { notifyTime } ?: return
+        val notifyTime = getConfigStore { notifyTime } ?: return
         var time = notifyTime.atDate(LocalDate.now())
         if (time.isBefore(now)) {
             //当天计算出来的时间比当前时间早，那么调度时间改成明天

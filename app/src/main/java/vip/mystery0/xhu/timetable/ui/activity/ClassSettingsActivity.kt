@@ -31,8 +31,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.Customisable
-import vip.mystery0.xhu.timetable.config.GlobalConfig
-import vip.mystery0.xhu.timetable.config.setConfig
+import vip.mystery0.xhu.timetable.config.store.ConfigStore
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
@@ -90,7 +89,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                     Text(text = "显示设置")
                 }) {
                     ConfigSettingsCheckbox(
-                        config = GlobalConfig::showNotThisWeek,
+                        config = ConfigStore::showNotThisWeek,
                         scope = scope,
                         icon = {
                             Icon(
@@ -99,14 +98,12 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                                 tint = XhuColor.Common.blackText,
                             )
                         },
-                        title = { Text(text = "显示非本周课程") },
-                        onCheckedChange = {
-                            setConfig { showNotThisWeek = it }
-                            eventBus.post(UIEvent(EventType.CHANGE_SHOW_NOT_THIS_WEEK))
-                        }
-                    )
+                        title = { Text(text = "显示非本周课程") }
+                    ) {
+                        eventBus.post(UIEvent(EventType.CHANGE_SHOW_NOT_THIS_WEEK))
+                    }
                     ConfigSettingsCheckbox(
-                        config = GlobalConfig::showStatus,
+                        config = ConfigStore::showStatus,
                         scope = scope,
                         icon = {
                             Icon(
@@ -115,12 +112,10 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                                 tint = XhuColor.Common.blackText,
                             )
                         },
-                        title = { Text(text = "显示今日课程状态") },
-                        onCheckedChange = {
-                            setConfig { showStatus = it }
-                            eventBus.post(UIEvent(EventType.CHANGE_SHOW_STATUS))
-                        }
-                    )
+                        title = { Text(text = "显示今日课程状态") }
+                    ) {
+                        eventBus.post(UIEvent(EventType.CHANGE_SHOW_STATUS))
+                    }
                     SettingsMenuLink(
                         title = { Text(text = "自动显示明日课程") },
                         subtitle = {
@@ -213,21 +208,6 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                         title = { Text(text = "自定义课程颜色") },
                         onClick = {
                             intentTo(CustomCourseColorActivity::class)
-                        }
-                    )
-                }
-                XhuSettingsGroup(title = {
-                    Text(text = "云端设置")
-                }) {
-                    ConfigSettingsCheckbox(
-                        config = GlobalConfig::autoCacheJwcCourse,
-                        scope = scope,
-                        title = { Text(text = "云端自动缓存课程数据") },
-                        subtitle = {
-                            Text(text = "由云端控制课程数据的缓存，在一定程度上，可以提高APP打开后数据刷新的效率")
-                        },
-                        onCheckedChange = {
-                            setConfig { autoCacheJwcCourse = it }
                         }
                     )
                 }

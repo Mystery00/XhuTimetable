@@ -3,19 +3,20 @@ package vip.mystery0.xhu.timetable.viewmodel
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.api.checkLogin
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.UserSelect
-import vip.mystery0.xhu.timetable.config.getConfig
 import vip.mystery0.xhu.timetable.config.runOnCpu
-import vip.mystery0.xhu.timetable.config.runOnIo
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLogin
+import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.model.CalendarAccount
 import vip.mystery0.xhu.timetable.model.CalendarAttender
@@ -58,7 +59,7 @@ class ExportCalendarViewModel : ComposeViewModel() {
             )
         }) {
             _calendarAccountListState.value = CalendarAccountListState(loading = true)
-            val accountList = runOnIo {
+            val accountList = withContext(Dispatchers.IO) {
                 CalendarRepo.getAllCalendarAccount()
             }
             _calendarAccountListState.value = CalendarAccountListState(list = accountList)
@@ -83,12 +84,12 @@ class ExportCalendarViewModel : ComposeViewModel() {
             _actionState.value = ActionState(loading = true)
             val selected = runOnCpu { _userSelect.value.first { it.selected }.studentId }
             val selectUser = UserStore.userByStudentId(selected)
-            val year = getConfig { currentYear }
-            val term = getConfig { currentTerm }
+            val year = getConfigStore { nowYear }
+            val term = getConfigStore { nowTerm }
             val eventList = selectUser.withAutoLogin {
                 serverApi.getCalendarEventList(
                     it,
-                    year,
+                    "year",
                     term,
                     includeCustomCourse,
                     includeCustomThing,
@@ -100,7 +101,7 @@ class ExportCalendarViewModel : ComposeViewModel() {
             if (accountId != null) {
                 CalendarRepo.deleteAllEvent(accountId)
             }
-            runOnIo {
+            withContext(Dispatchers.IO) {
                 eventList.forEach { response ->
                     val event = CalendarEvent(
                         response.title,
