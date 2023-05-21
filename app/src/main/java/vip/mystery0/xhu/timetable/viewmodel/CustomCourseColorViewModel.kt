@@ -45,7 +45,7 @@ class CustomCourseColorViewModel : ComposeViewModel(), KoinComponent {
                 CourseColorRepo.updateCourseColor(courseName, null)
             }
             loadList("")
-            eventBus.post(UIEvent(EventType.CHANGE_TERM_START_TIME))
+            eventBus.post(UIEvent(EventType.CHANGE_COURSE_COLOR))
         }
     }
 }
