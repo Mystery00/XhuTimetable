@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.model.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.LocalTime
 
 @Entity(tableName = "tb_course")
 data class CourseEntity(
@@ -17,6 +18,10 @@ data class CourseEntity(
     val startDayTime: Int,
     //结束节次
     val endDayTime: Int,
+    //开始上课时间
+    val startTime: String,
+    //结束上课时间
+    var endTime: String,
     //上课地点
     val location: String,
     //教师姓名

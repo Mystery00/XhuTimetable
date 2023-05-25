@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.trackEvent
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
@@ -386,14 +387,14 @@ private fun DrawCourseCard(
                             .size(16.dp),
                     )
                     Text(
-                        text = course.timeText.first,
+                        text = course.timeText.first.format(Formatter.TIME_NO_SECONDS),
                         fontSize = 12.sp,
                         modifier = Modifier
                             .padding(vertical = 1.dp),
                         textAlign = TextAlign.Center,
                     )
                     Text(
-                        text = course.timeText.second,
+                        text = course.timeText.second.format(Formatter.TIME_NO_SECONDS),
                         fontSize = 12.sp,
                         modifier = Modifier
                             .padding(vertical = 1.dp),

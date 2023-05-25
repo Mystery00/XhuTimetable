@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.Gender
 import vip.mystery0.xhu.timetable.model.UserInfo
@@ -28,6 +29,7 @@ import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import java.time.DayOfWeek
 import java.time.Instant
+import java.time.LocalTime
 import kotlin.random.Random
 
 object AggregationLocalRepo : KoinComponent {
@@ -82,6 +84,8 @@ object AggregationLocalRepo : KoinComponent {
                     dayIndex = it.dayIndex,
                     startDayTime = it.startDayTime,
                     endDayTime = it.endDayTime,
+                    startTime = LocalTime.parse(it.startTime, Formatter.TIME_NO_SECONDS),
+                    endTime = LocalTime.parse(it.endTime, Formatter.TIME_NO_SECONDS),
                     location = it.location,
                     teacher = it.teacher,
                     extraData = it.extraData,
@@ -124,6 +128,8 @@ object AggregationLocalRepo : KoinComponent {
                     dayIndex = it.dayIndex,
                     startDayTime = it.startDayTime,
                     endDayTime = it.endDayTime,
+                    startTime = LocalTime.parse(it.startTime, Formatter.TIME_NO_SECONDS),
+                    endTime = LocalTime.parse(it.endTime, Formatter.TIME_NO_SECONDS),
                     region = it.region,
                     location = it.location,
                 )
@@ -144,6 +150,8 @@ object AggregationLocalRepo : KoinComponent {
                         dayIndex = it.dayIndex,
                         startDayTime = it.startDayTime,
                         endDayTime = it.endDayTime,
+                        startTime = LocalTime.parse(it.startTime, Formatter.TIME_NO_SECONDS),
+                        endTime = LocalTime.parse(it.endTime, Formatter.TIME_NO_SECONDS),
                         location = it.location,
                         teacher = it.teacher,
                         extraData = it.extraData,
@@ -219,6 +227,8 @@ object AggregationLocalRepo : KoinComponent {
                 dayIndex = it.dayIndex,
                 startDayTime = it.startDayTime,
                 endDayTime = it.endDayTime,
+                startTime = it.startTime.format(Formatter.TIME_NO_SECONDS),
+                endTime = it.endTime.format(Formatter.TIME_NO_SECONDS),
                 location = it.location,
                 teacher = it.teacher,
                 extraData = it.extraData,
@@ -262,6 +272,8 @@ object AggregationLocalRepo : KoinComponent {
                 dayIndex = it.dayIndex,
                 startDayTime = it.startDayTime,
                 endDayTime = it.endDayTime,
+                startTime = it.startTime.format(Formatter.TIME_NO_SECONDS),
+                endTime = it.endTime.format(Formatter.TIME_NO_SECONDS),
                 region = it.region,
                 location = it.location,
                 year = year,
@@ -281,6 +293,8 @@ object AggregationLocalRepo : KoinComponent {
                 dayIndex = it.dayIndex,
                 startDayTime = it.startDayTime,
                 endDayTime = it.endDayTime,
+                startTime = it.startTime.format(Formatter.TIME_NO_SECONDS),
+                endTime = it.endTime.format(Formatter.TIME_NO_SECONDS),
                 location = it.location,
                 teacher = it.teacher,
                 extraData = it.extraData,
@@ -327,6 +341,8 @@ object AggregationLocalRepo : KoinComponent {
                     dayIndex = DayOfWeek.MONDAY.value,
                     startDayTime = 1,
                     endDayTime = 1,
+                    startTime = "08:00",
+                    endTime = "09:00",
                     location = "西华大学本部6A421",
                     teacher = "西瓜课表团队",
                     extraData = listOf("QQ群：1234567890"),
@@ -357,6 +373,8 @@ object AggregationLocalRepo : KoinComponent {
                 day = DayOfWeek.of(it.dayIndex),
                 startDayTime = it.startDayTime,
                 endDayTime = it.endDayTime,
+                startTime = LocalTime.parse(it.startTime, Formatter.TIME_NO_SECONDS),
+                endTime = LocalTime.parse(it.endTime, Formatter.TIME_NO_SECONDS),
                 courseDayTime = "",
                 courseTime = "",
                 location = it.location,

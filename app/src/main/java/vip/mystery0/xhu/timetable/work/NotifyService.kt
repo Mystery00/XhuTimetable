@@ -19,7 +19,9 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
+import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.model.response.ExamItem
 import vip.mystery0.xhu.timetable.setAlarmTrigger
 import vip.mystery0.xhu.timetable.ui.activity.ExamActivity
@@ -45,12 +47,19 @@ class NotifyService : Service(), KoinComponent {
 
     private val notificationManager: NotificationManager by inject()
 
-    //    private val courseLocalRepo: CourseRepo111 by localRepo()
     private val alarmManager: AlarmManager by inject()
     private val colorAccent = android.graphics.Color.parseColor("#2196F3")
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     private suspend fun doWork() {
+        setCacheStore { notifyWorkLastExecuteTime = Instant.now() }
+        runCatching {
+            val nowYear = getConfigStore { nowYear }
+            val nowTerm = getConfigStore { nowTerm }
+            val mainUser = UserStore.getMainUser() ?: return@runCatching
+            val tomorrow = LocalDate.now().plusDays(1)
+
+        }
 //        setConfig { notifyWorkLastExecuteTime = Instant.now() }
 //        try {
 //            val currentYear = getConfig { currentYear }

@@ -263,6 +263,7 @@ class MainViewModel : ComposeViewModel() {
         val showCustomThing = getConfigStore { showCustomThing }
         val view = AggregationRepo.fetchAggregationMainPage(
             forceLoadFromCloud,
+            false,
             showCustomCourse,
             showCustomThing,
         )
@@ -444,7 +445,7 @@ class MainViewModel : ComposeViewModel() {
                     TreeSet<Int>().apply {
                         addAll(it.startDayTime..it.endDayTime)
                     },
-                    it.courseTime,
+                    it.startTime to it.endTime,
                     it.courseDayTime,
                     it.location,
                     it.user.studentId,
@@ -724,13 +725,11 @@ data class CourseSheet(
     }
 }
 
-private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-
 data class TodayCourseSheet(
     val courseName: String,
     val teacherName: String,
     val timeSet: TreeSet<Int>,
-    val timeText: Pair<String, String>,
+    val timeText: Pair<LocalTime, LocalTime>,
     val timeString: String,
     val location: String,
     val studentId: String,
@@ -741,8 +740,8 @@ data class TodayCourseSheet(
     lateinit var courseStatus: CourseStatus
 
     fun calc(now: LocalDateTime): TodayCourseSheet {
-        val startTime = LocalTime.parse(timeText.first, timeFormatter).atDate(showDate)
-        val endTime = LocalTime.parse(timeText.second, timeFormatter).atDate(showDate)
+        val startTime = timeText.first.atDate(showDate)
+        val endTime = timeText.second.atDate(showDate)
         courseStatus = when {
             now.isBefore(startTime) -> CourseStatus.BEFORE
             now.isAfter(endTime) -> CourseStatus.AFTER

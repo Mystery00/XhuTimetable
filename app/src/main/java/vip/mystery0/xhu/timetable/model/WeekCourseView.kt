@@ -1,12 +1,14 @@
 package vip.mystery0.xhu.timetable.model
 
 import androidx.compose.ui.graphics.Color
+import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.response.Course
 import vip.mystery0.xhu.timetable.model.response.CustomCourseResponse
 import vip.mystery0.xhu.timetable.model.response.ExperimentCourse
 import vip.mystery0.xhu.timetable.utils.sha512
 import java.time.DayOfWeek
+import java.time.LocalTime
 
 data class WeekCourseView(
     //课程名称
@@ -21,6 +23,10 @@ data class WeekCourseView(
     val startDayTime: Int,
     //结束节次
     val endDayTime: Int,
+    //开始上课时间
+    val startTime: LocalTime,
+    //结束上课时间
+    var endTime: LocalTime,
     //上课节次
     val courseDayTime: String,
     //上课时间
@@ -73,8 +79,11 @@ data class WeekCourseView(
             } else {
                 "${course.startDayTime}-${course.endDayTime}节"
             }
-            val courseTime =
-                "${courseTimeStartArray[course.startDayTime - 1]} - ${courseTimeEndArray[course.endDayTime - 1]}"
+            val courseTime = buildString {
+                append(course.startTime.format(Formatter.TIME_NO_SECONDS))
+                append(" - ")
+                append(course.endTime.format(Formatter.TIME_NO_SECONDS))
+            }
             return WeekCourseView(
                 courseName = course.courseName,
                 weekStr = course.weekStr,
@@ -82,6 +91,8 @@ data class WeekCourseView(
                 day = course.day,
                 startDayTime = course.startDayTime,
                 endDayTime = course.endDayTime,
+                startTime = course.startTime,
+                endTime = course.endTime,
                 courseDayTime = courseDayTime,
                 courseTime = courseTime,
                 location = course.location,
@@ -97,8 +108,11 @@ data class WeekCourseView(
             } else {
                 "${experimentCourse.startDayTime}-${experimentCourse.endDayTime}节"
             }
-            val courseTime =
-                "${courseTimeStartArray[experimentCourse.startDayTime - 1]} - ${courseTimeEndArray[experimentCourse.endDayTime - 1]}"
+            val courseTime = buildString {
+                append(experimentCourse.startTime.format(Formatter.TIME_NO_SECONDS))
+                append(" - ")
+                append(experimentCourse.endTime.format(Formatter.TIME_NO_SECONDS))
+            }
             val extraData = if (experimentCourse.experimentGroupName.isNotBlank()) {
                 listOf("实验分组：${experimentCourse.experimentGroupName}")
             } else {
@@ -111,6 +125,8 @@ data class WeekCourseView(
                 day = experimentCourse.day,
                 startDayTime = experimentCourse.startDayTime,
                 endDayTime = experimentCourse.endDayTime,
+                startTime = experimentCourse.startTime,
+                endTime = experimentCourse.endTime,
                 courseDayTime = courseDayTime,
                 courseTime = courseTime,
                 location = experimentCourse.location,
@@ -126,8 +142,11 @@ data class WeekCourseView(
             } else {
                 "${course.startDayTime}-${course.endDayTime}节"
             }
-            val courseTime =
-                "${courseTimeStartArray[course.startDayTime - 1]} - ${courseTimeEndArray[course.endDayTime - 1]}"
+            val courseTime = buildString {
+                append(course.startTime.format(Formatter.TIME_NO_SECONDS))
+                append(" - ")
+                append(course.endTime.format(Formatter.TIME_NO_SECONDS))
+            }
             return WeekCourseView(
                 courseName = course.courseName,
                 weekStr = course.weekStr,
@@ -135,6 +154,8 @@ data class WeekCourseView(
                 day = course.day,
                 startDayTime = course.startDayTime,
                 endDayTime = course.endDayTime,
+                startTime = course.startTime,
+                endTime = course.endTime,
                 courseDayTime = courseDayTime,
                 courseTime = courseTime,
                 location = course.location,

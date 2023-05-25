@@ -23,6 +23,10 @@ data class ExperimentCourseEntity(
     val startDayTime: Int,
     //结束节次
     val endDayTime: Int,
+    //开始上课时间
+    val startTime: String,
+    //结束上课时间
+    var endTime: String,
     //校区
     val region: String,
     //？上课地点

@@ -68,7 +68,12 @@ object WidgetRepo {
         val showCustomCourse = getConfigStore { showCustomCourseOnWeek }
         val showCustomThing = getConfigStore { showCustomThing }
         val view =
-            AggregationRepo.fetchAggregationMainPage(false, showCustomCourse, showCustomThing)
+            AggregationRepo.fetchAggregationMainPage(
+                forceLoadFromCloud = false,
+                forceLoadFromLocal = true,
+                showCustomCourse,
+                showCustomThing,
+            )
 
         //获取自定义颜色列表
         val colorMap = CourseColorRepo.getRawCourseColorList()
@@ -133,20 +138,18 @@ object WidgetRepo {
         //最后按照开始节次排序
         resultList.map {
             it.updateTime()
-            val timeText = it.courseTime
-            val startTime =
-                LocalTime.parse(timeText.first, Formatter.TIME_NO_SECONDS).atDate(showDate).asInstant()
+            val startTime = it.startTime.atDate(showDate).asInstant()
             WidgetTodayItem(
                 it.courseName,
                 listOf(
-                    timeText.first,
-                    timeText.second,
+                    it.startTime.format(Formatter.TIME_NO_SECONDS),
+                    it.endTime.format(Formatter.TIME_NO_SECONDS),
                 ),
                 it.location,
                 it.backgroundColor,
                 startTime.toEpochMilli(),
             )
-        }
+        }.sortedBy { it.startTime }
     }
 
     private suspend fun loadTodayThingList(list: List<TodayThingView>): List<WidgetTodayItem> =
@@ -185,7 +188,12 @@ object WidgetRepo {
     suspend fun getWeekList(currentWeek: Int): List<List<WidgetWeekItem>> {
         val showCustomCourse = getConfigStore { showCustomCourseOnWeek }
         //周课表页面不显示自定义事项
-        val view = AggregationRepo.fetchAggregationMainPage(false, showCustomCourse, false)
+        val view = AggregationRepo.fetchAggregationMainPage(
+            forceLoadFromCloud = false,
+            forceLoadFromLocal = true,
+            showCustomCourse,
+            false,
+        )
 
         //获取自定义颜色列表
         val colorMap = CourseColorRepo.getRawCourseColorList()

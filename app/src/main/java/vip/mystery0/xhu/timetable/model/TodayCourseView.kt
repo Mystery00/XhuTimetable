@@ -7,6 +7,7 @@ import vip.mystery0.xhu.timetable.model.response.CustomCourseResponse
 import vip.mystery0.xhu.timetable.model.response.ExperimentCourse
 import vip.mystery0.xhu.timetable.utils.sha512
 import java.time.DayOfWeek
+import java.time.LocalTime
 
 data class TodayCourseView(
     //课程名称
@@ -19,6 +20,10 @@ data class TodayCourseView(
     val startDayTime: Int,
     //结束节次
     var endDayTime: Int,
+    //开始上课时间
+    val startTime: LocalTime,
+    //结束上课时间
+    var endTime: LocalTime,
     //上课地点
     val location: String,
     //教师姓名
@@ -28,9 +33,6 @@ data class TodayCourseView(
 ) {
     //上课节次
     var courseDayTime: String = ""
-
-    //上课时间
-    var courseTime: Pair<String, String> = Pair("", "")
 
     //课程颜色
     var backgroundColor = Color.Transparent
@@ -58,10 +60,6 @@ data class TodayCourseView(
         } else {
             "${startDayTime}-${endDayTime}节"
         }
-        courseTime = Pair(
-            courseTimeStartArray[startDayTime - 1],
-            courseTimeEndArray[endDayTime - 1]
-        )
     }
 
     companion object {
@@ -72,6 +70,8 @@ data class TodayCourseView(
                 day = course.day,
                 startDayTime = course.startDayTime,
                 endDayTime = course.endDayTime,
+                startTime = course.startTime,
+                endTime = course.endTime,
                 location = course.location,
                 teacher = course.teacher,
                 user = user,
@@ -85,6 +85,8 @@ data class TodayCourseView(
                 day = experimentCourse.day,
                 startDayTime = experimentCourse.startDayTime,
                 endDayTime = experimentCourse.endDayTime,
+                startTime = experimentCourse.startTime,
+                endTime = experimentCourse.endTime,
                 location = experimentCourse.location,
                 teacher = experimentCourse.teacherName,
                 user = user,
@@ -98,6 +100,8 @@ data class TodayCourseView(
                 day = customCourseResponse.day,
                 startDayTime = customCourseResponse.startDayTime,
                 endDayTime = customCourseResponse.endDayTime,
+                startTime = customCourseResponse.startTime,
+                endTime = customCourseResponse.endTime,
                 location = customCourseResponse.location,
                 teacher = customCourseResponse.teacher,
                 user = user,
