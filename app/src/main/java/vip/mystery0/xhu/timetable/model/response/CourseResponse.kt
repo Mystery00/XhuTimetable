@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable.model.response
 
 import java.time.DayOfWeek
+import java.time.LocalTime
 
 
 data class CourseResponse(
@@ -27,6 +28,10 @@ data class Course(
     val startDayTime: Int,
     //结束节次
     val endDayTime: Int,
+    //开始上课时间
+    val startTime: LocalTime,
+    //结束上课时间
+    val endTime: LocalTime,
     //上课地点
     val location: String,
     //教师姓名
@@ -83,6 +88,10 @@ data class ExperimentCourse(
     val startDayTime: Int,
     //结束节次
     val endDayTime: Int,
+    //开始上课时间
+    val startTime: LocalTime,
+    //结束上课时间
+    val endTime: LocalTime,
     //校区
     val region: String,
     //？上课地点

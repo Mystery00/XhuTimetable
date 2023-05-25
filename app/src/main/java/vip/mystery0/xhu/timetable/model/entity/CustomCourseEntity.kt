@@ -12,6 +12,10 @@ data class CustomCourseEntity(
     val dayIndex: Int,
     val startDayTime: Int,
     val endDayTime: Int,
+    //开始上课时间
+    val startTime: String,
+    //结束上课时间
+    var endTime: String,
     val location: String,
     val teacher: String,
     val extraData: List<String>,

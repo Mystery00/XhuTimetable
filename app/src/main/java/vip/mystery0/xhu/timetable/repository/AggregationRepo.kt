@@ -18,6 +18,7 @@ object AggregationRepo : BaseDataRepo {
 
     suspend fun fetchAggregationMainPage(
         forceLoadFromCloud: Boolean,
+        forceLoadFromLocal: Boolean,
         showCustomCourse: Boolean,
         showCustomThing: Boolean,
     ): AggregationView {
@@ -31,7 +32,12 @@ object AggregationRepo : BaseDataRepo {
         val weekViewList = ArrayList<WeekCourseView>()
         val todayThingList = ArrayList<TodayThingView>()
 
-        if (isOnline) {
+        val loadFromCloud = when {
+            forceLoadFromCloud -> true
+            forceLoadFromLocal -> false
+            else -> isOnline
+        }
+        if (loadFromCloud) {
             withContext(Dispatchers.Default) {
                 userList.forEach { user ->
                     val response = user.withAutoLoginOnce {

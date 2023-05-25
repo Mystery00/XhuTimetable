@@ -3,6 +3,7 @@ package vip.mystery0.xhu.timetable.model.response
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 
 data class CustomCourseResponse(
     val courseId: Long,
@@ -13,27 +14,14 @@ data class CustomCourseResponse(
     val dayIndex: Int,
     val startDayTime: Int,
     val endDayTime: Int,
+    val startTime: LocalTime,
+    val endTime: LocalTime,
     val location: String,
     val teacher: String,
     val extraData: List<String>,
     val createTime: Instant,
 ) {
     companion object {
-        val PLACEHOLDER = CustomCourseResponse(
-            0L,
-            "课程名称",
-            "第1周",
-            listOf(1),
-            DayOfWeek.MONDAY,
-            1,
-            1,
-            1,
-            "上课地点",
-            "教师名称",
-            emptyList(),
-            Instant.now(),
-        )
-
         fun init(): CustomCourseResponse {
             val day = LocalDate.now().dayOfWeek
             return CustomCourseResponse(
@@ -45,6 +33,8 @@ data class CustomCourseResponse(
                 day.value,
                 1,
                 1,
+                LocalTime.now(),
+                LocalTime.now(),
                 "",
                 "",
                 emptyList(),
