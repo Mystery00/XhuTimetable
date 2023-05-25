@@ -16,7 +16,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.api.FileApi
-import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.base.DownloadError
 import vip.mystery0.xhu.timetable.base.XhuCoroutineWorker
 import vip.mystery0.xhu.timetable.config.DataHolder

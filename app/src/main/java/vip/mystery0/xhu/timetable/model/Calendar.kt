@@ -18,17 +18,21 @@ data class CalendarAccount(
     var color: Color,
 ) {
     companion object {
-        val EMPTY = CalendarAccount("", "", "", 0L, 0, Color.White)
-
         fun byAccount(studentId: String, studentName: String): CalendarAccount =
             CalendarAccount("", studentId, studentName, -1L, 0, ColorPool.random)
     }
 
     val displayName: String
-        get() = "${studentName}(${GlobalConfigStore.nowYear}-${GlobalConfigStore.nowTerm})@$appName"
+        get() {
+            val nowYear = GlobalConfigStore.nowYear
+            val nowTerm = GlobalConfigStore.nowTerm
+            return "${studentName}(${nowYear}-${nowYear + 1}-${nowTerm})@$appName"
+        }
 
     fun generateAccountName(): String {
-        val name = "${studentId}(${GlobalConfigStore.nowYear}-${GlobalConfigStore.nowTerm})@$appName"
+        val nowYear = GlobalConfigStore.nowYear
+        val nowTerm = GlobalConfigStore.nowTerm
+        val name = "${studentId}(${nowYear}-${nowYear + 1}-${nowTerm})@$appName"
         accountName = name
         return name
     }
@@ -49,17 +53,17 @@ data class CalendarAccount(
 }
 
 data class CalendarAttender(
-    var name: String,
+    val name: String,
 )
 
 data class CalendarEvent(
-    var title: String,
-    var startTime: Instant,
-    var endTime: Instant,
-    var location: String,
-    var description: String,
-    var allDay: Boolean,
+    val title: String,
+    val startTime: Instant,
+    val endTime: Instant,
+    val location: String,
+    val description: String,
+    val allDay: Boolean,
 ) {
-    var attenderList = ArrayList<CalendarAttender>()
-    var reminder = ArrayList<Int>()
+    val attenderList = ArrayList<CalendarAttender>()
+    val reminder = ArrayList<Int>()
 }

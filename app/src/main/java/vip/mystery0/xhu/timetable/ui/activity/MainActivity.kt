@@ -94,9 +94,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
-import vip.mystery0.xhu.timetable.api.ServerApi
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.appVersionCodeNumber
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
@@ -115,7 +113,6 @@ import kotlin.math.min
 
 @OptIn(ExperimentalMaterialApi::class)
 class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEventBus = true) {
-    private val serverApi: ServerApi by inject()
     private val viewModel: MainViewModel by viewModels()
     private lateinit var modalBottomSheetState: ModalBottomSheetState
     private lateinit var addDialogState: MaterialDialogState
@@ -604,22 +601,6 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                 ) {}
             }
             Spacer(Modifier.padding(bottom = 2.dp))
-        }
-    }
-
-    suspend fun serverDetect() {
-        kotlin.runCatching {
-            val response = serverApi.serverDetect()
-            if (response.isSuccessful) {
-                detectContent = response.body()!!.joinToString("\n") {
-                    "${it.title}: ${if (it.health) "正常" else "异常"}"
-                }
-                detectDialogState.show()
-            } else {
-                toastString("服务器不可用，请联系开发者", true)
-            }
-        }.onFailure {
-            toastString("服务器不可用，请联系开发者", true)
         }
     }
 

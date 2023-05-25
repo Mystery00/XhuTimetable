@@ -38,6 +38,8 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -56,8 +58,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.zyao89.view.zloading.Z_TYPE
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.appName
@@ -280,34 +280,38 @@ class ExportCalendarActivity : BaseComposeActivity() {
                     }) {
                     if (calendarPermissionState.allPermissionsGranted) {
                         val calendarAccountListState by viewModel.calendarAccountListState.collectAsState()
-                        SwipeRefresh(
+                        Box(
                             modifier = Modifier
                                 .padding(paddingValues)
                                 .fillMaxSize(),
-                            state = rememberSwipeRefreshState(calendarAccountListState.loading),
-                            onRefresh = { viewModel.loadCalendarAccountList() },
                         ) {
-                            val list = calendarAccountListState.list
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(XhuColor.Common.grayBackground),
-                                contentPadding = PaddingValues(4.dp),
-                            ) {
-                                if (calendarAccountListState.loading) {
-                                    scope.launch {
-                                        showSheet.hide()
-                                    }
-                                } else {
-                                    items(list.size) { index ->
-                                        BuildItem(item = list[index], onClick = {
-                                            viewModel.deleteCalendarAccount(it.accountId)
-                                        })
+                            val pullRefreshState = rememberPullRefreshState(
+                                refreshing = calendarAccountListState.loading,
+                                onRefresh = { viewModel.loadCalendarAccountList() },
+                            )
+                            Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+                                val list = calendarAccountListState.list
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(XhuColor.Common.grayBackground),
+                                    contentPadding = PaddingValues(4.dp),
+                                ) {
+                                    if (calendarAccountListState.loading) {
+                                        scope.launch {
+                                            showSheet.hide()
+                                        }
+                                    } else {
+                                        items(list.size) { index ->
+                                            BuildItem(item = list[index], onClick = {
+                                                viewModel.deleteCalendarAccount(it.accountId)
+                                            })
+                                        }
                                     }
                                 }
-                            }
-                            if (list.isEmpty()) {
-                                BuildNoDataLayout()
+                                if (list.isEmpty()) {
+                                    BuildNoDataLayout()
+                                }
                             }
                         }
                         FloatingActionButton(modifier = Modifier

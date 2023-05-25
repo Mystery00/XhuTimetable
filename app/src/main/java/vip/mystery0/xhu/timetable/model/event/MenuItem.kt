@@ -87,10 +87,7 @@ enum class MenuItem(
     ),
     SERVER_DETECT(
         { XhuIcons.Profile.serverDetect },
-        {
-            toastString("正在检查服务器可用性...", false)
-            serverDetect()
-        },
+        { toCustomTabs(it.link) },
     ),
     EMPTY(
         { XhuIcons.Profile.unknownMenu },
