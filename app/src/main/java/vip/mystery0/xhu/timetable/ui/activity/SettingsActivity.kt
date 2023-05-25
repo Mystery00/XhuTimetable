@@ -55,8 +55,7 @@ import vip.mystery0.xhu.timetable.ui.preference.XhuFoldSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
-import vip.mystery0.xhu.timetable.utils.asLocalDateTime
-import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
+import vip.mystery0.xhu.timetable.utils.formatChinaDateTime
 import vip.mystery0.xhu.timetable.utils.timeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.SettingsViewModel
 import java.time.LocalDate
@@ -577,8 +576,7 @@ class SettingsActivity : BaseComposeActivity() {
                             title = { Text(text = "NotifyWork 上一次执行时间") },
                             subtitle = {
                                 Text(
-                                    text = GlobalCacheStore.notifyWorkLastExecuteTime.asLocalDateTime()
-                                        .format(chinaDateTimeFormatter)
+                                    text = GlobalCacheStore.notifyWorkLastExecuteTime.formatChinaDateTime()
                                 )
                             },
                             onClick = {

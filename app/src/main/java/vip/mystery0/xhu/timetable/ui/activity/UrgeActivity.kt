@@ -2,16 +2,12 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.viewModels
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
@@ -34,26 +30,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.zyao89.view.zloading.Z_TYPE
 import vip.mystery0.xhu.timetable.appName
-import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.base.BasePageComposeActivity
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.model.response.UrgeItem
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
-import vip.mystery0.xhu.timetable.utils.asLocalDateTime
-import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
+import vip.mystery0.xhu.timetable.utils.formatChinaDateTime
 import vip.mystery0.xhu.timetable.viewmodel.UrgeViewModel
-import java.time.Instant
 
-class UrgeActivity : BaseComposeActivity() {
+class UrgeActivity : BasePageComposeActivity() {
     private val viewModel: UrgeViewModel by viewModels()
 
     @Composable
     override fun BuildContent() {
-        val urgeListState by viewModel.urgeListState.collectAsState()
+        val pager = viewModel.pageState.collectAsLazyPagingItems()
+
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -73,46 +67,36 @@ class UrgeActivity : BaseComposeActivity() {
                 )
             },
         ) { paddingValues ->
-            SwipeRefresh(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
-                state = rememberSwipeRefreshState(urgeListState.loading),
-                onRefresh = { viewModel.loadUrgeList() },
-            ) {
-                Column {
-                    BuildTopDesc(remainCount = urgeListState.remainCount)
-                    val list = urgeListState.urgeList
-                    var expandItemIndex by remember { mutableStateOf(-1) }
-                    if (urgeListState.loading || list.isNotEmpty()) {
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(XhuColor.Common.grayBackground),
-                            contentPadding = PaddingValues(4.dp),
-                        ) {
-                            if (list.isNotEmpty()) {
-                                items(list.size) { index ->
-                                    BuildItem(
-                                        urgeItem = list[index],
-                                        expandItemIndex == index,
-                                        onClick = {
-                                            expandItemIndex =
-                                                if (expandItemIndex != index) index else -1
-                                        }) {
-                                        viewModel.urge(it.urgeId)
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        BuildNoDataLayout()
+            val refreshing by viewModel.refreshing.collectAsState()
+            val remainCount by viewModel.remainCount.collectAsState()
+            var expandItemIndex by remember { mutableStateOf(-1) }
+            BuildPaging(
+                paddingValues = paddingValues,
+                pager = pager,
+                refreshing = refreshing,
+                listContent = {
+                    item {
+                        BuildTopDesc(remainCount = remainCount)
                     }
-                }
-            }
+                    items(pager.itemCount) { index ->
+                        val item = pager[index] ?: return@items
+                        BuildItem(
+                            urgeItem = item,
+                            expandItemIndex == index,
+                            onClick = {
+                                expandItemIndex =
+                                    if (expandItemIndex != index) index else -1
+                            }) {
+                            viewModel.urge(it.urgeId)
+                        }
+                    }
+                },
+            )
         }
-        if (urgeListState.errorMessage.isNotBlank()) {
-            urgeListState.errorMessage.toast(true)
+
+        val errorMessage by viewModel.errorMessage.collectAsState()
+        if (errorMessage.second.isNotBlank()) {
+            errorMessage.second.toast(true)
         }
         val urgeLoading by viewModel.urgeLoading.collectAsState()
         ShowProgressDialog(
@@ -206,10 +190,7 @@ private fun BuildItem(
                     )
                 }
                 Text(
-                    text = "发布于 ${
-                        Instant.ofEpochMilli(urgeItem.createTime).asLocalDateTime()
-                            .format(chinaDateTimeFormatter)
-                    }",
+                    text = "发布于 ${urgeItem.createTime.formatChinaDateTime()}",
                     fontSize = 12.sp,
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -217,10 +198,7 @@ private fun BuildItem(
                 )
                 if (showDetail) {
                     Text(
-                        text = "更新于 ${
-                            Instant.ofEpochMilli(urgeItem.updateTime).asLocalDateTime()
-                                .format(chinaDateTimeFormatter)
-                        }",
+                        text = "更新于 ${urgeItem.updateTime.formatChinaDateTime()}",
                         fontSize = 12.sp,
                         modifier = Modifier
                             .fillMaxWidth(),

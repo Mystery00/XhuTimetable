@@ -21,6 +21,8 @@ object Formatter {
 
     val DATE: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
     val TIME: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_TIME
+    val TIME_NO_SECONDS: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+    val DATE_TIME: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 }
 
 private val instance = ConfigStore()

@@ -9,34 +9,17 @@ import vip.mystery0.xhu.timetable.model.request.*
 import vip.mystery0.xhu.timetable.model.response.*
 
 interface ServerApi {
-    @GET("/api/rest/xhu-timetable/server/calendar")
+    @GET("/api/rest/external/calendar/export")
     suspend fun getCalendarEventList(
         @Header("sessionToken") token: String,
-        @Query("year") year: String,
+        @Query("year") year: Int,
         @Query("term") term: Int,
         @Query("includeCustomCourse") includeCustomCourse: Boolean,
         @Query("includeCustomThing") includeCustomThing: Boolean,
     ): Response<List<CalendarEventResponse>>
 
-    @GET("/api/rest/xhu-timetable/server/urge")
-    suspend fun getUrgeList(
-        @Header("sessionToken") token: String,
-    ): Response<UrgeResponse>
-
-    @PUT("/api/rest/xhu-timetable/server/urge")
-    suspend fun urge(
-        @Header("sessionToken") token: String,
-        @Query("urgeId") urgeId: Long,
-    ): Response<Unit>
-
     @GET("/api/rest/xhu-timetable/health/detect")
     suspend fun serverDetect(): Response<List<DetectResponse>>
-
-    @POST("/api/rest/xhu-timetable/server/academicReport")
-    suspend fun getAcademicReportList(
-        @Header("sessionToken") token: String,
-        @Body keywords: AcademicReportRequest,
-    ): Response<List<AcademicReportResponse>>
 }
 
 fun <T : Any> Response<T>.checkLogin(): T {

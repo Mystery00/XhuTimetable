@@ -89,7 +89,7 @@ class ExportCalendarViewModel : ComposeViewModel() {
             val eventList = selectUser.withAutoLogin {
                 serverApi.getCalendarEventList(
                     it,
-                    "year",
+                    year,
                     term,
                     includeCustomCourse,
                     includeCustomThing,

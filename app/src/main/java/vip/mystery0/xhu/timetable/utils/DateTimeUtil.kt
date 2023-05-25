@@ -9,15 +9,13 @@ import java.util.TreeSet
 fun LocalDateTime.asInstant(): Instant = atZone(Formatter.ZONE_CHINA).toInstant()
 fun Instant.asLocalDateTime(): LocalDateTime = LocalDateTime.ofInstant(this, Formatter.ZONE_CHINA)
 
-val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-val dateFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日")
-val dateWithWeekFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日")
-val timeFormatter = DateTimeFormatter.ofPattern("HH时mm分")
-val chinaDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH时mm分ss秒")
-val thingDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH:mm")
+fun Instant.formatChinaDateTime(): String = asLocalDateTime().formatChinaDateTime()
+fun LocalDateTime.formatChinaDateTime(): String =
+    format(DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH时mm分ss秒"))
 
-val enDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-val enTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日")
+val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH时mm分")
+val thingDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH:mm")
 
 fun List<Int>.formatWeekString(): String {
     if (isNullOrEmpty()) return ""

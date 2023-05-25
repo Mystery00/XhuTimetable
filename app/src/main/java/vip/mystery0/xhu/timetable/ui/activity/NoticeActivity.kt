@@ -36,8 +36,7 @@ import vip.mystery0.xhu.timetable.model.response.NoticeResponse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuFonts
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
-import vip.mystery0.xhu.timetable.utils.asLocalDateTime
-import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
+import vip.mystery0.xhu.timetable.utils.formatChinaDateTime
 import vip.mystery0.xhu.timetable.viewmodel.NoticeViewModel
 
 class NoticeActivity : BasePageComposeActivity() {
@@ -102,9 +101,7 @@ class NoticeActivity : BasePageComposeActivity() {
                     text = notice.content,
                 )
                 Text(
-                    text = "发布于 ${
-                        notice.createTime.asLocalDateTime().format(chinaDateTimeFormatter)
-                    }",
+                    text = "发布于 ${notice.createTime.formatChinaDateTime()}",
                     fontSize = 12.sp,
                     modifier = Modifier
                         .fillMaxWidth(),

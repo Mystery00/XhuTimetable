@@ -50,8 +50,6 @@ import vip.mystery0.xhu.timetable.ui.activity.feedback.SymbolAnnotationType
 import vip.mystery0.xhu.timetable.ui.activity.feedback.UserInput
 import vip.mystery0.xhu.timetable.ui.activity.feedback.messageFormatter
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
-import vip.mystery0.xhu.timetable.utils.enDateFormatter
-import vip.mystery0.xhu.timetable.utils.enTimeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.FeedbackViewModel
 import vip.mystery0.xhu.timetable.viewmodel.WebSocketStatus
 import java.time.Duration
@@ -153,13 +151,12 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                                 }
                                 if (!nextDate.equals(thisDate)) {
                                     item {
-                                        DayHeader(dayString = thisDate.format(enDateFormatter))
+                                        DayHeader(dayString = thisDate.format(Formatter.DATE))
                                     }
                                 } else if (Duration.between(nextTime, thisTime).toMinutes() > 5) {
                                     item {
                                         DayHeader(
-                                            dayString = thisTime.atZone(Formatter.ZONE_CHINA)
-                                                .format(enTimeFormatter)
+                                            dayString = thisTime.atZone(Formatter.ZONE_CHINA).format(Formatter.TIME_NO_SECONDS)
                                         )
                                     }
                                 }

@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import vip.mystery0.xhu.timetable.config.store.Menu
 import vip.mystery0.xhu.timetable.toCustomTabs
-import vip.mystery0.xhu.timetable.ui.activity.AcademicReportActivity
 import vip.mystery0.xhu.timetable.ui.activity.AccountSettingsActivity
 import vip.mystery0.xhu.timetable.ui.activity.ClassSettingsActivity
 import vip.mystery0.xhu.timetable.ui.activity.CourseRoomActivity
@@ -40,7 +39,13 @@ enum class MenuItem(
     ),
     ACADEMIC_REPORT(
         { XhuIcons.Profile.academicReport },
-        { intentTo(AcademicReportActivity::class) },
+        { menu ->
+            if (menu.hint.isNotBlank()) {
+                toastString(menu.hint, true)
+            } else {
+                toastString("当前版本暂不支持该功能，请更新到最新版本", true)
+            }
+        },
     ),
     ACCOUNT_MANAGE(
         { XhuIcons.Profile.accountSettings },

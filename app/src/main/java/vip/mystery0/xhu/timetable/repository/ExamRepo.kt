@@ -11,12 +11,12 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.ExamApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.base.buildPageSource
+import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.model.response.ExamResponse
 import vip.mystery0.xhu.timetable.module.betweenDays
-import vip.mystery0.xhu.timetable.utils.enTimeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.Exam
 import vip.mystery0.xhu.timetable.viewmodel.ExamStatus
 import java.time.Duration
@@ -72,9 +72,9 @@ object ExamRepo : BaseDataRepo {
             else -> ExamStatus.IN
         }
         val time = buildString {
-            append(enTimeFormatter.format(response.examStartTime))
+            append(response.examStartTime.format(Formatter.TIME_NO_SECONDS))
             append(" - ")
-            append(enTimeFormatter.format(response.examEndTime))
+            append(response.examEndTime.format(Formatter.TIME_NO_SECONDS))
         }
         val statusShowText = when (examStatus) {
             ExamStatus.BEFORE -> {
