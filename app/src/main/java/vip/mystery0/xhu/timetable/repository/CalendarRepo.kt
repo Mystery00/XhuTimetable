@@ -6,6 +6,13 @@ import android.content.ContentValues
 import android.net.Uri
 import android.provider.CalendarContract
 import androidx.compose.ui.graphics.Color
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.koin.core.component.inject
+import vip.mystery0.xhu.timetable.api.CalendarApi
+import vip.mystery0.xhu.timetable.base.BaseDataRepo
+import vip.mystery0.xhu.timetable.config.store.User
+import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.model.CalendarAccount
 import vip.mystery0.xhu.timetable.model.CalendarAttender
@@ -14,11 +21,46 @@ import vip.mystery0.xhu.timetable.packageName
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import java.util.TimeZone
 
-object CalendarRepo {
+object CalendarRepo : BaseDataRepo {
+    private val calendarApi: CalendarApi by inject()
     private const val CALENDARS_ACCOUNT_TYPE = CalendarContract.ACCOUNT_TYPE_LOCAL
 
     private val contentResolver: ContentResolver by lazy {
         context.contentResolver
+    }
+
+    suspend fun getEventList(
+        user: User,
+        year: Int,
+        term: Int,
+        includeCustomCourse: Boolean,
+        includeCustomThing: Boolean,
+    ): List<CalendarEvent> {
+        checkForceLoadFromCloud(true)
+
+        val eventList = user.withAutoLoginOnce {
+            calendarApi.exportCalendarEventList(
+                it,
+                year,
+                term,
+                includeCustomCourse,
+                includeCustomThing,
+            )
+        }
+        return withContext(Dispatchers.Default) {
+            eventList.map { response ->
+                val event = CalendarEvent(
+                    response.title,
+                    response.startTime,
+                    response.endTime,
+                    response.location,
+                    response.description,
+                    response.allDay,
+                )
+                event.attenderList.addAll(response.attenders.map { CalendarAttender(it) })
+                event
+            }
+        }
     }
 
     /**
