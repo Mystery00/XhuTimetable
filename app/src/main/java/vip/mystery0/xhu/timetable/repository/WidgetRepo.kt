@@ -3,6 +3,7 @@ package vip.mystery0.xhu.timetable.repository
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.TodayCourseView
@@ -16,7 +17,6 @@ import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.utils.asInstant
 import vip.mystery0.xhu.timetable.utils.asLocalDateTime
-import vip.mystery0.xhu.timetable.utils.enTimeFormatter
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.Instant
@@ -135,7 +135,7 @@ object WidgetRepo {
             it.updateTime()
             val timeText = it.courseTime
             val startTime =
-                LocalTime.parse(timeText.first, enTimeFormatter).atDate(showDate).asInstant()
+                LocalTime.parse(timeText.first, Formatter.TIME_NO_SECONDS).atDate(showDate).asInstant()
             WidgetTodayItem(
                 it.courseName,
                 listOf(
@@ -169,8 +169,8 @@ object WidgetRepo {
                     showTime.add("还剩")
                     showTime.add("${remainDays}天")
                 } else {
-                    showTime.add(startDateTime.format(enTimeFormatter))
-                    showTime.add(endDateTime.format(enTimeFormatter))
+                    showTime.add(startDateTime.format(Formatter.TIME_NO_SECONDS))
+                    showTime.add(endDateTime.format(Formatter.TIME_NO_SECONDS))
                 }
                 WidgetTodayItem(
                     it.title,

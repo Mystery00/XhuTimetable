@@ -78,8 +78,7 @@ import vip.mystery0.xhu.timetable.model.response.AllCourseResponse
 import vip.mystery0.xhu.timetable.model.response.CustomCourseResponse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
-import vip.mystery0.xhu.timetable.utils.asLocalDateTime
-import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
+import vip.mystery0.xhu.timetable.utils.formatChinaDateTime
 import vip.mystery0.xhu.timetable.utils.formatWeekString
 import vip.mystery0.xhu.timetable.viewmodel.CustomCourseViewModel
 import java.time.DayOfWeek
@@ -1095,9 +1094,7 @@ private fun BuildItem(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "创建时间：${
-                        item.createTime.asLocalDateTime().format(chinaDateTimeFormatter)
-                    }"
+                    text = "创建时间：${item.createTime.formatChinaDateTime()}"
                 )
             }
         }
@@ -1180,9 +1177,7 @@ private fun BuildSearchResultItem(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "更新时间：${
-                        item.updateTime.asLocalDateTime().format(chinaDateTimeFormatter)
-                    }"
+                    text = "更新时间：${item.updateTime.formatChinaDateTime()}"
                 )
             }
         }

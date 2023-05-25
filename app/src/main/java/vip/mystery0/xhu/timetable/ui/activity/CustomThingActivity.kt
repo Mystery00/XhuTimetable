@@ -68,6 +68,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
+import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.model.CustomThing
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
@@ -76,10 +77,8 @@ import vip.mystery0.xhu.timetable.model.response.CustomThingResponse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.asLocalDateTime
-import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
 import vip.mystery0.xhu.timetable.utils.dateFormatter
-import vip.mystery0.xhu.timetable.utils.dateWithWeekFormatter
-import vip.mystery0.xhu.timetable.utils.enTimeFormatter
+import vip.mystery0.xhu.timetable.utils.formatChinaDateTime
 import vip.mystery0.xhu.timetable.utils.parseColorHexString
 import vip.mystery0.xhu.timetable.utils.thingDateTimeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.CustomThingViewModel
@@ -371,7 +370,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                                     indication = null,
                                                     interactionSource = MutableInteractionSource(),
                                                 ),
-                                            text = startTime.value.format(dateWithWeekFormatter),
+                                            text = startTime.value.format(dateFormatter),
                                         )
                                         if (!allDay) {
                                             Text(
@@ -383,7 +382,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                                         indication = null,
                                                         interactionSource = MutableInteractionSource(),
                                                     ),
-                                                text = startTime.value.format(enTimeFormatter),
+                                                text = startTime.value.format(Formatter.TIME_NO_SECONDS),
                                             )
                                         }
                                     }
@@ -404,7 +403,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                                         indication = null,
                                                         interactionSource = MutableInteractionSource(),
                                                     ),
-                                                text = endTime.value.format(dateWithWeekFormatter),
+                                                text = endTime.value.format(dateFormatter),
                                             )
                                             if (!allDay) {
                                                 Text(
@@ -416,7 +415,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                                             indication = null,
                                                             interactionSource = MutableInteractionSource(),
                                                         ),
-                                                    text = endTime.value.format(enTimeFormatter),
+                                                    text = endTime.value.format(Formatter.TIME_NO_SECONDS),
                                                 )
                                             }
                                         }
@@ -710,9 +709,7 @@ private fun BuildItem(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "创建时间：${
-                        item.createTime.asLocalDateTime().format(chinaDateTimeFormatter)
-                    }"
+                    text = "创建时间：${item.createTime.formatChinaDateTime()}"
                 )
             }
         }

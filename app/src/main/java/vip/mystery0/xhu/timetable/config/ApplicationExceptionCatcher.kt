@@ -8,8 +8,8 @@ import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.ui.activity.ErrorReportActivity
-import vip.mystery0.xhu.timetable.utils.chinaDateTimeFormatter
 import vip.mystery0.xhu.timetable.utils.finishAllActivity
+import vip.mystery0.xhu.timetable.utils.formatChinaDateTime
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -46,7 +46,7 @@ class ApplicationExceptionCatcher : Thread.UncaughtExceptionHandler {
         try {
             PrintWriter(BufferedWriter(FileWriter(file))).use { printWriter ->
                 //导出时间
-                printWriter.println(chinaDateTimeFormatter.format(now))
+                printWriter.println(now.formatChinaDateTime())
                 //导出手机信息
                 printWriter.println("===================================")
                 printWriter.println("应用版本: $appVersionName")

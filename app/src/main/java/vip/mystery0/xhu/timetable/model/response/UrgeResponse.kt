@@ -1,8 +1,11 @@
 package vip.mystery0.xhu.timetable.model.response
 
+import vip.mystery0.xhu.timetable.model.transfer.PageResult
+import java.time.Instant
+
 data class UrgeResponse(
     val remainCount: Int,
-    val urgeList: List<UrgeItem>
+    val page: PageResult<UrgeItem>,
 )
 
 data class UrgeItem(
@@ -13,6 +16,6 @@ data class UrgeItem(
     var rate: Int,
     var complete: Boolean,
     var urged: Boolean,
-    var createTime: Long,
-    var updateTime: Long,
+    var createTime: Instant,
+    var updateTime: Instant,
 )
