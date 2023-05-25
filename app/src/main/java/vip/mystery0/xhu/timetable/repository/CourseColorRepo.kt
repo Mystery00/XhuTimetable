@@ -8,10 +8,15 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.model.entity.CourseColor
 import vip.mystery0.xhu.timetable.repository.db.dao.CourseColorDao
 import vip.mystery0.xhu.timetable.repository.db.dao.CourseDao
+import vip.mystery0.xhu.timetable.repository.db.dao.CustomCourseDao
+import vip.mystery0.xhu.timetable.repository.db.dao.ExperimentCourseDao
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
+import java.util.concurrent.CopyOnWriteArraySet
 
 object CourseColorRepo : KoinComponent {
     private val courseDao: CourseDao by inject()
+    private val experimentCourseDao: ExperimentCourseDao by inject()
+    private val customCourseDao: CustomCourseDao by inject()
     private val courseColorDao: CourseColorDao by inject()
 
     suspend fun getRawCourseColorList(): Map<String, Color> {
@@ -29,11 +34,26 @@ object CourseColorRepo : KoinComponent {
     }
 
     suspend fun getCourseColorList(keywords: String): List<Pair<String, Color>> {
-        val courseList = withContext(Dispatchers.IO) {
+        val courseSet = CopyOnWriteArraySet<String>()
+        withContext(Dispatchers.IO) {
             if (keywords.isBlank()) {
-                courseDao.queryDistinctCourseByUsernameAndTerm()
+                courseSet.addAll(courseDao.queryDistinctCourseByUsernameAndTerm())
             } else {
-                courseDao.queryDistinctCourseByKeywordsAndUsernameAndTerm("%${keywords}%")
+                courseSet.addAll(courseDao.queryDistinctCourseByKeywordsAndUsernameAndTerm("%${keywords}%"))
+            }
+        }
+        withContext(Dispatchers.IO) {
+            if (keywords.isBlank()) {
+                courseSet.addAll(experimentCourseDao.queryDistinctCourseByUsernameAndTerm())
+            } else {
+                courseSet.addAll(experimentCourseDao.queryDistinctCourseByKeywordsAndUsernameAndTerm("%${keywords}%"))
+            }
+        }
+        withContext(Dispatchers.IO) {
+            if (keywords.isBlank()) {
+                courseSet.addAll(customCourseDao.queryDistinctCourseByUsernameAndTerm())
+            } else {
+                courseSet.addAll(customCourseDao.queryDistinctCourseByKeywordsAndUsernameAndTerm("%${keywords}%"))
             }
         }
         val colorList = withContext(Dispatchers.IO) {
@@ -45,7 +65,7 @@ object CourseColorRepo : KoinComponent {
                 val color = android.graphics.Color.parseColor(it.color)
                 map[it.courseName] = Color(color)
             }
-            courseList.map {
+            courseSet.map {
                 Pair(it, map[it] ?: ColorPool.hash(it))
             }
         }

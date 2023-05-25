@@ -624,7 +624,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             }
 
             EventType.CHANGE_AUTO_SHOW_TOMORROW_COURSE -> {
-                viewModel.loadLocalDataToState()
+                viewModel.loadLocalDataToState(changeWeekOnly = true)
                 viewModel.calculateTodayTitle()
             }
 
@@ -633,7 +633,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             EventType.CHANGE_COURSE_COLOR,
             EventType.CHANGE_CUSTOM_UI,
             EventType.CHANGE_SHOW_CUSTOM_THING -> {
-                viewModel.loadLocalDataToState()
+                viewModel.loadLocalDataToState(changeWeekOnly = true)
             }
 
             EventType.CHANGE_MAIN_BACKGROUND -> {
@@ -647,7 +647,6 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             EventType.UPDATE_FEEDBACK_CHECK -> {
                 viewModel.checkUnReadFeedback()
             }
-
 
             else -> {
             }

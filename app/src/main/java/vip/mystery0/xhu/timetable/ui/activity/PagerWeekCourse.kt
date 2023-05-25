@@ -94,9 +94,6 @@ val weekCourseTitle: TabTitle = @Composable { ext ->
 val weekCourseContent: TabContent = @Composable { ext ->
     val viewModel = ext.viewModel
     val courseDialogState = remember { mutableStateOf<List<WeekCourseView>>(emptyList()) }
-    val tableCourse by viewModel.tableCourse.collectAsState()
-    val multiAccountMode by viewModel.multiAccountMode.collectAsState()
-    val customUi by viewModel.customUi.collectAsState()
     Box {
         Column(modifier = Modifier.fillMaxSize()) {
             //顶部日期栏
@@ -130,6 +127,7 @@ val weekCourseContent: TabContent = @Composable { ext ->
             }
             //课程节次列表
             Row(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                val customUi by viewModel.customUi.collectAsState()
                 Column(
                     modifier = Modifier
                         .weight(0.3F)
@@ -139,6 +137,7 @@ val weekCourseContent: TabContent = @Composable { ext ->
                         BuildTimeItem(time = time, customUi.weekItemHeight.dp)
                     }
                 }
+                val tableCourse by viewModel.tableCourse.collectAsState()
                 if (tableCourse.isNotEmpty()) {
                     for (index in 0 until 7) {
                         Column(modifier = Modifier.weight(1F)) {
@@ -167,6 +166,7 @@ val weekCourseContent: TabContent = @Composable { ext ->
                 }
             }
         }
+        val multiAccountMode by viewModel.multiAccountMode.collectAsState()
         ShowCourseDialog(dialogState = courseDialogState, multiAccountMode = multiAccountMode)
     }
 }
