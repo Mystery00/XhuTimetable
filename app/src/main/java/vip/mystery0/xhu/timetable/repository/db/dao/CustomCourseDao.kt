@@ -20,4 +20,10 @@ interface CustomCourseDao {
         year: Int,
         term: Int,
     ): List<CustomCourseEntity>
+
+    @Query("select courseName from tb_custom_course group by courseName")
+    suspend fun queryDistinctCourseByUsernameAndTerm(): List<String>
+
+    @Query("select courseName from tb_custom_course where courseName like :keywords group by courseName")
+    suspend fun queryDistinctCourseByKeywordsAndUsernameAndTerm(keywords: String): List<String>
 }

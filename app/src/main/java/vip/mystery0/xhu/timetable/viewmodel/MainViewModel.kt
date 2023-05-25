@@ -56,7 +56,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
 import java.util.TreeSet
 
@@ -250,7 +249,9 @@ class MainViewModel : ComposeViewModel() {
                 //获取缓存的课程数据
                 val data = getMainPageData(false)
                 val weekList = data.weekViewList
-                loadCourseToTable(currentWeek, it, weekList, true)
+                //获取自定义颜色列表
+                val colorMap = CourseColorRepo.getRawCourseColorList()
+                loadCourseToTable(currentWeek, it, weekList, colorMap, true)
                 _dateStart.value = termStartDate.plusWeeks(it.toLong() - 1)
                     //设置一周开始为周一
                     .with(WeekFields.of(DayOfWeek.MONDAY, 1).dayOfWeek(), 1)
@@ -274,7 +275,7 @@ class MainViewModel : ComposeViewModel() {
     /**
      * 初始化时候加载数据的方法
      */
-    fun loadLocalDataToState() {
+    fun loadLocalDataToState(changeWeekOnly: Boolean = false) {
         viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "load local course list failed", throwable)
             _loading.value = false
@@ -288,13 +289,21 @@ class MainViewModel : ComposeViewModel() {
             val loadFromCloud = pair.second
             //获取缓存的课程数据
             val data = getMainPageData(false)
+            //获取自定义颜色列表
+            val colorMap = CourseColorRepo.getRawCourseColorList()
             withContext(Dispatchers.Default) {
                 //加载今日列表的数据
-                loadTodayCourse(currentWeek, data.todayViewList)
+                loadTodayCourse(currentWeek, data.todayViewList, colorMap)
                 //加载今日事项
                 loadTodayThing(data.todayThingList)
                 //加载周列表的数据
-                loadCourseToTable(currentWeek, currentWeek, data.weekViewList, false)
+                loadCourseToTable(
+                    currentWeek,
+                    currentWeek,
+                    data.weekViewList,
+                    colorMap,
+                    changeWeekOnly,
+                )
             }
 
             if (loadFromCloud) {
@@ -302,11 +311,17 @@ class MainViewModel : ComposeViewModel() {
                 val cloudData = getMainPageData(true)
                 withContext(Dispatchers.Default) {
                     //加载今日列表的数据
-                    loadTodayCourse(currentWeek, cloudData.todayViewList)
+                    loadTodayCourse(currentWeek, cloudData.todayViewList, colorMap)
                     //加载今日事项
                     loadTodayThing(cloudData.todayThingList)
                     //加载周列表的数据
-                    loadCourseToTable(currentWeek, currentWeek, cloudData.weekViewList, false)
+                    loadCourseToTable(
+                        currentWeek,
+                        currentWeek,
+                        cloudData.weekViewList,
+                        colorMap,
+                        changeWeekOnly,
+                    )
                 }
                 toastMessage("数据同步成功！")
             }
@@ -333,13 +348,15 @@ class MainViewModel : ComposeViewModel() {
             val currentWeek = pair.first
             //从云端加载数据
             val cloudData = getMainPageData(true)
+            //获取自定义颜色列表
+            val colorMap = CourseColorRepo.getRawCourseColorList()
             withContext(Dispatchers.Default) {
                 //加载今日列表的数据
-                loadTodayCourse(currentWeek, cloudData.todayViewList)
+                loadTodayCourse(currentWeek, cloudData.todayViewList, colorMap)
                 //加载今日事项
                 loadTodayThing(cloudData.todayThingList)
                 //加载周列表的数据
-                loadCourseToTable(currentWeek, currentWeek, cloudData.weekViewList, false)
+                loadCourseToTable(currentWeek, currentWeek, cloudData.weekViewList, colorMap, false)
             }
             toastMessage("数据同步成功！")
             _loading.value = false
@@ -370,9 +387,8 @@ class MainViewModel : ComposeViewModel() {
     private suspend fun loadTodayCourse(
         currentWeek: Int,
         courseList: List<TodayCourseView>,
+        colorMap: Map<String, Color>,
     ) {
-        //获取自定义颜色列表
-        val colorMap = CourseColorRepo.getRawCourseColorList()
         val today = LocalDate.now()
         val showTomorrow = getConfigStore { showTomorrowCourseTime }
             ?.let { LocalTime.now().isAfter(it) } ?: false
@@ -525,10 +541,9 @@ class MainViewModel : ComposeViewModel() {
         currentWeek: Int,
         showWeek: Int,
         courseList: List<WeekCourseView>,
-        changeWeekOnly: Boolean = false,
+        colorMap: Map<String, Color>,
+        changeWeekOnly: Boolean,
     ) {
-        //获取自定义颜色列表
-        val colorMap = CourseColorRepo.getRawCourseColorList()
         //设置是否本周以及课程颜色
         courseList.forEach {
             it.thisWeek = it.weekList.contains(showWeek)
@@ -715,11 +730,13 @@ data class CourseSheet(
         other as CourseSheet
 
         if (showTitle != other.showTitle) return false
+        if (color != other.color) return false
         return course == other.course
     }
 
     override fun hashCode(): Int {
         var result = showTitle.hashCode()
+        result = 31 * result + color.hashCode()
         result = 31 * result + course.hashCode()
         return result
     }
