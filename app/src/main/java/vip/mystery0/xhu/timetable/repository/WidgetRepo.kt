@@ -67,13 +67,12 @@ object WidgetRepo {
     suspend fun getTodayList(currentWeek: Int): List<WidgetTodayItem> {
         val showCustomCourse = getConfigStore { showCustomCourseOnWeek }
         val showCustomThing = getConfigStore { showCustomThing }
-        val view =
-            AggregationRepo.fetchAggregationMainPage(
-                forceLoadFromCloud = false,
-                forceLoadFromLocal = true,
-                showCustomCourse,
-                showCustomThing,
-            )
+        val view = AggregationRepo.fetchAggregationMainPage(
+            forceLoadFromCloud = false,
+            forceLoadFromLocal = true,
+            showCustomCourse,
+            showCustomThing,
+        )
 
         //获取自定义颜色列表
         val colorMap = CourseColorRepo.getRawCourseColorList()

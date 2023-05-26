@@ -26,10 +26,10 @@ import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
-import vip.mystery0.xhu.timetable.setAlarmTrigger
 import vip.mystery0.xhu.timetable.ui.theme.Theme
 import vip.mystery0.xhu.timetable.work.DownloadApkWork
 import vip.mystery0.xhu.timetable.work.DownloadPatchWork
+import vip.mystery0.xhu.timetable.work.NotifySetter
 import java.io.File
 import java.io.FileOutputStream
 import java.time.LocalTime
@@ -91,10 +91,7 @@ class SettingsViewModel : ComposeViewModel() {
         viewModelScope.launch {
             setConfigStore { notifyTime = time }
             _notifyTimeData.value = getConfigStore { notifyTime }
-            setAlarmTrigger(alarmManager)
-//            //取消旧的任务
-//            workManager.cancelUniqueWork(NotifyWork::class.java.name)
-//            setTrigger(workManager)
+            NotifySetter.setTrigger()
         }
     }
 
