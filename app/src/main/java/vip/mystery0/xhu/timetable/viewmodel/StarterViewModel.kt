@@ -31,6 +31,7 @@ import vip.mystery0.xhu.timetable.utils.md5
 import vip.mystery0.xhu.timetable.utils.sha1
 import vip.mystery0.xhu.timetable.utils.sha256
 import vip.mystery0.xhu.timetable.work.DownloadSplashWork
+import vip.mystery0.xhu.timetable.work.NotifySetter
 import java.io.File
 import java.time.Instant
 import java.time.LocalDate
@@ -58,8 +59,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
             _isLoginState.value = UserStore.isLogin()
             doClear()
             convertUserList()
-//            setTrigger(workManager)
-//            setAlarmTrigger(alarmManager)
+            NotifySetter.setTrigger()
             StartRepo.init()
             val hideTime = getCacheStore { hideSplashBefore }
             if (LocalDate.now().isBefore(hideTime)) {

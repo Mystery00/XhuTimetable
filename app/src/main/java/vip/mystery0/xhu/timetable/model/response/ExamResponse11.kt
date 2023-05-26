@@ -1,10 +1,5 @@
 package vip.mystery0.xhu.timetable.model.response
 
-data class ExamResponse11(
-    val list: List<ExamItem>,
-    val html: String,
-)
-
 data class ExamItem(
     val date: String,
     val examNumber: String,
