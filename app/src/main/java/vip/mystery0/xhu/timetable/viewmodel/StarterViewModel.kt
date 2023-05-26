@@ -136,6 +136,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
                 )
             )
         }
+        _isLoginState.value = UserStore.isLogin()
     }
 
     private data class OldUser(

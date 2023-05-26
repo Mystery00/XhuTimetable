@@ -71,6 +71,7 @@ android {
                 "app_version_name",
                 "${defaultConfig.versionName}.d$gitVersionCode.$gitVersionName"
             )
+            resValue("color", "ic_launcher_background", "#FFEB3B")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -89,6 +90,7 @@ android {
                     "app_version_name",
                     "${defaultConfig.versionName}.n$gitVersionCode.nightly"
                 )
+                resValue("color", "ic_launcher_background", "#00BCD4")
                 isMinifyEnabled = false
                 proguardFiles(
                     getDefaultProguardFile("proguard-android-optimize.txt"),
