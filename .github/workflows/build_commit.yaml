@@ -21,7 +21,7 @@ jobs:
       - name: 设置JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 11
+          java-version: 17
       - name: 设置Android SDK
         uses: android-actions/setup-android@v2
       - name: 解密签名
