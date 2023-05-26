@@ -25,7 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.microsoft.appcenter.crashes.model.TestCrashException
 import com.vanpra.composematerialdialogs.*
 import com.vanpra.composematerialdialogs.datetime.time.timepicker
@@ -53,6 +52,7 @@ import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.PoemsSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.XhuFoldSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
+import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsMenuLink
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.formatChinaDateTime
@@ -60,7 +60,6 @@ import vip.mystery0.xhu.timetable.utils.timeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.SettingsViewModel
 import java.time.LocalDate
 import java.time.LocalTime
-
 
 class SettingsActivity : BaseComposeActivity() {
     private val viewModel: SettingsViewModel by viewModels()
@@ -120,7 +119,7 @@ class SettingsActivity : BaseComposeActivity() {
                 XhuSettingsGroup(title = {
                     Text(text = "界面设置")
                 }) {
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         icon = {
                             Icon(
                                 painter = XhuIcons.customBackground,
@@ -150,7 +149,7 @@ class SettingsActivity : BaseComposeActivity() {
                     ) {
                         eventBus.post(UIEvent(EventType.CHANGE_MAIN_BACKGROUND))
                     }
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         icon = {
                             Icon(
                                 painter = XhuIcons.nightMode,
@@ -163,7 +162,7 @@ class SettingsActivity : BaseComposeActivity() {
                             showNightModeState.show()
                         }
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         icon = {
                             Icon(
                                 painter = XhuIcons.clearSplash,
@@ -179,7 +178,7 @@ class SettingsActivity : BaseComposeActivity() {
                             }
                         }
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         icon = {
                             Icon(
                                 painter = XhuIcons.customUi,
@@ -192,7 +191,7 @@ class SettingsActivity : BaseComposeActivity() {
                             intentTo(CustomUiActivity::class)
                         }
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         title = { Text(text = "自定义字体") },
                         subtitle = {
                             Text(text = "注意，如果选择的字体文件无效，会使用默认字体")
@@ -201,7 +200,7 @@ class SettingsActivity : BaseComposeActivity() {
                             fontFileSelectLauncher.launch("")
                         }
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         title = { Text(text = "恢复默认字体") },
                         onClick = {
                             viewModel.setCustomFont(null)
@@ -236,7 +235,7 @@ class SettingsActivity : BaseComposeActivity() {
                         },
                         title = { Text(text = "考试提醒") }
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         title = { Text(text = "提醒时间") },
                         icon = {
                             Icon(
@@ -266,7 +265,7 @@ class SettingsActivity : BaseComposeActivity() {
                             showNotifyTimeState.show()
                         }
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         title = { Text(text = "设置忽略电池优化") },
                         subtitle = {
                             Text(
@@ -312,7 +311,7 @@ class SettingsActivity : BaseComposeActivity() {
                         }
                         "重启应用后生效".toast()
                     }
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         title = { Text(text = "重置Token") },
                         subtitle = { Text(text = "如果一直无法显示今日诗词，可能是缓存的Token出现了问题，点击此处可以进行重置") },
                         onClick = {
@@ -326,7 +325,7 @@ class SettingsActivity : BaseComposeActivity() {
                 XhuSettingsGroup(title = {
                     Text(text = "其他设置")
                 }) {
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         icon = {
                             Icon(
                                 painter = XhuIcons.checkUpdate,
@@ -356,7 +355,7 @@ class SettingsActivity : BaseComposeActivity() {
                             Text(text = "这将帮助我们更快的发现并解决问题")
                         }
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         title = { },
                         subtitle = {
                             Text(
@@ -369,7 +368,7 @@ class SettingsActivity : BaseComposeActivity() {
                         },
                         onClick = {},
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         icon = {
                             Icon(
                                 painter = XhuIcons.qqGroup,
@@ -386,7 +385,7 @@ class SettingsActivity : BaseComposeActivity() {
                 XhuSettingsGroup(title = {
                     Text(text = "重置设置")
                 }) {
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         title = { Text(text = "重置背景图片") },
                         onClick = {
                             scope.launch {
@@ -399,13 +398,13 @@ class SettingsActivity : BaseComposeActivity() {
                 XhuSettingsGroup(title = {
                     Text(text = "应用关于")
                 }) {
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         title = { Text(text = "更新日志") },
                         onClick = {
                             showUpdateLogState.show()
                         }
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         title = { Text(text = "西瓜课表官网") },
                         subtitle = {
                             Text(text = "点击访问 https://xgkb.mystery0.vip")
@@ -414,7 +413,7 @@ class SettingsActivity : BaseComposeActivity() {
                             loadInBrowser("https://xgkb.mystery0.vip")
                         }
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         icon = {
                             Icon(
                                 painter = XhuIcons.github,
@@ -430,7 +429,7 @@ class SettingsActivity : BaseComposeActivity() {
                             loadInBrowser("https://github.com/Mystery00/XhuTimetable")
                         }
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         icon = {
                             Icon(
                                 painter = XhuIcons.poems,
@@ -450,7 +449,7 @@ class SettingsActivity : BaseComposeActivity() {
                 XhuSettingsGroup(title = {
                     Text(text = "版本关于")
                 }) {
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         title = { Text(text = "版本名称") },
                         subtitle = {
                             Text(text = appVersionName)
@@ -458,7 +457,7 @@ class SettingsActivity : BaseComposeActivity() {
                         onClick = {
                         }
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         title = { Text(text = "版本号") },
                         subtitle = {
                             Text(text = appVersionCode)
@@ -470,7 +469,7 @@ class SettingsActivity : BaseComposeActivity() {
                             }
                         }
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         title = { Text(text = "版本更新渠道") },
                         subtitle = {
                             Text(text = "重启应用后生效")
@@ -506,7 +505,7 @@ class SettingsActivity : BaseComposeActivity() {
                             Text(text = "开发者选项")
                         },
                     ) {
-                        SettingsMenuLink(
+                        XhuSettingsMenuLink(
                             title = { Text(text = "启用开发者模式") },
                             action = {
                                 Checkbox(
@@ -519,7 +518,7 @@ class SettingsActivity : BaseComposeActivity() {
                             },
                             onClick = {},
                         )
-                        SettingsMenuLink(
+                        XhuSettingsMenuLink(
                             title = { Text(text = "测试崩溃") },
                             onClick = {
                                 scope.launch {
@@ -528,7 +527,7 @@ class SettingsActivity : BaseComposeActivity() {
                             },
                         )
                         val splashList by viewModel.splashList.collectAsState()
-                        SettingsMenuLink(
+                        XhuSettingsMenuLink(
                             title = { Text(text = "启动页信息") },
                             subtitle = {
                                 Text(text = splashList.toString())
@@ -537,7 +536,7 @@ class SettingsActivity : BaseComposeActivity() {
                             },
                         )
                         val version = DataHolder.version
-                        SettingsMenuLink(
+                        XhuSettingsMenuLink(
                             title = { Text(text = "新版本信息") },
                             subtitle = {
                                 Text(text = version?.toString() ?: "无版本")
@@ -550,7 +549,7 @@ class SettingsActivity : BaseComposeActivity() {
                             scope = scope,
                             title = { Text(text = "始终显示新版本弹窗") }
                         )
-                        SettingsMenuLink(
+                        XhuSettingsMenuLink(
                             title = { Text(text = "测试下载最新安装包") },
                             subtitle = {
                                 Text(text = version?.apkSize?.formatFileSize() ?: "无版本")
@@ -561,7 +560,7 @@ class SettingsActivity : BaseComposeActivity() {
                                 }
                             },
                         )
-                        SettingsMenuLink(
+                        XhuSettingsMenuLink(
                             title = { Text(text = "测试下载最新增量包") },
                             subtitle = {
                                 Text(text = version?.patchSize?.formatFileSize() ?: "无版本")
@@ -572,7 +571,7 @@ class SettingsActivity : BaseComposeActivity() {
                                 }
                             },
                         )
-                        SettingsMenuLink(
+                        XhuSettingsMenuLink(
                             title = { Text(text = "NotifyWork 上一次执行时间") },
                             subtitle = {
                                 Text(
@@ -748,7 +747,7 @@ private fun TeamItem(
     subTitle: String,
     onClick: () -> Unit = {},
 ) {
-    SettingsMenuLink(
+    XhuSettingsMenuLink(
         icon = {
             Icon(
                 modifier = Modifier.size(48.dp),
