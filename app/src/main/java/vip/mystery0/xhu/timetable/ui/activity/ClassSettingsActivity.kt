@@ -19,7 +19,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.MaterialDialogState
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
@@ -36,6 +35,7 @@ import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
+import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsMenuLink
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.dateFormatter
@@ -116,7 +116,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                     ) {
                         eventBus.post(UIEvent(EventType.CHANGE_SHOW_STATUS))
                     }
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         title = { Text(text = "自动显示明日课程") },
                         subtitle = {
                             Text(
@@ -143,7 +143,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                 XhuSettingsGroup(title = {
                     Text(text = "时间设置")
                 }) {
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         icon = {
                             Icon(
                                 painter = XhuIcons.customYearTerm,
@@ -169,7 +169,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             yearAndTermState.show()
                         }
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         icon = {
                             Icon(
                                 painter = XhuIcons.customStartTime,
@@ -197,7 +197,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                 XhuSettingsGroup(title = {
                     Text(text = "自定义设置")
                 }) {
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         icon = {
                             Icon(
                                 painter = XhuIcons.customCourseColor,
@@ -214,7 +214,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                 XhuSettingsGroup(title = {
                     Text(text = "额外功能")
                 }) {
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         icon = {
                             Icon(
                                 painter = XhuIcons.schoolCalendar,
@@ -227,7 +227,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             intentTo(SchoolCalendarActivity::class)
                         }
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         icon = {
                             Icon(
                                 painter = XhuIcons.exportCalendar,
@@ -240,7 +240,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             intentTo(ExportCalendarActivity::class)
                         }
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         icon = {
                             Icon(
                                 painter = XhuIcons.customCourse,
@@ -268,7 +268,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             intentTo(CustomCourseActivity::class)
                         }
                     )
-                    SettingsMenuLink(
+                    XhuSettingsMenuLink(
                         icon = {
                             Icon(
                                 painter = XhuIcons.customThing,

@@ -1,12 +1,11 @@
 package vip.mystery0.xhu.timetable.ui.preference
 
+import androidx.compose.material.CheckboxColors
+import androidx.compose.material.CheckboxDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.alorma.compose.settings.storage.base.SettingValueState
 import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsCheckbox
 import com.alorma.compose.settings.ui.SettingsMenuLink
@@ -21,11 +20,32 @@ import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KMutableProperty1
 
 @Composable
+fun XhuSettingsMenuLink(
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    icon: @Composable () -> Unit = {},
+    title: @Composable () -> Unit,
+    subtitle: (@Composable () -> Unit)? = null,
+    action: (@Composable (Boolean) -> Unit)? = null,
+    onClick: () -> Unit,
+) {
+    SettingsMenuLink(
+        modifier,
+        enabled,
+        icon,
+        title,
+        subtitle,
+        action,
+        onClick,
+    )
+}
+
+@Composable
 fun ConfigSettingsCheckbox(
     modifier: Modifier = Modifier,
     config: KMutableProperty1<ConfigStore, Boolean>,
     scope: CoroutineScope = rememberCoroutineScope(),
-    icon: @Composable (() -> Unit)? = null,
+    icon: @Composable () -> Unit = {},
     title: @Composable () -> Unit,
     subtitle: @Composable (() -> Unit)? = null,
     onCheckedChange: suspend (Boolean) -> Unit = { },
@@ -52,7 +72,7 @@ fun CacheSettingsCheckbox(
     modifier: Modifier = Modifier,
     config: KMutableProperty1<CacheStore, Boolean>,
     scope: CoroutineScope = rememberCoroutineScope(),
-    icon: @Composable (() -> Unit)? = null,
+    icon: @Composable () -> Unit = {},
     title: @Composable () -> Unit,
     subtitle: @Composable (() -> Unit)? = null,
     onCheckedChange: suspend (Boolean) -> Unit = { },
@@ -79,7 +99,7 @@ fun PoemsSettingsCheckbox(
     modifier: Modifier = Modifier,
     config: KMutableProperty0<Boolean>,
     scope: CoroutineScope = rememberCoroutineScope(),
-    icon: @Composable (() -> Unit)? = null,
+    icon: @Composable () -> Unit = { },
     title: @Composable () -> Unit,
     subtitle: @Composable (() -> Unit)? = null,
     onCheckedChange: suspend (Boolean) -> Unit = { },
@@ -98,49 +118,5 @@ fun PoemsSettingsCheckbox(
                 onCheckedChange(newValue)
             }
         },
-    )
-}
-
-typealias ConfigSetter<T> = (T) -> Unit
-
-@Composable
-fun <T> ConfigSettingsMenuLink(
-    modifier: Modifier = Modifier,
-    config: KMutableProperty0<T>,
-    scope: CoroutineScope = rememberCoroutineScope(),
-    icon: (@Composable (T) -> Unit)? = null,
-    title: @Composable (T) -> Unit,
-    subtitle: (@Composable (T) -> Unit)? = null,
-    action: (@Composable (T, ConfigSetter<T>) -> Unit)? = null,
-    onClick: suspend (T, ConfigSetter<T>) -> Unit = { _, _ -> },
-) {
-    var value by remember { mutableStateOf(config.get()) }
-    val setter: ConfigSetter<T> = { newValue ->
-        scope.launch { config.set(newValue) }
-        value = newValue
-    }
-    SettingsMenuLink(
-        modifier = modifier,
-        icon = if (icon == null) null else {
-            {
-                icon(value)
-            }
-        },
-        title = {
-            title(value)
-        },
-        subtitle = if (subtitle == null) null else {
-            {
-                subtitle(value)
-            }
-        },
-        action = if (action == null) null else {
-            {
-                action(value, setter)
-            }
-        },
-        onClick = {
-            scope.launch { onClick(value, setter) }
-        }
     )
 }

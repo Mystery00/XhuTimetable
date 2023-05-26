@@ -39,12 +39,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.alorma.compose.settings.ui.SettingsMenuLink
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.model.TitleTemplate
 import vip.mystery0.xhu.timetable.model.format
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
+import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsMenuLink
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
 import vip.mystery0.xhu.timetable.viewmodel.CustomUiViewModel
@@ -172,7 +172,7 @@ class CustomUiActivity : BaseComposeActivity() {
                     XhuSettingsGroup(title = {
                         Text(text = "操作")
                     }) {
-                        SettingsMenuLink(
+                        XhuSettingsMenuLink(
                             title = { Text(text = "刷新课程列表") },
                             onClick = {
                                 viewModel.refreshRandomCourse()
@@ -233,7 +233,7 @@ class CustomUiActivity : BaseComposeActivity() {
                                 viewModel.backgroundImageBlur.value = newValue
                                 viewModel.update()
                             })
-                        SettingsMenuLink(
+                        XhuSettingsMenuLink(
                             title = { Text(text = "动态模糊说明") },
                             subtitle = {
                                 Text(text = "仅 Android 12+ 可使用")
@@ -241,7 +241,7 @@ class CustomUiActivity : BaseComposeActivity() {
                             onClick = {
                             }
                         )
-                        SettingsMenuLink(
+                        XhuSettingsMenuLink(
                             title = { Text(text = "格子文本模板") },
                             subtitle = {
                                 Text(text = "本周课程的文本格式")
@@ -250,7 +250,7 @@ class CustomUiActivity : BaseComposeActivity() {
                                 showCustomTitleTemplateDialog.value = true
                             }
                         )
-                        SettingsMenuLink(
+                        XhuSettingsMenuLink(
                             title = { Text(text = "非本周格子文本模板") },
                             subtitle = {
                                 Text(text = "非本周课程的文本格式")
@@ -259,7 +259,7 @@ class CustomUiActivity : BaseComposeActivity() {
                                 showCustomNotTitleTemplateDialog.value = true
                             }
                         )
-                        SettingsMenuLink(
+                        XhuSettingsMenuLink(
                             title = { Text(text = "点击右上角的保存按钮才会生效") },
                             onClick = {
                             }
@@ -367,7 +367,7 @@ private fun BuildSeekBar(
     val currentValue: Float = (value - start) / range.toFloat()
     val valueState = remember { mutableStateOf(currentValue) }
     valueState.value = currentValue
-    SettingsMenuLink(
+    XhuSettingsMenuLink(
         title = { Text(text = title) },
         subtitle = {
             Slider(
