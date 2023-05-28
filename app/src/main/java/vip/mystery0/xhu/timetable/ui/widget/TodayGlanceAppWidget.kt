@@ -43,6 +43,7 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.ui.activity.StartActivity
+import vip.mystery0.xhu.timetable.ui.widget.callback.UpdateTodayCourseActionCallback
 import vip.mystery0.xhu.timetable.ui.widget.state.CourseGlance
 import vip.mystery0.xhu.timetable.ui.widget.state.TodayCourseStateGlance
 import vip.mystery0.xhu.timetable.ui.widget.state.TodayGlanceStateDefinition
@@ -192,16 +193,6 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
                     )
                 }
             }
-        }
-    }
-
-    class UpdateTodayCourseActionCallback : ActionCallback {
-        override suspend fun onAction(
-            context: Context,
-            glanceId: GlanceId,
-            parameters: ActionParameters
-        ) {
-            TodayGlanceAppWidget().update(context, glanceId)
         }
     }
 }

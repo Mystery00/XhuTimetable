@@ -31,6 +31,7 @@ abstract class BasePageComposeActivity(
         paddingValues: PaddingValues,
         pager: LazyPagingItems<T>,
         refreshing: Boolean,
+        key: ((index: Int) -> Any)? = null,
         itemContent: @Composable LazyItemScope.(T) -> Unit,
         boxContent: @Composable BoxScope.() -> Unit = {},
     ) = BuildPaging(
@@ -38,7 +39,7 @@ abstract class BasePageComposeActivity(
         pager = pager,
         refreshing = refreshing,
         listContent = {
-            itemsIndexed(pager) { item ->
+            itemsIndexed(pager, key = key) { item ->
                 itemContent(item)
             }
         },
@@ -102,11 +103,12 @@ abstract class BasePageComposeActivity(
 
     protected fun <T : Any> LazyListScope.itemsIndexed(
         items: LazyPagingItems<T>,
+        key: ((index: Int) -> Any)? = null,
         itemContent: @Composable LazyItemScope.(value: T) -> Unit
     ) {
         items(
             count = items.itemCount,
-            key = null,
+            key = key,
             contentType = { null }
         ) { index ->
             val item = items[index]

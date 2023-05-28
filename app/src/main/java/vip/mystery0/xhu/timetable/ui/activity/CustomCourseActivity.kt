@@ -705,6 +705,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                         paddingValues = PaddingValues(4.dp),
                         pager = pager,
                         refreshing = refreshing,
+                        key = { index -> pager[index]?.courseId ?: index },
                         itemContent = { item ->
                             BuildItem(item) {
                                 scope.launch {

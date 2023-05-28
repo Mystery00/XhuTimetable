@@ -195,6 +195,7 @@ class CourseRoomActivity : BasePageComposeActivity() {
                     paddingValues = PaddingValues(4.dp),
                     pager = pager,
                     refreshing = !viewModel.init && pager.loadState.refresh is LoadState.Loading,
+                    key = { index -> pager[index]?.roomNo ?: index },
                     itemContent = { item ->
                         BuildItem(item)
                     }
