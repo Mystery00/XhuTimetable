@@ -23,10 +23,6 @@ import java.time.LocalDate
 class NotifyService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
-    companion object {
-        private const val TAG = "NotifyService"
-    }
-
     private val job = SupervisorJob()
     private val scope = CoroutineScope(job)
 
@@ -62,7 +58,6 @@ class NotifyService : Service() {
                 .setPriority(NotificationManagerCompat.IMPORTANCE_NONE)
                 .build()
         startForeground(NotificationId.NOTIFY_TOMORROW_FOREGROUND.id, notification)
-        Log.i(TAG, "onCreate: 任务执行了")
         scope.launch {
             doWork()
         }
