@@ -12,16 +12,14 @@ class NotifyWork(private val appContext: Context, workerParams: WorkerParameters
     CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
-        val lastDate = getCacheStore { notifyWorkLastExecuteDate }
-        if (lastDate == LocalDate.now()) {
-            return complete()
-        }
-        val action = NotifyAction(appContext)
-        runCatching {
-            action.checkNotifyCourse()
-        }
-        runCatching {
-            action.checkNotifyExam()
+        NotifySetter.lock {
+            val action = NotifyAction(appContext)
+            runCatching {
+                action.checkNotifyCourse()
+            }
+            runCatching {
+                action.checkNotifyExam()
+            }
         }
         return complete()
     }
