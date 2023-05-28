@@ -9,11 +9,9 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
-import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.provideContent
@@ -149,7 +147,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                                 for (time in 1..5) {
                                     BuildTimeItem(time = time)
                                 }
-                                BuildSingleTimeItem(time = 6)
+                                BuildSingleTimeItem()
                             }
                             if (stateGlance.hasData) {
                                 for (index in 0 until 7) {
@@ -249,14 +247,14 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun BuildSingleTimeItem(time: Int) {
+    private fun BuildSingleTimeItem() {
         Box(
             modifier = GlanceModifier.fillMaxWidth()
                 .height(weekItemHeight),
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = (2 * time - 1).toString(),
+                text = "11",
                 style = TextStyle(
                     color = ColorProvider(Color.Black),
                     fontSize = 12.sp
