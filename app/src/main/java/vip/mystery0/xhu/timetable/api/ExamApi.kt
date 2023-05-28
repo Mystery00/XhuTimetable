@@ -16,4 +16,11 @@ interface ExamApi {
         @Query("index") index: Int,
         @Query("size") size: Int,
     ): Response<PageResult<ExamResponse>>
+
+    @GET("/api/rest/external/exam/tomorrow")
+    suspend fun tomorrowExamList(
+        @Header("sessionToken") token: String,
+        @Query("year") year: Int,
+        @Query("term") term: Int,
+    ): Response<List<ExamResponse>>
 }

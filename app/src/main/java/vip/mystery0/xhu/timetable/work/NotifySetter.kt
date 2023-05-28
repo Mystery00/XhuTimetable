@@ -10,6 +10,7 @@ import androidx.work.WorkManager
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.utils.asInstant
 import vip.mystery0.xhu.timetable.utils.asLocalDateTime
@@ -24,6 +25,8 @@ object NotifySetter : KoinComponent {
     private val workManager: WorkManager by inject()
 
     suspend fun setTrigger(executeTime: Instant? = null) {
+        //清空上一次执行时间
+        setCacheStore { notifyWorkLastExecuteDate = LocalDate.MIN }
         setAlarmTrigger(executeTime)
         setWorkTrigger(executeTime)
     }
