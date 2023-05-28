@@ -273,6 +273,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                                         trackEvent("手动刷新课表")
                                         viewModel.refreshCloudDataToState()
                                     },
+                                contentAlignment = Alignment.Center,
                             ) {
                                 val isDark = isDarkMode()
                                 AndroidView(
