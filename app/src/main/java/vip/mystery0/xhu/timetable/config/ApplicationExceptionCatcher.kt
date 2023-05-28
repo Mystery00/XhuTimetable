@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Toast
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.appVersionName
+import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
 import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.ui.activity.ErrorReportActivity
 import vip.mystery0.xhu.timetable.utils.finishAllActivity
@@ -27,6 +28,10 @@ class ApplicationExceptionCatcher : Thread.UncaughtExceptionHandler {
     override fun uncaughtException(t: Thread, e: Throwable) {
         if (e is ServerError) {
             Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
+            return
+        }
+        if (e is ServerNeedLoginException) {
+            Toast.makeText(context, "请刷新页面", Toast.LENGTH_LONG).show()
             return
         }
         val logFile = dumpExceptionToFile(e)
