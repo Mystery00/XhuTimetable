@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.repository.local
 
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
@@ -198,7 +197,6 @@ object AggregationLocalRepo : KoinComponent {
         containCustomCourse: Boolean,
         containCustomThing: Boolean,
     ) {
-        Log.i("TAG", "saveResponse: $year, $term, $user", RuntimeException())
         //删除所有旧数据
         withContext(Dispatchers.IO) {
             courseDao.queryList(user.studentId, year, term).forEach {
