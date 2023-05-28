@@ -668,14 +668,12 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                         LazyColumn(
                                             contentPadding = PaddingValues(4.dp),
                                         ) {
-                                            itemsIndexed(allCoursePager) { _, item ->
-                                                item?.let {
-                                                    BuildSearchResultItem(
-                                                        item,
-                                                        checked = item == searchCourse
-                                                    ) {
-                                                        searchCourse = item
-                                                    }
+                                            itemsIndexed(allCoursePager) { item ->
+                                                BuildSearchResultItem(
+                                                    item,
+                                                    checked = item == searchCourse
+                                                ) {
+                                                    searchCourse = item
                                                 }
                                             }
                                             when (pager.loadState.append) {
@@ -708,12 +706,10 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                         pager = pager,
                         refreshing = refreshing,
                         itemContent = { item ->
-                            item?.let {
-                                BuildItem(it) {
-                                    scope.launch {
-                                        updateCustomCourse(it)
-                                        showSelect.show()
-                                    }
+                            BuildItem(item) {
+                                scope.launch {
+                                    updateCustomCourse(item)
+                                    showSelect.show()
                                 }
                             }
                         }

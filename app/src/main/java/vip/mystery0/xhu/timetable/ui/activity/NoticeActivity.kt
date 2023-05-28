@@ -73,9 +73,7 @@ class NoticeActivity : BasePageComposeActivity() {
                 pager = pager,
                 refreshing = refreshing,
                 itemContent = { item ->
-                    item?.let {
-                        BuildItem(it)
-                    }
+                    BuildItem(item)
                 },
             )
         }

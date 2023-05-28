@@ -44,6 +44,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
+import vip.mystery0.xhu.timetable.model.response.ScoreGpaResponse
 import vip.mystery0.xhu.timetable.model.response.ScoreResponse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
@@ -154,27 +155,31 @@ class ScoreActivity : BaseSelectComposeActivity() {
                         showTermDialog = termDialog,
                     ) {
                         viewModel.loadScoreList()
+                        viewModel.loadScoreGpa()
                     }
                 }
             ) {
                 val refreshing by viewModel.refreshing.collectAsState()
+                val gpa by viewModel.scoreGpa.collectAsState()
                 BuildPaging(
                     paddingValues = paddingValues,
                     pager = pager,
                     refreshing = refreshing,
                     listContent = {
-//                            stickyHeader {
-//                                Text(
-//                                    text = "学期总览",
-//                                    modifier = Modifier
-//                                        .fillMaxWidth()
-//                                        .background(XhuColor.Common.whiteBackground)
-//                                        .padding(12.dp),
-//                                )
-//                            }
-//                            item {
-//                                BuildTermInfo(scoreList)
-//                            }
+                        if (gpa != null) {
+                            stickyHeader {
+                                Text(
+                                    text = "学期总览",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(XhuColor.Common.whiteBackground)
+                                        .padding(12.dp),
+                                )
+                            }
+                            item {
+                                BuildTermInfo(gpa!!)
+                            }
+                        }
                         stickyHeader {
                             Text(
                                 text = "课程成绩列表",
@@ -184,12 +189,10 @@ class ScoreActivity : BaseSelectComposeActivity() {
                                     .padding(12.dp),
                             )
                         }
-                        itemsIndexed(pager) { _, item ->
-                            item?.let {
-                                BuildItem(showMoreInfo, it)
-                            }
+                        itemsIndexed(pager) { item ->
+                            BuildItem(showMoreInfo, item)
                         }
-                    }
+                    },
                 ) {
                     AnimatedVisibility(
                         modifier = Modifier.align(Alignment.TopEnd),
@@ -241,23 +244,7 @@ class ScoreActivity : BaseSelectComposeActivity() {
 }
 
 @Composable
-private fun BuildTermInfo(scoreListOrigin: List<ScoreResponse>) {
-    //正常考试的列表，也就是不包含重修的列表
-    val list = scoreListOrigin.filter { it.scoreType == "正常考试" }
-    val successList = list.filter { it.score >= 60 }
-
-    val scoreList = list.map { it.score }
-
-    //总成绩
-    val totalScore = scoreList.sum()
-    //平均成绩
-    val avgScore = scoreList.average()
-    //总学分
-    val totalCredit = list.sumOf { it.credit }
-
-    //GPA
-    val gpa = successList.sumOf { it.score * it.credit } / totalCredit
-
+private fun BuildTermInfo(gpa: ScoreGpaResponse) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -267,31 +254,29 @@ private fun BuildTermInfo(scoreListOrigin: List<ScoreResponse>) {
         Row(modifier = Modifier.padding(8.dp)) {
             Column(
                 modifier = Modifier
-                    .weight(1F)
-                    .padding(start = 16.dp),
+                    .weight(1F),
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    text = "总成绩：${totalScore}",
+                    text = "总成绩：${String.format("%.2f", gpa.totalScore)}",
                     fontSize = 13.sp,
                 )
                 Text(
-                    text = "平均成绩：${String.format("%.2f", avgScore)}",
+                    text = "平均成绩：${String.format("%.2f", gpa.averageScore)}",
                     fontSize = 13.sp,
                 )
                 Text(
-                    text = "总学分：${totalCredit}",
+                    text = "总学分：${String.format("%.2f", gpa.totalCredit)}",
                     fontSize = 13.sp,
                 )
             }
             Column(
                 modifier = Modifier
-                    .weight(1F)
-                    .padding(end = 16.dp),
+                    .weight(1F),
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    text = "GPA = ${String.format("%.2f", gpa)}",
+                    text = "GPA = ${String.format("%.2f", gpa.gpa)}",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                 )

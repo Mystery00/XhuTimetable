@@ -196,9 +196,7 @@ class CourseRoomActivity : BasePageComposeActivity() {
                     pager = pager,
                     refreshing = !viewModel.init && pager.loadState.refresh is LoadState.Loading,
                     itemContent = { item ->
-                        item?.let {
-                            BuildItem(it)
-                        }
+                        BuildItem(item)
                     }
                 )
             })

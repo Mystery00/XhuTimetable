@@ -11,6 +11,7 @@ import vip.mystery0.xhu.timetable.base.TermSelect
 import vip.mystery0.xhu.timetable.base.UserSelect
 import vip.mystery0.xhu.timetable.base.YearSelect
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
+import vip.mystery0.xhu.timetable.model.response.ScoreGpaResponse
 import vip.mystery0.xhu.timetable.model.response.ScoreResponse
 import vip.mystery0.xhu.timetable.repository.ScoreRepo
 
@@ -30,12 +31,16 @@ class ScoreViewModel : PagingComposeViewModel<PageRequest, ScoreResponse>(
     private val _termSelect = MutableStateFlow<List<TermSelect>>(emptyList())
     val termSelect: StateFlow<List<TermSelect>> = _termSelect
 
+    private val _scoreGpa = MutableStateFlow<ScoreGpaResponse?>(null)
+    val scoreGpa: StateFlow<ScoreGpaResponse?> = _scoreGpa
+
     init {
         viewModelScope.launch {
             _userSelect.value = initUserSelect()
             _yearSelect.value = initYearSelect()
             _termSelect.value = initTermSelect()
             loadScoreList()
+            loadScoreGpa()
         }
     }
 
@@ -56,6 +61,17 @@ class ScoreViewModel : PagingComposeViewModel<PageRequest, ScoreResponse>(
             val year = getSelectedYear(_yearSelect.value)
             val term = getSelectedTerm(_termSelect.value)
             loadData(PageRequest(selectedUser, year, term))
+        }
+    }
+
+    fun loadScoreGpa() {
+        viewModelScope.launch(networkErrorHandler { throwable ->
+            Log.w(TAG, "load score gpa failed", throwable)
+        }) {
+            val selectedUser = getSelectedUser(_userSelect.value) ?: return@launch
+            val year = getSelectedYear(_yearSelect.value)
+            val term = getSelectedTerm(_termSelect.value)
+            _scoreGpa.value = ScoreRepo.getGpa(selectedUser, year, term)
         }
     }
 

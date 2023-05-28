@@ -513,12 +513,10 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                         pager = pager,
                         refreshing = refreshing,
                         itemContent = { item ->
-                            item?.let {
-                                BuildItem(it) {
-                                    scope.launch {
-                                        updateCustomThing(it)
-                                        showSelect.show()
-                                    }
+                            BuildItem(item) {
+                                scope.launch {
+                                    updateCustomThing(item)
+                                    showSelect.show()
                                 }
                             }
                         }
