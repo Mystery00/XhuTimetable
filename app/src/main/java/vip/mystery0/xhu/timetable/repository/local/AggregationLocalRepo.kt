@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.repository.local
 
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
@@ -197,6 +198,7 @@ object AggregationLocalRepo : KoinComponent {
         containCustomCourse: Boolean,
         containCustomThing: Boolean,
     ) {
+        Log.i("TAG", "saveResponse: $year, $term, $user", RuntimeException())
         //删除所有旧数据
         withContext(Dispatchers.IO) {
             courseDao.queryList(user.studentId, year, term).forEach {
@@ -284,45 +286,49 @@ object AggregationLocalRepo : KoinComponent {
                 experimentCourseDao.insert(entity)
             }
         }
-        response.customCourseList.forEach {
-            val entity = CustomCourseEntity(
-                courseId = it.courseId,
-                courseName = it.courseName,
-                weekStr = it.weekStr,
-                weekList = it.weekList,
-                dayIndex = it.dayIndex,
-                startDayTime = it.startDayTime,
-                endDayTime = it.endDayTime,
-                startTime = it.startTime.format(Formatter.TIME_NO_SECONDS),
-                endTime = it.endTime.format(Formatter.TIME_NO_SECONDS),
-                location = it.location,
-                teacher = it.teacher,
-                extraData = it.extraData,
-                createTime = it.createTime.toEpochMilli(),
-                year = year,
-                term = term,
-                studentId = user.studentId,
-            )
-            withContext(Dispatchers.IO) {
-                customCourseDao.insert(entity)
+        if (containCustomCourse) {
+            response.customCourseList.forEach {
+                val entity = CustomCourseEntity(
+                    courseId = it.courseId,
+                    courseName = it.courseName,
+                    weekStr = it.weekStr,
+                    weekList = it.weekList,
+                    dayIndex = it.dayIndex,
+                    startDayTime = it.startDayTime,
+                    endDayTime = it.endDayTime,
+                    startTime = it.startTime.format(Formatter.TIME_NO_SECONDS),
+                    endTime = it.endTime.format(Formatter.TIME_NO_SECONDS),
+                    location = it.location,
+                    teacher = it.teacher,
+                    extraData = it.extraData,
+                    createTime = it.createTime.toEpochMilli(),
+                    year = year,
+                    term = term,
+                    studentId = user.studentId,
+                )
+                withContext(Dispatchers.IO) {
+                    customCourseDao.insert(entity)
+                }
             }
         }
-        response.customThingList.forEach {
-            val entity = CustomThingEntity(
-                thingId = it.thingId,
-                title = it.title,
-                location = it.location,
-                allDay = it.allDay,
-                startTime = it.startTime.toEpochMilli(),
-                endTime = it.endTime.toEpochMilli(),
-                remark = it.remark,
-                color = it.color,
-                metadata = it.metadata,
-                createTime = it.createTime.toEpochMilli(),
-                studentId = user.studentId,
-            )
-            withContext(Dispatchers.IO) {
-                customThingDao.insert(entity)
+        if (containCustomThing) {
+            response.customThingList.forEach {
+                val entity = CustomThingEntity(
+                    thingId = it.thingId,
+                    title = it.title,
+                    location = it.location,
+                    allDay = it.allDay,
+                    startTime = it.startTime.toEpochMilli(),
+                    endTime = it.endTime.toEpochMilli(),
+                    remark = it.remark,
+                    color = it.color,
+                    metadata = it.metadata,
+                    createTime = it.createTime.toEpochMilli(),
+                    studentId = user.studentId,
+                )
+                withContext(Dispatchers.IO) {
+                    customThingDao.insert(entity)
+                }
             }
         }
     }

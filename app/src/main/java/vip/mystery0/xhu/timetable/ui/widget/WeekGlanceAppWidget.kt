@@ -39,6 +39,7 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.ui.activity.StartActivity
+import vip.mystery0.xhu.timetable.ui.widget.callback.UpdateWeekCourseActionCallback
 import vip.mystery0.xhu.timetable.ui.widget.state.WeekCourseStateGlance
 import vip.mystery0.xhu.timetable.ui.widget.state.WeekGlanceStateDefinition
 import java.text.DecimalFormat
@@ -296,16 +297,6 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                     )
                 )
             }
-        }
-    }
-
-    inner class UpdateWeekCourseActionCallback : ActionCallback {
-        override suspend fun onAction(
-            context: Context,
-            glanceId: GlanceId,
-            parameters: ActionParameters
-        ) {
-            WeekGlanceAppWidget().update(context, glanceId)
         }
     }
 }

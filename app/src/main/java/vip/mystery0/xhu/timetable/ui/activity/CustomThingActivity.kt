@@ -512,6 +512,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                         paddingValues = PaddingValues(4.dp),
                         pager = pager,
                         refreshing = refreshing,
+                        key = { index -> pager[index]?.thingId ?: index },
                         itemContent = { item ->
                             BuildItem(item) {
                                 scope.launch {

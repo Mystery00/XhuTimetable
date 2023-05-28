@@ -72,6 +72,7 @@ class NoticeActivity : BasePageComposeActivity() {
                 paddingValues = paddingValues,
                 pager = pager,
                 refreshing = refreshing,
+                key = { index -> pager[index]?.noticeId ?: index },
                 itemContent = { item ->
                     BuildItem(item)
                 },

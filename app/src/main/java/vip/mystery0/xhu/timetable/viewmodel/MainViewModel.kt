@@ -247,7 +247,7 @@ class MainViewModel : ComposeViewModel() {
                 val termStartDate = getConfigStore { termStartDate }
                 val currentWeek = WidgetRepo.calculateWeek()
                 //获取缓存的课程数据
-                val data = getMainPageData(false)
+                val data = getMainPageData(forceLoadFromCloud = false, forceLoadFromLocal = true)
                 val weekList = data.weekViewList
                 //获取自定义颜色列表
                 val colorMap = CourseColorRepo.getRawCourseColorList()
@@ -259,12 +259,15 @@ class MainViewModel : ComposeViewModel() {
         }
     }
 
-    private suspend fun getMainPageData(forceLoadFromCloud: Boolean): AggregationView {
+    private suspend fun getMainPageData(
+        forceLoadFromCloud: Boolean,
+        forceLoadFromLocal: Boolean,
+    ): AggregationView {
         val showCustomCourse = getConfigStore { showCustomCourseOnWeek }
         val showCustomThing = getConfigStore { showCustomThing }
         val view = AggregationRepo.fetchAggregationMainPage(
             forceLoadFromCloud,
-            false,
+            forceLoadFromLocal,
             showCustomCourse,
             showCustomThing,
         )
@@ -288,7 +291,7 @@ class MainViewModel : ComposeViewModel() {
             val currentWeek = pair.first
             val loadFromCloud = pair.second
             //获取缓存的课程数据
-            val data = getMainPageData(false)
+            val data = getMainPageData(forceLoadFromCloud = false, forceLoadFromLocal = true)
             //获取自定义颜色列表
             val colorMap = CourseColorRepo.getRawCourseColorList()
             withContext(Dispatchers.Default) {
@@ -308,7 +311,7 @@ class MainViewModel : ComposeViewModel() {
 
             if (loadFromCloud) {
                 //需要从云端加载数据
-                val cloudData = getMainPageData(true)
+                val cloudData = getMainPageData(true, forceLoadFromLocal = false)
                 withContext(Dispatchers.Default) {
                     //加载今日列表的数据
                     loadTodayCourse(currentWeek, cloudData.todayViewList, colorMap)
@@ -347,7 +350,7 @@ class MainViewModel : ComposeViewModel() {
             val pair = loadCourseConfig(forceUpdate = false)
             val currentWeek = pair.first
             //从云端加载数据
-            val cloudData = getMainPageData(true)
+            val cloudData = getMainPageData(forceLoadFromCloud = true, forceLoadFromLocal = false)
             //获取自定义颜色列表
             val colorMap = CourseColorRepo.getRawCourseColorList()
             withContext(Dispatchers.Default) {

@@ -157,7 +157,10 @@ class BackgroundActivity : BaseComposeActivity() {
                         columns = GridCells.Adaptive(minSize = 120.dp),
                         modifier = Modifier.fillMaxSize(),
                     ) {
-                        items(backgroundListState.backgroundList) { background ->
+                        items(
+                            items = backgroundListState.backgroundList,
+                            key = { it.backgroundId },
+                        ) { background ->
                             PhotoItem(background)
                         }
                     }

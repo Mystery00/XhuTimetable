@@ -78,7 +78,10 @@ class UrgeActivity : BasePageComposeActivity() {
                     item {
                         BuildTopDesc(remainCount = remainCount)
                     }
-                    items(pager.itemCount) { index ->
+                    items(
+                        pager.itemCount,
+                        key = { index -> pager[index]?.urgeId ?: index },
+                    ) { index ->
                         val item = pager[index] ?: return@items
                         BuildItem(
                             urgeItem = item,
