@@ -120,4 +120,20 @@ object ExamRepo : BaseDataRepo {
             statusShowText,
         )
     }
+
+    suspend fun getTomorrowExamList(): List<Exam> {
+        checkForceLoadFromCloud(true)
+
+        val nowYear = getConfigStore { nowYear }
+        val nowTerm = getConfigStore { nowTerm }
+
+        val now = Instant.now()
+        return withContext(Dispatchers.Default) {
+            mainUser().withAutoLoginOnce {
+                examApi.tomorrowExamList(it, nowYear, nowTerm)
+            }.map {
+                mapExam(it, now)
+            }
+        }
+    }
 }

@@ -14,18 +14,16 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.model.TodayCourseView
-import vip.mystery0.xhu.timetable.model.response.ExamItem
 import vip.mystery0.xhu.timetable.repository.AggregationRepo
 import vip.mystery0.xhu.timetable.repository.CourseColorRepo
+import vip.mystery0.xhu.timetable.repository.ExamRepo
 import vip.mystery0.xhu.timetable.repository.WidgetRepo
 import vip.mystery0.xhu.timetable.ui.activity.ExamActivity
 import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_TOMORROW
 import vip.mystery0.xhu.timetable.ui.notification.NotificationId
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
-import vip.mystery0.xhu.timetable.utils.asLocalDateTime
-import java.time.Instant
+import vip.mystery0.xhu.timetable.viewmodel.Exam
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 class NotifyAction(
     private val appContext: Context,
@@ -37,13 +35,16 @@ class NotifyAction(
     private val notificationManager: NotificationManager by inject()
 
     private val colorAccent = android.graphics.Color.parseColor("#2196F3")
-    private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     suspend fun checkNotifyExam() {
-
+        val examList = ExamRepo.getTomorrowExamList()
+        if (examList.isEmpty()) {
+            return
+        }
+        notifyExam(examList)
     }
 
-    private fun notifyTest(examList: List<ExamItem>) {
+    private fun notifyExam(examList: List<Exam>) {
         if (examList.isEmpty()) {
             return
         }
@@ -70,11 +71,7 @@ class NotifyAction(
                 courseItem.length,
                 0
             )
-            val startTime = Instant.ofEpochMilli(it.startTime).asLocalDateTime()
-            val endTime = Instant.ofEpochMilli(it.endTime).asLocalDateTime()
-            val time =
-                "${timeFormatter.format(startTime)} - ${timeFormatter.format(endTime)}"
-            courseItem.append(" 时间：$time 地点：${it.location}")
+            courseItem.append(" 时间：${it.time} 地点：${it.location}")
             style.addLine(courseItem)
         }
         style.addLine("具体详情请点击查看")

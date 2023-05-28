@@ -73,6 +73,24 @@ class CacheStore {
             return Instant.ofEpochMilli(time)
         }
 
+    //课程提醒上一次执行日期，用来判断有没有重复执行
+    private val notifyWorkLastExecuteDateKey = "notifyWorkLastExecuteDate"
+    var notifyWorkLastExecuteDate: LocalDate
+        set(value) {
+            if (value == LocalDate.MIN) {
+                kv.removeValueForKey(notifyWorkLastExecuteDateKey)
+                return
+            }
+            kv.encode(notifyWorkLastExecuteDateKey, value.format(Formatter.DATE))
+        }
+        get() {
+            val date = kv.decodeString(notifyWorkLastExecuteDateKey)
+            if (date.isNullOrBlank()) {
+                return LocalDate.MIN
+            }
+            return LocalDate.parse(date, Formatter.DATE)
+        }
+
     //隐藏启动图到指定日期
     private val hideSplashBeforeKey = "hideSplashBefore"
     var hideSplashBefore: LocalDate

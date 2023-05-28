@@ -29,7 +29,7 @@ class ServerApiInterceptor : Interceptor {
 
         val map = TreeMap<String, String>()
         map["method"] = request.method.uppercase()
-        map["url"] = request.url.encodedPath
+        map["url"] = request.url.encodedPath.substringBefore("?")
         map["body"] = body
         map["content-type"] = requestBody?.contentType()?.toString() ?: "empty"
         map["content-length"] = (requestBody?.contentLength() ?: 0L).toString()

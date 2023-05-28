@@ -10,11 +10,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.R
+import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_DEFAULT
 import vip.mystery0.xhu.timetable.ui.notification.NotificationId
 import vip.mystery0.xhu.timetable.utils.asInstant
+import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import java.time.Instant
 import java.time.LocalDate
 
@@ -29,6 +31,10 @@ class NotifyService : Service() {
     private val scope = CoroutineScope(job)
 
     private suspend fun doWork() {
+        val lastDate = getCacheStore { notifyWorkLastExecuteDate }
+        if (lastDate == LocalDate.now()) {
+            return complete()
+        }
         setCacheStore { notifyWorkLastExecuteTime = Instant.now() }
         val action = NotifyAction(this)
         runCatching {
