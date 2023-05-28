@@ -25,17 +25,14 @@ class NotifyService : Service() {
     private val scope = CoroutineScope(job)
 
     private suspend fun doWork() {
-        val lastDate = getCacheStore { notifyWorkLastExecuteDate }
-        if (lastDate == LocalDate.now()) {
-            return complete()
-        }
-        setCacheStore { notifyWorkLastExecuteTime = Instant.now() }
-        val action = NotifyAction(this)
-        runCatching {
-            action.checkNotifyCourse()
-        }
-        runCatching {
-            action.checkNotifyExam()
+        NotifySetter.lock {
+            val action = NotifyAction(this)
+            runCatching {
+                action.checkNotifyCourse()
+            }
+            runCatching {
+                action.checkNotifyExam()
+            }
         }
         return complete()
     }

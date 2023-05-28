@@ -7,8 +7,11 @@ import android.util.Log
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.context
@@ -21,8 +24,22 @@ import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
 object NotifySetter : KoinComponent {
+    private val mutex = Mutex()
     private val alarmManager: AlarmManager by inject()
     private val workManager: WorkManager by inject()
+
+    suspend fun <T> lock(action: suspend () -> T) {
+        runCatching {
+            mutex.withLock(this) {
+                val lastDate = getCacheStore { notifyWorkLastExecuteDate }
+                if (lastDate == LocalDate.now()) {
+                    return
+                }
+                setCacheStore { notifyWorkLastExecuteTime = Instant.now() }
+                action()
+            }
+        }
+    }
 
     suspend fun setTrigger(executeTime: Instant? = null) {
         //清空上一次执行时间
