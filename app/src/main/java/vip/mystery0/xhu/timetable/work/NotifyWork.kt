@@ -1,15 +1,11 @@
 package vip.mystery0.xhu.timetable.work
 
 import android.content.Context
-import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
-import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.utils.asInstant
-import vip.mystery0.xhu.timetable.utils.asLocalDateTime
-import java.time.Instant
 import java.time.LocalDate
 
 class NotifyWork(private val appContext: Context, workerParams: WorkerParameters) :

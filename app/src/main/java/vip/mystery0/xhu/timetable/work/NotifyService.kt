@@ -3,7 +3,6 @@ package vip.mystery0.xhu.timetable.work
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import kotlinx.coroutines.CoroutineScope
@@ -16,7 +15,6 @@ import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_DEFAULT
 import vip.mystery0.xhu.timetable.ui.notification.NotificationId
 import vip.mystery0.xhu.timetable.utils.asInstant
-import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import java.time.Instant
 import java.time.LocalDate
 
