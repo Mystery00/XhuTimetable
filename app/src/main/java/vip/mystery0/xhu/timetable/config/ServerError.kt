@@ -1,7 +1,5 @@
 package vip.mystery0.xhu.timetable.config
 
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
 import kotlinx.coroutines.CoroutineExceptionHandler
 import retrofit2.Response
 import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
@@ -29,13 +27,6 @@ fun networkErrorHandler(handler: (Throwable) -> Unit): CoroutineExceptionHandler
     }
 
 class CoroutineStopException(override val message: String) : RuntimeException(message)
-
-fun parseServerError(httpCode: Int, response: String): ErrorMessage? =
-    runCatching {
-        errorMessageMoshi.fromJson(response)
-    }.getOrElse {
-        ErrorMessage(httpCode, response.trim())
-    }
 
 fun <T> Response<T>.checkNeedLogin(): T {
     if (isSuccessful) {
