@@ -11,6 +11,7 @@ import vip.mystery0.xhu.timetable.model.TodayCourseView
 import vip.mystery0.xhu.timetable.model.TodayThingView
 import vip.mystery0.xhu.timetable.model.WeekCourseView
 import vip.mystery0.xhu.timetable.model.transfer.AggregationView
+import vip.mystery0.xhu.timetable.module.HINT_NETWORK
 import vip.mystery0.xhu.timetable.repository.local.AggregationLocalRepo
 
 object AggregationRepo : BaseDataRepo {
@@ -32,10 +33,16 @@ object AggregationRepo : BaseDataRepo {
         val weekViewList = ArrayList<WeekCourseView>()
         val todayThingList = ArrayList<TodayThingView>()
 
-        val loadFromCloud = when {
+        var loadFromCloud = when {
             forceLoadFromCloud -> true
             forceLoadFromLocal -> false
             else -> isOnline
+        }
+        var loadWarning = ""
+        if (loadFromCloud && !isOnline) {
+            //需要从网络加载但是没有网络，降级为从本地加载，并显示一个错误
+            loadFromCloud = false
+            loadWarning = HINT_NETWORK
         }
         if (loadFromCloud) {
             withContext(Dispatchers.Default) {
@@ -101,6 +108,6 @@ object AggregationRepo : BaseDataRepo {
                 }
             }
         }
-        return AggregationView(todayViewList, weekViewList, todayThingList)
+        return AggregationView(todayViewList, weekViewList, todayThingList, loadWarning)
     }
 }
