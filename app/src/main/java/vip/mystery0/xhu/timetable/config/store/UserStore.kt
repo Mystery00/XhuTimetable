@@ -7,15 +7,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import org.koin.java.KoinJavaComponent
 import retrofit2.Response
-import vip.mystery0.xhu.timetable.api.UserApi
 import vip.mystery0.xhu.timetable.config.checkNeedLogin
 import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
 import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.model.UserInfo
 import vip.mystery0.xhu.timetable.module.moshiAdapter
-import vip.mystery0.xhu.timetable.repository.doLogin
+import vip.mystery0.xhu.timetable.repository.UserRepo
 import kotlin.random.Random
 import kotlin.system.exitProcess
 
@@ -173,10 +171,9 @@ object UserStore {
                     val updated = this@withAutoLoginOnce.token != newUser.token
                     if (!updated) {
                         //做一次登录
-                        val loginResponse = doLogin(this@withAutoLoginOnce)
+                        val loginResponse = UserRepo.doLogin(this@withAutoLoginOnce)
                         //获取用户信息
-                        val userApi = KoinJavaComponent.get<UserApi>(UserApi::class.java)
-                        val userInfo = userApi.getUserInfo(loginResponse.sessionToken)
+                        val userInfo = UserRepo.getUserInfo(loginResponse.sessionToken)
                         val user =
                             this@withAutoLoginOnce.copy(
                                 token = loginResponse.sessionToken,
@@ -200,10 +197,9 @@ object UserStore {
             block(token) to false
         } catch (exception: ServerNeedLoginException) {
             //做一次登录
-            val loginResponse = doLogin(this)
+            val loginResponse = UserRepo.doLogin(this)
             //获取用户信息
-            val userApi = KoinJavaComponent.get<UserApi>(UserApi::class.java)
-            val userInfo = userApi.getUserInfo(loginResponse.sessionToken)
+            val userInfo = UserRepo.getUserInfo(loginResponse.sessionToken)
             val user = this.copy(token = loginResponse.sessionToken, info = userInfo)
             updateUser(user)
             block(loginResponse.sessionToken) to true

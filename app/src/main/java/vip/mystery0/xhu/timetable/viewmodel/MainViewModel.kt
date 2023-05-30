@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.inject
-import vip.mystery0.xhu.timetable.api.PoemsApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
@@ -25,7 +24,6 @@ import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
-import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.TodayCourseView
 import vip.mystery0.xhu.timetable.model.TodayThingView
@@ -34,7 +32,6 @@ import vip.mystery0.xhu.timetable.model.format
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.model.transfer.AggregationView
-import vip.mystery0.xhu.timetable.module.Feature
 import vip.mystery0.xhu.timetable.repository.AggregationRepo
 import vip.mystery0.xhu.timetable.repository.CourseColorRepo
 import vip.mystery0.xhu.timetable.repository.FeedbackRepo
@@ -63,8 +60,6 @@ class MainViewModel : ComposeViewModel() {
     companion object {
         private const val TAG = "MainViewModel"
     }
-
-    private val poemsApi: PoemsApi by inject()
 
     private val workManager: WorkManager by inject()
 
@@ -201,31 +196,11 @@ class MainViewModel : ComposeViewModel() {
     }
 
     private fun showPoems() {
-        if (!isOnline()) {
-            return
-        }
         viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
             Log.w(TAG, "showPoems: ", throwable)
             trackError(throwable)
         }) {
-            if (PoemsStore.disablePoems) {
-                return@launch
-            }
-            if (!Feature.JRSC.isEnabled()) {
-                return@launch
-            }
-            val poems = withContext(Dispatchers.IO) {
-                val token = PoemsStore.token
-                if (token.isNullOrBlank()) {
-                    PoemsStore.token = poemsApi.getToken().data
-                }
-                val poems = poemsApi.getSentence().data
-                if (!PoemsStore.showPoemsTranslate) {
-                    poems.origin.translate = null
-                }
-                poems
-            }
-            _poems.value = poems
+            _poems.value = PoemsStore.loadPoems()
         }
     }
 
@@ -314,7 +289,8 @@ class MainViewModel : ComposeViewModel() {
 
             if (loadFromCloud) {
                 //需要从云端加载数据
-                val cloudData = getMainPageData(forceLoadFromCloud = true, forceLoadFromLocal = false)
+                val cloudData =
+                    getMainPageData(forceLoadFromCloud = true, forceLoadFromLocal = false)
                 withContext(Dispatchers.Default) {
                     //加载今日列表的数据
                     loadTodayCourse(currentWeek, cloudData.todayViewList, colorMap)

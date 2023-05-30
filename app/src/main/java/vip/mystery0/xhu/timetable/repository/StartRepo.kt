@@ -15,6 +15,7 @@ import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.request.ClientInitRequest
+import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
 import vip.mystery0.xhu.timetable.model.response.VersionUrl
 import java.time.Duration
 
@@ -62,4 +63,15 @@ object StartRepo : BaseDataRepo {
         withContext(Dispatchers.IO) {
             commonApi.getVersionUrl(versionId)
         }
+
+    suspend fun loadTeamMemberList(): List<TeamMemberResponse> {
+        if (!isOnline) {
+            return getCacheStore { teamMemberList }
+        }
+        val teamMemberList = commonApi.getTeamMemberList()
+        setCacheStore {
+            this.teamMemberList = teamMemberList
+        }
+        return teamMemberList
+    }
 }
