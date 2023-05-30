@@ -6,6 +6,7 @@ import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.model.response.Splash
+import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
 import vip.mystery0.xhu.timetable.module.registerAdapter
 import java.time.Instant
 import java.time.LocalDate
@@ -133,4 +134,21 @@ class CacheStore {
             kv.encode(firstFeedbackMessageIdKey, value)
         }
         get() = kv.decodeLong(firstFeedbackMessageIdKey, 0L)
+
+    //团队成员列表
+    private val teamMemberListMoshi = moshi.adapter<List<TeamMemberResponse>>(
+        Types.newParameterizedType(
+            List::class.java,
+            TeamMemberResponse::class.java
+        )
+    )
+    private val teamMemberListKey = "teamMemberList"
+    var teamMemberList: List<TeamMemberResponse>
+        set(value) {
+            kv.encode(teamMemberListKey, teamMemberListMoshi.toJson(value))
+        }
+        get() {
+            val saveValue = kv.decodeString(teamMemberListKey) ?: "[]"
+            return teamMemberListMoshi.fromJson(saveValue) ?: emptyList()
+        }
 }

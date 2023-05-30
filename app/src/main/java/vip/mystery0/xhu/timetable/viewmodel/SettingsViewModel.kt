@@ -1,9 +1,7 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
-import android.app.AlarmManager
 import android.net.Uri
 import android.os.SystemClock
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkManager
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.inject
-import vip.mystery0.xhu.timetable.api.CommonApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.startUniqueWork
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
@@ -26,6 +23,7 @@ import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
+import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.ui.theme.Theme
 import vip.mystery0.xhu.timetable.work.DownloadApkWork
 import vip.mystery0.xhu.timetable.work.DownloadPatchWork
@@ -41,8 +39,6 @@ class SettingsViewModel : ComposeViewModel() {
     }
 
     private val workManager: WorkManager by inject()
-    private val alarmManager: AlarmManager by inject()
-    private val commonApi: CommonApi by inject()
 
     private val _errorMessage = MutableStateFlow("")
     val errorMessage: StateFlow<String> = _errorMessage
@@ -72,11 +68,7 @@ class SettingsViewModel : ComposeViewModel() {
             debugMode.value = getConfigStore { debugMode }
             _splashList.value = getCacheStore { splashList }
             _versionChannel.value = getConfigStore { versionChannel }
-            try {
-                _teamMemberData.value = commonApi.getTeamMemberList()
-            } catch (e: Exception) {
-                Log.w(TAG, "load team member list", e)
-            }
+            _teamMemberData.value = StartRepo.loadTeamMemberList()
         }
     }
 

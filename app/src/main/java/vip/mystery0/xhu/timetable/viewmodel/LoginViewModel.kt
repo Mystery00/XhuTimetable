@@ -9,7 +9,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.inject
-import vip.mystery0.xhu.timetable.api.UserApi
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.CoroutineStopException
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
@@ -17,7 +16,7 @@ import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
-import vip.mystery0.xhu.timetable.repository.doLogin
+import vip.mystery0.xhu.timetable.repository.UserRepo
 
 class LoginViewModel : ComposeViewModel() {
     companion object {
@@ -25,8 +24,6 @@ class LoginViewModel : ComposeViewModel() {
     }
 
     private val eventBus: EventBus by inject()
-
-    private val userApi: UserApi by inject()
 
     private val _loginState = MutableStateFlow(LoginState())
     val loginState: StateFlow<LoginState> = _loginState
@@ -47,8 +44,8 @@ class LoginViewModel : ComposeViewModel() {
                     throw CoroutineStopException("该用户已登录！")
                 }
             }
-            val loginResponse = doLogin(username, password)
-            val userInfo = userApi.getUserInfo(loginResponse.sessionToken)
+            val loginResponse = UserRepo.doLogin(username, password)
+            val userInfo = UserRepo.getUserInfo(loginResponse.sessionToken)
             val user = User(
                 studentId = username,
                 password = password,
