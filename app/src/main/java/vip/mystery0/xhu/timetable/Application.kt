@@ -16,7 +16,7 @@ class Application : Application() {
     override fun onCreate() {
         super.onCreate()
         context = this
-        Thread.setDefaultUncaughtExceptionHandler(ApplicationExceptionCatcher())
+        Thread.setDefaultUncaughtExceptionHandler(ApplicationExceptionCatcher(Thread.getDefaultUncaughtExceptionHandler()))
         //配置Koin
         startKoin {
             androidLogger(Level.ERROR)

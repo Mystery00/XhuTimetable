@@ -7,6 +7,7 @@ import android.widget.Toast
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.config.interceptor.ServerNeedLoginException
+import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.ui.activity.ErrorReportActivity
 import vip.mystery0.xhu.timetable.utils.finishAllActivity
@@ -20,12 +21,18 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 
-class ApplicationExceptionCatcher : Thread.UncaughtExceptionHandler {
+class ApplicationExceptionCatcher(
+    private val defaultHandler: Thread.UncaughtExceptionHandler?,
+) : Thread.UncaughtExceptionHandler {
     companion object {
         private const val TAG = "ApplicationExceptionCat"
     }
 
     override fun uncaughtException(t: Thread, e: Throwable) {
+        if (GlobalConfigStore.alwaysCrash){
+            defaultHandler?.uncaughtException(t, e)
+            return
+        }
         if (e is ServerError) {
             Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
             return

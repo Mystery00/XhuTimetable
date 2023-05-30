@@ -279,6 +279,14 @@ class ConfigStore internal constructor() {
         }
         get() = kv.decodeBool(debugModeKey, false)
 
+    //始终显示崩溃信息
+    private val alwaysCrashKey = "alwaysCrash"
+    var alwaysCrash: Boolean
+        set(value) {
+            kv.encode(alwaysCrashKey, value)
+        }
+        get() = kv.decodeBool(alwaysCrashKey, debugMode)
+
     //自定义课表背景图
     private val backgroundImageKey = "backgroundImage"
     var backgroundImage: File?
