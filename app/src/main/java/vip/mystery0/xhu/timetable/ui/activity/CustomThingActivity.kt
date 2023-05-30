@@ -54,7 +54,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.MaterialDialogState
 import com.vanpra.composematerialdialogs.color.ARGBPickerState
@@ -91,7 +90,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
 
     @Composable
     override fun BuildContent() {
-        val pager = viewModel.pageState.collectAsLazyPagingItems()
+        val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
         val userSelectStatus = viewModel.userSelect.collectAsState()
 
         val saveLoadingState by viewModel.saveLoadingState.collectAsState()

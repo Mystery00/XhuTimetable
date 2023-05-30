@@ -66,7 +66,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
-import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -91,7 +90,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
 
     @Composable
     override fun BuildContent() {
-        val pager = viewModel.pageState.collectAsLazyPagingItems()
+        val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
         val userSelectStatus = viewModel.userSelect.collectAsState()
         val yearSelectStatus = viewModel.yearSelect.collectAsState()
         val termSelectStatus = viewModel.termSelect.collectAsState()
@@ -510,7 +509,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
 
                                 CreateType.SELECT -> {
                                     val allCoursePager =
-                                        viewModel.allCoursePageState.collectAsLazyPagingItems()
+                                        viewModel.allCoursePageState.collectAndHandleState(viewModel::handleLoadState)
 
                                     var searchCourseName by remember { mutableStateOf("") }
                                     var searchTeacherName by remember { mutableStateOf("") }
