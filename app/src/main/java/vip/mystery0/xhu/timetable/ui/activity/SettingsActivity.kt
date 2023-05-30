@@ -518,6 +518,14 @@ class SettingsActivity : BaseComposeActivity() {
                             },
                             onClick = {},
                         )
+                        ConfigSettingsCheckbox(
+                            config = ConfigStore::alwaysCrash,
+                            scope = scope,
+                            title = { Text(text = "始终显示崩溃信息") },
+                            subtitle = {
+                                Text(text = "不捕获全局异常")
+                            }
+                        )
                         XhuSettingsMenuLink(
                             title = { Text(text = "测试崩溃") },
                             onClick = {
