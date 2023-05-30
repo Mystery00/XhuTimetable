@@ -43,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
-import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BasePageComposeActivity
 import vip.mystery0.xhu.timetable.model.response.ClassroomResponse
@@ -63,7 +62,7 @@ class CourseRoomActivity : BasePageComposeActivity() {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun BuildContent() {
-        val pager = viewModel.pageState.collectAsLazyPagingItems()
+        val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
 
         val areaSelectStatus = viewModel.areaSelect.collectAsState()
         val weekSelectStatus = viewModel.weekSelect.collectAsState()

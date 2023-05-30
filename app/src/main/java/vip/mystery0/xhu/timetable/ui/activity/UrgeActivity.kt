@@ -30,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.zyao89.view.zloading.Z_TYPE
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BasePageComposeActivity
@@ -46,7 +45,7 @@ class UrgeActivity : BasePageComposeActivity() {
 
     @Composable
     override fun BuildContent() {
-        val pager = viewModel.pageState.collectAsLazyPagingItems()
+        val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
 
         Scaffold(
             topBar = {

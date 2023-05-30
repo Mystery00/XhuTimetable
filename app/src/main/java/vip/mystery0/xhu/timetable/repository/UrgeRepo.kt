@@ -11,9 +11,7 @@ import vip.mystery0.xhu.timetable.api.UrgeApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.base.buildPageSource
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
-import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.model.response.UrgeItem
-import vip.mystery0.xhu.timetable.module.NetworkNotConnectException
 
 object UrgeRepo : BaseDataRepo {
     private val urgeApi: UrgeApi by inject()
@@ -42,9 +40,8 @@ object UrgeRepo : BaseDataRepo {
     ).flow
 
     suspend fun doUrge(urgeId: Long) {
-        if (!isOnline()) {
-            throw NetworkNotConnectException()
-        }
+        checkForceLoadFromCloud(true)
+
         mainUser().withAutoLoginOnce {
             urgeApi.urge(it, urgeId)
         }

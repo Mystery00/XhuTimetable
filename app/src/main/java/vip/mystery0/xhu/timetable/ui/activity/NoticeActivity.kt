@@ -27,7 +27,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.paging.compose.collectAsLazyPagingItems
 import vip.mystery0.xhu.timetable.base.BasePageComposeActivity
 import vip.mystery0.xhu.timetable.loadInBrowser
 import vip.mystery0.xhu.timetable.model.event.EventType
@@ -46,7 +45,7 @@ class NoticeActivity : BasePageComposeActivity() {
 
     @Composable
     override fun BuildContent() {
-        val pager = viewModel.pageState.collectAsLazyPagingItems()
+        val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
 
         Scaffold(
             topBar = {

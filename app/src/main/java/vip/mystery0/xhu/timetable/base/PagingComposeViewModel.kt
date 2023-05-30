@@ -1,9 +1,13 @@
 package vip.mystery0.xhu.timetable.base
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
+import androidx.paging.LoadState
+import androidx.paging.LoadStates
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +19,10 @@ import vip.mystery0.xhu.timetable.config.store.User
 abstract class PagingComposeViewModel<REQ, RESP : Any>(
     pageLoader: (REQ) -> Flow<PagingData<RESP>>,
 ) : ComposeViewModel() {
+    companion object {
+        private const val TAG = "PagingComposeViewModel"
+    }
+
     // 分页数据
     protected val pageRequestFlow = MutableStateFlow<REQ?>(null)
     private val _pageState = pageRequestFlow
@@ -39,6 +47,18 @@ abstract class PagingComposeViewModel<REQ, RESP : Any>(
     protected suspend fun loadData(req: REQ) {
         _refreshing.value = true
         pageRequestFlow.emit(req)
+    }
+
+    fun handleLoadState(loadStates: LoadStates) {
+        val errorLoadState = arrayOf(
+            loadStates.append,
+            loadStates.prepend,
+            loadStates.refresh
+        ).filterIsInstance(LoadState.Error::class.java).firstOrNull()
+        errorLoadState?.error?.let {
+            Log.w(TAG, "handle LoadState Error", it)
+            toastMessage(it.message ?: it.javaClass.simpleName)
+        }
     }
 }
 

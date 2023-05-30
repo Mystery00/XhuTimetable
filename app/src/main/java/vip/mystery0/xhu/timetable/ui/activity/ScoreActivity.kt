@@ -40,7 +40,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
@@ -57,7 +56,7 @@ class ScoreActivity : BaseSelectComposeActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     override fun BuildContent() {
-        val pager = viewModel.pageState.collectAsLazyPagingItems()
+        val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
 
         val userSelectStatus = viewModel.userSelect.collectAsState()
         val yearSelectStatus = viewModel.yearSelect.collectAsState()

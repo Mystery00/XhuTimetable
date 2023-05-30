@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
-import android.app.AlarmManager
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder
@@ -42,7 +41,6 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
     }
 
     private val workManager: WorkManager by inject()
-    private val alarmManager: AlarmManager by inject()
 
     private val _readyState = MutableStateFlow(ReadyState(loading = true))
     val readyState: StateFlow<ReadyState> = _readyState
