@@ -8,4 +8,5 @@ data class AggregationView(
     val todayViewList: List<TodayCourseView>,
     val weekViewList: List<WeekCourseView>,
     val todayThingList: List<TodayThingView>,
+    val loadWarning: String = "",
 )

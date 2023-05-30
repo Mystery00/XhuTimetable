@@ -272,6 +272,9 @@ class MainViewModel : ComposeViewModel() {
             showCustomThing,
         )
         setCacheStore { lastSyncCourse = LocalDate.now() }
+        if (view.loadWarning.isNotBlank()) {
+            toastMessage(view.loadWarning)
+        }
         return view
     }
 
@@ -311,7 +314,7 @@ class MainViewModel : ComposeViewModel() {
 
             if (loadFromCloud) {
                 //需要从云端加载数据
-                val cloudData = getMainPageData(true, forceLoadFromLocal = false)
+                val cloudData = getMainPageData(forceLoadFromCloud = true, forceLoadFromLocal = false)
                 withContext(Dispatchers.Default) {
                     //加载今日列表的数据
                     loadTodayCourse(currentWeek, cloudData.todayViewList, colorMap)
