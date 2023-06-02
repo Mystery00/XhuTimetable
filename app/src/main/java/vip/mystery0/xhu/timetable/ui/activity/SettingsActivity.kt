@@ -1,6 +1,8 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -31,6 +33,7 @@ import com.vanpra.composematerialdialogs.datetime.time.timepicker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.*
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
@@ -63,6 +66,7 @@ import java.time.LocalTime
 
 class SettingsActivity : BaseComposeActivity() {
     private val viewModel: SettingsViewModel by viewModels()
+    private val clipboardManager: ClipboardManager by inject()
 
     private val fontFileSelectLauncher =
         registerForActivityResult(FontFileResultContract()) { intent ->
@@ -541,6 +545,22 @@ class SettingsActivity : BaseComposeActivity() {
                                 Text(text = splashList.toString())
                             },
                             onClick = {
+                            },
+                        )
+                        XhuSettingsMenuLink(
+                            title = { Text(text = "设备id") },
+                            subtitle = {
+                                Text(text = publicDeviceId)
+                            },
+                            onClick = {
+                                scope.launch {
+                                    clipboardManager.setPrimaryClip(
+                                        ClipData.newPlainText(
+                                            "设备id",
+                                            publicDeviceId
+                                        )
+                                    )
+                                }
                             },
                         )
                         val version = DataHolder.version
