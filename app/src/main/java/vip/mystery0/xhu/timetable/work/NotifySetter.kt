@@ -100,7 +100,9 @@ object NotifySetter : KoinComponent {
             workManager.cancelUniqueWork(uniqueWorkName)
         }
 
-        val nextExecuteTime = calculateNextExecuteTime(executeTime) ?: return
+        var nextExecuteTime = calculateNextExecuteTime(executeTime) ?: return
+        //避免因为相同时间的触发导致的重复执行
+        nextExecuteTime = nextExecuteTime.minus(1, ChronoUnit.MINUTES)
 
         val duration = Duration.between(Instant.now(), nextExecuteTime)
         workManager.enqueueUniqueWork(
