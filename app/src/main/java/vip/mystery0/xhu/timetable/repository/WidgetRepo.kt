@@ -247,7 +247,7 @@ object WidgetRepo {
                     lastKey = thisKey
                 }
             }
-            if (result.last() != last) {
+            if (result.lastOrNull() != last) {
                 result.add(last)
             }
             result

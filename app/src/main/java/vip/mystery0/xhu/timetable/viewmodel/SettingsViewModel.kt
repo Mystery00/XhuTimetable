@@ -3,10 +3,12 @@ package vip.mystery0.xhu.timetable.viewmodel
 import android.net.Uri
 import android.os.SystemClock
 import androidx.lifecycle.viewModelScope
+import androidx.work.Data
 import androidx.work.WorkManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.inject
@@ -69,6 +71,9 @@ class SettingsViewModel : ComposeViewModel() {
             _splashList.value = getCacheStore { splashList }
             _versionChannel.value = getConfigStore { versionChannel }
             _teamMemberData.value = StartRepo.loadTeamMemberList()
+            StartRepo.version.collectLatest {
+                version.value = it
+            }
         }
     }
 
@@ -120,13 +125,34 @@ class SettingsViewModel : ComposeViewModel() {
 
     fun downloadApk() {
         viewModelScope.launch {
-            workManager.startUniqueWork<DownloadApkWork>()
+            val newVersion = version.value ?: return@launch
+            workManager.startUniqueWork<DownloadApkWork>(
+                Data.Builder()
+                    .putString(DownloadApkWork.ARG_VERSION_ID, newVersion.versionId.toString())
+                    .putString(DownloadApkWork.ARG_VERSION_NAME, newVersion.versionName)
+                    .putString(DownloadApkWork.ARG_VERSION_CODE, newVersion.versionCode.toString())
+                    .putString(
+                        DownloadApkWork.ARG_VERSION_CHECK_MD5,
+                        newVersion.checkMd5.toString()
+                    )
+                    .build()
+            )
         }
     }
 
     fun downloadPatch() {
         viewModelScope.launch {
-            workManager.startUniqueWork<DownloadPatchWork>()
+            val newVersion = version.value ?: return@launch
+            workManager.startUniqueWork<DownloadPatchWork>(
+                Data.Builder()
+                    .putString(DownloadPatchWork.ARG_VERSION_ID, newVersion.versionId.toString())
+                    .putString(DownloadPatchWork.ARG_VERSION_NAME, newVersion.versionName)
+                    .putString(
+                        DownloadPatchWork.ARG_VERSION_CODE,
+                        newVersion.versionCode.toString()
+                    )
+                    .build()
+            )
         }
     }
 
@@ -147,11 +173,9 @@ class SettingsViewModel : ComposeViewModel() {
     }
 
     fun checkUpdate() {
-//        viewModelScope.launch {
-//            val latestVersion = startRepo.checkVersion()
-//            DataHolder.version = latestVersion
-//            version.value = latestVersion
-//        }
+        viewModelScope.launch {
+            StartRepo.checkVersion()
+        }
     }
 
     fun resetPoemsToken() {

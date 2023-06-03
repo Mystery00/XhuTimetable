@@ -37,7 +37,6 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.*
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
-import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.store.CacheStore
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
 import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
@@ -341,6 +340,7 @@ class SettingsActivity : BaseComposeActivity() {
                         onClick = {
                             scope.launch {
                                 viewModel.checkUpdate()
+                                toastString("检查更新完成")
                             }
                         }
                     )
@@ -563,7 +563,7 @@ class SettingsActivity : BaseComposeActivity() {
                                 }
                             },
                         )
-                        val version = DataHolder.version
+                        val version by viewModel.version.collectAsState()
                         XhuSettingsMenuLink(
                             title = { Text(text = "新版本信息") },
                             subtitle = {
