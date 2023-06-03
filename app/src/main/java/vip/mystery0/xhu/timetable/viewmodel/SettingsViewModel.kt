@@ -73,7 +73,11 @@ class SettingsViewModel : ComposeViewModel() {
             _versionChannel.value = getConfigStore { versionChannel }
             _teamMemberData.value = StartRepo.loadTeamMemberList()
             StartRepo.version.collectLatest {
-                version.value = it
+                if (it == ClientVersion.EMPTY) {
+                    version.value = null
+                } else {
+                    version.value = it
+                }
             }
         }
     }
