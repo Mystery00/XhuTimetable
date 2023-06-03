@@ -108,6 +108,7 @@ fun CheckUpdate(
     version: ClientVersion?,
     onDownload: (Boolean) -> Unit,
     onIgnore: () -> Unit,
+    onClose: () -> Unit,
 ) {
     if (version == null) {
         return
@@ -115,6 +116,7 @@ fun CheckUpdate(
     var dialogState by remember { mutableStateOf(true) }
     val downloadProgress by downloadStateFlow.collectAsState()
     val onCloseListener = {
+        onClose()
         when {
             GlobalConfigStore.debugMode && GlobalCacheStore.alwaysShowNewVersion -> {
                 dialogState = false
