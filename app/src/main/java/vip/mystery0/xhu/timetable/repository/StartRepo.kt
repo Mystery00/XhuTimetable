@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable.repository
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -23,9 +24,10 @@ object StartRepo : BaseDataRepo {
     private val commonApi: CommonApi by inject()
     private val menuApi: MenuApi by inject()
 
-    val version = MutableSharedFlow<ClientVersion?>(
-        replay = 0,
-        extraBufferCapacity = 1,
+    val version = MutableSharedFlow<ClientVersion>(
+        replay = 1,
+        extraBufferCapacity = 0,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
     suspend fun init() {
@@ -46,7 +48,7 @@ object StartRepo : BaseDataRepo {
             splashList = clientInitResponse.splash
         }
         //新版本处理
-        version.emit(clientInitResponse.latestVersion?.let { version ->
+        val newVersion = clientInitResponse.latestVersion?.let { version ->
             val ignoreList = getCacheStore { ignoreVersionList }
             val versionString = "${version.versionName}-${version.versionCode}"
             if (!ignoreList.contains(versionString)) {
@@ -54,7 +56,8 @@ object StartRepo : BaseDataRepo {
             } else {
                 null
             }
-        })
+        }
+        version.emit(newVersion ?: ClientVersion.EMPTY)
 
         //处理菜单
         val menuList = menuApi.list()
@@ -69,13 +72,13 @@ object StartRepo : BaseDataRepo {
         if (!isOnline) {
             return
         }
-        val version = commonApi.checkVersion().body() ?: return this.version.emit(null)
+        val version = commonApi.checkVersion().body() ?: return this.version.emit(ClientVersion.EMPTY)
         val ignoreList = getCacheStore { ignoreVersionList }
         val versionString = "${version.versionName}-${version.versionCode}"
         if (!ignoreList.contains(versionString)) {
             this.version.emit(version)
         } else {
-            this.version.emit(null)
+            this.version.emit(ClientVersion.EMPTY)
         }
     }
 

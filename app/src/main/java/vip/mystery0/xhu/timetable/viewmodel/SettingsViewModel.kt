@@ -17,6 +17,7 @@ import vip.mystery0.xhu.timetable.base.startUniqueWork
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.contentResolver
 import vip.mystery0.xhu.timetable.externalDocumentsDir

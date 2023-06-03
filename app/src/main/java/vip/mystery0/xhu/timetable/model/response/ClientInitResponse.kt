@@ -29,4 +29,19 @@ data class ClientVersion(
 ) {
     val checkMd5: Boolean
         get() = lastVersionCode != 0L
+
+    companion object {
+        val EMPTY = ClientVersion(
+            versionId = 0,
+            apkSize = 0,
+            patchSize = 0,
+            updateLog = "",
+            versionName = "",
+            versionCode = 0,
+            lastVersionCode = 0,
+            showPatch = false,
+            forceUpdate = false,
+            publishTime = Instant.EPOCH,
+        )
+    }
 }

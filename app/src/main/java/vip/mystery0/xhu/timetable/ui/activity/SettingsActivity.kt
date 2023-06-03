@@ -48,6 +48,8 @@ import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
+import vip.mystery0.xhu.timetable.model.response.ClientVersion
+import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.ui.activity.contract.FontFileResultContract
 import vip.mystery0.xhu.timetable.ui.preference.CacheSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
@@ -742,11 +744,10 @@ class SettingsActivity : BaseComposeActivity() {
     private fun ShowCheckUpdateDialog() {
         val version by viewModel.version.collectAsState()
         val newVersion = version ?: return
-        var show = newVersion.versionCode > appVersionCodeNumber
-        if (GlobalConfigStore.debugMode && GlobalCacheStore.alwaysShowNewVersion) {
-            show = true
+        if (newVersion == ClientVersion.EMPTY) {
+            return
         }
-        if (!show) return "检查更新完成，当前暂无新版本".toast()
+        val scope = rememberCoroutineScope()
         //需要提示版本更新
         CheckUpdate(
             version = newVersion,
@@ -758,7 +759,12 @@ class SettingsActivity : BaseComposeActivity() {
                 }
             },
             onIgnore = {
-            }
+            },
+            onClose = {
+                scope.launch {
+                    StartRepo.version.emit(ClientVersion.EMPTY)
+                }
+            },
         )
     }
 

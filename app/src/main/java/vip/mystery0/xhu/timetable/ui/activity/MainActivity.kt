@@ -102,6 +102,8 @@ import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
+import vip.mystery0.xhu.timetable.model.response.ClientVersion
+import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.trackEvent
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuStateIcons
@@ -502,11 +504,10 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
     private fun ShowCheckUpdateDialog() {
         val version by viewModel.version.collectAsState()
         val newVersion = version ?: return
-        var show = newVersion.versionCode > appVersionCodeNumber
-        if (GlobalConfigStore.debugMode && GlobalCacheStore.alwaysShowNewVersion) {
-            show = true
+        if (newVersion == ClientVersion.EMPTY) {
+            return
         }
-        if (!show) return
+        val scope = rememberCoroutineScope()
         //需要提示版本更新
         CheckUpdate(
             version = newVersion,
@@ -518,10 +519,13 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
                 }
             },
             onIgnore = {
-                if (!newVersion.forceUpdate) {
-                    viewModel.ignoreVersion(newVersion)
+                viewModel.ignoreVersion(newVersion)
+            },
+            onClose = {
+                scope.launch {
+                    StartRepo.version.emit(ClientVersion.EMPTY)
                 }
-            }
+            },
         )
     }
 
