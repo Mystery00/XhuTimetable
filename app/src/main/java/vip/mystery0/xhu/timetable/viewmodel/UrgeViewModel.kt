@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
+import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.model.response.UrgeItem
 import vip.mystery0.xhu.timetable.repository.UrgeRepo
 import vip.mystery0.xhu.timetable.trackEvent
@@ -23,10 +24,12 @@ class UrgeViewModel : PagingComposeViewModel<String, UrgeItem>(
     private val _urgeLoading = MutableStateFlow(false)
     val urgeLoading: StateFlow<Boolean> = _urgeLoading
 
+    val userName = MutableStateFlow("")
     val remainCount: StateFlow<Int> = UrgeRepo.remainCountFlow
 
     init {
         viewModelScope.launch {
+            userName.value = UserStore.getMainUser()?.info?.name ?: "未登录"
             loadData("")
         }
     }

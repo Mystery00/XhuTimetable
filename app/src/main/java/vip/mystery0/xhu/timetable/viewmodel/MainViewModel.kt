@@ -3,17 +3,18 @@ package vip.mystery0.xhu.timetable.viewmodel
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
-import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.Data
 import androidx.work.WorkManager
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.DataHolder
+import vip.mystery0.xhu.timetable.base.startUniqueWork
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.Menu
@@ -36,6 +37,7 @@ import vip.mystery0.xhu.timetable.repository.AggregationRepo
 import vip.mystery0.xhu.timetable.repository.CourseColorRepo
 import vip.mystery0.xhu.timetable.repository.FeedbackRepo
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
+import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.repository.WidgetRepo
 import vip.mystery0.xhu.timetable.trackError
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
@@ -63,7 +65,7 @@ class MainViewModel : ComposeViewModel() {
 
     private val workManager: WorkManager by inject()
 
-    val version = MutableStateFlow(DataHolder.version)
+    val version = MutableStateFlow<ClientVersion?>(null)
 
     private val isDarkMode = MutableStateFlow(false)
 
@@ -144,6 +146,9 @@ class MainViewModel : ComposeViewModel() {
             val mainUser = UserStore.getMainUser()
             _mainUser.value = mainUser
             _emptyUser.value = mainUser == null
+            StartRepo.version.collectLatest {
+                version.value = it
+            }
         }
         showPoems()
         calculateTodayTitle()
@@ -654,19 +659,32 @@ class MainViewModel : ComposeViewModel() {
         }
     }
 
-    fun downloadApk() {
+    fun downloadApk(newVersion: ClientVersion) {
         viewModelScope.launch {
-            workManager.enqueue(
-                OneTimeWorkRequestBuilder<DownloadApkWork>()
+            workManager.startUniqueWork<DownloadApkWork>(
+                Data.Builder()
+                    .putString(DownloadApkWork.ARG_VERSION_ID, newVersion.versionId.toString())
+                    .putString(DownloadApkWork.ARG_VERSION_NAME, newVersion.versionName)
+                    .putString(DownloadApkWork.ARG_VERSION_CODE, newVersion.versionCode.toString())
+                    .putString(
+                        DownloadApkWork.ARG_VERSION_CHECK_MD5,
+                        newVersion.checkMd5.toString()
+                    )
                     .build()
             )
         }
     }
 
-    fun downloadPatch() {
+    fun downloadPatch(newVersion: ClientVersion) {
         viewModelScope.launch {
-            workManager.enqueue(
-                OneTimeWorkRequestBuilder<DownloadPatchWork>()
+            workManager.startUniqueWork<DownloadPatchWork>(
+                Data.Builder()
+                    .putString(DownloadPatchWork.ARG_VERSION_ID, newVersion.versionId.toString())
+                    .putString(DownloadPatchWork.ARG_VERSION_NAME, newVersion.versionName)
+                    .putString(
+                        DownloadPatchWork.ARG_VERSION_CODE,
+                        newVersion.versionCode.toString()
+                    )
                     .build()
             )
         }

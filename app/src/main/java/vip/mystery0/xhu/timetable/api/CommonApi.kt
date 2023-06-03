@@ -1,9 +1,11 @@
 package vip.mystery0.xhu.timetable.api
 
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
+import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.model.request.ClientInitRequest
 import vip.mystery0.xhu.timetable.model.response.ClientInitResponse
@@ -16,7 +18,10 @@ interface CommonApi {
     suspend fun clientInit(@Body request: ClientInitRequest): ClientInitResponse
 
     @GET("/api/rest/external/common/version")
-    suspend fun checkVersion(@Query("checkBeta") checkBeta: Boolean = GlobalConfigStore.versionChannel.isBeta()): ClientVersion?
+    suspend fun checkVersion(
+        @Query("checkBeta") checkBeta: Boolean = GlobalConfigStore.versionChannel.isBeta(),
+        @Query("alwaysShowVersion") alwaysShowVersion: Boolean = GlobalCacheStore.alwaysShowNewVersion,
+    ): Response<ClientVersion?>
 
     @GET("/api/rest/external/common/version/url")
     suspend fun getVersionUrl(@Query("versionId") versionId: Long): VersionUrl

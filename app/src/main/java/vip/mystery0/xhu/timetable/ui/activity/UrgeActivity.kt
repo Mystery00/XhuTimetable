@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.sp
 import com.zyao89.view.zloading.Z_TYPE
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BasePageComposeActivity
-import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.model.response.UrgeItem
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
@@ -67,6 +66,7 @@ class UrgeActivity : BasePageComposeActivity() {
             },
         ) { paddingValues ->
             val refreshing by viewModel.refreshing.collectAsState()
+            val userName by viewModel.userName.collectAsState()
             val remainCount by viewModel.remainCount.collectAsState()
             var expandItemIndex by remember { mutableStateOf(-1) }
             BuildPaging(
@@ -75,7 +75,7 @@ class UrgeActivity : BasePageComposeActivity() {
                 refreshing = refreshing,
                 listContent = {
                     item {
-                        BuildTopDesc(remainCount = remainCount)
+                        BuildTopDesc(userName = userName, remainCount = remainCount)
                     }
                     items(
                         pager.itemCount,
@@ -108,7 +108,7 @@ class UrgeActivity : BasePageComposeActivity() {
 }
 
 @Composable
-private fun BuildTopDesc(remainCount: Int) {
+private fun BuildTopDesc(userName: String, remainCount: Int) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -132,7 +132,7 @@ private fun BuildTopDesc(remainCount: Int) {
             )
             Text(
                 text = buildAnnotatedString {
-                    append("您(${DataHolder.mainUserName})当前剩余的催更次数为： ")
+                    append("您(${userName})当前剩余的催更次数为： ")
                     withStyle(
                         style = SpanStyle(
                             color = MaterialTheme.colors.primary,

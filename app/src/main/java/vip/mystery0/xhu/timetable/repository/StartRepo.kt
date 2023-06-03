@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable.repository
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.component.inject
@@ -8,13 +9,12 @@ import vip.mystery0.xhu.timetable.api.CommonApi
 import vip.mystery0.xhu.timetable.api.MenuApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.config.Customisable
-import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.store.MenuStore
-import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.request.ClientInitRequest
+import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
 import vip.mystery0.xhu.timetable.model.response.VersionUrl
 import java.time.Duration
@@ -22,6 +22,11 @@ import java.time.Duration
 object StartRepo : BaseDataRepo {
     private val commonApi: CommonApi by inject()
     private val menuApi: MenuApi by inject()
+
+    val version = MutableSharedFlow<ClientVersion?>(
+        replay = 0,
+        extraBufferCapacity = 1,
+    )
 
     suspend fun init() {
         if (!isOnline) {
@@ -41,22 +46,37 @@ object StartRepo : BaseDataRepo {
             splashList = clientInitResponse.splash
         }
         //新版本处理
-        clientInitResponse.latestVersion?.let { version ->
+        version.emit(clientInitResponse.latestVersion?.let { version ->
             val ignoreList = getCacheStore { ignoreVersionList }
             val versionString = "${version.versionName}-${version.versionCode}"
             if (!ignoreList.contains(versionString)) {
-                DataHolder.version = version
+                version
+            } else {
+                null
             }
-        }
+        })
+
         //处理菜单
         val menuList = menuApi.list()
         MenuStore.updateList(menuList.map { it.toMenu() })
-        //处理用户信息
-        DataHolder.mainUserName = UserStore.getMainUser()?.info?.name ?: "未登录"
     }
 
     private fun localInit() {
         //do nothing
+    }
+
+    suspend fun checkVersion() {
+        if (!isOnline) {
+            return
+        }
+        val version = commonApi.checkVersion().body() ?: return this.version.emit(null)
+        val ignoreList = getCacheStore { ignoreVersionList }
+        val versionString = "${version.versionName}-${version.versionCode}"
+        if (!ignoreList.contains(versionString)) {
+            this.version.emit(version)
+        } else {
+            this.version.emit(null)
+        }
     }
 
     suspend fun getVersionUrl(versionId: Long): VersionUrl =

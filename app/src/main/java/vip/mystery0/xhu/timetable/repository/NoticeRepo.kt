@@ -11,6 +11,7 @@ import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.base.buildPageSource
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
+import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.model.response.NoticeResponse
 
 object NoticeRepo : BaseDataRepo {
@@ -28,9 +29,15 @@ object NoticeRepo : BaseDataRepo {
             buildPageSource { index, size ->
                 checkForceLoadFromCloud(true)
 
-                mainUser().withAutoLoginOnce {
+                val result = mainUser().withAutoLoginOnce {
                     noticeApi.noticeList(it, index = index, size = size)
                 }
+                result.items.maxOfOrNull { it.noticeId }?.let {
+                    val last = getCacheStore { lastNoticeId }
+                    setCacheStore { lastNoticeId = maxOf(last, it) }
+                }
+
+                result
             }
         }
     ).flow

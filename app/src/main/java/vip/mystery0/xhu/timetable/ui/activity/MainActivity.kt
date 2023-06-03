@@ -512,9 +512,9 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             version = newVersion,
             onDownload = {
                 if (it) {
-                    viewModel.downloadApk()
+                    viewModel.downloadApk(newVersion)
                 } else {
-                    viewModel.downloadPatch()
+                    viewModel.downloadPatch(newVersion)
                 }
             },
             onIgnore = {

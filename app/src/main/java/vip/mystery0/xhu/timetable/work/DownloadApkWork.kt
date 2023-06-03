@@ -18,10 +18,8 @@ import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.api.FileApi
 import vip.mystery0.xhu.timetable.base.DownloadError
 import vip.mystery0.xhu.timetable.base.XhuCoroutineWorker
-import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.externalCacheDownloadDir
-import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.packageName
 import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.ui.activity.DownloadUpdateState
@@ -41,6 +39,11 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
         private const val TAG = "DownloadApkWork"
         private const val NOTIFICATION_TAG = "DownloadApkWork"
         private val NOTIFICATION_ID = NotificationId.DOWNLOAD.id
+
+        const val ARG_VERSION_ID = "versionId"
+        const val ARG_VERSION_NAME = "versionName"
+        const val ARG_VERSION_CODE = "versionCode"
+        const val ARG_VERSION_CHECK_MD5 = "versionCheckMd5"
     }
 
     private val notificationManager: NotificationManager by inject()
@@ -57,23 +60,26 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
     }
 
     override suspend fun doWork(): Result {
-        val version = DataHolder.version ?: return Result.success()
-        startForeground(version)
+        val versionId = inputData.getString(ARG_VERSION_ID)?.toLong() ?: return Result.failure()
+        val versionName = inputData.getString(ARG_VERSION_NAME) ?: return Result.failure()
+        val versionCode = inputData.getInt(ARG_VERSION_CODE, 0)
+        val versionCheckMd5 = inputData.getString(ARG_VERSION_CHECK_MD5)?.toBoolean() ?: return Result.failure()
+        startForeground(versionName)
         val file = withContext(Dispatchers.IO) {
             val dir = File(externalCacheDownloadDir, "apk")
             if (!dir.exists()) {
                 dir.mkdirs()
             }
-            val file = File(dir, "${version.versionName}-${version.versionCode}.apk")
+            val file = File(dir, "${versionName}-${versionCode}.apk")
             if (file.exists()) {
                 file.delete()
             }
             file
         }
-        setForeground(getDownloadUrl(version))
+        setForeground(getDownloadUrl(versionName))
 
         //获取下载地址
-        val versionUrl = StartRepo.getVersionUrl(version.versionId)
+        val versionUrl = StartRepo.getVersionUrl(versionId)
 
         withContext(Dispatchers.IO) {
             val response =
@@ -91,7 +97,7 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
             file.md5()
         }
         updateStatus(status = "文件处理中", patch = false, progress = 100)
-        if (version.checkMd5 && !md5.equals(versionUrl.apkMd5, ignoreCase = true)) {
+        if (versionCheckMd5 && !md5.equals(versionUrl.apkMd5, ignoreCase = true)) {
             throw DownloadError.MD5CheckFailed()
         }
         //md5校验通过，安装应用
@@ -138,22 +144,22 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
             .setAutoCancel(true)
             .setContentText(null)
 
-    private suspend fun startForeground(version: ClientVersion) =
+    private suspend fun startForeground(versionName: String) =
         setForeground(
             ForegroundInfo(
                 NOTIFICATION_ID,
                 notificationBuilder
-                    .setContentTitle("正在下载：${version.versionName}")
+                    .setContentTitle("正在下载：${versionName}")
                     .setContentText("正在开始下载")
                     .build()
             )
         )
 
-    private fun getDownloadUrl(version: ClientVersion): ForegroundInfo =
+    private fun getDownloadUrl(versionName: String): ForegroundInfo =
         ForegroundInfo(
             NOTIFICATION_ID,
             notificationBuilder
-                .setContentTitle("正在下载：${version.versionName}")
+                .setContentTitle("正在下载：${versionName}")
                 .setContentText("正在获取下载地址……")
                 .build()
         )

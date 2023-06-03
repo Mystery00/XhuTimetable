@@ -15,7 +15,6 @@ abstract class XhuCoroutineWorker(
     appContext: Context,
     params: WorkerParameters
 ) : ListenableWorker(appContext, params) {
-
     private val job = Job()
     private val future: SettableFuture<Result> = SettableFuture()
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
@@ -74,11 +73,12 @@ class SettableFuture<V> internal constructor() : AbstractFuture<V>() {
     }
 }
 
-inline fun <reified W : XhuCoroutineWorker> WorkManager.startUniqueWork() {
+inline fun <reified W : XhuCoroutineWorker> WorkManager.startUniqueWork(inputData: Data) {
     enqueueUniqueWork(
         W::class.java.name,
         ExistingWorkPolicy.KEEP,
         OneTimeWorkRequestBuilder<W>()
+            .setInputData(inputData)
             .build()
     )
 }

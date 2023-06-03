@@ -18,10 +18,8 @@ import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.api.FileApi
 import vip.mystery0.xhu.timetable.base.DownloadError
 import vip.mystery0.xhu.timetable.base.XhuCoroutineWorker
-import vip.mystery0.xhu.timetable.config.DataHolder
 import vip.mystery0.xhu.timetable.config.interceptor.DownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.externalCacheDownloadDir
-import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.packageName
 import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.ui.activity.DownloadUpdateState
@@ -42,6 +40,10 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
         private const val TAG = "DownloadPatchWork"
         private const val NOTIFICATION_TAG = "DownloadPatchWork"
         private val NOTIFICATION_ID = NotificationId.DOWNLOAD.id
+
+        const val ARG_VERSION_ID = "versionId"
+        const val ARG_VERSION_NAME = "versionName"
+        const val ARG_VERSION_CODE = "versionCode"
     }
 
     private val notificationManager: NotificationManager by inject()
@@ -58,23 +60,25 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
     }
 
     override suspend fun doWork(): Result {
-        val version = DataHolder.version ?: return Result.success()
-        startForeground(version)
+        val versionId = inputData.getString(ARG_VERSION_ID)?.toLong() ?: return Result.failure()
+        val versionName = inputData.getString(ARG_VERSION_NAME) ?: return Result.failure()
+        val versionCode = inputData.getInt(ARG_VERSION_CODE, 0)
+        startForeground(versionName)
         val file = withContext(Dispatchers.IO) {
             val dir = File(externalCacheDownloadDir, "patch")
             if (!dir.exists()) {
                 dir.mkdirs()
             }
-            val file = File(dir, "${version.versionName}-${version.versionCode}.patch")
+            val file = File(dir, "${versionName}-${versionCode}.patch")
             if (file.exists()) {
                 file.delete()
             }
             file
         }
-        setForeground(getDownloadUrl(version))
+        setForeground(getDownloadUrl(versionName))
 
         //获取下载地址
-        val versionUrl = StartRepo.getVersionUrl(version.versionId)
+        val versionUrl = StartRepo.getVersionUrl(versionId)
 
         withContext(Dispatchers.IO) {
             val response =
@@ -98,7 +102,7 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
         //md5校验通过，合并安装包
         setForeground(patching())
         val apkDir = File(externalCacheDownloadDir, "apk")
-        val apkFile = File(apkDir, "${version.versionName}-${version.versionCode}.apk")
+        val apkFile = File(apkDir, "${versionName}-${versionCode}.apk")
         try {
             BsPatch.patch(
                 applicationContext.applicationInfo.sourceDir,
@@ -153,23 +157,23 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
             .setAutoCancel(true)
             .setContentText(null)
 
-    private suspend fun startForeground(version: ClientVersion) =
+    private suspend fun startForeground(versionName: String) =
         setForeground(
             ForegroundInfo(
                 NOTIFICATION_ID,
                 notificationBuilder
-                    .setContentTitle("正在下载：${version.versionName}")
+                    .setContentTitle("正在下载：${versionName}")
                     .setContentText("正在开始下载")
                     .build()
             )
         )
 
-    private fun getDownloadUrl(version: ClientVersion): ForegroundInfo =
+    private fun getDownloadUrl(versionName: String): ForegroundInfo =
         ForegroundInfo(
             NOTIFICATION_ID,
             notificationBuilder
                 .setContentText("正在获取下载地址……")
-                .setContentTitle("正在下载：${version.versionName}")
+                .setContentTitle("正在下载：${versionName}")
                 .build()
         )
 
