@@ -147,7 +147,11 @@ class MainViewModel : ComposeViewModel() {
             _mainUser.value = mainUser
             _emptyUser.value = mainUser == null
             StartRepo.version.collectLatest {
-                version.value = it
+                if (it == ClientVersion.EMPTY) {
+                    version.value = null
+                } else {
+                    version.value = it
+                }
             }
         }
         showPoems()
