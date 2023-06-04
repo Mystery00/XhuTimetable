@@ -76,6 +76,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.lifecycleScope
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
@@ -92,13 +93,11 @@ import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import com.vanpra.composematerialdialogs.title
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.model.event.EventType
-import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.trackEvent
@@ -111,7 +110,7 @@ import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
 import kotlin.math.min
 
 @OptIn(ExperimentalMaterialApi::class)
-class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEventBus = true) {
+class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
     private val viewModel: MainViewModel by viewModels()
     private lateinit var modalBottomSheetState: ModalBottomSheetState
     private lateinit var addDialogState: MaterialDialogState
@@ -129,6 +128,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
             else
                 "再按一次退出${appName}".toast()
         }
+        updateUIFromConfig()
     }
 
     @OptIn(ExperimentalPermissionsApi::class, ExperimentalFoundationApi::class)
@@ -606,51 +606,53 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false, registerEvent
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN_ORDERED)
-    fun updateUIFromConfig(uiEvent: UIEvent) {
-        viewModel.loadConfig()
-        when (uiEvent.eventType) {
-            EventType.MULTI_MODE_CHANGED,
-            EventType.CHANGE_MAIN_USER -> {
-                viewModel.checkMainUser()
-                viewModel.refreshCloudDataToState()
-            }
+    private fun updateUIFromConfig() {
+        lifecycleScope.launch {
+            EventBus.subscribe(lifecycle) { eventType ->
+                viewModel.loadConfig()
+                when (eventType) {
+                    EventType.MULTI_MODE_CHANGED,
+                    EventType.CHANGE_MAIN_USER -> {
+                        viewModel.checkMainUser()
+                        viewModel.refreshCloudDataToState()
+                    }
 
-            EventType.CHANGE_CURRENT_YEAR_AND_TERM,
-            EventType.CHANGE_SHOW_CUSTOM_COURSE -> {
-                viewModel.refreshCloudDataToState()
-            }
+                    EventType.CHANGE_CURRENT_YEAR_AND_TERM,
+                    EventType.CHANGE_SHOW_CUSTOM_COURSE -> {
+                        viewModel.refreshCloudDataToState()
+                    }
 
-            EventType.MAIN_USER_LOGOUT -> {
-                viewModel.checkMainUser()
-            }
+                    EventType.MAIN_USER_LOGOUT -> {
+                        viewModel.checkMainUser()
+                    }
 
-            EventType.CHANGE_AUTO_SHOW_TOMORROW_COURSE -> {
-                viewModel.loadLocalDataToState(changeWeekOnly = true)
-                viewModel.calculateTodayTitle()
-            }
+                    EventType.CHANGE_AUTO_SHOW_TOMORROW_COURSE -> {
+                        viewModel.loadLocalDataToState(changeWeekOnly = true)
+                        viewModel.calculateTodayTitle()
+                    }
 
-            EventType.CHANGE_SHOW_NOT_THIS_WEEK,
-            EventType.CHANGE_TERM_START_TIME,
-            EventType.CHANGE_COURSE_COLOR,
-            EventType.CHANGE_CUSTOM_UI,
-            EventType.CHANGE_SHOW_CUSTOM_THING -> {
-                viewModel.loadLocalDataToState(changeWeekOnly = true)
-            }
+                    EventType.CHANGE_SHOW_NOT_THIS_WEEK,
+                    EventType.CHANGE_TERM_START_TIME,
+                    EventType.CHANGE_COURSE_COLOR,
+                    EventType.CHANGE_CUSTOM_UI,
+                    EventType.CHANGE_SHOW_CUSTOM_THING -> {
+                        viewModel.loadLocalDataToState(changeWeekOnly = true)
+                    }
 
-            EventType.CHANGE_MAIN_BACKGROUND -> {
-                viewModel.loadBackground()
-            }
+                    EventType.CHANGE_MAIN_BACKGROUND -> {
+                        viewModel.loadBackground()
+                    }
 
-            EventType.UPDATE_NOTICE_CHECK -> {
-                viewModel.checkUnReadNotice()
-            }
+                    EventType.UPDATE_NOTICE_CHECK -> {
+                        viewModel.checkUnReadNotice()
+                    }
 
-            EventType.UPDATE_FEEDBACK_CHECK -> {
-                viewModel.checkUnReadFeedback()
-            }
+                    EventType.UPDATE_FEEDBACK_CHECK -> {
+                        viewModel.checkUnReadFeedback()
+                    }
 
-            else -> {
+                    else -> {}
+                }
             }
         }
     }

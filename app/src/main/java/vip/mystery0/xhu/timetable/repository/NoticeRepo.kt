@@ -9,9 +9,11 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.NoticeApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.base.buildPageSource
+import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
+import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.response.NoticeResponse
 
 object NoticeRepo : BaseDataRepo {
@@ -36,6 +38,7 @@ object NoticeRepo : BaseDataRepo {
                     val last = getCacheStore { lastNoticeId }
                     setCacheStore { lastNoticeId = maxOf(last, it) }
                 }
+                EventBus.post(EventType.UPDATE_NOTICE_CHECK)
 
                 result
             }

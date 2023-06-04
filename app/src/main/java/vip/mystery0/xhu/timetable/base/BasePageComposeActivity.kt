@@ -28,8 +28,7 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 
 abstract class BasePageComposeActivity(
     setSystemUiColor: Boolean = true,
-    registerEventBus: Boolean = false,
-) : BaseComposeActivity(setSystemUiColor, registerEventBus) {
+) : BaseComposeActivity(setSystemUiColor) {
 
     @Composable
     fun <T : Any> Flow<PagingData<T>>.collectAndHandleState(

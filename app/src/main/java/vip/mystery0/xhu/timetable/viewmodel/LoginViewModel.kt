@@ -7,23 +7,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.greenrobot.eventbus.EventBus
-import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.CoroutineStopException
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
+import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.model.event.EventType
-import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.repository.UserRepo
 
 class LoginViewModel : ComposeViewModel() {
     companion object {
         private const val TAG = "LoginViewModel"
     }
-
-    private val eventBus: EventBus by inject()
 
     private val _loginState = MutableStateFlow(LoginState())
     val loginState: StateFlow<LoginState> = _loginState
@@ -56,7 +52,7 @@ class LoginViewModel : ComposeViewModel() {
             UserStore.login(user)
             if (UserStore.mainUser().studentId == username) {
                 //刚刚登录的账号是主账号，说明是异常情况下登录
-                eventBus.post(UIEvent(EventType.CHANGE_MAIN_USER))
+                EventBus.post(EventType.CHANGE_MAIN_USER)
             }
             _loginState.value = LoginState(loading = false, success = true)
         }

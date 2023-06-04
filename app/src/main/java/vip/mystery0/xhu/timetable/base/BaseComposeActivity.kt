@@ -67,9 +67,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.zyao89.view.zloading.ZLoadingView
 import com.zyao89.view.zloading.Z_TYPE
-import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
@@ -78,16 +76,10 @@ import kotlin.reflect.KClass
 
 abstract class BaseComposeActivity(
     private val setSystemUiColor: Boolean = true,
-    private val registerEventBus: Boolean = false,
 ) : ComponentActivity(), KoinComponent {
-    val eventBus: EventBus by inject()
-
     private var toast: Toast? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (registerEventBus) {
-            eventBus.register(this)
-        }
         super.onCreate(savedInstanceState)
         initIntent()
         setContent {
@@ -338,13 +330,6 @@ abstract class BaseComposeActivity(
         ) {
             Text(text = text, fontSize = 14.sp)
         }
-    }
-
-    override fun onDestroy() {
-        if (registerEventBus) {
-            eventBus.unregister(this)
-        }
-        super.onDestroy()
     }
 
     protected inline fun <reified T : BaseComposeActivity> pushDynamicShortcuts(

@@ -8,8 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
-import org.greenrobot.eventbus.EventBus
-import org.koin.core.component.inject
 import retrofit2.Retrofit
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.api.FileApi
@@ -17,12 +15,12 @@ import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.interceptor.FileDownloadProgressInterceptor
 import vip.mystery0.xhu.timetable.config.interceptor.FileDownloadProgressState
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
+import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.customImageDir
 import vip.mystery0.xhu.timetable.externalPictureDir
 import vip.mystery0.xhu.timetable.model.event.EventType
-import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.model.response.BackgroundResponse
 import vip.mystery0.xhu.timetable.repository.BackgroundRepo
 import vip.mystery0.xhu.timetable.ui.activity.formatFileSize
@@ -37,8 +35,6 @@ class BackgroundViewModel : ComposeViewModel() {
     companion object {
         private const val TAG = "BackgroundViewModel"
     }
-
-    private val eventBus: EventBus by inject()
 
     private val fileApi: FileApi by lazy {
         val client = OkHttpClient.Builder()
@@ -143,7 +139,7 @@ class BackgroundViewModel : ComposeViewModel() {
                     backgroundList = generateList(),
                     errorMessage = "背景图设置成功"
                 )
-            eventBus.post(UIEvent(EventType.CHANGE_MAIN_BACKGROUND))
+            EventBus.post(EventType.CHANGE_MAIN_BACKGROUND)
         }
     }
 
@@ -210,7 +206,7 @@ class BackgroundViewModel : ComposeViewModel() {
                     backgroundList = generateList(),
                     errorMessage = "背景图设置成功"
                 )
-            eventBus.post(UIEvent(EventType.CHANGE_MAIN_BACKGROUND))
+            EventBus.post(EventType.CHANGE_MAIN_BACKGROUND)
         }
     }
 }

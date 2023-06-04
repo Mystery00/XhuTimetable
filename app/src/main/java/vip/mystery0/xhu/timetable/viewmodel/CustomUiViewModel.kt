@@ -4,20 +4,16 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
-import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.WeekCourseView
 import vip.mystery0.xhu.timetable.model.event.EventType
-import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.repository.local.AggregationLocalRepo
 
 class CustomUiViewModel : ComposeViewModel() {
-    private val eventBus: EventBus by inject()
-
     private val _randomCourse = MutableStateFlow<List<WeekCourseView>>(emptyList())
     val randomCourse: StateFlow<List<WeekCourseView>> = _randomCourse
 
@@ -91,8 +87,8 @@ class CustomUiViewModel : ComposeViewModel() {
                 backgroundImageBlur.value,
             )
             setConfigStore { customUi = nowCustomUi }
-            eventBus.post(UIEvent(EventType.CHANGE_CUSTOM_UI))
-            eventBus.post(UIEvent(EventType.CHANGE_MAIN_BACKGROUND))
+            EventBus.post(EventType.CHANGE_CUSTOM_UI)
+            EventBus.post(EventType.CHANGE_MAIN_BACKGROUND)
             loadCustomUi()
         }
     }

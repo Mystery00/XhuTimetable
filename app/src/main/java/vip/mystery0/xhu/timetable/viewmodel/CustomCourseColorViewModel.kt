@@ -5,12 +5,10 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.model.event.EventType
-import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.repository.CourseColorRepo
 import java.text.Collator
 import java.util.Locale
@@ -19,8 +17,6 @@ class CustomCourseColorViewModel : ComposeViewModel(), KoinComponent {
     companion object {
         private val comparator = Collator.getInstance(Locale.CHINA)
     }
-
-    private val eventBus: EventBus by inject()
 
     private val _listState = MutableStateFlow<List<Pair<String, Color>>>(emptyList())
     val listState: StateFlow<List<Pair<String, Color>>> = _listState
@@ -45,7 +41,7 @@ class CustomCourseColorViewModel : ComposeViewModel(), KoinComponent {
                 CourseColorRepo.updateCourseColor(courseName, null)
             }
             loadList("")
-            eventBus.post(UIEvent(EventType.CHANGE_COURSE_COLOR))
+            EventBus.post(EventType.CHANGE_COURSE_COLOR)
         }
     }
 }

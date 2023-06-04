@@ -17,7 +17,9 @@ import vip.mystery0.xhu.timetable.base.TermSelect
 import vip.mystery0.xhu.timetable.base.UserSelect
 import vip.mystery0.xhu.timetable.base.YearSelect
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
+import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.User
+import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.request.AllCourseRequest
 import vip.mystery0.xhu.timetable.model.request.CustomCourseRequest
 import vip.mystery0.xhu.timetable.model.response.AllCourseResponse
@@ -57,8 +59,6 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest,CustomCourseRes
             CourseRepo.getAllCourseListStream(it.user, it.year, it.term, request)
         }.cachedIn(viewModelScope)
     val allCoursePageState: Flow<PagingData<AllCourseResponse>> = _allCoursePageState
-
-    var changeCustomCourse = false
 
     private val _saveLoadingState = MutableStateFlow(LoadingState())
     val saveLoadingState: StateFlow<LoadingState> = _saveLoadingState
@@ -159,7 +159,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest,CustomCourseRes
             }
             _saveLoadingState.value = LoadingState()
             toastMessage("《${request.courseName}》保存成功")
-            changeCustomCourse = true
+            EventBus.post(EventType.CHANGE_SHOW_CUSTOM_COURSE)
             loadCustomCourseList()
         }
     }
@@ -185,7 +185,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest,CustomCourseRes
             CustomCourseRepo.deleteCustomCourse(selectedUser, courseId)
             _saveLoadingState.value = LoadingState()
             toastMessage("删除成功")
-            changeCustomCourse = true
+            EventBus.post(EventType.CHANGE_SHOW_CUSTOM_COURSE)
             loadCustomCourseList()
         }
     }

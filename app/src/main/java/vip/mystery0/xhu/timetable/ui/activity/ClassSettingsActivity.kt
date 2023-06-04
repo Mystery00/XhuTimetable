@@ -31,8 +31,8 @@ import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.Customisable
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
+import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.model.event.EventType
-import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsMenuLink
@@ -100,7 +100,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                         },
                         title = { Text(text = "显示非本周课程") }
                     ) {
-                        eventBus.post(UIEvent(EventType.CHANGE_SHOW_NOT_THIS_WEEK))
+                        EventBus.post(EventType.CHANGE_SHOW_NOT_THIS_WEEK)
                     }
                     ConfigSettingsCheckbox(
                         config = ConfigStore::showStatus,
@@ -114,7 +114,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                         },
                         title = { Text(text = "显示今日课程状态") }
                     ) {
-                        eventBus.post(UIEvent(EventType.CHANGE_SHOW_STATUS))
+                        EventBus.post(EventType.CHANGE_SHOW_STATUS)
                     }
                     XhuSettingsMenuLink(
                         title = { Text(text = "自动显示明日课程") },

@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.sp
 import vip.mystery0.xhu.timetable.base.BasePageComposeActivity
 import vip.mystery0.xhu.timetable.loadInBrowser
 import vip.mystery0.xhu.timetable.model.event.EventType
-import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.model.response.NoticeResponse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuFonts
@@ -161,10 +160,5 @@ class NoticeActivity : BasePageComposeActivity() {
                 }
             )
         }
-    }
-
-    override fun onStop() {
-        eventBus.post(UIEvent(EventType.UPDATE_NOTICE_CHECK))
-        super.onStop()
     }
 }

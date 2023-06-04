@@ -6,23 +6,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.greenrobot.eventbus.EventBus
-import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.Customisable
+import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.event.EventType
-import vip.mystery0.xhu.timetable.model.event.UIEvent
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.Month
 
 class ClassSettingsViewModel : ComposeViewModel() {
-    private val eventBus: EventBus by inject()
-
     private val _errorMessage = MutableStateFlow("")
     val errorMessage: StateFlow<String> = _errorMessage
 
@@ -70,7 +66,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
         viewModelScope.launch {
             setConfigStore { showTomorrowCourseTime = time }
             _showTomorrowCourseTimeData.value = getConfigStore { showTomorrowCourseTime }
-            eventBus.post(UIEvent(EventType.CHANGE_AUTO_SHOW_TOMORROW_COURSE))
+            EventBus.post(EventType.CHANGE_AUTO_SHOW_TOMORROW_COURSE)
         }
     }
 
@@ -84,7 +80,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
             }
             _currentYearData.value = getConfigStore { customNowYear }
             _currentTermData.value = getConfigStore { customNowTerm }
-            eventBus.post(UIEvent(EventType.CHANGE_CURRENT_YEAR_AND_TERM))
+            EventBus.post(EventType.CHANGE_CURRENT_YEAR_AND_TERM)
         }
     }
 
@@ -95,7 +91,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
                     if (custom) Customisable.custom(date) else Customisable.clearCustom(LocalDate.MIN)
             }
             _currentTermStartTime.value = getConfigStore { customTermStartDate }
-            eventBus.post(UIEvent(EventType.CHANGE_TERM_START_TIME))
+            EventBus.post(EventType.CHANGE_TERM_START_TIME)
         }
     }
 
@@ -103,7 +99,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
         viewModelScope.launch {
             setConfigStore { showCustomCourseOnWeek = showCustomCourseData }
             _showCustomCourseData.value = getConfigStore { showCustomCourseOnWeek }
-            eventBus.post(UIEvent(EventType.CHANGE_SHOW_CUSTOM_COURSE))
+            EventBus.post(EventType.CHANGE_SHOW_CUSTOM_COURSE)
         }
     }
 
@@ -111,7 +107,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
         viewModelScope.launch {
             setConfigStore { showCustomThing = showCustomThingData }
             _showCustomThingData.value = getConfigStore { showCustomThing }
-            eventBus.post(UIEvent(EventType.CHANGE_SHOW_CUSTOM_THING))
+            EventBus.post(EventType.CHANGE_SHOW_CUSTOM_THING)
         }
     }
 }

@@ -39,6 +39,7 @@ import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.store.CacheStore
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
+import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
@@ -46,7 +47,6 @@ import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.event.EventType
-import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.ui.activity.contract.FontFileResultContract
@@ -151,7 +151,7 @@ class SettingsActivity : BaseComposeActivity() {
                             Text(text = "当夜间模式开启时，自动禁用背景图片")
                         }
                     ) {
-                        eventBus.post(UIEvent(EventType.CHANGE_MAIN_BACKGROUND))
+                        EventBus.post(EventType.CHANGE_MAIN_BACKGROUND)
                     }
                     XhuSettingsMenuLink(
                         icon = {
