@@ -166,7 +166,7 @@ object UserStore {
                     r.checkNeedLogin()
                 }
             } catch (exception: ServerNeedLoginException) {
-                mutex.withLock {
+                val sessionToken = mutex.withLock {
                     val newUser = userByStudentId(studentId)
                     val updated = this@withAutoLoginOnce.token != newUser.token
                     if (!updated) {
@@ -180,10 +180,13 @@ object UserStore {
                                 info = userInfo
                             )
                         updateUser(user)
+                        loginResponse.sessionToken
+                    } else {
+                        newUser.token
                     }
                 }
                 val r = withContext(Dispatchers.IO) {
-                    block(token)
+                    block(sessionToken)
                 }
                 return@withContext withContext(Dispatchers.Default) {
                     r.checkNeedLogin()
