@@ -160,13 +160,9 @@ dependencies {
     implementation("androidx.paging:paging-runtime-ktx:3.1.1")
     implementation("androidx.paging:paging-compose:1.0.0-alpha20")
     //accompanist
-    val accompanistVersion = "0.31.2-alpha"
-    implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")
+    val accompanistVersion = "0.30.1"
     implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
-    implementation("com.google.accompanist:accompanist-pager:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
-    implementation("com.google.accompanist:accompanist-swiperefresh:$accompanistVersion")
-    implementation("com.google.accompanist:accompanist-placeholder-material:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
     //compose-material-dialogs
@@ -183,11 +179,11 @@ dependencies {
     //work manager
     implementation("androidx.work:work-runtime-ktx:2.8.1")
     //koin
-    implementation("io.insert-koin:koin-android:3.4.0")
-    implementation("io.insert-koin:koin-androidx-workmanager:3.4.0")
-    implementation("io.insert-koin:koin-androidx-compose:3.4.3")
+    implementation("io.insert-koin:koin-android:3.4.1")
+    implementation("io.insert-koin:koin-androidx-workmanager:3.4.1")
+    implementation("io.insert-koin:koin-androidx-compose:3.4.5")
     //coil
-    val coilVersion = "2.3.0"
+    val coilVersion = "2.4.0"
     implementation("io.coil-kt:coil-compose:$coilVersion")
     implementation("io.coil-kt:coil-gif:$coilVersion")
     //retrofit
