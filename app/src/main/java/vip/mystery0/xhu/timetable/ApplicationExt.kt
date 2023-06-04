@@ -59,7 +59,6 @@ const val appVersionName: String = BuildConfig.VERSION_NAME
 
 //版本号
 const val appVersionCode: String = BuildConfig.VERSION_CODE.toString()
-const val appVersionCodeNumber: Long = BuildConfig.VERSION_CODE.toLong()
 
 //系统UA
 val userAgent: String
