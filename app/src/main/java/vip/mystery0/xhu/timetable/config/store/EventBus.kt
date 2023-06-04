@@ -15,7 +15,7 @@ object EventBus {
         flow.emit(eventType)
     }
 
-    suspend fun tryPost(eventType: EventType) {
+    fun tryPost(eventType: EventType) {
         flow.tryEmit(eventType)
     }
 

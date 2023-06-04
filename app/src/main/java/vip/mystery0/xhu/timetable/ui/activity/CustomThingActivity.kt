@@ -69,7 +69,6 @@ import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.model.CustomThing
-import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.request.CustomThingRequest
 import vip.mystery0.xhu.timetable.model.response.CustomThingResponse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
@@ -143,6 +142,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                 }
                 return
             }
+            viewModel.updateChange()
             finish()
         }
 

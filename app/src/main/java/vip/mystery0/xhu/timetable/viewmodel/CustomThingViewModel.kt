@@ -32,6 +32,8 @@ class CustomThingViewModel : PagingComposeViewModel<User, CustomThingResponse>(
     private val _saveLoadingState = MutableStateFlow(LoadingState(init = true))
     val saveLoadingState: StateFlow<LoadingState> = _saveLoadingState
 
+    private var changed = false
+
     init {
         viewModelScope.launch {
             _userSelect.value = initUserSelect()
@@ -95,7 +97,7 @@ class CustomThingViewModel : PagingComposeViewModel<User, CustomThingResponse>(
             }
             _saveLoadingState.value = LoadingState()
             toastMessage("《${request.title}》保存成功")
-            EventBus.post(EventType.CHANGE_SHOW_CUSTOM_THING)
+            changed = true
             loadCustomThingList()
         }
     }
@@ -121,7 +123,7 @@ class CustomThingViewModel : PagingComposeViewModel<User, CustomThingResponse>(
             CustomThingRepo.deleteCustomThing(selectedUser, thingId)
             _saveLoadingState.value = LoadingState()
             toastMessage("删除成功")
-            EventBus.post(EventType.CHANGE_SHOW_CUSTOM_THING)
+            changed = true
             loadCustomThingList()
         }
     }
@@ -129,6 +131,12 @@ class CustomThingViewModel : PagingComposeViewModel<User, CustomThingResponse>(
     fun selectUser(studentId: String) {
         viewModelScope.launch {
             _userSelect.value = setSelectedUser(_userSelect.value, studentId).first
+        }
+    }
+
+    fun updateChange() {
+        if (changed) {
+            EventBus.tryPost(EventType.CHANGE_SHOW_CUSTOM_THING)
         }
     }
 

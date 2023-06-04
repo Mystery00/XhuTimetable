@@ -29,7 +29,7 @@ import vip.mystery0.xhu.timetable.repository.CustomCourseRepo
 import java.time.DayOfWeek
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class CustomCourseViewModel : PagingComposeViewModel<PageRequest,CustomCourseResponse>(
+class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseResponse>(
     {
         CustomCourseRepo.getCustomCourseListStream(it.user, it.year, it.term)
     }
@@ -44,6 +44,8 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest,CustomCourseRes
     val yearSelect: StateFlow<List<YearSelect>> = _yearSelect
     private val _termSelect = MutableStateFlow<List<TermSelect>>(emptyList())
     val termSelect: StateFlow<List<TermSelect>> = _termSelect
+
+    private var changed = false
 
     //蹭课列表分页数据
     private val allCoursePageRequestFlow = MutableStateFlow<AllCoursePageRequest?>(null)
@@ -159,7 +161,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest,CustomCourseRes
             }
             _saveLoadingState.value = LoadingState()
             toastMessage("《${request.courseName}》保存成功")
-            EventBus.post(EventType.CHANGE_SHOW_CUSTOM_COURSE)
+            changed = true
             loadCustomCourseList()
         }
     }
@@ -185,7 +187,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest,CustomCourseRes
             CustomCourseRepo.deleteCustomCourse(selectedUser, courseId)
             _saveLoadingState.value = LoadingState()
             toastMessage("删除成功")
-            EventBus.post(EventType.CHANGE_SHOW_CUSTOM_COURSE)
+            changed = true
             loadCustomCourseList()
         }
     }
@@ -205,6 +207,12 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest,CustomCourseRes
     fun selectTerm(term: Int) {
         viewModelScope.launch {
             _termSelect.value = setSelectedTerm(_termSelect.value, term)
+        }
+    }
+
+    fun updateChange() {
+        if (changed) {
+            EventBus.tryPost(EventType.CHANGE_SHOW_CUSTOM_COURSE)
         }
     }
 
