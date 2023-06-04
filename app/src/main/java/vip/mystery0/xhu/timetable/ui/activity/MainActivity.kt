@@ -96,10 +96,7 @@ import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
-import vip.mystery0.xhu.timetable.appVersionCodeNumber
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
-import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
-import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.event.UIEvent
 import vip.mystery0.xhu.timetable.model.response.ClientVersion

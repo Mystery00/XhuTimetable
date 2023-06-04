@@ -3,7 +3,6 @@ package vip.mystery0.xhu.timetable.work
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.utils.asInstant
 import java.time.LocalDate

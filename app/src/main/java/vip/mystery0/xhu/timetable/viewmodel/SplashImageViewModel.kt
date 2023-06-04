@@ -10,11 +10,8 @@ import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
-import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import java.io.File
-import java.time.Instant
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
 class SplashImageViewModel : ComposeViewModel(), KoinComponent {
 
