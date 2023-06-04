@@ -1,14 +1,9 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import android.Manifest
-import android.animation.Animator
-import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
-import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.ImageView
 import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
@@ -63,6 +58,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,7 +72,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.lifecycleScope
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
@@ -94,7 +89,6 @@ import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import com.vanpra.composematerialdialogs.title
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.store.EventBus
@@ -102,6 +96,9 @@ import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.trackEvent
+import vip.mystery0.xhu.timetable.ui.activity.loading.LoadingButton
+import vip.mystery0.xhu.timetable.ui.activity.loading.LoadingValue
+import vip.mystery0.xhu.timetable.ui.activity.loading.rememberLoadingState
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuStateIcons
 import vip.mystery0.xhu.timetable.ui.theme.isDarkMode
@@ -145,7 +142,6 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
         ShowCheckUpdateDialog()
         val coroutineScope = rememberCoroutineScope()
         val pagerState = rememberPagerState(initialPage = 0)
-        val loading by viewModel.loading.collectAsState()
         val poems by viewModel.poems.collectAsState()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -172,12 +168,20 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
 
         val isDarkMode = isDarkMode()
 
+        val loading by viewModel.loading.collectAsState()
+        var loadingValue by rememberLoadingState(if (loading) LoadingValue.Loading else LoadingValue.Stop)
+
         LaunchedEffect("init") {
             viewModel.loadBackground(isDarkMode)
         }
-        LaunchedEffect(pagerState) {
+        LaunchedEffect("pagerState") {
             snapshotFlow { pagerState.currentPage }.collect {
                 viewModel.dismissWeekView()
+            }
+        }
+        LaunchedEffect("loading") {
+            snapshotFlow { loading }.collect {
+                loadingValue = if (it) LoadingValue.Loading else LoadingValue.Stop
             }
         }
 
@@ -261,57 +265,15 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
                         if (tab.titleBar != null) {
                             tab.titleBar.invoke(this, ext)
                         } else {
-                            Box(
+                            LoadingButton(
+                                loadingValue = loadingValue,
                                 modifier = Modifier
                                     .fillMaxHeight()
                                     .padding(horizontal = 8.dp)
                                     .align(Alignment.CenterEnd)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                    ) {
-                                        trackEvent("手动刷新课表")
-                                        viewModel.refreshCloudDataToState()
-                                    },
-                                contentAlignment = Alignment.Center,
                             ) {
-                                val isDark = isDarkMode()
-                                AndroidView(
-                                    factory = { context ->
-                                        ImageView(context)
-                                    },
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .align(Alignment.Center),
-                                ) {
-                                    it.imageTintList =
-                                        ColorStateList.valueOf(if (isDark) android.graphics.Color.WHITE else android.graphics.Color.BLACK)
-                                    it.setImageResource(R.drawable.ic_sync)
-                                    val animation =
-                                        ObjectAnimator.ofFloat(it, "rotation", 0F, 360F).apply {
-                                            duration = 1000L
-                                            repeatCount = ValueAnimator.INFINITE
-                                            addListener(object : Animator.AnimatorListener {
-                                                override fun onAnimationStart(animation: Animator) {
-                                                }
-
-                                                override fun onAnimationEnd(animation: Animator) {
-                                                }
-
-                                                override fun onAnimationCancel(animation: Animator) {
-                                                }
-
-                                                override fun onAnimationRepeat(animation: Animator) {
-                                                    if (!loading) {
-                                                        animation.cancel()
-                                                    }
-                                                }
-                                            })
-                                        }
-                                    if (loading) {
-                                        animation.start()
-                                    }
-                                }
+                                trackEvent("手动刷新课表")
+                                viewModel.refreshCloudDataToState()
                             }
                             tab.title(this, ext)
                         }

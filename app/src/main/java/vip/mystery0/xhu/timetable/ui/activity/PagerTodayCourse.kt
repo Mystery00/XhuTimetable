@@ -1,10 +1,5 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,7 +32,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,6 +42,8 @@ import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.trackEvent
+import vip.mystery0.xhu.timetable.ui.activity.loading.LoadingButton
+import vip.mystery0.xhu.timetable.ui.activity.loading.LoadingValue
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.TodayCourseSheet
@@ -71,28 +67,11 @@ val todayCourseTitleBar: TabTitle = @Composable { ext ->
             .align(Alignment.CenterEnd)
     ) {
         if (loading) {
-            val infiniteTransition = rememberInfiniteTransition(label = "dataRefresh")
-            val angle by infiniteTransition.animateFloat(
-                initialValue = 0F,
-                targetValue = 360F,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(1000, easing = LinearEasing)
-                ),
-                label = "dataRefresh"
-            )
-            IconButton(
-                onClick = { },
+            LoadingButton(
+                loadingValue = LoadingValue.Loading,
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .graphicsLayer {
-                        rotationZ = angle
-                    },
-            ) {
-                Icon(
-                    painter = XhuIcons.Action.sync,
-                    contentDescription = null,
-                )
-            }
+                    .fillMaxHeight(),
+            ) {}
         }
         IconButton(
             onClick = {
