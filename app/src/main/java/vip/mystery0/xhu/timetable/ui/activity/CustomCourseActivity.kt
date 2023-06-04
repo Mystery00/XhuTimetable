@@ -148,6 +148,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                 }
                 return
             }
+            viewModel.updateChange()
             finish()
         }
 

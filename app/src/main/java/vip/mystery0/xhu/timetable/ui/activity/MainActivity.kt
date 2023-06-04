@@ -7,6 +7,7 @@ import android.animation.ValueAnimator
 import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageView
 import androidx.activity.addCallback
 import androidx.activity.viewModels
@@ -609,6 +610,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
     private fun updateUIFromConfig() {
         lifecycleScope.launch {
             EventBus.subscribe(lifecycle) { eventType ->
+                Log.i("TAG", "updateUIFromConfig: $eventType")
                 viewModel.loadConfig()
                 when (eventType) {
                     EventType.MULTI_MODE_CHANGED,
@@ -618,7 +620,8 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
                     }
 
                     EventType.CHANGE_CURRENT_YEAR_AND_TERM,
-                    EventType.CHANGE_SHOW_CUSTOM_COURSE -> {
+                    EventType.CHANGE_SHOW_CUSTOM_COURSE,
+                    EventType.CHANGE_SHOW_CUSTOM_THING -> {
                         viewModel.refreshCloudDataToState()
                     }
 
@@ -634,8 +637,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
                     EventType.CHANGE_SHOW_NOT_THIS_WEEK,
                     EventType.CHANGE_TERM_START_TIME,
                     EventType.CHANGE_COURSE_COLOR,
-                    EventType.CHANGE_CUSTOM_UI,
-                    EventType.CHANGE_SHOW_CUSTOM_THING -> {
+                    EventType.CHANGE_CUSTOM_UI -> {
                         viewModel.loadLocalDataToState(changeWeekOnly = true)
                     }
 

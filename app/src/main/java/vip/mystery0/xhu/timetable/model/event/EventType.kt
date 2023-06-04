@@ -1,7 +1,5 @@
 package vip.mystery0.xhu.timetable.model.event
 
-data class UIEvent(val eventType: EventType)
-
 enum class EventType {
     CHANGE_MAIN_USER,
     MAIN_USER_LOGOUT,
