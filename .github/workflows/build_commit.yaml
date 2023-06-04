@@ -52,6 +52,8 @@ jobs:
           prerelease: true
           body: |
             注意：该版本为测试版本，可能存在一些问题，不建议日常使用。
+            注意：该版本为测试版本，可能存在一些问题，不建议日常使用。
+            注意：该版本为测试版本，可能存在一些问题，不建议日常使用。
             
             ${{ steps.apk.outputs.commitMessage }}
           files: |
