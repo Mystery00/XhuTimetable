@@ -23,7 +23,6 @@ import androidx.paging.LoadStates
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 

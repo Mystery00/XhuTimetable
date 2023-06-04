@@ -1,9 +1,7 @@
 package vip.mystery0.xhu.timetable
 
 import android.annotation.SuppressLint
-import android.app.AlarmManager
 import android.app.Application
-import android.app.PendingIntent
 import android.content.ActivityNotFoundException
 import android.content.ContentResolver
 import android.content.Context
@@ -16,9 +14,6 @@ import android.provider.Settings
 import android.util.Log
 import android.webkit.WebSettings
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.AbstractCrashesListener
@@ -29,15 +24,7 @@ import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.UserStore
-import vip.mystery0.xhu.timetable.config.store.getConfigStore
-import vip.mystery0.xhu.timetable.utils.asInstant
-import vip.mystery0.xhu.timetable.work.NotifyService
-import vip.mystery0.xhu.timetable.work.NotifyWork
 import java.io.File
-import java.time.Duration
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.concurrent.TimeUnit
 
 @SuppressLint("StaticFieldLeak")
 internal lateinit var context: Context

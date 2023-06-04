@@ -2,10 +2,7 @@ package vip.mystery0.xhu.timetable.model.request
 
 import androidx.compose.ui.graphics.Color
 import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 import vip.mystery0.xhu.timetable.module.moshiTypeAdapter
-import vip.mystery0.xhu.timetable.module.registerAdapter
 import vip.mystery0.xhu.timetable.utils.asInstant
 import vip.mystery0.xhu.timetable.utils.toHexString
 import java.time.LocalDateTime

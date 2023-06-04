@@ -2,7 +2,6 @@ package vip.mystery0.xhu.timetable.model.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.time.LocalTime
 
 @Entity(tableName = "tb_course")
 data class CourseEntity(

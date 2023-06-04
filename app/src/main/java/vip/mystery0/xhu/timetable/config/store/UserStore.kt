@@ -193,20 +193,6 @@ object UserStore {
                 }
             }
         }
-
-    @Deprecated("不再使用")
-    suspend fun <R> User.withAutoLogin(block: suspend (String) -> R): Pair<R, Boolean> =
-        try {
-            block(token) to false
-        } catch (exception: ServerNeedLoginException) {
-            //做一次登录
-            val loginResponse = UserRepo.doLogin(this)
-            //获取用户信息
-            val userInfo = UserRepo.getUserInfo(loginResponse.sessionToken)
-            val user = this.copy(token = loginResponse.sessionToken, info = userInfo)
-            updateUser(user)
-            block(loginResponse.sessionToken) to true
-        }
 }
 
 data class User(
