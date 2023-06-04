@@ -155,7 +155,7 @@ dependencies {
     //compose
     implementation("androidx.compose.ui:ui:1.4.3")
     implementation("androidx.compose.material:material:1.4.3")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.4.3")
+    implementation("androidx.compose.animation:animation:1.4.3")
     //paging3
     implementation("androidx.paging:paging-runtime-ktx:3.1.1")
     implementation("androidx.paging:paging-compose:1.0.0-alpha20")
