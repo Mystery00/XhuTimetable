@@ -36,7 +36,6 @@ import java.time.LocalTime
 
 class SettingsViewModel : ComposeViewModel() {
     companion object {
-        private const val TAG = "SettingsViewModel"
         private var hits = Array(5) { 0L }
     }
 

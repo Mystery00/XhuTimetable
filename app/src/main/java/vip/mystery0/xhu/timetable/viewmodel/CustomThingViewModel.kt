@@ -8,7 +8,9 @@ import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
 import vip.mystery0.xhu.timetable.base.UserSelect
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
+import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.User
+import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.request.CustomThingRequest
 import vip.mystery0.xhu.timetable.model.response.CustomThingResponse
 import vip.mystery0.xhu.timetable.repository.CustomThingRepo
@@ -26,8 +28,6 @@ class CustomThingViewModel : PagingComposeViewModel<User, CustomThingResponse>(
 
     private val _userSelect = MutableStateFlow<List<UserSelect>>(emptyList())
     val userSelect: StateFlow<List<UserSelect>> = _userSelect
-
-    var changeCustomThing = false
 
     private val _saveLoadingState = MutableStateFlow(LoadingState(init = true))
     val saveLoadingState: StateFlow<LoadingState> = _saveLoadingState
@@ -95,7 +95,7 @@ class CustomThingViewModel : PagingComposeViewModel<User, CustomThingResponse>(
             }
             _saveLoadingState.value = LoadingState()
             toastMessage("《${request.title}》保存成功")
-            changeCustomThing = true
+            EventBus.post(EventType.CHANGE_SHOW_CUSTOM_THING)
             loadCustomThingList()
         }
     }
@@ -121,7 +121,7 @@ class CustomThingViewModel : PagingComposeViewModel<User, CustomThingResponse>(
             CustomThingRepo.deleteCustomThing(selectedUser, thingId)
             _saveLoadingState.value = LoadingState()
             toastMessage("删除成功")
-            changeCustomThing = true
+            EventBus.post(EventType.CHANGE_SHOW_CUSTOM_THING)
             loadCustomThingList()
         }
     }

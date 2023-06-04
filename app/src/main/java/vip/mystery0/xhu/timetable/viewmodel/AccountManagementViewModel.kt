@@ -4,19 +4,15 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
-import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.Gender
 import vip.mystery0.xhu.timetable.model.event.EventType
-import vip.mystery0.xhu.timetable.model.event.UIEvent
 
 class AccountManagementViewModel : ComposeViewModel() {
-    private val eventBus: EventBus by inject()
-
     private val _errorMessage = MutableStateFlow("")
     val errorMessage: StateFlow<String> = _errorMessage
 
@@ -46,7 +42,7 @@ class AccountManagementViewModel : ComposeViewModel() {
     fun changeMainUser(studentId: String) {
         viewModelScope.launch {
             UserStore.setMainUser(studentId)
-            eventBus.post(UIEvent(EventType.CHANGE_MAIN_USER))
+            EventBus.post(EventType.CHANGE_MAIN_USER)
             loadLoggedUserList()
         }
     }
@@ -55,7 +51,7 @@ class AccountManagementViewModel : ComposeViewModel() {
         viewModelScope.launch {
             val result = UserStore.logout(studentId)
             if (result) {
-                eventBus.post(UIEvent(EventType.MAIN_USER_LOGOUT))
+                EventBus.post(EventType.MAIN_USER_LOGOUT)
             }
             loadLoggedUserList()
         }
@@ -68,7 +64,7 @@ class AccountManagementViewModel : ComposeViewModel() {
                 return@launch
             }
             setConfigStore { this.multiAccountMode = enable }
-            eventBus.post(UIEvent(EventType.CHANGE_MAIN_USER))
+            EventBus.post(EventType.CHANGE_MAIN_USER)
         }
     }
 }

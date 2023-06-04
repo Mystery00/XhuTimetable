@@ -198,8 +198,6 @@ dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
     //mmkv
     implementation("com.tencent:mmkv-static:1.2.16")
-    //eventbus
-    implementation("org.greenrobot:eventbus:3.3.1")
     //preference
     implementation("com.github.alorma:compose-settings-ui:0.27.0")
     //AppCenter
