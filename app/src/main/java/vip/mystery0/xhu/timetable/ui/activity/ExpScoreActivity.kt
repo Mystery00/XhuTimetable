@@ -24,6 +24,7 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberModalBottomSheetState
@@ -39,14 +40,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.material.placeholder
-import com.google.accompanist.placeholder.material.shimmer
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.model.response.ExperimentScoreItemResponse
-import vip.mystery0.xhu.timetable.model.response.ExperimentScoreResponse
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.ExpScoreViewModel
@@ -141,7 +138,9 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
                     ) {
                         val pullRefreshState = rememberPullRefreshState(
                             refreshing = expScoreListState.loading,
-                            onRefresh = { },
+                            onRefresh = {
+                                viewModel.loadExpScoreList()
+                            },
                         )
 
                         Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
@@ -153,45 +152,29 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
                                         .background(XhuColor.Common.grayBackground),
                                     contentPadding = PaddingValues(4.dp),
                                 ) {
-                                    if (expScoreListState.loading) {
-                                        val placeHolder = ExperimentScoreResponse.PLACEHOLDER
+                                    scoreList.forEach {
                                         stickyHeader {
                                             Row(
                                                 modifier = Modifier
                                                     .background(XhuColor.Common.whiteBackground)
                                                     .padding(12.dp),
                                             ) {
-                                                Text(text = placeHolder.courseName)
+                                                Text(text = it.courseName)
                                                 Spacer(modifier = Modifier.weight(1f))
-                                                Text(text = "${placeHolder.totalScore}分")
+                                                Text(text = "${it.totalScore}分")
                                             }
                                         }
-                                        items(3) {
-                                            BuildItem(
-                                                ExperimentScoreItemResponse.PLACEHOLDER,
-                                                true,
-                                            )
-                                        }
-                                    } else {
-                                        scoreList.forEach {
-                                            stickyHeader {
-                                                Row(
-                                                    modifier = Modifier
-                                                        .background(XhuColor.Common.whiteBackground)
-                                                        .padding(12.dp),
-                                                ) {
-                                                    Text(text = it.courseName)
-                                                    Spacer(modifier = Modifier.weight(1f))
-                                                    Text(text = "${it.totalScore}分")
-                                                }
-                                            }
-                                            items(it.itemList.size) { index ->
-                                                val item = it.itemList[index]
-                                                BuildItem(item)
-                                            }
+                                        items(it.itemList.size) { index ->
+                                            val item = it.itemList[index]
+                                            BuildItem(item)
                                         }
                                     }
                                 }
+                                PullRefreshIndicator(
+                                    refreshing = expScoreListState.loading,
+                                    state = pullRefreshState,
+                                    Modifier.align(Alignment.TopCenter),
+                                )
                             } else {
                                 BuildNoDataLayout()
                             }
@@ -228,18 +211,11 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
 }
 
 @Composable
-private fun BuildItem(
-    item: ExperimentScoreItemResponse,
-    placeHolder: Boolean = false,
-) {
+private fun BuildItem(item: ExperimentScoreItemResponse) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .placeholder(
-                visible = placeHolder,
-                highlight = PlaceholderHighlight.shimmer(),
-            ),
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         backgroundColor = XhuColor.cardBackground,
     ) {
         Column(
