@@ -10,11 +10,6 @@ on:
         description: '上一版本版本号'
         required: true
         type: string
-      betaVersion:
-        description: '测试版本'
-        required: true
-        default: true
-        type: boolean
       forceUpdate:
         description: '是否强制更新'
         required: true
@@ -154,7 +149,7 @@ jobs:
           
           updateLog=$(cat "version.log")
           
-          json='{apkResourceId:$apkResourceId,apkMd5:$apkMd5,patchResourceId:$patchResourceId,patchMd5:$patchMd5,updateLog:$updateLog,versionCode:$versionCode,versionName:$versionName,lastVersionCode:$lastVersionCode,forceUpdate:$forceUpdate,betaVersion:$betaVersion}'
+          json='{apkResourceId:$apkResourceId,apkMd5:$apkMd5,patchResourceId:$patchResourceId,patchMd5:$patchMd5,updateLog:$updateLog,versionCode:$versionCode,versionName:$versionName,lastVersionCode:$lastVersionCode,forceUpdate:$forceUpdate}'
           requestJson=$(
           jq \
           --arg apkResourceId "$apkResourceId" \
@@ -166,7 +161,6 @@ jobs:
           --arg versionName "${{ steps.result.outputs.versionName }}" \
           --arg lastVersionCode "${{ inputs.oldVersionCode }}" \
           --arg forceUpdate "${{ inputs.forceUpdate }}" \
-          --arg betaVersion "${{ inputs.betaVersion }}" \
           -n "$json"
           )
           curl -s -X POST "${{ secrets.NEW_VERSION_API }}" \
