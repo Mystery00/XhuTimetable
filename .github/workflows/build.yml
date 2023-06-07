@@ -25,7 +25,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: 设置JDK
         uses: actions/setup-java@v1
         with:
@@ -50,12 +52,14 @@ jobs:
           versionName=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionName')
           versionCode=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionCode')
           apkFile=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].outputFile')
+          updateLog=$(cat "version.log")
           
           cp "${{ env.OUTPUT_DIR }}/$apkFile" "patch/new.apk"
           
           echo ::set-output name=versionName::$versionName
           echo ::set-output name=versionCode::$versionCode
           echo ::set-output name=apkFile::$apkFile
+          echo ::set-output name=updateLog::$updateLog
       - name: 生成 patch 文件
         id: patch
         run: |
@@ -73,6 +77,15 @@ jobs:
           echo "==========================================" >> $GITHUB_STEP_SUMMARY
           echo "增量包：${patchFile}" >> $GITHUB_STEP_SUMMARY
           echo "md5: $patchMd5" >> $GITHUB_STEP_SUMMARY
+      - name: 发布版本
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.apk.outputs.versionName }}
+          prerelease: false
+          body: |
+            ${{ steps.apk.outputs.updateLog }}
+          files: |
+            ${{ env.OUTPUT_DIR }}/${{ steps.apk.outputs.apkFile }}
       - name: 上传文件
         uses: actions/upload-artifact@v3
         with:
