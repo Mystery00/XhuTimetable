@@ -1,11 +1,9 @@
 package vip.mystery0.xhu.timetable.utils
 
-import android.util.Base64
 import java.io.File
 import java.io.FileInputStream
 import java.nio.channels.FileChannel
 import java.security.MessageDigest
-import java.util.Locale
 
 fun String.md5(): String = bytes2HexString(hashTemplate(toByteArray(), "MD5"))
 
@@ -57,26 +55,6 @@ private fun bytes2HexString(bytes: ByteArray?, isUpperCase: Boolean = true): Str
     return String(ret)
 }
 
-private fun hexString2Bytes(string: String): ByteArray {
-    var hexString = string
-    if (hexString.isBlank()) return ByteArray(0)
-    var len = hexString.length
-    if (len % 2 != 0) {
-        hexString = "0$hexString"
-        len++
-    }
-    val hexBytes = hexString.uppercase(Locale.getDefault()).toCharArray()
-    val ret = ByteArray(len shr 1)
-    var i = 0
-    while (i < len) {
-        ret[i shr 1] = (hex2Dec(hexBytes[i]) shl 4 or hex2Dec(
-            hexBytes[i + 1]
-        )).toByte()
-        i += 2
-    }
-    return ret
-}
-
 private fun hex2Dec(hexChar: Char): Int =
     when (hexChar) {
         in '0'..'9' -> {
@@ -89,21 +67,3 @@ private fun hex2Dec(hexChar: Char): Int =
             throw IllegalArgumentException()
         }
     }
-
-fun String.base64(): String =
-    bytes2HexString(base64Encode(toByteArray()))
-
-fun String.deBase64(): String =
-    bytes2HexString(base64Decode(toByteArray()))
-
-private fun base64Encode(input: ByteArray): ByteArray =
-    if (input.isEmpty())
-        ByteArray(0)
-    else
-        Base64.encode(input, Base64.NO_WRAP)
-
-private fun base64Decode(input: ByteArray): ByteArray =
-    if (input.isEmpty())
-        ByteArray(0)
-    else
-        Base64.decode(input, Base64.NO_WRAP)
