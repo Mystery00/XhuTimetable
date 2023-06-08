@@ -48,8 +48,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
                 val loggedUserList = UserStore.loggedUserList()
                 val startYear =
                     loggedUserList.minByOrNull { it.info.xhuGrade }?.info?.xhuGrade ?: 2019
-                val termStartDate = getConfigStore { termStartDate }
-                val endYear = if (termStartDate.month < Month.JUNE) termStartDate.year - 1 else termStartDate.year
+                val endYear = LocalDate.now().year
                 val tempArrayList = ArrayList<String>()
                 for (it in startYear..endYear) {
                     tempArrayList.add("${it}-${it + 1}学年 第1学期")
