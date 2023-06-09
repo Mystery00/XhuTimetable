@@ -51,10 +51,6 @@ const val appVersionCode: String = BuildConfig.VERSION_CODE.toString()
 val userAgent: String
     get() = WebSettings.getDefaultUserAgent(context)
 
-//更新日志
-val updateLogArray: Array<String>
-    get() = context.resources.getStringArray(R.array.update_log)
-
 @Suppress("DEPRECATION")
 fun isOnline(): Boolean {
     val connectivityManager =
