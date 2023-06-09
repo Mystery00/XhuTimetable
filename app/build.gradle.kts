@@ -179,8 +179,8 @@ dependencies {
     //work manager
     implementation("androidx.work:work-runtime-ktx:2.8.1")
     //koin
-    implementation("io.insert-koin:koin-android:3.4.1")
-    implementation("io.insert-koin:koin-androidx-workmanager:3.4.1")
+    implementation("io.insert-koin:koin-android:3.4.2")
+    implementation("io.insert-koin:koin-androidx-workmanager:3.4.2")
     implementation("io.insert-koin:koin-androidx-compose:3.4.5")
     //coil
     val coilVersion = "2.4.0"
