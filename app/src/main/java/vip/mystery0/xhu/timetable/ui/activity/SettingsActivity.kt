@@ -91,7 +91,6 @@ class SettingsActivity : BaseComposeActivity() {
 
         val showNightModeState = rememberMaterialDialogState()
         val showNotifyTimeState = rememberMaterialDialogState()
-        val showUpdateLogState = rememberMaterialDialogState()
         val checkVersionChannelState = rememberMaterialDialogState()
 
         Scaffold(
@@ -406,7 +405,7 @@ class SettingsActivity : BaseComposeActivity() {
                     XhuSettingsMenuLink(
                         title = { Text(text = "更新日志") },
                         onClick = {
-                            showUpdateLogState.show()
+                            toCustomTabs("https://blog.mystery0.vip/xgkb-changelog")
                         }
                     )
                     XhuSettingsMenuLink(
@@ -626,9 +625,6 @@ class SettingsActivity : BaseComposeActivity() {
             dialogState = showNotifyTimeState,
             initTime = notifyTime ?: LocalTime.now(),
         )
-        BuildUpdateLogDialog(
-            dialogState = showUpdateLogState
-        )
         BuildVersionChannelDialog(
             dialogState = checkVersionChannelState,
             initChannel = versionChannel,
@@ -684,33 +680,6 @@ class SettingsActivity : BaseComposeActivity() {
                 selectedTime = it
             }
         }
-    }
-
-    @Composable
-    private fun BuildUpdateLogDialog(dialogState: MaterialDialogState) {
-        if (!dialogState.showing) {
-            return
-        }
-        AlertDialog(
-            onDismissRequest = {
-                dialogState.hide()
-            },
-            title = {
-                Text(
-                    text = "$appVersionName 更新日志",
-                    fontWeight = FontWeight.Bold,
-                )
-            },
-            text = {
-                Text(text = updateLogArray.joinToString("\n"))
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    dialogState.hide()
-                }) {
-                    Text(text = "关闭")
-                }
-            })
     }
 
     @Composable
