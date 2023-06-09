@@ -2,6 +2,7 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="240dp"
     android:minHeight="100dp"
+    android:previewImage="@mipmap/widget_preview_week"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="1800001"
     android:widgetCategory="home_screen" />
