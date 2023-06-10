@@ -44,7 +44,7 @@ class NotifyService : Service() {
         super.onCreate()
         val notification =
             NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID_DEFAULT)
-                .setSmallIcon(R.mipmap.ic_stat_init)
+                .setSmallIcon(R.drawable.ic_stat_init)
                 .setContentText("正在初始化数据")
                 .setAutoCancel(true)
                 .setPriority(NotificationManagerCompat.IMPORTANCE_NONE)
