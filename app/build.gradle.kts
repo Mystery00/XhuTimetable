@@ -20,13 +20,14 @@ fun String.runCommand(workingDir: File = file("./")): String {
 
 val gitVersionCode: Int = "git rev-list HEAD --count".runCommand().toInt()
 val gitVersionName = "git rev-parse --short=8 HEAD".runCommand()
+val packageName = "vip.mystery0.xhu.timetable"
 
 android {
     compileSdk = 33
     buildToolsVersion = "33.0.2"
 
     defaultConfig {
-        applicationId = "vip.mystery0.xhu.timetable"
+        applicationId = packageName
         minSdk = 26
         targetSdk = 33
         versionCode = gitVersionCode
@@ -42,7 +43,6 @@ android {
             abiFilters.add("armeabi-v7a")
             abiFilters.add("arm64-v8a")
         }
-        manifestPlaceholders["JPUSH_PKGNAME"] = applicationId!!
         manifestPlaceholders["JPUSH_APPKEY"] = ""
         manifestPlaceholders["JPUSH_CHANNEL"] = "developer-default"
         externalNativeBuild {
@@ -81,6 +81,7 @@ android {
                 "proguard-rules.pro"
             )
             versionNameSuffix = ".d$gitVersionCode.$gitVersionName"
+            manifestPlaceholders["JPUSH_PKGNAME"] = "${packageName}${applicationIdSuffix}"
         }
         release {
             val nightly = System.getenv("NIGHTLY")?.toBoolean() ?: false
@@ -114,6 +115,7 @@ android {
                 versionNameSuffix = ".r$gitVersionCode.$gitVersionName"
             }
             signingConfig = signingConfigs.getByName("release")
+            manifestPlaceholders["JPUSH_PKGNAME"] = packageName
         }
     }
     compileOptions {
