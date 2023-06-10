@@ -7,6 +7,7 @@ import com.featureprobe.mobile.FpUrlBuilder
 import com.featureprobe.mobile.FpUser
 import org.koin.dsl.module
 import org.koin.java.KoinJavaComponent
+import vip.mystery0.xhu.timetable.BuildConfig
 import vip.mystery0.xhu.timetable.publicDeviceId
 
 val featureModule = module {
@@ -18,6 +19,7 @@ val featureModule = module {
         user.with("factory", Build.MANUFACTURER)
         user.with("model", Build.MODEL)
         user.with("rom", Build.DISPLAY)
+        user.with("packageName", BuildConfig.APPLICATION_ID)
         val config = FpConfig(url!!, "client-27a2a0787d92993d66680ac75f2fb050859c97d1", 10u, 10u)
         FeatureProbe(config, user)
     }
@@ -31,4 +33,11 @@ enum class Feature(val key: String, val defaultValue: Boolean) {
     ;
 
     fun isEnabled(): Boolean = fp.boolValue(key, defaultValue)
+}
+
+enum class FeatureString(val key: String, val defaultValue: String) {
+    JPUSH_APP_KEY("jpush_api_key", "disable"),
+    ;
+
+    fun getValue(): String = fp.stringValue(key, defaultValue)
 }

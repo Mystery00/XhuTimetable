@@ -42,6 +42,9 @@ android {
             abiFilters.add("armeabi-v7a")
             abiFilters.add("arm64-v8a")
         }
+        manifestPlaceholders["JPUSH_PKGNAME"] = applicationId!!
+        manifestPlaceholders["JPUSH_APPKEY"] = ""
+        manifestPlaceholders["JPUSH_CHANNEL"] = "developer-default"
         externalNativeBuild {
             cmake {
                 cppFlags += ""
@@ -207,6 +210,8 @@ dependencies {
     //feature-probe
     implementation("com.featureprobe:client-sdk-android:2.0.2@aar")
     implementation("net.java.dev.jna:jna:5.7.0@aar")
+    //jg-push
+    implementation("cn.jiguang.sdk:jpush:5.0.3")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
