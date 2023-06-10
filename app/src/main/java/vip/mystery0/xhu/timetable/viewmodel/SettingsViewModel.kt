@@ -5,7 +5,6 @@ import android.os.SystemClock
 import androidx.lifecycle.viewModelScope
 import androidx.work.Data
 import androidx.work.WorkManager
-import cn.jpush.android.api.JPushInterface
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +19,6 @@ import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.contentResolver
-import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.externalDocumentsDir
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
