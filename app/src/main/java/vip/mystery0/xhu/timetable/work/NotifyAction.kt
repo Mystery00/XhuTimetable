@@ -184,7 +184,7 @@ class NotifyAction(
     private val notificationBuilder: NotificationCompat.Builder
         get() = NotificationCompat.Builder(appContext, NOTIFICATION_CHANNEL_ID_TOMORROW)
             .setDefaults(Notification.DEFAULT_ALL)
-            .setSmallIcon(R.mipmap.ic_stat_init)
+            .setSmallIcon(R.drawable.ic_stat_init)
             .setColor(colorAccent)
             .setAutoCancel(true)
 
