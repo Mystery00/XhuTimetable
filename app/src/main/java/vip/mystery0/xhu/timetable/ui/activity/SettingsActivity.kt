@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import cn.jpush.android.api.JPushInterface
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.microsoft.appcenter.crashes.model.TestCrashException
@@ -66,6 +67,9 @@ import java.time.LocalTime
 class SettingsActivity : BaseComposeActivity() {
     private val viewModel: SettingsViewModel by viewModels()
     private val clipboardManager: ClipboardManager by inject()
+    private val jPushRegistrationId: String? by lazy {
+        JPushInterface.getRegistrationID(this)
+    }
 
     private val fontFileSelectLauncher =
         registerForActivityResult(FontFileResultContract()) { intent ->
@@ -557,6 +561,26 @@ class SettingsActivity : BaseComposeActivity() {
                                         ClipData.newPlainText(
                                             "设备id",
                                             publicDeviceId
+                                        )
+                                    )
+                                }
+                            },
+                        )
+                        XhuSettingsMenuLink(
+                            title = { Text(text = "极光推送注册id") },
+                            subtitle = {
+                                Text(text = jPushRegistrationId ?: "无推送注册id")
+                            },
+                            onClick = {
+                                if (jPushRegistrationId.isNullOrBlank()) {
+                                    toastString("推送注册id为空")
+                                    return@XhuSettingsMenuLink
+                                }
+                                scope.launch {
+                                    clipboardManager.setPrimaryClip(
+                                        ClipData.newPlainText(
+                                            "推送注册id",
+                                            jPushRegistrationId
                                         )
                                     )
                                 }
