@@ -42,11 +42,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zyao89.view.zloading.Z_TYPE
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.store.UserStore
+import vip.mystery0.xhu.timetable.model.LottieLoadingType
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.utils.finishAllActivity
@@ -260,7 +260,11 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
     @Composable
     private fun DialogContent() {
         val loginState by viewModel.loginState.collectAsState()
-        ShowProgressDialog(show = loginState.loading, text = "登录中……", type = Z_TYPE.STAR_LOADING)
+        ShowProgressDialog(
+            show = loginState.loading,
+            text = "登录中……",
+            type = LottieLoadingType.LOADING,
+        )
         if (loginState.success) {
             "登录成功，欢迎使用${appName}！".toast()
             if (!intent.getBooleanExtra(AccountSettingsActivity.INTENT_EXTRA, false)) {
