@@ -35,6 +35,10 @@ fun <T> Response<T>.checkNeedLogin(): T {
     if (code() == 401) {
         throw ServerNeedLoginException()
     }
+    parseServerErrorWhenFailed()
+}
+
+fun Response<*>.parseServerErrorWhenFailed(): Nothing {
     val response = errorBody()?.string()?.trim()
     if (response.isNullOrBlank()) {
         throw ServerError("no response body, http code: ${code()}")
