@@ -171,7 +171,7 @@ dependencies {
     implementation("io.github.vanpra.compose-material-dialogs:datetime:$composeMaterialDialogsVersion")
     implementation("io.github.vanpra.compose-material-dialogs:color:$composeMaterialDialogsVersion")
     //lottie
-    implementation("com.airbnb.android:lottie-compose:6.0.0")
+    implementation("com.airbnb.android:lottie-compose:6.0.1")
     //room
     implementation("androidx.room:room-runtime:2.5.1")
     ksp("androidx.room:room-compiler:2.5.1")
@@ -200,8 +200,6 @@ dependencies {
     val appCenterSdkVersion = "5.0.1"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
-    //zloading，通过jitpack导入修改版本
-    implementation("com.github.Mystery00:ZLoading:1.2.1")
     //ucrop
     implementation("com.github.yalantis:ucrop:2.2.8")
     //feature-probe
