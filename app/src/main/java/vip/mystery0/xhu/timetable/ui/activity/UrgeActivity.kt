@@ -30,9 +30,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zyao89.view.zloading.Z_TYPE
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BasePageComposeActivity
+import vip.mystery0.xhu.timetable.model.LottieLoadingType
 import vip.mystery0.xhu.timetable.model.response.UrgeItem
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
@@ -102,7 +102,9 @@ class UrgeActivity : BasePageComposeActivity() {
         }
         val urgeLoading by viewModel.urgeLoading.collectAsState()
         ShowProgressDialog(
-            show = urgeLoading, text = "正在催更……", type = Z_TYPE.PAC_MAN
+            show = urgeLoading,
+            text = "正在催更……",
+            type = LottieLoadingType.SETTING,
         )
     }
 }

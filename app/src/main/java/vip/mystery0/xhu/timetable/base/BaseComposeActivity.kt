@@ -3,7 +3,6 @@ package vip.mystery0.xhu.timetable.base
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -22,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -54,7 +52,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.pm.ShortcutInfoCompat
@@ -65,10 +62,9 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.zyao89.view.zloading.ZLoadingView
-import com.zyao89.view.zloading.Z_TYPE
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.R
+import vip.mystery0.xhu.timetable.model.LottieLoadingType
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
@@ -151,7 +147,7 @@ abstract class BaseComposeActivity(
         show: Boolean,
         text: String,
         fontSize: TextUnit = TextUnit.Unspecified,
-        type: Z_TYPE = Z_TYPE.SINGLE_CIRCLE,
+        type: LottieLoadingType = LottieLoadingType.LOADING,
     ) {
         if (!show) {
             return
@@ -171,22 +167,12 @@ abstract class BaseComposeActivity(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     val contentColor = MaterialTheme.colors.primary
-                    AndroidView(
-                        factory = { context ->
-                            ZLoadingView(context)
-                        }, modifier = Modifier
-                            .width(64.dp)
-                            .height(64.dp)
-                    ) {
-                        it.setLoadingBuilder(type)
-                        it.setColorFilter(
-                            Color.valueOf(
-                                contentColor.red,
-                                contentColor.green,
-                                contentColor.blue
-                            ).toArgb()
-                        )
-                    }
+                    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(type.resId))
+                    LottieAnimation(
+                        composition = composition,
+                        iterations = LottieConstants.IterateForever,
+                        modifier = Modifier.size(64.dp),
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = text,

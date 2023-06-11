@@ -4,8 +4,10 @@ import android.util.Base64
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.component.inject
+import retrofit2.HttpException
 import vip.mystery0.xhu.timetable.api.UserApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
+import vip.mystery0.xhu.timetable.config.parseServerErrorWhenFailed
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.request.LoginRequest
 import vip.mystery0.xhu.timetable.model.response.LoginResponse
@@ -30,8 +32,13 @@ object UserRepo : BaseDataRepo {
             Base64.encodeToString(cipher.doFinal(password.toByteArray()), Base64.DEFAULT)
         }
         val loginRequest = LoginRequest(username, encryptPassword, publicKey)
-        return withContext(Dispatchers.IO) {
-            userApi.login(loginRequest)
+        try {
+            return withContext(Dispatchers.IO) {
+                userApi.login(loginRequest)
+            }
+        } catch (e: HttpException) {
+            val resp = e.response() ?: throw e
+            resp.parseServerErrorWhenFailed()
         }
     }
 

@@ -58,11 +58,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.zyao89.view.zloading.Z_TYPE
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.model.CalendarAccount
+import vip.mystery0.xhu.timetable.model.LottieLoadingType
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.ExportCalendarViewModel
@@ -343,7 +343,9 @@ class ExportCalendarActivity : BaseComposeActivity() {
         ShowReminderDialog(show = reminderDialog, list = reminder)
         val exportAccountState by viewModel.actionState.collectAsState()
         ShowProgressDialog(
-            show = exportAccountState.loading, text = "数据导出中", type = Z_TYPE.STAR_LOADING
+            show = exportAccountState.loading,
+            text = "数据导出中",
+            type = LottieLoadingType.SETTING,
         )
     }
 
