@@ -16,7 +16,6 @@ import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
 
 object UserRepo : BaseDataRepo {
-    private const val TAG = "UserRepo"
     private val userApi: UserApi by inject()
 
     suspend fun doLogin(user: User): LoginResponse =
