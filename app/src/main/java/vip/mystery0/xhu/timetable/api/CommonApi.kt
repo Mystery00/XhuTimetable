@@ -19,8 +19,8 @@ interface CommonApi {
 
     @GET("/api/rest/external/common/version")
     suspend fun checkVersion(
-        @Query("checkBeta") checkBeta: Boolean = GlobalConfigStore.versionChannel.isBeta(),
-        @Query("alwaysShowVersion") alwaysShowVersion: Boolean = GlobalCacheStore.alwaysShowNewVersion,
+        @Query("checkBeta") checkBeta: Boolean,
+        @Query("alwaysShowVersion") alwaysShowVersion: Boolean,
     ): Response<ClientVersion?>
 
     @GET("/api/rest/external/common/version/url")

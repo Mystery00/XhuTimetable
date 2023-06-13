@@ -175,9 +175,9 @@ class SettingsViewModel : ComposeViewModel() {
         }
     }
 
-    fun checkUpdate() {
+    fun checkUpdate(forceBeta: Boolean) {
         viewModelScope.launch {
-            StartRepo.checkVersion()
+            StartRepo.checkVersion(forceBeta)
         }
     }
 

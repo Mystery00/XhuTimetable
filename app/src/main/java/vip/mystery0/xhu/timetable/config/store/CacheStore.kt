@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
+import vip.mystery0.xhu.timetable.model.transfer.Holiday
 import vip.mystery0.xhu.timetable.module.registerAdapter
 import java.time.Instant
 import java.time.LocalDate
@@ -150,5 +151,27 @@ class CacheStore {
         get() {
             val saveValue = kv.decodeString(teamMemberListKey) ?: "[]"
             return teamMemberListMoshi.fromJson(saveValue) ?: emptyList()
+        }
+
+    //团队成员列表
+    private val holidayMoshi =
+        moshi.adapter<Holiday>(Types.newParameterizedType(Holiday::class.java))
+    private val holidayKey = "holiday"
+    var holiday: Holiday?
+        set(value) {
+            kv.encode(holidayKey, holidayMoshi.toJson(value))
+        }
+        get() {
+            val saveValue = kv.decodeString(holidayKey) ?: return null
+            return holidayMoshi.fromJson(saveValue)
+        }
+    private val tomorrowHolidayKey = "tomorrowHoliday"
+    var tomorrowHoliday: Holiday?
+        set(value) {
+            kv.encode(tomorrowHolidayKey, holidayMoshi.toJson(value))
+        }
+        get() {
+            val saveValue = kv.decodeString(tomorrowHolidayKey) ?: return null
+            return holidayMoshi.fromJson(saveValue)
         }
 }

@@ -10,8 +10,10 @@ import vip.mystery0.xhu.timetable.api.CommonApi
 import vip.mystery0.xhu.timetable.api.MenuApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.config.Customisable
+import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.MenuStore
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
+import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.request.ClientInitRequest
@@ -68,11 +70,17 @@ object StartRepo : BaseDataRepo {
         //do nothing
     }
 
-    suspend fun checkVersion() {
+    suspend fun checkVersion(forceBeta: Boolean) {
         if (!isOnline) {
             return
         }
-        val version = commonApi.checkVersion().body() ?: return this.version.emit(ClientVersion.EMPTY)
+        val versionChannel = getConfigStore { versionChannel }
+        val alwaysShowNewVersion = getCacheStore { alwaysShowNewVersion }
+        val version = commonApi.checkVersion(
+            if (forceBeta) true else versionChannel.isBeta(),
+            alwaysShowNewVersion,
+        ).body()
+            ?: return this.version.emit(ClientVersion.EMPTY)
         val ignoreList = getCacheStore { ignoreVersionList }
         val versionString = "${version.versionName}-${version.versionCode}"
         if (!ignoreList.contains(versionString)) {

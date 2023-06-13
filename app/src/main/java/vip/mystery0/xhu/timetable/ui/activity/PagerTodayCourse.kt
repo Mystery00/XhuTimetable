@@ -56,7 +56,7 @@ val todayCourseTitleBar: TabTitle = @Composable { ext ->
     val holiday = viewModel.holiday.collectAsState()
     val loading by viewModel.loading.collectAsState()
     Text(
-        text = "${title.value}${holiday}",
+        text = "${title.value}${holiday.value}",
         fontSize = 18.sp,
         fontWeight = FontWeight.Bold,
         modifier = Modifier
