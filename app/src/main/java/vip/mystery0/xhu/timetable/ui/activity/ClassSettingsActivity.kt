@@ -298,6 +298,18 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             }
                         }
                     )
+                    ConfigSettingsCheckbox(
+                        config = ConfigStore::showHoliday,
+                        scope = scope,
+                        icon = {
+                            Icon(
+                                painter = XhuIcons.holiday,
+                                contentDescription = null,
+                                tint = XhuColor.Common.blackText,
+                            )
+                        },
+                        title = { Text(text = "显示节假日信息") }
+                    )
                 }
             }
         }
