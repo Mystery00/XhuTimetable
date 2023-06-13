@@ -342,7 +342,7 @@ class SettingsActivity : BaseComposeActivity() {
                         title = { Text(text = "检查更新") },
                         onClick = {
                             scope.launch {
-                                viewModel.checkUpdate()
+                                viewModel.checkUpdate(false)
                                 toastString("检查更新完成")
                             }
                         }
@@ -585,6 +585,22 @@ class SettingsActivity : BaseComposeActivity() {
                                     )
                                 }
                             },
+                        )
+                        XhuSettingsMenuLink(
+                            icon = {
+                                Icon(
+                                    painter = XhuIcons.checkUpdate,
+                                    contentDescription = null,
+                                    tint = XhuColor.Common.blackText,
+                                )
+                            },
+                            title = { Text(text = "直接检查测试版更新") },
+                            onClick = {
+                                scope.launch {
+                                    viewModel.checkUpdate(true)
+                                    toastString("检查更新完成")
+                                }
+                            }
                         )
                         val version by viewModel.version.collectAsState()
                         XhuSettingsMenuLink(

@@ -7,6 +7,7 @@ import vip.mystery0.xhu.timetable.api.AggregationApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.model.TodayCourseView
 import vip.mystery0.xhu.timetable.model.TodayThingView
 import vip.mystery0.xhu.timetable.model.WeekCourseView
