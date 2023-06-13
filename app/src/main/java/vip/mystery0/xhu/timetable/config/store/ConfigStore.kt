@@ -316,4 +316,12 @@ class ConfigStore internal constructor() {
             }
             return file
         }
+
+    //显示节假日信息
+    private val showHolidayKey = "showHoliday"
+    var showHoliday: Boolean
+        set(value) {
+            kv.encode(showHolidayKey, value)
+        }
+        get() = kv.decodeBool(showHolidayKey, true)
 }

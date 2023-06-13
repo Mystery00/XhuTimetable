@@ -71,6 +71,9 @@ object XhuIcons {
     val notifyCourse: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_notify_course)
+    val holiday: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_action_holiday)
     val notifyExam: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_notify_exam)

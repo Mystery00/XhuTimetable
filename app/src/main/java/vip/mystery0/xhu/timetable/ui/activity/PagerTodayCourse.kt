@@ -41,6 +41,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.model.response.Poems
+import vip.mystery0.xhu.timetable.model.transfer.showOnTitle
 import vip.mystery0.xhu.timetable.trackEvent
 import vip.mystery0.xhu.timetable.ui.activity.loading.LoadingButton
 import vip.mystery0.xhu.timetable.ui.activity.loading.LoadingValue
@@ -52,9 +53,10 @@ import vip.mystery0.xhu.timetable.viewmodel.TodayThingSheet
 val todayCourseTitleBar: TabTitle = @Composable { ext ->
     val viewModel = ext.viewModel
     val title = viewModel.todayTitle.collectAsState()
+    val holiday = viewModel.holiday.collectAsState()
     val loading by viewModel.loading.collectAsState()
     Text(
-        text = title.value,
+        text = "${title.value}${holiday}",
         fontSize = 18.sp,
         fontWeight = FontWeight.Bold,
         modifier = Modifier

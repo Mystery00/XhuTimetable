@@ -14,5 +14,6 @@ interface AggregationApi {
         @Query("term") term: Int,
         @Query("showCustomCourse") showCustomCourse: Boolean,
         @Query("showCustomThing") showCustomThing: Boolean,
+        @Query("showHoliday") showHoliday: Boolean,
     ): Response<AggregationMainPageResponse>
 }

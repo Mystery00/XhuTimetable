@@ -22,6 +22,7 @@ object AggregationRepo : BaseDataRepo {
         forceLoadFromLocal: Boolean,
         showCustomCourse: Boolean,
         showCustomThing: Boolean,
+        showHoliday: Boolean,
     ): AggregationView {
         checkForceLoadFromCloud(forceLoadFromCloud)
 
@@ -53,7 +54,8 @@ object AggregationRepo : BaseDataRepo {
                             nowYear,
                             nowTerm,
                             showCustomCourse,
-                            showCustomThing
+                            showCustomThing,
+                            showHoliday,
                         )
                     }
                     response.courseList.forEach { course ->
@@ -108,6 +110,6 @@ object AggregationRepo : BaseDataRepo {
                 }
             }
         }
-        return AggregationView(todayViewList, weekViewList, todayThingList, loadWarning)
+        return AggregationView(todayViewList, weekViewList, todayThingList, loadWarning, null, null)
     }
 }
