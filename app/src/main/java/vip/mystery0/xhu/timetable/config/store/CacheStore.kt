@@ -5,9 +5,9 @@ import com.squareup.moshi.Types
 import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import vip.mystery0.xhu.timetable.model.response.Holiday
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
-import vip.mystery0.xhu.timetable.model.transfer.Holiday
 import vip.mystery0.xhu.timetable.module.registerAdapter
 import java.time.Instant
 import java.time.LocalDate
@@ -155,23 +155,40 @@ class CacheStore {
 
     //团队成员列表
     private val holidayMoshi =
-        moshi.adapter<Holiday>(Types.newParameterizedType(Holiday::class.java))
-    private val holidayKey = "holiday"
-    var holiday: Holiday?
+        moshi.adapter(Holiday::class.java)
+    private val holidayKeyPrefix = "holiday:"
+    var holiday: Pair<Holiday?, Holiday?>
         set(value) {
-            kv.encode(holidayKey, holidayMoshi.toJson(value))
+            val now = LocalDate.now()
+            val tomorrow = now.plusDays(1)
+            if (value.first == null) {
+                kv.removeValueForKey("$holidayKeyPrefix${now.format(Formatter.DATE)}")
+            }
+            if (value.second == null) {
+                kv.removeValueForKey("$holidayKeyPrefix${tomorrow.format(Formatter.DATE)}")
+            }
+            value.first?.let {
+                kv.encode(
+                    "$holidayKeyPrefix${it.date.format(Formatter.DATE)}",
+                    holidayMoshi.toJson(it),
+                )
+            }
+            value.second?.let {
+                kv.encode(
+                    "$holidayKeyPrefix${it.date.format(Formatter.DATE)}",
+                    holidayMoshi.toJson(it),
+                )
+            }
         }
         get() {
-            val saveValue = kv.decodeString(holidayKey) ?: return null
-            return holidayMoshi.fromJson(saveValue)
-        }
-    private val tomorrowHolidayKey = "tomorrowHoliday"
-    var tomorrowHoliday: Holiday?
-        set(value) {
-            kv.encode(tomorrowHolidayKey, holidayMoshi.toJson(value))
-        }
-        get() {
-            val saveValue = kv.decodeString(tomorrowHolidayKey) ?: return null
-            return holidayMoshi.fromJson(saveValue)
+            val now = LocalDate.now()
+            val tomorrow = now.plusDays(1)
+            val nowHoliday = kv.decodeString("$holidayKeyPrefix${now.format(Formatter.DATE)}")
+            val tomorrowHoliday =
+                kv.decodeString("$holidayKeyPrefix${tomorrow.format(Formatter.DATE)}")
+            return Pair(
+                nowHoliday?.let { holidayMoshi.fromJson(it) },
+                tomorrowHoliday?.let { holidayMoshi.fromJson(it) },
+            )
         }
 }

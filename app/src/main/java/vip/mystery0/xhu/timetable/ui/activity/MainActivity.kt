@@ -594,8 +594,14 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
                     EventType.CHANGE_AUTO_SHOW_TOMORROW_COURSE -> {
                         viewModel.loadLocalDataToState(changeWeekOnly = true)
                         viewModel.calculateTodayTitle()
+                        viewModel.loadTodayHoliday()
                     }
 
+                    EventType.CHANGE_SHOW_HOLIDAY -> {
+                        viewModel.loadTodayHoliday()
+                    }
+
+                    EventType.CHANGE_SHOW_STATUS,
                     EventType.CHANGE_SHOW_NOT_THIS_WEEK,
                     EventType.CHANGE_TERM_START_TIME,
                     EventType.CHANGE_COURSE_COLOR,
@@ -614,8 +620,6 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
                     EventType.UPDATE_FEEDBACK_CHECK -> {
                         viewModel.checkUnReadFeedback()
                     }
-
-                    else -> {}
                 }
             }
         }

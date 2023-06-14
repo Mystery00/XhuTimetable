@@ -309,7 +309,9 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             )
                         },
                         title = { Text(text = "显示节假日信息") }
-                    )
+                    ) {
+                        EventBus.post(EventType.CHANGE_SHOW_HOLIDAY)
+                    }
                 }
             }
         }

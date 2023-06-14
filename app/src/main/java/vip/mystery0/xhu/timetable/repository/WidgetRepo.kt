@@ -71,7 +71,6 @@ object WidgetRepo {
             forceLoadFromLocal = true,
             showCustomCourse,
             showCustomThing,
-            showHoliday = false,
         )
 
         //获取自定义颜色列表
@@ -192,7 +191,6 @@ object WidgetRepo {
             forceLoadFromLocal = true,
             showCustomCourse,
             false,
-            showHoliday = false,
         )
 
         //获取自定义颜色列表

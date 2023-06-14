@@ -33,8 +33,6 @@ import vip.mystery0.xhu.timetable.model.format
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.model.transfer.AggregationView
-import vip.mystery0.xhu.timetable.model.transfer.Holiday
-import vip.mystery0.xhu.timetable.model.transfer.showOnTitle
 import vip.mystery0.xhu.timetable.repository.AggregationRepo
 import vip.mystery0.xhu.timetable.repository.CourseColorRepo
 import vip.mystery0.xhu.timetable.repository.FeedbackRepo
@@ -78,10 +76,6 @@ class MainViewModel : ComposeViewModel() {
     private val _todayTitle = MutableStateFlow("")
     val todayTitle: StateFlow<String> = _todayTitle
 
-    //页面节假日信息
-    private val _holiday = MutableStateFlow("")
-    val holiday: StateFlow<String> = _holiday
-
     //日期栏开始时间
     private val _dateStart = MutableStateFlow(LocalDate.now())
     val dateStart: StateFlow<LocalDate> = _dateStart
@@ -94,13 +88,19 @@ class MainViewModel : ComposeViewModel() {
     private val _poems = MutableStateFlow<Poems?>(null)
     val poems: StateFlow<Poems?> = _poems
 
+    //今日节假日信息
+    private val _holiday = MutableStateFlow<HolidayView?>(null)
+    val holiday: StateFlow<HolidayView?> = _holiday
+
     //今日事项列表
     private val _todayThing = MutableStateFlow<List<TodayThingSheet>>(emptyList())
     val todayThing: StateFlow<List<TodayThingSheet>> = _todayThing
 
+    //今日课程列表
     private val _todayCourse = MutableStateFlow<List<TodayCourseSheet>>(emptyList())
     val todayCourse: StateFlow<List<TodayCourseSheet>> = _todayCourse
 
+    //本周课程列表
     private val _tableCourse = MutableStateFlow<List<List<CourseSheet>>>(emptyList())
     val tableCourse: StateFlow<List<List<CourseSheet>>> = _tableCourse
 
@@ -165,6 +165,8 @@ class MainViewModel : ComposeViewModel() {
         calculateWeek()
 
         loadLocalDataToState()
+        //加载今日节假日信息
+        loadTodayHoliday()
     }
 
     private fun toastMessage(message: String) {
@@ -255,13 +257,11 @@ class MainViewModel : ComposeViewModel() {
     ): AggregationView {
         val showCustomCourse = getConfigStore { showCustomCourseOnWeek }
         val showCustomThing = getConfigStore { showCustomThing }
-        val showHoliday = getConfigStore { showHoliday }
         val view = AggregationRepo.fetchAggregationMainPage(
             forceLoadFromCloud,
             forceLoadFromLocal,
             showCustomCourse,
             showCustomThing,
-            showHoliday = showHoliday,
         )
         setCacheStore { lastSyncCourse = LocalDate.now() }
         if (view.loadWarning.isNotBlank()) {
@@ -295,8 +295,6 @@ class MainViewModel : ComposeViewModel() {
                     currentWeek,
                     data.todayViewList,
                     colorMap,
-                    data.holiday,
-                    data.tomorrowHoliday,
                 )
                 //加载今日事项
                 loadTodayThing(data.todayThingList)
@@ -320,8 +318,6 @@ class MainViewModel : ComposeViewModel() {
                         currentWeek,
                         cloudData.todayViewList,
                         colorMap,
-                        cloudData.holiday,
-                        cloudData.tomorrowHoliday,
                     )
                     //加载今日事项
                     loadTodayThing(cloudData.todayThingList)
@@ -367,8 +363,6 @@ class MainViewModel : ComposeViewModel() {
                     currentWeek,
                     cloudData.todayViewList,
                     colorMap,
-                    cloudData.holiday,
-                    cloudData.tomorrowHoliday,
                 )
                 //加载今日事项
                 loadTodayThing(cloudData.todayThingList)
@@ -405,30 +399,23 @@ class MainViewModel : ComposeViewModel() {
         currentWeek: Int,
         courseList: List<TodayCourseView>,
         colorMap: Map<String, Color>,
-        holiday: Holiday?,
-        tomorrowHoliday: Holiday?,
     ) {
         val today = LocalDate.now()
         val showTomorrow = getConfigStore { showTomorrowCourseTime }
             ?.let { LocalTime.now().isAfter(it) } ?: false
-        val debugMode = getConfigStore { debugMode }
         val showDate: LocalDate
         val showDay: DayOfWeek
         val showCurrentWeek: Int
-        val showHoliday: Holiday?
         if (showTomorrow) {
             //显示明天的课程，那么showDate就是明天对应的日期
             showDate = today.plusDays(1)
             showDay = showDate.dayOfWeek
             showCurrentWeek = WidgetRepo.calculateWeek(showDate)
-            showHoliday = tomorrowHoliday
         } else {
             showDate = today
             showDay = today.dayOfWeek
             showCurrentWeek = currentWeek
-            showHoliday = holiday
         }
-        _holiday.value = showHoliday.showOnTitle(debugMode)
         //过滤出今日或者明日的课程
         val showList =
             courseList.filter { it.weekList.contains(showCurrentWeek) && it.day == showDay }
@@ -551,6 +538,60 @@ class MainViewModel : ComposeViewModel() {
                 it.user.studentId,
                 it.user.info.name,
             )
+        }
+    }
+
+    /**
+     * 复用的加载今日节假日信息的方法
+     */
+    fun loadTodayHoliday() {
+        viewModelScope.launch {
+            val showHoliday = getConfigStore { showHoliday }
+            if (!showHoliday) {
+                _holiday.value = null
+                return@launch
+            }
+            val holiday = getCacheStore { holiday }
+            val debugMode = getConfigStore { debugMode }
+            val showTomorrow = getConfigStore { showTomorrowCourseTime }
+                ?.let { LocalTime.now().isAfter(it) } ?: false
+            val offDayColor = Color(0xFF03a9f4)
+            val workDayColor = Color(0xFFff3d00)
+            if (showTomorrow) {
+                val h = holiday.second
+                val holidayName = h?.name ?: ""
+                val isOffDay = h?.isOffDay ?: false
+                val special = holidayName.isNotBlank()
+                val s = if (isOffDay) "~" else "，但是要上班，别忘记上课哦~"
+                if (!special) {
+                    _holiday.value = if (debugMode) HolidayView(
+                        "明天是假期~",
+                        offDayColor,
+                    ) else null
+                } else {
+                    _holiday.value = HolidayView(
+                        "明天是 $holidayName$s",
+                        if (isOffDay) offDayColor else workDayColor,
+                    )
+                }
+            } else {
+                val h = holiday.first
+                val holidayName = h?.name ?: ""
+                val isOffDay = h?.isOffDay ?: false
+                val special = holidayName.isNotBlank()
+                val s = if (isOffDay) "~" else "，但是要上班，别忘记上课哦~"
+                if (!special) {
+                    _holiday.value = if (debugMode) HolidayView(
+                        "今天是调班，别忘记上课哦~",
+                        workDayColor,
+                    ) else null
+                } else {
+                    _holiday.value = HolidayView(
+                        "今天是 $holidayName$s",
+                        if (isOffDay) offDayColor else workDayColor,
+                    )
+                }
+            }
         }
     }
 
@@ -832,4 +873,9 @@ class WeekView(
     val weekNum: Int,
     val thisWeek: Boolean,
     val array: Array<Array<Boolean>>
+)
+
+data class HolidayView(
+    val showTitle: String,
+    val color: Color,
 )

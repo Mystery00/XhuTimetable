@@ -9,8 +9,10 @@ import kotlinx.coroutines.launch
 import okhttp3.WebSocket
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
+import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.isOnline
+import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.response.Message
 import vip.mystery0.xhu.timetable.module.HINT_NETWORK
 import vip.mystery0.xhu.timetable.repository.FeedbackRepo
@@ -58,6 +60,7 @@ class FeedbackViewModel : ComposeViewModel() {
             if (!isConnected()) {
                 connectWebSocket()
             }
+            EventBus.post(EventType.UPDATE_FEEDBACK_CHECK)
         }
     }
 

@@ -41,22 +41,21 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.model.response.Poems
-import vip.mystery0.xhu.timetable.model.transfer.showOnTitle
 import vip.mystery0.xhu.timetable.trackEvent
 import vip.mystery0.xhu.timetable.ui.activity.loading.LoadingButton
 import vip.mystery0.xhu.timetable.ui.activity.loading.LoadingValue
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.viewmodel.HolidayView
 import vip.mystery0.xhu.timetable.viewmodel.TodayCourseSheet
 import vip.mystery0.xhu.timetable.viewmodel.TodayThingSheet
 
 val todayCourseTitleBar: TabTitle = @Composable { ext ->
     val viewModel = ext.viewModel
     val title = viewModel.todayTitle.collectAsState()
-    val holiday = viewModel.holiday.collectAsState()
     val loading by viewModel.loading.collectAsState()
     Text(
-        text = "${title.value}${holiday.value}",
+        text = title.value,
         fontSize = 18.sp,
         fontWeight = FontWeight.Bold,
         modifier = Modifier
@@ -98,6 +97,7 @@ val todayCourseContent: TabContent = @Composable { ext ->
 
     Box {
         val poems by viewModel.poems.collectAsState()
+        val holiday by viewModel.holiday.collectAsState()
         val todayThingList by viewModel.todayThing.collectAsState()
         val todayCourseList by viewModel.todayCourse.collectAsState()
         val scope = rememberCoroutineScope()
@@ -115,6 +115,9 @@ val todayCourseContent: TabContent = @Composable { ext ->
             ) {
                 poems?.let { value ->
                     DrawPoemsCard(modalBottomSheetState, scope, poems = value)
+                }
+                holiday?.let { holiday ->
+                    DrawHoliday(holiday = holiday)
                 }
                 todayThingList.forEach {
                     DrawThingCard(thing = it, multiAccountMode = multiAccountMode)
@@ -184,6 +187,62 @@ private fun DrawPoemsCard(dialogState: ModalBottomSheetState, scope: CoroutineSc
                     textAlign = TextAlign.End,
                     modifier = Modifier.fillMaxWidth(),
                 )
+            }
+        }
+    }
+}
+
+@ExperimentalMaterialApi
+@Composable
+private fun DrawHoliday(holiday: HolidayView) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 4.dp)
+    ) {
+        Surface(
+            shape = CircleShape,
+            modifier = Modifier
+                .padding(horizontal = 6.dp)
+                .size(9.dp),
+            color = holiday.color,
+        ) {}
+        Card(
+            modifier = Modifier
+                .padding(end = 8.dp)
+                .fillMaxWidth(),
+        ) {
+            Box {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(
+                        top = 8.dp,
+                        bottom = 8.dp,
+                        end = 8.dp
+                    ),
+                ) {
+                    Icon(
+                        painter = XhuIcons.todayWaterMelon,
+                        contentDescription = null,
+                        tint = holiday.color,
+                        modifier = Modifier
+                            .padding(6.dp)
+                            .size(16.dp),
+                    )
+                    Column(
+                        modifier = Modifier
+                            .weight(1F)
+                    ) {
+                        Text(
+                            text = holiday.showTitle,
+                            fontWeight = FontWeight.Bold,
+                            color = holiday.color,
+                            fontSize = 16.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 1.dp),
+                        )
+                    }
+                }
             }
         }
     }
