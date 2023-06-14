@@ -64,7 +64,7 @@ class AccountManagementViewModel : ComposeViewModel() {
                 return@launch
             }
             setConfigStore { this.multiAccountMode = enable }
-            EventBus.post(EventType.CHANGE_MAIN_USER)
+            EventBus.post(EventType.MULTI_MODE_CHANGED)
         }
     }
 }

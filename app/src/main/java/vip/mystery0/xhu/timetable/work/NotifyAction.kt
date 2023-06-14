@@ -85,7 +85,6 @@ class NotifyAction(
             forceLoadFromLocal = false,
             showCustomCourse = true,
             showCustomThing = false,
-            showHoliday = false,
         )
         val showDate = LocalDate.now().plusDays(1)
         val showDay = showDate.dayOfWeek

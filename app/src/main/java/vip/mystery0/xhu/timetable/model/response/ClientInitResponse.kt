@@ -7,6 +7,10 @@ data class ClientInitResponse(
     val xhuStartTime: XhuStartTime,
     val splash: List<Splash>,
     val latestVersion: ClientVersion?,
+    //节假日信息
+    val holiday: Holiday,
+    //明日节假日信息
+    val tomorrowHoliday: Holiday,
 )
 
 data class XhuStartTime(
@@ -45,3 +49,9 @@ data class ClientVersion(
         )
     }
 }
+
+data class Holiday(
+    val date: LocalDate,
+    val isOffDay: Boolean,
+    val name: String,
+)
