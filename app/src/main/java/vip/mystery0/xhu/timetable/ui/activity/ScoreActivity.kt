@@ -322,7 +322,12 @@ private fun BuildItem(
                             fontSize = 14.sp,
                         )
                         Text(
-                            text = "课程绩点：${item.creditGpa}",
+                            text = "课程绩点：${item.gpa}",
+                            color = XhuColor.Common.grayText,
+                            fontSize = 14.sp,
+                        )
+                        Text(
+                            text = "学分绩点：${item.creditGpa}",
                             color = XhuColor.Common.grayText,
                             fontSize = 14.sp,
                         )
