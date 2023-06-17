@@ -25,6 +25,7 @@ import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
+import vip.mystery0.xhu.timetable.repository.JobRepo
 import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.ui.theme.Theme
 import vip.mystery0.xhu.timetable.work.DownloadApkWork
@@ -186,6 +187,12 @@ class SettingsViewModel : ComposeViewModel() {
             withContext(Dispatchers.IO) {
                 PoemsStore.token = null
             }
+        }
+    }
+
+    fun testPushChannel(registrationId: String) {
+        viewModelScope.launch {
+            JobRepo.testPush(registrationId)
         }
     }
 }
