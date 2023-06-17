@@ -657,6 +657,7 @@ class SettingsActivity : BaseComposeActivity() {
                                 }
                                 jPushRegistrationId?.let {
                                     viewModel.testPushChannel(it)
+                                    toastString("推送通道测试完成")
                                 }
                             },
                         )
