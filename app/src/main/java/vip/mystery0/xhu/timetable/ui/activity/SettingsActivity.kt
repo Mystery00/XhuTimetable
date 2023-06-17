@@ -648,6 +648,18 @@ class SettingsActivity : BaseComposeActivity() {
                             onClick = {
                             }
                         )
+                        XhuSettingsMenuLink(
+                            title = { Text(text = "测试推送通道") },
+                            onClick = {
+                                if (jPushRegistrationId.isNullOrBlank()) {
+                                    toastString("推送注册id为空")
+                                    return@XhuSettingsMenuLink
+                                }
+                                jPushRegistrationId?.let {
+                                    viewModel.testPushChannel(it)
+                                }
+                            },
+                        )
                     }
                 }
             }
