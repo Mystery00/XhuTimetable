@@ -15,6 +15,7 @@ val featureModule = module {
         val url = FpUrlBuilder("https://feature.api.mystery0.vip").build()
         val user = FpUser()
         user.stableRollout(publicDeviceId)
+        user.with("deviceId", "android-$publicDeviceId")
         user.with("systemVersion", "Android ${Build.VERSION.RELEASE}-${Build.VERSION.SDK_INT}")
         user.with("factory", Build.MANUFACTURER)
         user.with("model", Build.MODEL)
