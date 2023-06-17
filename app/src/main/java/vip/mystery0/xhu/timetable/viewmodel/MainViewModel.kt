@@ -552,7 +552,6 @@ class MainViewModel : ComposeViewModel() {
                 return@launch
             }
             val holiday = getCacheStore { holiday }
-            val debugMode = getConfigStore { debugMode }
             val showTomorrow = getConfigStore { showTomorrowCourseTime }
                 ?.let { LocalTime.now().isAfter(it) } ?: false
             val offDayColor = Color(0xFF03a9f4)
@@ -564,10 +563,7 @@ class MainViewModel : ComposeViewModel() {
                 val special = holidayName.isNotBlank()
                 val s = if (isOffDay) "~" else "，但是要上班，别忘记上课哦~"
                 if (!special) {
-                    _holiday.value = if (debugMode) HolidayView(
-                        "明天是假期~",
-                        offDayColor,
-                    ) else null
+                    _holiday.value = null
                 } else {
                     _holiday.value = HolidayView(
                         "明天是 $holidayName$s",
@@ -581,10 +577,7 @@ class MainViewModel : ComposeViewModel() {
                 val special = holidayName.isNotBlank()
                 val s = if (isOffDay) "~" else "，但是要上班，别忘记上课哦~"
                 if (!special) {
-                    _holiday.value = if (debugMode) HolidayView(
-                        "今天是调班，别忘记上课哦~",
-                        workDayColor,
-                    ) else null
+                    _holiday.value = null
                 } else {
                     _holiday.value = HolidayView(
                         "今天是 $holidayName$s",
