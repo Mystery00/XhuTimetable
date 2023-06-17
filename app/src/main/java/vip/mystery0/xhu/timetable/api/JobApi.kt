@@ -9,11 +9,11 @@ import vip.mystery0.xhu.timetable.model.response.JobHistoryResponse
 
 interface JobApi {
     @GET("/api/rest/external/job/history")
-    suspend fun getHistory(@Header("sessionToken") token: String): List<JobHistoryResponse>
+    suspend fun getHistory(@Header("sessionToken") token: String): Response<List<JobHistoryResponse>>
 
     @POST("/api/rest/external/job/test")
     suspend fun pushTest(
         @Header("sessionToken") token: String,
         @Query("registrationId") registrationId: String,
-    ): Response<Unit>
+    ): Response<Boolean>
 }
