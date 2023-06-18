@@ -53,7 +53,6 @@ import vip.mystery0.xhu.timetable.screenHeight
 import vip.mystery0.xhu.timetable.screenWidth
 import vip.mystery0.xhu.timetable.ui.activity.contract.BackgroundResultContract
 import vip.mystery0.xhu.timetable.ui.activity.contract.UCropResultContract
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.Background
 import vip.mystery0.xhu.timetable.viewmodel.BackgroundViewModel
@@ -212,7 +211,7 @@ class BackgroundActivity : BaseComposeActivity() {
                     color = Color.Transparent,
                     border = BorderStroke(
                         width = 6.dp,
-                        color = XhuColor.Common.blackText
+                        color = MaterialTheme.colors.secondary
                     ),
                 ) {}
                 Image(
