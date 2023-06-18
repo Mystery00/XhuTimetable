@@ -167,15 +167,15 @@ private fun BuildItem(item: JobHistory) {
         ) {
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(
-                    text = "任务ID：${item.jobId}",
+                    text = "任务类型：${item.jobTypeTitle}",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    color = XhuColor.Common.blackText,
+                    fontSize = 16.sp,
+                    color = XhuColor.Common.grayText,
                 )
                 Text(
-                    text = "任务类型：${item.jobTypeTitle}",
-                    color = XhuColor.Common.grayText,
+                    text = "任务ID：${item.jobId}",
                     fontSize = 14.sp,
+                    color = XhuColor.Common.blackText,
                 )
                 Text(
                     text = "预期执行时间：${item.prepareExecuteTime}",
