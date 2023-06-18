@@ -119,6 +119,9 @@ enum class MenuItem(
 }
 
 private val shareText = arrayListOf(
-    "查课查课表，我就用西瓜课表~ 下载链接：https://xgkb.mystery0.vip",
-    "西瓜子都在用的课表~ 下载链接：https://xgkb.mystery0.vip"
+    "查课查成绩，我就用西瓜课表~ 下载链接：https://xgkb.mystery0.vip",
+    "西瓜子都在用的课表，最方便的学习助手~ 下载链接：https://xgkb.mystery0.vip",
+    "西瓜课表，轻松查课，快速查成绩~ 下载链接：https://xgkb.mystery0.vip",
+    "西瓜子们的必备神器，下载西瓜课表，追求高效学习~ 下载链接：https://xgkb.mystery0.vip",
+    "西瓜课表，移动学习的首选工具，随时随地掌握课程~ 下载链接：https://xgkb.mystery0.vip",
 )
