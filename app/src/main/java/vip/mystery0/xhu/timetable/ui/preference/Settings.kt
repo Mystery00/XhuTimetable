@@ -60,17 +60,15 @@ fun XhuSettingsMenuLink(
     icon: @Composable () -> Unit = {},
     title: @Composable () -> Unit,
     subtitle: (@Composable () -> Unit)? = null,
-    action: (@Composable (Boolean) -> Unit)? = null,
     onClick: () -> Unit,
 ) {
     SettingsMenuLink(
-        modifier,
-        enabled,
-        icon,
-        title,
-        subtitle,
-        action,
-        onClick,
+        modifier = modifier,
+        enabled = enabled,
+        icon = icon,
+        title = title,
+        subtitle = subtitle,
+        onClick = onClick,
     )
 }
 
