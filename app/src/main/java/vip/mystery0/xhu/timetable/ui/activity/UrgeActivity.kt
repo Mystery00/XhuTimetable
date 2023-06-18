@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.viewModels
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -217,7 +218,7 @@ private fun BuildItem(
                         onUrge(urgeItem)
                     }) {
                     Row {
-                        Icon(
+                        Image(
                             painter = if (urgeItem.urged) XhuIcons.hotDisable else XhuIcons.hot,
                             contentDescription = null
                         )
