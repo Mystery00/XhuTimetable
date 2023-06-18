@@ -172,7 +172,7 @@ class BackgroundViewModel : ComposeViewModel() {
                             FileDownloadProgressState(),
                             text = "正在获取下载地址"
                         )
-                    val url = selected.thumbnailUrl
+                    val url = selected.imageUrl
                     val file = withContext(Dispatchers.Default) {
                         val dir = File(externalPictureDir, "background")
                         if (!dir.exists()) {
