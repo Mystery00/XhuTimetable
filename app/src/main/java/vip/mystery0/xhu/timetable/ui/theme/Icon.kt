@@ -113,6 +113,12 @@ object XhuIcons {
     val cornerFailed: Painter
         @Composable
         get() = painterResource(R.drawable.ic_corner_failed)
+    val hot: Painter
+        @Composable
+        get() = painterResource(R.drawable.ic_hot)
+    val hotDisable: Painter
+        @Composable
+        get() = painterResource(R.drawable.ic_hot_disable)
 
     object CustomCourse {
         val title: Painter

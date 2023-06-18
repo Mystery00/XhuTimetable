@@ -342,7 +342,7 @@ private fun BuildItem(
                 }
                 Text(
                     text = "${item.score}",
-                    color = XhuColor.Common.blackText,
+                    color = if (item.score < 60) Color.Red else XhuColor.Common.blackText,
                     fontSize = 16.sp,
                 )
             }
