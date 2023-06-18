@@ -16,6 +16,7 @@
     <string name="title_activity_export_calendar">日历导出管理</string>
     <string name="title_activity_urge">催更管理</string>
     <string name="title_activity_ui">UI设置</string>
+    <string name="title_activity_job_history">任务历史</string>
 
     <string name="title_widget_today_course">今日课表</string>
     <string name="title_widget_week_course">本周课表</string>

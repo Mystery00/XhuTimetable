@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -214,13 +215,12 @@ class BackgroundActivity : BaseComposeActivity() {
                         color = XhuColor.Common.blackText
                     ),
                 ) {}
-                Icon(
+                Image(
                     painter = XhuIcons.checked,
                     modifier = Modifier
                         .padding(8.dp)
                         .align(Alignment.BottomEnd)
-                        .width(24.dp)
-                        .height(24.dp),
+                        .size(24.dp),
                     contentDescription = null,
                 )
             }

@@ -6,7 +6,6 @@ import cn.jpush.android.api.BasicPushNotificationBuilder
 import cn.jpush.android.api.JPushInterface
 import cn.jpush.android.data.JPushConfig
 import org.koin.core.component.KoinComponent
-import vip.mystery0.xhu.timetable.BuildConfig
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.module.FeatureString
@@ -16,7 +15,7 @@ object PushSetter : KoinComponent {
     fun init() {
         val apiKey = FeatureString.JPUSH_APP_KEY.getValue()
         if (apiKey == "disable") return
-        JPushInterface.setDebugMode(BuildConfig.DEBUG)
+        JPushInterface.setDebugMode(false)
         JCollectionAuth.setAuth(context, true)
         val config = JPushConfig()
         config.setjAppKey(apiKey)

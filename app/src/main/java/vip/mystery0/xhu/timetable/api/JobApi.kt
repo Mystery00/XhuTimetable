@@ -1,10 +1,12 @@
 package vip.mystery0.xhu.timetable.api
 
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Query
+import vip.mystery0.xhu.timetable.model.request.AutoCheckScoreRequest
 import vip.mystery0.xhu.timetable.model.response.JobHistoryResponse
 
 interface JobApi {
@@ -15,5 +17,11 @@ interface JobApi {
     suspend fun pushTest(
         @Header("sessionToken") token: String,
         @Query("registrationId") registrationId: String,
+    ): Response<Boolean>
+
+    @POST("/api/rest/external/score/auto/check")
+    suspend fun autoCheckScore(
+        @Header("sessionToken") token: String,
+        @Body request: AutoCheckScoreRequest,
     ): Response<Boolean>
 }
