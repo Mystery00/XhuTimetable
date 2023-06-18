@@ -170,7 +170,7 @@ private fun BuildItem(item: JobHistory) {
                     text = "任务类型：${item.jobTypeTitle}",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = XhuColor.Common.grayText,
+                    color = XhuColor.Common.blackText,
                 )
                 Text(
                     text = "任务ID：${item.jobId}",
