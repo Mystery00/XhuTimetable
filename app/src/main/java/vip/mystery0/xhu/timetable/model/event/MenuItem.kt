@@ -10,6 +10,7 @@ import vip.mystery0.xhu.timetable.ui.activity.CourseRoomActivity
 import vip.mystery0.xhu.timetable.ui.activity.ExamActivity
 import vip.mystery0.xhu.timetable.ui.activity.ExpScoreActivity
 import vip.mystery0.xhu.timetable.ui.activity.FeedbackActivity
+import vip.mystery0.xhu.timetable.ui.activity.JobHistoryActivity
 import vip.mystery0.xhu.timetable.ui.activity.MainActivity
 import vip.mystery0.xhu.timetable.ui.activity.NoticeActivity
 import vip.mystery0.xhu.timetable.ui.activity.ScoreActivity
@@ -88,6 +89,10 @@ enum class MenuItem(
     SERVER_DETECT(
         { XhuIcons.Profile.serverDetect },
         { toCustomTabs(it.link) },
+    ),
+    JOB(
+        { XhuIcons.Profile.job },
+        { intentTo(JobHistoryActivity::class) },
     ),
     EMPTY(
         { XhuIcons.Profile.unknownMenu },

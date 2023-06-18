@@ -107,6 +107,12 @@ object XhuIcons {
     val github: Painter
         @Composable
         get() = painterResource(R.drawable.ic_github)
+    val cornerSuccess: Painter
+        @Composable
+        get() = painterResource(R.drawable.ic_corner_success)
+    val cornerFailed: Painter
+        @Composable
+        get() = painterResource(R.drawable.ic_corner_failed)
 
     object CustomCourse {
         val title: Painter
@@ -264,6 +270,12 @@ object XhuIcons {
             get() = iconOf(
                 painterResource(id = R.drawable.ic_server_detect_night) to
                         painterResource(id = R.drawable.ic_server_detect)
+            )
+        val job: Painter
+            @Composable
+            get() = iconOf(
+                painterResource(id = R.drawable.ic_job_night) to
+                        painterResource(id = R.drawable.ic_job)
             )
         val unknownMenu: Painter
             @Composable

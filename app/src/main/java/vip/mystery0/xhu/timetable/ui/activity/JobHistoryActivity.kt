@@ -1,0 +1,221 @@
+package vip.mystery0.xhu.timetable.ui.activity
+
+import androidx.activity.viewModels
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import cn.jpush.android.api.JPushInterface
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.MaterialDialogState
+import com.vanpra.composematerialdialogs.listItems
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import com.vanpra.composematerialdialogs.title
+import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.ui.theme.XhuColor
+import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.viewmodel.JobHistory
+import vip.mystery0.xhu.timetable.viewmodel.JobHistoryViewModel
+
+class JobHistoryActivity : BaseComposeActivity() {
+    private val viewModel: JobHistoryViewModel by viewModels()
+
+    private val jPushRegistrationId: String? by lazy {
+        JPushInterface.getRegistrationID(this)
+    }
+
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    override fun BuildContent() {
+        val historyListState by viewModel.historyListState.collectAsState()
+
+        val addDialogState = rememberMaterialDialogState()
+
+        fun onBack() {
+            finish()
+        }
+
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(text = title.toString()) },
+                    backgroundColor = MaterialTheme.colors.primary,
+                    contentColor = MaterialTheme.colors.onPrimary,
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            onBack()
+                        }) {
+                            Icon(
+                                painter = XhuIcons.back,
+                                contentDescription = null,
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = {
+                            if (jPushRegistrationId.isNullOrBlank()) {
+                                toastString("推送注册id为空")
+                                return@IconButton
+                            }
+                            addDialogState.show()
+                        }) {
+                            Icon(
+                                painter = XhuIcons.Action.addCircle,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
+                    }
+                )
+            },
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
+            ) {
+                val pullRefreshState = rememberPullRefreshState(
+                    refreshing = historyListState.loading,
+                    onRefresh = {
+                        viewModel.loadHistoryList()
+                    },
+                )
+
+                Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+                    val historyList = historyListState.history
+                    if (historyListState.loading || historyList.isNotEmpty()) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(XhuColor.Common.grayBackground),
+                            contentPadding = PaddingValues(4.dp),
+                        ) {
+                            items(historyList.size) { index ->
+                                val item = historyList[index]
+                                BuildItem(item)
+                            }
+                        }
+                        PullRefreshIndicator(
+                            refreshing = historyListState.loading,
+                            state = pullRefreshState,
+                            Modifier.align(Alignment.TopCenter),
+                        )
+                    } else {
+                        BuildNoDataLayout()
+                    }
+                }
+            }
+        }
+        ShowAddDialog(addDialogState)
+    }
+
+    @Composable
+    private fun ShowAddDialog(
+        dialogState: MaterialDialogState,
+    ) {
+        MaterialDialog(dialogState = dialogState) {
+            title("请选择需要添加的任务类型")
+            listItems(list = listOf("自动查询成绩")) { index, _ ->
+                when (index) {
+                    0 -> {
+                        jPushRegistrationId?.let {
+                            viewModel.addAutoCheckScoreJob(it)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BuildItem(item: JobHistory) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(),
+            backgroundColor = XhuColor.cardBackground,
+        ) {
+            Column(modifier = Modifier.padding(8.dp)) {
+                Text(
+                    text = "任务ID：${item.jobId}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = XhuColor.Common.blackText,
+                )
+                Text(
+                    text = "任务类型：${item.jobTypeTitle}",
+                    color = XhuColor.Common.grayText,
+                    fontSize = 14.sp,
+                )
+                Text(
+                    text = "预期执行时间：${item.prepareExecuteTime}",
+                    color = XhuColor.Common.grayText,
+                    fontSize = 14.sp,
+                )
+                Text(
+                    text = "任务执行时间：${item.executeTime}",
+                    color = XhuColor.Common.grayText,
+                    fontSize = 14.sp,
+                )
+                Text(
+                    text = "任务执行信息：${item.message}",
+                    color = XhuColor.Common.grayText,
+                    fontSize = 14.sp,
+                )
+            }
+        }
+        if (item.showStatus) {
+            when {
+                item.success -> {
+                    Image(
+                        painter = XhuIcons.cornerSuccess,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .align(Alignment.TopEnd),
+                    )
+                }
+
+                item.failed -> {
+                    Image(
+                        painter = XhuIcons.cornerFailed,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .align(Alignment.TopEnd),
+                    )
+                }
+            }
+        }
+    }
+}
