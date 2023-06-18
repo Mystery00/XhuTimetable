@@ -91,7 +91,7 @@ object XhuIcons {
         get() = painterResource(id = R.drawable.ic_action_qq_group)
     val poems: Painter
         @Composable
-        get() = painterResource(R.mipmap.ic_poems)
+        get() = painterResource(R.drawable.ic_poems)
     val checked: Painter
         @Composable
         get() = painterResource(R.drawable.ic_checked)
