@@ -116,9 +116,6 @@ object XhuIcons {
     val hot: Painter
         @Composable
         get() = painterResource(R.drawable.ic_hot)
-    val hotDisable: Painter
-        @Composable
-        get() = painterResource(R.drawable.ic_hot_disable)
 
     object CustomCourse {
         val title: Painter
