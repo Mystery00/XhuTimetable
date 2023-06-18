@@ -1,8 +1,13 @@
 package vip.mystery0.xhu.timetable.ui.preference
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxColors
+import androidx.compose.material.CheckboxDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsCheckbox
 import com.alorma.compose.settings.ui.SettingsMenuLink
@@ -15,6 +20,38 @@ import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KMutableProperty1
+
+@Composable
+fun XhuActionSettingsCheckbox(
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    icon: @Composable () -> Unit = {},
+    title: @Composable () -> Unit,
+    subtitle: (@Composable () -> Unit)? = null,
+    checkboxColors: CheckboxColors = CheckboxDefaults.colors(),
+    onCheckedChange: ((Boolean) -> Unit)? = null,
+    checkboxEnabled: Boolean = true,
+    checked: Boolean,
+    onClick: () -> Unit,
+) {
+    SettingsMenuLink(
+        modifier,
+        enabled,
+        icon,
+        title,
+        subtitle,
+        action = @Composable {
+            Checkbox(
+                enabled = checkboxEnabled,
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                modifier = Modifier.padding(end = 8.dp),
+                colors = checkboxColors,
+            )
+        },
+        onClick,
+    )
+}
 
 @Composable
 fun XhuSettingsMenuLink(
