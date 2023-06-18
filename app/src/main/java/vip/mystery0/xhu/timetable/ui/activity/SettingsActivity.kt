@@ -53,6 +53,7 @@ import vip.mystery0.xhu.timetable.ui.activity.contract.FontFileResultContract
 import vip.mystery0.xhu.timetable.ui.preference.CacheSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.PoemsSettingsCheckbox
+import vip.mystery0.xhu.timetable.ui.preference.XhuActionSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.XhuFoldSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsMenuLink
@@ -241,7 +242,7 @@ class SettingsActivity : BaseComposeActivity() {
                         },
                         title = { Text(text = "考试提醒") }
                     )
-                    XhuSettingsMenuLink(
+                    XhuActionSettingsCheckbox(
                         title = { Text(text = "提醒时间") },
                         icon = {
                             Icon(
@@ -258,15 +259,11 @@ class SettingsActivity : BaseComposeActivity() {
                                     "提醒功能已禁用"
                             )
                         },
-                        action = {
-                            Checkbox(
-                                checked = notifyTime != null,
-                                onCheckedChange = {
-                                    viewModel.updateNotifyTime(null)
-                                },
-                                enabled = notifyTime != null,
-                            )
+                        onCheckedChange = {
+                            viewModel.updateNotifyTime(null)
                         },
+                        checkboxEnabled = notifyTime != null,
+                        checked = notifyTime != null,
                         onClick = {
                             showNotifyTimeState.show()
                         }
@@ -512,18 +509,13 @@ class SettingsActivity : BaseComposeActivity() {
                             Text(text = "开发者选项")
                         },
                     ) {
-                        XhuSettingsMenuLink(
+                        XhuActionSettingsCheckbox(
                             title = { Text(text = "启用开发者模式") },
-                            action = {
-                                Checkbox(
-                                    checked = debugMode,
-                                    onCheckedChange = {
-                                        viewModel.disableDebugMode()
-                                    },
-                                    enabled = debugMode,
-                                )
+                            onCheckedChange = {
+                                viewModel.disableDebugMode()
                             },
-                            onClick = {},
+                            checked = true,
+                            onClick = { }
                         )
                         ConfigSettingsCheckbox(
                             config = ConfigStore::alwaysCrash,

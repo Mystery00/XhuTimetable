@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Checkbox
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -34,6 +33,7 @@ import vip.mystery0.xhu.timetable.config.store.ConfigStore
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
+import vip.mystery0.xhu.timetable.ui.preference.XhuActionSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsMenuLink
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
@@ -116,7 +116,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                     ) {
                         EventBus.post(EventType.CHANGE_SHOW_STATUS)
                     }
-                    XhuSettingsMenuLink(
+                    XhuActionSettingsCheckbox(
                         title = { Text(text = "自动显示明日课程") },
                         subtitle = {
                             Text(
@@ -126,15 +126,11 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                                     "此功能已禁用，今日课程页面只会显示今日的课表"
                             )
                         },
-                        action = {
-                            Checkbox(
-                                checked = showTomorrowCourseTime != null,
-                                onCheckedChange = {
-                                    viewModel.updateShowTomorrowCourseTime(null)
-                                },
-                                enabled = showTomorrowCourseTime != null,
-                            )
+                        onCheckedChange = {
+                            viewModel.updateShowTomorrowCourseTime(null)
                         },
+                        checkboxEnabled = showTomorrowCourseTime != null,
+                        checked = showTomorrowCourseTime != null,
                         onClick = {
                             showTomorrowCourseTimeState.show()
                         }
@@ -240,7 +236,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             intentTo(ExportCalendarActivity::class)
                         }
                     )
-                    XhuSettingsMenuLink(
+                    XhuActionSettingsCheckbox(
                         icon = {
                             Icon(
                                 painter = XhuIcons.customCourse,
@@ -256,19 +252,17 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                                 "当前：不显示自定义课程信息"
                             Text(text = text)
                         },
-                        action = {
-                            Checkbox(
-                                checked = showCustomCourse,
-                                onCheckedChange = {
-                                    viewModel.updateShowCustomCourse(it)
-                                },
-                            )
+                        onCheckedChange = {
+                            viewModel.updateShowCustomCourse(it)
                         },
+                        checked = showCustomCourse,
                         onClick = {
-                            intentTo(CustomCourseActivity::class)
+                            scope.launch {
+                                intentTo(CustomCourseActivity::class)
+                            }
                         }
                     )
-                    XhuSettingsMenuLink(
+                    XhuActionSettingsCheckbox(
                         icon = {
                             Icon(
                                 painter = XhuIcons.customThing,
@@ -284,14 +278,10 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                                 "当前：不显示自定义事项列表"
                             Text(text = text)
                         },
-                        action = {
-                            Checkbox(
-                                checked = showCustomThing,
-                                onCheckedChange = {
-                                    viewModel.updateShowCustomThing(it)
-                                },
-                            )
+                        onCheckedChange = {
+                            viewModel.updateShowCustomThing(it)
                         },
+                        checked = showCustomThing,
                         onClick = {
                             scope.launch {
                                 intentTo(CustomThingActivity::class)
