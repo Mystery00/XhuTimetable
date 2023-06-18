@@ -217,7 +217,10 @@ private fun BuildItem(
                         onUrge(urgeItem)
                     }) {
                     Row {
-                        Icon(painter = XhuIcons.Profile.urge, contentDescription = null)
+                        Icon(
+                            painter = if (urgeItem.urged) XhuIcons.hotDisable else XhuIcons.hot,
+                            contentDescription = null
+                        )
                         Text(text = "(${urgeItem.count})")
                     }
                 }
