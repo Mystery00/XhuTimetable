@@ -103,7 +103,7 @@ val todayCourseContent: TabContent = @Composable { ext ->
         val scope = rememberCoroutineScope()
 
         if (poems == null && todayThingList.isEmpty() && todayCourseList.isEmpty()) {
-            activity.BuildNoCourseLayout()
+            activity.BuildNoDataLayout()
         } else {
             DrawLine()
             val multiAccountMode by viewModel.multiAccountMode.collectAsState()
