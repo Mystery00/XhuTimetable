@@ -262,7 +262,7 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
         val loginState by viewModel.loginState.collectAsState()
         ShowProgressDialog(
             show = loginState.loading,
-            text = "登录中……",
+            text = "登录中...",
             type = LottieLoadingType.LOADING,
         )
         if (loginState.success) {

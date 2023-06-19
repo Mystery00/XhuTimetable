@@ -103,8 +103,8 @@ class UrgeActivity : BasePageComposeActivity() {
         val urgeLoading by viewModel.urgeLoading.collectAsState()
         ShowProgressDialog(
             show = urgeLoading,
-            text = "正在催更……",
-            type = LottieLoadingType.SETTING,
+            text = "正在催更...",
+            type = LottieLoadingType.LOADING,
         )
     }
 }

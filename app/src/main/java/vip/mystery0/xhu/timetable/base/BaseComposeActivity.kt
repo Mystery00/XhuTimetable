@@ -13,6 +13,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,7 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
@@ -31,6 +32,7 @@ import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -49,6 +51,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -159,25 +162,28 @@ abstract class BaseComposeActivity(
                 dismissOnClickOutside = false,
             )
         ) {
-            Box(
+            Surface(
                 modifier = Modifier
-                    .size(120.dp)
-                    .background(XhuColor.Common.grayBackground, shape = RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
+                    .size(144.dp),
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colors.surface,
+                elevation = 24.dp
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    val contentColor = MaterialTheme.colors.primary
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
                     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(type.resId))
                     LottieAnimation(
                         composition = composition,
                         iterations = LottieConstants.IterateForever,
-                        modifier = Modifier.size(64.dp),
+                        modifier = Modifier.size(72.dp),
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = text,
                         fontSize = fontSize,
-                        color = contentColor
+                        color = MaterialTheme.colors.onSurface
                     )
                 }
             }
@@ -186,7 +192,18 @@ abstract class BaseComposeActivity(
 
     @Composable
     fun BuildNoDataLayout() {
-        BuildLayout(resId = R.raw.lottie_no_data, text = "暂无数据")
+        BuildLayout(
+            resId = R.raw.lottie_no_data,
+            text = "",
+            appendLayout = {
+                Text(
+                    text = "暂无数据",
+                    color = MaterialTheme.colors.onSurface,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 48.dp),
+                    fontSize = 20.sp
+                )
+            })
     }
 
     @Composable
@@ -196,6 +213,8 @@ abstract class BaseComposeActivity(
     ) {
         BuildLayout(
             resId = R.raw.lottie_no_permission,
+            lottieHeight = 160.dp,
+            lottieWidth = 325.dp,
             text = permissionDescription,
             appendLayout = {
                 Button(onClick = onRequestPermission) {
@@ -208,6 +227,8 @@ abstract class BaseComposeActivity(
     @Composable
     private fun BuildLayout(
         @RawRes resId: Int,
+        lottieHeight: Dp = 256.dp,
+        lottieWidth: Dp = 256.dp,
         text: String,
         appendLayout: (@Composable () -> Unit)? = null,
     ) {
@@ -224,7 +245,9 @@ abstract class BaseComposeActivity(
                 LottieAnimation(
                     composition = composition,
                     iterations = LottieConstants.IterateForever,
-                    modifier = Modifier.size(256.dp)
+                    modifier = Modifier
+                        .height(lottieHeight)
+                        .width(lottieWidth)
                 )
                 if (text.isNotBlank()) {
                     Text(
