@@ -190,11 +190,6 @@ abstract class BaseComposeActivity(
     }
 
     @Composable
-    fun BuildNoCourseLayout() {
-        BuildLayout(resId = R.raw.lottie_no_course, text = "暂无课程")
-    }
-
-    @Composable
     fun BuildNoPermissionLayout(
         permissionDescription: String,
         onRequestPermission: () -> Unit = {},
