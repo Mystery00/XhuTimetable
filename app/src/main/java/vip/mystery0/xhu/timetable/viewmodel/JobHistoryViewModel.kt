@@ -68,6 +68,7 @@ class JobHistoryViewModel : ComposeViewModel() {
             Log.w(TAG, "add auto check score job failed", throwable)
         }) {
             JobRepo.addAutoCheckScoreJob(registrationId)
+            loadHistoryList()
         }
     }
 }
