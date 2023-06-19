@@ -331,7 +331,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
                             )
                         }
                     } else {
-                        BuildNoPermissionLayout(permissionDescription = "将课程导出到系统日历功能需要对${appName}授予“读取/写入日历”权限。没有这个权限，该功能无法运作",
+                        BuildNoPermissionLayout(permissionDescription = "将课程导出到系统日历功能需要对${appName}授予“读取/写入日历”权限。\n没有这个权限，该功能无法运作",
                             onRequestPermission = {
                                 calendarPermissionState.launchMultiplePermissionRequest()
                             })
@@ -344,7 +344,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
         val exportAccountState by viewModel.actionState.collectAsState()
         ShowProgressDialog(
             show = exportAccountState.loading,
-            text = "数据导出中",
+            text = "数据导出中...",
             type = LottieLoadingType.SETTING,
         )
     }
