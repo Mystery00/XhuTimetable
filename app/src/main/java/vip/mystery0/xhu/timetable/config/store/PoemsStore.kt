@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.config.store
 
+import android.util.Log
 import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -11,6 +12,7 @@ import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.module.Feature
 
 object PoemsStore : KoinComponent {
+    private const val TAG = "PoemsStore"
     private val poemsApi: PoemsApi by inject()
     private val kv = MMKV.mmkvWithID("PoemsStore", MMKV.SINGLE_PROCESS_MODE)
 
@@ -44,6 +46,7 @@ object PoemsStore : KoinComponent {
             return null
         }
         if (!Feature.JRSC.isEnabled()) {
+            Log.i(TAG, "disable jinrishici with feature switch")
             return null
         }
         if (!isOnline()) {
