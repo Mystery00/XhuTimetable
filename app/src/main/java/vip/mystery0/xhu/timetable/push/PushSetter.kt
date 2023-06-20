@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable.push
 
 import android.app.Notification
+import android.util.Log
 import cn.jiguang.api.utils.JCollectionAuth
 import cn.jpush.android.api.BasicPushNotificationBuilder
 import cn.jpush.android.api.JPushInterface
@@ -12,9 +13,14 @@ import vip.mystery0.xhu.timetable.module.FeatureString
 import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_PUSH
 
 object PushSetter : KoinComponent {
+    private const val TAG = "PushSetter"
+
     fun init() {
         val apiKey = FeatureString.JPUSH_APP_KEY.getValue()
-        if (apiKey == "disable") return
+        if (apiKey == "disable") {
+            Log.i(TAG, "disable jpush with feature switch")
+            return
+        }
         JPushInterface.setDebugMode(false)
         JCollectionAuth.setAuth(context, true)
         val config = JPushConfig()

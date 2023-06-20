@@ -21,7 +21,7 @@ val featureModule = module {
         user.with("model", Build.MODEL)
         user.with("rom", Build.DISPLAY)
         user.with("packageName", BuildConfig.APPLICATION_ID)
-        val config = FpConfig(url!!, "client-27a2a0787d92993d66680ac75f2fb050859c97d1", 10u, 10u)
+        val config = FpConfig(url!!, "client-27a2a0787d92993d66680ac75f2fb050859c97d1", 60u, true)
         FeatureProbe(config, user)
     }
 }

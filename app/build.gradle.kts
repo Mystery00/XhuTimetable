@@ -208,7 +208,7 @@ dependencies {
     //ucrop
     implementation("com.github.yalantis:ucrop:2.2.8")
     //feature-probe
-    implementation("com.featureprobe:client-sdk-android:2.0.2@aar")
+    implementation("com.featureprobe:client-sdk-android:1.2.0@aar")
     implementation("net.java.dev.jna:jna:5.7.0@aar")
     //jg-push
     implementation("cn.jiguang.sdk:jpush:5.0.3")
