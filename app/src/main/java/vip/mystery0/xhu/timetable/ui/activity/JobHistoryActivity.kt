@@ -132,6 +132,10 @@ class JobHistoryActivity : BaseComposeActivity() {
             }
         }
         ShowAddDialog(addDialogState)
+        val errorMessage by viewModel.errorMessage.collectAsState()
+        if (errorMessage.second.isNotBlank()) {
+            errorMessage.second.toast(true)
+        }
     }
 
     @Composable

@@ -20,6 +20,13 @@ class JobHistoryViewModel : ComposeViewModel() {
     private val _historyListState = MutableStateFlow(JobHistoryListState())
     val historyListState: StateFlow<JobHistoryListState> = _historyListState
 
+    private val _errorMessage = MutableStateFlow(Pair(System.currentTimeMillis(), ""))
+    val errorMessage: StateFlow<Pair<Long, String>> = _errorMessage
+
+    private fun toastMessage(message: String) {
+        _errorMessage.value = System.currentTimeMillis() to message
+    }
+
     init {
         loadHistoryList()
     }
@@ -27,7 +34,7 @@ class JobHistoryViewModel : ComposeViewModel() {
     fun loadHistoryList() {
         fun failed(message: String) {
             Log.w(TAG, "load exp score list failed, $message")
-            _historyListState.value = JobHistoryListState(errorMessage = message)
+            toastMessage(message)
         }
 
         viewModelScope.launch(networkErrorHandler { throwable ->
@@ -66,6 +73,7 @@ class JobHistoryViewModel : ComposeViewModel() {
     fun addAutoCheckScoreJob(registrationId: String) {
         viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "add auto check score job failed", throwable)
+            toastMessage(throwable.message ?: throwable.javaClass.simpleName)
         }) {
             JobRepo.addAutoCheckScoreJob(registrationId)
             loadHistoryList()
@@ -76,7 +84,6 @@ class JobHistoryViewModel : ComposeViewModel() {
 data class JobHistoryListState(
     val loading: Boolean = false,
     val history: List<JobHistory> = emptyList(),
-    val errorMessage: String = "",
 )
 
 data class JobHistory(
