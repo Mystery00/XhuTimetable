@@ -24,6 +24,7 @@ import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
 object NotifySetter : KoinComponent {
+    private const val TAG = "NotifySetter"
     private val mutex = Mutex()
     private val alarmManager: AlarmManager by inject()
     private val workManager: WorkManager by inject()
@@ -35,6 +36,7 @@ object NotifySetter : KoinComponent {
                 if (lastDate == LocalDate.now()) {
                     return
                 }
+                setCacheStore { notifyWorkLastExecuteDate = LocalDate.now() }
                 setCacheStore { notifyWorkLastExecuteTime = Instant.now() }
                 action()
             }
@@ -83,10 +85,7 @@ object NotifySetter : KoinComponent {
             nextExecuteTime.toEpochMilli(),
             pendingIntent
         )
-        Log.i(
-            "ApplicationExt",
-            "set alarm trigger success, next execute time: ${nextExecuteTime.asLocalDateTime()}",
-        )
+        Log.i(TAG, "set alarm success, next time: ${nextExecuteTime.asLocalDateTime()}")
     }
 
     suspend fun setWorkTrigger(executeTime: Instant? = null) {
@@ -102,7 +101,7 @@ object NotifySetter : KoinComponent {
 
         var nextExecuteTime = calculateNextExecuteTime(executeTime) ?: return
         //避免因为相同时间的触发导致的重复执行
-        nextExecuteTime = nextExecuteTime.minus(1, ChronoUnit.MINUTES)
+        nextExecuteTime = nextExecuteTime.plus(1, ChronoUnit.MINUTES)
 
         val duration = Duration.between(Instant.now(), nextExecuteTime)
         workManager.enqueueUniqueWork(
@@ -112,9 +111,6 @@ object NotifySetter : KoinComponent {
                 .setInitialDelay(duration.toMillis(), TimeUnit.MILLISECONDS)
                 .build()
         )
-        Log.i(
-            "ApplicationExt",
-            "work enqueue success, next execute time: ${nextExecuteTime.asLocalDateTime()}",
-        )
+        Log.i(TAG, "work enqueue success, next time: ${nextExecuteTime.asLocalDateTime()}")
     }
 }
