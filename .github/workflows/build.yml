@@ -52,14 +52,12 @@ jobs:
           versionName=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionName')
           versionCode=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionCode')
           apkFile=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].outputFile')
-          updateLog=$(cat "version.log")
           
           cp "${{ env.OUTPUT_DIR }}/$apkFile" "patch/new.apk"
           
           echo ::set-output name=versionName::$versionName
           echo ::set-output name=versionCode::$versionCode
           echo ::set-output name=apkFile::$apkFile
-          echo ::set-output name=updateLog::$updateLog
       - name: 生成 patch 文件
         id: patch
         run: |
@@ -82,8 +80,7 @@ jobs:
         with:
           tag_name: ${{ steps.apk.outputs.versionName }}
           prerelease: false
-          body: |
-            ${{ steps.apk.outputs.updateLog }}
+          body_path: version.log
           files: |
             ${{ env.OUTPUT_DIR }}/${{ steps.apk.outputs.apkFile }}
       - name: 上传文件
