@@ -48,10 +48,6 @@ abstract class XhuCoroutineWorker(
 
     abstract suspend fun doWork(): Result
 
-    suspend fun setForeground(foregroundInfo: ForegroundInfo) {
-        setForegroundAsync(foregroundInfo).await()
-    }
-
     override fun onStopped() {
         super.onStopped()
         future.cancel(false)

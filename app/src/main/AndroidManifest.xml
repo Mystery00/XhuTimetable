@@ -9,13 +9,27 @@
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"  tools:node="remove"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"  tools:node="remove"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"  tools:node="remove"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"  tools:node="remove"/>
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"  tools:node="remove"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"  tools:node="remove"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"  tools:node="remove"/>
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.ACCESS_COARSE_LOCATION"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.READ_PHONE_STATE"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.ACCESS_WIFI_STATE"
+        tools:node="remove" />
 
     <application
         android:name=".Application"
@@ -148,7 +162,9 @@
             android:screenOrientation="fullSensor"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
 
-        <service android:name=".work.NotifyService" />
+        <service
+            android:name=".work.NotifyService"
+            android:foregroundServiceType="shortService" />
         <service
             android:name=".push.PushService"
             android:enabled="true"

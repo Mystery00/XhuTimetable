@@ -1,14 +1,16 @@
 package vip.mystery0.xhu.timetable.work
 
+import android.Manifest
 import android.app.Notification
-import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.SystemClock
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.FileProvider
-import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -46,7 +48,6 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
         const val ARG_VERSION_CODE = "versionCode"
     }
 
-    private val notificationManager: NotificationManager by inject()
     private val fileApi: FileApi by inject()
 
     private var lastUpdateProgressTime = 0L
@@ -54,7 +55,7 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
     private val observerId = addDownloadObserver(patchObserver = false) {
         val now = SystemClock.uptimeMillis()
         if (now - lastUpdateProgressTime > 100) {
-            setForeground(updateProgress(it))
+            updateProgress(it).notify()
             lastUpdateProgressTime = now
         }
     }
@@ -75,7 +76,7 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
             }
             file
         }
-        setForeground(getDownloadUrl(versionName))
+        getDownloadUrl(versionName).notify()
 
         //获取下载地址
         val versionUrl = StartRepo.getVersionUrl(versionId)
@@ -90,7 +91,7 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
                 }
             }
         }
-        setForeground(md5Checking())
+        md5Checking().notify()
         //检查md5
         val md5 = withContext(Dispatchers.Default) {
             file.md5()
@@ -100,7 +101,7 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
             throw DownloadError.MD5CheckFailed()
         }
         //md5校验通过，合并安装包
-        setForeground(patching())
+        patching().notify()
         val apkDir = File(externalCacheDownloadDir, "apk")
         val apkFile = File(apkDir, "${versionName}-${versionCode}.apk")
         try {
@@ -158,63 +159,46 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
             .setContentText(null)
 
     private suspend fun startForeground(versionName: String) =
-        setForeground(
-            ForegroundInfo(
-                NOTIFICATION_ID,
-                notificationBuilder
-                    .setContentTitle("正在下载：${versionName}")
-                    .setContentText("正在开始下载")
-                    .build()
-            )
-        )
+        notificationBuilder
+            .setContentTitle("正在下载：${versionName}")
+            .setContentText("正在开始下载")
+            .build()
 
-    private fun getDownloadUrl(versionName: String): ForegroundInfo =
-        ForegroundInfo(
-            NOTIFICATION_ID,
-            notificationBuilder
-                .setContentText("正在获取下载地址……")
-                .setContentTitle("正在下载：${versionName}")
-                .build()
-        )
+    private fun getDownloadUrl(versionName: String) =
+        notificationBuilder
+            .setContentText("正在获取下载地址……")
+            .setContentTitle("正在下载：${versionName}")
+            .build()
 
-    private fun updateProgress(downloadUpdateState: DownloadUpdateState): ForegroundInfo =
-        ForegroundInfo(
-            NOTIFICATION_ID,
-            notificationBuilder
-                .setProgress(100, downloadUpdateState.progress, false)
-                .setContentText("${downloadUpdateState.downloaded.formatFileSize()}/${downloadUpdateState.totalSize.formatFileSize()}")
-                .setSubText("已下载${downloadUpdateState.progress}%")
-                .build()
-        )
+    private fun updateProgress(downloadUpdateState: DownloadUpdateState) =
+        notificationBuilder
+            .setProgress(100, downloadUpdateState.progress, false)
+            .setContentText("${downloadUpdateState.downloaded.formatFileSize()}/${downloadUpdateState.totalSize.formatFileSize()}")
+            .setSubText("已下载${downloadUpdateState.progress}%")
+            .build()
 
-    private fun md5Checking(): ForegroundInfo =
-        ForegroundInfo(
-            NOTIFICATION_ID,
-            notificationBuilder
-                .setProgress(0, 0, false)
-                .setContentTitle("MD5校验中……")
-                .setContentText(null)
-                .setOngoing(false)
-                .build()
-        )
+    private fun md5Checking() =
+        notificationBuilder
+            .setProgress(0, 0, false)
+            .setContentTitle("MD5校验中……")
+            .setContentText(null)
+            .setOngoing(false)
+            .build()
 
-    private fun patching(): ForegroundInfo =
-        ForegroundInfo(
-            NOTIFICATION_ID,
-            notificationBuilder
-                .setProgress(0, 0, false)
-                .setContentTitle("正在合成安装包")
-                .setContentText(null)
-                .setOngoing(false)
-                .build()
-        )
+    private fun patching() =
+        notificationBuilder
+            .setProgress(0, 0, false)
+            .setContentTitle("正在合成安装包")
+            .setContentText(null)
+            .setOngoing(false)
+            .build()
 
-    private fun md5Failed(): Notification =
+    private fun md5Failed() =
         failedNotificationBuilder
             .setContentTitle("MD5校验失败，请重新下载")
             .build()
 
-    private fun patchFailed(): Notification =
+    private fun patchFailed() =
         failedNotificationBuilder
             .setContentTitle("安装包合成失败，请重新下载")
             .build()
@@ -225,6 +209,16 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
             .build()
 
     private fun Notification.notify() {
-        notificationManager.notify(NOTIFICATION_TAG, NOTIFICATION_ID, this)
+        with(NotificationManagerCompat.from(appContext)) {
+            if (ActivityCompat.checkSelfPermission(
+                    appContext,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                Log.w(TAG, "notify: no permission to post notifications")
+                return
+            }
+            notify(NOTIFICATION_ID, this@notify)
+        }
     }
 }
