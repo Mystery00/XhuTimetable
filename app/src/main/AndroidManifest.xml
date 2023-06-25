@@ -209,6 +209,10 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/week_glance_widget_info" />
         </receiver>
+
+        <meta-data
+            android:name="com.huawei.agconnect.AccessNetwork"
+            android:value="false" />
     </application>
 
 </manifest>
