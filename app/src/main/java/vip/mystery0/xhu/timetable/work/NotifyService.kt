@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.work
 
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
@@ -8,6 +9,8 @@ import androidx.core.app.NotificationManagerCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_DEFAULT
@@ -15,8 +18,10 @@ import vip.mystery0.xhu.timetable.ui.notification.NotificationId
 import vip.mystery0.xhu.timetable.utils.asInstant
 import java.time.LocalDate
 
-class NotifyService : Service() {
+class NotifyService : Service(), KoinComponent {
     override fun onBind(intent: Intent?): IBinder? = null
+
+    private val notificationManager: NotificationManager by inject()
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(job)
@@ -58,6 +63,9 @@ class NotifyService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         stopForeground(STOP_FOREGROUND_REMOVE)
+        runCatching {
+            notificationManager.cancel(NotificationId.NOTIFY_TOMORROW_FOREGROUND.id)
+        }
         job.cancel()
     }
 }
