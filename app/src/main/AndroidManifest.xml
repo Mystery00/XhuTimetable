@@ -169,6 +169,7 @@
             android:name=".push.PushService"
             android:enabled="true"
             android:exported="false"
+            android:foregroundServiceType="remoteMessaging"
             android:process=":pushcore">
             <intent-filter>
                 <action android:name="cn.jiguang.user.service.action" />
