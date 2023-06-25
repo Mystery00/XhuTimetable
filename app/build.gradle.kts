@@ -4,6 +4,7 @@ plugins {
     id("kotlin-kapt")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
+    id("com.huawei.agconnect")
 }
 
 fun String.runCommand(workingDir: File = file("./")): String {
@@ -146,6 +147,12 @@ android {
     namespace = "vip.mystery0.xhu.timetable"
 }
 
+configurations {
+    all {
+        exclude(group = "com.huawei.hms", module = "hmscoreinstaller")
+    }
+}
+
 dependencies {
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -212,6 +219,8 @@ dependencies {
     implementation("net.java.dev.jna:jna:5.7.0@aar")
     //jg-push
     implementation("cn.jiguang.sdk:jpush:5.0.3")
+    implementation("cn.jiguang.sdk.plugin:huawei:5.0.3")
+    implementation("com.huawei.hms:push:6.11.0.300")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
