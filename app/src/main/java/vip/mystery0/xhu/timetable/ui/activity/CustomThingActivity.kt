@@ -546,7 +546,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                 Icon(
                                     imageVector = Icons.Rounded.Add,
                                     contentDescription = null,
-                                    tint = Color.White
+                                    tint = XhuColor.Common.whiteText,
                                 )
                             }
                         }

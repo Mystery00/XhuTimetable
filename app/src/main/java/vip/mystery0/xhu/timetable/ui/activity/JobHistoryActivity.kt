@@ -18,7 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.ExtendedFloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -35,7 +35,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -97,19 +96,24 @@ class JobHistoryActivity : BaseComposeActivity() {
                     enter = slideInVertically(initialOffsetY = { it }),
                     exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
                 ) {
-                    FloatingActionButton(onClick = {
-                        if (jPushRegistrationId.isNullOrBlank()) {
-                            toastString("推送注册id为空")
-                            return@FloatingActionButton
-                        }
-                        addDialogState.show()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Rounded.Add,
-                            contentDescription = null,
-                            tint = Color.White
-                        )
-                    }
+                    ExtendedFloatingActionButton(
+                        text = {
+                            Text(text = "添加任务", color = XhuColor.Common.whiteText)
+                        },
+                        onClick = {
+                            if (jPushRegistrationId.isNullOrBlank()) {
+                                toastString("推送注册id为空")
+                                return@ExtendedFloatingActionButton
+                            }
+                            addDialogState.show()
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Rounded.Add,
+                                contentDescription = null,
+                                tint = XhuColor.Common.whiteText,
+                            )
+                        })
                 }
             }
         ) { paddingValues ->
