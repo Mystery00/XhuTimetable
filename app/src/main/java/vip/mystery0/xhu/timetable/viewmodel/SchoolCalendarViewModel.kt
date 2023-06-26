@@ -35,7 +35,7 @@ class SchoolCalendarViewModel : ComposeViewModel() {
 
     init {
         fun failed(message: String) {
-            Log.w(TAG, "load exp score list failed, $message")
+            Log.w(TAG, "load school calendar list failed, $message")
             _loading.value = LoadingState(false, message)
         }
 

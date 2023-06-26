@@ -316,6 +316,9 @@ object XhuIcons {
         val sync: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_sync)
+        val switch: Painter
+            @Composable
+            get() = painterResource(R.drawable.ic_action_switch)
     }
 
     object WsState {

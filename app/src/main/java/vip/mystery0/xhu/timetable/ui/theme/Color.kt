@@ -57,6 +57,9 @@ object XhuColor {
         val blackText: Color
             @Composable
             get() = colorOf(pair = Color.White to Color.Black)
+        val whiteText: Color
+            @Composable
+            get() = colorOf(pair = Color.Black to Color.White)
     }
 
     object Status {

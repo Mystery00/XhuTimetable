@@ -3,38 +3,28 @@ package vip.mystery0.xhu.timetable.ui.activity
 import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.BackdropScaffold
-import androidx.compose.material.BackdropScaffoldState
-import androidx.compose.material.BackdropValue
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ExtendedFloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.RadioButton
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.rememberBackdropScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -43,10 +33,16 @@ import androidx.core.content.FileProvider
 import coil.compose.SubcomposeAsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import kotlinx.coroutines.launch
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.MaterialDialogState
+import com.vanpra.composematerialdialogs.listItems
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import com.vanpra.composematerialdialogs.title
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.trackEvent
+import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.viewmodel.SchoolCalendarData
 import vip.mystery0.xhu.timetable.viewmodel.SchoolCalendarViewModel
 
 class SchoolCalendarActivity : BaseComposeActivity() {
@@ -59,23 +55,15 @@ class SchoolCalendarActivity : BaseComposeActivity() {
         val area by viewModel.area.collectAsState()
         val schoolCalendarData by viewModel.schoolCalendarData.collectAsState()
 
-        val scope = rememberCoroutineScope()
-        val scaffoldState: BackdropScaffoldState =
-            rememberBackdropScaffoldState(initialValue = BackdropValue.Concealed)
-        var selected by remember { mutableStateOf(schoolCalendarData.area) }
+        val selectDialogState = rememberMaterialDialogState()
+        val selectedArea = remember { mutableStateOf(schoolCalendarData.area) }
 
         LaunchedEffect(schoolCalendarData) {
-            selected = schoolCalendarData.area
+            selectedArea.value = schoolCalendarData.area
         }
 
         fun onBack() {
-            if (scaffoldState.isConcealed) {
-                finish()
-            } else {
-                scope.launch {
-                    scaffoldState.conceal()
-                }
-            }
+            finish()
         }
         BackHandler(
             onBack = {
@@ -83,10 +71,8 @@ class SchoolCalendarActivity : BaseComposeActivity() {
             }
         )
 
-        BackdropScaffold(
-            modifier = Modifier,
-            scaffoldState = scaffoldState,
-            appBar = {
+        Scaffold(
+            topBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
                     backgroundColor = MaterialTheme.colors.primary,
@@ -102,16 +88,6 @@ class SchoolCalendarActivity : BaseComposeActivity() {
                         }
                     },
                     actions = {
-                        if (scaffoldState.isRevealed) {
-                            IconButton(onClick = {
-                                viewModel.changeArea(selected)
-                            }) {
-                                Icon(
-                                    painter = XhuIcons.Action.done,
-                                    contentDescription = null,
-                                )
-                            }
-                        }
                         IconButton(onClick = {
                             trackEvent("分享校历")
                             val shareIntent = Intent(Intent.ACTION_SEND).apply {
@@ -139,56 +115,73 @@ class SchoolCalendarActivity : BaseComposeActivity() {
                         }
                     }
                 )
-            }, backLayerContent = {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    area.forEach {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp)
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() },
-                                ) {
-                                    selected = it.area
-                                },
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            RadioButton(selected = selected == it.area, onClick = null)
-                            Text(text = it.area)
+            },
+            floatingActionButton = {
+                ExtendedFloatingActionButton(
+                    text = {
+                        Text(text = "切换校区", color = XhuColor.Common.whiteText)
+                    },
+                    onClick = {
+                        if (!selectDialogState.showing) {
+                            selectDialogState.show()
                         }
-                    }
-                }
-            }, frontLayerContent = {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    val pullRefreshState = rememberPullRefreshState(
-                        refreshing = loading.loading,
-                        onRefresh = { },
-                    )
-                    Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
-                        SubcomposeAsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(schoolCalendarData.imageUrl)
-                                .memoryCachePolicy(CachePolicy.ENABLED)
-                                .diskCachePolicy(CachePolicy.ENABLED)
-                                .listener(onError = { _, result ->
-                                    result.throwable.message ?: "加载失败".toast(true)
-                                })
-                                .build(),
-                            loading = {
-                                Box(contentAlignment = Alignment.Center) {
-                                    CircularProgressIndicator(modifier = Modifier.size(48.dp))
-                                }
-                            },
+                    },
+                    icon = {
+                        Icon(
+                            painter = XhuIcons.Action.switch,
                             contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
+                            tint = XhuColor.Common.whiteText,
                         )
-                    }
+                    })
+            }
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+            ) {
+                val pullRefreshState = rememberPullRefreshState(
+                    refreshing = loading.loading,
+                    onRefresh = { },
+                )
+                Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+                    SubcomposeAsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(schoolCalendarData.imageUrl)
+                            .memoryCachePolicy(CachePolicy.ENABLED)
+                            .diskCachePolicy(CachePolicy.ENABLED)
+                            .listener(onError = { _, result ->
+                                result.throwable.message ?: "加载失败".toast(true)
+                            })
+                            .build(),
+                        loading = {
+                            Box(contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                            }
+                        },
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                    )
                 }
-            })
+            }
+        }
+        ShowSelectDialog(dialogState = selectDialogState, area = area, selectedArea = selectedArea)
         if (loading.errorMessage.isNotBlank()) {
             loading.errorMessage.toast(true)
+        }
+    }
+
+    @Composable
+    private fun ShowSelectDialog(
+        dialogState: MaterialDialogState,
+        area: List<SchoolCalendarData>,
+        selectedArea: MutableState<String>,
+    ) {
+        MaterialDialog(dialogState = dialogState) {
+            title("请选择需要查看校历的校区")
+            listItems(list = area.map { it.area }) { index, _ ->
+                selectedArea.value = area[index].area
+            }
         }
     }
 }
