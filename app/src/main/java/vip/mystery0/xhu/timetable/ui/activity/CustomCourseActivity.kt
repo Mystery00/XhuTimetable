@@ -2,6 +2,10 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,6 +26,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
@@ -698,8 +703,11 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                             }
                         }
                     }) {
+                    val lazyListState = rememberLazyListState()
                     val refreshing by viewModel.refreshing.collectAsState()
+                    val isScrollingUp = lazyListState.isScrollingUp()
                     BuildPaging(
+                        state = lazyListState,
                         paddingValues = PaddingValues(4.dp),
                         pager = pager,
                         refreshing = refreshing,
@@ -713,21 +721,27 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                             }
                         }
                     ) {
-                        FloatingActionButton(
+                        AnimatedVisibility(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
                                 .padding(24.dp),
-                            onClick = {
-                                scope.launch {
-                                    updateCustomCourse(CustomCourseResponse.init())
-                                    showSelect.show()
-                                }
-                            }) {
-                            Icon(
-                                imageVector = Icons.Rounded.Add,
-                                contentDescription = null,
-                                tint = Color.White
-                            )
+                            visible = isScrollingUp,
+                            enter = slideInVertically(initialOffsetY = { it }),
+                            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                        ) {
+                            FloatingActionButton(
+                                onClick = {
+                                    scope.launch {
+                                        updateCustomCourse(CustomCourseResponse.init())
+                                        showSelect.show()
+                                    }
+                                }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Add,
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                            }
                         }
                     }
                 }

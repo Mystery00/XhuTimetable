@@ -1,6 +1,10 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -11,14 +15,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -27,6 +35,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,6 +65,8 @@ class JobHistoryActivity : BaseComposeActivity() {
 
         val addDialogState = rememberMaterialDialogState()
 
+        val lazyListState = rememberLazyListState()
+
         fun onBack() {
             finish()
         }
@@ -76,23 +87,31 @@ class JobHistoryActivity : BaseComposeActivity() {
                             )
                         }
                     },
-                    actions = {
-                        IconButton(onClick = {
-                            if (jPushRegistrationId.isNullOrBlank()) {
-                                toastString("推送注册id为空")
-                                return@IconButton
-                            }
-                            addDialogState.show()
-                        }) {
-                            Icon(
-                                painter = XhuIcons.Action.addCircle,
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        }
-                    }
                 )
             },
+            floatingActionButton = {
+                val isScrollingUp = lazyListState.isScrollingUp()
+
+                AnimatedVisibility(
+                    visible = isScrollingUp,
+                    enter = slideInVertically(initialOffsetY = { it }),
+                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                ) {
+                    FloatingActionButton(onClick = {
+                        if (jPushRegistrationId.isNullOrBlank()) {
+                            toastString("推送注册id为空")
+                            return@FloatingActionButton
+                        }
+                        addDialogState.show()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Add,
+                            contentDescription = null,
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
         ) { paddingValues ->
             Box(
                 modifier = Modifier
@@ -110,6 +129,7 @@ class JobHistoryActivity : BaseComposeActivity() {
                     val historyList = historyListState.history
                     if (historyListState.loading || historyList.isNotEmpty()) {
                         LazyColumn(
+                            state = lazyListState,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(XhuColor.Common.grayBackground),
