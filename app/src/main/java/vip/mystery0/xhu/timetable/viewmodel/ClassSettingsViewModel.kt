@@ -16,7 +16,6 @@ import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.event.EventType
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.Month
 
 class ClassSettingsViewModel : ComposeViewModel() {
     private val _errorMessage = MutableStateFlow("")
