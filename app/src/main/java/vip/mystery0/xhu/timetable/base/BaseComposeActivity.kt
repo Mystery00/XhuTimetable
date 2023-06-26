@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
@@ -38,6 +39,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -350,5 +352,23 @@ abstract class BaseComposeActivity(
             })
             .build()
         ShortcutManagerCompat.pushDynamicShortcut(this, shortcut)
+    }
+
+    @Composable
+    protected fun LazyListState.isScrollingUp(): Boolean {
+        var previousIndex by remember(this) { mutableStateOf(firstVisibleItemIndex) }
+        var previousScrollOffset by remember(this) { mutableStateOf(firstVisibleItemScrollOffset) }
+        return remember(this) {
+            derivedStateOf {
+                if (previousIndex != firstVisibleItemIndex) {
+                    previousIndex > firstVisibleItemIndex
+                } else {
+                    previousScrollOffset >= firstVisibleItemScrollOffset
+                }.also {
+                    previousIndex = firstVisibleItemIndex
+                    previousScrollOffset = firstVisibleItemScrollOffset
+                }
+            }
+        }.value
     }
 }

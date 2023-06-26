@@ -2,6 +2,10 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BackdropScaffold
 import androidx.compose.material.BackdropValue
@@ -505,8 +510,11 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                             Spacer(modifier = Modifier.weight(1F))
                         }
                     }) {
+                    val lazyListState = rememberLazyListState()
                     val refreshing by viewModel.refreshing.collectAsState()
+                    val isScrollingUp = lazyListState.isScrollingUp()
                     BuildPaging(
+                        state = lazyListState,
                         paddingValues = PaddingValues(4.dp),
                         pager = pager,
                         refreshing = refreshing,
@@ -520,21 +528,27 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                             }
                         }
                     ) {
-                        FloatingActionButton(
+                        AnimatedVisibility(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
                                 .padding(24.dp),
-                            onClick = {
-                                scope.launch {
-                                    updateCustomThing(CustomThingResponse.init())
-                                    showSelect.show()
-                                }
-                            }) {
-                            Icon(
-                                imageVector = Icons.Rounded.Add,
-                                contentDescription = null,
-                                tint = Color.White
-                            )
+                            visible = isScrollingUp,
+                            enter = slideInVertically(initialOffsetY = { it }),
+                            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                        ) {
+                            FloatingActionButton(
+                                onClick = {
+                                    scope.launch {
+                                        updateCustomThing(CustomThingResponse.init())
+                                        showSelect.show()
+                                    }
+                                }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Add,
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                            }
                         }
                     }
                 }

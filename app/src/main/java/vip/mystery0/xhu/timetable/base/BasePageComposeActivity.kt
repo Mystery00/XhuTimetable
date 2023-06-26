@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -47,6 +49,7 @@ abstract class BasePageComposeActivity(
 
     @Composable
     protected fun <T : Any> BuildPaging(
+        state: LazyListState = rememberLazyListState(),
         paddingValues: PaddingValues,
         pager: LazyPagingItems<T>,
         refreshing: Boolean,
@@ -54,6 +57,7 @@ abstract class BasePageComposeActivity(
         itemContent: @Composable LazyItemScope.(T) -> Unit,
         boxContent: @Composable BoxScope.() -> Unit = {},
     ) = BuildPaging(
+        state = state,
         paddingValues = paddingValues,
         pager = pager,
         refreshing = refreshing,
@@ -68,6 +72,7 @@ abstract class BasePageComposeActivity(
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     protected fun <T : Any> BuildPaging(
+        state: LazyListState = rememberLazyListState(),
         paddingValues: PaddingValues,
         pager: LazyPagingItems<T>,
         refreshing: Boolean,
@@ -92,6 +97,7 @@ abstract class BasePageComposeActivity(
                     BuildNoDataLayout()
                 } else {
                     LazyColumn(
+                        state = state,
                         modifier = Modifier
                             .fillMaxSize()
                             .background(XhuColor.Common.grayBackground),
