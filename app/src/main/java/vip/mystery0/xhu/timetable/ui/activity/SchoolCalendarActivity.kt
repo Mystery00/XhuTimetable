@@ -4,12 +4,16 @@ import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExtendedFloatingActionButton
+import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -87,8 +91,13 @@ class SchoolCalendarActivity : BaseComposeActivity() {
                             )
                         }
                     },
-                    actions = {
-                        IconButton(onClick = {
+                )
+            },
+            floatingActionButton = {
+                Column(horizontalAlignment = Alignment.End) {
+                    FloatingActionButton(
+                        modifier = Modifier.size(40.dp),
+                        onClick = {
                             trackEvent("分享校历")
                             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
@@ -108,31 +117,30 @@ class SchoolCalendarActivity : BaseComposeActivity() {
                                 )
                             )
                         }) {
-                            Icon(
-                                painter = XhuIcons.Action.send,
-                                contentDescription = null,
-                            )
-                        }
-                    }
-                )
-            },
-            floatingActionButton = {
-                ExtendedFloatingActionButton(
-                    text = {
-                        Text(text = "切换校区", color = XhuColor.Common.whiteText)
-                    },
-                    onClick = {
-                        if (!selectDialogState.showing) {
-                            selectDialogState.show()
-                        }
-                    },
-                    icon = {
                         Icon(
-                            painter = XhuIcons.Action.switch,
+                            painter = XhuIcons.Action.send,
                             contentDescription = null,
                             tint = XhuColor.Common.whiteText,
                         )
-                    })
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    ExtendedFloatingActionButton(
+                        text = {
+                            Text(text = "切换校区", color = XhuColor.Common.whiteText)
+                        },
+                        onClick = {
+                            if (!selectDialogState.showing) {
+                                selectDialogState.show()
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                painter = XhuIcons.Action.switch,
+                                contentDescription = null,
+                                tint = XhuColor.Common.whiteText,
+                            )
+                        })
+                }
             }
         ) { paddingValues ->
             Box(
