@@ -63,7 +63,7 @@ class JobHistoryViewModel : ComposeViewModel() {
                     status = it.status,
                     executeTime = executeTime,
                     message = message,
-                    ext = it.ext,
+                    registrationId = it.ext.getOrDefault("registrationId", ""),
                 )
             }
             _historyListState.value = JobHistoryListState(history = historyList)
@@ -96,5 +96,5 @@ data class JobHistory(
     val status: String,
     val executeTime: String,
     val message: String,
-    val ext: Map<String, String>,
+    val registrationId: String,
 )

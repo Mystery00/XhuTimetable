@@ -141,7 +141,7 @@ class JobHistoryActivity : BaseComposeActivity() {
                         ) {
                             items(historyList.size) { index ->
                                 val item = historyList[index]
-                                BuildItem(item)
+                                BuildItem(item, jPushRegistrationId)
                             }
                         }
                         PullRefreshIndicator(
@@ -182,7 +182,7 @@ class JobHistoryActivity : BaseComposeActivity() {
 }
 
 @Composable
-private fun BuildItem(item: JobHistory) {
+private fun BuildItem(item: JobHistory, jPushRegistrationId: String?) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -201,7 +201,7 @@ private fun BuildItem(item: JobHistory) {
                     color = XhuColor.Common.blackText,
                 )
                 Text(
-                    text = "任务ID：${item.jobId}",
+                    text = "通知设备：${if (item.registrationId == jPushRegistrationId) "本机" else "非本机"}",
                     fontSize = 14.sp,
                     color = XhuColor.Common.blackText,
                 )
