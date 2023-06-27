@@ -2,8 +2,9 @@
 
 [西瓜课表官网](https://xgkb.mystery0.vip)
 
-![接口可用性](https://status.admin.mystery0.vip/api/badge/9/uptime/24?label=24%E5%B0%8F%E6%97%B6%E5%8F%AF%E7%94%A8%E6%80%A7&labelSuffix=d)
-![教务系统可用性](https://status.admin.mystery0.vip/api/badge/12/uptime/24?label=24%E5%B0%8F%E6%97%B6%E5%8F%AF%E7%94%A8%E6%80%A7&labelSuffix=d)
+服务端接口 ![接口可用性](https://status.admin.mystery0.vip/api/badge/9/uptime/24?label=24%E5%B0%8F%E6%97%B6%E5%8F%AF%E7%94%A8%E6%80%A7&labelSuffix=d)
+
+教务系统 ![教务系统可用性](https://status.admin.mystery0.vip/api/badge/12/uptime/24?label=24%E5%B0%8F%E6%97%B6%E5%8F%AF%E7%94%A8%E6%80%A7&labelSuffix=d)
 
 [![Build Android APK](https://github.com/Mystery00/XhuTimetable/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/Mystery00/XhuTimetable/actions/workflows/build.yml)
 
