@@ -160,17 +160,17 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.activity:activity-compose:1.7.2")
     implementation("androidx.core:core-splashscreen:1.0.1")
-    implementation("androidx.browser:browser:1.5.0")
+    implementation("androidx.browser:browser:1.6.0")
     implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
-    implementation("androidx.glance:glance:1.0.0-beta01")
-    implementation("androidx.glance:glance-appwidget:1.0.0-beta01")
+    implementation("androidx.glance:glance:1.0.0-rc01")
+    implementation("androidx.glance:glance-appwidget:1.0.0-rc01")
     //compose
-    implementation("androidx.compose.ui:ui:1.4.3")
-    implementation("androidx.compose.material:material:1.4.3")
-    implementation("androidx.compose.animation:animation:1.4.3")
+    implementation("androidx.compose.ui:ui:1.5.0")
+    implementation("androidx.compose.material:material:1.5.0")
+    implementation("androidx.compose.animation:animation:1.5.0")
     //paging3
-    implementation("androidx.paging:paging-runtime-ktx:3.1.1")
-    implementation("androidx.paging:paging-compose:1.0.0-alpha20")
+    implementation("androidx.paging:paging-runtime-ktx:3.2.0")
+    implementation("androidx.paging:paging-compose:3.2.0")
     //accompanist
     val accompanistVersion = "0.30.1"
     implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
@@ -183,7 +183,7 @@ dependencies {
     implementation("io.github.vanpra.compose-material-dialogs:datetime:$composeMaterialDialogsVersion")
     implementation("io.github.vanpra.compose-material-dialogs:color:$composeMaterialDialogsVersion")
     //lottie
-    implementation("com.airbnb.android:lottie-compose:6.0.1")
+    implementation("com.airbnb.android:lottie-compose:6.1.0")
     //room
     implementation("androidx.room:room-runtime:2.5.2")
     ksp("androidx.room:room-compiler:2.5.2")
@@ -191,9 +191,9 @@ dependencies {
     //work manager
     implementation("androidx.work:work-runtime-ktx:2.8.1")
     //koin
-    implementation("io.insert-koin:koin-android:3.4.2")
-    implementation("io.insert-koin:koin-androidx-workmanager:3.4.2")
-    implementation("io.insert-koin:koin-androidx-compose:3.4.5")
+    implementation("io.insert-koin:koin-android:3.4.3")
+    implementation("io.insert-koin:koin-androidx-workmanager:3.4.3")
+    implementation("io.insert-koin:koin-androidx-compose:3.4.6")
     //coil
     val coilVersion = "2.4.0"
     implementation("io.coil-kt:coil-compose:$coilVersion")
@@ -205,11 +205,11 @@ dependencies {
     implementation("com.squareup.moshi:moshi:1.15.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
     //mmkv
-    implementation("com.tencent:mmkv-static:1.3.0")
+    implementation("com.tencent:mmkv-static:1.3.1")
     //preference
     implementation("com.github.alorma:compose-settings-ui:0.27.0")
     //AppCenter
-    val appCenterSdkVersion = "5.0.1"
+    val appCenterSdkVersion = "5.0.2"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
     //ucrop
@@ -218,8 +218,8 @@ dependencies {
     implementation("com.featureprobe:client-sdk-android:2.0.2@aar")
     implementation("net.java.dev.jna:jna:5.7.0@aar")
     //jg-push
-    implementation("cn.jiguang.sdk:jpush:5.0.3")
-    implementation("cn.jiguang.sdk.plugin:huawei:5.0.3")
+    implementation("cn.jiguang.sdk:jpush:5.0.4")
+    implementation("cn.jiguang.sdk.plugin:huawei:5.0.4")
     implementation("com.huawei.hms:push:6.11.0.300")
 }
 

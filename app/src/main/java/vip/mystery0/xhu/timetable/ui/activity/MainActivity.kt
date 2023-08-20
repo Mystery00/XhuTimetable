@@ -141,7 +141,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
         }
         ShowCheckUpdateDialog()
         val coroutineScope = rememberCoroutineScope()
-        val pagerState = rememberPagerState(initialPage = 0)
+        val pagerState = rememberPagerState(initialPage = 0) { 3 }
         val poems by viewModel.poems.collectAsState()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -336,7 +336,6 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
                         )
                     }
                     HorizontalPager(
-                        pageCount = 3,
                         beyondBoundsPageCount = 2,
                         state = pagerState,
                         modifier = Modifier.padding(paddingValues),
