@@ -256,7 +256,7 @@ private fun BoxScope.ShowCourseDialog(
     if (showList.isEmpty()) return
     val first = showList.firstOrNull { it.thisWeek }
     val initPage = if (first == null) 0 else showList.indexOf(first)
-    val pagerState = rememberPagerState(initialPage = initPage)
+    val pagerState = rememberPagerState(initialPage = initPage) { showList.size }
     Dialog(onDismissRequest = {
         dialogState.value = emptyList()
     }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -266,7 +266,6 @@ private fun BoxScope.ShowCourseDialog(
                 .align(Alignment.Center)
         ) {
             HorizontalPager(
-                pageCount = showList.size,
                 state = pagerState,
                 modifier = Modifier.height(240.dp),
             ) { page ->
