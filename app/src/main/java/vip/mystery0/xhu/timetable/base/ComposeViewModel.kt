@@ -25,6 +25,9 @@ abstract class ComposeViewModel : ViewModel(), KoinComponent {
         val minYear = loggedUserList.minByOrNull { it.info.xhuGrade }?.info?.xhuGrade ?: nowYear
         var maxYear =
             if (termStartDate.month < Month.JUNE) termStartDate.year else termStartDate.year - 1
+        if (maxYear < nowYear) {
+            maxYear = nowYear
+        }
         if (minYear > maxYear) {
             maxYear = minYear
         }
