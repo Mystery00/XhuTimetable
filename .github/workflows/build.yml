@@ -7,7 +7,7 @@ on:
         required: true
         type: string
       oldVersionCode:
-        description: '上一版本版本号'
+        description: '上一版本版本号(只要code)'
         required: true
         type: string
       forceUpdate:
