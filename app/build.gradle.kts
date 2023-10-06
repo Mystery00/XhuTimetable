@@ -154,26 +154,25 @@ configurations {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.10.1")
+    implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.9.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-    implementation("androidx.activity:activity-compose:1.7.2")
+    implementation("com.google.android.material:material:1.10.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("androidx.activity:activity-compose:1.8.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.browser:browser:1.6.0")
     implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
-    implementation("androidx.glance:glance:1.0.0-rc01")
-    implementation("androidx.glance:glance-appwidget:1.0.0-rc01")
+    implementation("androidx.glance:glance:1.0.0")
+    implementation("androidx.glance:glance-appwidget:1.0.0")
     //compose
-    implementation("androidx.compose.ui:ui:1.5.0")
-    implementation("androidx.compose.material:material:1.5.0")
-    implementation("androidx.compose.animation:animation:1.5.0")
+    implementation("androidx.compose.ui:ui:1.5.3")
+    implementation("androidx.compose.material:material:1.5.3")
+    implementation("androidx.compose.animation:animation:1.5.3")
     //paging3
-    implementation("androidx.paging:paging-runtime-ktx:3.2.0")
-    implementation("androidx.paging:paging-compose:3.2.0")
+    implementation("androidx.paging:paging-runtime-ktx:3.2.1")
+    implementation("androidx.paging:paging-compose:3.2.1")
     //accompanist
-    val accompanistVersion = "0.30.1"
-    implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
+    val accompanistVersion = "0.32.0"
     implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
@@ -191,9 +190,9 @@ dependencies {
     //work manager
     implementation("androidx.work:work-runtime-ktx:2.8.1")
     //koin
-    implementation("io.insert-koin:koin-android:3.4.3")
-    implementation("io.insert-koin:koin-androidx-workmanager:3.4.3")
-    implementation("io.insert-koin:koin-androidx-compose:3.4.6")
+    implementation("io.insert-koin:koin-android:3.5.0")
+    implementation("io.insert-koin:koin-androidx-workmanager:3.5.0")
+    implementation("io.insert-koin:koin-androidx-compose:3.5.0")
     //coil
     val coilVersion = "2.4.0"
     implementation("io.coil-kt:coil-compose:$coilVersion")
@@ -218,9 +217,9 @@ dependencies {
     implementation("com.featureprobe:client-sdk-android:2.0.2@aar")
     implementation("net.java.dev.jna:jna:5.7.0@aar")
     //jg-push
-    implementation("cn.jiguang.sdk:jpush:5.0.4")
-    implementation("cn.jiguang.sdk.plugin:huawei:5.0.4")
-    implementation("com.huawei.hms:push:6.11.0.300")
+    implementation("cn.jiguang.sdk:jpush-google:5.2.0")
+    implementation("cn.jiguang.sdk.plugin:huawei:5.2.0")
+    implementation("com.huawei.hms:push:6.12.0.300")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
