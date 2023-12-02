@@ -321,7 +321,7 @@ private fun BoxScope.ShowCourseDialog(
                             }
                             if (multiAccountMode) {
                                 Text(
-                                    text = "${course.user.studentId}(${course.user.info.name})",
+                                    text = course.accountTitle,
                                     fontSize = 12.sp,
                                     color = MaterialTheme.colors.onSecondary,
                                     modifier = Modifier

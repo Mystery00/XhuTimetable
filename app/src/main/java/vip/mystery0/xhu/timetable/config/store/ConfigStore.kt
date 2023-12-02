@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.BuildConfig
 import vip.mystery0.xhu.timetable.config.Customisable
+import vip.mystery0.xhu.timetable.model.CustomAccountTitle
 import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
@@ -145,6 +146,20 @@ class ConfigStore internal constructor() {
             kv.encode(multiAccountModeKey, value)
         }
         get() = kv.decodeBool(multiAccountModeKey, false)
+
+    private val customAccountTitleKey = "customAccountTitle"
+    var customAccountTitle: CustomAccountTitle
+        set(value) {
+            kv.encode(
+                customAccountTitleKey,
+                moshi.adapter(CustomAccountTitle::class.java).toJson(value)
+            )
+        }
+        get() {
+            val save = kv.decodeString(customAccountTitleKey, "")
+            return if (save.isNullOrBlank()) CustomAccountTitle.DEFAULT
+            else moshi.adapter(CustomAccountTitle::class.java).fromJson(save)!!
+        }
 
     //显示非本周课程
     private val showNotThisWeekKey = "showNotThisWeek"

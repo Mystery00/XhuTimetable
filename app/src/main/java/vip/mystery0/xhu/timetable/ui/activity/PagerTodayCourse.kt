@@ -273,7 +273,7 @@ private fun DrawThingCard(
             Box {
                 if (multiAccountMode) {
                     Text(
-                        text = "${thing.studentId}(${thing.userName})",
+                        text = thing.accountTitle,
                         fontSize = 8.sp,
                         color = MaterialTheme.colors.onSecondary,
                         modifier = Modifier
@@ -452,7 +452,7 @@ private fun DrawCourseCard(
                 Box {
                     if (multiAccountMode) {
                         Text(
-                            text = "${course.studentId}(${course.userName})",
+                            text = course.accountTitle,
                             fontSize = 8.sp,
                             color = MaterialTheme.colors.onSecondary,
                             modifier = Modifier

@@ -303,9 +303,13 @@ class CustomUiActivity : BaseComposeActivity() {
             },
             text = {
                 Column(modifier = Modifier.padding(4.dp)) {
-                    OutlinedTextField(value = valueState.value, onValueChange = {
-                        valueState.value = it
-                    })
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = valueState.value,
+                        onValueChange = {
+                            valueState.value = it
+                        })
+                    Spacer(modifier = Modifier.height(2.dp))
                     Row {
                         Text(text = "课程名称",
                             color = MaterialTheme.colors.primary,

@@ -84,7 +84,6 @@ import com.google.android.material.math.MathUtils.lerp
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.MaterialDialogState
 import com.vanpra.composematerialdialogs.listItems
-import com.vanpra.composematerialdialogs.message
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import com.vanpra.composematerialdialogs.title
 import kotlinx.coroutines.CoroutineScope
@@ -112,8 +111,6 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
     private val viewModel: MainViewModel by viewModels()
     private lateinit var modalBottomSheetState: ModalBottomSheetState
     private lateinit var addDialogState: MaterialDialogState
-    private lateinit var detectDialogState: MaterialDialogState
-    private var detectContent: String = ""
 
     private val ext: MainActivityExt
         get() = MainActivityExt(this, viewModel, modalBottomSheetState, addDialogState)
@@ -157,7 +154,6 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
 
         modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
         addDialogState = rememberMaterialDialogState()
-        detectDialogState = rememberMaterialDialogState()
 
         val showWeekView by viewModel.showWeekView.collectAsState()
         val weekView by viewModel.weekView.collectAsState()
@@ -457,7 +453,6 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
         }
 
         ShowAddDialog(addDialogState)
-        ShowDetectDialog(detectDialogState)
     }
 
     @Composable
@@ -506,19 +501,6 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
                     }
                 }
             }
-        }
-    }
-
-    @Composable
-    private fun ShowDetectDialog(
-        dialogState: MaterialDialogState,
-    ) {
-        MaterialDialog(dialogState = dialogState,
-            buttons = {
-                positiveButton("确定")
-            }) {
-            title("服务器状态")
-            message(detectContent)
         }
     }
 

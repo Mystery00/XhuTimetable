@@ -2,7 +2,6 @@ package vip.mystery0.xhu.timetable.model
 
 import androidx.compose.ui.graphics.Color
 import vip.mystery0.xhu.timetable.config.store.Formatter
-import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.response.Course
 import vip.mystery0.xhu.timetable.model.response.CustomCourseResponse
 import vip.mystery0.xhu.timetable.model.response.ExperimentCourse
@@ -37,8 +36,8 @@ data class WeekCourseView(
     val teacher: String,
     //备注
     val extraData: List<String>,
-    //归属用户
-    val user: User,
+    //多用户显示内容
+    val accountTitle: String,
 ) : Comparable<WeekCourseView> {
     //是否是本周课程
     var thisWeek = false
@@ -73,7 +72,7 @@ data class WeekCourseView(
     }
 
     companion object {
-        fun valueOf(course: Course, user: User): WeekCourseView {
+        fun valueOf(course: Course, accountTitle: String): WeekCourseView {
             val courseDayTime = if (course.startDayTime == course.endDayTime) {
                 "第${course.startDayTime}节"
             } else {
@@ -98,11 +97,11 @@ data class WeekCourseView(
                 location = course.location,
                 teacher = course.teacher,
                 extraData = course.extraData,
-                user = user,
+                accountTitle = accountTitle,
             )
         }
 
-        fun valueOf(experimentCourse: ExperimentCourse, user: User): WeekCourseView {
+        fun valueOf(experimentCourse: ExperimentCourse, accountTitle: String): WeekCourseView {
             val courseDayTime = if (experimentCourse.startDayTime == experimentCourse.endDayTime) {
                 "第${experimentCourse.startDayTime}节"
             } else {
@@ -132,11 +131,11 @@ data class WeekCourseView(
                 location = experimentCourse.location,
                 teacher = experimentCourse.teacherName,
                 extraData = extraData,
-                user = user,
+                accountTitle = accountTitle,
             )
         }
 
-        fun valueOf(course: CustomCourseResponse, user: User): WeekCourseView {
+        fun valueOf(course: CustomCourseResponse, accountTitle: String): WeekCourseView {
             val courseDayTime = if (course.startDayTime == course.endDayTime) {
                 "第${course.startDayTime}节"
             } else {
@@ -161,7 +160,7 @@ data class WeekCourseView(
                 location = course.location,
                 teacher = course.teacher,
                 extraData = emptyList(),
-                user = user,
+                accountTitle = accountTitle,
             )
         }
     }
