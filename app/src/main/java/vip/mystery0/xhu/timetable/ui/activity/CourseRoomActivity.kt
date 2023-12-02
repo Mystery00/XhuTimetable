@@ -13,23 +13,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.BackdropScaffold
 import androidx.compose.material.BackdropValue
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.Checkbox
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.RadioButton
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.rememberBackdropScaffoldState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -59,7 +61,7 @@ import java.util.Locale
 class CourseRoomActivity : BasePageComposeActivity() {
     private val viewModel: CourseRoomViewModel by viewModels()
 
-    @OptIn(ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
     override fun BuildContent() {
         val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
@@ -97,8 +99,6 @@ class CourseRoomActivity : BasePageComposeActivity() {
             appBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
-                    backgroundColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
                     navigationIcon = {
                         IconButton(onClick = {
                             onBack()
@@ -178,7 +178,7 @@ class CourseRoomActivity : BasePageComposeActivity() {
                         Text(text = text)
                     }
                     Button(
-                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             scope.launch {
@@ -371,7 +371,9 @@ private fun BuildItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp),
-        backgroundColor = XhuColor.cardBackground,
+        colors = CardDefaults.cardColors(
+            containerColor = XhuColor.cardBackground,
+        ),
     ) {
         Column(
             modifier = Modifier.padding(8.dp),

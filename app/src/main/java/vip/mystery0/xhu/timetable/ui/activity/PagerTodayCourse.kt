@@ -17,14 +17,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -145,6 +146,7 @@ private fun DrawLine() {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalMaterialApi
 @Composable
 private fun DrawPoemsCard(dialogState: ModalBottomSheetState, scope: CoroutineScope, poems: Poems) {
@@ -275,10 +277,10 @@ private fun DrawThingCard(
                     Text(
                         text = thing.accountTitle,
                         fontSize = 8.sp,
-                        color = MaterialTheme.colors.onSecondary,
+                        color = MaterialTheme.colorScheme.onSecondary,
                         modifier = Modifier
                             .background(
-                                color = MaterialTheme.colors.secondary,
+                                color = MaterialTheme.colorScheme.secondary,
                                 shape = RoundedCornerShape(bottomStart = 4.dp),
                             )
                             .padding(1.dp)
@@ -454,10 +456,10 @@ private fun DrawCourseCard(
                         Text(
                             text = course.accountTitle,
                             fontSize = 8.sp,
-                            color = MaterialTheme.colors.onSecondary,
+                            color = MaterialTheme.colorScheme.onSecondary,
                             modifier = Modifier
                                 .background(
-                                    color = MaterialTheme.colors.secondary,
+                                    color = MaterialTheme.colorScheme.secondary,
                                     shape = RoundedCornerShape(bottomStart = 4.dp),
                                 )
                                 .padding(1.dp)

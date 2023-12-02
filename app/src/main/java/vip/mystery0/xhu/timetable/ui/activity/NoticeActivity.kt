@@ -7,13 +7,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,6 +43,7 @@ class NoticeActivity : BasePageComposeActivity() {
     private val regex =
         Regex("(https?)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]")
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
         val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
@@ -49,8 +52,6 @@ class NoticeActivity : BasePageComposeActivity() {
             topBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
-                    backgroundColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
                     navigationIcon = {
                         IconButton(onClick = {
                             finish()
@@ -83,7 +84,9 @@ class NoticeActivity : BasePageComposeActivity() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp, vertical = 4.dp),
-            backgroundColor = XhuColor.cardBackground,
+            colors = CardDefaults.cardColors(
+                containerColor = XhuColor.cardBackground,
+            ),
         ) {
             Column(
                 modifier = Modifier.padding(8.dp)
@@ -118,7 +121,7 @@ class NoticeActivity : BasePageComposeActivity() {
         val annotatedText = buildAnnotatedString {
             split.forEachIndexed { index, s ->
                 withStyle(
-                    style = SpanStyle(color = MaterialTheme.colors.onBackground),
+                    style = SpanStyle(color = MaterialTheme.colorScheme.onBackground),
                 ) {
                     append(s)
                 }

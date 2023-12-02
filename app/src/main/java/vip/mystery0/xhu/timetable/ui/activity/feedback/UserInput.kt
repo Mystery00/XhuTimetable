@@ -31,16 +31,16 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -100,7 +100,7 @@ fun UserInput(
     var textFieldFocusState by remember { mutableStateOf(false) }
 
     Surface(
-        elevation = 12.dp
+        shadowElevation = 12.dp
     ) {
         Column(modifier = modifier) {
             UserInputText(
@@ -207,12 +207,12 @@ fun FunctionalityNotAvailablePanel() {
         ) {
             Text(
                 text = "暂不支持",
-                style = MaterialTheme.typography.caption
+                style = MaterialTheme.typography.bodySmall
             )
             Text(
                 text = "暂不支持",
                 modifier = Modifier.paddingFrom(FirstBaseline, before = 32.dp),
-                style = MaterialTheme.typography.body2,
+                style = MaterialTheme.typography.bodyMedium,
                 color = XhuColor.Common.grayText
             )
         }
@@ -288,7 +288,7 @@ private fun InputSelectorButton(
 ) {
     val backgroundModifier = if (selected) {
         Modifier.background(
-            color = MaterialTheme.colors.secondary,
+            color = MaterialTheme.colorScheme.secondary,
             shape = RoundedCornerShape(14.dp)
         )
     } else {
@@ -299,9 +299,9 @@ private fun InputSelectorButton(
         modifier = backgroundModifier
     ) {
         val tint = if (selected) {
-            MaterialTheme.colors.onSecondary
+            MaterialTheme.colorScheme.onSecondary
         } else {
-            MaterialTheme.colors.secondary
+            MaterialTheme.colorScheme.secondary
         }
         Icon(
             icon,
@@ -376,7 +376,7 @@ private fun UserInputText(
                             .align(Alignment.CenterStart)
                             .padding(start = 32.dp),
                         text = "请输入文本...",
-                        style = MaterialTheme.typography.body1.copy(color = XhuColor.Common.grayText)
+                        style = MaterialTheme.typography.bodyLarge.copy(color = XhuColor.Common.grayText)
                     )
                 }
             }

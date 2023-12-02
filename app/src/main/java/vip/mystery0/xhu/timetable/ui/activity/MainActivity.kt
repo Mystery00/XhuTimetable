@@ -16,6 +16,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -39,18 +40,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.BottomNavigation
-import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -130,7 +131,7 @@ class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
     @Composable
     override fun BuildContent() {
         val systemUiController = rememberSystemUiController()
-        val useDarkIcons = MaterialTheme.colors.isLight
+        val useDarkIcons = !isSystemInDarkTheme()
         val barColor = XhuColor.mainBarColorBackground
         SideEffect {
             systemUiController.setSystemBarsColor(barColor, darkIcons = useDarkIcons)
@@ -616,7 +617,7 @@ private val weekViewGrayColor = Color(0xFFCFDBDB)
 
 @Composable
 private fun colorOf(checked: Boolean): Color =
-    if (checked) XhuColor.iconChecked else MaterialTheme.colors.onSurface
+    if (checked) XhuColor.iconChecked else MaterialTheme.colorScheme.onSurface
 
 @ExperimentalMaterialApi
 private enum class Tab(

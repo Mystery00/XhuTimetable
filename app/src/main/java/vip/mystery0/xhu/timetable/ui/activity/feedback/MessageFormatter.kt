@@ -1,7 +1,7 @@
 package vip.mystery0.xhu.timetable.ui.activity.feedback
 
-import androidx.compose.material.Colors
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -52,9 +52,9 @@ fun messageFormatter(
 
         val codeSnippetBackground =
             if (primary) {
-                MaterialTheme.colors.secondary
+                MaterialTheme.colorScheme.secondary
             } else {
-                MaterialTheme.colors.surface
+                MaterialTheme.colorScheme.surface
             }
 
         for (token in tokens) {
@@ -62,7 +62,7 @@ fun messageFormatter(
 
             val (annotatedString, stringAnnotation) = getSymbolAnnotation(
                 matchResult = token,
-                colors = MaterialTheme.colors,
+                colors = MaterialTheme.colorScheme,
                 primary = primary,
                 codeSnippetBackground = codeSnippetBackground
             )
@@ -92,7 +92,7 @@ fun messageFormatter(
  */
 private fun getSymbolAnnotation(
     matchResult: MatchResult,
-    colors: Colors,
+    colors: ColorScheme,
     primary: Boolean,
     codeSnippetBackground: Color
 ): SymbolAnnotation {

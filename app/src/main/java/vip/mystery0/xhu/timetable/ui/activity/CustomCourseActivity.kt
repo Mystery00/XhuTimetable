@@ -29,31 +29,33 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.BackdropScaffold
 import androidx.compose.material.BackdropValue
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.RadioButton
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.rememberBackdropScaffoldState
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -87,10 +89,10 @@ import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
 
-@OptIn(ExperimentalMaterialApi::class)
 class CustomCourseActivity : BaseSelectComposeActivity() {
     private val viewModel: CustomCourseViewModel by viewModels()
 
+    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
         val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
@@ -175,8 +177,6 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
             appBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
-                    backgroundColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
                     navigationIcon = {
                         IconButton(onClick = {
                             onBack()
@@ -298,8 +298,8 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                         .align(Alignment.CenterHorizontally),
                                 ) {
                                     val selectedContentColor = Color.White
-                                    val selectedBackgroundColor = MaterialTheme.colors.primary
-                                    val contentColor = MaterialTheme.colors.primary
+                                    val selectedBackgroundColor = MaterialTheme.colorScheme.primary
+                                    val contentColor = MaterialTheme.colorScheme.primary
                                     val backgroundColor = XhuColor.Common.whiteBackground
                                     OutlinedButton(
                                         shape = RoundedCornerShape(
@@ -308,7 +308,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                         ),
                                         colors = ButtonDefaults.outlinedButtonColors(
                                             contentColor = if (createType == CreateType.INPUT) selectedContentColor else contentColor,
-                                            backgroundColor = if (createType == CreateType.INPUT) selectedBackgroundColor else backgroundColor,
+                                            containerColor = if (createType == CreateType.INPUT) selectedBackgroundColor else backgroundColor,
                                         ),
                                         onClick = {
                                             createType = CreateType.INPUT
@@ -319,7 +319,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                         shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp),
                                         colors = ButtonDefaults.outlinedButtonColors(
                                             contentColor = if (createType == CreateType.SELECT) selectedContentColor else contentColor,
-                                            backgroundColor = if (createType == CreateType.SELECT) selectedBackgroundColor else backgroundColor,
+                                            containerColor = if (createType == CreateType.SELECT) selectedBackgroundColor else backgroundColor,
                                         ),
                                         onClick = {
                                             createType = CreateType.SELECT
@@ -354,8 +354,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                     )
                                                 },
                                                 onValueChange = { courseName = it },
-                                                colors = TextFieldDefaults.textFieldColors(
-                                                    backgroundColor = Color.Transparent,
+                                                colors = TextFieldDefaults.colors(
                                                     unfocusedIndicatorColor = Color.Transparent,
                                                 )
                                             )
@@ -381,8 +380,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                     )
                                                 },
                                                 onValueChange = { teacher = it },
-                                                colors = TextFieldDefaults.textFieldColors(
-                                                    backgroundColor = Color.Transparent,
+                                                colors = TextFieldDefaults.colors(
                                                     unfocusedIndicatorColor = Color.Transparent,
                                                 )
                                             )
@@ -408,8 +406,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                     )
                                                 },
                                                 onValueChange = { location = it },
-                                                colors = TextFieldDefaults.textFieldColors(
-                                                    backgroundColor = Color.Transparent,
+                                                colors = TextFieldDefaults.colors(
                                                     unfocusedIndicatorColor = Color.Transparent,
                                                 )
                                             )
@@ -435,9 +432,9 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                             val item = index + 1
                                                             val inList = item in weekList
                                                             val color =
-                                                                if (inList) MaterialTheme.colors.primary else XhuColor.customCourseWeekColorBackground
+                                                                if (inList) MaterialTheme.colorScheme.primary else XhuColor.customCourseWeekColorBackground
                                                             val textColor =
-                                                                if (inList) MaterialTheme.colors.onPrimary else Color.Black
+                                                                if (inList) MaterialTheme.colorScheme.onPrimary else Color.Black
                                                             Surface(
                                                                 shape = CircleShape,
                                                                 modifier = Modifier
@@ -545,8 +542,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                     )
                                                 },
                                                 onValueChange = { searchCourseName = it },
-                                                colors = TextFieldDefaults.textFieldColors(
-                                                    backgroundColor = Color.Transparent,
+                                                colors = TextFieldDefaults.colors(
                                                     unfocusedIndicatorColor = Color.Transparent,
                                                 )
                                             )
@@ -572,8 +568,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                     )
                                                 },
                                                 onValueChange = { searchTeacherName = it },
-                                                colors = TextFieldDefaults.textFieldColors(
-                                                    backgroundColor = Color.Transparent,
+                                                colors = TextFieldDefaults.colors(
                                                     unfocusedIndicatorColor = Color.Transparent,
                                                 )
                                             )
@@ -1038,7 +1033,9 @@ private fun BuildItem(
                 indication = null,
                 interactionSource = MutableInteractionSource(),
             ),
-        backgroundColor = XhuColor.cardBackground,
+        colors = CardDefaults.cardColors(
+            containerColor = XhuColor.cardBackground,
+        ),
     ) {
         Column(
             modifier = Modifier.padding(8.dp),
@@ -1110,7 +1107,7 @@ private fun BuildSearchResultItem(
     onClick: () -> Unit,
 ) {
     val border =
-        if (checked) BorderStroke(width = 1.dp, color = MaterialTheme.colors.primary) else null
+        if (checked) BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.primary) else null
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -1120,7 +1117,9 @@ private fun BuildSearchResultItem(
                 indication = null,
                 interactionSource = MutableInteractionSource(),
             ),
-        backgroundColor = XhuColor.cardBackground,
+        colors = CardDefaults.cardColors(
+            containerColor = XhuColor.cardBackground,
+        ),
         border = border,
     ) {
         Column(

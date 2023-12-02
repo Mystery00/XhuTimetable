@@ -20,27 +20,28 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.RadioButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Switch
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -67,11 +68,13 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.ExportCalendarViewModel
 
-@OptIn(ExperimentalMaterialApi::class)
 class ExportCalendarActivity : BaseComposeActivity() {
     private val viewModel: ExportCalendarViewModel by viewModels()
 
-    @OptIn(ExperimentalPermissionsApi::class)
+    @OptIn(
+        ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
+        ExperimentalMaterialApi::class
+    )
     @Composable
     override fun BuildContent() {
         val calendarPermissionState = rememberMultiplePermissionsState(
@@ -107,8 +110,6 @@ class ExportCalendarActivity : BaseComposeActivity() {
             topBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
-                    backgroundColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
                     navigationIcon = {
                         IconButton(onClick = {
                             onBack()
@@ -498,7 +499,9 @@ private fun BuildItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp),
-        backgroundColor = XhuColor.cardBackground,
+        colors = CardDefaults.cardColors(
+            containerColor = XhuColor.cardBackground,
+        ),
     ) {
         Row(
             modifier = Modifier.padding(8.dp),

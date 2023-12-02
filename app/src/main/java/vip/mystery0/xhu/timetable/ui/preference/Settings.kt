@@ -1,9 +1,9 @@
 package vip.mystery0.xhu.timetable.ui.preference
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxColors
-import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxColors
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier

@@ -23,10 +23,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -323,10 +323,10 @@ private fun BoxScope.ShowCourseDialog(
                                 Text(
                                     text = course.accountTitle,
                                     fontSize = 12.sp,
-                                    color = MaterialTheme.colors.onSecondary,
+                                    color = MaterialTheme.colorScheme.onSecondary,
                                     modifier = Modifier
                                         .background(
-                                            color = MaterialTheme.colors.secondary,
+                                            color = MaterialTheme.colorScheme.secondary,
                                             shape = RoundedCornerShape(4.dp),
                                         )
                                         .padding(2.dp),
