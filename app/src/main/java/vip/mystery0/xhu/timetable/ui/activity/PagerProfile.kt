@@ -19,11 +19,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -61,7 +61,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState()),
     ) {
         val coroutineScope = rememberCoroutineScope()
@@ -112,7 +112,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
                         Text(
                             text,
                             fontSize = 17.sp,
-                            color = MaterialTheme.colors.onBackground,
+                            color = MaterialTheme.colorScheme.onBackground,
                             fontWeight = FontWeight.Bold,
                         )
                         Text(mainUser?.info?.className ?: "", fontSize = 14.sp, color = Color.Gray)
@@ -230,7 +230,7 @@ private fun BuildProfileItem(
         )
         Text(
             text = title,
-            color = MaterialTheme.colors.onBackground,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 14.sp,
             modifier = Modifier
                 .weight(1F)

@@ -13,6 +13,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,21 +27,22 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -95,8 +97,8 @@ abstract class BaseComposeActivity(
         XhuTimetableTheme {
             if (setSystemUiColor) {
                 val systemUiController = rememberSystemUiController()
-                val systemBarColor = MaterialTheme.colors.primary
-                val isLight = MaterialTheme.colors.isLight
+                val systemBarColor = MaterialTheme.colorScheme.primary
+                val isLight = !isSystemInDarkTheme()
                 SideEffect {
                     systemUiController.setSystemBarsColor(systemBarColor, darkIcons = isLight)
                     systemUiController.setNavigationBarColor(systemBarColor, darkIcons = isLight)
@@ -168,8 +170,8 @@ abstract class BaseComposeActivity(
                 modifier = Modifier
                     .size(144.dp),
                 shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colors.surface,
-                elevation = 24.dp
+                color = MaterialTheme.colorScheme.surface,
+                shadowElevation = 24.dp
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -185,7 +187,7 @@ abstract class BaseComposeActivity(
                     Text(
                         text = text,
                         fontSize = fontSize,
-                        color = MaterialTheme.colors.onSurface
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -200,7 +202,7 @@ abstract class BaseComposeActivity(
             appendLayout = {
                 Text(
                     text = "暂无数据",
-                    color = MaterialTheme.colors.onSurface,
+                    color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = 48.dp),
                     fontSize = 20.sp
@@ -237,7 +239,7 @@ abstract class BaseComposeActivity(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colors.surface),
+                .background(MaterialTheme.colorScheme.surface),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -254,7 +256,7 @@ abstract class BaseComposeActivity(
                 if (text.isNotBlank()) {
                     Text(
                         text = text,
-                        color = MaterialTheme.colors.onSurface,
+                        color = MaterialTheme.colorScheme.onSurface,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(horizontal = 48.dp)
                     )
@@ -289,10 +291,9 @@ abstract class BaseComposeActivity(
             placeholder = {
                 Text(text = placeholderText)
             },
-            colors = TextFieldDefaults.textFieldColors(
+            colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
                 unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
-                backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
                 cursorColor = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
             ),
             trailingIcon = {
@@ -356,8 +357,8 @@ abstract class BaseComposeActivity(
 
     @Composable
     protected fun LazyListState.isScrollingUp(): Boolean {
-        var previousIndex by remember(this) { mutableStateOf(firstVisibleItemIndex) }
-        var previousScrollOffset by remember(this) { mutableStateOf(firstVisibleItemScrollOffset) }
+        var previousIndex by remember(this) { mutableIntStateOf(firstVisibleItemIndex) }
+        var previousScrollOffset by remember(this) { mutableIntStateOf(firstVisibleItemScrollOffset) }
         return remember(this) {
             derivedStateOf {
                 if (previousIndex != firstVisibleItemIndex) {

@@ -166,7 +166,7 @@ dependencies {
     implementation("androidx.glance:glance-appwidget:1.0.0")
     //compose
     implementation("androidx.compose.ui:ui:1.5.4")
-    implementation("androidx.compose.material:material:1.5.4")
+    implementation("androidx.compose.material3:material3:1.1.2")
     implementation("androidx.compose.animation:animation:1.5.4")
     //paging3
     implementation("androidx.paging:paging-runtime-ktx:3.2.1")
@@ -176,6 +176,11 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
+    //sheets-compose-dialogs
+    val sheetsComposeDialogsVersion = "1.2.0"
+    implementation("com.maxkeppeler.sheets-compose-dialogs:core:$sheetsComposeDialogsVersion")
+    implementation("com.maxkeppeler.sheets-compose-dialogs:date-time:$sheetsComposeDialogsVersion")
+    implementation("com.maxkeppeler.sheets-compose-dialogs:state:$sheetsComposeDialogsVersion")
     //compose-material-dialogs
     val composeMaterialDialogsVersion = "0.9.0"
     implementation("io.github.vanpra.compose-material-dialogs:core:$composeMaterialDialogsVersion")
@@ -206,7 +211,7 @@ dependencies {
     //mmkv
     implementation("com.tencent:mmkv-static:1.3.2")
     //preference
-    implementation("com.github.alorma:compose-settings-ui:1.0.2")
+    implementation("com.github.alorma:compose-settings-ui-m3:1.0.2")
     //AppCenter
     val appCenterSdkVersion = "5.0.3"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")

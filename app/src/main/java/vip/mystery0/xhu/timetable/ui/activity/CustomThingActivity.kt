@@ -24,25 +24,26 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BackdropScaffold
 import androidx.compose.material.BackdropValue
-import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Surface
-import androidx.compose.material.Switch
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.rememberBackdropScaffoldState
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -87,10 +88,10 @@ import vip.mystery0.xhu.timetable.viewmodel.CustomThingViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@OptIn(ExperimentalMaterialApi::class)
 class CustomThingActivity : BaseSelectComposeActivity() {
     private val viewModel: CustomThingViewModel by viewModels()
 
+    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
         val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
@@ -171,8 +172,6 @@ class CustomThingActivity : BaseSelectComposeActivity() {
             appBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
-                    backgroundColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
                     navigationIcon = {
                         IconButton(onClick = {
                             onBack()
@@ -300,8 +299,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                         Text(text = "标题")
                                     },
                                     onValueChange = { thingTitle = it },
-                                    colors = TextFieldDefaults.textFieldColors(
-                                        backgroundColor = Color.Transparent,
+                                    colors = TextFieldDefaults.colors(
                                         unfocusedIndicatorColor = Color.Transparent,
                                     )
                                 )
@@ -447,8 +445,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                         )
                                     },
                                     onValueChange = { location = it },
-                                    colors = TextFieldDefaults.textFieldColors(
-                                        backgroundColor = Color.Transparent,
+                                    colors = TextFieldDefaults.colors(
                                         unfocusedIndicatorColor = Color.Transparent,
                                     )
                                 )
@@ -501,8 +498,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                         )
                                     },
                                     onValueChange = { remark = it },
-                                    colors = TextFieldDefaults.textFieldColors(
-                                        backgroundColor = Color.Transparent,
+                                    colors = TextFieldDefaults.colors(
                                         unfocusedIndicatorColor = Color.Transparent,
                                     )
                                 )
@@ -659,7 +655,9 @@ private fun BuildItem(
                 indication = null,
                 interactionSource = MutableInteractionSource(),
             ),
-        backgroundColor = XhuColor.cardBackground,
+        colors = CardDefaults.cardColors(
+            containerColor = XhuColor.cardBackground,
+        ),
     ) {
         Column(
             modifier = Modifier.padding(8.dp),

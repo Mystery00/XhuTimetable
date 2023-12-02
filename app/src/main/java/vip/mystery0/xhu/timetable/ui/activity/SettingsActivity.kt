@@ -14,7 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,14 +33,20 @@ import cn.jpush.android.api.JPushInterface
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.microsoft.appcenter.crashes.model.TestCrashException
-import com.vanpra.composematerialdialogs.*
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.MaterialDialogState
 import com.vanpra.composematerialdialogs.datetime.time.timepicker
+import com.vanpra.composematerialdialogs.listItemsSingleChoice
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import com.vanpra.composematerialdialogs.title
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.inject
-import vip.mystery0.xhu.timetable.*
 import vip.mystery0.xhu.timetable.R
+import vip.mystery0.xhu.timetable.appName
+import vip.mystery0.xhu.timetable.appVersionCode
+import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.store.CacheStore
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
@@ -44,11 +55,16 @@ import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
+import vip.mystery0.xhu.timetable.isIgnoringBatteryOptimizations
+import vip.mystery0.xhu.timetable.joinQQGroup
+import vip.mystery0.xhu.timetable.loadInBrowser
 import vip.mystery0.xhu.timetable.model.entity.NightMode
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
+import vip.mystery0.xhu.timetable.publicDeviceId
 import vip.mystery0.xhu.timetable.repository.StartRepo
+import vip.mystery0.xhu.timetable.toCustomTabs
 import vip.mystery0.xhu.timetable.ui.activity.contract.FontFileResultContract
 import vip.mystery0.xhu.timetable.ui.preference.CacheSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
@@ -84,6 +100,7 @@ class SettingsActivity : BaseComposeActivity() {
             }
         }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @SuppressLint("BatteryLife")
     @Composable
     override fun BuildContent() {
@@ -101,8 +118,6 @@ class SettingsActivity : BaseComposeActivity() {
             topBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
-                    backgroundColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
                     navigationIcon = {
                         IconButton(onClick = {
                             finish()
