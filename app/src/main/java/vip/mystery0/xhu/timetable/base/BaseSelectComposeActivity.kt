@@ -1,37 +1,33 @@
 package vip.mystery0.xhu.timetable.base
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.BackdropScaffoldState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.maxkeppeker.sheets.core.models.base.Header
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeler.sheets.list.ListDialog
+import com.maxkeppeler.sheets.list.models.ListOption
+import com.maxkeppeler.sheets.list.models.ListSelection
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
@@ -231,6 +227,7 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
         ShowSelectDialog("请选择要查询的学期", selectState, show, onSelect)
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     protected fun <T : Selectable> ShowSelectDialog(
         dialogTitle: String,
@@ -239,60 +236,22 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
         onSelect: (T) -> Unit,
     ) {
         val select = selectState.value
-        val selectedValue = select.firstOrNull { it.selected } ?: return
-        var selected by remember { mutableStateOf(selectedValue) }
         if (show.value) {
-            AlertDialog(
-                onDismissRequest = {
-                    show.value = false
+            ListDialog(
+                header = Header.Default(title = dialogTitle),
+                state = rememberUseCaseState(
+                    visible = true,
+                    onCloseRequest = { show.value = false }),
+                selection = ListSelection.Single(
+                    options = select.map {
+                        ListOption(
+                            titleText = it.title,
+                            selected = it.selected,
+                        )
+                    },
+                ) { index, _ ->
+                    onSelect(select[index])
                 },
-                title = {
-                    Text(text = dialogTitle)
-                },
-                text = {
-                    Column {
-                        LazyColumn {
-                            items(select.size) { index ->
-                                val item = select[index]
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp)
-                                        .clickable(
-                                            indication = null,
-                                            interactionSource = remember { MutableInteractionSource() },
-                                        ) {
-                                            selected = item
-                                        },
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    RadioButton(selected = selected == item, onClick = null)
-                                    Text(text = item.title)
-                                }
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            onSelect(selected)
-                            show.value = false
-                        },
-                    ) {
-                        Text("确认")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            show.value = false
-                        }
-                    ) {
-                        Text("取消")
-                    }
-                }
             )
         }
     }

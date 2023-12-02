@@ -195,7 +195,7 @@ class CourseRoomActivity : BasePageComposeActivity() {
                     pager = pager,
                     refreshing = !viewModel.init && pager.loadState.refresh is LoadState.Loading,
                     key = { index -> pager[index]?.roomNo ?: index },
-                    itemContent = { item ->
+                    itemContent = @Composable { item ->
                         BuildItem(item)
                     }
                 )
