@@ -403,6 +403,7 @@ class MainViewModel : ComposeViewModel() {
         val today = LocalDate.now()
         val showTomorrow = getConfigStore { showTomorrowCourseTime }
             ?.let { LocalTime.now().isAfter(it) } ?: false
+        val customAccountTitle = getConfigStore { customAccountTitle }
         val showDate: LocalDate
         val showDay: DayOfWeek
         val showCurrentWeek: Int
@@ -475,10 +476,9 @@ class MainViewModel : ComposeViewModel() {
                     it.startTime to it.endTime,
                     it.courseDayTime,
                     it.location,
-                    it.user.studentId,
-                    it.user.info.name,
                     it.backgroundColor,
                     showDate,
+                    customAccountTitle.formatToday(it.user.info),
                 ).calc(now)
             }
     }
@@ -490,13 +490,14 @@ class MainViewModel : ComposeViewModel() {
     private suspend fun loadTodayThing(thingList: List<TodayThingView>) {
         val showTomorrow = getConfigStore { showTomorrowCourseTime }
             ?.let { LocalTime.now().isAfter(it) } ?: false
-        val showInstant: Instant
-        if (showTomorrow) {
-            //显示明天的事项，那么showInstant就是明天开始的时间
-            showInstant = LocalDate.now().plusDays(1).atStartOfDay().asInstant()
-        } else {
-            showInstant = Instant.now()
-        }
+        val customAccountTitle = getConfigStore { customAccountTitle }
+        val showInstant =
+            if (showTomorrow) {
+                //显示明天的事项，那么showInstant就是明天开始的时间
+                LocalDate.now().plusDays(1).atStartOfDay().asInstant()
+            } else {
+                Instant.now()
+            }
         //过滤出今日或者明日的课程
         val showList = thingList
             .filter { it.showOnDay(showInstant) }
@@ -535,8 +536,7 @@ class MainViewModel : ComposeViewModel() {
                 it.color,
                 it.saveAsCountDown,
                 remainDays,
-                it.user.studentId,
-                it.user.info.name,
+                customAccountTitle.formatToday(it.user.info),
             )
         }
     }
@@ -820,10 +820,9 @@ data class TodayCourseSheet(
     val timeText: Pair<LocalTime, LocalTime>,
     val timeString: String,
     val location: String,
-    val studentId: String,
-    val userName: String,
     val color: Color,
     val showDate: LocalDate,
+    val accountTitle: String,
 ) {
     lateinit var courseStatus: CourseStatus
 
@@ -848,8 +847,7 @@ data class TodayThingSheet(
     val color: Color,
     val saveAsCountDown: Boolean,
     val remainDays: Long,
-    val studentId: String,
-    val userName: String,
+    val accountTitle: String,
 )
 
 enum class CourseStatus(
