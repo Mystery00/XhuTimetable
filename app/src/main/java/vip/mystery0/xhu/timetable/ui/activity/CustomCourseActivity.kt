@@ -61,6 +61,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -80,6 +81,7 @@ import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.model.request.CustomCourseRequest
 import vip.mystery0.xhu.timetable.model.response.AllCourseResponse
 import vip.mystery0.xhu.timetable.model.response.CustomCourseResponse
+import vip.mystery0.xhu.timetable.ui.component.CourseIndexSelector
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.formatChinaDateTime
@@ -112,16 +114,14 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
 
         var createType by remember { mutableStateOf(CreateType.INPUT) }
 
-        val courseIndex1Dialog = remember { mutableStateOf(false) }
-        val courseIndex2Dialog = remember { mutableStateOf(false) }
         val weekDialog = remember { mutableStateOf(false) }
 
         var customCourse by remember { mutableStateOf(CustomCourseResponse.init()) }
         var courseName by remember { mutableStateOf(customCourse.courseName) }
         var weekList by remember { mutableStateOf(customCourse.weekList) }
         val day = remember { mutableStateOf(customCourse.day) }
-        val startDayTime = remember { mutableStateOf(customCourse.startDayTime) }
-        val endDayTime = remember { mutableStateOf(customCourse.endDayTime) }
+        val startDayTime = remember { mutableIntStateOf(customCourse.startDayTime) }
+        val endDayTime = remember { mutableIntStateOf(customCourse.endDayTime) }
         var location by remember { mutableStateOf(customCourse.location) }
         var teacher by remember { mutableStateOf(customCourse.teacher) }
 
@@ -133,8 +133,8 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                 courseName = data.courseName
                 weekList = data.weekList
                 day.value = data.day
-                startDayTime.value = data.startDayTime
-                endDayTime.value = data.endDayTime
+                startDayTime.intValue = data.startDayTime
+                endDayTime.intValue = data.endDayTime
                 location = data.location
                 teacher = data.teacher
             }
@@ -264,8 +264,8 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                         courseName,
                                                         weekList,
                                                         day.value,
-                                                        startDayTime.value,
-                                                        endDayTime.value,
+                                                        startDayTime.intValue,
+                                                        endDayTime.intValue,
                                                         location,
                                                         teacher,
                                                     )
@@ -475,18 +475,11 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                 painter = XhuIcons.CustomCourse.time,
                                                 contentDescription = null
                                             )
-                                            Text(
+                                            CourseIndexSelector(
+                                                index = startDayTime.intValue to endDayTime.intValue,
                                                 modifier = Modifier
                                                     .weight(1F)
-                                                    .clickable(
-                                                        onClick = {
-                                                            courseIndex1Dialog.value = true
-                                                            courseIndex2Dialog.value = true
-                                                        },
-                                                        indication = null,
-                                                        interactionSource = MutableInteractionSource(),
-                                                    ),
-                                                text = "第 ${startDayTime.value}-${endDayTime.value} 节",
+                                                    .height(36.dp),
                                             )
                                             Text(
                                                 modifier = Modifier
@@ -514,8 +507,8 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
 
                                     var searchCourseName by remember { mutableStateOf("") }
                                     var searchTeacherName by remember { mutableStateOf("") }
-                                    val searchCourseIndex = remember { mutableStateOf(0) }
-                                    val searchDay = remember { mutableStateOf(0) }
+                                    val searchCourseIndex = remember { mutableIntStateOf(0) }
+                                    val searchDay = remember { mutableIntStateOf(0) }
 
                                     val searchWeekDialog = remember { mutableStateOf(false) }
                                     val searchCourseIndexDialog = remember { mutableStateOf(false) }
@@ -584,7 +577,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                 contentDescription = null
                                             )
                                             val courseIndexText =
-                                                if (searchCourseIndex.value == 0) "选择节次" else "第 ${searchCourseIndex.value} 节"
+                                                if (searchCourseIndex.intValue == 0) "选择节次" else "第 ${searchCourseIndex.intValue} 节"
                                             Text(
                                                 modifier = Modifier
                                                     .weight(1F)
@@ -598,10 +591,10 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                 text = courseIndexText,
                                             )
                                             val dayText: String =
-                                                if (searchDay.value == 0) {
+                                                if (searchDay.intValue == 0) {
                                                     "选择星期"
                                                 } else {
-                                                    val dayOfWeek = DayOfWeek.of(searchDay.value)
+                                                    val dayOfWeek = DayOfWeek.of(searchDay.intValue)
                                                     dayOfWeek.getDisplayName(
                                                         TextStyle.SHORT,
                                                         Locale.CHINA
@@ -634,10 +627,10 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                                 onClick = {
                                                     searchCourse = null
                                                     val selectedCourseIndex =
-                                                        if (searchCourseIndex.value == 0) null else searchCourseIndex.value
+                                                        if (searchCourseIndex.intValue == 0) null else searchCourseIndex.intValue
                                                     val dayOfWeek =
-                                                        if (searchDay.value == 0) null else DayOfWeek.of(
-                                                            searchDay.value
+                                                        if (searchDay.intValue == 0) null else DayOfWeek.of(
+                                                            searchDay.intValue
                                                         )
                                                     viewModel.loadSearchCourseList(
                                                         searchCourseName,
@@ -707,7 +700,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                         pager = pager,
                         refreshing = refreshing,
                         key = { index -> pager[index]?.courseId ?: index },
-                        itemContent = { item ->
+                        itemContent = @Composable { item ->
                             BuildItem(item) {
                                 scope.launch {
                                     updateCustomCourse(item)
@@ -750,138 +743,10 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
         ShowTermDialog(selectState = termSelectStatus, show = termDialog, onSelect = {
             viewModel.selectTerm(it.value)
         })
-        ShowCourseIndexDialog(
-            startDayTime = startDayTime,
-            endDayTime = endDayTime,
-            first = courseIndex1Dialog,
-            second = courseIndex2Dialog
-        )
         ShowWeekDialog(dayOfWeek = day, show = weekDialog)
         val errorMessage by viewModel.errorMessage.collectAsState()
         if (errorMessage.second.isNotBlank()) {
             errorMessage.second.toast(true)
-        }
-    }
-
-    @Composable
-    private fun ShowCourseIndexDialog(
-        startDayTime: MutableState<Int>,
-        endDayTime: MutableState<Int>,
-        first: MutableState<Boolean>,
-        second: MutableState<Boolean>,
-    ) {
-        var saveData by remember { mutableStateOf(listOf(startDayTime.value, endDayTime.value)) }
-        if (first.value) {
-            var selected by remember { mutableStateOf(1) }
-            AlertDialog(
-                onDismissRequest = {
-                    first.value = false
-                },
-                title = {
-                    Text(text = "请选择开始上课的节次")
-                },
-                text = {
-                    LazyColumn {
-                        items(11) { index ->
-                            val item = index + 1
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                    ) {
-                                        selected = item
-                                    },
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(selected = selected == item, onClick = null)
-                                Text(text = "第 $item 节")
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            saveData = listOf(selected, endDayTime.value)
-                            first.value = false
-                        },
-                    ) {
-                        Text("确认")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            saveData = listOf(startDayTime.value, endDayTime.value)
-                            first.value = false
-                            second.value = false
-                        }
-                    ) {
-                        Text("取消")
-                    }
-                }
-            )
-        } else if (second.value) {
-            var selected by remember { mutableStateOf(saveData[0]) }
-            AlertDialog(
-                onDismissRequest = {
-                    second.value = false
-                },
-                title = {
-                    Text(text = "请选择结束上课的节次")
-                },
-                text = {
-                    LazyColumn {
-                        items(12 - saveData[0]) { index ->
-                            val item = index + saveData[0]
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                    ) {
-                                        selected = item
-                                    },
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(selected = selected == item, onClick = null)
-                                Text(text = "第 $item 节")
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            saveData = listOf(saveData[0], selected)
-                            second.value = false
-                        },
-                    ) {
-                        Text("确认")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            saveData = listOf(startDayTime.value, endDayTime.value)
-                            first.value = false
-                            second.value = false
-                        }
-                    ) {
-                        Text("取消")
-                    }
-                }
-            )
-        } else {
-            startDayTime.value = saveData[0]
-            endDayTime.value = saveData[1]
         }
     }
 
@@ -893,7 +758,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
         if (!show.value) {
             return
         }
-        var selected by remember { mutableStateOf(courseIndex.value) }
+        var selected by remember { mutableIntStateOf(courseIndex.value) }
         AlertDialog(
             onDismissRequest = {
                 show.value = false

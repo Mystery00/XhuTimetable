@@ -71,7 +71,7 @@ class NoticeActivity : BasePageComposeActivity() {
                 pager = pager,
                 refreshing = refreshing,
                 key = { index -> pager[index]?.noticeId ?: index },
-                itemContent = { item ->
+                itemContent = @Composable { item ->
                     BuildItem(item)
                 },
             )

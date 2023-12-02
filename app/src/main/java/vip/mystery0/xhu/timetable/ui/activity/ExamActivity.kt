@@ -105,10 +105,10 @@ class ExamActivity : BasePageComposeActivity() {
                 paddingValues = paddingValues,
                 pager = pager,
                 refreshing = refreshing,
-                itemContent = { item ->
+                itemContent = @Composable { item ->
                     BuildItem(item)
                 }
-            ) {
+            ) @Composable {
                 AnimatedVisibility(
                     modifier = Modifier.align(Alignment.TopEnd),
                     visible = showUserSelect,
