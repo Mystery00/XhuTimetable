@@ -105,7 +105,7 @@ class NoticeActivity : BasePageComposeActivity() {
                     modifier = Modifier
                         .fillMaxWidth(),
                     textAlign = TextAlign.End,
-                    color = XhuColor.Common.grayText,
+                    color = MaterialTheme.colorScheme.outline,
                 )
             }
         }

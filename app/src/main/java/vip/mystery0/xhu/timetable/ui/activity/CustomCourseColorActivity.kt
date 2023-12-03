@@ -1,7 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.viewModels
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,14 +31,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.vanpra.composematerialdialogs.MaterialDialog
-import com.vanpra.composematerialdialogs.MaterialDialogState
-import com.vanpra.composematerialdialogs.color.ARGBPickerState
-import com.vanpra.composematerialdialogs.color.ColorPalette
-import com.vanpra.composematerialdialogs.color.colorChooser
-import com.vanpra.composematerialdialogs.rememberMaterialDialogState
-import com.vanpra.composematerialdialogs.title
+import com.maxkeppeker.sheets.core.models.base.Header
+import com.maxkeppeker.sheets.core.models.base.SelectionButton
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeler.sheets.color.ColorDialog
+import com.maxkeppeler.sheets.color.models.ColorConfig
+import com.maxkeppeler.sheets.color.models.ColorSelection
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
+import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
+import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.CustomCourseColorViewModel
@@ -51,9 +52,8 @@ class CustomCourseColorActivity : BaseComposeActivity() {
     @Composable
     override fun BuildContent() {
         val list by viewModel.listState.collectAsState()
-        val dialogState = rememberMaterialDialogState()
+        val showColorDialog = rememberXhuDialogState()
         var courseName by remember { mutableStateOf("") }
-        var currentColor by remember { mutableStateOf(Color.Black) }
         var showSearchView by remember { mutableStateOf(false) }
         var searchText by remember { mutableStateOf("") }
 
@@ -101,7 +101,6 @@ class CustomCourseColorActivity : BaseComposeActivity() {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(XhuColor.Common.grayBackground)
                     .padding(paddingValues),
                 contentPadding = PaddingValues(4.dp),
             ) {
@@ -111,8 +110,7 @@ class CustomCourseColorActivity : BaseComposeActivity() {
                             item = list[index],
                             onChangeClick = {
                                 courseName = list[index].first
-                                currentColor = list[index].second
-                                dialogState.show()
+                                showColorDialog.show()
                             })
                     }
                 }
@@ -122,35 +120,44 @@ class CustomCourseColorActivity : BaseComposeActivity() {
             }
         }
         BuildColorSelector(
-            dialogState = dialogState,
+            dialogState = showColorDialog,
             courseName = courseName,
-            currentColor = currentColor,
         )
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun BuildColorSelector(
-        dialogState: MaterialDialogState,
+        dialogState: XhuDialogState,
         courseName: String,
-        currentColor: Color,
     ) {
-        var selectedColor = currentColor
-        MaterialDialog(
-            dialogState = dialogState,
-            buttons = {
-                positiveButton("确定") {
-                    viewModel.updateColor(courseName, selectedColor)
-                }
-                negativeButton("重置为默认") {
-                    viewModel.updateColor(courseName, null)
-                }
-            }) {
-            title("请选择需要修改的颜色")
-            val colors = ArrayList(ColorPalette.Primary).apply { add(0, currentColor) }
-            colorChooser(colors = colors, argbPickerState = ARGBPickerState.WithoutAlphaSelector) {
-                selectedColor = it
-            }
+        if (!dialogState.showing) {
+            return
         }
+        ColorDialog(
+            header = Header.Default(
+                title = "请选择需要修改的颜色",
+            ),
+            state = rememberUseCaseState(
+                visible = true,
+                onCloseRequest = {
+                    dialogState.hide()
+                }),
+            selection = ColorSelection(
+                extraButton = SelectionButton(text = "重置为默认"),
+                onExtraButtonClick = {
+                    viewModel.updateColor(courseName, null)
+                    dialogState.hide()
+
+                },
+                onSelectColor = {
+                    viewModel.updateColor(courseName, Color(it))
+                }
+            ),
+            config = ColorConfig(
+                templateColors = ColorPool.templateColors,
+            )
+        )
     }
 }
 

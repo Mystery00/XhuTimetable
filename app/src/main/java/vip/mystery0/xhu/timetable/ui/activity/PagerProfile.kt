@@ -110,10 +110,14 @@ val profileCourseContent: TabContent = @Composable { ext ->
                         Text(
                             text,
                             fontSize = 17.sp,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Bold,
                         )
-                        Text(mainUser?.info?.className ?: "", fontSize = 14.sp, color = Color.Gray)
+                        Text(
+                            mainUser?.info?.className ?: "",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.outline
+                        )
                     }
                     val rotationAngle by animateFloatAsState(
                         targetValue = if (profileExpanded) 90F else 0F,
@@ -126,7 +130,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
                             .padding(horizontal = 12.dp)
                             .size(12.dp)
                             .rotate(rotationAngle),
-                        tint = more,
+                        tint = XhuColor.surfaceContainer,
                     )
                 }
                 if (targetExpanded) {
@@ -140,7 +144,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
                                 if (userInfo.majorDirection.isNotBlank()) appendLine("专业方向：${userInfo.majorDirection}")
                             },
                             fontSize = 14.sp,
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.outline,
                             modifier = Modifier.padding(horizontal = 48.dp),
                         )
                     }
@@ -151,7 +155,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp)
-                .background(divider),
+                .background(XhuColor.surfaceContainer),
         )
 
         val menuList by viewModel.menu.collectAsState()
@@ -181,8 +185,8 @@ val profileCourseContent: TabContent = @Composable { ext ->
                     Divider(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(0.33.dp)
-                            .background(dividerSmall),
+                            .height(1.dp)
+                            .background(XhuColor.surfaceContainer),
                     )
                 }
             }
@@ -190,21 +194,11 @@ val profileCourseContent: TabContent = @Composable { ext ->
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(6.dp)
-                    .background(divider),
+                    .background(XhuColor.surfaceContainer),
             )
         }
     }
 }
-
-private val divider: Color
-    @Composable
-    get() = XhuColor.Profile.divider
-private val dividerSmall: Color
-    @Composable
-    get() = XhuColor.Profile.dividerSmall
-private val more: Color
-    @Composable
-    get() = XhuColor.Profile.more
 
 @Composable
 private fun BuildProfileItem(
@@ -247,7 +241,7 @@ private fun BuildProfileItem(
             modifier = Modifier
                 .padding(end = 12.dp, start = if (showBadge) 10.dp else 12.dp)
                 .size(12.dp),
-            tint = more,
+            tint = XhuColor.surfaceContainer,
         )
     }
 }

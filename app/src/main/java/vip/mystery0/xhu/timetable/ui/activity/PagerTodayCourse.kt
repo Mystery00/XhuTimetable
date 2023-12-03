@@ -61,6 +61,7 @@ import vip.mystery0.xhu.timetable.ui.activity.loading.LoadingButton
 import vip.mystery0.xhu.timetable.ui.activity.loading.LoadingValue
 import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
+import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.HolidayView
 import vip.mystery0.xhu.timetable.viewmodel.TodayCourseSheet
@@ -261,6 +262,9 @@ private fun DrawPoemsCard(
             modifier = Modifier
                 .padding(end = 8.dp)
                 .fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = XhuColor.cardBackground,
+            ),
         ) {
             Column(
                 modifier = Modifier
@@ -303,8 +307,8 @@ private fun DrawHoliday(holiday: HolidayView) {
                 .padding(end = 8.dp)
                 .fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            )
+                containerColor = XhuColor.cardBackground,
+            ),
         ) {
             Box {
                 Row(
@@ -365,8 +369,8 @@ private fun DrawThingCard(
                 .padding(end = 8.dp)
                 .fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            )
+                containerColor = XhuColor.cardBackground,
+            ),
         ) {
             Box {
                 if (multiAccountMode) {
@@ -506,7 +510,7 @@ private fun DrawCourseCard(
                 .padding(end = 8.dp)
                 .fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
+                containerColor = XhuColor.cardBackground,
             )
         ) {
             Row(

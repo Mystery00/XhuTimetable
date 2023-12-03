@@ -22,7 +22,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -34,8 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BasePageComposeActivity
-import vip.mystery0.xhu.timetable.model.LottieLoadingType
 import vip.mystery0.xhu.timetable.model.response.UrgeItem
+import vip.mystery0.xhu.timetable.ui.component.ObserverXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.formatChinaDateTime
@@ -69,7 +69,7 @@ class UrgeActivity : BasePageComposeActivity() {
             val refreshing by viewModel.refreshing.collectAsState()
             val userName by viewModel.userName.collectAsState()
             val remainCount by viewModel.remainCount.collectAsState()
-            var expandItemIndex by remember { mutableStateOf(-1) }
+            var expandItemIndex by remember { mutableIntStateOf(-1) }
             BuildPaging(
                 paddingValues = paddingValues,
                 pager = pager,
@@ -102,11 +102,8 @@ class UrgeActivity : BasePageComposeActivity() {
             errorMessage.second.toast(true)
         }
         val urgeLoading by viewModel.urgeLoading.collectAsState()
-        ShowProgressDialog(
-            show = urgeLoading,
-            text = "正在催更...",
-            type = LottieLoadingType.LOADING,
-        )
+        val loadingDialog = ObserverXhuDialogState(urgeLoading)
+        ShowProgressDialog(showState = loadingDialog, text = "正在催更...")
     }
 }
 
@@ -203,7 +200,7 @@ private fun BuildItem(
                     fontSize = 12.sp,
                     modifier = Modifier
                         .fillMaxWidth(),
-                    color = XhuColor.Common.grayText,
+                    color = MaterialTheme.colorScheme.outline,
                 )
                 if (showDetail) {
                     Text(
@@ -211,7 +208,7 @@ private fun BuildItem(
                         fontSize = 12.sp,
                         modifier = Modifier
                             .fillMaxWidth(),
-                        color = XhuColor.Common.grayText,
+                        color = MaterialTheme.colorScheme.outline,
                     )
                 }
             }

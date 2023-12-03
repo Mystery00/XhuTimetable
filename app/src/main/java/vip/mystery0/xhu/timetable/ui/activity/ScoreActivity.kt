@@ -2,30 +2,26 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -46,6 +42,7 @@ import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.model.response.ScoreGpaResponse
 import vip.mystery0.xhu.timetable.model.response.ScoreResponse
+import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.ScoreViewModel
@@ -59,28 +56,22 @@ class ScoreActivity : BaseSelectComposeActivity() {
     override fun BuildContent() {
         val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
 
-        val userSelectStatus = viewModel.userSelect.collectAsState()
-        val yearSelectStatus = viewModel.yearSelect.collectAsState()
-        val termSelectStatus = viewModel.termSelect.collectAsState()
+        val userSelect by viewModel.userSelect.collectAsState()
+        val yearSelect by viewModel.yearSelect.collectAsState()
+        val termSelect by viewModel.termSelect.collectAsState()
 
-        val showSelect = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+        val showSelect = rememberXhuDialogState()
         val scope = rememberCoroutineScope()
 
-        var showOption by remember { mutableStateOf(false) }
-
-        val userDialog = remember { mutableStateOf(false) }
-        val yearDialog = remember { mutableStateOf(false) }
-        val termDialog = remember { mutableStateOf(false) }
+        val userDialog = rememberXhuDialogState()
+        val yearDialog = rememberXhuDialogState()
+        val termDialog = rememberXhuDialogState()
 
         fun onBack() {
-            if (showSelect.isVisible) {
+            if (showSelect.showing) {
                 scope.launch {
                     showSelect.hide()
                 }
-                return
-            }
-            if (showOption) {
-                showOption = false
                 return
             }
             finish()
@@ -106,30 +97,10 @@ class ScoreActivity : BaseSelectComposeActivity() {
                     },
                     actions = {
                         IconButton(onClick = {
-                            scope.launch {
-                                showOption = false
-                                if (showSelect.isVisible) {
-                                    showSelect.hide()
-                                } else {
-                                    showSelect.show()
-                                }
-                            }
+                            showSelect.toggle()
                         }) {
                             Icon(
                                 painter = XhuIcons.Action.more,
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        }
-                        IconButton(onClick = {
-                            scope.launch {
-                                if (!showSelect.isVisible) {
-                                    showOption = !showOption
-                                }
-                            }
-                        }) {
-                            Icon(
-                                painter = XhuIcons.Action.view,
                                 contentDescription = null,
                                 modifier = Modifier.size(24.dp),
                             )
@@ -139,93 +110,78 @@ class ScoreActivity : BaseSelectComposeActivity() {
             },
         ) { paddingValues ->
             var showMoreInfo by remember { mutableStateOf(true) }
-            ModalBottomSheetLayout(
-                sheetState = showSelect,
-                scrimColor = Color.Black.copy(alpha = 0.32f),
-                sheetContent = {
-                    BuildSelectSheetLayout(
-                        bottomSheetState = showSelect,
-                        selectUserState = userSelectStatus,
-                        selectYearState = yearSelectStatus,
-                        selectTermState = termSelectStatus,
-                        showUserDialog = userDialog,
-                        showYearDialog = yearDialog,
-                        showTermDialog = termDialog,
-                    ) {
-                        viewModel.loadScoreList()
-                        viewModel.loadScoreGpa()
-                    }
-                }
-            ) {
-                val refreshing by viewModel.refreshing.collectAsState()
-                val gpa by viewModel.scoreGpa.collectAsState()
-                BuildPaging(
-                    paddingValues = paddingValues,
-                    pager = pager,
-                    refreshing = refreshing,
-                    listContent = {
-                        if (gpa != null) {
-                            stickyHeader {
-                                Text(
-                                    text = "学期总览",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .background(XhuColor.Common.whiteBackground)
-                                        .padding(12.dp),
-                                )
-                            }
-                            item {
-                                BuildTermInfo(gpa!!)
-                            }
+            val refreshing by viewModel.refreshing.collectAsState()
+            val gpa by viewModel.scoreGpa.collectAsState()
+            BuildPaging(
+                paddingValues = paddingValues,
+                pager = pager,
+                refreshing = refreshing,
+                listContent = {
+                    stickyHeader {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(XhuColor.surfaceContainer)
+                                .padding(12.dp)
+                                .clickable {
+                                    showMoreInfo = !showMoreInfo
+                                },
+                        ) {
+                            Text(text = "显示更多信息")
+                            Spacer(modifier = Modifier.weight(1F))
+                            Switch(checked = showMoreInfo, onCheckedChange = null)
                         }
+                    }
+                    if (gpa != null) {
                         stickyHeader {
                             Text(
-                                text = "课程成绩列表",
+                                text = "学期总览",
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(XhuColor.Common.whiteBackground)
+                                    .background(XhuColor.surfaceContainer)
                                     .padding(12.dp),
                             )
                         }
-                        itemsIndexed(pager) { item ->
-                            BuildItem(showMoreInfo, item)
-                        }
-                    },
-                ) {
-                    AnimatedVisibility(
-                        modifier = Modifier.align(Alignment.TopEnd),
-                        visible = showOption,
-                        enter = fadeIn(),
-                        exit = fadeOut(),
-                    ) {
-                        Card(
-                            modifier = Modifier
-                                .padding(4.dp),
-                            elevation = CardDefaults.cardElevation(4.dp),
-                        ) {
-                            Column {
-                                Row(modifier = Modifier
-                                    .padding(8.dp)
-                                    .clickable {
-                                        showMoreInfo = !showMoreInfo
-                                        showOption = false
-                                    }) {
-                                    Checkbox(checked = showMoreInfo, onCheckedChange = null)
-                                    Text(text = "显示更多信息")
-                                }
-                            }
+                        item {
+                            BuildTermInfo(gpa!!)
                         }
                     }
-                }
+                    stickyHeader {
+                        Text(
+                            text = "课程成绩列表",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(XhuColor.surfaceContainer)
+                                .padding(12.dp),
+                        )
+                    }
+                    itemsIndexed(pager) { item ->
+                        BuildItem(showMoreInfo, item)
+                    }
+                },
+            )
+
+            BuildSelectSheetLayout(
+                showBottomSheet = showSelect,
+                userSelect = userSelect,
+                yearSelect = yearSelect,
+                termSelect = termSelect,
+                showUserDialog = userDialog,
+                showYearDialog = yearDialog,
+                showTermDialog = termDialog,
+            ) {
+                viewModel.loadScoreList()
+                viewModel.loadScoreGpa()
             }
         }
-        ShowUserDialog(selectState = userSelectStatus, show = userDialog, onSelect = {
+        ShowUserDialog(selectList = userSelect, show = userDialog, onSelect = {
             viewModel.selectUser(it.studentId)
         })
-        ShowYearDialog(selectState = yearSelectStatus, show = yearDialog, onSelect = {
+        ShowYearDialog(selectList = yearSelect, show = yearDialog, onSelect = {
             viewModel.selectYear(it.value)
         })
-        ShowTermDialog(selectState = termSelectStatus, show = termDialog, onSelect = {
+        ShowTermDialog(selectList = termSelect, show = termDialog, onSelect = {
             viewModel.selectTerm(it.value)
         })
 
@@ -306,38 +262,38 @@ private fun BuildItem(
                         text = item.courseName,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
-                        color = XhuColor.Common.blackText,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                     if (showMoreInfo) {
                         Text(
                             text = item.courseType,
-                            color = XhuColor.Common.grayText,
+                            color = MaterialTheme.colorScheme.outline,
                             fontSize = 14.sp,
                         )
                         Text(
                             text = item.scoreType,
-                            color = XhuColor.Common.grayText,
+                            color = MaterialTheme.colorScheme.outline,
                             fontSize = 14.sp,
                         )
                         Text(
                             text = "课程学分：${item.credit}",
-                            color = XhuColor.Common.grayText,
+                            color = MaterialTheme.colorScheme.outline,
                             fontSize = 14.sp,
                         )
                         Text(
                             text = "课程绩点：${item.gpa}",
-                            color = XhuColor.Common.grayText,
+                            color = MaterialTheme.colorScheme.outline,
                             fontSize = 14.sp,
                         )
                         Text(
                             text = "学分绩点：${item.creditGpa}",
-                            color = XhuColor.Common.grayText,
+                            color = MaterialTheme.colorScheme.outline,
                             fontSize = 14.sp,
                         )
                         if (item.scoreDescription.isNotBlank()) {
                             Text(
                                 text = "成绩说明：${item.scoreDescription}",
-                                color = XhuColor.Common.grayText,
+                                color = MaterialTheme.colorScheme.outline,
                                 fontSize = 14.sp,
                             )
                         }
@@ -345,7 +301,7 @@ private fun BuildItem(
                 }
                 Text(
                     text = "${item.score}",
-                    color = if (item.score < 60) Color.Red else XhuColor.Common.blackText,
+                    color = if (item.score < 60) Color.Red else MaterialTheme.colorScheme.onSurface,
                     fontSize = 16.sp,
                 )
             }

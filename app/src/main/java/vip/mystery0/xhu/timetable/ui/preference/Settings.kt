@@ -1,13 +1,11 @@
 package vip.mystery0.xhu.timetable.ui.preference
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.alorma.compose.settings.ui.SettingsSwitch
@@ -45,7 +43,6 @@ fun XhuActionSettingsCheckbox(
                 enabled = checkboxEnabled,
                 checked = checked,
                 onCheckedChange = onCheckedChange,
-                modifier = Modifier.padding(end = 8.dp),
                 colors = checkboxColors,
             )
         },

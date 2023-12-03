@@ -1,7 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.viewModels
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -40,7 +40,6 @@ import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.XhuActionSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsMenuLink
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.dateFormatter
 import vip.mystery0.xhu.timetable.utils.timeFormatter
@@ -85,7 +84,6 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .background(XhuColor.Common.grayBackground)
                     .verticalScroll(rememberScrollState()),
             ) {
                 XhuSettingsGroup(title = {
@@ -98,7 +96,7 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.showNotThisWeek,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "显示非本周课程") }
@@ -112,7 +110,7 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.showCourseStatus,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "显示今日课程状态") }
@@ -147,7 +145,7 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.customYearTerm,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "更改当前学期") },
@@ -173,7 +171,7 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.customStartTime,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "更改开学时间") },
@@ -201,7 +199,7 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.customCourseColor,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "自定义课程颜色") },
@@ -218,7 +216,7 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.schoolCalendar,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "查看校历") },
@@ -231,7 +229,7 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.exportCalendar,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "导出到日历") },
@@ -244,7 +242,7 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.customCourse,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "自定义课程") },
@@ -270,7 +268,7 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.customThing,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "自定义事项") },
@@ -298,7 +296,7 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.holiday,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "显示节假日信息") }
