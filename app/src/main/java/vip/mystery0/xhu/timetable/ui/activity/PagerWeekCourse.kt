@@ -1,10 +1,10 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -12,18 +12,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,7 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -47,53 +51,62 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.google.accompanist.pager.HorizontalPagerIndicator
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeler.sheets.option.OptionDialog
+import com.maxkeppeler.sheets.option.models.DisplayMode
+import com.maxkeppeler.sheets.option.models.Option
+import com.maxkeppeler.sheets.option.models.OptionConfig
+import com.maxkeppeler.sheets.option.models.OptionSelection
 import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.WeekCourseView
-import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
+import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.viewmodel.WeekView
 import java.text.DecimalFormat
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
+import kotlin.math.min
 
-val weekCourseTitle: TabTitle = @Composable { ext ->
+private val weekViewLightColor = Color(0xFF3FCAB8)
+private val weekViewGrayColor = Color(0xFFCFDBDB)
+
+val weekCourseTitleBar: TabTitle = @Composable { ext ->
     val viewModel = ext.viewModel
     val week = viewModel.week.collectAsState()
-    val showWeekView by viewModel.showWeekView.collectAsState()
-    val rotationAngle by animateFloatAsState(
-        targetValue = if (showWeekView) 180F else 0F, label = "weekViewRotationAngle"
-    )
 
-    Row(
+    val title = when {
+        week.value <= 0 -> "还没有开学哦~"
+        week.value > 20 -> "学期已结束啦~"
+        else -> "第${week.value}周"
+    }
+
+    Text(text = title)
+}
+
+val weekCourseActions: TabAction = @Composable { ext ->
+    IconButton(
+        onClick = {
+            ext.weekViewDialogState.show()
+        },
         modifier = Modifier
-            .align(Alignment.Center)
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() },
-            ) {
-                viewModel.animeWeekView()
-            },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+            .fillMaxHeight()
     ) {
-        val title = when {
-            week.value <= 0 -> "还没有开学哦~"
-            week.value > 20 -> "学期已结束啦~"
-            else -> "第${week.value}周"
-        }
-        Text(text = title)
         Icon(
-            imageVector = MaterialIcons.TwoTone.ArrowDropUp,
+            painter = XhuIcons.Action.weekView,
             contentDescription = null,
-            modifier = Modifier.rotate(rotationAngle),
         )
     }
+    true
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 val weekCourseContent: TabContent = @Composable { ext ->
     val viewModel = ext.viewModel
+    val weekView by viewModel.weekView.collectAsState()
+    val currentWeek by viewModel.week.collectAsState()
     val courseDialogState = remember { mutableStateOf<List<WeekCourseView>>(emptyList()) }
+
     Box {
         Column(modifier = Modifier.fillMaxSize()) {
             //顶部日期栏
@@ -168,6 +181,97 @@ val weekCourseContent: TabContent = @Composable { ext ->
         }
         val multiAccountMode by viewModel.multiAccountMode.collectAsState()
         ShowCourseDialog(dialogState = courseDialogState, multiAccountMode = multiAccountMode)
+
+        WeekViewDialog(ext.weekViewDialogState, weekView, currentWeek) {
+            viewModel.changeCurrentWeek(it)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun WeekViewDialog(
+    dialogState: XhuDialogState,
+    weekView: List<WeekView>,
+    currentWeek: Int,
+    onWeekChange: (Int) -> Unit = {},
+) {
+    val options = weekView.map {
+        Option(
+            titleText = "第${it.weekNum}周",
+            selected = currentWeek == it.weekNum,
+            customView = { _ ->
+                var modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp)
+                if (it.thisWeek) {
+                    modifier = modifier.border(
+                        2.dp,
+                        MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                }
+                Column(
+                    modifier = modifier.padding(4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Canvas(
+                        modifier = Modifier
+                            .height(32.dp)
+                            .width(32.dp)
+                    ) {
+                        val canvasHeight = size.height
+                        val canvasWidth = size.width
+                        //每一项大小
+                        val itemHeight = canvasHeight / 5F
+                        val itemWidth = canvasWidth / 5F
+                        //圆心位置
+                        val itemCenterHeight = itemHeight / 2F
+                        val itemCenterWidth = itemWidth / 2F
+                        //半径
+                        val radius = min(itemCenterHeight, itemCenterWidth) - 1F
+                        for (day in 0 until 5) {
+                            for (time in 0 until 5) {
+                                val light = it.array[time][day]
+                                drawCircle(
+                                    color = if (light) weekViewLightColor else weekViewGrayColor,
+                                    center = Offset(
+                                        x = itemWidth * time + itemCenterWidth,
+                                        y = itemHeight * day + itemCenterHeight,
+                                    ),
+                                    radius = radius,
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "第${it.weekNum}周",
+                        fontSize = 12.sp,
+                    )
+                }
+            }
+        )
+    }
+    if (dialogState.showing) {
+        OptionDialog(
+            state = rememberUseCaseState(
+                visible = true,
+                onDismissRequest = { dialogState.hide() },
+            ),
+            selection = OptionSelection.Single(
+                options = options,
+                withButtonView = false,
+                onSelectOption = { index, _ ->
+                    dialogState.hide()
+                    onWeekChange(weekView[index].weekNum)
+                }
+            ),
+            config = OptionConfig(
+                mode = DisplayMode.GRID_VERTICAL,
+                gridColumns = 4,
+            )
+        )
     }
 }
 
@@ -323,10 +427,10 @@ private fun BoxScope.ShowCourseDialog(
                                 Text(
                                     text = course.accountTitle,
                                     fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSecondary,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     modifier = Modifier
                                         .background(
-                                            color = MaterialTheme.colorScheme.secondary,
+                                            color = MaterialTheme.colorScheme.primaryContainer,
                                             shape = RoundedCornerShape(4.dp),
                                         )
                                         .padding(2.dp),

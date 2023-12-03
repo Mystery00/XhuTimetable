@@ -1,7 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -50,11 +49,10 @@ import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
 
-val profileCourseTitle: TabTitle = @Composable {
-    Text(text = "我的", modifier = Modifier.align(Alignment.Center))
+val profileCourseTitleBar: TabTitle = @Composable {
+    Text(text = "我的")
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 val profileCourseContent: TabContent = @Composable { ext ->
     val activity = ext.activity
     val viewModel = ext.viewModel

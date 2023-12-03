@@ -13,7 +13,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,7 +38,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -68,7 +66,6 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.model.LottieLoadingType
@@ -95,15 +92,15 @@ abstract class BaseComposeActivity(
     @Composable
     open fun BuildContentWindow() {
         XhuTimetableTheme {
-            if (setSystemUiColor) {
-                val systemUiController = rememberSystemUiController()
-                val systemBarColor = MaterialTheme.colorScheme.primary
-                val isLight = !isSystemInDarkTheme()
-                SideEffect {
-                    systemUiController.setSystemBarsColor(systemBarColor, darkIcons = isLight)
-                    systemUiController.setNavigationBarColor(systemBarColor, darkIcons = isLight)
-                }
-            }
+//            if (setSystemUiColor) {
+//                val systemUiController = rememberSystemUiController()
+//                val systemBarColor = MaterialTheme.colorScheme.primary
+//                val isLight = !isSystemInDarkTheme()
+//                SideEffect {
+//                    systemUiController.setSystemBarsColor(systemBarColor, darkIcons = isLight)
+//                    systemUiController.setNavigationBarColor(systemBarColor, darkIcons = isLight)
+//                }
+//            }
             BuildContent()
         }
     }
