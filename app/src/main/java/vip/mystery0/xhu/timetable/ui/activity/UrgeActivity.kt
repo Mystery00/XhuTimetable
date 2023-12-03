@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.sp
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BasePageComposeActivity
 import vip.mystery0.xhu.timetable.model.response.UrgeItem
-import vip.mystery0.xhu.timetable.ui.component.ObserverXhuDialogState
+import vip.mystery0.xhu.timetable.ui.component.observerXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.formatChinaDateTime
@@ -102,7 +102,7 @@ class UrgeActivity : BasePageComposeActivity() {
             errorMessage.second.toast(true)
         }
         val urgeLoading by viewModel.urgeLoading.collectAsState()
-        val loadingDialog = ObserverXhuDialogState(urgeLoading)
+        val loadingDialog = observerXhuDialogState(urgeLoading)
         ShowProgressDialog(showState = loadingDialog, text = "正在催更...")
     }
 }

@@ -45,7 +45,7 @@ import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.store.UserStore
-import vip.mystery0.xhu.timetable.ui.component.ObserverXhuDialogState
+import vip.mystery0.xhu.timetable.ui.component.observerXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.utils.finishAllActivity
@@ -260,7 +260,7 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
     private fun DialogContent() {
         val loginState by viewModel.loginState.collectAsState()
         ShowProgressDialog(
-            showState = ObserverXhuDialogState(loginState.loading),
+            showState = observerXhuDialogState(loginState.loading),
             text = "登录中..."
         )
         if (loginState.success) {
