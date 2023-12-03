@@ -137,13 +137,13 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
         fun failed(message: String) {
             Log.w(TAG, "saveCustomCourse failed: $message")
             toastMessage(message)
-            _saveLoadingState.value = LoadingState()
+            _saveLoadingState.value = LoadingState(actionSuccess = false)
         }
         viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "save custom course failed", throwable)
             failed(throwable.message ?: throwable.javaClass.simpleName)
         }) {
-            _saveLoadingState.value = LoadingState(loading = true)
+            _saveLoadingState.value = LoadingState(loading = true, actionSuccess = false)
 
             val selectedUser = getSelectedUser(_userSelect.value)
             if (selectedUser == null) {
@@ -159,7 +159,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
             } else {
                 CustomCourseRepo.updateCustomCourse(selectedUser, courseId, request)
             }
-            _saveLoadingState.value = LoadingState()
+            _saveLoadingState.value = LoadingState(actionSuccess = true)
             toastMessage("《${request.courseName}》保存成功")
             changed = true
             loadCustomCourseList()
@@ -170,13 +170,13 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
         fun failed(message: String) {
             Log.w(TAG, "deleteCustomCourse failed: $message")
             toastMessage(message)
-            _saveLoadingState.value = LoadingState()
+            _saveLoadingState.value = LoadingState(actionSuccess = false)
         }
         viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "delete custom course failed", throwable)
             failed(throwable.message ?: throwable.javaClass.simpleName)
         }) {
-            _saveLoadingState.value = LoadingState(loading = true)
+            _saveLoadingState.value = LoadingState(loading = true, actionSuccess = false)
 
             val selectedUser = getSelectedUser(_userSelect.value)
             if (selectedUser == null) {
@@ -185,7 +185,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
             }
 
             CustomCourseRepo.deleteCustomCourse(selectedUser, courseId)
-            _saveLoadingState.value = LoadingState()
+            _saveLoadingState.value = LoadingState(actionSuccess = true)
             toastMessage("删除成功")
             changed = true
             loadCustomCourseList()

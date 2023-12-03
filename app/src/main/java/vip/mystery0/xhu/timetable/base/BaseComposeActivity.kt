@@ -12,28 +12,24 @@ import androidx.annotation.RawRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -54,11 +50,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
@@ -66,10 +59,14 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeler.sheets.state.StateDialog
+import com.maxkeppeler.sheets.state.models.ProgressIndicator
+import com.maxkeppeler.sheets.state.models.State
+import com.maxkeppeler.sheets.state.models.StateConfig
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.R
-import vip.mystery0.xhu.timetable.model.LottieLoadingType
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
+import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
 import kotlin.reflect.KClass
@@ -146,48 +143,27 @@ abstract class BaseComposeActivity(
         toast?.show()
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     protected fun ShowProgressDialog(
-        show: Boolean,
+        showState: XhuDialogState,
         text: String,
-        fontSize: TextUnit = TextUnit.Unspecified,
-        type: LottieLoadingType = LottieLoadingType.LOADING,
     ) {
-        if (!show) {
-            return
+        val state = remember {
+            mutableStateOf(State.Loading(labelText = text, ProgressIndicator.Circular()))
         }
-        Dialog(
-            onDismissRequest = { },
-            properties = DialogProperties(
-                dismissOnBackPress = false,
-                dismissOnClickOutside = false,
+        if (showState.showing) {
+            StateDialog(
+                state = rememberUseCaseState(
+                    visible = true,
+                    onDismissRequest = {
+                        showState.hide()
+                    }
+                ),
+                config = StateConfig(
+                    state = state.value
+                )
             )
-        ) {
-            Surface(
-                modifier = Modifier
-                    .size(144.dp),
-                shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 24.dp
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(type.resId))
-                    LottieAnimation(
-                        composition = composition,
-                        iterations = LottieConstants.IterateForever,
-                        modifier = Modifier.size(72.dp),
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = text,
-                        fontSize = fontSize,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
         }
     }
 
@@ -235,8 +211,7 @@ abstract class BaseComposeActivity(
     ) {
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface),
+                .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -305,7 +280,7 @@ abstract class BaseComposeActivity(
                         Icon(
                             painter = XhuIcons.close,
                             contentDescription = null,
-                            tint = XhuColor.Common.blackText,
+                            tint = MaterialTheme.colorScheme.onSurface,
                         )
                     }
 
@@ -332,7 +307,7 @@ abstract class BaseComposeActivity(
                 .padding(vertical = 16.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = text, fontSize = 14.sp)
+            Text(text = text, fontSize = 14.sp, color = MaterialTheme.colorScheme.outline)
         }
     }
 

@@ -7,7 +7,6 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.viewModels
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -73,7 +73,6 @@ import vip.mystery0.xhu.timetable.ui.preference.XhuActionSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.XhuFoldSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsMenuLink
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.formatChinaDateTime
 import vip.mystery0.xhu.timetable.utils.timeFormatter
@@ -135,7 +134,6 @@ class SettingsActivity : BaseComposeActivity() {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .background(XhuColor.Common.grayBackground)
                     .verticalScroll(rememberScrollState()),
             ) {
                 XhuSettingsGroup(title = {
@@ -146,7 +144,7 @@ class SettingsActivity : BaseComposeActivity() {
                             Icon(
                                 painter = XhuIcons.customBackground,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "自定义背景图片") },
@@ -161,7 +159,7 @@ class SettingsActivity : BaseComposeActivity() {
                             Icon(
                                 painter = XhuIcons.disableBackgroundWhenNight,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "夜间模式时自动禁用背景图") },
@@ -176,7 +174,7 @@ class SettingsActivity : BaseComposeActivity() {
                             Icon(
                                 painter = XhuIcons.nightMode,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "夜间模式") },
@@ -189,7 +187,7 @@ class SettingsActivity : BaseComposeActivity() {
                             Icon(
                                 painter = XhuIcons.clearSplash,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "清除启动图隐藏设置") },
@@ -205,7 +203,7 @@ class SettingsActivity : BaseComposeActivity() {
                             Icon(
                                 painter = XhuIcons.customUi,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "自定义课表界面") },
@@ -240,7 +238,7 @@ class SettingsActivity : BaseComposeActivity() {
                             Icon(
                                 painter = XhuIcons.notifyCourse,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "课程提醒") }
@@ -252,7 +250,7 @@ class SettingsActivity : BaseComposeActivity() {
                             Icon(
                                 painter = XhuIcons.notifyExam,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "考试提醒") }
@@ -263,7 +261,7 @@ class SettingsActivity : BaseComposeActivity() {
                             Icon(
                                 painter = XhuIcons.notifyTime,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         subtitle = {
@@ -348,7 +346,7 @@ class SettingsActivity : BaseComposeActivity() {
                             Icon(
                                 painter = XhuIcons.checkUpdate,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "检查更新") },
@@ -364,7 +362,7 @@ class SettingsActivity : BaseComposeActivity() {
                             Icon(
                                 painter = XhuIcons.allowUploadCrash,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         config = ConfigStore::allowSendCrashReport,
@@ -392,7 +390,7 @@ class SettingsActivity : BaseComposeActivity() {
                             Icon(
                                 painter = XhuIcons.qqGroup,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "点击加入『西瓜课表用户交流反馈』") },
@@ -437,7 +435,7 @@ class SettingsActivity : BaseComposeActivity() {
                             Icon(
                                 painter = XhuIcons.github,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "开源地址") },
@@ -453,7 +451,7 @@ class SettingsActivity : BaseComposeActivity() {
                             Icon(
                                 painter = XhuIcons.poems,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "今日诗词") },
@@ -598,7 +596,7 @@ class SettingsActivity : BaseComposeActivity() {
                                 Icon(
                                     painter = XhuIcons.checkUpdate,
                                     contentDescription = null,
-                                    tint = XhuColor.Common.blackText,
+                                    tint = MaterialTheme.colorScheme.onSurface,
                                 )
                             },
                             title = { Text(text = "直接检查测试版更新") },

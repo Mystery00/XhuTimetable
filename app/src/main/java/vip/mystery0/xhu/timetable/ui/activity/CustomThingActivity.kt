@@ -21,11 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.BackdropValue
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.rememberBackdropScaffoldState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,7 +50,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -67,10 +63,8 @@ import com.maxkeppeler.sheets.calendar.models.CalendarStyle
 import com.maxkeppeler.sheets.color.ColorDialog
 import com.maxkeppeler.sheets.color.models.ColorConfig
 import com.maxkeppeler.sheets.color.models.ColorSelection
-import com.maxkeppeler.sheets.color.models.MultipleColors
 import com.maxkeppeler.sheets.date_time.DateTimeDialog
 import com.maxkeppeler.sheets.date_time.models.DateTimeSelection
-import com.vanpra.composematerialdialogs.color.ColorPalette
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
@@ -80,6 +74,7 @@ import vip.mystery0.xhu.timetable.model.request.CustomThingRequest
 import vip.mystery0.xhu.timetable.model.response.CustomThingResponse
 import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
 import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
+import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.asLocalDateTime
@@ -94,17 +89,16 @@ class CustomThingActivity : BaseSelectComposeActivity() {
     private val viewModel: CustomThingViewModel by viewModels()
 
     @OptIn(
-        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class,
+        ExperimentalMaterial3Api::class,
         ExperimentalFoundationApi::class
     )
     @Composable
     override fun BuildContent() {
         val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
-        val userSelectStatus = viewModel.userSelect.collectAsState()
+        val userSelect by viewModel.userSelect.collectAsState()
 
-        val userDialog = remember { mutableStateOf(false) }
+        val userDialog = rememberXhuDialogState()
 
-        val scaffoldState = rememberBackdropScaffoldState(initialValue = BackdropValue.Concealed)
         val scope = rememberCoroutineScope()
 
         val openBottomSheet = rememberSaveable { mutableStateOf(false) }
@@ -154,6 +148,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                 paddingValues = paddingValues,
                 pager = pager,
                 refreshing = refreshing,
+                alwaysShowList = true,
                 listContent = {
                     stickyHeader {
                         Column(
@@ -162,9 +157,8 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                 .padding(8.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            BuildUserSelectBackLayerContent(
-                                scaffoldState = scaffoldState,
-                                selectUserState = userSelectStatus,
+                            BuildUserSelectStickyHeaderContent(
+                                userSelect = userSelect,
                                 showUserDialog = userDialog,
                             ) {
                                 viewModel.loadCustomThingList()
@@ -195,13 +189,12 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                         Icon(
                             imageVector = Icons.Rounded.Add,
                             contentDescription = null,
-                            tint = XhuColor.Common.whiteText,
                         )
                     }
                 }
             }
         }
-        ShowUserDialog(selectState = userSelectStatus, show = userDialog, onSelect = {
+        ShowUserDialog(selectList = userSelect, show = userDialog, onSelect = {
             viewModel.selectUser(it.studentId)
         })
         CustomThingBottomSheet(customThingState, openBottomSheet, scope)
@@ -295,9 +288,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                 }
             ),
             config = ColorConfig(
-                templateColors = MultipleColors.ColorsInt(
-                    ColorPalette.Primary.map { it.toArgb() }
-                )
+                templateColors = ColorPool.templateColors,
             )
         )
     }

@@ -2,7 +2,6 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
@@ -15,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +45,7 @@ import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.store.UserStore
-import vip.mystery0.xhu.timetable.model.LottieLoadingType
+import vip.mystery0.xhu.timetable.ui.component.ObserverXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.utils.finishAllActivity
@@ -56,7 +54,7 @@ import vip.mystery0.xhu.timetable.viewmodel.LoginViewModel
 class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
     private val viewModel: LoginViewModel by viewModels()
 
-    @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     override fun BuildContent() {
         val keyboardController = LocalSoftwareKeyboardController.current
@@ -68,7 +66,6 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(XhuColor.Common.whiteBackground)
         ) {
             Image(
                 modifier = Modifier.fillMaxWidth(),
@@ -263,9 +260,8 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
     private fun DialogContent() {
         val loginState by viewModel.loginState.collectAsState()
         ShowProgressDialog(
-            show = loginState.loading,
-            text = "登录中...",
-            type = LottieLoadingType.LOADING,
+            showState = ObserverXhuDialogState(loginState.loading),
+            text = "登录中..."
         )
         if (loginState.success) {
             "登录成功，欢迎使用${appName}！".toast()

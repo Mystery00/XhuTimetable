@@ -95,7 +95,6 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .background(XhuColor.Common.grayBackground)
                     .verticalScroll(rememberScrollState()),
             ) {
                 XhuSettingsGroup(title = {
@@ -108,7 +107,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.multiUser,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "启用情侣模式") },
@@ -180,7 +179,7 @@ private fun BuildItem(
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = XhuColor.accountCardBackground,
+            containerColor = XhuColor.cardBackground,
         ),
     ) {
         Box {
@@ -188,10 +187,10 @@ private fun BuildItem(
                 Text(
                     text = "主用户",
                     fontSize = 8.sp,
-                    color = Color(0xFF2196F3),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier
                         .background(
-                            color = Color(0xFFBBDEFB),
+                            color = MaterialTheme.colorScheme.primaryContainer,
                             shape = RoundedCornerShape(bottomEnd = 8.dp),
                         )
                         .padding(1.dp),
@@ -204,10 +203,6 @@ private fun BuildItem(
             ) {
                 Image(
                     modifier = Modifier
-                        .background(
-                            color = XhuColor.Common.grayBackground,
-                            shape = MaterialTheme.shapes.medium,
-                        )
                         .size(48.dp)
                         .clip(RoundedCornerShape(4.dp)),
                     painter = painter,

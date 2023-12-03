@@ -3,7 +3,6 @@ package vip.mystery0.xhu.timetable.ui.activity
 import android.Manifest
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +34,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -63,7 +63,7 @@ import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.model.CalendarAccount
-import vip.mystery0.xhu.timetable.model.LottieLoadingType
+import vip.mystery0.xhu.timetable.ui.component.ObserverXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.ExportCalendarViewModel
@@ -167,7 +167,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                         .padding(12.dp),
                                     painter = XhuIcons.multiUser,
                                     contentDescription = null,
-                                    tint = XhuColor.Common.blackText,
+                                    tint = MaterialTheme.colorScheme.onSurface,
                                 )
                                 val userSelect by viewModel.userSelect.collectAsState()
                                 val selected = userSelect.firstOrNull { it.selected }
@@ -193,7 +193,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                         .padding(12.dp),
                                     painter = XhuIcons.customCourse,
                                     contentDescription = null,
-                                    tint = XhuColor.Common.blackText,
+                                    tint = MaterialTheme.colorScheme.onSurface,
                                 )
                                 Text(
                                     modifier = Modifier.weight(1F),
@@ -214,7 +214,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                         .padding(12.dp),
                                     painter = XhuIcons.customThing,
                                     contentDescription = null,
-                                    tint = XhuColor.Common.blackText,
+                                    tint = MaterialTheme.colorScheme.onSurface,
                                 )
                                 Text(
                                     modifier = Modifier.weight(1F),
@@ -234,7 +234,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                         .padding(12.dp),
                                     painter = XhuIcons.notifyCourse,
                                     contentDescription = null,
-                                    tint = XhuColor.Common.blackText,
+                                    tint = MaterialTheme.colorScheme.onSurface,
                                 )
                                 Column(
                                     modifier = Modifier.weight(1F),
@@ -294,8 +294,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
                                 val list = calendarAccountListState.list
                                 LazyColumn(
                                     modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(XhuColor.Common.grayBackground),
+                                        .fillMaxSize(),
                                     contentPadding = PaddingValues(4.dp),
                                 ) {
                                     if (calendarAccountListState.loading) {
@@ -328,7 +327,6 @@ class ExportCalendarActivity : BaseComposeActivity() {
                             Icon(
                                 imageVector = Icons.Rounded.Add,
                                 contentDescription = null,
-                                tint = XhuColor.Common.whiteText,
                             )
                         }
                     } else {
@@ -343,11 +341,8 @@ class ExportCalendarActivity : BaseComposeActivity() {
         ShowUserDialog(show = userDialog)
         ShowReminderDialog(show = reminderDialog, list = reminder)
         val exportAccountState by viewModel.actionState.collectAsState()
-        ShowProgressDialog(
-            show = exportAccountState.loading,
-            text = "数据导出中...",
-            type = LottieLoadingType.SETTING,
-        )
+        val loadingDialog = ObserverXhuDialogState(exportAccountState.loading)
+        ShowProgressDialog(showState = loadingDialog, text = "数据导出中...")
     }
 
     @Composable

@@ -2,12 +2,8 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -18,22 +14,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,13 +33,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import vip.mystery0.xhu.timetable.R
-import vip.mystery0.xhu.timetable.base.BasePageComposeActivity
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
+import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
+import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.Exam
 import vip.mystery0.xhu.timetable.viewmodel.ExamViewModel
 
-class ExamActivity : BasePageComposeActivity() {
+class ExamActivity : BaseSelectComposeActivity() {
     private val viewModel: ExamViewModel by viewModels()
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -58,13 +49,9 @@ class ExamActivity : BasePageComposeActivity() {
 
         val userSelect by viewModel.userSelect.collectAsState()
 
-        var showUserSelect by remember { mutableStateOf(false) }
+        val showUserSelect = rememberXhuDialogState()
 
         fun onBack() {
-            if (showUserSelect) {
-                showUserSelect = false
-                return
-            }
             finish()
         }
 
@@ -89,7 +76,7 @@ class ExamActivity : BasePageComposeActivity() {
                     },
                     actions = {
                         IconButton(onClick = {
-                            showUserSelect = !showUserSelect
+                            showUserSelect.show()
                         }) {
                             Icon(
                                 painter = XhuIcons.Action.more,
@@ -108,36 +95,11 @@ class ExamActivity : BasePageComposeActivity() {
                 itemContent = @Composable { item ->
                     BuildItem(item)
                 }
-            ) @Composable {
-                AnimatedVisibility(
-                    modifier = Modifier.align(Alignment.TopEnd),
-                    visible = showUserSelect,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                ) {
-                    Card(
-                        modifier = Modifier
-                            .padding(4.dp),
-                        elevation = CardDefaults.cardElevation(4.dp),
-                    ) {
-                        LazyColumn {
-                            items(userSelect.size) { index ->
-                                val user = userSelect[index]
-                                Row(modifier = Modifier
-                                    .padding(8.dp)
-                                    .clickable {
-                                        viewModel.selectUser(user.studentId)
-                                        showUserSelect = false
-                                    }) {
-                                    RadioButton(selected = user.selected, onClick = null)
-                                    Text(text = "${user.userName}(${user.studentId})")
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            )
         }
+        ShowUserDialog(selectList = userSelect, show = showUserSelect, onSelect = {
+            viewModel.selectUser(it.studentId)
+        })
         val errorMessage by viewModel.errorMessage.collectAsState()
         if (errorMessage.second.isNotBlank()) {
             errorMessage.second.toast(true)
@@ -190,17 +152,17 @@ private fun BuildItem(
                 )
                 Text(
                     text = "考试时间：${item.dateString} ${item.time}",
-                    color = XhuColor.Common.grayText,
+                    color = MaterialTheme.colorScheme.outline,
                     fontSize = 14.sp,
                 )
                 Text(
                     text = "考试地点：${item.location}",
-                    color = XhuColor.Common.grayText,
+                    color = MaterialTheme.colorScheme.outline,
                     fontSize = 14.sp,
                 )
                 Text(
                     text = "考试类型：${item.examName}",
-                    color = XhuColor.Common.grayText,
+                    color = MaterialTheme.colorScheme.outline,
                     fontSize = 14.sp,
                 )
             }
