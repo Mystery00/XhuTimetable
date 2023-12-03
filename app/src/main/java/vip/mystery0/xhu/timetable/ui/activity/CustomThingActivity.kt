@@ -40,6 +40,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -327,14 +328,31 @@ class CustomThingActivity : BaseSelectComposeActivity() {
         BuildTimeSelector(endTimeDialog, endTime)
         BuildColorSelector(showColorDialog, color)
 
+        fun dismissSheet() {
+            focusManager.clearFocus()
+            scope
+                .launch { sheetState.hide() }
+                .invokeOnCompletion {
+                    if (!sheetState.isVisible) {
+                        openBottomSheet.value = false
+                    }
+                }
+        }
+
+        LaunchedEffect(saveLoadingState.loading) {
+            if (!saveLoadingState.loading && saveLoadingState.actionSuccess && openBottomSheet.value) {
+                dismissSheet()
+            }
+        }
+
         if (!openBottomSheet.value) {
             return
         }
 
         ModalBottomSheet(
             onDismissRequest = {
-                openBottomSheet.value = false
                 focusManager.clearFocus()
+                openBottomSheet.value = false
             },
             sheetState = sheetState,
         ) {
@@ -347,14 +365,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                     modifier = Modifier
                         .padding(12.dp)
                         .clickable {
-                            focusManager.clearFocus()
-                            scope
-                                .launch { sheetState.hide() }
-                                .invokeOnCompletion {
-                                    if (!sheetState.isVisible) {
-                                        openBottomSheet.value = false
-                                    }
-                                }
+                            dismissSheet()
                         },
                     painter = XhuIcons.CustomCourse.close,
                     contentDescription = null,
@@ -417,6 +428,10 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                     },
                     onValueChange = { thingTitle = it },
                     colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        errorContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                     )
                 )
@@ -563,6 +578,10 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                     },
                     onValueChange = { location = it },
                     colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        errorContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                     )
                 )
@@ -616,6 +635,10 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                     },
                     onValueChange = { remark = it },
                     colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        errorContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                     )
                 )

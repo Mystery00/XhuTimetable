@@ -39,7 +39,7 @@ fun <T> ScrollPicker(
     var lastSelectedIndex by remember { mutableIntStateOf(0) }
     var itemsState by remember { mutableStateOf(items) }
 
-    LaunchedEffect(items) {
+    LaunchedEffect(initialItem) {
         val targetIndex = items.indexOf(initialItem)
         itemsState = items
         lastSelectedIndex = targetIndex

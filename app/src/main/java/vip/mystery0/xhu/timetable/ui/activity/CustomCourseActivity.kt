@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -217,7 +218,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
         ShowTermDialog(selectList = termSelect, show = termDialog, onSelect = {
             viewModel.selectTerm(it.value)
         })
-        CustomCourseBottomSheet(customCourseState, openBottomSheet, scope)
+        CustomCourseBottomSheet(customCourseState.value, openBottomSheet, scope)
         val errorMessage by viewModel.errorMessage.collectAsState()
         if (errorMessage.second.isNotBlank()) {
             errorMessage.second.toast(true)
@@ -245,28 +246,18 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
     @Composable
     private fun ShowWeekDialog(
         state: XhuDialogState,
-        dayOfWeek: MutableState<DayOfWeek>? = null,
-        day: MutableState<Int>? = null,
+        initDayOfWeek: DayOfWeek?,
+        onSelect: (DayOfWeek) -> Unit,
     ) {
         val options = DayOfWeek.values().toList()
-        var selectIndex = -1
-        if (dayOfWeek != null) {
-            selectIndex = options.indexOf(dayOfWeek.value)
-        } else if (day != null && day.value != 0) {
-            selectIndex = options.indexOf(DayOfWeek.of(day.value))
-        }
         ShowSelectDialog(
             dialogTitle = "请选择上课星期",
             options = options,
-            selectIndex = selectIndex,
+            selectIndex = options.indexOf(initDayOfWeek),
             itemTransform = { it.getDisplayName(TextStyle.SHORT, Locale.CHINA) },
             state = state,
             onSelect = { _, option ->
-                if (dayOfWeek != null) {
-                    dayOfWeek.value = option
-                } else if (day != null) {
-                    day.value = option.value
-                }
+                onSelect(option)
             },
         )
     }
@@ -274,7 +265,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun CustomCourseBottomSheet(
-        customCourseState: MutableState<CustomCourseResponse>,
+        customCourse: CustomCourseResponse,
         openBottomSheet: MutableState<Boolean>,
         scope: CoroutineScope,
     ) {
@@ -283,14 +274,23 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
         val weekDialog = rememberXhuDialogState()
         val sheetState = rememberModalBottomSheetState()
 
-        val customCourse = customCourseState.value
-        var courseName = customCourse.courseName
-        var weekList = customCourse.weekList
-        val day = remember { mutableStateOf(customCourse.day) }
-        val startDayTime = remember { mutableIntStateOf(customCourse.startDayTime) }
-        val endDayTime = remember { mutableIntStateOf(customCourse.endDayTime) }
-        var location = customCourse.location
-        var teacher = customCourse.teacher
+        var courseName by remember { mutableStateOf(customCourse.courseName) }
+        var weekList by remember { mutableStateOf(customCourse.weekList) }
+        var day by remember { mutableStateOf(customCourse.day) }
+        var startDayTime by remember { mutableIntStateOf(customCourse.startDayTime) }
+        var endDayTime by remember { mutableIntStateOf(customCourse.endDayTime) }
+        var location by remember { mutableStateOf(customCourse.location) }
+        var teacher by remember { mutableStateOf(customCourse.teacher) }
+
+        LaunchedEffect(customCourse) {
+            courseName = customCourse.courseName
+            weekList = customCourse.weekList
+            day = customCourse.day
+            startDayTime = customCourse.startDayTime
+            endDayTime = customCourse.endDayTime
+            location = customCourse.location
+            teacher = customCourse.teacher
+        }
 
         var searchCourse by remember { mutableStateOf<AllCourseResponse?>(null) }
 
@@ -298,7 +298,12 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
 
         val focusManager = LocalFocusManager.current
 
-        ShowWeekDialog(dayOfWeek = day, state = weekDialog)
+        ShowWeekDialog(
+            state = weekDialog,
+            initDayOfWeek = day,
+        ) {
+            day = it
+        }
 
         fun dismissSheet() {
             focusManager.clearFocus()
@@ -330,7 +335,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
         ) {
             Row(
                 modifier = Modifier
-                    .padding(8.dp),
+                    .padding(horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Image(
@@ -366,9 +371,9 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                     CustomCourseRequest.buildOf(
                                         courseName,
                                         weekList,
-                                        day.value,
-                                        startDayTime.intValue,
-                                        endDayTime.intValue,
+                                        day,
+                                        startDayTime,
+                                        endDayTime,
                                         location,
                                         teacher,
                                     )
@@ -450,6 +455,10 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                 },
                                 onValueChange = { courseName = it },
                                 colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    errorContainerColor = Color.Transparent,
+                                    disabledContainerColor = Color.Transparent,
                                     unfocusedIndicatorColor = Color.Transparent,
                                 )
                             )
@@ -476,6 +485,10 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                 },
                                 onValueChange = { teacher = it },
                                 colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    errorContainerColor = Color.Transparent,
+                                    disabledContainerColor = Color.Transparent,
                                     unfocusedIndicatorColor = Color.Transparent,
                                 )
                             )
@@ -502,13 +515,17 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                 },
                                 onValueChange = { location = it },
                                 colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    errorContainerColor = Color.Transparent,
+                                    disabledContainerColor = Color.Transparent,
                                     unfocusedIndicatorColor = Color.Transparent,
                                 )
                             )
                         }
                         Row(
                             modifier = Modifier
-                                .defaultMinSize(minHeight = 48.dp),
+                                .defaultMinSize(minHeight = 64.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Image(
@@ -527,9 +544,9 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                             val item = index + 1
                                             val inList = item in weekList
                                             val color =
-                                                if (inList) MaterialTheme.colorScheme.primary else XhuColor.customCourseWeekColorBackground
+                                                if (inList) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
                                             val textColor =
-                                                if (inList) MaterialTheme.colorScheme.onPrimary else Color.Black
+                                                if (inList) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimaryContainer
                                             Surface(
                                                 shape = CircleShape,
                                                 modifier = Modifier
@@ -571,11 +588,16 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                 contentDescription = null
                             )
                             CourseIndexSelector(
-                                index = startDayTime.intValue to endDayTime.intValue,
+                                startIndex = startDayTime,
+                                endIndex = endDayTime,
                                 modifier = Modifier
                                     .weight(1F)
                                     .height(36.dp),
-                            )
+                            ) { startIndex, endIndex ->
+                                startDayTime = startIndex
+                                endDayTime = endIndex
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
                             Text(
                                 modifier = Modifier
                                     .weight(1F)
@@ -586,7 +608,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                         indication = null,
                                         interactionSource = MutableInteractionSource(),
                                     ),
-                                text = day.value.getDisplayName(
+                                text = day.getDisplayName(
                                     TextStyle.SHORT,
                                     Locale.CHINA
                                 ),
@@ -631,6 +653,10 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                 },
                                 onValueChange = { searchCourseName = it },
                                 colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    errorContainerColor = Color.Transparent,
+                                    disabledContainerColor = Color.Transparent,
                                     unfocusedIndicatorColor = Color.Transparent,
                                 )
                             )
@@ -657,6 +683,10 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                 },
                                 onValueChange = { searchTeacherName = it },
                                 colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    errorContainerColor = Color.Transparent,
+                                    disabledContainerColor = Color.Transparent,
                                     unfocusedIndicatorColor = Color.Transparent,
                                 )
                             )
@@ -795,7 +825,14 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                             }
                         }
                     }
-                    ShowWeekDialog(day = searchDay, state = searchWeekDialog)
+                    ShowWeekDialog(
+                        state = searchWeekDialog,
+                        initDayOfWeek = if (searchDay.intValue == 0) null else DayOfWeek.of(
+                            searchDay.intValue
+                        ),
+                    ) {
+                        searchDay.intValue = it.value
+                    }
                     ShowSearchCourseIndexDialog(
                         courseIndex = searchCourseIndex,
                         state = searchCourseIndexDialog
