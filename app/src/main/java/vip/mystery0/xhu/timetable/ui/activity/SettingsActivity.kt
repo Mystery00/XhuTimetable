@@ -32,13 +32,11 @@ import androidx.compose.ui.unit.dp
 import cn.jpush.android.api.JPushInterface
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.maxkeppeker.sheets.core.models.base.Header
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeler.sheets.date_time.DateTimeDialog
+import com.maxkeppeler.sheets.date_time.models.DateTimeSelection
 import com.microsoft.appcenter.crashes.model.TestCrashException
-import com.vanpra.composematerialdialogs.MaterialDialog
-import com.vanpra.composematerialdialogs.MaterialDialogState
-import com.vanpra.composematerialdialogs.datetime.time.timepicker
-import com.vanpra.composematerialdialogs.listItemsSingleChoice
-import com.vanpra.composematerialdialogs.rememberMaterialDialogState
-import com.vanpra.composematerialdialogs.title
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -47,7 +45,7 @@ import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.appVersionCode
 import vip.mystery0.xhu.timetable.appVersionName
-import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.config.store.CacheStore
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
 import vip.mystery0.xhu.timetable.config.store.EventBus
@@ -66,6 +64,8 @@ import vip.mystery0.xhu.timetable.publicDeviceId
 import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.toCustomTabs
 import vip.mystery0.xhu.timetable.ui.activity.contract.FontFileResultContract
+import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
+import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.preference.CacheSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.PoemsSettingsCheckbox
@@ -80,7 +80,7 @@ import vip.mystery0.xhu.timetable.viewmodel.SettingsViewModel
 import java.time.LocalDate
 import java.time.LocalTime
 
-class SettingsActivity : BaseComposeActivity() {
+class SettingsActivity : BaseSelectComposeActivity() {
     private val viewModel: SettingsViewModel by viewModels()
     private val clipboardManager: ClipboardManager by inject()
     private val jPushRegistrationId: String? by lazy {
@@ -109,9 +109,9 @@ class SettingsActivity : BaseComposeActivity() {
         val nightMode by viewModel.nightMode.collectAsState()
         val versionChannel by viewModel.versionChannel.collectAsState()
 
-        val showNightModeState = rememberMaterialDialogState()
-        val showNotifyTimeState = rememberMaterialDialogState()
-        val checkVersionChannelState = rememberMaterialDialogState()
+        val showNightModeState = rememberXhuDialogState()
+        val showNotifyTimeState = rememberXhuDialogState()
+        val checkVersionChannelState = rememberXhuDialogState()
 
         Scaffold(
             topBar = {
@@ -691,77 +691,71 @@ class SettingsActivity : BaseComposeActivity() {
 
     @Composable
     private fun BuildNightModeSelector(
-        dialogState: MaterialDialogState,
+        dialogState: XhuDialogState,
         initNightMode: NightMode,
     ) {
         val list = NightMode.selectList()
         var selectedMode = list.indexOf(initNightMode)
         if (selectedMode == -1) selectedMode = 0
-        MaterialDialog(
-            dialogState = dialogState,
-            buttons = {
-                positiveButton("确定") {
-                    viewModel.updateNightMode(list[selectedMode])
-                }
-                negativeButton("取消")
-            }) {
-            title("更改主题")
-            listItemsSingleChoice(
-                list = list.map { it.title },
-                initialSelection = selectedMode,
-            ) {
-                selectedMode = it
-            }
+
+        if (dialogState.showing) {
+            ShowSelectDialog(
+                dialogTitle = "更改主题",
+                options = list,
+                selectIndex = selectedMode,
+                itemTransform = { it.title },
+                state = dialogState,
+                onSelect = { _, select ->
+                    viewModel.updateNightMode(select)
+                },
+            )
         }
     }
 
     @Composable
     private fun BuildTimeSelector(
-        dialogState: MaterialDialogState,
+        dialogState: XhuDialogState,
         initTime: LocalTime,
     ) {
-        var selectedTime = initTime
-        MaterialDialog(
-            dialogState = dialogState,
-            buttons = {
-                positiveButton("确定") {
-                    viewModel.updateNotifyTime(selectedTime)
-                }
-                negativeButton("取消")
-            }) {
-            timepicker(
-                title = "请选择时间",
-                initialTime = selectedTime,
-                is24HourClock = true,
-            ) {
-                selectedTime = it
-            }
+        if (dialogState.showing) {
+            DateTimeDialog(
+                header = Header.Default(
+                    title = "请选择时间",
+                ),
+                state = rememberUseCaseState(
+                    visible = true,
+                    onCloseRequest = {
+                        dialogState.hide()
+                    }),
+                selection = DateTimeSelection.Time(
+                    selectedTime = initTime,
+                ) { newTime ->
+                    viewModel.updateNotifyTime(newTime)
+                },
+            )
         }
     }
 
     @Composable
     private fun BuildVersionChannelDialog(
-        dialogState: MaterialDialogState,
+        dialogState: XhuDialogState,
         initChannel: VersionChannel,
     ) {
         val list = VersionChannel.selectList()
         var selectedMode = list.indexOf(initChannel)
         if (selectedMode == -1) selectedMode = 0
-        MaterialDialog(
-            dialogState = dialogState,
-            buttons = {
-                positiveButton("确定") {
-                    viewModel.updateVersionChannel(list[selectedMode])
-                }
-                negativeButton("取消")
-            }) {
-            title("修改更新渠道")
-            listItemsSingleChoice(
-                list = list.map { it.title },
-                initialSelection = selectedMode,
-            ) {
-                selectedMode = it
-            }
+
+        if (dialogState.showing) {
+            ShowSelectDialog(
+                dialogTitle = "修改更新渠道",
+                options = list,
+                selectIndex = selectedMode,
+                itemTransform = { it.title },
+                state = dialogState,
+                onSelect = { _, select ->
+                    viewModel.updateVersionChannel(select)
+                },
+            )
         }
     }
 

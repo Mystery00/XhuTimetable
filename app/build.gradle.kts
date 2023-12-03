@@ -185,16 +185,11 @@ dependencies {
     val sheetsComposeDialogsVersion = "1.2.0"
     implementation("com.maxkeppeler.sheets-compose-dialogs:core:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:calendar:$sheetsComposeDialogsVersion")
-    implementation("com.maxkeppeler.sheets-compose-dialogs:date-time:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:color:$sheetsComposeDialogsVersion")
+    implementation("com.maxkeppeler.sheets-compose-dialogs:date-time:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:list:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:option:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:state:$sheetsComposeDialogsVersion")
-    //compose-material-dialogs
-    val composeMaterialDialogsVersion = "0.9.0"
-    implementation("io.github.vanpra.compose-material-dialogs:core:$composeMaterialDialogsVersion")
-    implementation("io.github.vanpra.compose-material-dialogs:datetime:$composeMaterialDialogsVersion")
-    implementation("io.github.vanpra.compose-material-dialogs:color:$composeMaterialDialogsVersion")
     //lottie
     implementation("com.airbnb.android:lottie-compose:6.2.0")
     //room

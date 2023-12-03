@@ -23,8 +23,6 @@ object XhuColor {
     val loginLabel: Color
         @Composable
         get() = Color(0xFFCCCCCC)
-    val customCourseWeekColorBackground: Color
-        get() = Color(0xFFE5E5E5)
     val notThisWeekBackgroundColor: Color
         get() = Color(0xFFe5e5e5)
 
