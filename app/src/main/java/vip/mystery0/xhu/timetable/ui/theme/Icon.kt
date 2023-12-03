@@ -319,6 +319,9 @@ object XhuIcons {
         val switch: Painter
             @Composable
             get() = painterResource(R.drawable.ic_action_switch)
+        val weekView: Painter
+            @Composable
+            get() = painterResource(R.drawable.ic_week_view)
     }
 
     object WsState {

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -205,7 +204,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
         ShowUserDialog(selectState = userSelectStatus, show = userDialog, onSelect = {
             viewModel.selectUser(it.studentId)
         })
-        ShowBottomSheet(customThingState, openBottomSheet, scope)
+        CustomThingBottomSheet(customThingState, openBottomSheet, scope)
         val errorMessage by viewModel.errorMessage.collectAsState()
         if (errorMessage.second.isNotBlank()) {
             errorMessage.second.toast(true)
@@ -218,33 +217,31 @@ class CustomThingActivity : BaseSelectComposeActivity() {
         dialogState: XhuDialogState,
         data: MutableState<LocalDateTime>,
     ) {
-        if (!dialogState.showing) {
-            return
-        }
-
         val date = data.value.toLocalDate()
         val time = data.value.toLocalTime()
 
-        CalendarDialog(
-            header = Header.Default(
-                title = "请选择日期",
-            ),
-            state = rememberUseCaseState(
-                visible = true,
-                onCloseRequest = {
-                    dialogState.hide()
-                }),
-            selection = CalendarSelection.Date(
-                selectedDate = date,
-            ) {
-                data.value = LocalDateTime.of(it, time)
-            },
-            config = CalendarConfig(
-                yearSelection = true,
-                monthSelection = true,
-                style = CalendarStyle.MONTH,
+        if (dialogState.showing) {
+            CalendarDialog(
+                header = Header.Default(
+                    title = "请选择日期",
+                ),
+                state = rememberUseCaseState(
+                    visible = true,
+                    onCloseRequest = {
+                        dialogState.hide()
+                    }),
+                selection = CalendarSelection.Date(
+                    selectedDate = date,
+                ) {
+                    data.value = LocalDateTime.of(it, time)
+                },
+                config = CalendarConfig(
+                    yearSelection = true,
+                    monthSelection = true,
+                    style = CalendarStyle.MONTH,
+                )
             )
-        )
+        }
     }
 
     @Composable
@@ -252,28 +249,26 @@ class CustomThingActivity : BaseSelectComposeActivity() {
         dialogState: XhuDialogState,
         data: MutableState<LocalDateTime>,
     ) {
-        if (!dialogState.showing) {
-            return
-        }
-
         val date = data.value.toLocalDate()
         val time = data.value.toLocalTime()
 
-        DateTimeDialog(
-            header = Header.Default(
-                title = "请选择时间",
-            ),
-            state = rememberUseCaseState(
-                visible = true,
-                onCloseRequest = {
-                    dialogState.hide()
-                }),
-            selection = DateTimeSelection.Time(
-                selectedTime = time,
-            ) { newTime ->
-                data.value = LocalDateTime.of(date, newTime)
-            },
-        )
+        if (dialogState.showing) {
+            DateTimeDialog(
+                header = Header.Default(
+                    title = "请选择时间",
+                ),
+                state = rememberUseCaseState(
+                    visible = true,
+                    onCloseRequest = {
+                        dialogState.hide()
+                    }),
+                selection = DateTimeSelection.Time(
+                    selectedTime = time,
+                ) { newTime ->
+                    data.value = LocalDateTime.of(date, newTime)
+                },
+            )
+        }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -309,7 +304,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    private fun ShowBottomSheet(
+    private fun CustomThingBottomSheet(
         customThingState: MutableState<CustomThingResponse>,
         openBottomSheet: MutableState<Boolean>,
         scope: CoroutineScope,
@@ -352,141 +347,173 @@ class CustomThingActivity : BaseSelectComposeActivity() {
             },
             sheetState = sheetState,
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                Row(
+            Row(
+                modifier = Modifier
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Image(
                     modifier = Modifier
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Image(
-                        modifier = Modifier
-                            .padding(12.dp)
-                            .clickable {
-                                focusManager.clearFocus()
-                                scope
-                                    .launch { sheetState.hide() }
-                                    .invokeOnCompletion {
-                                        if (!sheetState.isVisible) {
-                                            openBottomSheet.value = false
-                                        }
+                        .padding(12.dp)
+                        .clickable {
+                            focusManager.clearFocus()
+                            scope
+                                .launch { sheetState.hide() }
+                                .invokeOnCompletion {
+                                    if (!sheetState.isVisible) {
+                                        openBottomSheet.value = false
                                     }
-                            },
-                        painter = XhuIcons.CustomCourse.close,
-                        contentDescription = null,
-                    )
-                    Spacer(modifier = Modifier.weight(1F))
-                    if (customThing.thingId != 0L && !saveLoadingState.loading) {
-                        TextButton(
-                            onClick = {
-                                viewModel.deleteCustomThing(customThing.thingId)
-                            }) {
-                            Text(text = "删除", color = Color.Red)
-                        }
-                    }
-                    if (!saveLoadingState.loading) {
-                        TextButton(
-                            onClick = {
-                                viewModel.saveCustomThing(
-                                    customThing.thingId,
-                                    CustomThingRequest.buildOf(
-                                        thingTitle,
-                                        location,
-                                        allDay,
-                                        startTime.value,
-                                        endTime.value,
-                                        remark,
-                                        color.value,
-                                        mapOf(
-                                            CustomThing.Key.SAVE_AS_COUNT_DOWN to saveAsCountdown.toString()
-                                        )
-                                    ),
-                                    saveAsCountdown,
-                                )
-                            }) {
-                            Text(text = "保存")
-                        }
-                    }
-                    if (saveLoadingState.loading) {
-                        TextButton(
-                            enabled = false,
-                            onClick = {
-                            }) {
-                            Text(text = "保存操作中...")
-                        }
+                                }
+                        },
+                    painter = XhuIcons.CustomCourse.close,
+                    contentDescription = null,
+                )
+                Spacer(modifier = Modifier.weight(1F))
+                if (customThing.thingId != 0L && !saveLoadingState.loading) {
+                    TextButton(
+                        onClick = {
+                            viewModel.deleteCustomThing(customThing.thingId)
+                        }) {
+                        Text(text = "删除", color = Color.Red)
                     }
                 }
-                Row(
-                    modifier = Modifier
-                        .defaultMinSize(minHeight = 48.dp)
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    TextField(
-                        modifier = Modifier.weight(1F),
-                        value = thingTitle,
-                        placeholder = {
-                            Text(text = "（必填）")
-                        },
-                        label = {
-                            Text(text = "标题")
-                        },
-                        onValueChange = { thingTitle = it },
-                        colors = TextFieldDefaults.colors(
-                            unfocusedIndicatorColor = Color.Transparent,
-                        )
-                    )
+                if (!saveLoadingState.loading) {
+                    TextButton(
+                        onClick = {
+                            viewModel.saveCustomThing(
+                                customThing.thingId,
+                                CustomThingRequest.buildOf(
+                                    thingTitle,
+                                    location,
+                                    allDay,
+                                    startTime.value,
+                                    endTime.value,
+                                    remark,
+                                    color.value,
+                                    mapOf(
+                                        CustomThing.Key.SAVE_AS_COUNT_DOWN to saveAsCountdown.toString()
+                                    )
+                                ),
+                                saveAsCountdown,
+                            )
+                        }) {
+                        Text(text = "保存")
+                    }
                 }
-                Row(
-                    modifier = Modifier
-                        .defaultMinSize(minHeight = 48.dp)
-                        .padding(8.dp),
-                ) {
-                    Image(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(12.dp),
-                        painter = XhuIcons.CustomCourse.time,
-                        contentDescription = null
+                if (saveLoadingState.loading) {
+                    TextButton(
+                        enabled = false,
+                        onClick = {
+                        }) {
+                        Text(text = "保存操作中...")
+                    }
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .defaultMinSize(minHeight = 48.dp)
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextField(
+                    modifier = Modifier.weight(1F),
+                    value = thingTitle,
+                    placeholder = {
+                        Text(text = "（必填）")
+                    },
+                    label = {
+                        Text(text = "标题")
+                    },
+                    onValueChange = { thingTitle = it },
+                    colors = TextFieldDefaults.colors(
+                        unfocusedIndicatorColor = Color.Transparent,
                     )
-                    Column(
-                        modifier = Modifier
-                            .weight(1F),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .defaultMinSize(minHeight = 48.dp)
+                    .padding(8.dp),
+            ) {
+                Image(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(12.dp),
+                    painter = XhuIcons.CustomCourse.time,
+                    contentDescription = null
+                )
+                Column(
+                    modifier = Modifier
+                        .weight(1F),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
+                        Text(
+                            modifier = Modifier
+                                .weight(1F),
+                            text = "全天",
+                        )
+                        Switch(
+                            checked = allDay,
+                            onCheckedChange = { allDay = it },
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .weight(1F),
+                            text = "存储为倒计时",
+                        )
+                        Switch(
+                            checked = saveAsCountdown,
+                            onCheckedChange = {
+                                saveAsCountdown = it
+                                if (it) {
+                                    //启用存储为倒计时，那么自动打开全天
+                                    allDay = true
+                                }
+                            },
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(36.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .weight(1F)
+                                .clickable(
+                                    onClick = {
+                                        startDateDialog.show()
+                                    },
+                                    indication = null,
+                                    interactionSource = MutableInteractionSource(),
+                                ),
+                            text = startTime.value.format(dateFormatter),
+                        )
+                        if (!allDay) {
                             Text(
                                 modifier = Modifier
-                                    .weight(1F),
-                                text = "全天",
-                            )
-                            Switch(
-                                checked = allDay,
-                                onCheckedChange = { allDay = it },
-                            )
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                modifier = Modifier
-                                    .weight(1F),
-                                text = "存储为倒计时",
-                            )
-                            Switch(
-                                checked = saveAsCountdown,
-                                onCheckedChange = {
-                                    saveAsCountdown = it
-                                    if (it) {
-                                        //启用存储为倒计时，那么自动打开全天
-                                        allDay = true
-                                    }
-                                },
+                                    .clickable(
+                                        onClick = {
+                                            startTimeDialog.show()
+                                        },
+                                        indication = null,
+                                        interactionSource = MutableInteractionSource(),
+                                    ),
+                                text = startTime.value.format(Formatter.TIME_NO_SECONDS),
                             )
                         }
+                    }
+                    if (!saveAsCountdown) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -498,145 +525,111 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                     .weight(1F)
                                     .clickable(
                                         onClick = {
-                                            startDateDialog.show()
+                                            endDateDialog.show()
                                         },
                                         indication = null,
                                         interactionSource = MutableInteractionSource(),
                                     ),
-                                text = startTime.value.format(dateFormatter),
+                                text = endTime.value.format(dateFormatter),
                             )
                             if (!allDay) {
                                 Text(
                                     modifier = Modifier
                                         .clickable(
                                             onClick = {
-                                                startTimeDialog.show()
+                                                endTimeDialog.show()
                                             },
                                             indication = null,
                                             interactionSource = MutableInteractionSource(),
                                         ),
-                                    text = startTime.value.format(Formatter.TIME_NO_SECONDS),
+                                    text = endTime.value.format(Formatter.TIME_NO_SECONDS),
                                 )
-                            }
-                        }
-                        if (!saveAsCountdown) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(36.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Text(
-                                    modifier = Modifier
-                                        .weight(1F)
-                                        .clickable(
-                                            onClick = {
-                                                endDateDialog.show()
-                                            },
-                                            indication = null,
-                                            interactionSource = MutableInteractionSource(),
-                                        ),
-                                    text = endTime.value.format(dateFormatter),
-                                )
-                                if (!allDay) {
-                                    Text(
-                                        modifier = Modifier
-                                            .clickable(
-                                                onClick = {
-                                                    endTimeDialog.show()
-                                                },
-                                                indication = null,
-                                                interactionSource = MutableInteractionSource(),
-                                            ),
-                                        text = endTime.value.format(Formatter.TIME_NO_SECONDS),
-                                    )
-                                }
                             }
                         }
                     }
                 }
-                Row(
-                    modifier = Modifier
-                        .defaultMinSize(minHeight = 48.dp)
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    TextField(
-                        modifier = Modifier.weight(1F),
-                        value = location,
-                        placeholder = {
-                            Text(text = "（选填）")
-                        },
-                        label = {
-                            Text(text = "地点")
-                        },
-                        leadingIcon = {
-                            Image(
-                                painter = XhuIcons.CustomCourse.location,
-                                contentDescription = null
-                            )
-                        },
-                        onValueChange = { location = it },
-                        colors = TextFieldDefaults.colors(
-                            unfocusedIndicatorColor = Color.Transparent,
-                        )
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .defaultMinSize(minHeight = 48.dp)
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Surface(
-                        shape = CircleShape,
-                        modifier = Modifier
-                            .padding(horizontal = 12.dp)
-                            .size(24.dp),
-                        color = color.value
-                    ) {}
-                    Text(
-                        modifier = Modifier
-                            .weight(1F)
-                            .clickable(
-                                onClick = {
-                                    showColorDialog.show()
-                                },
-                                indication = null,
-                                interactionSource = MutableInteractionSource(),
-                            ),
-                        text = "设置颜色",
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .defaultMinSize(minHeight = 48.dp)
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    TextField(
-                        modifier = Modifier.weight(1F),
-                        value = remark,
-                        placeholder = {
-                            Text(text = "（选填）")
-                        },
-                        label = {
-                            Text(text = "备注")
-                        },
-                        leadingIcon = {
-                            Image(
-                                painter = XhuIcons.CustomCourse.remark,
-                                contentDescription = null
-                            )
-                        },
-                        onValueChange = { remark = it },
-                        colors = TextFieldDefaults.colors(
-                            unfocusedIndicatorColor = Color.Transparent,
-                        )
-                    )
-                }
-                Spacer(modifier = Modifier.weight(1F))
             }
+            Row(
+                modifier = Modifier
+                    .defaultMinSize(minHeight = 48.dp)
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextField(
+                    modifier = Modifier.weight(1F),
+                    value = location,
+                    placeholder = {
+                        Text(text = "（选填）")
+                    },
+                    label = {
+                        Text(text = "地点")
+                    },
+                    leadingIcon = {
+                        Image(
+                            painter = XhuIcons.CustomCourse.location,
+                            contentDescription = null
+                        )
+                    },
+                    onValueChange = { location = it },
+                    colors = TextFieldDefaults.colors(
+                        unfocusedIndicatorColor = Color.Transparent,
+                    )
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .defaultMinSize(minHeight = 48.dp)
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .size(24.dp),
+                    color = color.value
+                ) {}
+                Text(
+                    modifier = Modifier
+                        .weight(1F)
+                        .clickable(
+                            onClick = {
+                                showColorDialog.show()
+                            },
+                            indication = null,
+                            interactionSource = MutableInteractionSource(),
+                        ),
+                    text = "设置颜色",
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .defaultMinSize(minHeight = 48.dp)
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextField(
+                    modifier = Modifier.weight(1F),
+                    value = remark,
+                    placeholder = {
+                        Text(text = "（选填）")
+                    },
+                    label = {
+                        Text(text = "备注")
+                    },
+                    leadingIcon = {
+                        Image(
+                            painter = XhuIcons.CustomCourse.remark,
+                            contentDescription = null
+                        )
+                    },
+                    onValueChange = { remark = it },
+                    colors = TextFieldDefaults.colors(
+                        unfocusedIndicatorColor = Color.Transparent,
+                    )
+                )
+            }
+            Spacer(modifier = Modifier.weight(1F))
         }
     }
 }

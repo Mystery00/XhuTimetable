@@ -3,7 +3,6 @@ package vip.mystery0.xhu.timetable.ui.theme
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -16,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.model.entity.NightMode
+import vip.mystery0.xhu.timetable.ui.theme.XhuFonts.globalSet
 
 private val DarkColorPalette = darkColorScheme()
 
@@ -51,9 +51,7 @@ fun XhuTimetableTheme(
         if (isDark) DarkColorPalette else LightColorPalette
     }
 
-    val fontFamily = XhuFonts.DEFAULT
-    //todo set font
-    val replacementTypography = Typography()
+    val replacementTypography = MaterialTheme.typography.globalSet(XhuFonts.DEFAULT)
 
     MaterialTheme(
         typography = replacementTypography,

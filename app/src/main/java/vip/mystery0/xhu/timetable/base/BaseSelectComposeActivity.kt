@@ -29,6 +29,8 @@ import com.maxkeppeler.sheets.list.ListDialog
 import com.maxkeppeler.sheets.list.models.ListOption
 import com.maxkeppeler.sheets.list.models.ListSelection
 import kotlinx.coroutines.launch
+import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
+import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
@@ -251,6 +253,36 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
                     },
                 ) { index, _ ->
                     onSelect(select[index])
+                },
+            )
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    protected fun <T> ShowSelectDialog(
+        dialogTitle: String,
+        options: List<T>,
+        selectIndex: Int,
+        itemTransform: (T) -> String = { it.toString() },
+        state: XhuDialogState = rememberXhuDialogState(),
+        onSelect: (Int, T) -> Unit = { _, _ -> },
+    ) {
+        if (state.showing) {
+            ListDialog(
+                header = Header.Default(title = dialogTitle),
+                state = rememberUseCaseState(
+                    visible = true,
+                    onCloseRequest = { state.hide() }),
+                selection = ListSelection.Single(
+                    options = options.mapIndexed { index, item ->
+                        ListOption(
+                            titleText = itemTransform(item),
+                            selected = index == selectIndex,
+                        )
+                    },
+                ) { index, _ ->
+                    onSelect(index, options[index])
                 },
             )
         }

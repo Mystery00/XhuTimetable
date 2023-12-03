@@ -110,9 +110,6 @@ class MainViewModel : ComposeViewModel() {
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
-    private val _showWeekView = MutableStateFlow(false)
-    val showWeekView: StateFlow<Boolean> = _showWeekView
-
     private val _hasUnReadNotice = MutableStateFlow(false)
     val hasUnReadNotice: StateFlow<Boolean> = _hasUnReadNotice
 
@@ -700,14 +697,6 @@ class MainViewModel : ComposeViewModel() {
         _weekView.value = weekViewArray.toList()
     }
 
-    fun animeWeekView() {
-        _showWeekView.value = !_showWeekView.value
-    }
-
-    fun dismissWeekView() {
-        _showWeekView.value = false
-    }
-
     fun changeCurrentWeek(currentWeek: Int) {
         _week.value = currentWeek
     }
@@ -852,12 +841,10 @@ data class TodayThingSheet(
 
 enum class CourseStatus(
     val title: String,
-    val color: Color,
-    val backgroundColor: Color,
 ) {
-    BEFORE("未开始", XhuColor.Status.beforeColor, XhuColor.Status.beforeBackgroundColor),
-    IN("开课中", XhuColor.Status.inColor, XhuColor.Status.inBackgroundColor),
-    AFTER("已结束", XhuColor.Status.afterColor, XhuColor.Status.afterBackgroundColor),
+    BEFORE("未开始"),
+    IN("开课中"),
+    AFTER("已结束"),
 }
 
 class WeekView(
