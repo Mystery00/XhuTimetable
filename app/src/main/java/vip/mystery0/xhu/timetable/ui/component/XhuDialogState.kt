@@ -9,7 +9,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 
 @Composable
-fun ObserverXhuDialogState(observerData: Boolean): XhuDialogState {
+fun observerXhuDialogState(observerData: Boolean): XhuDialogState {
     val state = rememberXhuDialogState(observerData)
     LaunchedEffect(observerData) {
         if (observerData) state.show()

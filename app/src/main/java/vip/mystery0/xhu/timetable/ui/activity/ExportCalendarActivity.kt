@@ -63,7 +63,7 @@ import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.model.CalendarAccount
-import vip.mystery0.xhu.timetable.ui.component.ObserverXhuDialogState
+import vip.mystery0.xhu.timetable.ui.component.observerXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.ExportCalendarViewModel
@@ -341,7 +341,7 @@ class ExportCalendarActivity : BaseComposeActivity() {
         ShowUserDialog(show = userDialog)
         ShowReminderDialog(show = reminderDialog, list = reminder)
         val exportAccountState by viewModel.actionState.collectAsState()
-        val loadingDialog = ObserverXhuDialogState(exportAccountState.loading)
+        val loadingDialog = observerXhuDialogState(exportAccountState.loading)
         ShowProgressDialog(showState = loadingDialog, text = "数据导出中...")
     }
 
