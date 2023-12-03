@@ -15,8 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 
-private const val TAG = "CourseIndex"
-
 @Composable
 fun CourseIndexSelector(
     startIndex: Int,

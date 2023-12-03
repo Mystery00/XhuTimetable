@@ -2,7 +2,6 @@ package vip.mystery0.xhu.timetable.ui.activity.feedback
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -23,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFrom
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
@@ -57,10 +57,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.FirstBaseline
-import androidx.compose.ui.semantics.SemanticsPropertyKey
-import androidx.compose.ui.semantics.SemanticsPropertyReceiver
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -106,8 +102,6 @@ fun UserInput(
             UserInputText(
                 textFieldValue = textState,
                 onTextChanged = { textState = it },
-                // Only show the keyboard if there's no input selector and text field has focus
-                keyboardShown = currentInputSelector == InputSelector.NONE && textFieldFocusState,
                 // Close extended selector if text field receives focus
                 onTextFieldFocused = { focused ->
                     if (focused) {
@@ -189,7 +183,6 @@ private fun SelectorExpanded(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun FunctionalityNotAvailablePanel() {
     AnimatedVisibility(
@@ -250,7 +243,7 @@ private fun UserInputSelector(
         val border = if (!sendMessageEnabled) {
             BorderStroke(
                 width = 1.dp,
-                color = XhuColor.Common.grayText.copy(alpha = 0.3f)
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
             )
         } else {
             null
@@ -258,7 +251,7 @@ private fun UserInputSelector(
         Spacer(modifier = Modifier.weight(1f))
 
         val buttonColors = ButtonDefaults.buttonColors(
-            disabledContentColor = XhuColor.Common.grayText.copy(alpha = 0.3f)
+            disabledContentColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
         )
 
         // Send button
@@ -306,14 +299,11 @@ private fun InputSelectorButton(
         Icon(
             icon,
             tint = tint,
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.size(24.dp),
             contentDescription = description
         )
     }
 }
-
-val KeyboardShownKey = SemanticsPropertyKey<Boolean>("KeyboardShownKey")
-var SemanticsPropertyReceiver.keyboardShownProperty by KeyboardShownKey
 
 @ExperimentalFoundationApi
 @Composable
@@ -321,7 +311,6 @@ private fun UserInputText(
     keyboardType: KeyboardType = KeyboardType.Text,
     onTextChanged: (TextFieldValue) -> Unit,
     textFieldValue: TextFieldValue,
-    keyboardShown: Boolean,
     onTextFieldFocused: (Boolean) -> Unit,
     onMessageSent: () -> Unit,
     focusState: Boolean
@@ -329,11 +318,7 @@ private fun UserInputText(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = 64.dp)
-            .semantics {
-                contentDescription = ""
-                keyboardShownProperty = keyboardShown
-            },
+            .defaultMinSize(minHeight = 64.dp),
         horizontalArrangement = Arrangement.End
     ) {
         Surface {
@@ -389,13 +374,11 @@ fun EmojiSelector(
     onTextAdded: (String) -> Unit,
     focusRequester: FocusRequester
 ) {
-    val a11yLabel = "stringResource(id = R.string.emoji_selector_desc)"
     Column(
         modifier = Modifier
             .focusRequester(focusRequester) // Requests focus when the Emoji selector is displayed
             // Make the emoji selector focusable so it can steal focus from TextField
             .focusTarget()
-            .semantics { contentDescription = a11yLabel }
     ) {
         Row(modifier = Modifier.verticalScroll(rememberScrollState())) {
             EmojiTable(onTextAdded, modifier = Modifier.padding(8.dp))
