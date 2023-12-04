@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.annotation.DrawableRes
 import androidx.annotation.RawRes
 import androidx.compose.animation.AnimatedVisibility
@@ -71,12 +72,11 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
 import kotlin.reflect.KClass
 
-abstract class BaseComposeActivity(
-    private val setSystemUiColor: Boolean = true,
-) : ComponentActivity(), KoinComponent {
+abstract class BaseComposeActivity : ComponentActivity(), KoinComponent {
     private var toast: Toast? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         initIntent()
         setContent {
@@ -89,15 +89,6 @@ abstract class BaseComposeActivity(
     @Composable
     open fun BuildContentWindow() {
         XhuTimetableTheme {
-//            if (setSystemUiColor) {
-//                val systemUiController = rememberSystemUiController()
-//                val systemBarColor = MaterialTheme.colorScheme.primary
-//                val isLight = !isSystemInDarkTheme()
-//                SideEffect {
-//                    systemUiController.setSystemBarsColor(systemBarColor, darkIcons = isLight)
-//                    systemUiController.setNavigationBarColor(systemBarColor, darkIcons = isLight)
-//                }
-//            }
             BuildContent()
         }
     }

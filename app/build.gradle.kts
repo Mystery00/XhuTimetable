@@ -179,7 +179,6 @@ dependencies {
     //accompanist
     val accompanistVersion = "0.32.0"
     implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
-    implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
     //sheets-compose-dialogs
     val sheetsComposeDialogsVersion = "1.2.0"

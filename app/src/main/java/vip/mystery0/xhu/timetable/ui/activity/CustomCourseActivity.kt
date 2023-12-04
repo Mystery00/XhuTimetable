@@ -162,7 +162,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                 .padding(8.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            BuildSelectBackLayerContent(
+                            BuildSelectStickyHeaderContent(
                                 userSelect = userSelect,
                                 yearSelect = yearSelect,
                                 termSelect = termSelect,
@@ -772,7 +772,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 8.dp, bottom = 4.dp),
-                        color = XhuColor.Common.divider
+                        color = MaterialTheme.colorScheme.outline
                     )
                     BuildPaging(
                         paddingValues = PaddingValues(4.dp),

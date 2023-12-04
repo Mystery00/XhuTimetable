@@ -41,6 +41,7 @@ import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.model.response.ExperimentScoreItemResponse
 import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
+import vip.mystery0.xhu.timetable.ui.theme.ExtendedTheme
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.ExpScoreViewModel
@@ -127,7 +128,7 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
                                     stickyHeader {
                                         Row(
                                             modifier = Modifier
-                                                .background(XhuColor.surfaceContainer)
+                                                .background(ExtendedTheme.colorScheme.surfaceContainer)
                                                 .padding(12.dp),
                                         ) {
                                             Text(text = it.courseName)

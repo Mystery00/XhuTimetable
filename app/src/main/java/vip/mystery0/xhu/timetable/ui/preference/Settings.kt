@@ -1,11 +1,14 @@
 package vip.mystery0.xhu.timetable.ui.preference
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.alorma.compose.settings.ui.SettingsSwitch
@@ -23,7 +26,7 @@ import kotlin.reflect.KMutableProperty1
 fun XhuActionSettingsCheckbox(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    icon: @Composable () -> Unit = {},
+    icon: @Composable () -> Unit = { Spacer(modifier = Modifier.width(24.dp)) },
     title: @Composable () -> Unit,
     subtitle: (@Composable () -> Unit)? = null,
     checkboxColors: SwitchColors = SwitchDefaults.colors(),
@@ -54,7 +57,7 @@ fun XhuActionSettingsCheckbox(
 fun XhuSettingsMenuLink(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    icon: @Composable () -> Unit = {},
+    icon: @Composable () -> Unit = { Spacer(modifier = Modifier.width(24.dp)) },
     title: @Composable () -> Unit,
     subtitle: (@Composable () -> Unit)? = null,
     onClick: () -> Unit,
@@ -74,7 +77,7 @@ fun ConfigSettingsCheckbox(
     modifier: Modifier = Modifier,
     config: KMutableProperty1<ConfigStore, Boolean>,
     scope: CoroutineScope = rememberCoroutineScope(),
-    icon: @Composable () -> Unit = {},
+    icon: @Composable () -> Unit = { Spacer(modifier = Modifier.width(24.dp)) },
     title: @Composable () -> Unit,
     subtitle: @Composable (() -> Unit)? = null,
     onCheckedChange: suspend (Boolean) -> Unit = { },
@@ -101,7 +104,7 @@ fun CacheSettingsCheckbox(
     modifier: Modifier = Modifier,
     config: KMutableProperty1<CacheStore, Boolean>,
     scope: CoroutineScope = rememberCoroutineScope(),
-    icon: @Composable () -> Unit = {},
+    icon: @Composable () -> Unit = { Spacer(modifier = Modifier.width(24.dp)) },
     title: @Composable () -> Unit,
     subtitle: @Composable (() -> Unit)? = null,
     onCheckedChange: suspend (Boolean) -> Unit = { },
@@ -128,7 +131,7 @@ fun PoemsSettingsCheckbox(
     modifier: Modifier = Modifier,
     config: KMutableProperty0<Boolean>,
     scope: CoroutineScope = rememberCoroutineScope(),
-    icon: @Composable () -> Unit = { },
+    icon: @Composable () -> Unit = { Spacer(modifier = Modifier.width(24.dp)) },
     title: @Composable () -> Unit,
     subtitle: @Composable (() -> Unit)? = null,
     onCheckedChange: suspend (Boolean) -> Unit = { },

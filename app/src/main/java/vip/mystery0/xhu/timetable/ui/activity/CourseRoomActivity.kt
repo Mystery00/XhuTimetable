@@ -130,7 +130,7 @@ class CourseRoomActivity : BasePageComposeActivity() {
             }, backLayerContent = {
                 Column(modifier = Modifier.padding(16.dp)) {
                     OutlinedButton(
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.outline),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             areaDialog.value = true
@@ -140,7 +140,7 @@ class CourseRoomActivity : BasePageComposeActivity() {
                         Text(text = text)
                     }
                     OutlinedButton(
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.outline),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             weekDialog.value = true
@@ -152,7 +152,7 @@ class CourseRoomActivity : BasePageComposeActivity() {
                         Text(text = text)
                     }
                     OutlinedButton(
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.outline),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             dayDialog.value = true
@@ -166,7 +166,7 @@ class CourseRoomActivity : BasePageComposeActivity() {
                         Text(text = text)
                     }
                     OutlinedButton(
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.outline),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             timeDialog.value = true

@@ -43,6 +43,7 @@ import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.model.response.ScoreGpaResponse
 import vip.mystery0.xhu.timetable.model.response.ScoreResponse
 import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
+import vip.mystery0.xhu.timetable.ui.theme.ExtendedTheme
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.ScoreViewModel
@@ -122,7 +123,7 @@ class ScoreActivity : BaseSelectComposeActivity() {
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(XhuColor.surfaceContainer)
+                                .background(ExtendedTheme.colorScheme.surfaceContainer)
                                 .padding(12.dp)
                                 .clickable {
                                     showMoreInfo = !showMoreInfo
@@ -139,7 +140,7 @@ class ScoreActivity : BaseSelectComposeActivity() {
                                 text = "学期总览",
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(XhuColor.surfaceContainer)
+                                    .background(ExtendedTheme.colorScheme.surfaceContainer)
                                     .padding(12.dp),
                             )
                         }
@@ -152,7 +153,7 @@ class ScoreActivity : BaseSelectComposeActivity() {
                             text = "课程成绩列表",
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(XhuColor.surfaceContainer)
+                                .background(ExtendedTheme.colorScheme.surfaceContainer)
                                 .padding(12.dp),
                         )
                     }
