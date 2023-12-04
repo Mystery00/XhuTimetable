@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -16,7 +17,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 
 @Composable
 fun XhuFoldSettingsGroup(
@@ -42,7 +42,7 @@ fun XhuFoldSettingsGroup(
                 modifier = Modifier
                     .fillMaxWidth(),
                 thickness = 0.33.dp,
-                color = XhuColor.Common.divider,
+                color = MaterialTheme.colorScheme.outline,
             )
             Spacer(
                 modifier = Modifier

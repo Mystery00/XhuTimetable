@@ -66,7 +66,7 @@ import vip.mystery0.xhu.timetable.utils.isTwiceClick
 import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
-class MainActivity : BaseComposeActivity(setSystemUiColor = false) {
+class MainActivity : BaseComposeActivity() {
     private val viewModel: MainViewModel by viewModels()
     private lateinit var addDialogState: XhuDialogState
     private lateinit var weekViewDialogState: XhuDialogState

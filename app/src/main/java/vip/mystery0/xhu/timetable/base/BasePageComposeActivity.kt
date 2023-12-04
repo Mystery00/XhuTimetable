@@ -26,9 +26,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.flow.Flow
 
-abstract class BasePageComposeActivity(
-    setSystemUiColor: Boolean = true,
-) : BaseComposeActivity(setSystemUiColor) {
+abstract class BasePageComposeActivity : BaseComposeActivity() {
 
     @Composable
     fun <T : Any> Flow<PagingData<T>>.collectAndHandleState(

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,7 +30,6 @@ import com.maxkeppeler.sheets.list.models.ListSelection
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
 import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
 abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
@@ -94,7 +94,7 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
     }
 
     @Composable
-    protected fun BuildSelectBackLayerContent(
+    protected fun BuildSelectStickyHeaderContent(
         userSelect: List<UserSelect>,
         yearSelect: List<YearSelect>,
         termSelect: List<TermSelect>,
@@ -149,12 +149,12 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
+                        .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     OutlinedButton(
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.outline),
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             showUserDialog.show()
@@ -162,25 +162,28 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
                         val userString = userSelect.firstOrNull { it.selected }?.title ?: "查询中"
                         Text(text = "查询用户：$userString")
                     }
-                    OutlinedButton(
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            showYearDialog.show()
-                        }) {
-                        val yearString =
-                            yearSelect.firstOrNull { it.selected }?.title ?: "查询中"
-                        Text(text = yearString)
-                    }
-                    OutlinedButton(
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = XhuColor.Common.grayText),
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            showTermDialog.show()
-                        }) {
-                        val termString =
-                            termSelect.firstOrNull { it.selected }?.title ?: "查询中"
-                        Text(text = termString)
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedButton(
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.outline),
+                            modifier = Modifier.weight(1F),
+                            onClick = {
+                                showYearDialog.show()
+                            }) {
+                            val yearString =
+                                yearSelect.firstOrNull { it.selected }?.title ?: "查询中"
+                            Text(text = yearString)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        OutlinedButton(
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.outline),
+                            modifier = Modifier.weight(1F),
+                            onClick = {
+                                showTermDialog.show()
+                            }) {
+                            val termString =
+                                termSelect.firstOrNull { it.selected }?.title ?: "查询中"
+                            Text(text = termString)
+                        }
                     }
                     Button(
                         modifier = Modifier.fillMaxWidth(),

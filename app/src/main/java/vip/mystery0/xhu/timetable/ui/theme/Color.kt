@@ -17,23 +17,11 @@ object XhuColor {
     val cardBackground: Color
         @Composable
         get() = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
-    val surfaceContainer: Color
-        @Composable
-        get() = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
     val loginLabel: Color
         @Composable
         get() = Color(0xFFCCCCCC)
     val notThisWeekBackgroundColor: Color
         get() = Color(0xFFe5e5e5)
-
-    object Common {
-        val divider: Color
-            @Composable
-            get() = Color(0xFFDDDDDD)
-        val grayText: Color
-            @Composable
-            get() = colorOf(pair = Color(0x8AFFFFFF) to Color(0x8A000000))
-    }
 
     object Status {
         val beforeColor = Color(0xFF4CAF50)

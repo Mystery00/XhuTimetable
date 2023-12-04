@@ -51,7 +51,7 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.utils.finishAllActivity
 import vip.mystery0.xhu.timetable.viewmodel.LoginViewModel
 
-class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
+class LoginActivity : BaseComposeActivity() {
     private val viewModel: LoginViewModel by viewModels()
 
     @OptIn(ExperimentalComposeUiApi::class)

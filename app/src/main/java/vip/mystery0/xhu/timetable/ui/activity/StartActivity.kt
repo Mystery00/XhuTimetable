@@ -17,7 +17,7 @@ import vip.mystery0.xhu.timetable.registerAppCenter
 import vip.mystery0.xhu.timetable.viewmodel.StarterViewModel
 import java.io.File
 
-class StartActivity : BaseComposeActivity(setSystemUiColor = false) {
+class StartActivity : BaseComposeActivity() {
     private val viewModel: StarterViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {

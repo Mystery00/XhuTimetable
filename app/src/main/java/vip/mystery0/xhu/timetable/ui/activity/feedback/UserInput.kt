@@ -64,8 +64,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import vip.mystery0.xhu.timetable.ui.theme.ExtendedTheme
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
 enum class InputSelector {
@@ -96,7 +96,7 @@ fun UserInput(
     var textFieldFocusState by remember { mutableStateOf(false) }
 
     Surface(
-        shadowElevation = 12.dp
+        color = ExtendedTheme.colorScheme.surfaceContainer,
     ) {
         Column(modifier = modifier) {
             UserInputText(
@@ -206,7 +206,7 @@ fun FunctionalityNotAvailablePanel() {
                 text = "暂不支持",
                 modifier = Modifier.paddingFrom(FirstBaseline, before = 32.dp),
                 style = MaterialTheme.typography.bodyMedium,
-                color = XhuColor.Common.grayText
+                color = MaterialTheme.colorScheme.outline
             )
         }
     }
@@ -328,8 +328,10 @@ private fun UserInputText(
                     .fillMaxWidth()
                     .weight(1f)
                     .align(Alignment.Bottom)
+                    .background(ExtendedTheme.colorScheme.surfaceContainer)
             ) {
                 var lastFocusState by remember { mutableStateOf(false) }
+                val contentColor = LocalContentColor.current
                 BasicTextField(
                     value = textFieldValue,
                     onValueChange = { onTextChanged(it) },
@@ -351,8 +353,8 @@ private fun UserInputText(
                         onMessageSent()
                     },
                     maxLines = 9,
-                    cursorBrush = SolidColor(LocalContentColor.current),
-                    textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current)
+                    cursorBrush = SolidColor(contentColor),
+                    textStyle = LocalTextStyle.current.copy(color = contentColor)
                 )
 
                 if (textFieldValue.text.isEmpty() && !focusState) {
@@ -361,7 +363,7 @@ private fun UserInputText(
                             .align(Alignment.CenterStart)
                             .padding(start = 32.dp),
                         text = "请输入文本...",
-                        style = MaterialTheme.typography.bodyLarge.copy(color = XhuColor.Common.grayText)
+                        style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.outline)
                     )
                 }
             }

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,6 +32,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -152,7 +153,7 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                                     item {
                                         DayHeader(dayString = thisDate.format(Formatter.DATE))
                                     }
-                                } else if (Duration.between(nextTime, thisTime).toMinutes() > 5) {
+                                } else if (Duration.between(nextTime, thisTime).toHours() > 1) {
                                     item {
                                         DayHeader(
                                             dayString = thisTime.atZone(Formatter.ZONE_CHINA).format(Formatter.TIME_NO_SECONDS)
@@ -170,9 +171,7 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                                     lazyListState.scrollToItem(0)
                                 }
                             },
-                            modifier = Modifier
-                                .navigationBarsPadding()
-                                .imePadding(),
+                            modifier = Modifier.imePadding(),
                         )
                     }
                 }
@@ -244,7 +243,7 @@ fun DayHeader(dayString: String) {
             text = dayString,
             modifier = Modifier.padding(horizontal = 16.dp),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.outline
         )
         DayHeaderLine()
     }
@@ -256,7 +255,7 @@ private fun RowScope.DayHeaderLine() {
         modifier = Modifier
             .weight(1f)
             .align(Alignment.CenterVertically),
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+        color = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)
     )
 }
 
@@ -296,10 +295,16 @@ fun ClickableMessage(
         text = message.content,
         primary = message.isMe
     )
+    val textColor = if (message.isMe) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.onSecondary
+    }
 
     ClickableText(
         text = styledMessage,
         modifier = Modifier.padding(16.dp),
+        style = TextStyle.Default.copy(color = textColor),
         onClick = {
             styledMessage
                 .getStringAnnotations(start = it, end = it)

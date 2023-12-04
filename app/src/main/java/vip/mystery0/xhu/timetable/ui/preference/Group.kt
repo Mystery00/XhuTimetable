@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 
 @Composable
 fun XhuSettingsGroup(
@@ -31,7 +30,7 @@ fun XhuSettingsGroup(
                 modifier = Modifier
                     .fillMaxWidth(),
                 thickness = 0.33.dp,
-                color = XhuColor.Common.divider,
+                color = MaterialTheme.colorScheme.outline,
             )
             Spacer(
                 modifier = Modifier
@@ -51,8 +50,8 @@ internal fun XhuSettingsGroupTitle(title: @Composable () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .height(36.dp)
-            .padding(horizontal = 64.dp),
-        contentAlignment = Alignment.CenterStart
+            .padding(horizontal = 56.dp),
+        contentAlignment = Alignment.CenterStart,
     ) {
         val primary = MaterialTheme.colorScheme.primary
         val titleStyle = MaterialTheme.typography.titleSmall.copy(color = primary)
