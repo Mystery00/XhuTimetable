@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -121,7 +120,7 @@ class NoticeActivity : BasePageComposeActivity() {
         val annotatedText = buildAnnotatedString {
             split.forEachIndexed { index, s ->
                 withStyle(
-                    style = SpanStyle(color = MaterialTheme.colorScheme.onBackground),
+                    style = SpanStyle(color = MaterialTheme.colorScheme.onSurface),
                 ) {
                     append(s)
                 }
@@ -132,7 +131,7 @@ class NoticeActivity : BasePageComposeActivity() {
                     )
                     withStyle(
                         style = SpanStyle(
-                            color = Color.Blue,
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
                         )
                     ) {
@@ -147,9 +146,7 @@ class NoticeActivity : BasePageComposeActivity() {
             ClickableText(
                 modifier = modifier,
                 text = annotatedText,
-                style = TextStyle(
-                    fontFamily = XhuFonts.DEFAULT,
-                ),
+                style = TextStyle(fontFamily = XhuFonts.DEFAULT),
                 onClick = { offset ->
                     annotatedText.getStringAnnotations(
                         tag = "URL",
