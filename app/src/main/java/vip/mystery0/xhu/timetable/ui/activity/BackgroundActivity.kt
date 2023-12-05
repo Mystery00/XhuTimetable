@@ -3,6 +3,8 @@ package vip.mystery0.xhu.timetable.ui.activity
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.activity.viewModels
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -17,24 +19,28 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,6 +51,11 @@ import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeler.sheets.state.StateDialog
+import com.maxkeppeler.sheets.state.models.ProgressIndicator
+import com.maxkeppeler.sheets.state.models.State
+import com.maxkeppeler.sheets.state.models.StateConfig
 import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
@@ -53,6 +64,7 @@ import vip.mystery0.xhu.timetable.screenHeight
 import vip.mystery0.xhu.timetable.screenWidth
 import vip.mystery0.xhu.timetable.ui.activity.contract.BackgroundResultContract
 import vip.mystery0.xhu.timetable.ui.activity.contract.UCropResultContract
+import vip.mystery0.xhu.timetable.ui.component.observerXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.Background
 import vip.mystery0.xhu.timetable.viewmodel.BackgroundViewModel
@@ -96,7 +108,7 @@ class BackgroundActivity : BaseComposeActivity() {
             }
         }
 
-    @OptIn(ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
     override fun BuildContent() {
         val backgroundListState by viewModel.backgroundListState.collectAsState()
@@ -106,8 +118,6 @@ class BackgroundActivity : BaseComposeActivity() {
             topBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
-                    backgroundColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
                     navigationIcon = {
                         IconButton(onClick = {
                             finish()
@@ -211,7 +221,7 @@ class BackgroundActivity : BaseComposeActivity() {
                     color = Color.Transparent,
                     border = BorderStroke(
                         width = 6.dp,
-                        color = MaterialTheme.colors.secondary
+                        color = MaterialTheme.colorScheme.secondary
                     ),
                 ) {}
                 Image(
@@ -226,28 +236,27 @@ class BackgroundActivity : BaseComposeActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun ShowDownloadDialog(downloadProgressState: DownloadProgressState) {
-        if (downloadProgressState.finished) return
-        AlertDialog(onDismissRequest = {},
-            title = {
-                Text(
-                    text = "正在下载...",
-                    fontWeight = FontWeight.W700,
-                    style = MaterialTheme.typography.h6,
-                )
-            }, text = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Text(text = downloadProgressState.text)
-                    LinearProgressIndicator(
-                        progress = (downloadProgressState.progress.progress / 100).toFloat(),
+        val progressAnimated = animateFloatAsState(
+            label = "progressAnimated",
+            targetValue = downloadProgressState.progress.progress / 100.0F,
+            animationSpec = tween(1000),
+        ).value
+        if (!downloadProgressState.finished) {
+            StateDialog(
+                state = rememberUseCaseState(
+                    visible = true,
+                    onDismissRequest = { }
+                ),
+                config = StateConfig(
+                    state = State.Loading(
+                        labelText = downloadProgressState.text,
+                        ProgressIndicator.Circular(progressAnimated),
                     )
-                }
-            }, confirmButton = {
-            }, dismissButton = {
-            })
+                )
+            )
+        }
     }
 }

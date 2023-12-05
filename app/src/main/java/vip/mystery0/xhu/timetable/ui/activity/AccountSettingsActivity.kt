@@ -17,15 +17,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -56,6 +58,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
 
     private val viewModel: AccountManagementViewModel by viewModels()
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
         val errorMessage by viewModel.errorMessage.collectAsState()
@@ -64,8 +67,6 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
             topBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
-                    backgroundColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
                     navigationIcon = {
                         IconButton(onClick = {
                             finish()
@@ -94,7 +95,6 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .background(XhuColor.Common.grayBackground)
                     .verticalScroll(rememberScrollState()),
             ) {
                 XhuSettingsGroup(title = {
@@ -107,7 +107,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.multiUser,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "启用情侣模式") },
@@ -178,18 +178,19 @@ private fun BuildItem(
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(8.dp),
-        elevation = 0.dp,
-        backgroundColor = XhuColor.accountCardBackground,
+        colors = CardDefaults.cardColors(
+            containerColor = XhuColor.cardBackground,
+        ),
     ) {
         Box {
             if (mainUser) {
                 Text(
                     text = "主用户",
                     fontSize = 8.sp,
-                    color = Color(0xFF2196F3),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier
                         .background(
-                            color = Color(0xFFBBDEFB),
+                            color = MaterialTheme.colorScheme.primaryContainer,
                             shape = RoundedCornerShape(bottomEnd = 8.dp),
                         )
                         .padding(1.dp),
@@ -202,10 +203,6 @@ private fun BuildItem(
             ) {
                 Image(
                     modifier = Modifier
-                        .background(
-                            color = XhuColor.Common.grayBackground,
-                            shape = MaterialTheme.shapes.medium,
-                        )
                         .size(48.dp)
                         .clip(RoundedCornerShape(4.dp)),
                     painter = painter,
@@ -220,7 +217,7 @@ private fun BuildItem(
                     TextButton(
                         onClick = onButtonClick,
                         colors = ButtonDefaults.textButtonColors(
-                            backgroundColor = Color.Red,
+                            containerColor = Color.Red,
                             contentColor = Color.White,
                         ),
                         modifier = Modifier.height(24.dp),

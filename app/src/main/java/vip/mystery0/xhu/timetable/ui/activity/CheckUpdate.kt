@@ -1,14 +1,15 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -115,25 +116,31 @@ fun CheckUpdate(
     }
     var dialogState by remember { mutableStateOf(true) }
     val downloadProgress by downloadStateFlow.collectAsState()
-    val onCloseListener = {
-        onClose()
-        when {
-            GlobalConfigStore.debugMode && GlobalCacheStore.alwaysShowNewVersion -> {
-                dialogState = false
-            }
+    val onCloseListener = { skip: Boolean ->
+        if (skip) {
+            when {
+                GlobalConfigStore.debugMode && GlobalCacheStore.alwaysShowNewVersion -> {
+                    dialogState = false
+                    onClose()
+                }
 
-            !version.forceUpdate -> {
-                dialogState = false
+                !version.forceUpdate -> {
+                    dialogState = false
+                    onClose()
+                }
             }
         }
     }
     if (!dialogState) return
-    AlertDialog(onDismissRequest = onCloseListener,
+    AlertDialog(
+        onDismissRequest = {
+            onCloseListener(true)
+        },
         title = {
             Text(
                 text = "检测到新版本 ${version.versionName}",
                 fontWeight = FontWeight.W700,
-                style = MaterialTheme.typography.h6,
+                style = MaterialTheme.typography.titleLarge,
             )
         }, text = {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -159,14 +166,14 @@ fun CheckUpdate(
             if (version.showPatch) {
                 TextButton(onClick = {
                     onDownload(false)
-                    onCloseListener()
+                    onCloseListener(false)
                 }) {
                     Text(text = "下载增量包(${version.patchSize.formatFileSize()})")
                 }
             }
             TextButton(onClick = {
                 onDownload(true)
-                onCloseListener()
+                onCloseListener(false)
             }) {
                 Text(text = "下载APK(${version.apkSize.formatFileSize()})")
             }
@@ -180,7 +187,7 @@ fun CheckUpdate(
             } else {
                 TextButton(onClick = {
                     onIgnore()
-                    onCloseListener()
+                    onCloseListener(true)
                 }) {
                     Text(text = "忽略")
                 }

@@ -8,19 +8,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -32,8 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BasePageComposeActivity
-import vip.mystery0.xhu.timetable.model.LottieLoadingType
 import vip.mystery0.xhu.timetable.model.response.UrgeItem
+import vip.mystery0.xhu.timetable.ui.component.observerXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.formatChinaDateTime
@@ -42,6 +44,7 @@ import vip.mystery0.xhu.timetable.viewmodel.UrgeViewModel
 class UrgeActivity : BasePageComposeActivity() {
     private val viewModel: UrgeViewModel by viewModels()
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
         val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
@@ -50,8 +53,6 @@ class UrgeActivity : BasePageComposeActivity() {
             topBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
-                    backgroundColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
                     navigationIcon = {
                         IconButton(onClick = {
                             finish()
@@ -68,7 +69,7 @@ class UrgeActivity : BasePageComposeActivity() {
             val refreshing by viewModel.refreshing.collectAsState()
             val userName by viewModel.userName.collectAsState()
             val remainCount by viewModel.remainCount.collectAsState()
-            var expandItemIndex by remember { mutableStateOf(-1) }
+            var expandItemIndex by remember { mutableIntStateOf(-1) }
             BuildPaging(
                 paddingValues = paddingValues,
                 pager = pager,
@@ -101,11 +102,8 @@ class UrgeActivity : BasePageComposeActivity() {
             errorMessage.second.toast(true)
         }
         val urgeLoading by viewModel.urgeLoading.collectAsState()
-        ShowProgressDialog(
-            show = urgeLoading,
-            text = "正在催更...",
-            type = LottieLoadingType.LOADING,
-        )
+        val loadingDialog = observerXhuDialogState(urgeLoading)
+        ShowProgressDialog(showState = loadingDialog, text = "正在催更...")
     }
 }
 
@@ -115,7 +113,9 @@ private fun BuildTopDesc(userName: String, remainCount: Int) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp),
-        backgroundColor = XhuColor.cardBackground,
+        colors = CardDefaults.cardColors(
+            containerColor = XhuColor.cardBackground,
+        ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -137,7 +137,7 @@ private fun BuildTopDesc(userName: String, remainCount: Int) {
                     append("您(${userName})当前剩余的催更次数为： ")
                     withStyle(
                         style = SpanStyle(
-                            color = MaterialTheme.colors.primary,
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     ) {
                         append(remainCount.toString())
@@ -163,7 +163,9 @@ private fun BuildItem(
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .clickable(onClick = onClick),
-        backgroundColor = XhuColor.cardBackground,
+        colors = CardDefaults.cardColors(
+            containerColor = XhuColor.cardBackground,
+        ),
     ) {
         Row(
             modifier = Modifier
@@ -198,7 +200,7 @@ private fun BuildItem(
                     fontSize = 12.sp,
                     modifier = Modifier
                         .fillMaxWidth(),
-                    color = XhuColor.Common.grayText,
+                    color = MaterialTheme.colorScheme.outline,
                 )
                 if (showDetail) {
                     Text(
@@ -206,7 +208,7 @@ private fun BuildItem(
                         fontSize = 12.sp,
                         modifier = Modifier
                             .fillMaxWidth(),
-                        color = XhuColor.Common.grayText,
+                        color = MaterialTheme.colorScheme.outline,
                     )
                 }
             }

@@ -2,7 +2,6 @@ package vip.mystery0.xhu.timetable.ui.activity.feedback
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -23,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFrom
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
@@ -31,16 +31,16 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -57,10 +57,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.FirstBaseline
-import androidx.compose.ui.semantics.SemanticsPropertyKey
-import androidx.compose.ui.semantics.SemanticsPropertyReceiver
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -68,8 +64,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import vip.mystery0.xhu.timetable.ui.theme.ExtendedTheme
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
 enum class InputSelector {
@@ -100,14 +96,12 @@ fun UserInput(
     var textFieldFocusState by remember { mutableStateOf(false) }
 
     Surface(
-        elevation = 12.dp
+        color = ExtendedTheme.colorScheme.surfaceContainer,
     ) {
         Column(modifier = modifier) {
             UserInputText(
                 textFieldValue = textState,
                 onTextChanged = { textState = it },
-                // Only show the keyboard if there's no input selector and text field has focus
-                keyboardShown = currentInputSelector == InputSelector.NONE && textFieldFocusState,
                 // Close extended selector if text field receives focus
                 onTextFieldFocused = { focused ->
                     if (focused) {
@@ -189,7 +183,6 @@ private fun SelectorExpanded(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun FunctionalityNotAvailablePanel() {
     AnimatedVisibility(
@@ -207,13 +200,13 @@ fun FunctionalityNotAvailablePanel() {
         ) {
             Text(
                 text = "暂不支持",
-                style = MaterialTheme.typography.caption
+                style = MaterialTheme.typography.bodySmall
             )
             Text(
                 text = "暂不支持",
                 modifier = Modifier.paddingFrom(FirstBaseline, before = 32.dp),
-                style = MaterialTheme.typography.body2,
-                color = XhuColor.Common.grayText
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.outline
             )
         }
     }
@@ -250,7 +243,7 @@ private fun UserInputSelector(
         val border = if (!sendMessageEnabled) {
             BorderStroke(
                 width = 1.dp,
-                color = XhuColor.Common.grayText.copy(alpha = 0.3f)
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
             )
         } else {
             null
@@ -258,7 +251,7 @@ private fun UserInputSelector(
         Spacer(modifier = Modifier.weight(1f))
 
         val buttonColors = ButtonDefaults.buttonColors(
-            disabledContentColor = XhuColor.Common.grayText.copy(alpha = 0.3f)
+            disabledContentColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
         )
 
         // Send button
@@ -288,7 +281,7 @@ private fun InputSelectorButton(
 ) {
     val backgroundModifier = if (selected) {
         Modifier.background(
-            color = MaterialTheme.colors.secondary,
+            color = MaterialTheme.colorScheme.secondary,
             shape = RoundedCornerShape(14.dp)
         )
     } else {
@@ -299,21 +292,18 @@ private fun InputSelectorButton(
         modifier = backgroundModifier
     ) {
         val tint = if (selected) {
-            MaterialTheme.colors.onSecondary
+            MaterialTheme.colorScheme.onSecondary
         } else {
-            MaterialTheme.colors.secondary
+            MaterialTheme.colorScheme.secondary
         }
         Icon(
             icon,
             tint = tint,
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.size(24.dp),
             contentDescription = description
         )
     }
 }
-
-val KeyboardShownKey = SemanticsPropertyKey<Boolean>("KeyboardShownKey")
-var SemanticsPropertyReceiver.keyboardShownProperty by KeyboardShownKey
 
 @ExperimentalFoundationApi
 @Composable
@@ -321,7 +311,6 @@ private fun UserInputText(
     keyboardType: KeyboardType = KeyboardType.Text,
     onTextChanged: (TextFieldValue) -> Unit,
     textFieldValue: TextFieldValue,
-    keyboardShown: Boolean,
     onTextFieldFocused: (Boolean) -> Unit,
     onMessageSent: () -> Unit,
     focusState: Boolean
@@ -329,11 +318,7 @@ private fun UserInputText(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = 64.dp)
-            .semantics {
-                contentDescription = ""
-                keyboardShownProperty = keyboardShown
-            },
+            .defaultMinSize(minHeight = 64.dp),
         horizontalArrangement = Arrangement.End
     ) {
         Surface {
@@ -343,8 +328,10 @@ private fun UserInputText(
                     .fillMaxWidth()
                     .weight(1f)
                     .align(Alignment.Bottom)
+                    .background(ExtendedTheme.colorScheme.surfaceContainer)
             ) {
                 var lastFocusState by remember { mutableStateOf(false) }
+                val contentColor = LocalContentColor.current
                 BasicTextField(
                     value = textFieldValue,
                     onValueChange = { onTextChanged(it) },
@@ -366,8 +353,8 @@ private fun UserInputText(
                         onMessageSent()
                     },
                     maxLines = 9,
-                    cursorBrush = SolidColor(LocalContentColor.current),
-                    textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current)
+                    cursorBrush = SolidColor(contentColor),
+                    textStyle = LocalTextStyle.current.copy(color = contentColor)
                 )
 
                 if (textFieldValue.text.isEmpty() && !focusState) {
@@ -376,7 +363,7 @@ private fun UserInputText(
                             .align(Alignment.CenterStart)
                             .padding(start = 32.dp),
                         text = "请输入文本...",
-                        style = MaterialTheme.typography.body1.copy(color = XhuColor.Common.grayText)
+                        style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.outline)
                     )
                 }
             }
@@ -389,13 +376,11 @@ fun EmojiSelector(
     onTextAdded: (String) -> Unit,
     focusRequester: FocusRequester
 ) {
-    val a11yLabel = "stringResource(id = R.string.emoji_selector_desc)"
     Column(
         modifier = Modifier
             .focusRequester(focusRequester) // Requests focus when the Emoji selector is displayed
             // Make the emoji selector focusable so it can steal focus from TextField
             .focusTarget()
-            .semantics { contentDescription = a11yLabel }
     ) {
         Row(modifier = Modifier.verticalScroll(rememberScrollState())) {
             EmojiTable(onTextAdded, modifier = Modifier.padding(8.dp))

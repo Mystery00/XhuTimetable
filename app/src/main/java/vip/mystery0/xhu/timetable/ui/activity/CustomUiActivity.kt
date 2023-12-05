@@ -16,20 +16,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Slider
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -39,10 +41,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.maxkeppeker.sheets.core.models.base.Header
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeler.sheets.input.InputDialog
+import com.maxkeppeler.sheets.input.models.InputCustomView
+import com.maxkeppeler.sheets.input.models.InputHeader
+import com.maxkeppeler.sheets.input.models.InputSelection
+import com.maxkeppeler.sheets.input.models.InputText
+import com.maxkeppeler.sheets.input.models.InputTextField
+import com.maxkeppeler.sheets.input.models.ValidationResult
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.model.TitleTemplate
 import vip.mystery0.xhu.timetable.model.format
+import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
+import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsMenuLink
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
@@ -54,6 +67,7 @@ import kotlin.random.Random
 class CustomUiActivity : BaseComposeActivity() {
     private val viewModel: CustomUiViewModel by viewModels()
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
         val randomCourse by viewModel.randomCourse.collectAsState()
@@ -63,8 +77,6 @@ class CustomUiActivity : BaseComposeActivity() {
             topBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
-                    backgroundColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
                     navigationIcon = {
                         IconButton(onClick = {
                             finish()
@@ -106,8 +118,8 @@ class CustomUiActivity : BaseComposeActivity() {
 
             val customUi by viewModel.customUi.collectAsState()
 
-            val showCustomTitleTemplateDialog = remember { mutableStateOf(false) }
-            val showCustomNotTitleTemplateDialog = remember { mutableStateOf(false) }
+            val showCustomTitleTemplateDialog = rememberXhuDialogState()
+            val showCustomNotTitleTemplateDialog = rememberXhuDialogState()
             Column(modifier = Modifier.padding(paddingValues)) {
                 Row(
                     modifier = Modifier
@@ -247,7 +259,7 @@ class CustomUiActivity : BaseComposeActivity() {
                                 Text(text = "本周课程的文本格式")
                             },
                             onClick = {
-                                showCustomTitleTemplateDialog.value = true
+                                showCustomTitleTemplateDialog.show()
                             }
                         )
                         XhuSettingsMenuLink(
@@ -256,7 +268,7 @@ class CustomUiActivity : BaseComposeActivity() {
                                 Text(text = "非本周课程的文本格式")
                             },
                             onClick = {
-                                showCustomNotTitleTemplateDialog.value = true
+                                showCustomNotTitleTemplateDialog.show()
                             }
                         )
                         XhuSettingsMenuLink(
@@ -284,45 +296,44 @@ class CustomUiActivity : BaseComposeActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun BuildTitleTemplateDialog(
         value: String,
-        show: MutableState<Boolean>,
+        show: XhuDialogState,
         listener: (String) -> Unit,
     ) {
-        if (!show.value) {
+        val valueState = remember { mutableStateOf(value) }
+        if (!show.showing) {
             return
         }
-        val valueState = remember { mutableStateOf(value) }
-        AlertDialog(
-            onDismissRequest = {
-                show.value = false
-            },
-            title = {
-                Text(text = "请输入模板内容")
-            },
-            text = {
+        val inputOptions = listOf(
+            InputCustomView(view = {
                 Column(modifier = Modifier.padding(4.dp)) {
-                    OutlinedTextField(value = valueState.value, onValueChange = {
-                        valueState.value = it
-                    })
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = valueState.value,
+                        onValueChange = {
+                            valueState.value = it
+                        })
+                    Spacer(modifier = Modifier.height(4.dp))
                     Row {
                         Text(text = "课程名称",
-                            color = MaterialTheme.colors.primary,
+                            color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .padding(4.dp)
                                 .clickable {
                                     valueState.value += "{${TitleTemplate.COURSE_NAME.tpl}}"
                                 })
                         Text(text = "上课地点",
-                            color = MaterialTheme.colors.primary,
+                            color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .padding(4.dp)
                                 .clickable {
                                     valueState.value += "{${TitleTemplate.LOCATION.tpl}}"
                                 })
                         Text(text = "教师名称",
-                            color = MaterialTheme.colors.primary,
+                            color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .padding(4.dp)
                                 .clickable {
@@ -330,26 +341,20 @@ class CustomUiActivity : BaseComposeActivity() {
                                 })
                     }
                 }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        listener(valueState.value)
-                        show.value = false
-                    },
-                ) {
-                    Text("确认")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        show.value = false
-                    }
-                ) {
-                    Text("取消")
-                }
-            }
+            }),
+        )
+        InputDialog(
+            header = Header.Default(title = "请输入模板内容"),
+            state = rememberUseCaseState(
+                visible = true,
+                onCloseRequest = { show.hide() },
+            ),
+            selection = InputSelection(
+                input = inputOptions,
+                onPositiveClick = {
+                    listener(valueState.value)
+                },
+            )
         )
     }
 }
@@ -365,21 +370,21 @@ private fun BuildSeekBar(
 ) {
     val range = end - start
     val currentValue: Float = (value - start) / range.toFloat()
-    val valueState = remember { mutableStateOf(currentValue) }
-    valueState.value = currentValue
+    val valueState = remember { mutableFloatStateOf(currentValue) }
+    valueState.floatValue = currentValue
     XhuSettingsMenuLink(
         title = { Text(text = title) },
         subtitle = {
             Slider(
                 enabled = enabled,
-                value = valueState.value,
+                value = valueState.floatValue,
                 onValueChange = {
-                    valueState.value = it
+                    valueState.floatValue = it
                 },
                 modifier = Modifier.fillMaxWidth(),
                 steps = end - start + 1,
                 onValueChangeFinished = {
-                    val newValue = (start + range * valueState.value).roundToInt()
+                    val newValue = (start + range * valueState.floatValue).roundToInt()
                     listener(newValue)
                 },
             )

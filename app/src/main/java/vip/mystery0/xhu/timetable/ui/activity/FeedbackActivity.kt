@@ -12,26 +12,27 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -58,7 +60,7 @@ import java.time.Instant
 class FeedbackActivity : BaseComposeActivity(), KoinComponent {
     private val viewModel: FeedbackViewModel by viewModels()
 
-    @OptIn(ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
         val loading by viewModel.loading.collectAsState()
@@ -71,8 +73,6 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
             topBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
-                    backgroundColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
                     navigationIcon = {
                         IconButton(onClick = {
                             finish()
@@ -153,7 +153,7 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                                     item {
                                         DayHeader(dayString = thisDate.format(Formatter.DATE))
                                     }
-                                } else if (Duration.between(nextTime, thisTime).toMinutes() > 5) {
+                                } else if (Duration.between(nextTime, thisTime).toHours() > 1) {
                                     item {
                                         DayHeader(
                                             dayString = thisTime.atZone(Formatter.ZONE_CHINA).format(Formatter.TIME_NO_SECONDS)
@@ -171,9 +171,7 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                                     lazyListState.scrollToItem(0)
                                 }
                             },
-                            modifier = Modifier
-                                .navigationBarsPadding()
-                                .imePadding(),
+                            modifier = Modifier.imePadding(),
                         )
                     }
                 }
@@ -244,8 +242,8 @@ fun DayHeader(dayString: String) {
         Text(
             text = dayString,
             modifier = Modifier.padding(horizontal = 16.dp),
-            style = MaterialTheme.typography.caption,
-            color = MaterialTheme.colors.onSurface
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.outline
         )
         DayHeaderLine()
     }
@@ -257,7 +255,7 @@ private fun RowScope.DayHeaderLine() {
         modifier = Modifier
             .weight(1f)
             .align(Alignment.CenterVertically),
-        color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
+        color = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)
     )
 }
 
@@ -266,9 +264,9 @@ fun ChatItemBubble(
     message: Message,
 ) {
     val backgroundBubbleColor = if (message.isMe) {
-        MaterialTheme.colors.primary
+        MaterialTheme.colorScheme.primary
     } else {
-        MaterialTheme.colors.secondary
+        MaterialTheme.colorScheme.secondary
     }
     val shape = if (message.isMe) {
         SendChatBubbleShape
@@ -297,10 +295,16 @@ fun ClickableMessage(
         text = message.content,
         primary = message.isMe
     )
+    val textColor = if (message.isMe) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.onSecondary
+    }
 
     ClickableText(
         text = styledMessage,
         modifier = Modifier.padding(16.dp),
+        style = TextStyle.Default.copy(color = textColor),
         onClick = {
             styledMessage
                 .getStringAnnotations(start = it, end = it)

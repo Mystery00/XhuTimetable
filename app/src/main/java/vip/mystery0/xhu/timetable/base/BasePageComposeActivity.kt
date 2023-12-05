@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.base
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,11 +25,8 @@ import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.flow.Flow
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 
-abstract class BasePageComposeActivity(
-    setSystemUiColor: Boolean = true,
-) : BaseComposeActivity(setSystemUiColor) {
+abstract class BasePageComposeActivity : BaseComposeActivity() {
 
     @Composable
     fun <T : Any> Flow<PagingData<T>>.collectAndHandleState(
@@ -54,6 +50,7 @@ abstract class BasePageComposeActivity(
         pager: LazyPagingItems<T>,
         refreshing: Boolean,
         key: ((index: Int) -> Any)? = null,
+        alwaysShowList: Boolean = false,
         itemContent: @Composable LazyItemScope.(T) -> Unit,
         boxContent: @Composable BoxScope.() -> Unit = {},
     ) = BuildPaging(
@@ -66,6 +63,7 @@ abstract class BasePageComposeActivity(
                 itemContent(item)
             }
         },
+        alwaysShowList = alwaysShowList,
         boxContent = boxContent,
     )
 
@@ -77,6 +75,7 @@ abstract class BasePageComposeActivity(
         pager: LazyPagingItems<T>,
         refreshing: Boolean,
         listContent: LazyListScope.() -> Unit,
+        alwaysShowList: Boolean = false,
         boxContent: @Composable BoxScope.() -> Unit = {},
     ) {
         val append = pager.loadState.append
@@ -93,14 +92,13 @@ abstract class BasePageComposeActivity(
             Box(
                 modifier = Modifier.pullRefresh(pullRefreshState),
             ) {
-                if (!isPageLoading && pager.itemCount == 0) {
+                if (!alwaysShowList && !isPageLoading && pager.itemCount == 0) {
                     BuildNoDataLayout()
                 } else {
                     LazyColumn(
                         state = state,
                         modifier = Modifier
-                            .fillMaxSize()
-                            .background(XhuColor.Common.grayBackground),
+                            .fillMaxSize(),
                         contentPadding = PaddingValues(4.dp),
                     ) {
                         listContent()
