@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,20 +15,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ExtendedFloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,12 +40,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cn.jpush.android.api.JPushInterface
-import com.vanpra.composematerialdialogs.MaterialDialog
-import com.vanpra.composematerialdialogs.MaterialDialogState
-import com.vanpra.composematerialdialogs.listItems
-import com.vanpra.composematerialdialogs.rememberMaterialDialogState
-import com.vanpra.composematerialdialogs.title
+import com.maxkeppeker.sheets.core.models.base.Header
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeler.sheets.list.ListDialog
+import com.maxkeppeler.sheets.list.models.ListOption
+import com.maxkeppeler.sheets.list.models.ListSelection
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
+import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.JobHistory
@@ -57,12 +60,12 @@ class JobHistoryActivity : BaseComposeActivity() {
         JPushInterface.getRegistrationID(this)
     }
 
-    @OptIn(ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
     override fun BuildContent() {
         val historyListState by viewModel.historyListState.collectAsState()
 
-        val addDialogState = rememberMaterialDialogState()
+        val addDialogState = rememberXhuDialogState()
 
         val lazyListState = rememberLazyListState()
 
@@ -74,8 +77,6 @@ class JobHistoryActivity : BaseComposeActivity() {
             topBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
-                    backgroundColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
                     navigationIcon = {
                         IconButton(onClick = {
                             onBack()
@@ -98,7 +99,7 @@ class JobHistoryActivity : BaseComposeActivity() {
                 ) {
                     ExtendedFloatingActionButton(
                         text = {
-                            Text(text = "添加任务", color = XhuColor.Common.whiteText)
+                            Text(text = "添加任务")
                         },
                         onClick = {
                             if (jPushRegistrationId.isNullOrBlank()) {
@@ -111,7 +112,6 @@ class JobHistoryActivity : BaseComposeActivity() {
                             Icon(
                                 imageVector = Icons.Rounded.Add,
                                 contentDescription = null,
-                                tint = XhuColor.Common.whiteText,
                             )
                         })
                 }
@@ -135,8 +135,7 @@ class JobHistoryActivity : BaseComposeActivity() {
                         LazyColumn(
                             state = lazyListState,
                             modifier = Modifier
-                                .fillMaxSize()
-                                .background(XhuColor.Common.grayBackground),
+                                .fillMaxSize(),
                             contentPadding = PaddingValues(4.dp),
                         ) {
                             items(historyList.size) { index ->
@@ -162,21 +161,36 @@ class JobHistoryActivity : BaseComposeActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun ShowAddDialog(
-        dialogState: MaterialDialogState,
+        dialogState: XhuDialogState,
     ) {
-        MaterialDialog(dialogState = dialogState) {
-            title("请选择需要添加的任务类型")
-            listItems(list = listOf("自动查询成绩")) { index, _ ->
-                when (index) {
-                    0 -> {
-                        jPushRegistrationId?.let {
-                            viewModel.addAutoCheckScoreJob(it)
+        if (dialogState.showing) {
+            ListDialog(
+                header = Header.Default(title = "请选择需要添加的任务类型"),
+                state = rememberUseCaseState(
+                    visible = true,
+                    onDismissRequest = {
+                        dialogState.hide()
+                    }),
+                selection = ListSelection.Single(
+                    options = listOf(
+                        ListOption(titleText = "自动查询成绩"),
+                    ),
+                    withButtonView = false,
+                    onSelectOption = { index, _ ->
+                        dialogState.hide()
+                        when (index) {
+                            0 -> {
+                                jPushRegistrationId?.let {
+                                    viewModel.addAutoCheckScoreJob(it)
+                                }
+                            }
                         }
                     }
-                }
-            }
+                ),
+            )
         }
     }
 }
@@ -191,33 +205,35 @@ private fun BuildItem(item: JobHistory, jPushRegistrationId: String?) {
         Card(
             modifier = Modifier
                 .fillMaxWidth(),
-            backgroundColor = XhuColor.cardBackground,
+            colors = CardDefaults.cardColors(
+                containerColor = XhuColor.cardBackground,
+            ),
         ) {
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(
                     text = "任务类型：${item.jobTypeTitle}",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = XhuColor.Common.blackText,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = "通知设备：${if (item.registrationId == jPushRegistrationId) "本机" else "非本机"}",
                     fontSize = 14.sp,
-                    color = XhuColor.Common.blackText,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = "预期执行时间：${item.prepareExecuteTime}",
-                    color = XhuColor.Common.grayText,
+                    color = MaterialTheme.colorScheme.outline,
                     fontSize = 14.sp,
                 )
                 Text(
                     text = "任务执行时间：${item.executeTime}",
-                    color = XhuColor.Common.grayText,
+                    color = MaterialTheme.colorScheme.outline,
                     fontSize = 14.sp,
                 )
                 Text(
                     text = "任务执行信息：${item.message}",
-                    color = XhuColor.Common.grayText,
+                    color = MaterialTheme.colorScheme.outline,
                     fontSize = 14.sp,
                 )
             }

@@ -56,13 +56,13 @@ class ExportCalendarViewModel : ComposeViewModel() {
     ) {
         fun failed(message: String) {
             Log.w(TAG, "export calendar failed, $message")
-            _actionState.value = ActionState(errorMessage = message)
+            _actionState.value = ActionState(errorMessage = message, actionSuccess = false)
         }
         viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
             Log.w(TAG, "export calendar failed", throwable)
             failed(throwable.message ?: throwable.javaClass.simpleName)
         }) {
-            _actionState.value = ActionState(loading = true)
+            _actionState.value = ActionState(loading = true, actionSuccess = false)
             val selectedUser = getSelectedUser(_userSelect.value)
             if (selectedUser == null) {
                 failed("选择用户为空，请重新选择")
@@ -89,7 +89,7 @@ class ExportCalendarViewModel : ComposeViewModel() {
                     CalendarRepo.addEvent(account, event)
                 }
             }
-            _actionState.value = ActionState()
+            _actionState.value = ActionState(actionSuccess = true)
             loadCalendarAccountList()
         }
     }
@@ -98,12 +98,13 @@ class ExportCalendarViewModel : ComposeViewModel() {
         viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
             Log.w(TAG, "delete calendar account failed", throwable)
             _actionState.value = ActionState(
-                errorMessage = throwable.message ?: throwable.javaClass.simpleName
+                errorMessage = throwable.message ?: throwable.javaClass.simpleName,
+                actionSuccess = false,
             )
         }) {
-            _actionState.value = ActionState(loading = true)
+            _actionState.value = ActionState(loading = true, actionSuccess = false)
             CalendarRepo.deleteCalendarAccount(accountId)
-            _actionState.value = ActionState()
+            _actionState.value = ActionState(actionSuccess = true)
             loadCalendarAccountList()
         }
     }
@@ -128,4 +129,5 @@ data class CalendarAccountListState(
 data class ActionState(
     val loading: Boolean = false,
     val errorMessage: String = "",
+    val actionSuccess: Boolean = true,
 )

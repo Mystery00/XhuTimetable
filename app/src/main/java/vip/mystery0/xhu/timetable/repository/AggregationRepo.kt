@@ -27,6 +27,7 @@ object AggregationRepo : BaseDataRepo {
 
         val nowYear = getConfigStore { nowYear }
         val nowTerm = getConfigStore { nowTerm }
+        val customAccountTitle = getConfigStore { customAccountTitle }
         val userList = requestUserList()
 
         val todayViewList = ArrayList<TodayCourseView>()
@@ -58,15 +59,30 @@ object AggregationRepo : BaseDataRepo {
                     }
                     response.courseList.forEach { course ->
                         todayViewList.add(TodayCourseView.valueOf(course, user))
-                        weekViewList.add(WeekCourseView.valueOf(course, user))
+                        weekViewList.add(
+                            WeekCourseView.valueOf(
+                                course,
+                                customAccountTitle.formatWeek(user.info)
+                            )
+                        )
                     }
                     response.experimentCourseList.forEach { experimentCourse ->
                         todayViewList.add(TodayCourseView.valueOf(experimentCourse, user))
-                        weekViewList.add(WeekCourseView.valueOf(experimentCourse, user))
+                        weekViewList.add(
+                            WeekCourseView.valueOf(
+                                experimentCourse,
+                                customAccountTitle.formatWeek(user.info)
+                            )
+                        )
                     }
                     response.customCourseList.forEach { customCourse ->
                         todayViewList.add(TodayCourseView.valueOf(customCourse, user))
-                        weekViewList.add(WeekCourseView.valueOf(customCourse, user))
+                        weekViewList.add(
+                            WeekCourseView.valueOf(
+                                customCourse,
+                                customAccountTitle.formatWeek(user.info)
+                            )
+                        )
                     }
                     response.customThingList.forEach { customThing ->
                         todayThingList.add(TodayThingView.valueOf(customThing, user))
@@ -93,15 +109,30 @@ object AggregationRepo : BaseDataRepo {
                 )
                 response.courseList.forEach { course ->
                     todayViewList.add(TodayCourseView.valueOf(course, user))
-                    weekViewList.add(WeekCourseView.valueOf(course, user))
+                    weekViewList.add(
+                        WeekCourseView.valueOf(
+                            course,
+                            customAccountTitle.formatWeek(user.info)
+                        )
+                    )
                 }
                 response.experimentCourseList.forEach { experimentCourse ->
                     todayViewList.add(TodayCourseView.valueOf(experimentCourse, user))
-                    weekViewList.add(WeekCourseView.valueOf(experimentCourse, user))
+                    weekViewList.add(
+                        WeekCourseView.valueOf(
+                            experimentCourse,
+                            customAccountTitle.formatWeek(user.info)
+                        )
+                    )
                 }
                 response.customCourseList.forEach { customCourse ->
                     todayViewList.add(TodayCourseView.valueOf(customCourse, user))
-                    weekViewList.add(WeekCourseView.valueOf(customCourse, user))
+                    weekViewList.add(
+                        WeekCourseView.valueOf(
+                            customCourse,
+                            customAccountTitle.formatWeek(user.info)
+                        )
+                    )
                 }
                 response.customThingList.forEach { customThing ->
                     todayThingList.add(TodayThingView.valueOf(customThing, user))

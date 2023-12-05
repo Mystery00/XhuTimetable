@@ -1,5 +1,7 @@
 package vip.mystery0.xhu.timetable.model.entity
 
+import android.os.Build
+
 enum class NightMode(
     val value: Int,
     val title: String
@@ -12,10 +14,10 @@ enum class NightMode(
 
     companion object {
         fun selectList(): List<NightMode> {
-            val list = NightMode.values().sortedBy { it.value }.toMutableList()
-//    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            list.remove(MATERIAL_YOU)
-//    }
+            val list = entries.sortedBy { it.value }.toMutableList()
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                list.remove(MATERIAL_YOU)
+            }
             return list
         }
     }
@@ -28,6 +30,7 @@ enum class VersionChannel(
     STABLE(1, "稳定版"),
     BETA(2, "测试版"),
     ;
+
     fun isBeta() = this == BETA
 
     companion object {

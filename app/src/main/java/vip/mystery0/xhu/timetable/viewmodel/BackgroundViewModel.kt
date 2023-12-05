@@ -170,7 +170,7 @@ class BackgroundViewModel : ComposeViewModel() {
                     _progressState.value =
                         DownloadProgressState(
                             FileDownloadProgressState(),
-                            text = "正在获取下载地址"
+                            text = "正在获取下载地址..."
                         )
                     val url = selected.imageUrl
                     val file = withContext(Dispatchers.Default) {
@@ -245,6 +245,6 @@ data class Background(
 
 data class DownloadProgressState(
     val progress: FileDownloadProgressState,
-    val text: String = "",
+    val text: String = "正在下载...",
     val finished: Boolean = false,
 )

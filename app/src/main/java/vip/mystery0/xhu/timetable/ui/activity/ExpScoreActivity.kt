@@ -14,29 +14,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,6 +40,8 @@ import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.model.response.ExperimentScoreItemResponse
+import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
+import vip.mystery0.xhu.timetable.ui.theme.ExtendedTheme
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.ExpScoreViewModel
@@ -52,23 +50,23 @@ import vip.mystery0.xhu.timetable.viewmodel.ExpScoreViewModel
 class ExpScoreActivity : BaseSelectComposeActivity() {
     private val viewModel: ExpScoreViewModel by viewModels()
 
-    @OptIn(ExperimentalFoundationApi::class)
+    @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
         val expScoreListState by viewModel.expScoreListState.collectAsState()
-        val userSelectStatus = viewModel.userSelect.collectAsState()
-        val yearSelectStatus = viewModel.yearSelect.collectAsState()
-        val termSelectStatus = viewModel.termSelect.collectAsState()
+        val userSelect by viewModel.userSelect.collectAsState()
+        val yearSelect by viewModel.yearSelect.collectAsState()
+        val termSelect by viewModel.termSelect.collectAsState()
 
-        val showSelect = rememberModalBottomSheetState(ModalBottomSheetValue.Expanded)
+        val showSelect = rememberXhuDialogState(initialValue = true)
         val scope = rememberCoroutineScope()
 
-        val userDialog = remember { mutableStateOf(false) }
-        val yearDialog = remember { mutableStateOf(false) }
-        val termDialog = remember { mutableStateOf(false) }
+        val userDialog = rememberXhuDialogState()
+        val yearDialog = rememberXhuDialogState()
+        val termDialog = rememberXhuDialogState()
 
         fun onBack() {
-            if (showSelect.isVisible) {
+            if (showSelect.showing) {
                 scope.launch {
                     showSelect.hide()
                 }
@@ -81,8 +79,6 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
             topBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
-                    backgroundColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
                     navigationIcon = {
                         IconButton(onClick = {
                             onBack()
@@ -95,13 +91,7 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
                     },
                     actions = {
                         IconButton(onClick = {
-                            scope.launch {
-                                if (showSelect.isVisible) {
-                                    showSelect.hide()
-                                } else {
-                                    showSelect.show()
-                                }
-                            }
+                            showSelect.toggle()
                         }) {
                             Icon(
                                 painter = XhuIcons.Action.more,
@@ -114,82 +104,75 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
             },
         ) { paddingValues ->
             Box {
-                ModalBottomSheetLayout(
-                    sheetState = showSelect,
-                    scrimColor = Color.Black.copy(alpha = 0.32f),
-                    sheetContent = {
-                        BuildSelectSheetLayout(
-                            bottomSheetState = showSelect,
-                            selectUserState = userSelectStatus,
-                            selectYearState = yearSelectStatus,
-                            selectTermState = termSelectStatus,
-                            showUserDialog = userDialog,
-                            showYearDialog = yearDialog,
-                            showTermDialog = termDialog,
-                        ) {
-                            viewModel.loadExpScoreList()
-                        }
-                    }
+                Box(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize(),
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .padding(paddingValues)
-                            .fillMaxSize(),
-                    ) {
-                        val pullRefreshState = rememberPullRefreshState(
-                            refreshing = expScoreListState.loading,
-                            onRefresh = {
-                                viewModel.loadExpScoreList()
-                            },
-                        )
+                    val pullRefreshState = rememberPullRefreshState(
+                        refreshing = expScoreListState.loading,
+                        onRefresh = {
+                            viewModel.loadExpScoreList()
+                        },
+                    )
 
-                        Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
-                            val scoreList = expScoreListState.scoreList
-                            if (expScoreListState.loading || scoreList.isNotEmpty()) {
-                                LazyColumn(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(XhuColor.Common.grayBackground),
-                                    contentPadding = PaddingValues(4.dp),
-                                ) {
-                                    scoreList.forEach {
-                                        stickyHeader {
-                                            Row(
-                                                modifier = Modifier
-                                                    .background(XhuColor.Common.whiteBackground)
-                                                    .padding(12.dp),
-                                            ) {
-                                                Text(text = it.courseName)
-                                                Spacer(modifier = Modifier.weight(1f))
-                                                Text(text = "${it.totalScore}分")
-                                            }
-                                        }
-                                        items(it.itemList.size) { index ->
-                                            val item = it.itemList[index]
-                                            BuildItem(item)
+                    Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+                        val scoreList = expScoreListState.scoreList
+                        if (expScoreListState.loading || scoreList.isNotEmpty()) {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxSize(),
+                                contentPadding = PaddingValues(4.dp),
+                            ) {
+                                scoreList.forEach {
+                                    stickyHeader {
+                                        Row(
+                                            modifier = Modifier
+                                                .background(ExtendedTheme.colorScheme.surfaceContainer)
+                                                .padding(12.dp),
+                                        ) {
+                                            Text(text = it.courseName)
+                                            Spacer(modifier = Modifier.weight(1f))
+                                            Text(text = "${it.totalScore}分")
                                         }
                                     }
+                                    items(it.itemList.size) { index ->
+                                        val item = it.itemList[index]
+                                        BuildItem(item)
+                                    }
                                 }
-                                PullRefreshIndicator(
-                                    refreshing = expScoreListState.loading,
-                                    state = pullRefreshState,
-                                    Modifier.align(Alignment.TopCenter),
-                                )
-                            } else {
-                                BuildNoDataLayout()
                             }
+                            PullRefreshIndicator(
+                                refreshing = expScoreListState.loading,
+                                state = pullRefreshState,
+                                Modifier.align(Alignment.TopCenter),
+                            )
+                        } else {
+                            BuildNoDataLayout()
                         }
                     }
                 }
+
+                BuildSelectSheetLayout(
+                    showBottomSheet = showSelect,
+                    userSelect = userSelect,
+                    yearSelect = yearSelect,
+                    termSelect = termSelect,
+                    showUserDialog = userDialog,
+                    showYearDialog = yearDialog,
+                    showTermDialog = termDialog,
+                ) {
+                    viewModel.loadExpScoreList()
+                }
             }
         }
-        ShowUserDialog(selectState = userSelectStatus, show = userDialog, onSelect = {
+        ShowUserDialog(selectList = userSelect, show = userDialog, onSelect = {
             viewModel.selectUser(it.studentId)
         })
-        ShowYearDialog(selectState = yearSelectStatus, show = yearDialog, onSelect = {
+        ShowYearDialog(selectList = yearSelect, show = yearDialog, onSelect = {
             viewModel.selectYear(it.value)
         })
-        ShowTermDialog(selectState = termSelectStatus, show = termDialog, onSelect = {
+        ShowTermDialog(selectList = termSelect, show = termDialog, onSelect = {
             viewModel.selectTerm(it.value)
         })
 
@@ -197,7 +180,7 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
             expScoreListState.errorMessage.toast(true)
         }
         BackHandler(
-            enabled = showSelect.isVisible,
+            enabled = showSelect.showing,
             onBack = {
                 onBack()
             }
@@ -216,7 +199,9 @@ private fun BuildItem(item: ExperimentScoreItemResponse) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp),
-        backgroundColor = XhuColor.cardBackground,
+        colors = CardDefaults.cardColors(
+            containerColor = XhuColor.cardBackground,
+        ),
     ) {
         Column(
             modifier = Modifier.padding(8.dp)
@@ -227,29 +212,29 @@ private fun BuildItem(item: ExperimentScoreItemResponse) {
                         text = item.experimentProjectName,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
-                        color = XhuColor.Common.blackText,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
                         text = item.mustTest,
-                        color = XhuColor.Common.grayText,
+                        color = MaterialTheme.colorScheme.outline,
                         fontSize = 14.sp,
                     )
                     Text(
                         text = "实验学分：${item.credit}",
-                        color = XhuColor.Common.grayText,
+                        color = MaterialTheme.colorScheme.outline,
                         fontSize = 14.sp,
                     )
                     if (item.scoreDescription.isNotBlank()) {
                         Text(
                             text = "成绩说明：${item.scoreDescription}",
-                            color = XhuColor.Common.grayText,
+                            color = MaterialTheme.colorScheme.outline,
                             fontSize = 14.sp,
                         )
                     }
                 }
                 Text(
                     text = "${item.score}",
-                    color = XhuColor.Common.blackText,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 16.sp,
                 )
             }

@@ -10,21 +10,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ExtendedFloatingActionButton
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,29 +36,23 @@ import androidx.core.content.FileProvider
 import coil.compose.SubcomposeAsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import com.vanpra.composematerialdialogs.MaterialDialog
-import com.vanpra.composematerialdialogs.MaterialDialogState
-import com.vanpra.composematerialdialogs.listItems
-import com.vanpra.composematerialdialogs.rememberMaterialDialogState
-import com.vanpra.composematerialdialogs.title
-import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.trackEvent
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
+import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
-import vip.mystery0.xhu.timetable.viewmodel.SchoolCalendarData
 import vip.mystery0.xhu.timetable.viewmodel.SchoolCalendarViewModel
 
-class SchoolCalendarActivity : BaseComposeActivity() {
+class SchoolCalendarActivity : BaseSelectComposeActivity() {
     private val viewModel: SchoolCalendarViewModel by viewModels()
 
-    @OptIn(ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
     override fun BuildContent() {
         val loading by viewModel.loading.collectAsState()
         val area by viewModel.area.collectAsState()
         val schoolCalendarData by viewModel.schoolCalendarData.collectAsState()
 
-        val selectDialogState = rememberMaterialDialogState()
+        val selectDialogState = rememberXhuDialogState()
         val selectedArea = remember { mutableStateOf(schoolCalendarData.area) }
 
         LaunchedEffect(schoolCalendarData) {
@@ -79,8 +72,6 @@ class SchoolCalendarActivity : BaseComposeActivity() {
             topBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
-                    backgroundColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
                     navigationIcon = {
                         IconButton(onClick = {
                             onBack()
@@ -120,13 +111,12 @@ class SchoolCalendarActivity : BaseComposeActivity() {
                         Icon(
                             painter = XhuIcons.Action.send,
                             contentDescription = null,
-                            tint = XhuColor.Common.whiteText,
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     ExtendedFloatingActionButton(
                         text = {
-                            Text(text = "切换校区", color = XhuColor.Common.whiteText)
+                            Text(text = "切换校区")
                         },
                         onClick = {
                             if (!selectDialogState.showing) {
@@ -137,7 +127,6 @@ class SchoolCalendarActivity : BaseComposeActivity() {
                             Icon(
                                 painter = XhuIcons.Action.switch,
                                 contentDescription = null,
-                                tint = XhuColor.Common.whiteText,
                             )
                         })
                 }
@@ -173,23 +162,19 @@ class SchoolCalendarActivity : BaseComposeActivity() {
                 }
             }
         }
-        ShowSelectDialog(dialogState = selectDialogState, area = area, selectedArea = selectedArea)
+        ShowSelectDialog(
+            dialogTitle = "请选择需要查看校历的校区",
+            options = area,
+            selectIndex = -1,
+            itemTransform = { it.area },
+            state = selectDialogState,
+            onSelect = { _, select ->
+                selectedArea.value = select.area
+            },
+            withButtonView = false,
+        )
         if (loading.errorMessage.isNotBlank()) {
             loading.errorMessage.toast(true)
-        }
-    }
-
-    @Composable
-    private fun ShowSelectDialog(
-        dialogState: MaterialDialogState,
-        area: List<SchoolCalendarData>,
-        selectedArea: MutableState<String>,
-    ) {
-        MaterialDialog(dialogState = dialogState) {
-            title("请选择需要查看校历的校区")
-            listItems(list = area.map { it.area }) { index, _ ->
-                selectedArea.value = area[index].area
-            }
         }
     }
 }

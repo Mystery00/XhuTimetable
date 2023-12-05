@@ -1,42 +1,45 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.viewModels
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import com.vanpra.composematerialdialogs.MaterialDialog
-import com.vanpra.composematerialdialogs.MaterialDialogState
-import com.vanpra.composematerialdialogs.datetime.date.datepicker
-import com.vanpra.composematerialdialogs.datetime.time.timepicker
-import com.vanpra.composematerialdialogs.listItemsSingleChoice
-import com.vanpra.composematerialdialogs.rememberMaterialDialogState
-import com.vanpra.composematerialdialogs.title
+import com.maxkeppeker.sheets.core.models.base.Header
+import com.maxkeppeker.sheets.core.models.base.SelectionButton
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeler.sheets.calendar.CalendarDialog
+import com.maxkeppeler.sheets.calendar.models.CalendarConfig
+import com.maxkeppeler.sheets.calendar.models.CalendarSelection
+import com.maxkeppeler.sheets.calendar.models.CalendarStyle
+import com.maxkeppeler.sheets.date_time.DateTimeDialog
+import com.maxkeppeler.sheets.date_time.models.DateTimeSelection
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.config.Customisable
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.model.event.EventType
+import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
+import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.XhuActionSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsMenuLink
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.dateFormatter
 import vip.mystery0.xhu.timetable.utils.timeFormatter
@@ -44,9 +47,10 @@ import vip.mystery0.xhu.timetable.viewmodel.ClassSettingsViewModel
 import java.time.LocalDate
 import java.time.LocalTime
 
-class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
+class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
     private val viewModel: ClassSettingsViewModel by viewModels()
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
         val scope = rememberCoroutineScope()
@@ -56,15 +60,13 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
         val currentTermStartTime by viewModel.currentTermStartTime.collectAsState()
         val showCustomCourse by viewModel.showCustomCourseData.collectAsState()
         val showCustomThing by viewModel.showCustomThingData.collectAsState()
-        val showTomorrowCourseTimeState = rememberMaterialDialogState()
-        val yearAndTermState = rememberMaterialDialogState()
-        val termStartTimeState = rememberMaterialDialogState()
+        val showTomorrowCourseTimeState = rememberXhuDialogState()
+        val yearAndTermState = rememberXhuDialogState()
+        val termStartTimeState = rememberXhuDialogState()
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
-                    backgroundColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary,
                     navigationIcon = {
                         IconButton(onClick = {
                             finish()
@@ -82,7 +84,6 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .background(XhuColor.Common.grayBackground)
                     .verticalScroll(rememberScrollState()),
             ) {
                 XhuSettingsGroup(title = {
@@ -95,7 +96,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.showNotThisWeek,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "显示非本周课程") }
@@ -109,7 +110,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.showCourseStatus,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "显示今日课程状态") }
@@ -144,7 +145,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.customYearTerm,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "更改当前学期") },
@@ -170,7 +171,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.customStartTime,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "更改开学时间") },
@@ -198,7 +199,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.customCourseColor,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "自定义课程颜色") },
@@ -215,7 +216,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.schoolCalendar,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "查看校历") },
@@ -228,7 +229,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.exportCalendar,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "导出到日历") },
@@ -241,7 +242,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.customCourse,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "自定义课程") },
@@ -267,7 +268,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.customThing,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "自定义事项") },
@@ -295,7 +296,7 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
                             Icon(
                                 painter = XhuIcons.holiday,
                                 contentDescription = null,
-                                tint = XhuColor.Common.blackText,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         title = { Text(text = "显示节假日信息") }
@@ -328,90 +329,94 @@ class ClassSettingsActivity : BaseComposeActivity(), KoinComponent {
 
     @Composable
     private fun BuildTimeSelector(
-        dialogState: MaterialDialogState,
+        dialogState: XhuDialogState,
         initTime: LocalTime,
     ) {
-        var selectedTime = initTime
-        MaterialDialog(
-            dialogState = dialogState,
-            buttons = {
-                positiveButton("确定") {
-                    viewModel.updateShowTomorrowCourseTime(selectedTime)
-                }
-                negativeButton("取消")
-            }) {
-            timepicker(
-                title = "请选择时间",
-                initialTime = selectedTime,
-                is24HourClock = true,
-            ) {
-                selectedTime = it
-            }
+        if (dialogState.showing) {
+            DateTimeDialog(
+                header = Header.Default(
+                    title = "请选择时间",
+                ),
+                state = rememberUseCaseState(
+                    visible = true,
+                    onCloseRequest = {
+                        dialogState.hide()
+                    }),
+                selection = DateTimeSelection.Time(
+                    selectedTime = initTime,
+                ) { newTime ->
+                    viewModel.updateShowTomorrowCourseTime(newTime)
+                },
+            )
         }
     }
 
     @Composable
     private fun BuildYearAndTermSelector(
-        dialogState: MaterialDialogState,
+        dialogState: XhuDialogState,
         selectList: List<String>,
         currentYear: Customisable<Int>,
         currentTerm: Customisable<Int>,
     ) {
         val currentString =
             "${currentYear.data}-${currentYear.data + 1}学年 第${currentTerm.data}学期"
-        var selectedIndex =
+        val selectedIndex =
             if (currentYear.custom || currentTerm.custom)
                 selectList.indexOf(currentString)
             else
                 0
-        MaterialDialog(
-            dialogState = dialogState,
-            buttons = {
-                positiveButton("确定") {
-                    if (selectedIndex == 0) {
-                        viewModel.updateCurrentYearTerm(custom = false)
-                    } else {
-                        val select = selectList[selectedIndex]
-                        val year = select.substring(0, 4)
-                        val term = select.substring(13, 14)
-                        viewModel.updateCurrentYearTerm(custom = true, year.toInt(), term.toInt())
-                    }
+
+        ShowSelectDialog(
+            dialogTitle = "更改当前学期",
+            options = selectList,
+            selectIndex = selectedIndex,
+            state = dialogState,
+            onSelect = { index, _ ->
+                if (index == 0) {
+                    viewModel.updateCurrentYearTerm(custom = false)
+                } else {
+                    val select = selectList[index]
+                    val year = select.substring(0, 4)
+                    val term = select.substring(13, 14)
+                    viewModel.updateCurrentYearTerm(custom = true, year.toInt(), term.toInt())
                 }
-                negativeButton("取消")
-            }) {
-            title("更改当前学期")
-            listItemsSingleChoice(
-                list = selectList,
-                initialSelection = selectedIndex,
-            ) {
-                selectedIndex = it
             }
-        }
+        )
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun BuildTermStartTimeSelector(
-        dialogState: MaterialDialogState,
+        dialogState: XhuDialogState,
         initDate: LocalDate,
     ) {
-        var selectedDate = initDate
-        MaterialDialog(
-            dialogState = dialogState,
-            buttons = {
-                positiveButton("确定") {
-                    viewModel.updateTermStartTime(true, selectedDate)
-                }
-                negativeButton("自动获取") {
-                    viewModel.updateTermStartTime(false, LocalDate.MIN)
-                }
-            }) {
-            datepicker(
-                title = "更改开学时间",
-                initialDate = initDate,
-                yearRange = 2015..LocalDate.now().year
-            ) {
-                selectedDate = it
-            }
+        if (dialogState.showing) {
+            CalendarDialog(
+                header = Header.Default(
+                    title = "更改开学时间",
+                ),
+                state = rememberUseCaseState(
+                    visible = true,
+                    onCloseRequest = {
+                        dialogState.hide()
+                    }),
+                selection = CalendarSelection.Date(
+                    selectedDate = initDate,
+                    extraButton = SelectionButton(text = "自动获取"),
+                    onExtraButtonClick = {
+                        viewModel.updateTermStartTime(false, LocalDate.MIN)
+                        dialogState.hide()
+                    }
+                ) {
+                    viewModel.updateTermStartTime(true, it)
+                },
+                config = CalendarConfig(
+                    yearSelection = true,
+                    monthSelection = true,
+                    style = CalendarStyle.MONTH,
+                    boundary = LocalDate.of(2015, 1, 1)..LocalDate.now().plusYears(1),
+                )
+            )
         }
     }
 }

@@ -384,7 +384,7 @@ object AggregationLocalRepo : KoinComponent {
                 location = it.location,
                 teacher = it.teacher,
                 extraData = it.extraData,
-                user = User("3120150905411", "", "", userInfo, null)
+                accountTitle = "",
             ).apply {
                 thisWeek = Random.nextBoolean()
                 backgroundColor =

@@ -2,7 +2,6 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
@@ -14,14 +13,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,13 +45,13 @@ import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.store.UserStore
-import vip.mystery0.xhu.timetable.model.LottieLoadingType
+import vip.mystery0.xhu.timetable.ui.component.observerXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.utils.finishAllActivity
 import vip.mystery0.xhu.timetable.viewmodel.LoginViewModel
 
-class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
+class LoginActivity : BaseComposeActivity() {
     private val viewModel: LoginViewModel by viewModels()
 
     @OptIn(ExperimentalComposeUiApi::class)
@@ -67,7 +66,6 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(XhuColor.Common.whiteBackground)
         ) {
             Image(
                 modifier = Modifier.fillMaxWidth(),
@@ -117,11 +115,12 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                     label = {
                         Text(text = "学号")
                     },
-                    colors = TextFieldDefaults.textFieldColors(
-                        textColor = MaterialTheme.colors.secondary,
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.colorScheme.secondary,
+                        unfocusedTextColor = MaterialTheme.colorScheme.secondary,
                         unfocusedLabelColor = XhuColor.loginLabel,
-                        backgroundColor = Color.Transparent,
-                        leadingIconColor = MaterialTheme.colors.secondary,
+//                        backgroundColor = Color.Transparent,
+//                        leadingIconColor = MaterialTheme.colors.secondary,
                     ),
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Next,
@@ -164,11 +163,11 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                     label = {
                         Text(text = "密码")
                     },
-                    colors = TextFieldDefaults.textFieldColors(
-                        textColor = MaterialTheme.colors.secondary,
+                    colors = TextFieldDefaults.colors(
+//                        textColor = MaterialTheme.colors.secondary,
                         unfocusedLabelColor = XhuColor.loginLabel,
-                        backgroundColor = Color.Transparent,
-                        leadingIconColor = MaterialTheme.colors.secondary,
+//                        backgroundColor = Color.Transparent,
+//                        leadingIconColor = MaterialTheme.colors.secondary,
                     ),
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(
@@ -208,7 +207,7 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
                     modifier = Modifier
                         .fillMaxWidth(),
                     colors = ButtonDefaults.textButtonColors(
-                        backgroundColor = MaterialTheme.colors.secondary,
+                        containerColor = MaterialTheme.colorScheme.secondary,
                         contentColor = Color.White,
                     ),
                     shape = RoundedCornerShape(36.dp),
@@ -261,9 +260,8 @@ class LoginActivity : BaseComposeActivity(setSystemUiColor = false) {
     private fun DialogContent() {
         val loginState by viewModel.loginState.collectAsState()
         ShowProgressDialog(
-            show = loginState.loading,
-            text = "登录中...",
-            type = LottieLoadingType.LOADING,
+            showState = observerXhuDialogState(loginState.loading),
+            text = "登录中..."
         )
         if (loginState.success) {
             "登录成功，欢迎使用${appName}！".toast()

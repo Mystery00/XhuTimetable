@@ -33,7 +33,7 @@ abstract class ComposeViewModel : ViewModel(), KoinComponent {
         }
         return (minYear..maxYear).map {
             YearSelect(it, "${it}-${it + 1}学年", it == nowYear)
-        }
+        }.reversed()
     }
 
     protected suspend fun initTermSelect(): List<TermSelect> {

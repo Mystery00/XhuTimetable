@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -86,7 +86,7 @@ class SplashImageActivity : BaseComposeActivity() {
             val showSplashFile by viewModel.showSplashFile.collectAsState()
             Box(
                 modifier = Modifier
-                    .background(showSplashBackgroundColor ?: MaterialTheme.colors.background)
+                    .background(showSplashBackgroundColor ?: MaterialTheme.colorScheme.background)
                     .fillMaxSize()
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },

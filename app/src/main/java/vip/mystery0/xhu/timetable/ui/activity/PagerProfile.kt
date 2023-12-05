@@ -1,7 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -19,11 +18,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,23 +44,22 @@ import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.model.Gender
 import vip.mystery0.xhu.timetable.model.event.MenuItem
 import vip.mystery0.xhu.timetable.trackEvent
+import vip.mystery0.xhu.timetable.ui.theme.ExtendedTheme
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
 import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
 
-val profileCourseTitle: TabTitle = @Composable {
-    Text(text = "我的", modifier = Modifier.align(Alignment.Center))
+val profileCourseTitleBar: TabTitle = @Composable {
+    Text(text = "我的")
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 val profileCourseContent: TabContent = @Composable { ext ->
     val activity = ext.activity
     val viewModel = ext.viewModel
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState()),
     ) {
         val coroutineScope = rememberCoroutineScope()
@@ -112,10 +110,14 @@ val profileCourseContent: TabContent = @Composable { ext ->
                         Text(
                             text,
                             fontSize = 17.sp,
-                            color = MaterialTheme.colors.onBackground,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Bold,
                         )
-                        Text(mainUser?.info?.className ?: "", fontSize = 14.sp, color = Color.Gray)
+                        Text(
+                            mainUser?.info?.className ?: "",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.outline
+                        )
                     }
                     val rotationAngle by animateFloatAsState(
                         targetValue = if (profileExpanded) 90F else 0F,
@@ -128,7 +130,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
                             .padding(horizontal = 12.dp)
                             .size(12.dp)
                             .rotate(rotationAngle),
-                        tint = more,
+                        tint = ExtendedTheme.colorScheme.surfaceContainer,
                     )
                 }
                 if (targetExpanded) {
@@ -142,7 +144,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
                                 if (userInfo.majorDirection.isNotBlank()) appendLine("专业方向：${userInfo.majorDirection}")
                             },
                             fontSize = 14.sp,
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.outline,
                             modifier = Modifier.padding(horizontal = 48.dp),
                         )
                     }
@@ -153,7 +155,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp)
-                .background(divider),
+                .background(ExtendedTheme.colorScheme.surfaceContainer),
         )
 
         val menuList by viewModel.menu.collectAsState()
@@ -183,8 +185,8 @@ val profileCourseContent: TabContent = @Composable { ext ->
                     Divider(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(0.33.dp)
-                            .background(dividerSmall),
+                            .height(1.dp)
+                            .background(ExtendedTheme.colorScheme.surfaceContainer),
                     )
                 }
             }
@@ -192,21 +194,11 @@ val profileCourseContent: TabContent = @Composable { ext ->
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(6.dp)
-                    .background(divider),
+                    .background(ExtendedTheme.colorScheme.surfaceContainer),
             )
         }
     }
 }
-
-private val divider: Color
-    @Composable
-    get() = XhuColor.Profile.divider
-private val dividerSmall: Color
-    @Composable
-    get() = XhuColor.Profile.dividerSmall
-private val more: Color
-    @Composable
-    get() = XhuColor.Profile.more
 
 @Composable
 private fun BuildProfileItem(
@@ -230,7 +222,7 @@ private fun BuildProfileItem(
         )
         Text(
             text = title,
-            color = MaterialTheme.colors.onBackground,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 14.sp,
             modifier = Modifier
                 .weight(1F)
@@ -249,7 +241,7 @@ private fun BuildProfileItem(
             modifier = Modifier
                 .padding(end = 12.dp, start = if (showBadge) 10.dp else 12.dp)
                 .size(12.dp),
-            tint = more,
+            tint = ExtendedTheme.colorScheme.surfaceContainer,
         )
     }
 }
