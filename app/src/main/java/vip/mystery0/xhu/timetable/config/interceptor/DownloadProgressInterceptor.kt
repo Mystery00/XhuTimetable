@@ -14,7 +14,7 @@ class DownloadProgressInterceptor : Interceptor {
     companion object {
         fun buildTag(
             patch: Boolean,
-        ): Tag = Tag(true, patch)
+        ): Tag = Tag(showProgress = true, patch = patch)
 
         fun emptyTag(): Tag = Tag(showProgress = false, patch = false)
     }
@@ -38,7 +38,7 @@ class DownloadProgressInterceptor : Interceptor {
 }
 
 class DownloadProgressResponseBody(
-    private val responseBody: ResponseBody,
+    responseBody: ResponseBody,
     private val patch: Boolean,
 ) : FileDownloadProgressResponseBody(responseBody, { progress ->
     val state = DownloadUpdateState(
@@ -47,7 +47,7 @@ class DownloadProgressResponseBody(
         totalSize = progress.total,
         patch = patch,
         progress = progress.progress.toInt(),
-        status = "${progress}%",
+        status = "${progress.progress.toInt()}%",
     )
     updateProgress(state)
 })
