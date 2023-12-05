@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -115,20 +116,26 @@ fun CheckUpdate(
     }
     var dialogState by remember { mutableStateOf(true) }
     val downloadProgress by downloadStateFlow.collectAsState()
-    val onCloseListener = {
-        onClose()
-        when {
-            GlobalConfigStore.debugMode && GlobalCacheStore.alwaysShowNewVersion -> {
-                dialogState = false
-            }
+    val onCloseListener = { skip: Boolean ->
+        if (skip) {
+            when {
+                GlobalConfigStore.debugMode && GlobalCacheStore.alwaysShowNewVersion -> {
+                    dialogState = false
+                    onClose()
+                }
 
-            !version.forceUpdate -> {
-                dialogState = false
+                !version.forceUpdate -> {
+                    dialogState = false
+                    onClose()
+                }
             }
         }
     }
     if (!dialogState) return
-    AlertDialog(onDismissRequest = onCloseListener,
+    AlertDialog(
+        onDismissRequest = {
+            onCloseListener(true)
+        },
         title = {
             Text(
                 text = "检测到新版本 ${version.versionName}",
@@ -159,14 +166,14 @@ fun CheckUpdate(
             if (version.showPatch) {
                 TextButton(onClick = {
                     onDownload(false)
-                    onCloseListener()
+                    onCloseListener(false)
                 }) {
                     Text(text = "下载增量包(${version.patchSize.formatFileSize()})")
                 }
             }
             TextButton(onClick = {
                 onDownload(true)
-                onCloseListener()
+                onCloseListener(false)
             }) {
                 Text(text = "下载APK(${version.apkSize.formatFileSize()})")
             }
@@ -180,7 +187,7 @@ fun CheckUpdate(
             } else {
                 TextButton(onClick = {
                     onIgnore()
-                    onCloseListener()
+                    onCloseListener(true)
                 }) {
                     Text(text = "忽略")
                 }

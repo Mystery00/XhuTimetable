@@ -41,10 +41,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.maxkeppeker.sheets.core.models.base.Header
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeler.sheets.input.InputDialog
+import com.maxkeppeler.sheets.input.models.InputCustomView
+import com.maxkeppeler.sheets.input.models.InputHeader
+import com.maxkeppeler.sheets.input.models.InputSelection
+import com.maxkeppeler.sheets.input.models.InputText
+import com.maxkeppeler.sheets.input.models.InputTextField
+import com.maxkeppeler.sheets.input.models.ValidationResult
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.model.TitleTemplate
 import vip.mystery0.xhu.timetable.model.format
+import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
+import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsMenuLink
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
@@ -107,8 +118,8 @@ class CustomUiActivity : BaseComposeActivity() {
 
             val customUi by viewModel.customUi.collectAsState()
 
-            val showCustomTitleTemplateDialog = remember { mutableStateOf(false) }
-            val showCustomNotTitleTemplateDialog = remember { mutableStateOf(false) }
+            val showCustomTitleTemplateDialog = rememberXhuDialogState()
+            val showCustomNotTitleTemplateDialog = rememberXhuDialogState()
             Column(modifier = Modifier.padding(paddingValues)) {
                 Row(
                     modifier = Modifier
@@ -248,7 +259,7 @@ class CustomUiActivity : BaseComposeActivity() {
                                 Text(text = "本周课程的文本格式")
                             },
                             onClick = {
-                                showCustomTitleTemplateDialog.value = true
+                                showCustomTitleTemplateDialog.show()
                             }
                         )
                         XhuSettingsMenuLink(
@@ -257,7 +268,7 @@ class CustomUiActivity : BaseComposeActivity() {
                                 Text(text = "非本周课程的文本格式")
                             },
                             onClick = {
-                                showCustomNotTitleTemplateDialog.value = true
+                                showCustomNotTitleTemplateDialog.show()
                             }
                         )
                         XhuSettingsMenuLink(
@@ -285,24 +296,19 @@ class CustomUiActivity : BaseComposeActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun BuildTitleTemplateDialog(
         value: String,
-        show: MutableState<Boolean>,
+        show: XhuDialogState,
         listener: (String) -> Unit,
     ) {
-        if (!show.value) {
+        val valueState = remember { mutableStateOf(value) }
+        if (!show.showing) {
             return
         }
-        val valueState = remember { mutableStateOf(value) }
-        AlertDialog(
-            onDismissRequest = {
-                show.value = false
-            },
-            title = {
-                Text(text = "请输入模板内容")
-            },
-            text = {
+        val inputOptions = listOf(
+            InputCustomView(view = {
                 Column(modifier = Modifier.padding(4.dp)) {
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
@@ -310,7 +316,7 @@ class CustomUiActivity : BaseComposeActivity() {
                         onValueChange = {
                             valueState.value = it
                         })
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Row {
                         Text(text = "课程名称",
                             color = MaterialTheme.colorScheme.primary,
@@ -335,26 +341,20 @@ class CustomUiActivity : BaseComposeActivity() {
                                 })
                     }
                 }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        listener(valueState.value)
-                        show.value = false
-                    },
-                ) {
-                    Text("确认")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        show.value = false
-                    }
-                ) {
-                    Text("取消")
-                }
-            }
+            }),
+        )
+        InputDialog(
+            header = Header.Default(title = "请输入模板内容"),
+            state = rememberUseCaseState(
+                visible = true,
+                onCloseRequest = { show.hide() },
+            ),
+            selection = InputSelection(
+                input = inputOptions,
+                onPositiveClick = {
+                    listener(valueState.value)
+                },
+            )
         )
     }
 }

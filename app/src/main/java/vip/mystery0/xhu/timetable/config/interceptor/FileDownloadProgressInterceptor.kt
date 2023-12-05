@@ -15,20 +15,12 @@ class FileDownloadProgressInterceptor(
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
-
-        val tag = request.tag(Tag::class.java) ?: return chain.proceed(request)
-        if (!tag.showProgress) return chain.proceed(request)
         val originalResponse = chain.proceed(request)
 
         return originalResponse.newBuilder()
             .body(FileDownloadProgressResponseBody(originalResponse.body!!, progressUpdater))
             .build()
     }
-
-    data class Tag(
-        val showProgress: Boolean,
-        val patch: Boolean,
-    )
 }
 
 open class FileDownloadProgressResponseBody(
@@ -51,7 +43,7 @@ open class FileDownloadProgressResponseBody(
             override fun read(sink: Buffer, byteCount: Long): Long {
                 val bytesRead = super.read(sink, byteCount)
                 totalBytesRead += if (bytesRead != -1L) bytesRead else 0
-                val progress = totalBytesRead * 100 / totalSize.toDouble()
+                val progress = totalBytesRead * 100 / totalSize.toFloat()
                 progressUpdater(FileDownloadProgressState(totalBytesRead, totalSize, progress))
                 return bytesRead
             }
@@ -62,5 +54,5 @@ open class FileDownloadProgressResponseBody(
 data class FileDownloadProgressState(
     val received: Long = 1L,
     val total: Long = 1L,
-    val progress: Double = 100.0,
+    val progress: Float = 100.0F,
 )
