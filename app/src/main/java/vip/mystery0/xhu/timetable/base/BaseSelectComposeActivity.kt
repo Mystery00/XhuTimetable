@@ -145,7 +145,6 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
                 },
                 sheetState = sheetState,
             ) {
-
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
