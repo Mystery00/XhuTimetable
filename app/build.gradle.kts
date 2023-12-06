@@ -216,7 +216,7 @@ dependencies {
     //mmkv
     implementation("com.tencent:mmkv-static:1.3.2")
     //preference
-    implementation("com.github.alorma:compose-settings-ui-m3:1.0.2")
+    implementation("me.zhanghai.compose.preference:library:1.0.0")
     //AppCenter
     val appCenterSdkVersion = "5.0.3"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
