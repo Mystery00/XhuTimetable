@@ -1,19 +1,13 @@
 package vip.mystery0.xhu.timetable.ui.preference
 
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchColors
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
-import com.alorma.compose.settings.ui.SettingsMenuLink
-import com.alorma.compose.settings.ui.SettingsSwitch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import me.zhanghai.compose.preference.Preference
+import me.zhanghai.compose.preference.SwitchPreference
+import me.zhanghai.compose.preference.TwoTargetSwitchPreference
 import vip.mystery0.xhu.timetable.config.store.CacheStore
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
 import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
@@ -24,32 +18,26 @@ import kotlin.reflect.KMutableProperty1
 
 @Composable
 fun XhuActionSettingsCheckbox(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    icon: @Composable () -> Unit = { Spacer(modifier = Modifier.width(24.dp)) },
+    icon: @Composable () -> Unit = { },
     title: @Composable () -> Unit,
     subtitle: (@Composable () -> Unit)? = null,
-    checkboxColors: SwitchColors = SwitchDefaults.colors(),
-    onCheckedChange: ((Boolean) -> Unit)? = null,
     checkboxEnabled: Boolean = true,
-    checked: Boolean,
     onClick: () -> Unit,
 ) {
-    SettingsMenuLink(
-        modifier,
-        enabled,
-        icon,
-        title,
-        subtitle,
-        action = @Composable {
-            Switch(
-                enabled = checkboxEnabled,
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-                colors = checkboxColors,
-            )
-        },
-        onClick,
+    TwoTargetSwitchPreference(
+        value = checked,
+        onValueChange = onCheckedChange,
+        title = title,
+        modifier = modifier,
+        enabled = enabled,
+        icon = icon,
+        summary = subtitle,
+        switchEnabled = checkboxEnabled,
+        onClick = onClick,
     )
 }
 
@@ -57,17 +45,17 @@ fun XhuActionSettingsCheckbox(
 fun XhuSettingsMenuLink(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    icon: @Composable () -> Unit = { Spacer(modifier = Modifier.width(24.dp)) },
+    icon: @Composable () -> Unit = { },
     title: @Composable () -> Unit,
     subtitle: (@Composable () -> Unit)? = null,
     onClick: () -> Unit,
 ) {
-    SettingsMenuLink(
+    Preference(
+        title = title,
         modifier = modifier,
         enabled = enabled,
         icon = icon,
-        title = title,
-        subtitle = subtitle,
+        summary = subtitle,
         onClick = onClick,
     )
 }
@@ -77,25 +65,24 @@ fun ConfigSettingsCheckbox(
     modifier: Modifier = Modifier,
     config: KMutableProperty1<ConfigStore, Boolean>,
     scope: CoroutineScope = rememberCoroutineScope(),
-    icon: @Composable () -> Unit = { Spacer(modifier = Modifier.width(24.dp)) },
+    icon: @Composable () -> Unit = { },
     title: @Composable () -> Unit,
     subtitle: @Composable (() -> Unit)? = null,
     onCheckedChange: suspend (Boolean) -> Unit = { },
 ) {
-    val valueState = rememberBooleanSettingState(config.get(GlobalConfigStore))
-    SettingsSwitch(
-        modifier = modifier,
-        state = valueState,
-        icon = icon,
-        title = title,
-        subtitle = subtitle,
-        onCheckedChange = { newValue ->
-            valueState.value = newValue
+    SwitchPreference(
+        value = config.get(GlobalConfigStore),
+        onValueChange = { newValue: Boolean ->
+            config.set(GlobalConfigStore, newValue)
             scope.launch {
                 setConfigStore { config.set(GlobalConfigStore, newValue) }
                 onCheckedChange(newValue)
             }
         },
+        title = title,
+        modifier = modifier,
+        icon = icon,
+        summary = subtitle,
     )
 }
 
@@ -104,25 +91,23 @@ fun CacheSettingsCheckbox(
     modifier: Modifier = Modifier,
     config: KMutableProperty1<CacheStore, Boolean>,
     scope: CoroutineScope = rememberCoroutineScope(),
-    icon: @Composable () -> Unit = { Spacer(modifier = Modifier.width(24.dp)) },
+    icon: @Composable () -> Unit = { },
     title: @Composable () -> Unit,
     subtitle: @Composable (() -> Unit)? = null,
     onCheckedChange: suspend (Boolean) -> Unit = { },
 ) {
-    val valueState = rememberBooleanSettingState(config.get(GlobalCacheStore))
-    SettingsSwitch(
-        modifier = modifier,
-        state = valueState,
-        icon = icon,
-        title = title,
-        subtitle = subtitle,
-        onCheckedChange = { newValue ->
-            valueState.value = newValue
+    SwitchPreference(
+        value = config.get(GlobalCacheStore),
+        onValueChange = { newValue: Boolean ->
             scope.launch {
                 setConfigStore { config.set(GlobalCacheStore, newValue) }
                 onCheckedChange(newValue)
             }
         },
+        title = title,
+        modifier = modifier,
+        icon = icon,
+        summary = subtitle,
     )
 }
 
@@ -131,24 +116,22 @@ fun PoemsSettingsCheckbox(
     modifier: Modifier = Modifier,
     config: KMutableProperty0<Boolean>,
     scope: CoroutineScope = rememberCoroutineScope(),
-    icon: @Composable () -> Unit = { Spacer(modifier = Modifier.width(24.dp)) },
+    icon: @Composable () -> Unit = { },
     title: @Composable () -> Unit,
     subtitle: @Composable (() -> Unit)? = null,
     onCheckedChange: suspend (Boolean) -> Unit = { },
 ) {
-    val valueState = rememberBooleanSettingState(config.get())
-    SettingsSwitch(
-        modifier = modifier,
-        state = valueState,
-        icon = icon,
-        title = title,
-        subtitle = subtitle,
-        onCheckedChange = { newValue ->
-            valueState.value = newValue
+    SwitchPreference(
+        value = config.get(),
+        onValueChange = { newValue: Boolean ->
             scope.launch {
                 setConfigStore { config.set(newValue) }
                 onCheckedChange(newValue)
             }
         },
+        title = title,
+        modifier = modifier,
+        icon = icon,
+        summary = subtitle,
     )
 }
