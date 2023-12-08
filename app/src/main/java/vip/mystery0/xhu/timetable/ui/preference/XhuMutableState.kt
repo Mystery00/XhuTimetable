@@ -61,6 +61,11 @@ internal class XhuMutableState<S : Any, T>(
     private val onChange: ((T) -> Unit)? = null,
     private val mutableState: MutableState<T> = mutableStateOf(getter(store)),
 ) : MutableState<T> by mutableState {
+    override var value: T
+        get() = component1()
+        set(value) {
+            component2().invoke(value)
+        }
 
     override fun component1(): T = mutableState.component1()
 
