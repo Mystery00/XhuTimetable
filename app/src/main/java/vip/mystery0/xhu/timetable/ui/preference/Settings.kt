@@ -10,7 +10,6 @@ import me.zhanghai.compose.preference.SwitchPreference
 import me.zhanghai.compose.preference.TwoTargetSwitchPreference
 import vip.mystery0.xhu.timetable.config.store.CacheStore
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
-import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import kotlin.reflect.KMutableProperty0
@@ -70,15 +69,16 @@ fun ConfigSettingsCheckbox(
     subtitle: @Composable (() -> Unit)? = null,
     onCheckedChange: suspend (Boolean) -> Unit = { },
 ) {
-    SwitchPreference(
-        value = config.get(GlobalConfigStore),
-        onValueChange = { newValue: Boolean ->
-            config.set(GlobalConfigStore, newValue)
+    val state = rememberConfigState(
+        property = config,
+        onChange = {
             scope.launch {
-                setConfigStore { config.set(GlobalConfigStore, newValue) }
-                onCheckedChange(newValue)
+                setConfigStore { config.set(GlobalConfigStore, it) }
+                onCheckedChange(it)
             }
-        },
+        })
+    SwitchPreference(
+        state = state,
         title = title,
         modifier = modifier,
         icon = icon,
@@ -90,20 +90,13 @@ fun ConfigSettingsCheckbox(
 fun CacheSettingsCheckbox(
     modifier: Modifier = Modifier,
     config: KMutableProperty1<CacheStore, Boolean>,
-    scope: CoroutineScope = rememberCoroutineScope(),
     icon: @Composable () -> Unit = { },
     title: @Composable () -> Unit,
     subtitle: @Composable (() -> Unit)? = null,
-    onCheckedChange: suspend (Boolean) -> Unit = { },
 ) {
+    val state = rememberCacheState(property = config)
     SwitchPreference(
-        value = config.get(GlobalCacheStore),
-        onValueChange = { newValue: Boolean ->
-            scope.launch {
-                setConfigStore { config.set(GlobalCacheStore, newValue) }
-                onCheckedChange(newValue)
-            }
-        },
+        state = state,
         title = title,
         modifier = modifier,
         icon = icon,
@@ -121,14 +114,11 @@ fun PoemsSettingsCheckbox(
     subtitle: @Composable (() -> Unit)? = null,
     onCheckedChange: suspend (Boolean) -> Unit = { },
 ) {
+    val state = rememberPoemsState(property = config) {
+        scope.launch { onCheckedChange(it) }
+    }
     SwitchPreference(
-        value = config.get(),
-        onValueChange = { newValue: Boolean ->
-            scope.launch {
-                setConfigStore { config.set(newValue) }
-                onCheckedChange(newValue)
-            }
-        },
+        state = state,
         title = title,
         modifier = modifier,
         icon = icon,

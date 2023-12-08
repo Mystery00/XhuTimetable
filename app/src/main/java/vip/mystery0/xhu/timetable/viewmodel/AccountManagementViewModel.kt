@@ -8,7 +8,6 @@ import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
-import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.Gender
 import vip.mystery0.xhu.timetable.model.event.EventType
 
@@ -63,7 +62,6 @@ class AccountManagementViewModel : ComposeViewModel() {
             if (multiAccountMode == enable) {
                 return@launch
             }
-            setConfigStore { this.multiAccountMode = enable }
             EventBus.post(EventType.MULTI_MODE_CHANGED)
         }
     }

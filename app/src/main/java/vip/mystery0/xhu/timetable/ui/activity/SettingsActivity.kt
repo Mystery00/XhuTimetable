@@ -37,9 +37,7 @@ import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.date_time.DateTimeDialog
 import com.maxkeppeler.sheets.date_time.models.DateTimeSelection
 import com.microsoft.appcenter.crashes.model.TestCrashException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
@@ -305,26 +303,14 @@ class SettingsActivity : BaseSelectComposeActivity() {
                 }) {
                     PoemsSettingsCheckbox(
                         config = PoemsStore::disablePoems,
-                        scope = scope,
                         title = { Text(text = "禁用今日诗词") }
                     ) {
-                        scope.launch {
-                            withContext(Dispatchers.IO) {
-                                PoemsStore.disablePoems = it
-                            }
-                        }
                         "重启应用后生效".toast()
                     }
                     PoemsSettingsCheckbox(
                         config = PoemsStore::showPoemsTranslate,
-                        scope = scope,
                         title = { Text(text = "显示诗词大意") }
                     ) {
-                        scope.launch {
-                            withContext(Dispatchers.IO) {
-                                PoemsStore.showPoemsTranslate = it
-                            }
-                        }
                         "重启应用后生效".toast()
                     }
                     XhuSettingsMenuLink(
@@ -618,7 +604,6 @@ class SettingsActivity : BaseSelectComposeActivity() {
                         )
                         CacheSettingsCheckbox(
                             config = CacheStore::alwaysShowNewVersion,
-                            scope = scope,
                             title = { Text(text = "始终显示新版本弹窗") }
                         )
                         XhuSettingsMenuLink(
