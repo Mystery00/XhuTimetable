@@ -10,7 +10,6 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,13 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import cn.jpush.android.api.JPushInterface
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.date_time.DateTimeDialog
@@ -67,6 +60,8 @@ import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.preference.CacheSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.PoemsSettingsCheckbox
+import vip.mystery0.xhu.timetable.ui.preference.TeamContent
+import vip.mystery0.xhu.timetable.ui.preference.TeamItem
 import vip.mystery0.xhu.timetable.ui.preference.XhuActionSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.XhuFoldSettingsGroup
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
@@ -482,20 +477,11 @@ class SettingsActivity : BaseSelectComposeActivity() {
                         }
                     )
                 }
-                XhuSettingsGroup(title = {
-                    Text(text = "西瓜课表团队出品")
-                }) {
+                TeamContent(title = "西瓜课表团队出品") {
                     val teamMember by viewModel.teamMemberData.collectAsState()
                     teamMember.forEach {
                         TeamItem(
-                            painter = rememberAsyncImagePainter(
-                                ImageRequest.Builder(LocalContext.current)
-                                    .data(data = it.icon)
-                                    .apply {
-                                        size(width = 192, height = 192)
-                                    }
-                                    .build()
-                            ),
+                            iconUrl = it.icon,
                             title = it.title,
                             subTitle = it.subtitle,
                         )
@@ -747,11 +733,11 @@ class SettingsActivity : BaseSelectComposeActivity() {
     @Composable
     private fun ShowCheckUpdateDialog() {
         val version by viewModel.version.collectAsState()
+        val scope = rememberCoroutineScope()
         val newVersion = version ?: return
         if (newVersion == ClientVersion.EMPTY) {
             return
         }
-        val scope = rememberCoroutineScope()
         //需要提示版本更新
         CheckUpdate(
             version = newVersion,
@@ -776,28 +762,4 @@ class SettingsActivity : BaseSelectComposeActivity() {
         super.onStart()
         pushDynamicShortcuts<SettingsActivity>(iconResId = R.drawable.ic_settings)
     }
-}
-
-@Composable
-private fun TeamItem(
-    painter: Painter,
-    title: String,
-    subTitle: String,
-    onClick: () -> Unit = {},
-) {
-    XhuSettingsMenuLink(
-        icon = {
-            Icon(
-                modifier = Modifier.size(48.dp),
-                painter = painter,
-                contentDescription = null,
-                tint = Color.Unspecified,
-            )
-        },
-        title = { Text(text = title) },
-        subtitle = {
-            Text(text = subTitle)
-        },
-        onClick = onClick,
-    )
 }
