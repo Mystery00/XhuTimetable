@@ -14,6 +14,7 @@ import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.model.event.EventType
+import vip.mystery0.xhu.timetable.module.FeatureString
 import vip.mystery0.xhu.timetable.repository.UserRepo
 
 class LoginViewModel : ComposeViewModel() {
@@ -21,8 +22,17 @@ class LoginViewModel : ComposeViewModel() {
         private const val TAG = "LoginViewModel"
     }
 
+    private val _loginLabel = MutableStateFlow("")
+    val loginLabel: StateFlow<String> = _loginLabel
+
     private val _loginState = MutableStateFlow(LoginState())
     val loginState: StateFlow<LoginState> = _loginState
+
+    init {
+        viewModelScope.launch {
+            _loginLabel.value = FeatureString.LOGIN_LABEL.getValue()
+        }
+    }
 
     fun login(
         username: String,

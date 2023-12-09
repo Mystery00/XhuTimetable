@@ -18,4 +18,7 @@ interface UserApi {
 
     @GET("/api/rest/external/user/info")
     suspend fun getUserInfo(@Header("sessionToken") token: String,): UserInfo
+
+    @GET("/api/rest/external/user/info/reload")
+    suspend fun reloadUserInfo(@Header("sessionToken") token: String): UserInfo
 }

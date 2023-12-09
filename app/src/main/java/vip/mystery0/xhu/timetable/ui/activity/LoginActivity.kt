@@ -185,14 +185,17 @@ class LoginActivity : BaseComposeActivity() {
                     maxLines = 1,
                     isError = passwordError,
                 )
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    text = "* 密码为教育系统密码（默认为18位身份证号）",
-                    color = MaterialTheme.colorScheme.outline,
-                    fontSize = 12.sp,
-                )
+                val loginLabel by viewModel.loginLabel.collectAsState()
+                if (loginLabel.isNotBlank()) {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        text = loginLabel,
+                        color = MaterialTheme.colorScheme.outline,
+                        fontSize = 12.sp,
+                    )
+                }
                 Spacer(
                     modifier = Modifier
                         .height(60.dp)

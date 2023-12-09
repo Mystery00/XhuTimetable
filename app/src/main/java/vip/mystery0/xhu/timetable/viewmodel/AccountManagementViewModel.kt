@@ -12,6 +12,7 @@ import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.CustomAccountTitle
 import vip.mystery0.xhu.timetable.model.Gender
 import vip.mystery0.xhu.timetable.model.event.EventType
+import vip.mystery0.xhu.timetable.repository.UserRepo
 
 class AccountManagementViewModel : ComposeViewModel() {
     private val _errorMessage = MutableStateFlow("")
@@ -51,6 +52,18 @@ class AccountManagementViewModel : ComposeViewModel() {
         viewModelScope.launch {
             UserStore.setMainUser(studentId)
             EventBus.post(EventType.CHANGE_MAIN_USER)
+            loadLoggedUserList()
+        }
+    }
+
+    fun reloadUserInfo(studentId: String) {
+        viewModelScope.launch {
+            var loginUser = UserStore.getUserByStudentId(studentId)!!
+            val userInfo = UserRepo.reloadUserInfo(loginUser.token)
+            //再获取一次数据，避免更新用户信息的请求时token变了
+            loginUser = UserStore.getUserByStudentId(studentId)!!
+            val user = loginUser.copy(info = userInfo)
+            UserStore.updateUser(user)
             loadLoggedUserList()
         }
     }
