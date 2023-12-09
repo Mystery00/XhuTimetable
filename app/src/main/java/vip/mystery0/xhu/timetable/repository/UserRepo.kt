@@ -45,4 +45,8 @@ object UserRepo : BaseDataRepo {
     suspend fun getUserInfo(token: String) = withContext(Dispatchers.IO) {
         userApi.getUserInfo(token)
     }
+
+    suspend fun reloadUserInfo(token: String) = withContext(Dispatchers.IO) {
+        userApi.reloadUserInfo(token)
+    }
 }

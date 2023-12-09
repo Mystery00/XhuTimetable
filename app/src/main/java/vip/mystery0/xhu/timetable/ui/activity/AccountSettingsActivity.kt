@@ -6,9 +6,11 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -189,6 +191,10 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                 XhuSettingsGroup(title = {
                     Text(text = "账号管理")
                 }) {
+                    XhuSettingsMenuLink(
+                        title = { Text(text = "长按用户卡片可强制更新用户信息") },
+                        subtitle = { Text(text = "转了专业或者因为某些原因，导致教务系统的个人信息变更，可通过此方式更新服务端的缓存") }
+                    )
                     val loggedUserList by viewModel.loggedUserList.collectAsState()
                     loggedUserList.forEach { userItem ->
                         BuildItem(
@@ -199,6 +205,10 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                             user = userItem,
                             onClick = {
                                 viewModel.changeMainUser(userItem.studentId)
+                            },
+                            onLongClick = {
+                                viewModel.reloadUserInfo(userItem.studentId)
+                                "用户信息已更新".toast()
                             },
                             onButtonClick = {
                                 viewModel.logoutUser(userItem.studentId)
@@ -306,11 +316,13 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BuildItem(
     painter: Painter,
     user: UserItem,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
     onButtonClick: () -> Unit,
     mainUser: Boolean,
     showButton: Boolean = true,
@@ -319,7 +331,7 @@ private fun BuildItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable(onClick = onClick),
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
             containerColor = XhuColor.cardBackground,

@@ -38,6 +38,7 @@ enum class Feature(val key: String, val defaultValue: Boolean) {
 
 enum class FeatureString(val key: String, val defaultValue: String) {
     JPUSH_APP_KEY("jpush_api_key", "disable"),
+    LOGIN_LABEL("data_login_label", ""),
     ;
 
     fun getValue(): String = fp.stringValue(key, defaultValue)

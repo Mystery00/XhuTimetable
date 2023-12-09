@@ -140,7 +140,7 @@ object UserStore {
         return mainUserId == studentId
     }
 
-    private suspend fun updateUser(user: User) {
+    suspend fun updateUser(user: User) {
         Log.i(TAG, "updateUser: $user")
         val key = user.mapKey()
         val json = userMoshi.toJson(user)
