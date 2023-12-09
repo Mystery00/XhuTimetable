@@ -45,8 +45,6 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
     private val _termSelect = MutableStateFlow<List<TermSelect>>(emptyList())
     val termSelect: StateFlow<List<TermSelect>> = _termSelect
 
-    private var changed = false
-
     //蹭课列表分页数据
     private val allCoursePageRequestFlow = MutableStateFlow<AllCoursePageRequest?>(null)
     private val _allCoursePageState = allCoursePageRequestFlow
@@ -161,8 +159,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
             }
             _saveLoadingState.value = LoadingState(actionSuccess = true)
             toastMessage("《${request.courseName}》保存成功")
-            changed = true
-            loadCustomCourseList()
+            updateChange()
         }
     }
 
@@ -187,8 +184,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
             CustomCourseRepo.deleteCustomCourse(selectedUser, courseId)
             _saveLoadingState.value = LoadingState(actionSuccess = true)
             toastMessage("删除成功")
-            changed = true
-            loadCustomCourseList()
+            updateChange()
         }
     }
 
@@ -210,10 +206,11 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
         }
     }
 
-    fun updateChange() {
-        if (changed) {
-            EventBus.tryPost(EventType.CHANGE_SHOW_CUSTOM_COURSE)
+    private fun updateChange() {
+        viewModelScope.launch {
+            EventBus.post(EventType.CHANGE_SHOW_CUSTOM_COURSE)
         }
+        loadCustomCourseList()
     }
 
     internal data class AllCoursePageRequest(
