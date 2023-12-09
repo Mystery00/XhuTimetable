@@ -8,20 +8,20 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,7 +47,6 @@ import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.ui.component.observerXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.utils.finishAllActivity
 import vip.mystery0.xhu.timetable.viewmodel.LoginViewModel
 
@@ -76,7 +75,6 @@ class LoginActivity : BaseComposeActivity() {
             Column(
                 modifier = Modifier
                     .padding(horizontal = 48.dp)
-                    .navigationBarsPadding()
                     .fillMaxHeight()
             ) {
                 var username by remember { mutableStateOf("") }
@@ -116,11 +114,10 @@ class LoginActivity : BaseComposeActivity() {
                         Text(text = "学号")
                     },
                     colors = TextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.secondary,
-                        unfocusedTextColor = MaterialTheme.colorScheme.secondary,
-                        unfocusedLabelColor = XhuColor.loginLabel,
-//                        backgroundColor = Color.Transparent,
-//                        leadingIconColor = MaterialTheme.colors.secondary,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedTextColor = MaterialTheme.colorScheme.primary,
+                        unfocusedTextColor = MaterialTheme.colorScheme.primary,
                     ),
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Next,
@@ -164,10 +161,10 @@ class LoginActivity : BaseComposeActivity() {
                         Text(text = "密码")
                     },
                     colors = TextFieldDefaults.colors(
-//                        textColor = MaterialTheme.colors.secondary,
-                        unfocusedLabelColor = XhuColor.loginLabel,
-//                        backgroundColor = Color.Transparent,
-//                        leadingIconColor = MaterialTheme.colors.secondary,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedTextColor = MaterialTheme.colorScheme.primary,
+                        unfocusedTextColor = MaterialTheme.colorScheme.primary,
                     ),
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(
@@ -193,7 +190,7 @@ class LoginActivity : BaseComposeActivity() {
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 4.dp),
                     text = "* 密码为教育系统密码（默认为18位身份证号）",
-                    color = XhuColor.loginLabel,
+                    color = MaterialTheme.colorScheme.outline,
                     fontSize = 12.sp,
                 )
                 Spacer(
@@ -202,13 +199,13 @@ class LoginActivity : BaseComposeActivity() {
                         .fillMaxWidth()
                 )
                 val loginState by viewModel.loginState.collectAsState()
-                TextButton(
+                Button(
                     enabled = !loginState.loading,
                     modifier = Modifier
                         .fillMaxWidth(),
-                    colors = ButtonDefaults.textButtonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = Color.White,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
                     ),
                     shape = RoundedCornerShape(36.dp),
                     onClick = {
@@ -263,15 +260,17 @@ class LoginActivity : BaseComposeActivity() {
             showState = observerXhuDialogState(loginState.loading),
             text = "登录中..."
         )
-        if (loginState.success) {
-            "登录成功，欢迎使用${appName}！".toast()
-            if (!intent.getBooleanExtra(AccountSettingsActivity.INTENT_EXTRA, false)) {
-                intentTo(MainActivity::class)
+        LaunchedEffect(loginState) {
+            if (loginState.success) {
+                "登录成功，欢迎使用${appName}！".toast()
+                if (!intent.getBooleanExtra(AccountSettingsActivity.INTENT_EXTRA, false)) {
+                    intentTo(MainActivity::class)
+                }
+                finish()
             }
-            finish()
-        }
-        if (loginState.errorMessage.isNotBlank()) {
-            loginState.errorMessage.toast(true)
+            if (loginState.errorMessage.isNotBlank()) {
+                loginState.errorMessage.toast(true)
+            }
         }
     }
 
