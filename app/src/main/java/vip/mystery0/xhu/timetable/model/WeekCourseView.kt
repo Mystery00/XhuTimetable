@@ -168,7 +168,7 @@ data class WeekCourseView(
 
 fun WeekCourseView.format(template: String): String {
     var result = template
-    for (titleTemplate in TitleTemplate.values()) {
+    for (titleTemplate in TitleTemplate.entries) {
         result = result.replace("{${titleTemplate.tpl}}", titleTemplate.action(this))
     }
     return result

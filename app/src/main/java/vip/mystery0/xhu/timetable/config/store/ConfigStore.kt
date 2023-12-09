@@ -147,6 +147,7 @@ class ConfigStore internal constructor() {
         }
         get() = kv.decodeBool(multiAccountModeKey, false)
 
+    //自定义账号标题模板
     private val customAccountTitleKey = "customAccountTitle"
     var customAccountTitle: CustomAccountTitle
         set(value) {

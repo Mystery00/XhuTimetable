@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -96,7 +97,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
                             .size(60.dp)
-                            .clip(CircleShape)
+                            .clip(RoundedCornerShape(16.dp))
                     )
                     Column(modifier = Modifier.weight(1F)) {
                         var text = "账号未登录"

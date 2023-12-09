@@ -47,7 +47,7 @@ fun XhuSettingsMenuLink(
     icon: @Composable () -> Unit = { },
     title: @Composable () -> Unit,
     subtitle: (@Composable () -> Unit)? = null,
-    onClick: () -> Unit,
+    onClick: (() -> Unit)? = null,
 ) {
     Preference(
         title = title,

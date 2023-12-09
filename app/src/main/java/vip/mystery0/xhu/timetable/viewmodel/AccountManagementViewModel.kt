@@ -6,8 +6,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.store.EventBus
+import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.UserStore
-import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.config.store.setConfigStore
+import vip.mystery0.xhu.timetable.model.CustomAccountTitle
 import vip.mystery0.xhu.timetable.model.Gender
 import vip.mystery0.xhu.timetable.model.event.EventType
 
@@ -17,6 +19,9 @@ class AccountManagementViewModel : ComposeViewModel() {
 
     private val _loggedUserList = MutableStateFlow<List<UserItem>>(emptyList())
     val loggedUserList: StateFlow<List<UserItem>> = _loggedUserList
+
+    private val _customAccountTitle = MutableStateFlow(GlobalConfigStore.customAccountTitle)
+    val customAccountTitle: StateFlow<CustomAccountTitle> = _customAccountTitle
 
     init {
         loadLoggedUserList()
@@ -33,8 +38,12 @@ class AccountManagementViewModel : ComposeViewModel() {
                         it.info.name,
                         it.info.gender,
                         it.studentId == mainUserId,
+                        it.info.xhuGrade,
+                        it.info.college,
+                        it.info.majorName,
+                        it.info.majorDirection,
                     )
-                }
+                }.sortedBy { it.studentId }
         }
     }
 
@@ -56,13 +65,11 @@ class AccountManagementViewModel : ComposeViewModel() {
         }
     }
 
-    fun changeMultiAccountMode(enable: Boolean) {
+    fun updateAccountTitleTemplate(customAccountTitle: CustomAccountTitle) {
         viewModelScope.launch {
-            val multiAccountMode = getConfigStore { multiAccountMode }
-            if (multiAccountMode == enable) {
-                return@launch
-            }
-            EventBus.post(EventType.MULTI_MODE_CHANGED)
+            setConfigStore { this.customAccountTitle = customAccountTitle }
+            _customAccountTitle.value = customAccountTitle
+            EventBus.post(EventType.CHANGE_CUSTOM_ACCOUNT_TITLE)
         }
     }
 }
@@ -76,4 +83,8 @@ data class UserItem(
     val gender: Gender,
     //是否为主用户
     var main: Boolean,
+    var xhuGrade: Int,
+    var college: String,
+    var majorName: String,
+    var majorDirection: String,
 )

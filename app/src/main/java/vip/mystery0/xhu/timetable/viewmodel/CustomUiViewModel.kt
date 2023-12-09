@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.store.EventBus
+import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.CustomUi
@@ -17,7 +18,7 @@ class CustomUiViewModel : ComposeViewModel() {
     private val _randomCourse = MutableStateFlow<List<WeekCourseView>>(emptyList())
     val randomCourse: StateFlow<List<WeekCourseView>> = _randomCourse
 
-    private val _customUi = MutableStateFlow(CustomUi.DEFAULT)
+    private val _customUi = MutableStateFlow(GlobalConfigStore.customUi)
     val customUi: StateFlow<CustomUi> = _customUi
 
     val weekItemHeight = MutableStateFlow(CustomUi.DEFAULT.weekItemHeight)

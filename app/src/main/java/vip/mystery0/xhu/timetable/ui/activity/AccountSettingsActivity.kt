@@ -1,6 +1,11 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,13 +23,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,18 +48,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.maxkeppeker.sheets.core.models.base.Header
+import com.maxkeppeker.sheets.core.models.base.SelectionButton
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeler.sheets.input.InputDialog
+import com.maxkeppeler.sheets.input.models.InputCustomView
+import com.maxkeppeler.sheets.input.models.InputSelection
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
+import vip.mystery0.xhu.timetable.config.store.EventBus
+import vip.mystery0.xhu.timetable.model.AccountTitleTemplate
+import vip.mystery0.xhu.timetable.model.CustomAccountTitle
 import vip.mystery0.xhu.timetable.model.Gender
+import vip.mystery0.xhu.timetable.model.event.EventType
+import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
+import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsGroup
+import vip.mystery0.xhu.timetable.ui.preference.XhuSettingsMenuLink
 import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.AccountManagementViewModel
+import vip.mystery0.xhu.timetable.viewmodel.UserItem
 
 class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
     companion object {
@@ -90,7 +115,34 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                     }
                 )
             },
+            floatingActionButton = {
+                AnimatedVisibility(
+                    visible = !editMode.value,
+                    enter = scaleIn(),
+                    exit = scaleOut(),
+                ) {
+                    ExtendedFloatingActionButton(
+                        text = { Text(text = "登录其他账号") },
+                        onClick = {
+                            intentTo(LoginActivity::class) {
+                                it.putExtra(INTENT_EXTRA, true)
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Rounded.Add,
+                                contentDescription = "登录其他账号",
+                            )
+                        },
+                    )
+                }
+            }
         ) { paddingValues ->
+            val customTodayUserTemplateDialog = rememberXhuDialogState()
+            val customWeekUserTemplateDialog = rememberXhuDialogState()
+
+            val customAccountTitle by viewModel.customAccountTitle.collectAsState()
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -111,8 +163,28 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                             )
                         },
                         title = { Text(text = "启用情侣模式") },
-                        subtitle = { Text(text = "注意：如果多个用户的课表存在冲突的情况，表格可能会变得很乱，请确定您开启这个模式的意义！") },
-                    ) { newValue -> viewModel.changeMultiAccountMode(newValue) }
+                        subtitle = { Text(text = "将当前所有已登录账号的课表全部显示出来") },
+                    ) {
+                        EventBus.post(EventType.MULTI_MODE_CHANGED)
+                    }
+                    XhuSettingsMenuLink(
+                        title = { Text(text = "今日课程界面账号信息模板") },
+                        subtitle = {
+                            Text(text = "启动情侣模式之后，使用该模板来显示对应的账号信息")
+                        },
+                        onClick = {
+                            customTodayUserTemplateDialog.show()
+                        }
+                    )
+                    XhuSettingsMenuLink(
+                        title = { Text(text = "本周课程界面账号信息模板") },
+                        subtitle = {
+                            Text(text = "启动情侣模式之后，使用该模板来显示对应的账号信息")
+                        },
+                        onClick = {
+                            customWeekUserTemplateDialog.show()
+                        }
+                    )
                 }
                 XhuSettingsGroup(title = {
                     Text(text = "账号管理")
@@ -124,7 +196,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                                 userItem.userName,
                                 userItem.gender == Gender.MALE
                             ),
-                            text = "${userItem.studentId}(${userItem.userName})",
+                            user = userItem,
                             onClick = {
                                 viewModel.changeMainUser(userItem.studentId)
                             },
@@ -135,26 +207,97 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                             showButton = editMode.value,
                         )
                     }
-                    if (!editMode.value) {
-                        BuildItem(
-                            painter = XhuIcons.add,
-                            text = "登录其他账号",
-                            onClick = {
-                                intentTo(LoginActivity::class) {
-                                    it.putExtra(INTENT_EXTRA, true)
-                                }
-                            },
-                            onButtonClick = {},
-                            mainUser = false,
-                            showButton = false,
-                        )
-                    }
                 }
+                BuildCustomUserTemplateDialog(
+                    value = customAccountTitle.todayTemplate,
+                    resetValue = CustomAccountTitle.DEFAULT.todayTemplate,
+                    show = customTodayUserTemplateDialog,
+                    listener = { newValue ->
+                        val copy = customAccountTitle.copy(todayTemplate = newValue)
+                        viewModel.updateAccountTitleTemplate(copy)
+                    })
+                BuildCustomUserTemplateDialog(
+                    value = customAccountTitle.weekTemplate,
+                    resetValue = CustomAccountTitle.DEFAULT.weekTemplate,
+                    show = customWeekUserTemplateDialog,
+                    listener = { newValue ->
+                        val copy = customAccountTitle.copy(weekTemplate = newValue)
+                        viewModel.updateAccountTitleTemplate(copy)
+                    })
             }
         }
         if (errorMessage.isNotBlank()) {
             errorMessage.toast(true)
         }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun BuildCustomUserTemplateDialog(
+        value: String,
+        resetValue: String,
+        show: XhuDialogState,
+        listener: (String) -> Unit,
+    ) {
+        val valueState = remember { mutableStateOf(value) }
+        if (!show.showing) {
+            return
+        }
+        val inputOptions = listOf(
+            InputCustomView(view = {
+                Column(modifier = Modifier.padding(4.dp)) {
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = valueState.value,
+                        onValueChange = {
+                            valueState.value = it
+                        })
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row {
+                        Text(text = "学号",
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .clickable {
+                                    valueState.value += "{${AccountTitleTemplate.STUDENT_NO.tpl}}"
+                                })
+                        Text(text = "姓名",
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .clickable {
+                                    valueState.value += "{${AccountTitleTemplate.NAME.tpl}}"
+                                })
+                        Text(text = "昵称",
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .clickable {
+                                    valueState.value += "{${AccountTitleTemplate.NICK_NAME.tpl}}"
+                                })
+                    }
+                }
+            }),
+        )
+        InputDialog(
+            header = Header.Default(title = "请输入模板内容"),
+            state = rememberUseCaseState(
+                visible = true,
+                onCloseRequest = { show.hide() },
+            ),
+            selection = InputSelection(
+                input = inputOptions,
+                onPositiveClick = {
+                    listener(valueState.value)
+                },
+                extraButton = SelectionButton(text = "重置"),
+                onExtraButtonClick = {
+                    valueState.value = resetValue
+                    listener(resetValue)
+                    show.hide()
+                },
+            )
+        )
     }
 
     override fun onResume() {
@@ -166,7 +309,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
 @Composable
 private fun BuildItem(
     painter: Painter,
-    text: String,
+    user: UserItem,
     onClick: () -> Unit,
     onButtonClick: () -> Unit,
     mainUser: Boolean,
@@ -186,7 +329,7 @@ private fun BuildItem(
             if (mainUser) {
                 Text(
                     text = "主用户",
-                    fontSize = 8.sp,
+                    fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier
                         .background(
@@ -204,16 +347,33 @@ private fun BuildItem(
                 Image(
                     modifier = Modifier
                         .size(48.dp)
-                        .clip(RoundedCornerShape(4.dp)),
+                        .clip(RoundedCornerShape(16.dp)),
                     painter = painter,
                     contentDescription = null
                 )
-                Text(
-                    text = text,
-                    fontSize = 14.sp,
-                    modifier = Modifier.weight(1F),
-                )
-                if (showButton) {
+                Column(modifier = Modifier.weight(1F)) {
+                    Text(
+                        text = "${user.studentId}(${user.userName})",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        buildString {
+                            appendLine("年级：${user.xhuGrade}")
+                            if (user.majorName.isNotBlank()) appendLine("专业：${user.majorName}")
+                            if (user.college.isNotBlank()) appendLine("学院：${user.college}")
+                            if (user.majorDirection.isNotBlank()) appendLine("专业方向：${user.majorDirection}")
+                        },
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                }
+                AnimatedVisibility(
+                    visible = showButton,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
                     TextButton(
                         onClick = onButtonClick,
                         colors = ButtonDefaults.textButtonColors(
