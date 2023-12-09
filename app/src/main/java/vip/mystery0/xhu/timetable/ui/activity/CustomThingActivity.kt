@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -48,9 +49,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -64,6 +67,7 @@ import com.maxkeppeler.sheets.calendar.models.CalendarStyle
 import com.maxkeppeler.sheets.color.ColorDialog
 import com.maxkeppeler.sheets.color.models.ColorConfig
 import com.maxkeppeler.sheets.color.models.ColorSelection
+import com.maxkeppeler.sheets.color.models.SingleColor
 import com.maxkeppeler.sheets.date_time.DateTimeDialog
 import com.maxkeppeler.sheets.date_time.models.DateTimeSelection
 import kotlinx.coroutines.CoroutineScope
@@ -116,7 +120,6 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                 openBottomSheet.value = false
                 return
             }
-            viewModel.updateChange()
             finish()
         }
 
@@ -166,6 +169,9 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                             }
                         }
                     }
+                    stickyHeader {
+                        Divider()
+                    }
                     itemsIndexed(
                         pager,
                         key = { index -> pager[index]?.thingId ?: index }) { item ->
@@ -209,10 +215,11 @@ class CustomThingActivity : BaseSelectComposeActivity() {
     @Composable
     private fun BuildDateSelector(
         dialogState: XhuDialogState,
-        data: MutableState<LocalDateTime>,
+        initData: LocalDateTime,
+        onDateChange: (LocalDateTime) -> Unit,
     ) {
-        val date = data.value.toLocalDate()
-        val time = data.value.toLocalTime()
+        val date = initData.toLocalDate()
+        val time = initData.toLocalTime()
 
         if (dialogState.showing) {
             CalendarDialog(
@@ -227,7 +234,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                 selection = CalendarSelection.Date(
                     selectedDate = date,
                 ) {
-                    data.value = LocalDateTime.of(it, time)
+                    onDateChange(LocalDateTime.of(it, time))
                 },
                 config = CalendarConfig(
                     yearSelection = true,
@@ -241,10 +248,11 @@ class CustomThingActivity : BaseSelectComposeActivity() {
     @Composable
     private fun BuildTimeSelector(
         dialogState: XhuDialogState,
-        data: MutableState<LocalDateTime>,
+        initData: LocalDateTime,
+        onDateChange: (LocalDateTime) -> Unit,
     ) {
-        val date = data.value.toLocalDate()
-        val time = data.value.toLocalTime()
+        val date = initData.toLocalDate()
+        val time = initData.toLocalTime()
 
         if (dialogState.showing) {
             DateTimeDialog(
@@ -259,7 +267,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                 selection = DateTimeSelection.Time(
                     selectedTime = time,
                 ) { newTime ->
-                    data.value = LocalDateTime.of(date, newTime)
+                    onDateChange(LocalDateTime.of(date, newTime))
                 },
             )
         }
@@ -269,7 +277,8 @@ class CustomThingActivity : BaseSelectComposeActivity() {
     @Composable
     private fun BuildColorSelector(
         dialogState: XhuDialogState,
-        currentColor: MutableState<Color>,
+        initData: Color,
+        onDateChange: (Color) -> Unit,
     ) {
         if (!dialogState.showing) {
             return
@@ -284,8 +293,9 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                     dialogState.hide()
                 }),
             selection = ColorSelection(
+                selectedColor = SingleColor(initData.toArgb()),
                 onSelectColor = {
-                    currentColor.value = Color(it)
+                    onDateChange(Color(it))
                 }
             ),
             config = ColorConfig(
@@ -311,22 +321,44 @@ class CustomThingActivity : BaseSelectComposeActivity() {
         val saveLoadingState by viewModel.saveLoadingState.collectAsState()
 
         val customThing = customThingState.value
-        var thingTitle = customThing.title
-        var location = customThing.location
-        var allDay = customThing.allDay
-        var saveAsCountdown = customThing.saveAsCountDown
-        val startTime = remember { mutableStateOf(customThing.startTime.asLocalDateTime()) }
-        val endTime = remember { mutableStateOf(customThing.endTime.asLocalDateTime()) }
-        var remark = customThing.remark
-        val color = remember { mutableStateOf(customThing.color.parseColorHexString()) }
+
+        var thingTitle by remember { mutableStateOf(customThing.title) }
+        var location by remember { mutableStateOf(customThing.location) }
+        var allDay by remember { mutableStateOf(customThing.allDay) }
+        var saveAsCountdown by remember { mutableStateOf(customThing.saveAsCountDown) }
+        var startTime by remember { mutableStateOf(customThing.startTime.asLocalDateTime()) }
+        var endTime by remember { mutableStateOf(customThing.endTime.asLocalDateTime()) }
+        var remark by remember { mutableStateOf(customThing.remark) }
+        var color by remember { mutableStateOf(customThing.color.parseColorHexString()) }
+
+        LaunchedEffect(customThing) {
+            thingTitle = customThing.title
+            location = customThing.location
+            allDay = customThing.allDay
+            saveAsCountdown = customThing.saveAsCountDown
+            startTime = customThing.startTime.asLocalDateTime()
+            endTime = customThing.endTime.asLocalDateTime()
+            remark = customThing.remark
+            color = customThing.color.parseColorHexString()
+        }
 
         val focusManager = LocalFocusManager.current
 
-        BuildDateSelector(startDateDialog, startTime)
-        BuildTimeSelector(startTimeDialog, startTime)
-        BuildDateSelector(endDateDialog, endTime)
-        BuildTimeSelector(endTimeDialog, endTime)
-        BuildColorSelector(showColorDialog, color)
+        BuildDateSelector(startDateDialog, startTime) {
+            startTime = it
+        }
+        BuildTimeSelector(startTimeDialog, startTime) {
+            startTime = it
+        }
+        BuildDateSelector(endDateDialog, endTime) {
+            endTime = it
+        }
+        BuildTimeSelector(endTimeDialog, endTime) {
+            endTime = it
+        }
+        BuildColorSelector(showColorDialog, color) {
+            color = it
+        }
 
         fun dismissSheet() {
             focusManager.clearFocus()
@@ -388,10 +420,10 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                     thingTitle,
                                     location,
                                     allDay,
-                                    startTime.value,
-                                    endTime.value,
+                                    startTime,
+                                    endTime,
                                     remark,
-                                    color.value,
+                                    color,
                                     mapOf(
                                         CustomThing.Key.SAVE_AS_COUNT_DOWN to saveAsCountdown.toString()
                                     )
@@ -503,7 +535,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                     indication = null,
                                     interactionSource = MutableInteractionSource(),
                                 ),
-                            text = startTime.value.format(dateFormatter),
+                            text = startTime.format(dateFormatter),
                         )
                         if (!allDay) {
                             Text(
@@ -515,7 +547,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                         indication = null,
                                         interactionSource = MutableInteractionSource(),
                                     ),
-                                text = startTime.value.format(Formatter.TIME_NO_SECONDS),
+                                text = startTime.format(Formatter.TIME_NO_SECONDS),
                             )
                         }
                     }
@@ -536,7 +568,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                         indication = null,
                                         interactionSource = MutableInteractionSource(),
                                     ),
-                                text = endTime.value.format(dateFormatter),
+                                text = endTime.format(dateFormatter),
                             )
                             if (!allDay) {
                                 Text(
@@ -548,7 +580,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                             indication = null,
                                             interactionSource = MutableInteractionSource(),
                                         ),
-                                    text = endTime.value.format(Formatter.TIME_NO_SECONDS),
+                                    text = endTime.format(Formatter.TIME_NO_SECONDS),
                                 )
                             }
                         }
@@ -597,7 +629,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
                         .size(24.dp),
-                    color = color.value
+                    color = color
                 ) {}
                 Text(
                     modifier = Modifier

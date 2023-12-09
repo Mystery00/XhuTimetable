@@ -120,7 +120,6 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                 openBottomSheet.value = false
                 return
             }
-            viewModel.updateChange()
             finish()
         }
 
@@ -174,6 +173,9 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                 }
                             )
                         }
+                    }
+                    stickyHeader {
+                        Divider()
                     }
                     itemsIndexed(
                         pager,

@@ -5,11 +5,11 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import vip.mystery0.xhu.timetable.base.PageRequest
 import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
 import vip.mystery0.xhu.timetable.base.UserSelect
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.EventBus
-import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.request.CustomThingRequest
 import vip.mystery0.xhu.timetable.model.response.CustomThingResponse
@@ -17,9 +17,9 @@ import vip.mystery0.xhu.timetable.repository.CustomThingRepo
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-class CustomThingViewModel : PagingComposeViewModel<User, CustomThingResponse>(
+class CustomThingViewModel : PagingComposeViewModel<PageRequest, CustomThingResponse>(
     {
-        CustomThingRepo.getCustomThingListStream(it)
+        CustomThingRepo.getCustomThingListStream(it.user)
     }
 ) {
     companion object {
@@ -31,8 +31,6 @@ class CustomThingViewModel : PagingComposeViewModel<User, CustomThingResponse>(
 
     private val _saveLoadingState = MutableStateFlow(LoadingState(init = true))
     val saveLoadingState: StateFlow<LoadingState> = _saveLoadingState
-
-    private var changed = false
 
     init {
         viewModelScope.launch {
@@ -56,7 +54,7 @@ class CustomThingViewModel : PagingComposeViewModel<User, CustomThingResponse>(
                 failed("选择用户为空，请重新选择")
                 return@launch
             }
-            loadData(selectedUser)
+            loadData(PageRequest(selectedUser, 1, 1))
         }
     }
 
@@ -97,8 +95,7 @@ class CustomThingViewModel : PagingComposeViewModel<User, CustomThingResponse>(
             }
             _saveLoadingState.value = LoadingState()
             toastMessage("《${request.title}》保存成功")
-            changed = true
-            loadCustomThingList()
+            updateChange()
         }
     }
 
@@ -123,8 +120,7 @@ class CustomThingViewModel : PagingComposeViewModel<User, CustomThingResponse>(
             CustomThingRepo.deleteCustomThing(selectedUser, thingId)
             _saveLoadingState.value = LoadingState()
             toastMessage("删除成功")
-            changed = true
-            loadCustomThingList()
+            updateChange()
         }
     }
 
@@ -134,10 +130,11 @@ class CustomThingViewModel : PagingComposeViewModel<User, CustomThingResponse>(
         }
     }
 
-    fun updateChange() {
-        if (changed) {
-            EventBus.tryPost(EventType.CHANGE_SHOW_CUSTOM_THING)
+    private fun updateChange() {
+        viewModelScope.launch {
+            EventBus.post(EventType.CHANGE_SHOW_CUSTOM_THING)
         }
+        loadCustomThingList()
     }
 
     data class LoadingState(

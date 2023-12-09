@@ -15,10 +15,6 @@ object EventBus {
         flow.emit(eventType)
     }
 
-    fun tryPost(eventType: EventType) {
-        flow.tryEmit(eventType)
-    }
-
     suspend fun subscribe(lifecycle: Lifecycle, block: (EventType) -> Unit) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
             flow.collect(block)
