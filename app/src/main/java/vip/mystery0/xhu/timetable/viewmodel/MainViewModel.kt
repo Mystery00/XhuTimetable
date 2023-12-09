@@ -839,6 +839,26 @@ data class TodayThingSheet(
     val accountTitle: String,
 )
 
+data class CalendarSheetWeek(
+    val weekNum: Int,
+    val startDate: LocalDate,
+    val endDate: LocalDate,
+    val items: List<CalendarSheet>,
+)
+
+data class CalendarSheet(
+    val showDate: LocalDate,
+    val items: List<CalendarSheetItem>,
+)
+
+data class CalendarSheetItem(
+    val title: String,
+    val timeText: String,
+    val location: String,
+    val color: Color,
+    val accountTitle: String,
+)
+
 enum class CourseStatus(
     val title: String,
 ) {

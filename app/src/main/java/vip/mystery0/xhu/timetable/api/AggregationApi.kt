@@ -5,6 +5,7 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Query
 import vip.mystery0.xhu.timetable.model.response.AggregationMainPageResponse
+import vip.mystery0.xhu.timetable.model.response.CalendarWeekResponse
 
 interface AggregationApi {
     @GET("/api/rest/external/aggregation/page/main")
@@ -15,4 +16,12 @@ interface AggregationApi {
         @Query("showCustomCourse") showCustomCourse: Boolean,
         @Query("showCustomThing") showCustomThing: Boolean,
     ): Response<AggregationMainPageResponse>
+
+    @GET("/api/rest/external/aggregation/page/calendar")
+    suspend fun pageCalendar(
+        @Header("sessionToken") token: String,
+        @Query("startDate") startDate: String,
+        @Query("year") year: Int,
+        @Query("term") term: Int,
+    ): Response<List<CalendarWeekResponse>>
 }

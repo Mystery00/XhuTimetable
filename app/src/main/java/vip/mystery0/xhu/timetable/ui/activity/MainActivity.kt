@@ -159,31 +159,15 @@ class MainActivity : BaseComposeActivity() {
             },
             bottomBar = {
                 NavigationBar {
-                    DrawNavigationItem(
-                        checked = pagerState.currentPage == Tab.TODAY.index,
-                        tab = Tab.TODAY,
-                        icon = XhuStateIcons.todayCourse,
-                    ) {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(it)
-                        }
-                    }
-                    DrawNavigationItem(
-                        checked = pagerState.currentPage == Tab.WEEK.index,
-                        tab = Tab.WEEK,
-                        icon = XhuStateIcons.weekCourse,
-                    ) {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(it)
-                        }
-                    }
-                    DrawNavigationItem(
-                        checked = pagerState.currentPage == Tab.PROFILE.index,
-                        tab = Tab.PROFILE,
-                        icon = XhuStateIcons.profile,
-                    ) {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(it)
+                    for (tab in Tab.entries) {
+                        DrawNavigationItem(
+                            checked = pagerState.currentPage == tab.index,
+                            tab = tab,
+                            icon = tab.icon,
+                        ) {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(it)
+                            }
                         }
                     }
                 }
@@ -223,11 +207,7 @@ class MainActivity : BaseComposeActivity() {
                             }
                             .fillMaxSize()
                     ) {
-                        when (page) {
-                            Tab.TODAY.index -> Tab.TODAY.content(this, ext)
-                            Tab.WEEK.index -> Tab.WEEK.content(this, ext)
-                            Tab.PROFILE.index -> Tab.PROFILE.content(this, ext)
-                        }
+                        tabOf(page).content(this, ext)
                     }
                 }
             }
@@ -367,6 +347,7 @@ private enum class Tab(
     val index: Int,
     val label: String,
     val otherLabel: String = label,
+    val icon: Pair<Pair<Int, Int>, Pair<Int, Int>>,
     val titleBar: TabTitle? = null,
     val actions: TabAction? = null,
     val content: TabContent,
@@ -375,6 +356,7 @@ private enum class Tab(
         index = 0,
         label = "今日",
         otherLabel = "明日",
+        icon = XhuStateIcons.todayCourse,
         titleBar = todayCourseTitleBar,
         actions = todayCourseActions,
         content = todayCourseContent,
@@ -382,25 +364,30 @@ private enum class Tab(
     WEEK(
         index = 1,
         label = "本周",
+        icon = XhuStateIcons.weekCourse,
         titleBar = weekCourseTitleBar,
         actions = weekCourseActions,
         content = weekCourseContent,
     ),
-    PROFILE(
+    CALENDAR(
         index = 2,
+        label = "月历",
+        icon = XhuStateIcons.weekCourse,
+        titleBar = calendarTitleBar,
+        actions = calendarActions,
+        content = calendarContent,
+    ),
+    PROFILE(
+        index = 3,
         label = "我的",
+        icon = XhuStateIcons.profile,
         titleBar = profileCourseTitleBar,
         content = profileCourseContent,
     ),
 }
 
 @ExperimentalMaterialApi
-private fun tabOf(index: Int): Tab = when (index) {
-    0 -> Tab.TODAY
-    1 -> Tab.WEEK
-    2 -> Tab.PROFILE
-    else -> throw NoSuchElementException()
-}
+private fun tabOf(index: Int): Tab = Tab.entries.first { it.index == index }
 
 data class MainActivityExt(
     val activity: MainActivity,

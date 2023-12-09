@@ -141,4 +141,11 @@ object AggregationRepo : BaseDataRepo {
         }
         return AggregationView(todayViewList, weekViewList, todayThingList, loadWarning)
     }
+
+//    suspend fun fetchAggregationCalendarPage(): AggregationView {
+//        val nowYear = getConfigStore { nowYear }
+//        val nowTerm = getConfigStore { nowTerm }
+//
+//
+//    }
 }
