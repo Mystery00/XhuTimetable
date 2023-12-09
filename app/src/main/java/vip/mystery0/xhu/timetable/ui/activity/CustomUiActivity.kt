@@ -16,19 +16,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -42,16 +38,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.maxkeppeker.sheets.core.models.base.Header
+import com.maxkeppeker.sheets.core.models.base.SelectionButton
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.input.InputDialog
 import com.maxkeppeler.sheets.input.models.InputCustomView
-import com.maxkeppeler.sheets.input.models.InputHeader
 import com.maxkeppeler.sheets.input.models.InputSelection
-import com.maxkeppeler.sheets.input.models.InputText
-import com.maxkeppeler.sheets.input.models.InputTextField
-import com.maxkeppeler.sheets.input.models.ValidationResult
 import kotlinx.coroutines.launch
+import me.zhanghai.compose.preference.SliderPreference
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
+import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.TitleTemplate
 import vip.mystery0.xhu.timetable.model.format
 import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
@@ -198,8 +193,8 @@ class CustomUiActivity : BaseComposeActivity() {
                         BuildSeekBar(
                             title = "格子高度",
                             value = weekItemHeight,
-                            start = 50,
-                            end = 150,
+                            start = 50F,
+                            end = 150F,
                             listener = { newValue ->
                                 viewModel.weekItemHeight.value = newValue
                                 viewModel.update()
@@ -207,9 +202,9 @@ class CustomUiActivity : BaseComposeActivity() {
                         val weekBackgroundAlpha by viewModel.weekBackgroundAlpha.collectAsState()
                         BuildSeekBar(
                             title = "背景色透明度",
-                            value = (weekBackgroundAlpha * 100).toInt(),
-                            start = 30,
-                            end = 100,
+                            value = weekBackgroundAlpha * 100,
+                            start = 30F,
+                            end = 100F,
                             listener = { newValue ->
                                 viewModel.weekBackgroundAlpha.value = newValue / 100F
                                 viewModel.update()
@@ -218,8 +213,8 @@ class CustomUiActivity : BaseComposeActivity() {
                         BuildSeekBar(
                             title = "圆角大小",
                             value = weekItemCorner,
-                            start = 0,
-                            end = 50,
+                            start = 0F,
+                            end = 50F,
                             listener = { newValue ->
                                 viewModel.weekItemCorner.value = newValue
                                 viewModel.update()
@@ -228,8 +223,8 @@ class CustomUiActivity : BaseComposeActivity() {
                         BuildSeekBar(
                             title = "文字大小",
                             value = weekTitleTextSize,
-                            start = 5,
-                            end = 36,
+                            start = 5F,
+                            end = 36F,
                             listener = { newValue ->
                                 viewModel.weekTitleTextSize.value = newValue
                                 viewModel.update()
@@ -239,8 +234,8 @@ class CustomUiActivity : BaseComposeActivity() {
                             enabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
                             title = "动态模糊半径",
                             value = backgroundImageBlur,
-                            start = 0,
-                            end = 30,
+                            start = 0F,
+                            end = 30F,
                             listener = { newValue ->
                                 viewModel.backgroundImageBlur.value = newValue
                                 viewModel.update()
@@ -250,8 +245,6 @@ class CustomUiActivity : BaseComposeActivity() {
                             subtitle = {
                                 Text(text = "仅 Android 12+ 可使用")
                             },
-                            onClick = {
-                            }
                         )
                         XhuSettingsMenuLink(
                             title = { Text(text = "格子文本模板") },
@@ -271,16 +264,13 @@ class CustomUiActivity : BaseComposeActivity() {
                                 showCustomNotTitleTemplateDialog.show()
                             }
                         )
-                        XhuSettingsMenuLink(
-                            title = { Text(text = "点击右上角的保存按钮才会生效") },
-                            onClick = {
-                            }
-                        )
+                        XhuSettingsMenuLink(title = { Text(text = "点击右上角的保存按钮才会生效") })
                     }
                 }
             }
             BuildTitleTemplateDialog(
                 value = weekTitleTemplate,
+                resetValue = CustomUi.DEFAULT.weekTitleTemplate,
                 show = showCustomTitleTemplateDialog,
                 listener = { newValue ->
                     viewModel.weekTitleTemplate.value = newValue
@@ -288,6 +278,7 @@ class CustomUiActivity : BaseComposeActivity() {
                 })
             BuildTitleTemplateDialog(
                 value = weekNotTitleTemplate,
+                resetValue = CustomUi.DEFAULT.weekNotTitleTemplate,
                 show = showCustomNotTitleTemplateDialog,
                 listener = { newValue ->
                     viewModel.weekNotTitleTemplate.value = newValue
@@ -300,6 +291,7 @@ class CustomUiActivity : BaseComposeActivity() {
     @Composable
     private fun BuildTitleTemplateDialog(
         value: String,
+        resetValue: String,
         show: XhuDialogState,
         listener: (String) -> Unit,
     ) {
@@ -354,6 +346,12 @@ class CustomUiActivity : BaseComposeActivity() {
                 onPositiveClick = {
                     listener(valueState.value)
                 },
+                extraButton = SelectionButton(text = "重置"),
+                onExtraButtonClick = {
+                    valueState.value = resetValue
+                    listener(resetValue)
+                    show.hide()
+                },
             )
         )
     }
@@ -363,32 +361,24 @@ class CustomUiActivity : BaseComposeActivity() {
 private fun BuildSeekBar(
     enabled: Boolean = true,
     title: String,
-    value: Int,
-    start: Int,
-    end: Int,
-    listener: (Int) -> Unit,
+    value: Float,
+    start: Float,
+    end: Float,
+    listener: (Float) -> Unit,
 ) {
-    val range = end - start
-    val currentValue: Float = (value - start) / range.toFloat()
-    val valueState = remember { mutableFloatStateOf(currentValue) }
-    valueState.floatValue = currentValue
-    XhuSettingsMenuLink(
-        title = { Text(text = title) },
-        subtitle = {
-            Slider(
-                enabled = enabled,
-                value = valueState.floatValue,
-                onValueChange = {
-                    valueState.floatValue = it
-                },
-                modifier = Modifier.fillMaxWidth(),
-                steps = end - start + 1,
-                onValueChangeFinished = {
-                    val newValue = (start + range * valueState.floatValue).roundToInt()
-                    listener(newValue)
-                },
-            )
+    val valueState = remember { mutableFloatStateOf(value) }
+    SliderPreference(
+        value = 1F,
+        onValueChange = {},
+        sliderValue = valueState.floatValue,
+        onSliderValueChange = {
+            valueState.floatValue = it
+            listener(it)
         },
-        onClick = {}
+        title = { Text(text = title) },
+        valueRange = start..end,
+        valueSteps = (end - start + 1).roundToInt(),
+        enabled = enabled,
+        icon = {},
     )
 }

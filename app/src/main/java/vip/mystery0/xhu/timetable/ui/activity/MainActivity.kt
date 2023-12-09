@@ -340,7 +340,8 @@ class MainActivity : BaseComposeActivity() {
                     EventType.CHANGE_SHOW_NOT_THIS_WEEK,
                     EventType.CHANGE_TERM_START_TIME,
                     EventType.CHANGE_COURSE_COLOR,
-                    EventType.CHANGE_CUSTOM_UI -> {
+                    EventType.CHANGE_CUSTOM_UI,
+                    EventType.CHANGE_CUSTOM_ACCOUNT_TITLE -> {
                         viewModel.loadLocalDataToState(changeWeekOnly = true)
                     }
 
