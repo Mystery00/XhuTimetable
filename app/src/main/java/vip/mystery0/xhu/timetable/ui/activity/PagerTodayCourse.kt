@@ -376,7 +376,7 @@ private fun DrawThingCard(
                 if (multiAccountMode) {
                     Text(
                         text = thing.accountTitle,
-                        fontSize = 8.sp,
+                        fontSize = 10.sp,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier
                             .background(
@@ -390,7 +390,7 @@ private fun DrawThingCard(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(
-                        top = if (multiAccountMode) 16.dp else 8.dp,
+                        top = if (multiAccountMode) 18.dp else 8.dp,
                         bottom = 8.dp,
                         end = 8.dp
                     ),
@@ -558,7 +558,7 @@ private fun DrawCourseCard(
                     if (multiAccountMode) {
                         Text(
                             text = course.accountTitle,
-                            fontSize = 8.sp,
+                            fontSize = 10.sp,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
                             modifier = Modifier
                                 .background(
@@ -573,7 +573,7 @@ private fun DrawCourseCard(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .padding(
-                                top = if (multiAccountMode) 16.dp else 8.dp,
+                                top = if (multiAccountMode) 18.dp else 8.dp,
                                 bottom = if (showStatus) 24.dp else 8.dp,
                                 end = 8.dp
                             ),
