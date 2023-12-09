@@ -2,10 +2,8 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -313,60 +311,43 @@ private fun BuildItem(
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             if (item.roomNo.isNotBlank()) {
-                Row(
+                Text(
+                    text = "教室编号：${item.roomNo}",
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Image(painter = XhuIcons.CourseRoom.no, contentDescription = null)
-                    Text(text = "教室编号：${item.roomNo}")
-                }
+                )
             }
             if (item.roomName.isNotBlank()) {
-                Row(
+                Text(
+                    text = "教室名称：${item.roomName}",
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Image(painter = XhuIcons.CourseRoom.name, contentDescription = null)
-                    Text(text = "教室名称：${item.roomName}")
-                }
+                )
             }
             if (item.seatCount.isNotBlank()) {
-                Row(
+                Text(
+                    text = "座位数：${item.seatCount}",
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Image(painter = XhuIcons.CourseRoom.seat, contentDescription = null)
-                    Text(
-                        text = "座位数：${item.seatCount}"
-                    )
-                }
+                )
             }
             if (item.campus.isNotBlank()) {
-                Row(
+                Text(
+                    text = "校区：${item.campus}",
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Image(painter = XhuIcons.CourseRoom.region, contentDescription = null)
-                    Text(text = "校区：${item.campus}")
-                }
+                    color = MaterialTheme.colorScheme.outline,
+                )
             }
             if (item.roomType.isNotBlank()) {
-                Row(
+                Text(
+                    text = "场地类型：${item.roomType}",
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Image(painter = XhuIcons.CourseRoom.type, contentDescription = null)
-                    Text(text = "场地类型：${item.roomType}")
-                }
+                    color = MaterialTheme.colorScheme.outline,
+                )
             }
             if (item.roomRemark.isNotBlank()) {
-                Row(
+                Text(
+                    text = "备注：${item.roomRemark}",
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Image(painter = XhuIcons.CourseRoom.remark, contentDescription = null)
-                    Text(text = "备注：${item.roomRemark}")
-                }
+                    color = MaterialTheme.colorScheme.outline,
+                )
             }
         }
     }
