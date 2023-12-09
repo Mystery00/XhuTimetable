@@ -168,27 +168,6 @@ object XhuIcons {
             )
     }
 
-    object CourseRoom {
-        val no: Painter
-            @Composable
-            get() = painterResource(id = R.drawable.ic_room_no)
-        val name: Painter
-            @Composable
-            get() = painterResource(id = R.drawable.ic_room_name)
-        val seat: Painter
-            @Composable
-            get() = painterResource(id = R.drawable.ic_room_seat)
-        val region: Painter
-            @Composable
-            get() = painterResource(id = R.drawable.ic_room_region)
-        val type: Painter
-            @Composable
-            get() = painterResource(id = R.drawable.ic_room_type)
-        val remark: Painter
-            @Composable
-            get() = painterResource(id = R.drawable.ic_room_remark)
-    }
-
     object Profile {
         val exam: Painter
             @Composable
