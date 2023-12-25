@@ -1,7 +1,6 @@
 name: Test Actions
 on:
   workflow_dispatch:
-env:
 jobs:
   deploy:
     runs-on: self-hosted
