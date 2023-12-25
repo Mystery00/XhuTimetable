@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Test Actions
 on:
   workflow_dispatch:
 env:
