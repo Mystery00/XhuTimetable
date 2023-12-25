@@ -5,7 +5,9 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
-      - name: 测试命令
+      - name: 测试curl命令
         run: |
-          curl https://blog.mystery0.vip
-          jq
+          curl -I -m 10 -o /dev/null -s -w %{http_code} https://blog.mystery0.vip
+      - name: 测试jq命令
+        run: |
+          echo '{"name":"mystery0"}' | jq -r '.name'
