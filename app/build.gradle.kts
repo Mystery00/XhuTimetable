@@ -156,7 +156,7 @@ configurations {
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.10.0")
+    implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.browser:browser:1.7.0")
@@ -181,7 +181,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
     //sheets-compose-dialogs
-    val sheetsComposeDialogsVersion = "1.2.0"
+    val sheetsComposeDialogsVersion = "1.2.1"
     implementation("com.maxkeppeler.sheets-compose-dialogs:core:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:calendar:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:color:$sheetsComposeDialogsVersion")
@@ -192,7 +192,7 @@ dependencies {
     implementation("com.maxkeppeler.sheets-compose-dialogs:option:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:state:$sheetsComposeDialogsVersion")
     //lottie
-    implementation("com.airbnb.android:lottie-compose:6.2.0")
+    implementation("com.airbnb.android:lottie-compose:6.3.0")
     //room
     implementation("androidx.room:room-runtime:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
@@ -200,9 +200,9 @@ dependencies {
     //work manager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     //koin
-    implementation("io.insert-koin:koin-android:3.5.0")
-    implementation("io.insert-koin:koin-androidx-workmanager:3.5.0")
-    implementation("io.insert-koin:koin-androidx-compose:3.5.0")
+    implementation("io.insert-koin:koin-android:3.5.3")
+    implementation("io.insert-koin:koin-androidx-workmanager:3.5.3")
+    implementation("io.insert-koin:koin-androidx-compose:3.5.3")
     //coil
     val coilVersion = "2.5.0"
     implementation("io.coil-kt:coil-compose:$coilVersion")
@@ -218,14 +218,14 @@ dependencies {
     //preference
     implementation("me.zhanghai.compose.preference:library:1.0.0")
     //AppCenter
-    val appCenterSdkVersion = "5.0.3"
+    val appCenterSdkVersion = "5.0.4"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
     //ucrop
     implementation("com.github.yalantis:ucrop:2.2.8")
     //feature-probe
     implementation("com.featureprobe:client-sdk-android:2.0.2@aar")
-    implementation("net.java.dev.jna:jna:5.7.0@aar")
+    implementation("net.java.dev.jna:jna:5.13.0@aar")
     //jg-push
     implementation("cn.jiguang.sdk:jpush-google:5.2.2")
     implementation("cn.jiguang.sdk.plugin:huawei:5.2.2")
