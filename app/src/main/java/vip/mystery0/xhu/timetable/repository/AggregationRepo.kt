@@ -10,11 +10,15 @@ import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.model.TodayCourseView
 import vip.mystery0.xhu.timetable.model.TodayThingView
 import vip.mystery0.xhu.timetable.model.WeekCourseView
+import vip.mystery0.xhu.timetable.model.response.CalendarWeekResponse
 import vip.mystery0.xhu.timetable.model.transfer.AggregationView
 import vip.mystery0.xhu.timetable.module.HINT_NETWORK
 import vip.mystery0.xhu.timetable.repository.local.AggregationLocalRepo
+import java.time.format.DateTimeFormatter
 
 object AggregationRepo : BaseDataRepo {
+    private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
     private val aggregationApi: AggregationApi by inject()
 
     suspend fun fetchAggregationMainPage(
@@ -34,17 +38,10 @@ object AggregationRepo : BaseDataRepo {
         val weekViewList = ArrayList<WeekCourseView>()
         val todayThingList = ArrayList<TodayThingView>()
 
-        var loadFromCloud = when {
-            forceLoadFromCloud -> true
-            forceLoadFromLocal -> false
-            else -> isOnline
-        }
-        var loadWarning = ""
-        if (loadFromCloud && !isOnline) {
-            //需要从网络加载但是没有网络，降级为从本地加载，并显示一个错误
-            loadFromCloud = false
-            loadWarning = HINT_NETWORK
-        }
+        val (loadFromCloud, loadWarning) = checkLoadFromCloud(
+            forceLoadFromCloud,
+            forceLoadFromLocal,
+        )
         if (loadFromCloud) {
             withContext(Dispatchers.Default) {
                 userList.forEach { user ->
@@ -142,10 +139,57 @@ object AggregationRepo : BaseDataRepo {
         return AggregationView(todayViewList, weekViewList, todayThingList, loadWarning)
     }
 
-//    suspend fun fetchAggregationCalendarPage(): AggregationView {
-//        val nowYear = getConfigStore { nowYear }
-//        val nowTerm = getConfigStore { nowTerm }
-//
-//
-//    }
+    suspend fun fetchAggregationCalendarPage(
+        forceLoadFromCloud: Boolean,
+        forceLoadFromLocal: Boolean,
+    ): List<CalendarWeekResponse> {
+        val multiAccountMode = getConfigStore { multiAccountMode }
+        if (multiAccountMode) {
+            //多账号模式下不支持日历
+            return emptyList()
+        }
+        val (loadFromCloud, _) = checkLoadFromCloud(
+            forceLoadFromCloud,
+            forceLoadFromLocal,
+        )
+        val nowYear = getConfigStore { nowYear }
+        val nowTerm = getConfigStore { nowTerm }
+        val termStartDate = getConfigStore { termStartDate }
+
+        if (loadFromCloud) {
+            return mainUser().withAutoLoginOnce {
+                aggregationApi.pageCalendar(
+                    it,
+                    termStartDate.format(dateFormatter),
+                    nowYear,
+                    nowTerm,
+                )
+            }
+        } else {
+            return AggregationLocalRepo.fetchAggregationCalendarPage(
+                nowYear,
+                nowTerm,
+                mainUser(),
+                termStartDate,
+            )
+        }
+    }
+
+    private fun checkLoadFromCloud(
+        forceLoadFromCloud: Boolean,
+        forceLoadFromLocal: Boolean,
+    ): Pair<Boolean, String> {
+        var loadFromCloud = when {
+            forceLoadFromCloud -> true
+            forceLoadFromLocal -> false
+            else -> isOnline
+        }
+        var loadWarning = ""
+        if (loadFromCloud && !isOnline) {
+            //需要从网络加载但是没有网络，降级为从本地加载，并显示一个错误
+            loadFromCloud = false
+            loadWarning = HINT_NETWORK
+        }
+        return Pair(loadFromCloud, loadWarning)
+    }
 }

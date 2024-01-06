@@ -16,6 +16,8 @@ fun LocalDateTime.formatChinaDateTime(): String =
 val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日")
 val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH时mm分")
 val thingDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH:mm")
+val calendarTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+val calendarMonthFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy年MM月")
 
 fun List<Int>.formatWeekString(): String {
     if (isNullOrEmpty()) return ""

@@ -23,12 +23,12 @@ data class CalendarDayItemResponse(
     val type: CalendarDayItemType,
     val courseName: String = "",
     val seatNo: String = "",
+    val customThingColor: String = "",
 )
 
 enum class CalendarDayItemType {
     COURSE,
     EXPERIMENT_COURSE,
-    EXAM,
     CUSTOM_COURSE,
     CUSTOM_THING,
 }
