@@ -93,8 +93,9 @@ class MainActivity : BaseComposeActivity() {
     @Composable
     override fun BuildContent() {
         ShowCheckUpdateDialog()
+        val multiAccountMode by viewModel.multiAccountMode.collectAsState()
         val coroutineScope = rememberCoroutineScope()
-        val pagerState = rememberPagerState(initialPage = 0) { Tab.entries.size }
+        val pagerState = rememberPagerState(initialPage = 0) { if (multiAccountMode) 3 else 4 }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val permissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
@@ -123,7 +124,11 @@ class MainActivity : BaseComposeActivity() {
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
-                val tab = tabOf(pagerState.currentPage)
+                val tab = if (multiAccountMode) {
+                    tabOfWhenMultiMode(pagerState.currentPage)
+                } else {
+                    tabOf(pagerState.currentPage)
+                }
                 TopAppBar(
                     scrollBehavior = scrollBehavior,
                     title = {
@@ -159,14 +164,19 @@ class MainActivity : BaseComposeActivity() {
             },
             bottomBar = {
                 NavigationBar {
-                    for (tab in Tab.entries) {
+                    val tabs = if (multiAccountMode) {
+                        Tab.entries.filter { it != Tab.CALENDAR }
+                    } else {
+                        Tab.entries
+                    }
+                    tabs.forEachIndexed { index, tab ->
                         DrawNavigationItem(
-                            checked = pagerState.currentPage == tab.index,
+                            checked = pagerState.currentPage == index,
                             tab = tab,
                             icon = tab.icon,
                         ) {
                             coroutineScope.launch {
-                                pagerState.animateScrollToPage(it)
+                                pagerState.animateScrollToPage(index)
                             }
                         }
                     }
@@ -189,7 +199,7 @@ class MainActivity : BaseComposeActivity() {
                     )
                 }
                 HorizontalPager(
-                    beyondBoundsPageCount = Tab.entries.size - 1,
+                    beyondBoundsPageCount = 3,
                     state = pagerState,
                     modifier = Modifier.padding(paddingValues),
                 ) { page ->
@@ -207,7 +217,11 @@ class MainActivity : BaseComposeActivity() {
                             }
                             .fillMaxSize()
                     ) {
-                        tabOf(page).content(this, ext)
+                        if (multiAccountMode) {
+                            tabOfWhenMultiMode(page).content(this, ext)
+                        } else {
+                            tabOf(page).content(this, ext)
+                        }
                     }
                 }
             }
@@ -259,7 +273,7 @@ class MainActivity : BaseComposeActivity() {
         checked: Boolean,
         tab: Tab,
         icon: Pair<Pair<Int, Int>, Pair<Int, Int>>,
-        onSelect: (Int) -> Unit = {},
+        onSelect: () -> Unit = {},
     ) {
         val showTomorrowCourse by viewModel.showTomorrowCourse.collectAsState()
         val label = if (showTomorrowCourse) tab.otherLabel else tab.label
@@ -279,7 +293,7 @@ class MainActivity : BaseComposeActivity() {
                 Text(text = label)
             },
             onClick = {
-                onSelect(tab.index)
+                onSelect()
             },
         )
     }
@@ -344,7 +358,6 @@ class MainActivity : BaseComposeActivity() {
 
 @ExperimentalMaterialApi
 private enum class Tab(
-    val index: Int,
     val label: String,
     val otherLabel: String = label,
     val icon: Pair<Pair<Int, Int>, Pair<Int, Int>>,
@@ -353,7 +366,6 @@ private enum class Tab(
     val content: TabContent,
 ) {
     TODAY(
-        index = 0,
         label = "今日",
         otherLabel = "明日",
         icon = XhuStateIcons.todayCourse,
@@ -362,7 +374,6 @@ private enum class Tab(
         content = todayCourseContent,
     ),
     WEEK(
-        index = 1,
         label = "本周",
         icon = XhuStateIcons.weekCourse,
         titleBar = weekCourseTitleBar,
@@ -370,7 +381,6 @@ private enum class Tab(
         content = weekCourseContent,
     ),
     CALENDAR(
-        index = 2,
         label = "月历",
         icon = XhuStateIcons.weekCourse,
         titleBar = calendarTitleBar,
@@ -378,7 +388,6 @@ private enum class Tab(
         content = calendarContent,
     ),
     PROFILE(
-        index = 3,
         label = "我的",
         icon = XhuStateIcons.profile,
         titleBar = profileCourseTitleBar,
@@ -387,7 +396,21 @@ private enum class Tab(
 }
 
 @ExperimentalMaterialApi
-private fun tabOf(index: Int): Tab = Tab.entries.first { it.index == index }
+private fun tabOf(index: Int): Tab = when (index) {
+    0 -> Tab.TODAY
+    1 -> Tab.WEEK
+    2 -> Tab.CALENDAR
+    3 -> Tab.PROFILE
+    else -> Tab.PROFILE
+}
+
+@ExperimentalMaterialApi
+private fun tabOfWhenMultiMode(index: Int): Tab = when (index) {
+    0 -> Tab.TODAY
+    1 -> Tab.WEEK
+    2 -> Tab.PROFILE
+    else -> Tab.PROFILE
+}
 
 data class MainActivityExt(
     val activity: MainActivity,
