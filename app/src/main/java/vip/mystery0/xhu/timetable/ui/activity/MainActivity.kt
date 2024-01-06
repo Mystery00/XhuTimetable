@@ -94,7 +94,7 @@ class MainActivity : BaseComposeActivity() {
     override fun BuildContent() {
         ShowCheckUpdateDialog()
         val coroutineScope = rememberCoroutineScope()
-        val pagerState = rememberPagerState(initialPage = 0) { 3 }
+        val pagerState = rememberPagerState(initialPage = 0) { Tab.entries.size }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val permissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
@@ -189,7 +189,7 @@ class MainActivity : BaseComposeActivity() {
                     )
                 }
                 HorizontalPager(
-                    beyondBoundsPageCount = 2,
+                    beyondBoundsPageCount = Tab.entries.size - 1,
                     state = pagerState,
                     modifier = Modifier.padding(paddingValues),
                 ) { page ->

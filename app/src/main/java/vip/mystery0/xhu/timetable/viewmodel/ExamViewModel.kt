@@ -53,11 +53,11 @@ class ExamViewModel : PagingComposeViewModel<User, Exam>(
 
     fun selectUser(studentId: String) {
         viewModelScope.launch {
-            val result = setSelectedUser(_userSelect.value, studentId)
-            if (!result.second) {
+            val (selectList, changed) = setSelectedUser(_userSelect.value, studentId)
+            if (!changed) {
                 return@launch
             }
-            _userSelect.value = result.first
+            _userSelect.value = selectList
             loadExamList()
         }
     }

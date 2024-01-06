@@ -62,7 +62,8 @@ class ExpScoreViewModel : ComposeViewModel(), KoinComponent {
 
     fun selectUser(studentId: String) {
         viewModelScope.launch {
-            _userSelect.value = setSelectedUser(_userSelect.value, studentId).first
+            val (selectList, _) = setSelectedUser(_userSelect.value, studentId)
+            _userSelect.value = selectList
         }
     }
 
