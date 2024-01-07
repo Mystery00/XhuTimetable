@@ -53,7 +53,7 @@ abstract class PagingComposeViewModel<REQ, RESP : Any>(
             loadStates.append,
             loadStates.prepend,
             loadStates.refresh
-        ).filterIsInstance(LoadState.Error::class.java).firstOrNull()
+        ).filterIsInstance<LoadState.Error>().firstOrNull()
         errorLoadState?.error?.let {
             Log.w(TAG, "handle LoadState Error", it)
             toastMessage(it.message ?: it.javaClass.simpleName)

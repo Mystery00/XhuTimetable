@@ -30,6 +30,10 @@ class CoroutineStopException(override val message: String) : RuntimeException(me
 
 fun <T> Response<T>.checkNeedLogin(): T {
     if (isSuccessful) {
+        if (code() == 204) {
+            @Suppress("UNCHECKED_CAST")
+            return Unit as T
+        }
         return body()!!
     }
     if (code() == 401) {
