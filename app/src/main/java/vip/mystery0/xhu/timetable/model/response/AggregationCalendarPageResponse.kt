@@ -22,7 +22,6 @@ data class CalendarDayItemResponse(
     val location: String,
     val type: CalendarDayItemType,
     val courseName: String = "",
-    val seatNo: String = "",
     val customThingColor: String = "",
 )
 

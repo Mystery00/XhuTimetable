@@ -274,7 +274,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
         var createType by remember { mutableStateOf(CreateType.INPUT) }
 
         val weekDialog = rememberXhuDialogState()
-        val sheetState = rememberModalBottomSheetState()
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
         var courseName by remember { mutableStateOf(customCourse.courseName) }
         var weekList by remember { mutableStateOf(customCourse.weekList) }

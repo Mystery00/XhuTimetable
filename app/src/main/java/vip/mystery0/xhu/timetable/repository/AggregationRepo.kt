@@ -148,6 +148,11 @@ object AggregationRepo : BaseDataRepo {
             //多账号模式下不支持日历
             return emptyList()
         }
+        val enableCalendarView = getConfigStore { enableCalendarView }
+        if (!enableCalendarView) {
+            //未启用日历视图
+            return emptyList()
+        }
         val (loadFromCloud, _) = checkLoadFromCloud(
             forceLoadFromCloud,
             forceLoadFromLocal,

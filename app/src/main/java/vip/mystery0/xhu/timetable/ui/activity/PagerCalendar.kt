@@ -43,9 +43,15 @@ import java.time.Month
 
 val calendarTitleBar: TabTitle = @Composable { ext ->
     val viewModel = ext.viewModel
-    val title = viewModel.todayTitle.collectAsState()
+    val week = viewModel.week.collectAsState()
 
-    Text(text = title.value)
+    val title = when {
+        week.value <= 0 -> "还没有开学哦~"
+        week.value > 20 -> "学期已结束啦~"
+        else -> "第${week.value}周"
+    }
+
+    Text(text = title)
 }
 
 val calendarActions: TabAction = @Composable {
@@ -60,7 +66,7 @@ val calendarContent: TabContent = @Composable { ext ->
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface),
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.3F)),
     ) {
         val calendarList by viewModel.calendarList.collectAsState()
 
@@ -70,7 +76,7 @@ val calendarContent: TabContent = @Composable { ext ->
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surface),
+                            .background(MaterialTheme.colorScheme.surface.copy(0.8F)),
                     ) {
                         Text(
                             text = sheetWeek.title,
@@ -127,7 +133,7 @@ fun BuildCalendarMonthHeader(sheet: CalendarSheet) {
 @Composable
 fun BuildCalendarDay(sheet: CalendarSheet) {
     Row(modifier = Modifier.padding(vertical = 12.dp)) {
-        var backgroundColor = MaterialTheme.colorScheme.surface
+        var backgroundColor = Color.Transparent
         var color = MaterialTheme.colorScheme.onSurface
         if (sheet.today) {
             backgroundColor = MaterialTheme.colorScheme.primaryContainer
@@ -161,10 +167,14 @@ fun BuildCalendarDay(sheet: CalendarSheet) {
                         .padding(end = 12.dp)
                         .fillMaxWidth(),
                     backgroundColor = it.color.copy(alpha = 0.6F),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    elevation = 0.dp,
                 ) {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text(text = it.title, fontWeight = FontWeight.Bold)
+                        if (it.subtitle.isNotBlank()) {
+                            Text(text = it.subtitle)
+                        }
                         Text(text = it.text)
                     }
                 }

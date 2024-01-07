@@ -130,6 +130,9 @@ class MainViewModel : ComposeViewModel() {
     private val _multiAccountMode = MutableStateFlow(false)
     val multiAccountMode: StateFlow<Boolean> = _multiAccountMode
 
+    private val _enableCalendarView = MutableStateFlow(false)
+    val enableCalendarView: StateFlow<Boolean> = _enableCalendarView
+
     private val _showStatus = MutableStateFlow(false)
     val showStatus: StateFlow<Boolean> = _showStatus
 
@@ -183,6 +186,7 @@ class MainViewModel : ComposeViewModel() {
 
     private suspend fun loadFromConfig() {
         _multiAccountMode.value = getConfigStore { multiAccountMode }
+        _enableCalendarView.value = getConfigStore { enableCalendarView && !multiAccountMode }
         _showStatus.value = getConfigStore { showStatus }
         _showTomorrowCourse.value =
             getConfigStore { showTomorrowCourseTime }?.let { LocalTime.now().isAfter(it) } ?: false
@@ -780,6 +784,7 @@ class MainViewModel : ComposeViewModel() {
                             }
                             CalendarSheetItem(
                                 title = item.title,
+                                subtitle = item.courseName,
                                 text = textBuilder.toString(),
                                 color = color,
                             )
@@ -993,6 +998,7 @@ data class CalendarSheet(
 
 data class CalendarSheetItem(
     val title: String,
+    val subtitle: String,
     val text: String,
     val color: Color,
 )

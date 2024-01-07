@@ -93,9 +93,9 @@ class MainActivity : BaseComposeActivity() {
     @Composable
     override fun BuildContent() {
         ShowCheckUpdateDialog()
-        val multiAccountMode by viewModel.multiAccountMode.collectAsState()
+        val enableCalendarView by viewModel.enableCalendarView.collectAsState()
         val coroutineScope = rememberCoroutineScope()
-        val pagerState = rememberPagerState(initialPage = 0) { if (multiAccountMode) 3 else 4 }
+        val pagerState = rememberPagerState(initialPage = 0) { if (enableCalendarView) 4 else 3 }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val permissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
@@ -124,10 +124,10 @@ class MainActivity : BaseComposeActivity() {
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
-                val tab = if (multiAccountMode) {
-                    tabOfWhenMultiMode(pagerState.currentPage)
+                val tab = if (enableCalendarView) {
+                    tabOfWhenEnableCalendar(pagerState.currentPage)
                 } else {
-                    tabOf(pagerState.currentPage)
+                    tabOfWhenDisableCalendar(pagerState.currentPage)
                 }
                 TopAppBar(
                     scrollBehavior = scrollBehavior,
@@ -164,10 +164,10 @@ class MainActivity : BaseComposeActivity() {
             },
             bottomBar = {
                 NavigationBar {
-                    val tabs = if (multiAccountMode) {
-                        Tab.entries.filter { it != Tab.CALENDAR }
-                    } else {
+                    val tabs = if (enableCalendarView) {
                         Tab.entries
+                    } else {
+                        Tab.entries.filter { it != Tab.CALENDAR }
                     }
                     tabs.forEachIndexed { index, tab ->
                         DrawNavigationItem(
@@ -217,10 +217,10 @@ class MainActivity : BaseComposeActivity() {
                             }
                             .fillMaxSize()
                     ) {
-                        if (multiAccountMode) {
-                            tabOfWhenMultiMode(page).content(this, ext)
+                        if (enableCalendarView) {
+                            tabOfWhenEnableCalendar(page).content(this, ext)
                         } else {
-                            tabOf(page).content(this, ext)
+                            tabOfWhenDisableCalendar(page).content(this, ext)
                         }
                     }
                 }
@@ -305,6 +305,7 @@ class MainActivity : BaseComposeActivity() {
                 viewModel.loadConfig()
                 when (eventType) {
                     EventType.MULTI_MODE_CHANGED,
+                    EventType.CHANGE_ENABLE_CALENDAR_VIEW,
                     EventType.CHANGE_MAIN_USER -> {
                         viewModel.checkMainUser()
                         viewModel.refreshCloudDataToState()
@@ -382,7 +383,7 @@ private enum class Tab(
     ),
     CALENDAR(
         label = "月历",
-        icon = XhuStateIcons.weekCourse,
+        icon = XhuStateIcons.calendar,
         titleBar = calendarTitleBar,
         actions = calendarActions,
         content = calendarContent,
@@ -396,7 +397,7 @@ private enum class Tab(
 }
 
 @ExperimentalMaterialApi
-private fun tabOf(index: Int): Tab = when (index) {
+private fun tabOfWhenEnableCalendar(index: Int): Tab = when (index) {
     0 -> Tab.TODAY
     1 -> Tab.WEEK
     2 -> Tab.CALENDAR
@@ -405,7 +406,7 @@ private fun tabOf(index: Int): Tab = when (index) {
 }
 
 @ExperimentalMaterialApi
-private fun tabOfWhenMultiMode(index: Int): Tab = when (index) {
+private fun tabOfWhenDisableCalendar(index: Int): Tab = when (index) {
     0 -> Tab.TODAY
     1 -> Tab.WEEK
     2 -> Tab.PROFILE
