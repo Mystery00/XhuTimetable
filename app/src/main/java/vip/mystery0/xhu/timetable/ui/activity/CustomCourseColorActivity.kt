@@ -81,6 +81,8 @@ class CustomCourseColorActivity : BaseComposeActivity() {
                                     viewModel.loadList(it)
                                 },
                                 onClearClick = {
+                                    searchText = ""
+                                    viewModel.loadList("")
                                     showSearchView = false
                                 }
                             )
