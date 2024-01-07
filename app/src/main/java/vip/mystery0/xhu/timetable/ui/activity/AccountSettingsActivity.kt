@@ -164,7 +164,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                                 tint = MaterialTheme.colorScheme.onSurface,
                             )
                         },
-                        title = { Text(text = "启用情侣模式") },
+                        title = { Text(text = "多账号模式") },
                         subtitle = { Text(text = "将当前所有已登录账号的课表全部显示出来") },
                     ) {
                         EventBus.post(EventType.MULTI_MODE_CHANGED)
@@ -172,7 +172,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                     XhuSettingsMenuLink(
                         title = { Text(text = "今日课程界面账号信息模板") },
                         subtitle = {
-                            Text(text = "启动情侣模式之后，使用该模板来显示对应的账号信息")
+                            Text(text = "启动多账号模式之后，使用该模板来显示对应的账号信息")
                         },
                         onClick = {
                             customTodayUserTemplateDialog.show()
@@ -181,7 +181,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                     XhuSettingsMenuLink(
                         title = { Text(text = "本周课程界面账号信息模板") },
                         subtitle = {
-                            Text(text = "启动情侣模式之后，使用该模板来显示对应的账号信息")
+                            Text(text = "启动多账号模式之后，使用该模板来显示对应的账号信息")
                         },
                         onClick = {
                             customWeekUserTemplateDialog.show()

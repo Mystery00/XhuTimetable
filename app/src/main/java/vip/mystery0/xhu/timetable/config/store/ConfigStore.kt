@@ -234,6 +234,14 @@ class ConfigStore internal constructor() {
         }
         get() = kv.decodeBool(disableBackgroundWhenNightKey, true)
 
+    //启用日历视图
+    private val enableCalendarViewKey = "enableCalendarView"
+    var enableCalendarView: Boolean
+        set(value) {
+            kv.encode(enableCalendarViewKey, value)
+        }
+        get() = kv.decodeBool(enableCalendarViewKey, true)
+
     //课程提醒开关
     private val notifyCourseKey = "notifyCourse"
     var notifyCourse: Boolean

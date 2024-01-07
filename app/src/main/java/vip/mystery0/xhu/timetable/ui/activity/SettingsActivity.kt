@@ -42,6 +42,7 @@ import vip.mystery0.xhu.timetable.config.store.CacheStore
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
+import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
@@ -221,6 +222,31 @@ class SettingsActivity : BaseSelectComposeActivity() {
                             toastString("字体恢复默认成功，重启应用后生效")
                         }
                     )
+                    ConfigSettingsCheckbox(
+                        config = ConfigStore::enableCalendarView,
+                        enabled = !GlobalConfigStore.multiAccountMode,
+                        scope = scope,
+                        icon = {
+                            Icon(
+                                painter = XhuIcons.enableCalendarView,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface,
+                            )
+                        },
+                        title = { Text(text = "启用日历视图") },
+                        subtitle = {
+                            val text = buildString {
+                                append("启用后，可以以日历的视图中查看当前学期的所有课程")
+                                if (GlobalConfigStore.multiAccountMode) {
+                                    appendLine()
+                                    append("【多账号模式下无法使用日历视图】")
+                                }
+                            }
+                            Text(text = text)
+                        }
+                    ) {
+                        EventBus.post(EventType.CHANGE_ENABLE_CALENDAR_VIEW)
+                    }
                 }
                 XhuSettingsGroup(title = {
                     Text(text = "通知设置")

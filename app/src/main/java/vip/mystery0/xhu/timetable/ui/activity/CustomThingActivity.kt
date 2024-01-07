@@ -321,7 +321,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
         val endDateDialog = rememberXhuDialogState()
         val endTimeDialog = rememberXhuDialogState()
         val showColorDialog = rememberXhuDialogState()
-        val sheetState = rememberModalBottomSheetState()
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
         val saveLoadingState by viewModel.saveLoadingState.collectAsState()
 

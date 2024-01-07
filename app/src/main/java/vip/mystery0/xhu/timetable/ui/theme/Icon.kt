@@ -62,6 +62,9 @@ object XhuIcons {
     val disableBackgroundWhenNight: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_disable_when_night)
+    val enableCalendarView: Painter
+        @Composable
+        get() = painterResource(id = R.drawable.ic_enable_calendar_view)
     val nightMode: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_night_mode)
@@ -321,8 +324,8 @@ object XhuIcons {
 
 @Composable
 fun stateOf(checked: Boolean, pair: Pair<Pair<Int, Int>, Pair<Int, Int>>): Painter {
-    val icon = if (isDarkMode()) pair.first else pair.second
-    return if (checked) painterResource(id = icon.first) else painterResource(id = icon.second)
+    val (checkedId, uncheckedId) = if (isDarkMode()) pair.first else pair.second
+    return if (checked) painterResource(id = checkedId) else painterResource(id = uncheckedId)
 }
 
 object XhuStateIcons {
@@ -332,6 +335,9 @@ object XhuStateIcons {
     val weekCourse =
         (R.drawable.ic_week_course_night to R.drawable.ic_week_course_unchecked_night) to
                 (R.drawable.ic_week_course to R.drawable.ic_week_course_unchecked)
+    val calendar =
+        (R.drawable.ic_calendar_night to R.drawable.ic_calendar_unchecked_night) to
+                (R.drawable.ic_calendar to R.drawable.ic_calendar_unchecked)
     val profile = (R.drawable.ic_profile_night to R.drawable.ic_profile_unchecked_night) to
             (R.drawable.ic_profile to R.drawable.ic_profile_unchecked)
 }

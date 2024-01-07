@@ -62,6 +62,7 @@ fun XhuSettingsMenuLink(
 @Composable
 fun ConfigSettingsCheckbox(
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     config: KMutableProperty1<ConfigStore, Boolean>,
     scope: CoroutineScope = rememberCoroutineScope(),
     icon: @Composable () -> Unit = { },
@@ -80,6 +81,7 @@ fun ConfigSettingsCheckbox(
     SwitchPreference(
         state = state,
         title = title,
+        enabled = enabled,
         modifier = modifier,
         icon = icon,
         summary = subtitle,
