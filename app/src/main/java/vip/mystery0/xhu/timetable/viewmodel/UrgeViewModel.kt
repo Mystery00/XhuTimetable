@@ -12,7 +12,7 @@ import vip.mystery0.xhu.timetable.model.response.UrgeItem
 import vip.mystery0.xhu.timetable.repository.UrgeRepo
 import vip.mystery0.xhu.timetable.trackEvent
 
-class UrgeViewModel : PagingComposeViewModel<String, UrgeItem>(
+class UrgeViewModel : PagingComposeViewModel<Long, UrgeItem>(
     {
         UrgeRepo.getUrgeListStream()
     }
@@ -30,7 +30,7 @@ class UrgeViewModel : PagingComposeViewModel<String, UrgeItem>(
     init {
         viewModelScope.launch {
             userName.value = UserStore.getMainUser()?.info?.name ?: "未登录"
-            loadData("")
+            loadData(0)
         }
     }
 
@@ -48,6 +48,7 @@ class UrgeViewModel : PagingComposeViewModel<String, UrgeItem>(
             trackEvent("催更")
             UrgeRepo.doUrge(urgeId)
             _urgeLoading.value = false
+            loadData(System.currentTimeMillis())
         }
     }
 }
