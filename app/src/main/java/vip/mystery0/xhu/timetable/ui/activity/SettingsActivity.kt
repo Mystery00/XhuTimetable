@@ -27,8 +27,9 @@ import androidx.compose.ui.Modifier
 import cn.jpush.android.api.JPushInterface
 import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
-import com.maxkeppeler.sheets.date_time.DateTimeDialog
-import com.maxkeppeler.sheets.date_time.models.DateTimeSelection
+import com.maxkeppeler.sheets.clock.ClockDialog
+import com.maxkeppeler.sheets.clock.models.ClockConfig
+import com.maxkeppeler.sheets.clock.models.ClockSelection
 import com.microsoft.appcenter.crashes.model.TestCrashException
 import kotlinx.coroutines.launch
 import org.koin.core.component.inject
@@ -683,13 +684,14 @@ class SettingsActivity : BaseSelectComposeActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun BuildTimeSelector(
         dialogState: XhuDialogState,
         initTime: LocalTime,
     ) {
         if (dialogState.showing) {
-            DateTimeDialog(
+            ClockDialog(
                 header = Header.Default(
                     title = "请选择时间",
                 ),
@@ -698,11 +700,13 @@ class SettingsActivity : BaseSelectComposeActivity() {
                     onCloseRequest = {
                         dialogState.hide()
                     }),
-                selection = DateTimeSelection.Time(
-                    selectedTime = initTime,
-                ) { newTime ->
-                    viewModel.updateNotifyTime(newTime)
+                selection = ClockSelection.HoursMinutes { hour, minutes ->
+                    viewModel.updateNotifyTime(LocalTime.of(hour, minutes, 0))
                 },
+                config = ClockConfig(
+                    defaultTime = initTime,
+                    is24HourFormat = true,
+                )
             )
         }
     }

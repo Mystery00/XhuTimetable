@@ -25,8 +25,9 @@ import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
-import com.maxkeppeler.sheets.date_time.DateTimeDialog
-import com.maxkeppeler.sheets.date_time.models.DateTimeSelection
+import com.maxkeppeler.sheets.clock.ClockDialog
+import com.maxkeppeler.sheets.clock.models.ClockConfig
+import com.maxkeppeler.sheets.clock.models.ClockSelection
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
@@ -327,13 +328,14 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun BuildTimeSelector(
         dialogState: XhuDialogState,
         initTime: LocalTime,
     ) {
         if (dialogState.showing) {
-            DateTimeDialog(
+            ClockDialog(
                 header = Header.Default(
                     title = "请选择时间",
                 ),
@@ -342,11 +344,13 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
                     onCloseRequest = {
                         dialogState.hide()
                     }),
-                selection = DateTimeSelection.Time(
-                    selectedTime = initTime,
-                ) { newTime ->
-                    viewModel.updateShowTomorrowCourseTime(newTime)
+                selection = ClockSelection.HoursMinutes { hour, minutes ->
+                    viewModel.updateShowTomorrowCourseTime(LocalTime.of(hour, minutes, 0))
                 },
+                config = ClockConfig(
+                    defaultTime = initTime,
+                    is24HourFormat = true,
+                )
             )
         }
     }
