@@ -185,6 +185,7 @@ dependencies {
     implementation("com.maxkeppeler.sheets-compose-dialogs:core:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:calendar:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:color:$sheetsComposeDialogsVersion")
+    implementation("com.maxkeppeler.sheets-compose-dialogs:clock:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:date-time:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:info:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:input:$sheetsComposeDialogsVersion")

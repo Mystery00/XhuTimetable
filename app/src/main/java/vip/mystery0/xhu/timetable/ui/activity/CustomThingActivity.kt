@@ -64,12 +64,13 @@ import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
+import com.maxkeppeler.sheets.clock.ClockDialog
+import com.maxkeppeler.sheets.clock.models.ClockConfig
+import com.maxkeppeler.sheets.clock.models.ClockSelection
 import com.maxkeppeler.sheets.color.ColorDialog
 import com.maxkeppeler.sheets.color.models.ColorConfig
 import com.maxkeppeler.sheets.color.models.ColorSelection
 import com.maxkeppeler.sheets.color.models.SingleColor
-import com.maxkeppeler.sheets.date_time.DateTimeDialog
-import com.maxkeppeler.sheets.date_time.models.DateTimeSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
@@ -89,6 +90,7 @@ import vip.mystery0.xhu.timetable.utils.parseColorHexString
 import vip.mystery0.xhu.timetable.utils.thingDateTimeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.CustomThingViewModel
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 class CustomThingActivity : BaseSelectComposeActivity() {
     private val viewModel: CustomThingViewModel by viewModels()
@@ -245,6 +247,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun BuildTimeSelector(
         dialogState: XhuDialogState,
@@ -255,7 +258,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
         val time = initData.toLocalTime()
 
         if (dialogState.showing) {
-            DateTimeDialog(
+            ClockDialog(
                 header = Header.Default(
                     title = "请选择时间",
                 ),
@@ -264,11 +267,13 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                     onCloseRequest = {
                         dialogState.hide()
                     }),
-                selection = DateTimeSelection.Time(
-                    selectedTime = time,
-                ) { newTime ->
-                    onDateChange(LocalDateTime.of(date, newTime))
+                selection = ClockSelection.HoursMinutes { hour, minutes ->
+                    onDateChange(LocalDateTime.of(date, LocalTime.of(hour, minutes, 0)))
                 },
+                config = ClockConfig(
+                    defaultTime = time,
+                    is24HourFormat = true,
+                )
             )
         }
     }
