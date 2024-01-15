@@ -36,7 +36,6 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.appName
 import vip.mystery0.xhu.timetable.appVersionCode
-import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.config.store.CacheStore
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
@@ -474,12 +473,14 @@ class SettingsActivity : BaseSelectComposeActivity() {
                 XhuSettingsGroup(title = {
                     Text(text = "版本关于")
                 }) {
+
                     XhuSettingsMenuLink(
-                        title = { Text(text = "版本名称") },
+                        title = { Text(text = "ICP备案号") },
                         subtitle = {
-                            Text(text = appVersionName)
+                            Text(text = "蜀ICP备19031621号-2A")
                         },
                         onClick = {
+                            loadInBrowser("https://beian.miit.gov.cn")
                         }
                     )
                     XhuSettingsMenuLink(
