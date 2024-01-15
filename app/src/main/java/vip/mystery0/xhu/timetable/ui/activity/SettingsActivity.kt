@@ -473,7 +473,6 @@ class SettingsActivity : BaseSelectComposeActivity() {
                 XhuSettingsGroup(title = {
                     Text(text = "版本关于")
                 }) {
-
                     XhuSettingsMenuLink(
                         title = { Text(text = "ICP备案号") },
                         subtitle = {
