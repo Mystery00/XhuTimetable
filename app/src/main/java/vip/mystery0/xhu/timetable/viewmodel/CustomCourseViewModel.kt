@@ -150,6 +150,10 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
             }
             val year = getSelectedYear(_yearSelect.value)
             val term = getSelectedTerm(_termSelect.value)
+            if (request.startDayTime > request.endDayTime) {
+                failed("开始节次不能大于结束节次")
+                return@launch
+            }
             request.year = year
             request.term = term
             if (courseId == null || courseId == 0L) {

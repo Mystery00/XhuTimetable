@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,7 +27,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.model.response.ScoreGpaResponse
@@ -48,7 +44,6 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.ScoreViewModel
 
-@OptIn(ExperimentalMaterialApi::class)
 class ScoreActivity : BaseSelectComposeActivity() {
     private val viewModel: ScoreViewModel by viewModels()
 
@@ -61,20 +56,11 @@ class ScoreActivity : BaseSelectComposeActivity() {
         val yearSelect by viewModel.yearSelect.collectAsState()
         val termSelect by viewModel.termSelect.collectAsState()
 
-        val showSelect = rememberXhuDialogState()
-        val scope = rememberCoroutineScope()
-
         val userDialog = rememberXhuDialogState()
         val yearDialog = rememberXhuDialogState()
         val termDialog = rememberXhuDialogState()
 
         fun onBack() {
-            if (showSelect.showing) {
-                scope.launch {
-                    showSelect.hide()
-                }
-                return
-            }
             finish()
         }
 
@@ -96,17 +82,6 @@ class ScoreActivity : BaseSelectComposeActivity() {
                             )
                         }
                     },
-                    actions = {
-                        IconButton(onClick = {
-                            showSelect.toggle()
-                        }) {
-                            Icon(
-                                painter = XhuIcons.Action.more,
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        }
-                    }
                 )
             },
         ) { paddingValues ->
@@ -118,6 +93,20 @@ class ScoreActivity : BaseSelectComposeActivity() {
                 pager = pager,
                 refreshing = refreshing,
                 listContent = {
+                    stickyHeader {
+                        BuildSelectFilterChipContent(
+                            userSelect = userSelect,
+                            yearSelect = yearSelect,
+                            termSelect = termSelect,
+                            showUserDialog = userDialog,
+                            showYearDialog = yearDialog,
+                            showTermDialog = termDialog,
+                            onDataLoad = {
+                                viewModel.loadScoreList()
+                                viewModel.loadScoreGpa()
+                            }
+                        )
+                    }
                     stickyHeader {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -162,19 +151,6 @@ class ScoreActivity : BaseSelectComposeActivity() {
                     }
                 },
             )
-
-            BuildSelectSheetLayout(
-                showBottomSheet = showSelect,
-                userSelect = userSelect,
-                yearSelect = yearSelect,
-                termSelect = termSelect,
-                showUserDialog = userDialog,
-                showYearDialog = yearDialog,
-                showTermDialog = termDialog,
-            ) {
-                viewModel.loadScoreList()
-                viewModel.loadScoreGpa()
-            }
         }
         ShowUserDialog(selectList = userSelect, show = userDialog, onSelect = {
             viewModel.selectUser(it.studentId)
