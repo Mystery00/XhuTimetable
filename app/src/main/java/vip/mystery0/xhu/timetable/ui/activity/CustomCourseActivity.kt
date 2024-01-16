@@ -48,6 +48,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,17 +65,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
+import com.maxkeppeker.sheets.core.models.base.Header
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeler.sheets.input.InputDialog
+import com.maxkeppeler.sheets.input.models.InputConfig
+import com.maxkeppeler.sheets.input.models.InputHeader
+import com.maxkeppeler.sheets.input.models.InputRadioButtonGroup
+import com.maxkeppeler.sheets.input.models.InputSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.model.request.CustomCourseRequest
 import vip.mystery0.xhu.timetable.model.response.AllCourseResponse
 import vip.mystery0.xhu.timetable.model.response.CustomCourseResponse
-import vip.mystery0.xhu.timetable.ui.component.CourseIndexSelector
 import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
 import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
@@ -155,24 +163,17 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                 alwaysShowList = true,
                 listContent = {
                     stickyHeader {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            BuildSelectStickyHeaderContent(
-                                userSelect = userSelect,
-                                yearSelect = yearSelect,
-                                termSelect = termSelect,
-                                showUserDialog = userDialog,
-                                showYearDialog = yearDialog,
-                                showTermDialog = termDialog,
-                                onDataLoad = {
-                                    viewModel.loadCustomCourseList()
-                                }
-                            )
-                        }
+                        BuildSelectFilterChipContent(
+                            userSelect = userSelect,
+                            yearSelect = yearSelect,
+                            termSelect = termSelect,
+                            showUserDialog = userDialog,
+                            showYearDialog = yearDialog,
+                            showTermDialog = termDialog,
+                            onDataLoad = {
+                                viewModel.loadCustomCourseList()
+                            }
+                        )
                     }
                     stickyHeader {
                         Divider()
@@ -245,6 +246,47 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
         )
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun ShowCourseIndexDialog(
+        state: XhuDialogState,
+        initCourseIndex: Pair<Int, Int>,
+        onSelect: (Pair<Int, Int>) -> Unit,
+    ) {
+        if (state.showing) {
+            val inputOptions = listOf(
+                InputRadioButtonGroup(
+                    header = InputHeader(title = "开始节次"),
+                    items = (1..11).toList().map { "第 $it 节" },
+                    selectedIndex = initCourseIndex.first - 1,
+                    required = true,
+                    key = "Start"
+                ),
+                InputRadioButtonGroup(
+                    header = InputHeader(title = "结束节次"),
+                    items = (1..11).toList().map { "第 $it 节" },
+                    selectedIndex = initCourseIndex.second - 1,
+                    required = true,
+                    key = "End"
+                ),
+            )
+
+            InputDialog(
+                header = Header.Default(title = "请选择上课时间"),
+                state = rememberUseCaseState(visible = true, onCloseRequest = { state.hide() }),
+                config = InputConfig(columns = 1),
+                selection = InputSelection(
+                    input = inputOptions,
+                    onPositiveClick = { result ->
+                        val startIndex = result.getInt("Start")
+                        val endIndex = result.getInt("End")
+                        onSelect(startIndex + 1 to endIndex + 1)
+                    },
+                )
+            )
+        }
+    }
+
     @Composable
     private fun ShowWeekDialog(
         state: XhuDialogState,
@@ -273,6 +315,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
     ) {
         var createType by remember { mutableStateOf(CreateType.INPUT) }
 
+        val courseIndexDialog = rememberXhuDialogState()
         val weekDialog = rememberXhuDialogState()
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -300,6 +343,13 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
 
         val focusManager = LocalFocusManager.current
 
+        ShowCourseIndexDialog(
+            state = courseIndexDialog,
+            initCourseIndex = startDayTime to endDayTime,
+        ) { (start, end) ->
+            startDayTime = start
+            endDayTime = end
+        }
         ShowWeekDialog(
             state = weekDialog,
             initDayOfWeek = day,
@@ -399,10 +449,10 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                         .padding(8.dp)
                         .align(Alignment.CenterHorizontally),
                 ) {
-                    val selectedContentColor = MaterialTheme.colorScheme.onPrimary
                     val selectedBackgroundColor = MaterialTheme.colorScheme.primary
-                    val contentColor = MaterialTheme.colorScheme.onPrimary
+                    val selectedContentColor = MaterialTheme.colorScheme.onPrimary
                     val backgroundColor = MaterialTheme.colorScheme.inversePrimary
+                    val contentColor = contentColorFor(backgroundColor = backgroundColor)
                     OutlinedButton(
                         shape = RoundedCornerShape(
                             topStart = 8.dp,
@@ -589,16 +639,18 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                                 painter = XhuIcons.CustomCourse.time,
                                 contentDescription = null
                             )
-                            CourseIndexSelector(
-                                startIndex = startDayTime,
-                                endIndex = endDayTime,
+                            Text(
                                 modifier = Modifier
                                     .weight(1F)
-                                    .height(36.dp),
-                            ) { startIndex, endIndex ->
-                                startDayTime = startIndex
-                                endDayTime = endIndex
-                            }
+                                    .clickable(
+                                        onClick = {
+                                            courseIndexDialog.show()
+                                        },
+                                        indication = null,
+                                        interactionSource = MutableInteractionSource(),
+                                    ),
+                                text = "第 $startDayTime - $endDayTime 节",
+                            )
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
                                 modifier = Modifier
@@ -919,7 +971,9 @@ private fun BuildItem(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "创建时间：${item.createTime.formatChinaDateTime()}"
+                    text = "收录时间：${item.createTime.formatChinaDateTime()}",
+                    fontSize = 12.sp,
+                    fontStyle = FontStyle.Italic,
                 )
             }
         }

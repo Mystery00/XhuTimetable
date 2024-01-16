@@ -113,7 +113,7 @@ data class UserSelect(
     val studentId: String,
     val userName: String,
     override val selected: Boolean,
-    override val title: String = "${userName}(${studentId})",
+    override val title: String = userName,
 ) : Selectable
 
 data class YearSelect(

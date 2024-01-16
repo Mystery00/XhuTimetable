@@ -157,18 +157,11 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                 alwaysShowList = true,
                 listContent = {
                     stickyHeader {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
+                        BuildUserSelectFilterChipContent(
+                            userSelect = userSelect,
+                            showUserDialog = userDialog,
                         ) {
-                            BuildUserSelectStickyHeaderContent(
-                                userSelect = userSelect,
-                                showUserDialog = userDialog,
-                            ) {
-                                viewModel.loadCustomThingList()
-                            }
+                            viewModel.loadCustomThingList()
                         }
                     }
                     stickyHeader {
