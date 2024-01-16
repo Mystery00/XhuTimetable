@@ -260,6 +260,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                     items = (1..11).toList().map { "第 $it 节" },
                     selectedIndex = initCourseIndex.first - 1,
                     required = true,
+                    columns = 1,
                     key = "Start"
                 ),
                 InputRadioButtonGroup(
@@ -267,6 +268,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                     items = (1..11).toList().map { "第 $it 节" },
                     selectedIndex = initCourseIndex.second - 1,
                     required = true,
+                    columns = 1,
                     key = "End"
                 ),
             )
@@ -274,7 +276,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
             InputDialog(
                 header = Header.Default(title = "请选择上课时间"),
                 state = rememberUseCaseState(visible = true, onCloseRequest = { state.hide() }),
-                config = InputConfig(columns = 1),
+                config = InputConfig(columns = 2),
                 selection = InputSelection(
                     input = inputOptions,
                     onPositiveClick = { result ->
