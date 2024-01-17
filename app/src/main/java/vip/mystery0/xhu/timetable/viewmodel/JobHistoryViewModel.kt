@@ -20,13 +20,6 @@ class JobHistoryViewModel : ComposeViewModel() {
     private val _historyListState = MutableStateFlow(JobHistoryListState())
     val historyListState: StateFlow<JobHistoryListState> = _historyListState
 
-    private val _errorMessage = MutableStateFlow(Pair(System.currentTimeMillis(), ""))
-    val errorMessage: StateFlow<Pair<Long, String>> = _errorMessage
-
-    private fun toastMessage(message: String) {
-        _errorMessage.value = System.currentTimeMillis() to message
-    }
-
     init {
         loadHistoryList()
     }

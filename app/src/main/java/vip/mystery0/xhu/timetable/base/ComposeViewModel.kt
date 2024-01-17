@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.base
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.config.store.User
@@ -10,6 +11,12 @@ import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import java.time.Month
 
 abstract class ComposeViewModel : ViewModel(), KoinComponent {
+    val errorMessage = MutableStateFlow("")
+
+    protected fun toastMessage(message: String) {
+        errorMessage.value = message
+    }
+
     protected suspend fun initUserSelect(): List<UserSelect> {
         val loggedUserList = UserStore.loggedUserList()
         val mainUserId = UserStore.mainUserId()

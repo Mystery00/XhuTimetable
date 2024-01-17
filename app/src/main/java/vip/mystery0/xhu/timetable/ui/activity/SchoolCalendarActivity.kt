@@ -148,7 +148,7 @@ class SchoolCalendarActivity : BaseSelectComposeActivity() {
                             .memoryCachePolicy(CachePolicy.ENABLED)
                             .diskCachePolicy(CachePolicy.ENABLED)
                             .listener(onError = { _, result ->
-                                result.throwable.message ?: "加载失败".toast(true)
+                                (result.throwable.message ?: "加载失败").notBlankToast(true)
                             })
                             .build(),
                         loading = {
@@ -173,8 +173,8 @@ class SchoolCalendarActivity : BaseSelectComposeActivity() {
             },
             withButtonView = false,
         )
-        if (loading.errorMessage.isNotBlank()) {
-            loading.errorMessage.toast(true)
+        HandleErrorMessage(errorMessage = loading.errorMessage) {
+            viewModel.clearLoadingErrorMessage()
         }
     }
 }

@@ -115,6 +115,14 @@ class FeedbackViewModel : ComposeViewModel() {
         webSocket?.close(1000, "客户端下线")
         super.onCleared()
     }
+
+    fun clearLoadingErrorMessage() {
+        _loading.value = _loading.value.copy(errorMessage = "")
+    }
+
+    fun clearWebSocketErrorMessage() {
+        _wsStatus.value = _wsStatus.value.copy(errorMessage = "")
+    }
 }
 
 data class LoadingState(

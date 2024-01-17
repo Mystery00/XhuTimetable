@@ -58,6 +58,10 @@ class SchoolCalendarViewModel : ComposeViewModel() {
             }
         }
     }
+
+    fun clearLoadingErrorMessage() {
+        _loading.value = _loading.value.copy(errorMessage = "")
+    }
 }
 
 data class SchoolCalendarData(

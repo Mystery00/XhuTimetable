@@ -97,10 +97,8 @@ class UrgeActivity : BasePageComposeActivity() {
             )
         }
 
-        val errorMessage by viewModel.errorMessage.collectAsState()
-        if (errorMessage.second.isNotBlank()) {
-            errorMessage.second.toast(true)
-        }
+        HandleErrorMessage(flow = viewModel.errorMessage)
+
         val urgeLoading by viewModel.urgeLoading.collectAsState()
         val loadingDialog = observerXhuDialogState(urgeLoading)
         ShowProgressDialog(showState = loadingDialog, text = "正在催更...")

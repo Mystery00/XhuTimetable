@@ -18,9 +18,6 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 class ClassSettingsViewModel : ComposeViewModel() {
-    private val _errorMessage = MutableStateFlow("")
-    val errorMessage: StateFlow<String> = _errorMessage
-
     private val _selectYearAndTermList = MutableStateFlow<List<String>>(emptyList())
     val selectYearAndTermList: StateFlow<List<String>> = _selectYearAndTermList
 

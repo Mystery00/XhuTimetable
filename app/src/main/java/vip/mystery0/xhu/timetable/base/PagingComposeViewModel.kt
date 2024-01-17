@@ -36,13 +36,6 @@ abstract class PagingComposeViewModel<REQ, RESP : Any>(
     private val _refreshing = MutableStateFlow(false)
     val refreshing: StateFlow<Boolean> = _refreshing
 
-    private val _errorMessage = MutableStateFlow(Pair(System.currentTimeMillis(), ""))
-    val errorMessage: StateFlow<Pair<Long, String>> = _errorMessage
-
-    protected fun toastMessage(message: String) {
-        _errorMessage.value = System.currentTimeMillis() to message
-    }
-
     protected suspend fun loadData(req: REQ) {
         _refreshing.value = true
         pageRequestFlow.emit(req)

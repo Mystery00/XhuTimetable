@@ -29,7 +29,7 @@ class StartActivity : BaseComposeActivity() {
     override fun BuildContentWindow() {
         val readyState by viewModel.readyState.collectAsState()
         val isLoginState by viewModel.isLoginState.collectAsState()
-        readyState.errorMessage.notBlankToast(true)
+        HandleErrorMessage(errorMessage = readyState.errorMessage) {}
         if (!readyState.loading) {
             goToMainScreen(
                 isLoginState,

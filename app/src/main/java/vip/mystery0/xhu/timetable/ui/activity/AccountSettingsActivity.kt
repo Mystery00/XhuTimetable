@@ -88,7 +88,6 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
-        val errorMessage by viewModel.errorMessage.collectAsState()
         val editMode = remember { mutableStateOf(false) }
         Scaffold(
             topBar = {
@@ -236,9 +235,8 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                     })
             }
         }
-        if (errorMessage.isNotBlank()) {
-            errorMessage.toast(true)
-        }
+
+        HandleErrorMessage(flow = viewModel.errorMessage)
     }
 
     @OptIn(ExperimentalMaterial3Api::class)

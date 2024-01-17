@@ -156,7 +156,8 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                                 } else if (Duration.between(nextTime, thisTime).toHours() > 1) {
                                     item {
                                         DayHeader(
-                                            dayString = thisTime.atZone(Formatter.ZONE_CHINA).format(Formatter.TIME_NO_SECONDS)
+                                            dayString = thisTime.atZone(Formatter.ZONE_CHINA)
+                                                .format(Formatter.TIME_NO_SECONDS)
                                         )
                                     }
                                 }
@@ -176,11 +177,12 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                     }
                 }
             }
-            if (loading.errorMessage.isNotBlank()) {
-                loading.errorMessage.toast(true)
+
+            HandleErrorMessage(errorMessage = loading.errorMessage) {
+                viewModel.clearLoadingErrorMessage()
             }
-            if (wsState.errorMessage.isNotBlank()) {
-                wsState.errorMessage.toast(true)
+            HandleErrorMessage(errorMessage = wsState.errorMessage) {
+                viewModel.clearWebSocketErrorMessage()
             }
         }
     }

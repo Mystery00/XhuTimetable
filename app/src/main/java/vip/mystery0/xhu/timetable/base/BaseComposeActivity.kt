@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -66,6 +67,8 @@ import com.maxkeppeler.sheets.state.StateDialog
 import com.maxkeppeler.sheets.state.models.ProgressIndicator
 import com.maxkeppeler.sheets.state.models.State
 import com.maxkeppeler.sheets.state.models.StateConfig
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
@@ -96,6 +99,30 @@ abstract class BaseComposeActivity : ComponentActivity(), KoinComponent {
 
     @Composable
     open fun BuildContent() {
+    }
+
+    @Composable
+    fun HandleErrorMessage(
+        flow: MutableStateFlow<String>,
+        showLong: Boolean = true,
+    ) {
+        val errorMessage by flow.collectAsState()
+        HandleErrorMessage(errorMessage = errorMessage, showLong = showLong) {
+            flow.value = ""
+        }
+    }
+
+    @Composable
+    fun HandleErrorMessage(
+        errorMessage: String,
+        showLong: Boolean = true,
+        cancel: () -> Unit,
+    ) {
+        errorMessage.notBlankToast(showLong)
+        LaunchedEffect(errorMessage) {
+            delay(500)
+            cancel()
+        }
     }
 
     fun <T : Activity> intentTo(

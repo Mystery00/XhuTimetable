@@ -176,8 +176,8 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
             viewModel.selectTerm(it.value)
         })
 
-        if (expScoreListState.errorMessage.isNotBlank()) {
-            expScoreListState.errorMessage.toast(true)
+        HandleErrorMessage(errorMessage = expScoreListState.errorMessage) {
+            viewModel.clearErrorMessage()
         }
         BackHandler(
             enabled = showSelect.showing,
