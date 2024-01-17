@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -266,9 +267,9 @@ fun ChatItemBubble(
     message: Message,
 ) {
     val backgroundBubbleColor = if (message.isMe) {
-        MaterialTheme.colorScheme.primary
+        MaterialTheme.colorScheme.primaryContainer
     } else {
-        MaterialTheme.colorScheme.secondary
+        MaterialTheme.colorScheme.secondaryContainer
     }
     val shape = if (message.isMe) {
         SendChatBubbleShape
@@ -298,25 +299,27 @@ fun ClickableMessage(
         primary = message.isMe
     )
     val textColor = if (message.isMe) {
-        MaterialTheme.colorScheme.onPrimary
+        MaterialTheme.colorScheme.onPrimaryContainer
     } else {
-        MaterialTheme.colorScheme.onSecondary
+        MaterialTheme.colorScheme.onSecondaryContainer
     }
 
-    ClickableText(
-        text = styledMessage,
-        modifier = Modifier.padding(16.dp),
-        style = TextStyle.Default.copy(color = textColor),
-        onClick = {
-            styledMessage
-                .getStringAnnotations(start = it, end = it)
-                .firstOrNull()
-                ?.let { annotation ->
-                    when (annotation.tag) {
-                        SymbolAnnotationType.LINK.name -> uriHandler.openUri(annotation.item)
-                        else -> Unit
+    SelectionContainer {
+        ClickableText(
+            text = styledMessage,
+            modifier = Modifier.padding(16.dp),
+            style = TextStyle.Default.copy(color = textColor),
+            onClick = {
+                styledMessage
+                    .getStringAnnotations(start = it, end = it)
+                    .firstOrNull()
+                    ?.let { annotation ->
+                        when (annotation.tag) {
+                            SymbolAnnotationType.LINK.name -> uriHandler.openUri(annotation.item)
+                            else -> Unit
+                        }
                     }
-                }
-        }
-    )
+            }
+        )
+    }
 }

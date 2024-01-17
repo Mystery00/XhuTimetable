@@ -47,14 +47,13 @@ fun messageFormatter(
     val tokens = symbolPattern.findAll(text)
 
     return buildAnnotatedString {
-
         var cursorPosition = 0
 
         val codeSnippetBackground =
             if (primary) {
-                MaterialTheme.colorScheme.secondary
+                MaterialTheme.colorScheme.primaryContainer
             } else {
-                MaterialTheme.colorScheme.surface
+                MaterialTheme.colorScheme.secondaryContainer
             }
 
         for (token in tokens) {
