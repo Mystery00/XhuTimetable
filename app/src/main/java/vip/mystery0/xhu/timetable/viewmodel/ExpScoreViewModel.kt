@@ -78,6 +78,10 @@ class ExpScoreViewModel : ComposeViewModel(), KoinComponent {
             _termSelect.value = setSelectedTerm(_termSelect.value, term)
         }
     }
+
+    fun clearErrorMessage() {
+        _expScoreListState.value = _expScoreListState.value.copy(errorMessage = "")
+    }
 }
 
 data class ExpScoreListState(

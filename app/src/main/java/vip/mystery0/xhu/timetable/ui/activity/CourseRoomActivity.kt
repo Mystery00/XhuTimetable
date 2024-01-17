@@ -119,10 +119,8 @@ class CourseRoomActivity : BaseSelectComposeActivity() {
         }
 
         CourseRoomBottomSheet(openBottomSheet, scope)
-        val errorMessage by viewModel.errorMessage.collectAsState()
-        if (errorMessage.second.isNotBlank()) {
-            errorMessage.second.toast(true)
-        }
+
+        HandleErrorMessage(flow = viewModel.errorMessage)
     }
 
     @Composable

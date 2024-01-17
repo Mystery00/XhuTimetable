@@ -222,10 +222,8 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
             viewModel.selectTerm(it.value)
         })
         CustomCourseBottomSheet(customCourseState.value, openBottomSheet, scope)
-        val errorMessage by viewModel.errorMessage.collectAsState()
-        if (errorMessage.second.isNotBlank()) {
-            errorMessage.second.toast(true)
-        }
+
+        HandleErrorMessage(flow = viewModel.errorMessage)
     }
 
     @Composable

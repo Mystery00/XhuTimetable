@@ -209,6 +209,10 @@ class BackgroundViewModel : ComposeViewModel() {
             EventBus.post(EventType.CHANGE_MAIN_BACKGROUND)
         }
     }
+
+    fun clearErrorMessage() {
+        _backgroundListState.value = _backgroundListState.value.copy(errorMessage = "")
+    }
 }
 
 data class BackgroundListState(

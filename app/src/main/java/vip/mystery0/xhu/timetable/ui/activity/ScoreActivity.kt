@@ -162,10 +162,7 @@ class ScoreActivity : BaseSelectComposeActivity() {
             viewModel.selectTerm(it.value)
         })
 
-        val errorMessage by viewModel.errorMessage.collectAsState()
-        if (errorMessage.second.isNotBlank()) {
-            errorMessage.second.toast(true)
-        }
+        HandleErrorMessage(flow = viewModel.errorMessage)
     }
 
     override fun onStart() {

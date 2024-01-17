@@ -100,10 +100,8 @@ class ExamActivity : BaseSelectComposeActivity() {
         ShowUserDialog(selectList = userSelect, show = showUserSelect, onSelect = {
             viewModel.selectUser(it.studentId)
         })
-        val errorMessage by viewModel.errorMessage.collectAsState()
-        if (errorMessage.second.isNotBlank()) {
-            errorMessage.second.toast(true)
-        }
+
+        HandleErrorMessage(flow = viewModel.errorMessage)
     }
 
     override fun onStart() {

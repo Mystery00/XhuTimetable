@@ -271,9 +271,7 @@ class LoginActivity : BaseComposeActivity() {
                 }
                 finish()
             }
-            if (loginState.errorMessage.isNotBlank()) {
-                loginState.errorMessage.toast(true)
-            }
+            loginState.errorMessage.notBlankToast(true)
         }
     }
 

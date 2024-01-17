@@ -322,10 +322,8 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
             dialogState = termStartTimeState,
             initDate = currentTermStartTime.data,
         )
-        val errorMessage by viewModel.errorMessage.collectAsState()
-        if (errorMessage.isNotBlank()) {
-            errorMessage.toast(true)
-        }
+
+        HandleErrorMessage(flow = viewModel.errorMessage)
     }
 
     @OptIn(ExperimentalMaterial3Api::class)

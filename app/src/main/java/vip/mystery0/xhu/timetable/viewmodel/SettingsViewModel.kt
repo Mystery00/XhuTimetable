@@ -42,9 +42,6 @@ class SettingsViewModel : ComposeViewModel() {
 
     private val workManager: WorkManager by inject()
 
-    private val _errorMessage = MutableStateFlow("")
-    val errorMessage: StateFlow<String> = _errorMessage
-
     val nightMode: StateFlow<NightMode> = Theme.nightMode
 
     private val _notifyTimeData = MutableStateFlow<LocalTime?>(null)

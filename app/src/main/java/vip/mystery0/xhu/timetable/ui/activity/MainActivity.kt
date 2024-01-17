@@ -227,10 +227,7 @@ class MainActivity : BaseComposeActivity() {
             }
         }
 
-        val errorMessage by viewModel.errorMessage.collectAsState()
-        if (errorMessage.second.isNotBlank()) {
-            errorMessage.second.toast(true)
-        }
+        HandleErrorMessage(flow = viewModel.errorMessage)
         val emptyUser by viewModel.emptyUser.collectAsState()
         if (emptyUser) {
             intentTo(LoginActivity::class) {

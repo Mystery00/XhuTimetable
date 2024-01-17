@@ -76,9 +76,6 @@ class MainViewModel : ComposeViewModel() {
 
     private val isDarkMode = MutableStateFlow(false)
 
-    private val _errorMessage = MutableStateFlow(Pair(System.currentTimeMillis(), ""))
-    val errorMessage: StateFlow<Pair<Long, String>> = _errorMessage
-
     //页面标题
     private val _todayTitle = MutableStateFlow("")
     val todayTitle: StateFlow<String> = _todayTitle
@@ -178,10 +175,6 @@ class MainViewModel : ComposeViewModel() {
         loadLocalDataToState()
         //加载今日节假日信息
         loadTodayHoliday()
-    }
-
-    private fun toastMessage(message: String) {
-        _errorMessage.value = System.currentTimeMillis() to message
     }
 
     private suspend fun loadFromConfig() {

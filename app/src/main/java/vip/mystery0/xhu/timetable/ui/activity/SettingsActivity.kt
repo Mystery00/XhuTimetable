@@ -668,10 +668,6 @@ class SettingsActivity : BaseSelectComposeActivity() {
                 }
             }
         }
-        val errorMessage by viewModel.errorMessage.collectAsState()
-        if (errorMessage.isNotBlank()) {
-            errorMessage.toast(true)
-        }
         BuildNightModeSelector(
             dialogState = showNightModeState,
             initNightMode = nightMode,
@@ -685,6 +681,8 @@ class SettingsActivity : BaseSelectComposeActivity() {
             initChannel = versionChannel,
         )
         ShowCheckUpdateDialog()
+
+        HandleErrorMessage(flow = viewModel.errorMessage)
     }
 
     @Composable

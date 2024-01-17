@@ -15,9 +15,6 @@ import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.repository.UserRepo
 
 class AccountManagementViewModel : ComposeViewModel() {
-    private val _errorMessage = MutableStateFlow("")
-    val errorMessage: StateFlow<String> = _errorMessage
-
     private val _loggedUserList = MutableStateFlow<List<UserItem>>(emptyList())
     val loggedUserList: StateFlow<List<UserItem>> = _loggedUserList
 
