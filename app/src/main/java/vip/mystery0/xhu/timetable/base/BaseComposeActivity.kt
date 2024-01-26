@@ -120,8 +120,10 @@ abstract class BaseComposeActivity : ComponentActivity(), KoinComponent {
     ) {
         errorMessage.notBlankToast(showLong)
         LaunchedEffect(errorMessage) {
-            delay(500)
-            cancel()
+            if (errorMessage.isNotBlank()) {
+                delay(5000)
+                cancel()
+            }
         }
     }
 

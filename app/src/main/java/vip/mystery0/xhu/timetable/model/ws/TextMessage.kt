@@ -1,15 +1,15 @@
-package vip.mystery0.xhu.timetable.model.response
+package vip.mystery0.xhu.timetable.model.ws
 
 import java.time.Instant
 
-data class Message(
+data class TextMessage(
     val id: Long,
     val time: Long,
     val fromUserId: String,
     val content: String,
     val messageType: MessageType,
     val status: Status,
-) {
+) : BaseMessage {
     @Transient
     var isMe: Boolean = false
 

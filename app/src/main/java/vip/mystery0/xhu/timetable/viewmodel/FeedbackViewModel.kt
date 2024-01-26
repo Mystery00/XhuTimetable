@@ -13,7 +13,8 @@ import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.isOnline
 import vip.mystery0.xhu.timetable.model.event.EventType
-import vip.mystery0.xhu.timetable.model.response.Message
+import vip.mystery0.xhu.timetable.model.ws.AdminStatus
+import vip.mystery0.xhu.timetable.model.ws.TextMessage
 import vip.mystery0.xhu.timetable.module.HINT_NETWORK
 import vip.mystery0.xhu.timetable.repository.FeedbackRepo
 
@@ -29,6 +30,9 @@ class FeedbackViewModel : ComposeViewModel() {
 
     private val _wsStatus = MutableStateFlow(WebSocketState(WebSocketStatus.DISCONNECTED))
     val wsStatus: StateFlow<WebSocketState> = _wsStatus
+
+    private val _adminStatus = MutableStateFlow(AdminOnlineState(false))
+    val adminStatus: StateFlow<AdminOnlineState> = _adminStatus
 
     val messageState = MessageState(emptyList())
 
@@ -105,6 +109,11 @@ class FeedbackViewModel : ComposeViewModel() {
             messageConsumer = {
                 messageState.addMessage(it)
             },
+            systemMessageConsumer = {
+                if (it is AdminStatus) {
+                    _adminStatus.value = AdminOnlineState(it.online, it.onlineMessage)
+                }
+            },
             statusConsumer = {
                 _wsStatus.value = it
             }
@@ -123,6 +132,10 @@ class FeedbackViewModel : ComposeViewModel() {
     fun clearWebSocketErrorMessage() {
         _wsStatus.value = _wsStatus.value.copy(errorMessage = "")
     }
+
+    fun clearAdminOnlineMessage() {
+        _adminStatus.value = _adminStatus.value.copy(message = "")
+    }
 }
 
 data class LoadingState(
@@ -130,23 +143,28 @@ data class LoadingState(
     val errorMessage: String = "",
 )
 
-class MessageState(initialMessages: List<Message>) {
-    private val _messages: MutableList<Message> =
+class MessageState(initialMessages: List<TextMessage>) {
+    private val _Text_messages: MutableList<TextMessage> =
         mutableStateListOf(*initialMessages.toTypedArray())
-    val messages: List<Message> = _messages
+    val messages: List<TextMessage> = _Text_messages
 
-    fun loadMessage(msgList: List<Message>) {
-        _messages.addAll(msgList)
+    fun loadMessage(msgList: List<TextMessage>) {
+        _Text_messages.addAll(msgList)
     }
 
-    fun addMessage(msg: Message) {
-        _messages.add(0, msg)
+    fun addMessage(msg: TextMessage) {
+        _Text_messages.add(0, msg)
     }
 }
 
 data class WebSocketState(
     val status: WebSocketStatus,
     val errorMessage: String = "",
+)
+
+data class AdminOnlineState(
+    val online: Boolean,
+    val message: String = "",
 )
 
 enum class WebSocketStatus {

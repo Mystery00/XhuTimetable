@@ -48,7 +48,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.store.Formatter
-import vip.mystery0.xhu.timetable.model.response.Message
+import vip.mystery0.xhu.timetable.model.ws.TextMessage
 import vip.mystery0.xhu.timetable.ui.activity.feedback.SymbolAnnotationType
 import vip.mystery0.xhu.timetable.ui.activity.feedback.UserInput
 import vip.mystery0.xhu.timetable.ui.activity.feedback.messageFormatter
@@ -69,6 +69,7 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
         val scope = rememberCoroutineScope()
 
         val wsState by viewModel.wsStatus.collectAsState()
+        val adminStatus by viewModel.adminStatus.collectAsState()
 
         Scaffold(
             topBar = {
@@ -185,6 +186,9 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
             HandleErrorMessage(errorMessage = wsState.errorMessage) {
                 viewModel.clearWebSocketErrorMessage()
             }
+            HandleErrorMessage(errorMessage = adminStatus.message) {
+                viewModel.clearAdminOnlineMessage()
+            }
         }
     }
 }
@@ -192,7 +196,7 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
 @Composable
 fun Message(
     modifier: Modifier,
-    msg: Message,
+    msg: TextMessage,
     isFirstMessage: Boolean,
     isLastMessage: Boolean,
 ) {
@@ -212,7 +216,7 @@ fun Message(
 
 @Composable
 fun TextMessage(
-    msg: Message,
+    msg: TextMessage,
     isFirstMessage: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -264,14 +268,14 @@ private fun RowScope.DayHeaderLine() {
 
 @Composable
 fun ChatItemBubble(
-    message: Message,
+    textMessage: TextMessage,
 ) {
-    val backgroundBubbleColor = if (message.isMe) {
+    val backgroundBubbleColor = if (textMessage.isMe) {
         MaterialTheme.colorScheme.primaryContainer
     } else {
         MaterialTheme.colorScheme.secondaryContainer
     }
-    val shape = if (message.isMe) {
+    val shape = if (textMessage.isMe) {
         SendChatBubbleShape
     } else {
         ReceiveChatBubbleShape
@@ -282,7 +286,7 @@ fun ChatItemBubble(
             shape = shape
         ) {
             ClickableMessage(
-                message = message,
+                textMessage = textMessage,
             )
         }
     }
@@ -290,15 +294,15 @@ fun ChatItemBubble(
 
 @Composable
 fun ClickableMessage(
-    message: Message,
+    textMessage: TextMessage,
 ) {
     val uriHandler = LocalUriHandler.current
 
     val styledMessage = messageFormatter(
-        text = message.content,
-        primary = message.isMe
+        text = textMessage.content,
+        primary = textMessage.isMe
     )
-    val textColor = if (message.isMe) {
+    val textColor = if (textMessage.isMe) {
         MaterialTheme.colorScheme.onPrimaryContainer
     } else {
         MaterialTheme.colorScheme.onSecondaryContainer
