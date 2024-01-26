@@ -1,6 +1,8 @@
 package vip.mystery0.xhu.timetable.repository
 
 import android.util.Log
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.adapter
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -12,8 +14,11 @@ import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
-import vip.mystery0.xhu.timetable.model.response.Message
-import vip.mystery0.xhu.timetable.module.moshiAdapter
+import vip.mystery0.xhu.timetable.model.ws.BaseMessage
+import vip.mystery0.xhu.timetable.model.ws.MessageAdapter
+import vip.mystery0.xhu.timetable.model.ws.SystemMessage
+import vip.mystery0.xhu.timetable.model.ws.TextMessage
+import vip.mystery0.xhu.timetable.module.registerAdapter
 import vip.mystery0.xhu.timetable.viewmodel.WebSocketState
 import vip.mystery0.xhu.timetable.viewmodel.WebSocketStatus
 import java.util.concurrent.TimeUnit
@@ -22,10 +27,16 @@ object FeedbackRepo : BaseDataRepo {
     private const val TAG = "FeedbackRepo"
     private val feedbackApi: FeedbackApi by inject()
 
-    private val jsonAdapter = moshiAdapter<Message>()
+    @OptIn(ExperimentalStdlibApi::class)
+    private val jsonAdapter = Moshi.Builder()
+        .registerAdapter()
+        .add(BaseMessage::class.java, MessageAdapter())
+        .build()
+        .adapter<BaseMessage>()
 
     suspend fun initWebSocket(
-        messageConsumer: (Message) -> Unit,
+        messageConsumer: (TextMessage) -> Unit,
+        systemMessageConsumer: (SystemMessage) -> Unit,
         statusConsumer: (WebSocketState) -> Unit,
     ): WebSocket {
         statusConsumer(WebSocketState(WebSocketStatus.CONNECTING))
@@ -45,9 +56,16 @@ object FeedbackRepo : BaseDataRepo {
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 super.onMessage(webSocket, text)
-                jsonAdapter.fromJson(text)?.let {
-                    it.generate(mainUser.studentId)
-                    messageConsumer(it)
+                val msg = jsonAdapter.fromJson(text) ?: return
+                when (msg) {
+                    is TextMessage -> {
+                        msg.generate(mainUser.studentId)
+                        messageConsumer(msg)
+                    }
+
+                    is SystemMessage -> {
+                        systemMessageConsumer(msg)
+                    }
                 }
             }
 
@@ -69,7 +87,7 @@ object FeedbackRepo : BaseDataRepo {
         })
     }
 
-    suspend fun loadLastMessage(lastId: Long, size: Int): List<Message> {
+    suspend fun loadLastMessage(lastId: Long, size: Int): List<TextMessage> {
         val mainUser = UserStore.mainUser()
         val list = mainUser.withAutoLoginOnce {
             feedbackApi.pullMessage(it, lastId, size)
@@ -83,7 +101,7 @@ object FeedbackRepo : BaseDataRepo {
             return false
         }
 
-        val firstId= getCacheStore { firstFeedbackMessageId }
+        val firstId = getCacheStore { firstFeedbackMessageId }
         return mainUser().withAutoLoginOnce {
             feedbackApi.checkMessage(it, firstId)
         }.newResult
