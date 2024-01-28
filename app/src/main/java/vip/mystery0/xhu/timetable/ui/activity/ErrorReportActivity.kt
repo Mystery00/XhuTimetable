@@ -75,7 +75,7 @@ class ErrorReportActivity : BaseComposeActivity() {
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Button(
-                        onClick = { joinQQGroup(this@ErrorReportActivity) },
+                        onClick = { joinQQGroup(true) },
                         modifier = Modifier.weight(1F),
                     ) {
                         Text(text = "加入交流反馈群")

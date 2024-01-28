@@ -262,6 +262,12 @@ object XhuIcons {
                 painterResource(id = R.drawable.ic_job_night) to
                         painterResource(id = R.drawable.ic_job)
             )
+        val joinGroup: Painter
+            @Composable
+            get() = iconOf(
+                painterResource(id = R.drawable.ic_join_group_night) to
+                        painterResource(id = R.drawable.ic_join_group)
+            )
         val unknownMenu: Painter
             @Composable
             get() = iconOf(
@@ -319,6 +325,9 @@ object XhuIcons {
         val failed: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_ws_state_failed)
+        val adminOnline: Painter
+            @Composable
+            get() = painterResource(id = R.drawable.ic_admin_status)
     }
 }
 

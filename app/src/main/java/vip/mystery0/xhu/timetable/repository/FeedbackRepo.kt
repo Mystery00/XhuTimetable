@@ -10,6 +10,8 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.FeedbackApi
+import vip.mystery0.xhu.timetable.appVersionCode
+import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
@@ -19,6 +21,7 @@ import vip.mystery0.xhu.timetable.model.ws.MessageAdapter
 import vip.mystery0.xhu.timetable.model.ws.SystemMessage
 import vip.mystery0.xhu.timetable.model.ws.TextMessage
 import vip.mystery0.xhu.timetable.module.registerAdapter
+import vip.mystery0.xhu.timetable.publicDeviceId
 import vip.mystery0.xhu.timetable.viewmodel.WebSocketState
 import vip.mystery0.xhu.timetable.viewmodel.WebSocketStatus
 import java.util.concurrent.TimeUnit
@@ -44,6 +47,9 @@ object FeedbackRepo : BaseDataRepo {
         val url = "wss://ws.api.mystery0.vip/ws?sessionToken=${mainUser.token}"
         val request = Request.Builder()
             .url(url)
+            .addHeader("deviceId", "android-$publicDeviceId")
+            .addHeader("clientVersionName", appVersionName)
+            .addHeader("clientVersionCode", appVersionCode)
             .build()
         val webSocketClient = OkHttpClient.Builder()
             .pingInterval(5, TimeUnit.SECONDS)
@@ -56,6 +62,7 @@ object FeedbackRepo : BaseDataRepo {
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 super.onMessage(webSocket, text)
+                Log.d(TAG, "onMessage: $text")
                 val msg = jsonAdapter.fromJson(text) ?: return
                 when (msg) {
                     is TextMessage -> {
