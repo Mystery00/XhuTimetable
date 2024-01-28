@@ -164,15 +164,12 @@ fun trackError(error: Throwable) {
     }
 }
 
-fun Context.joinQQGroup(activity: BaseComposeActivity) {
-    try {
-        val goIntent = Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3DJwFjXuBEWPJuevlxn9QhtMRGFSh-geZV")
-        )
-        startActivity(goIntent)
-    } catch (e: ActivityNotFoundException) {
-        activity.toastString("QQ未安装", true)
+fun BaseComposeActivity.joinQQGroup(loadInBrowser: Boolean) {
+    val url = "https://blog.mystery0.vip/xgkb-group"
+    if (loadInBrowser) {
+        loadInBrowser((url))
+    } else {
+        toCustomTabs(url)
     }
 }
 

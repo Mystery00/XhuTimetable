@@ -94,13 +94,21 @@ enum class MenuItem(
         { XhuIcons.Profile.job },
         { intentTo(JobHistoryActivity::class) },
     ),
+    JOIN_GROUP(
+        { XhuIcons.Profile.joinGroup },
+        { toCustomTabs(it.link) },
+    ),
     EMPTY(
         { XhuIcons.Profile.unknownMenu },
         { menu ->
-            if (menu.hint.isNotBlank()) {
-                toastString(menu.hint, true)
+            if (menu.hint.isBlank() && menu.link.isNotBlank()) {
+                toCustomTabs(menu.link)
             } else {
-                toastString("当前版本暂不支持该功能，请更新到最新版本", true)
+                if (menu.hint.isNotBlank()) {
+                    toastString(menu.hint, true)
+                } else {
+                    toastString("当前版本暂不支持该功能，请更新到最新版本", true)
+                }
             }
         }
     )
@@ -108,7 +116,7 @@ enum class MenuItem(
 
     companion object {
         fun parseKey(key: String): MenuItem {
-            for (value in values()) {
+            for (value in entries) {
                 if (value.name.equals(key, true)) {
                     return value
                 }

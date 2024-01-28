@@ -401,9 +401,7 @@ class SettingsActivity : BaseSelectComposeActivity() {
                             )
                         },
                         title = { Text(text = "点击加入『西瓜课表用户交流反馈』") },
-                        onClick = {
-                            joinQQGroup(this@SettingsActivity)
-                        }
+                        onClick = { joinQQGroup(false) }
                     )
                 }
                 XhuSettingsGroup(title = {

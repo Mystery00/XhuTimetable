@@ -111,7 +111,8 @@ class FeedbackViewModel : ComposeViewModel() {
             },
             systemMessageConsumer = {
                 if (it is AdminStatus) {
-                    _adminStatus.value = AdminOnlineState(it.online, it.onlineMessage)
+                    val message = if (it.online) "" else "管理员下线"
+                    _adminStatus.value = AdminOnlineState(it.online, message)
                 }
             },
             statusConsumer = {
@@ -144,16 +145,16 @@ data class LoadingState(
 )
 
 class MessageState(initialMessages: List<TextMessage>) {
-    private val _Text_messages: MutableList<TextMessage> =
+    private val textMessages: MutableList<TextMessage> =
         mutableStateListOf(*initialMessages.toTypedArray())
-    val messages: List<TextMessage> = _Text_messages
+    val messages: List<TextMessage> = textMessages
 
     fun loadMessage(msgList: List<TextMessage>) {
-        _Text_messages.addAll(msgList)
+        textMessages.addAll(msgList)
     }
 
     fun addMessage(msg: TextMessage) {
-        _Text_messages.add(0, msg)
+        textMessages.add(0, msg)
     }
 }
 

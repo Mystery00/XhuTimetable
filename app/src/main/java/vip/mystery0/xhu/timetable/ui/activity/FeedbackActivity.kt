@@ -86,6 +86,17 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                         }
                     },
                     actions = {
+                        if (adminStatus.online) {
+                            IconButton(onClick = {
+                                toastString("管理员当前正在线上，发送消息管理员可以实时接收到")
+                            }) {
+                                Icon(
+                                    painter = XhuIcons.WsState.adminOnline,
+                                    contentDescription = null,
+                                    tint = Color.Unspecified,
+                                )
+                            }
+                        }
                         IconButton(onClick = {
                             viewModel.connectWebSocket()
                         }) {
