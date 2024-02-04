@@ -440,6 +440,7 @@ private fun BoxScope.ShowCourseDialog(
                     }
                 }
             }
+            @Suppress("DEPRECATION")
             HorizontalPagerIndicator(
                 pageCount = showList.size,
                 pagerState = pagerState,
