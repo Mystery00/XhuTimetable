@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -151,7 +150,7 @@ fun CheckUpdate(
                 ) {
                     if (downloadProgress.downloading) {
                         LinearProgressIndicator(
-                            progress = downloadProgress.progress / 100F,
+                            progress = { downloadProgress.progress / 100F },
                             modifier = Modifier.weight(1F),
                         )
                         Text(

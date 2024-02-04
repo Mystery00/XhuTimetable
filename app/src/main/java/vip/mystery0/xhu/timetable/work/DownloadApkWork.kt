@@ -81,6 +81,7 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
         getDownloadUrl(versionName).notify()
 
         //获取下载地址
+        updateStatus(status = "正在获取下载地址", patch = false, progress = 0)
         val versionUrl = StartRepo.getVersionUrl(versionId)
 
         withContext(Dispatchers.IO) {
@@ -93,6 +94,7 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
                 }
             }
         }
+        updateStatus(status = "文件检查中", patch = false, progress = 100)
         md5Checking().notify()
         //检查md5
         val md5 = withContext(Dispatchers.Default) {
