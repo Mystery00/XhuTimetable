@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Divider
@@ -107,9 +106,7 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                                 WebSocketStatus.FAILED -> XhuIcons.WsState.failed
                             }
                             val tint = when (wsState.status) {
-                                WebSocketStatus.CONNECTED, WebSocketStatus.CONNECTING -> LocalContentColor.current.copy(
-                                    alpha = LocalContentAlpha.current
-                                )
+                                WebSocketStatus.CONNECTED, WebSocketStatus.CONNECTING -> LocalContentColor.current
 
                                 WebSocketStatus.DISCONNECTED, WebSocketStatus.FAILED -> Color.Unspecified
                             }
