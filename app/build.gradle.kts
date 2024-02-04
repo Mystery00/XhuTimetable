@@ -165,7 +165,7 @@ dependencies {
     implementation("androidx.glance:glance-appwidget:1.0.0")
     //compose
     implementation("androidx.compose:compose-bom:2024.01.00")
-    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3:1.2.0-rc01")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
