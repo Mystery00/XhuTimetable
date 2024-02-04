@@ -32,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
-import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.option.OptionDialog
 import com.maxkeppeler.sheets.option.models.DisplayMode
@@ -152,7 +151,7 @@ class CourseRoomActivity : BaseSelectComposeActivity() {
                 config = OptionConfig(mode = DisplayMode.GRID_VERTICAL, gridColumns = columnSize)
             }
             OptionDialog(
-                header = Header.Default(title = title),
+                header = xhuHeader(title = title),
                 state = rememberUseCaseState(
                     visible = true,
                     onCloseRequest = { show.hide() }),

@@ -40,7 +40,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cn.jpush.android.api.JPushInterface
-import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.list.ListDialog
 import com.maxkeppeler.sheets.list.models.ListOption
@@ -166,7 +165,7 @@ class JobHistoryActivity : BaseComposeActivity() {
     ) {
         if (dialogState.showing) {
             ListDialog(
-                header = Header.Default(title = "请选择需要添加的任务类型"),
+                header = xhuHeader(title = "请选择需要添加的任务类型"),
                 state = rememberUseCaseState(
                     visible = true,
                     onDismissRequest = {

@@ -70,7 +70,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
-import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.input.InputDialog
 import com.maxkeppeler.sheets.input.models.InputConfig
@@ -272,7 +271,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
             )
 
             InputDialog(
-                header = Header.Default(title = "请选择上课时间"),
+                header = xhuHeader(title = "请选择上课时间"),
                 state = rememberUseCaseState(visible = true, onCloseRequest = { state.hide() }),
                 config = InputConfig(columns = 2),
                 selection = InputSelection(

@@ -53,7 +53,6 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.SelectionButton
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.input.InputDialog
@@ -288,7 +287,7 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
             }),
         )
         InputDialog(
-            header = Header.Default(title = "请输入模板内容"),
+            header = xhuHeader(title = "请输入模板内容"),
             state = rememberUseCaseState(
                 visible = true,
                 onCloseRequest = { show.hide() },

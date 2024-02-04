@@ -47,13 +47,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.list.ListDialog
 import com.maxkeppeler.sheets.list.models.ListOption
 import com.maxkeppeler.sheets.list.models.ListSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.trackEvent
@@ -149,7 +149,7 @@ val todayCourseContent: TabContent = @Composable { ext ->
             poems = poems,
         )
 
-        ShowAddDialog(ext.addDialogState) {
+        ext.activity.ShowAddDialog(ext.addDialogState) {
             ext.activity.startActivity(Intent(ext.activity, it.java))
         }
     }
@@ -635,13 +635,13 @@ private fun DrawCourseCard(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ShowAddDialog(
+private fun BaseComposeActivity.ShowAddDialog(
     dialogState: XhuDialogState,
     onIntent: (KClass<*>) -> Unit,
 ) {
     if (dialogState.showing) {
         ListDialog(
-            header = Header.Default(title = "请选择需要添加的数据类型"),
+            header = xhuHeader(title = "请选择需要添加的数据类型"),
             state = rememberUseCaseState(
                 visible = true,
                 onDismissRequest = {
