@@ -3,12 +3,13 @@ package vip.mystery0.xhu.timetable.ui.activity
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.activity.viewModels
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -40,14 +41,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil.compose.SubcomposeAsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
-import com.maxkeppeler.sheets.state.StateDialog
-import com.maxkeppeler.sheets.state.models.ProgressIndicator
-import com.maxkeppeler.sheets.state.models.State
-import com.maxkeppeler.sheets.state.models.StateConfig
 import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
@@ -227,27 +225,39 @@ class BackgroundActivity : BaseComposeActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun ShowDownloadDialog(downloadProgressState: DownloadProgressState) {
-        val progressAnimated = animateFloatAsState(
-            label = "progressAnimated",
-            targetValue = downloadProgressState.progress.progress / 100.0F,
-            animationSpec = tween(1000),
-        ).value
-        if (!downloadProgressState.finished) {
-            StateDialog(
-                state = rememberUseCaseState(
-                    visible = true,
-                    onDismissRequest = { }
-                ),
-                config = StateConfig(
-                    state = State.Loading(
-                        labelText = downloadProgressState.text,
-                        ProgressIndicator.Circular(progressAnimated),
-                    )
-                )
+        if (downloadProgressState.finished) return
+        Dialog(
+            onDismissRequest = { },
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
             )
+        ) {
+            Surface(
+                modifier = Modifier
+                    .size(144.dp),
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colorScheme.surface,
+                shadowElevation = 24.dp
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    CircularProgressIndicator(
+                        progress = downloadProgressState.progress.progress / 100.0F,
+                        modifier = Modifier.size(72.dp),
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "正在下载...",
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                }
+            }
         }
     }
 }

@@ -28,13 +28,14 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.Surface
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -184,18 +185,13 @@ abstract class BaseComposeActivity : ComponentActivity(), KoinComponent {
                     .size(144.dp),
                 shape = MaterialTheme.shapes.medium,
                 color = MaterialTheme.colorScheme.surface,
-                elevation = 24.dp
+                shadowElevation = 24.dp
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.lottie_progress))
-                    LottieAnimation(
-                        composition = composition,
-                        iterations = LottieConstants.IterateForever,
-                        modifier = Modifier.size(72.dp),
-                    )
+                    CircularProgressIndicator(modifier = Modifier.size(72.dp))
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = text,
