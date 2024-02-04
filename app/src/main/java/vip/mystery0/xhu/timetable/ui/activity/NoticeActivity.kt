@@ -1,5 +1,7 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
@@ -9,6 +11,7 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,17 +23,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.BasePageComposeActivity
 import vip.mystery0.xhu.timetable.loadInBrowser
 import vip.mystery0.xhu.timetable.model.response.NoticeResponse
+import vip.mystery0.xhu.timetable.ui.activity.feedback.StringAnnotation
+import vip.mystery0.xhu.timetable.ui.activity.feedback.SymbolAnnotation
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuFonts
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
@@ -38,9 +44,10 @@ import vip.mystery0.xhu.timetable.utils.formatChinaDateTime
 import vip.mystery0.xhu.timetable.viewmodel.NoticeViewModel
 
 class NoticeActivity : BasePageComposeActivity() {
+    private val regex = Regex("(https?://[^\\s\\t\\n]+)|(\\d{4}\\d+)")
+
     private val viewModel: NoticeViewModel by viewModels()
-    private val regex =
-        Regex("(https?)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]")
+    private val clipboardManager: ClipboardManager by inject()
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -115,30 +122,27 @@ class NoticeActivity : BasePageComposeActivity() {
         text: String,
         modifier: Modifier = Modifier,
     ) {
-        val result = regex.findAll(text).toList()
-        val split = text.split(regex)
+        val tokens = regex.findAll(text)
         val annotatedText = buildAnnotatedString {
-            split.forEachIndexed { index, s ->
-                withStyle(
-                    style = SpanStyle(color = MaterialTheme.colorScheme.onSurface),
-                ) {
-                    append(s)
+            var cursorPosition = 0
+            for (token in tokens) {
+                append(text.slice(cursorPosition until token.range.first))
+                val (annotatedString, stringAnnotation) = getSymbolAnnotation(
+                    token,
+                    MaterialTheme.colorScheme
+                )
+                append(annotatedString)
+                if (stringAnnotation != null) {
+                    val (item, start, end, tag) = stringAnnotation
+                    addStringAnnotation(tag = tag, start = start, end = end, annotation = item)
                 }
-                if (result.size > index) {
-                    pushStringAnnotation(
-                        tag = "URL",
-                        annotation = result[index].value
-                    )
-                    withStyle(
-                        style = SpanStyle(
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-                    ) {
-                        append(result[index].value)
-                    }
-                    pop()
-                }
+                cursorPosition = token.range.last + 1
+            }
+
+            if (!tokens.none()) {
+                append(text.slice(cursorPosition..text.lastIndex))
+            } else {
+                append(text)
             }
         }
 
@@ -146,17 +150,68 @@ class NoticeActivity : BasePageComposeActivity() {
             ClickableText(
                 modifier = modifier,
                 text = annotatedText,
-                style = TextStyle(fontFamily = XhuFonts.DEFAULT),
+                style = TextStyle(
+                    fontFamily = XhuFonts.DEFAULT,
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
                 onClick = { offset ->
-                    annotatedText.getStringAnnotations(
-                        tag = "URL",
-                        start = offset,
-                        end = offset,
-                    ).firstOrNull()?.let { annotation ->
-                        Log.d("Clicked URL", annotation.item)
-                        loadInBrowser(annotation.item)
-                    }
+                    annotatedText.getStringAnnotations(start = offset, end = offset)
+                        .firstOrNull()
+                        ?.let { annotation ->
+                            when (annotation.tag) {
+                                "URL" -> {
+                                    Log.d("Clicked URL", annotation.item)
+                                    loadInBrowser(annotation.item)
+                                }
+
+                                "NUMBER" -> {
+                                    Log.d("Clicked Number", annotation.item)
+                                    clipboardManager.setPrimaryClip(
+                                        ClipData.newPlainText("Number", annotation.item)
+                                    )
+                                }
+                            }
+                        }
                 }
+            )
+        }
+    }
+
+    private fun getSymbolAnnotation(
+        matchResult: MatchResult,
+        colorScheme: ColorScheme,
+    ): SymbolAnnotation {
+        return when (matchResult.value.first()) {
+            'h' -> SymbolAnnotation(
+                AnnotatedString(
+                    text = matchResult.value,
+                    spanStyle = SpanStyle(
+                        color = colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                ),
+                StringAnnotation(
+                    item = matchResult.value,
+                    start = matchResult.range.first,
+                    end = matchResult.range.last,
+                    tag = "URL"
+                )
+            )
+
+            else -> SymbolAnnotation(
+                AnnotatedString(
+                    text = matchResult.value,
+                    spanStyle = SpanStyle(
+                        color = colorScheme.tertiary,
+                        fontWeight = FontWeight.Bold
+                    )
+                ),
+                StringAnnotation(
+                    item = matchResult.value,
+                    start = matchResult.range.first,
+                    end = matchResult.range.last,
+                    tag = "NUMBER"
+                )
             )
         }
     }
