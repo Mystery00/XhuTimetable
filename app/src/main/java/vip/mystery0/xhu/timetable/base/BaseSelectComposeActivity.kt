@@ -27,7 +27,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.list.ListDialog
 import com.maxkeppeler.sheets.list.models.ListOption
@@ -243,7 +242,7 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
     ) {
         if (show.showing) {
             ListDialog(
-                header = Header.Default(title = dialogTitle),
+                header = xhuHeader(title = dialogTitle),
                 state = rememberUseCaseState(
                     visible = true,
                     onCloseRequest = { show.hide() }),
@@ -275,7 +274,7 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
     ) {
         if (state.showing) {
             ListDialog(
-                header = Header.Default(title = dialogTitle),
+                header = xhuHeader(title = dialogTitle),
                 state = rememberUseCaseState(
                     visible = true,
                     onCloseRequest = { state.hide() }),

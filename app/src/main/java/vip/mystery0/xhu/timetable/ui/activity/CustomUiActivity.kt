@@ -37,7 +37,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.SelectionButton
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.input.InputDialog
@@ -336,7 +335,7 @@ class CustomUiActivity : BaseComposeActivity() {
             }),
         )
         InputDialog(
-            header = Header.Default(title = "请输入模板内容"),
+            header = xhuHeader(title = "请输入模板内容"),
             state = rememberUseCaseState(
                 visible = true,
                 onCloseRequest = { show.hide() },

@@ -48,7 +48,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -68,6 +67,8 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.maxkeppeker.sheets.core.models.base.Header
+import com.maxkeppeker.sheets.core.utils.BaseValues
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.core.component.KoinComponent
@@ -274,7 +275,6 @@ abstract class BaseComposeActivity : ComponentActivity(), KoinComponent {
         }
     }
 
-    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     fun BuildSearchText(
         searchText: String,
@@ -380,4 +380,21 @@ abstract class BaseComposeActivity : ComponentActivity(), KoinComponent {
             }
         }.value
     }
+
+    fun xhuHeader(title: String): Header =
+        Header.Custom {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(BaseValues.CONTENT_DEFAULT_PADDING)
+                    .padding(top = 24.dp),
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Start
+                )
+            }
+        }
 }

@@ -56,7 +56,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.list.ListDialog
 import com.maxkeppeler.sheets.list.models.ListOption
@@ -200,7 +199,7 @@ class ExportCalendarActivity : BaseSelectComposeActivity() {
         val options = listOf(5, 10, 15, 20, 30)
         if (show.showing) {
             ListDialog(
-                header = Header.Default(title = "请选择要添加的提醒时间"),
+                header = xhuHeader(title = "请选择要添加的提醒时间"),
                 state = rememberUseCaseState(
                     visible = true,
                     onCloseRequest = { show.hide() }),
