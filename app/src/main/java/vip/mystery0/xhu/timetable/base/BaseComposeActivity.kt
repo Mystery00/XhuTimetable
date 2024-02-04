@@ -14,19 +14,22 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.Surface
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -55,6 +58,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
@@ -62,11 +67,6 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
-import com.maxkeppeler.sheets.state.StateDialog
-import com.maxkeppeler.sheets.state.models.ProgressIndicator
-import com.maxkeppeler.sheets.state.models.State
-import com.maxkeppeler.sheets.state.models.StateConfig
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.core.component.KoinComponent
@@ -164,27 +164,45 @@ abstract class BaseComposeActivity : ComponentActivity(), KoinComponent {
         toast?.show()
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     protected fun ShowProgressDialog(
         showState: XhuDialogState,
         text: String,
     ) {
-        val state = remember {
-            mutableStateOf(State.Loading(labelText = text, ProgressIndicator.Circular()))
+        if (!showState.showing) {
+            return
         }
-        if (showState.showing) {
-            StateDialog(
-                state = rememberUseCaseState(
-                    visible = true,
-                    onDismissRequest = {
-                        showState.hide()
-                    }
-                ),
-                config = StateConfig(
-                    state = state.value
-                )
+        Dialog(
+            onDismissRequest = { },
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
             )
+        ) {
+            Surface(
+                modifier = Modifier
+                    .size(144.dp),
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colorScheme.surface,
+                elevation = 24.dp
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.lottie_progress))
+                    LottieAnimation(
+                        composition = composition,
+                        iterations = LottieConstants.IterateForever,
+                        modifier = Modifier.size(72.dp),
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = text,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
         }
     }
 
