@@ -247,7 +247,7 @@ class BackgroundActivity : BaseComposeActivity() {
                     verticalArrangement = Arrangement.Center,
                 ) {
                     CircularProgressIndicator(
-                        progress = downloadProgressState.progress.progress / 100.0F,
+                        progress = { downloadProgressState.progress.progress / 100.0F },
                         modifier = Modifier.size(72.dp),
                     )
                     Spacer(modifier = Modifier.height(8.dp))

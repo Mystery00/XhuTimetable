@@ -19,7 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -152,11 +152,11 @@ val profileCourseContent: TabContent = @Composable { ext ->
                 }
             }
         }
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp)
-                .background(ExtendedTheme.colorScheme.surfaceContainer),
+                .background(ExtendedTheme.colorScheme.surfaceContainer)
         )
 
         val menuList by viewModel.menu.collectAsState()
@@ -183,19 +183,19 @@ val profileCourseContent: TabContent = @Composable { ext ->
                         }
                     })
                 if (iterator.hasNext()) {
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(1.dp)
-                            .background(ExtendedTheme.colorScheme.surfaceContainer),
+                            .background(ExtendedTheme.colorScheme.surfaceContainer)
                     )
                 }
             }
-            Divider(
+            HorizontalDivider(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(6.dp)
-                    .background(ExtendedTheme.colorScheme.surfaceContainer),
+                    .background(ExtendedTheme.colorScheme.surfaceContainer)
             )
         }
     }
