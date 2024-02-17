@@ -164,14 +164,14 @@ dependencies {
     implementation("androidx.glance:glance:1.0.0")
     implementation("androidx.glance:glance-appwidget:1.0.0")
     //compose
-    implementation("androidx.compose:compose-bom:2024.01.00")
-    implementation("androidx.compose.material3:material3:1.2.0-rc01")
+    implementation("androidx.compose:compose-bom:2024.02.00")
+    implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material3:material3-window-size-class")
     implementation("androidx.activity:activity-compose")
-    implementation("androidx.compose.animation:animation:1.6.0")
+    implementation("androidx.compose.animation:animation:1.6.1")
     //paging3
     implementation("androidx.paging:paging-runtime-ktx:3.2.1")
     implementation("androidx.paging:paging-compose:3.2.1")
@@ -180,7 +180,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
     //sheets-compose-dialogs
-    val sheetsComposeDialogsVersion = "1.2.1"
+    val sheetsComposeDialogsVersion = "1.3.0"
     implementation("com.maxkeppeler.sheets-compose-dialogs:core:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:calendar:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:color:$sheetsComposeDialogsVersion")
