@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.base
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -51,6 +52,7 @@ abstract class BasePageComposeActivity : BaseComposeActivity() {
         refreshing: Boolean,
         key: ((index: Int) -> Any)? = null,
         alwaysShowList: Boolean = false,
+        listHeader: (@Composable LazyItemScope.() -> Unit)? = null,
         itemContent: @Composable LazyItemScope.(T) -> Unit,
         boxContent: @Composable BoxScope.() -> Unit = {},
     ) = BuildPaging(
@@ -58,6 +60,7 @@ abstract class BasePageComposeActivity : BaseComposeActivity() {
         paddingValues = paddingValues,
         pager = pager,
         refreshing = refreshing,
+        listHeader = listHeader,
         listContent = {
             itemsIndexed(pager, key = key) { item ->
                 itemContent(item)
@@ -67,13 +70,14 @@ abstract class BasePageComposeActivity : BaseComposeActivity() {
         boxContent = boxContent,
     )
 
-    @OptIn(ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
     @Composable
     protected fun <T : Any> BuildPaging(
         state: LazyListState = rememberLazyListState(),
         paddingValues: PaddingValues,
         pager: LazyPagingItems<T>,
         refreshing: Boolean,
+        listHeader: (@Composable LazyItemScope.() -> Unit)? = null,
         listContent: LazyListScope.() -> Unit,
         alwaysShowList: Boolean = false,
         boxContent: @Composable BoxScope.() -> Unit = {},
@@ -92,15 +96,20 @@ abstract class BasePageComposeActivity : BaseComposeActivity() {
             Box(
                 modifier = Modifier.pullRefresh(pullRefreshState),
             ) {
-                if (!alwaysShowList && !isPageLoading && pager.itemCount == 0) {
-                    BuildNoDataLayout()
-                } else {
-                    LazyColumn(
-                        state = state,
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentPadding = PaddingValues(4.dp),
-                    ) {
+                LazyColumn(
+                    state = state,
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentPadding = PaddingValues(4.dp),
+                ) {
+                    listHeader?.let {
+                        stickyHeader { it() }
+                    }
+                    if (!alwaysShowList && !isPageLoading && pager.itemCount == 0) {
+                        item {
+                            BuildNoDataLayout()
+                        }
+                    } else {
                         listContent()
                         when (pager.loadState.append) {
                             is LoadState.Loading -> {

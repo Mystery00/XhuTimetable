@@ -160,20 +160,20 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                 pager = pager,
                 refreshing = refreshing,
                 alwaysShowList = true,
+                listHeader = {
+                    BuildSelectFilterChipContent(
+                        userSelect = userSelect,
+                        yearSelect = yearSelect,
+                        termSelect = termSelect,
+                        showUserDialog = userDialog,
+                        showYearDialog = yearDialog,
+                        showTermDialog = termDialog,
+                        onDataLoad = {
+                            viewModel.loadCustomCourseList()
+                        }
+                    )
+                },
                 listContent = {
-                    stickyHeader {
-                        BuildSelectFilterChipContent(
-                            userSelect = userSelect,
-                            yearSelect = yearSelect,
-                            termSelect = termSelect,
-                            showUserDialog = userDialog,
-                            showYearDialog = yearDialog,
-                            showTermDialog = termDialog,
-                            onDataLoad = {
-                                viewModel.loadCustomCourseList()
-                            }
-                        )
-                    }
                     stickyHeader {
                         HorizontalDivider()
                     }

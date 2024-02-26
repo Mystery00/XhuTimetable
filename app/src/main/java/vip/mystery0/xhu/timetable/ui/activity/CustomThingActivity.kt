@@ -155,15 +155,15 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                 pager = pager,
                 refreshing = refreshing,
                 alwaysShowList = true,
-                listContent = {
-                    stickyHeader {
-                        BuildUserSelectFilterChipContent(
-                            userSelect = userSelect,
-                            showUserDialog = userDialog,
-                        ) {
-                            viewModel.loadCustomThingList()
-                        }
+                listHeader = {
+                    BuildUserSelectFilterChipContent(
+                        userSelect = userSelect,
+                        showUserDialog = userDialog,
+                    ) {
+                        viewModel.loadCustomThingList()
                     }
+                },
+                listContent = {
                     stickyHeader {
                         HorizontalDivider()
                     }
