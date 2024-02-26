@@ -92,21 +92,21 @@ class ScoreActivity : BaseSelectComposeActivity() {
                 paddingValues = paddingValues,
                 pager = pager,
                 refreshing = refreshing,
+                listHeader = {
+                    BuildSelectFilterChipContent(
+                        userSelect = userSelect,
+                        yearSelect = yearSelect,
+                        termSelect = termSelect,
+                        showUserDialog = userDialog,
+                        showYearDialog = yearDialog,
+                        showTermDialog = termDialog,
+                        onDataLoad = {
+                            viewModel.loadScoreList()
+                            viewModel.loadScoreGpa()
+                        }
+                    )
+                },
                 listContent = {
-                    stickyHeader {
-                        BuildSelectFilterChipContent(
-                            userSelect = userSelect,
-                            yearSelect = yearSelect,
-                            termSelect = termSelect,
-                            showUserDialog = userDialog,
-                            showYearDialog = yearDialog,
-                            showTermDialog = termDialog,
-                            onDataLoad = {
-                                viewModel.loadScoreList()
-                                viewModel.loadScoreGpa()
-                            }
-                        )
-                    }
                     stickyHeader {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
