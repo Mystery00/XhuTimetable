@@ -147,6 +147,10 @@
             android:exported="true"
             android:label="@string/title_activity_job_history"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
+        <activity
+            android:name=".ui.activity.AboutActivity"
+            android:exported="true"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar" />
 
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
