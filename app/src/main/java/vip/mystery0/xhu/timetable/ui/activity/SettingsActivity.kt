@@ -501,6 +501,12 @@ class SettingsActivity : BaseSelectComposeActivity() {
                             checkVersionChannelState.show()
                         }
                     )
+                    XhuSettingsMenuLink(
+                        title = { Text(text = "依赖项说明") },
+                        onClick = {
+                            intentTo(AboutActivity::class)
+                        }
+                    )
                 }
                 TeamContent(title = "西瓜课表团队出品") {
                     val teamMember by viewModel.teamMemberData.collectAsState()

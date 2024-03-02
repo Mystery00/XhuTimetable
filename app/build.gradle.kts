@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("com.huawei.agconnect")
+    id("com.mikepenz.aboutlibraries.plugin")
 }
 
 fun String.runCommand(workingDir: File = file("./")): String {
@@ -164,14 +165,14 @@ dependencies {
     implementation("androidx.glance:glance:1.0.0")
     implementation("androidx.glance:glance-appwidget:1.0.0")
     //compose
-    implementation("androidx.compose:compose-bom:2024.02.00")
+    implementation("androidx.compose:compose-bom:2024.02.01")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material3:material3-window-size-class")
     implementation("androidx.activity:activity-compose")
-    implementation("androidx.compose.animation:animation:1.6.1")
+    implementation("androidx.compose.animation:animation:1.6.2")
     //paging3
     implementation("androidx.paging:paging-runtime-ktx:3.2.1")
     implementation("androidx.paging:paging-compose:3.2.1")
@@ -203,7 +204,7 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-workmanager:3.5.3")
     implementation("io.insert-koin:koin-androidx-compose:3.5.3")
     //coil
-    val coilVersion = "2.5.0"
+    val coilVersion = "2.6.0"
     implementation("io.coil-kt:coil-compose:$coilVersion")
     implementation("io.coil-kt:coil-gif:$coilVersion")
     //retrofit
@@ -226,9 +227,16 @@ dependencies {
     implementation("com.featureprobe:client-sdk-android:2.0.2@aar")
     implementation("net.java.dev.jna:jna:5.14.0@aar")
     //jg-push
-    implementation("cn.jiguang.sdk:jpush-google:5.2.2")
-    implementation("cn.jiguang.sdk.plugin:huawei:5.2.2")
+    implementation("cn.jiguang.sdk:jpush-google:5.2.3")
+    implementation("cn.jiguang.sdk.plugin:huawei:5.2.3")
     implementation("com.huawei.hms:push:6.12.0.300")
+    //AboutLibraries
+    val aboutLibrariesVersion = "11.1.0"
+    implementation("com.mikepenz:aboutlibraries-core:$aboutLibrariesVersion")
+    implementation("com.mikepenz:aboutlibraries-compose-m3:$aboutLibrariesVersion")
+}
+
+aboutLibraries {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
