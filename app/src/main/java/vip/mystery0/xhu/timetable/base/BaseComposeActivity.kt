@@ -249,7 +249,7 @@ abstract class BaseComposeActivity : ComponentActivity(), KoinComponent {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .requiredHeightIn(min = 320.dp)
+                .requiredHeightIn(min = 640.dp)
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.surface),
             contentAlignment = Alignment.Center
