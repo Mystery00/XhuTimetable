@@ -33,7 +33,7 @@ class ExamViewModel : PagingComposeViewModel<User, Exam>(
         }
     }
 
-    private fun loadExamList() {
+    fun loadExamList() {
         fun failed(message: String) {
             Log.w(TAG, "load exam list failed, $message")
             toastMessage(message)
@@ -53,12 +53,8 @@ class ExamViewModel : PagingComposeViewModel<User, Exam>(
 
     fun selectUser(studentId: String) {
         viewModelScope.launch {
-            val (selectList, changed) = setSelectedUser(_userSelect.value, studentId)
-            if (!changed) {
-                return@launch
-            }
+            val (selectList, _) = setSelectedUser(_userSelect.value, studentId)
             _userSelect.value = selectList
-            loadExamList()
         }
     }
 }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -42,14 +43,14 @@ import vip.mystery0.xhu.timetable.viewmodel.ExamViewModel
 class ExamActivity : BaseSelectComposeActivity() {
     private val viewModel: ExamViewModel by viewModels()
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
     @Composable
     override fun BuildContent() {
         val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
 
         val userSelect by viewModel.userSelect.collectAsState()
 
-        val showUserSelect = rememberXhuDialogState()
+        val userDialog = rememberXhuDialogState()
 
         fun onBack() {
             finish()
@@ -74,16 +75,6 @@ class ExamActivity : BaseSelectComposeActivity() {
                             )
                         }
                     },
-                    actions = {
-                        IconButton(onClick = {
-                            showUserSelect.show()
-                        }) {
-                            Icon(
-                                painter = XhuIcons.Action.more,
-                                contentDescription = null,
-                            )
-                        }
-                    }
                 )
             },
         ) { paddingValues ->
@@ -92,12 +83,21 @@ class ExamActivity : BaseSelectComposeActivity() {
                 paddingValues = paddingValues,
                 pager = pager,
                 refreshing = refreshing,
+                listHeader = {
+                    BuildSelectFilterChipContentOnlyUser(
+                        userSelect = userSelect,
+                        showUserDialog = userDialog,
+                        onDataLoad = {
+                            viewModel.loadExamList()
+                        }
+                    )
+                },
                 itemContent = @Composable { item ->
                     BuildItem(item)
                 }
             )
         }
-        ShowUserDialog(selectList = userSelect, show = showUserSelect, onSelect = {
+        ShowUserDialog(selectList = userSelect, show = userDialog, onSelect = {
             viewModel.selectUser(it.studentId)
         })
 

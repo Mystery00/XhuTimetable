@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -30,13 +29,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.model.response.ExperimentScoreItemResponse
@@ -58,20 +55,11 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
         val yearSelect by viewModel.yearSelect.collectAsState()
         val termSelect by viewModel.termSelect.collectAsState()
 
-        val showSelect = rememberXhuDialogState(initialValue = true)
-        val scope = rememberCoroutineScope()
-
         val userDialog = rememberXhuDialogState()
         val yearDialog = rememberXhuDialogState()
         val termDialog = rememberXhuDialogState()
 
         fun onBack() {
-            if (showSelect.showing) {
-                scope.launch {
-                    showSelect.hide()
-                }
-                return
-            }
             finish()
         }
 
@@ -89,17 +77,6 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
                             )
                         }
                     },
-                    actions = {
-                        IconButton(onClick = {
-                            showSelect.toggle()
-                        }) {
-                            Icon(
-                                painter = XhuIcons.Action.more,
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        }
-                    }
                 )
             },
         ) { paddingValues ->
@@ -118,12 +95,25 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
 
                     Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
                         val scoreList = expScoreListState.scoreList
-                        if (expScoreListState.loading || scoreList.isNotEmpty()) {
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxSize(),
-                                contentPadding = PaddingValues(4.dp),
-                            ) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentPadding = PaddingValues(4.dp),
+                        ) {
+                            stickyHeader {
+                                BuildSelectFilterChipContent(
+                                    userSelect = userSelect,
+                                    yearSelect = yearSelect,
+                                    termSelect = termSelect,
+                                    showUserDialog = userDialog,
+                                    showYearDialog = yearDialog,
+                                    showTermDialog = termDialog,
+                                    onDataLoad = {
+                                        viewModel.loadExpScoreList()
+                                    }
+                                )
+                            }
+                            if (expScoreListState.loading || scoreList.isNotEmpty()) {
                                 scoreList.forEach {
                                     stickyHeader {
                                         Row(
@@ -141,28 +131,18 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
                                         BuildItem(item)
                                     }
                                 }
+                            } else {
+                                item {
+                                    BuildNoDataLayout()
+                                }
                             }
-                            PullRefreshIndicator(
-                                refreshing = expScoreListState.loading,
-                                state = pullRefreshState,
-                                Modifier.align(Alignment.TopCenter),
-                            )
-                        } else {
-                            BuildNoDataLayout()
                         }
+                        PullRefreshIndicator(
+                            refreshing = expScoreListState.loading,
+                            state = pullRefreshState,
+                            Modifier.align(Alignment.TopCenter),
+                        )
                     }
-                }
-
-                BuildSelectSheetLayout(
-                    showBottomSheet = showSelect,
-                    userSelect = userSelect,
-                    yearSelect = yearSelect,
-                    termSelect = termSelect,
-                    showUserDialog = userDialog,
-                    showYearDialog = yearDialog,
-                    showTermDialog = termDialog,
-                ) {
-                    viewModel.loadExpScoreList()
                 }
             }
         }
@@ -180,7 +160,6 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
             viewModel.clearErrorMessage()
         }
         BackHandler(
-            enabled = showSelect.showing,
             onBack = {
                 onBack()
             }
