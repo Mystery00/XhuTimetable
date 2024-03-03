@@ -111,17 +111,17 @@ jobs:
         run: |
           versionName=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionName')
           versionCode=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionCode')
-          echo ::set-output name=versionName::$versionName
-          echo ::set-output name=versionCode::$versionCode
+          echo "versionName=$versionName" >> $GITHUB_OUTPUT
+          echo "versionCode=$versionCode" >> $GITHUB_OUTPUT
           
           patchFile=$(cat patch_name)
-          echo ::set-output name=patchFile::$patchFile
+          echo "patchFile=$patchFile" >> $GITHUB_OUTPUT
           
           apkMd5=$(md5sum "patch/new.apk" | cut -d" " -f1)
           patchMd5=$(md5sum "patch/$patchFile" | cut -d" " -f1)
           
-          echo ::set-output name=apkMd5::$apkMd5
-          echo ::set-output name=patchMd5::$patchMd5
+          echo "apkMd5=$apkMd5" >> $GITHUB_OUTPUT
+          echo "patchMd5=$patchMd5" >> $GITHUB_OUTPUT
       - name: 上传 APK 文件
         id: upload_apk
         uses: Mystery00/upload-actions@v1.11
