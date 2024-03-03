@@ -124,22 +124,16 @@ jobs:
           echo ::set-output name=patchMd5::$patchMd5
       - name: 上传 APK 文件
         id: upload_apk
-        uses: Mystery00/upload-actions@v1.9
+        uses: Mystery00/upload-actions@v1.10
         with:
-          signUrl: "${{ secrets.SIGNATURE_API }}"
-          mimeType: "application/vnd.android.package-archive"
           st: apk
           filePath: "patch/new.apk"
-          title: "${{ steps.result.outputs.versionName }}-${{ steps.result.outputs.versionCode }}.apk"
       - name: 上传 APK 文件
         id: upload_patch
-        uses: Mystery00/upload-actions@v1.9
+        uses: Mystery00/upload-actions@v1.10
         with:
-          signUrl: "${{ secrets.SIGNATURE_API }}"
-          mimeType: "text/x-diff"
           st: apk
           filePath: "patch/${{ steps.result.outputs.patchFile }}"
-          title: "${{ steps.result.outputs.patchFile }}"
       - name: 发布新版本
         run: |
           apkResourceId=${{ steps.upload_apk.outputs.resId }}
