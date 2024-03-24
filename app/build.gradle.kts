@@ -160,19 +160,19 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
-    implementation("androidx.browser:browser:1.7.0")
+    implementation("androidx.browser:browser:1.8.0")
     implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
     implementation("androidx.glance:glance:1.0.0")
     implementation("androidx.glance:glance-appwidget:1.0.0")
     //compose
-    implementation("androidx.compose:compose-bom:2024.02.01")
+    implementation(platform("androidx.compose:compose-bom:2024.03.00"))
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material3:material3-window-size-class")
     implementation("androidx.activity:activity-compose")
-    implementation("androidx.compose.animation:animation:1.6.2")
+    implementation("androidx.compose.animation:animation:1.6.4")
     //paging3
     implementation("androidx.paging:paging-runtime-ktx:3.2.1")
     implementation("androidx.paging:paging-compose:3.2.1")
@@ -192,7 +192,7 @@ dependencies {
     implementation("com.maxkeppeler.sheets-compose-dialogs:list:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:option:$sheetsComposeDialogsVersion")
     //lottie
-    implementation("com.airbnb.android:lottie-compose:6.3.0")
+    implementation("com.airbnb.android:lottie-compose:6.4.0")
     //room
     implementation("androidx.room:room-runtime:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
@@ -208,13 +208,13 @@ dependencies {
     implementation("io.coil-kt:coil-compose:$coilVersion")
     implementation("io.coil-kt:coil-gif:$coilVersion")
     //retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+    implementation("com.squareup.retrofit2:retrofit:2.10.0")
+    implementation("com.squareup.retrofit2:converter-moshi:2.10.0")
     //moshi
     implementation("com.squareup.moshi:moshi:1.15.1")
     implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
     //mmkv
-    implementation("com.tencent:mmkv-static:1.3.3")
+    implementation("com.tencent:mmkv-static:1.3.4")
     //preference
     implementation("me.zhanghai.compose.preference:library:1.0.0")
     //AppCenter
@@ -227,11 +227,11 @@ dependencies {
     implementation("com.featureprobe:client-sdk-android:2.0.2@aar")
     implementation("net.java.dev.jna:jna:5.14.0@aar")
     //jg-push
-    implementation("cn.jiguang.sdk:jpush-google:5.2.3")
-    implementation("cn.jiguang.sdk.plugin:huawei:5.2.3")
+    implementation("cn.jiguang.sdk:jpush-google:5.2.4")
+    implementation("cn.jiguang.sdk.plugin:huawei:5.2.4")
     implementation("com.huawei.hms:push:6.12.0.300")
     //AboutLibraries
-    val aboutLibrariesVersion = "11.1.0"
+    val aboutLibrariesVersion = "11.1.1"
     implementation("com.mikepenz:aboutlibraries-core:$aboutLibrariesVersion")
     implementation("com.mikepenz:aboutlibraries-compose-m3:$aboutLibrariesVersion")
 }
