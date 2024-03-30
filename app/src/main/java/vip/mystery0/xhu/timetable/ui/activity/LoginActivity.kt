@@ -27,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -53,7 +52,6 @@ import vip.mystery0.xhu.timetable.viewmodel.LoginViewModel
 class LoginActivity : BaseComposeActivity() {
     private val viewModel: LoginViewModel by viewModels()
 
-    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     override fun BuildContent() {
         val keyboardController = LocalSoftwareKeyboardController.current

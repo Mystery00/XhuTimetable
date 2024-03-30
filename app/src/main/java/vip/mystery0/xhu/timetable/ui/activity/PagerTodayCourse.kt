@@ -233,7 +233,6 @@ private fun DrawLine() {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalMaterialApi
 @Composable
 private fun DrawPoemsCard(

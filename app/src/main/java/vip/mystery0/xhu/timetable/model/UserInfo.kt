@@ -28,9 +28,9 @@ enum class Gender(val showTitle: String) {
     companion object {
         fun parseOld(sex: String): Gender =
             when (sex) {
-                "男" -> Gender.MALE
-                "女" -> Gender.FEMALE
-                else -> Gender.UNKNOWN
+                "男" -> MALE
+                "女" -> FEMALE
+                else -> UNKNOWN
             }
     }
 }
