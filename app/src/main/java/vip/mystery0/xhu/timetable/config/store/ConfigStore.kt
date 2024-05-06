@@ -4,7 +4,6 @@ import com.squareup.moshi.Moshi
 import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import vip.mystery0.xhu.timetable.BuildConfig
 import vip.mystery0.xhu.timetable.config.Customisable
 import vip.mystery0.xhu.timetable.model.CustomAccountTitle
 import vip.mystery0.xhu.timetable.model.CustomUi
@@ -282,7 +281,7 @@ class ConfigStore internal constructor() {
         set(value) {
             kv.encode(allowSendCrashReportKey, value)
         }
-        get() = kv.decodeBool(allowSendCrashReportKey, !BuildConfig.DEBUG)
+        get() = kv.decodeBool(allowSendCrashReportKey, false)
 
     //夜间模式
     private val nightModeKey = "nightMode"
