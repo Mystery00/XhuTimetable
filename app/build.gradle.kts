@@ -155,9 +155,9 @@ configurations {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
+    implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.browser:browser:1.8.0")
@@ -165,14 +165,14 @@ dependencies {
     implementation("androidx.glance:glance:1.0.0")
     implementation("androidx.glance:glance-appwidget:1.0.0")
     //compose
-    implementation(platform("androidx.compose:compose-bom:2024.03.00"))
+    implementation(platform("androidx.compose:compose-bom:2024.05.00"))
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material3:material3-window-size-class")
     implementation("androidx.activity:activity-compose")
-    implementation("androidx.compose.animation:animation:1.6.4")
+    implementation("androidx.compose.animation:animation:1.6.7")
     //paging3
     implementation("androidx.paging:paging-runtime-ktx:3.2.1")
     implementation("androidx.paging:paging-compose:3.2.1")
@@ -200,21 +200,21 @@ dependencies {
     //work manager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     //koin
-    implementation("io.insert-koin:koin-android:3.5.3")
-    implementation("io.insert-koin:koin-androidx-workmanager:3.5.3")
-    implementation("io.insert-koin:koin-androidx-compose:3.5.3")
+    implementation("io.insert-koin:koin-android:3.5.6")
+    implementation("io.insert-koin:koin-androidx-workmanager:3.5.6")
+    implementation("io.insert-koin:koin-androidx-compose:3.5.6")
     //coil
     val coilVersion = "2.6.0"
     implementation("io.coil-kt:coil-compose:$coilVersion")
     implementation("io.coil-kt:coil-gif:$coilVersion")
     //retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.10.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.10.0")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-moshi:2.11.0")
     //moshi
     implementation("com.squareup.moshi:moshi:1.15.1")
     implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
     //mmkv
-    implementation("com.tencent:mmkv-static:1.3.4")
+    implementation("com.tencent:mmkv-static:1.3.5")
     //preference
     implementation("me.zhanghai.compose.preference:library:1.0.0")
     //AppCenter
@@ -227,11 +227,11 @@ dependencies {
     implementation("com.featureprobe:client-sdk-android:2.0.2@aar")
     implementation("net.java.dev.jna:jna:5.14.0@aar")
     //jg-push
-    implementation("cn.jiguang.sdk:jpush-google:5.2.4")
-    implementation("cn.jiguang.sdk.plugin:huawei:5.2.4")
+    implementation("cn.jiguang.sdk:jpush-google:5.3.1")
+    implementation("cn.jiguang.sdk.plugin:huawei:5.3.1")
     implementation("com.huawei.hms:push:6.12.0.300")
     //AboutLibraries
-    val aboutLibrariesVersion = "11.1.1"
+    val aboutLibrariesVersion = "11.1.4"
     implementation("com.mikepenz:aboutlibraries-core:$aboutLibrariesVersion")
     implementation("com.mikepenz:aboutlibraries-compose-m3:$aboutLibrariesVersion")
 }
