@@ -178,7 +178,7 @@ private fun BuildItem(
             ) {
                 if (!urgeItem.complete) {
                     LinearProgressIndicator(
-                        progress = urgeItem.rate / 100F,
+                        progress = { urgeItem.rate / 100F },
                     )
                 }
                 val title = if (urgeItem.complete) "【已完成】${urgeItem.title}" else urgeItem.title
