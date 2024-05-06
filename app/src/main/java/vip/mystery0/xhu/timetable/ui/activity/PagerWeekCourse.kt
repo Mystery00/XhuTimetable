@@ -154,7 +154,7 @@ val weekCourseContent: TabContent = @Composable { ext ->
                 if (tableCourse.isNotEmpty()) {
                     for (index in 0 until 7) {
                         Column(modifier = Modifier.weight(1F)) {
-                            tableCourse[index].forEach { sheet ->
+                            tableCourse.getOrElse(index) { emptyList() }.forEach { sheet ->
                                 if (!sheet.isEmpty()) {
                                     BuildWeekItem(
                                         customUi = customUi,
@@ -232,7 +232,8 @@ private fun WeekViewDialog(
                         val radius = min(itemCenterHeight, itemCenterWidth) - 1F
                         for (day in 0 until 5) {
                             for (time in 0 until 5) {
-                                val light = it.array[time][day]
+                                val light = it.array.getOrElse(time) { emptyArray() }
+                                    .getOrElse(day) { false }
                                 drawCircle(
                                     color = if (light) weekViewLightColor else weekViewGrayColor,
                                     center = Offset(
