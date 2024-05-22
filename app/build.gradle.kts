@@ -158,7 +158,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.browser:browser:1.8.0")
     implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
@@ -174,8 +174,8 @@ dependencies {
     implementation("androidx.activity:activity-compose")
     implementation("androidx.compose.animation:animation:1.6.7")
     //paging3
-    implementation("androidx.paging:paging-runtime-ktx:3.2.1")
-    implementation("androidx.paging:paging-compose:3.2.1")
+    implementation("androidx.paging:paging-runtime-ktx:3.3.0")
+    implementation("androidx.paging:paging-compose:3.3.0")
     //accompanist
     val accompanistVersion = "0.34.0"
     implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
