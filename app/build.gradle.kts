@@ -156,23 +156,23 @@ configurations {
 
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.3")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.browser:browser:1.8.0")
-    implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
-    implementation("androidx.glance:glance:1.0.0")
-    implementation("androidx.glance:glance-appwidget:1.0.0")
+    implementation("androidx.concurrent:concurrent-futures-ktx:1.2.0")
+    implementation("androidx.glance:glance:1.1.0")
+    implementation("androidx.glance:glance-appwidget:1.1.0")
     //compose
-    implementation(platform("androidx.compose:compose-bom:2024.05.00"))
+    implementation(platform("androidx.compose:compose-bom:2024.06.00"))
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material3:material3-window-size-class")
     implementation("androidx.activity:activity-compose")
-    implementation("androidx.compose.animation:animation:1.6.7")
+    implementation("androidx.compose.animation:animation:1.6.8")
     //paging3
     implementation("androidx.paging:paging-runtime-ktx:3.3.0")
     implementation("androidx.paging:paging-compose:3.3.0")
@@ -192,7 +192,7 @@ dependencies {
     implementation("com.maxkeppeler.sheets-compose-dialogs:list:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:option:$sheetsComposeDialogsVersion")
     //lottie
-    implementation("com.airbnb.android:lottie-compose:6.4.0")
+    implementation("com.airbnb.android:lottie-compose:6.4.1")
     //room
     implementation("androidx.room:room-runtime:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
@@ -214,7 +214,7 @@ dependencies {
     implementation("com.squareup.moshi:moshi:1.15.1")
     implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
     //mmkv
-    implementation("com.tencent:mmkv-static:1.3.5")
+    implementation("com.tencent:mmkv-static:1.3.7")
     //preference
     implementation("me.zhanghai.compose.preference:library:1.0.0")
     //AppCenter
@@ -227,11 +227,11 @@ dependencies {
     implementation("com.featureprobe:client-sdk-android:2.0.2@aar")
     implementation("net.java.dev.jna:jna:5.14.0@aar")
     //jg-push
-    implementation("cn.jiguang.sdk:jpush-google:5.3.1")
-    implementation("cn.jiguang.sdk.plugin:huawei:5.3.1")
+    implementation("cn.jiguang.sdk:jpush-google:5.4.0")
+    implementation("cn.jiguang.sdk.plugin:huawei:5.4.0")
     implementation("com.huawei.hms:push:6.12.0.300")
     //AboutLibraries
-    val aboutLibrariesVersion = "11.1.4"
+    val aboutLibrariesVersion = "11.2.2"
     implementation("com.mikepenz:aboutlibraries-core:$aboutLibrariesVersion")
     implementation("com.mikepenz:aboutlibraries-compose-m3:$aboutLibrariesVersion")
 }
