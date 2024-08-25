@@ -802,6 +802,12 @@ class MainViewModel : ComposeViewModel() {
                         dayItems.add(indexOfFirst, CalendarSheet.monthHeader(week.endDate))
                     }
                 }
+            } else {
+                //没有跨月，那么判断第一天是不是1号
+                if (week.startDate.dayOfMonth == 1) {
+                    //是1号，那么加一个月标题
+                    dayItems.add(0, CalendarSheet.monthHeader(week.startDate))
+                }
             }
             CalendarSheetWeek(
                 weekNum = week.weekNum,
