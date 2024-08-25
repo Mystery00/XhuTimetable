@@ -165,7 +165,7 @@ dependencies {
     implementation("androidx.glance:glance:1.1.0")
     implementation("androidx.glance:glance-appwidget:1.1.0")
     //compose
-    implementation(platform("androidx.compose:compose-bom:2024.06.00"))
+    implementation(platform("androidx.compose:compose-bom:2024.08.00"))
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material:material-icons-core")
@@ -231,7 +231,7 @@ dependencies {
     implementation("cn.jiguang.sdk.plugin:huawei:5.4.2")
     implementation("com.huawei.hms:push:6.12.0.300")
     //AboutLibraries
-    val aboutLibrariesVersion = "11.2.2"
+    val aboutLibrariesVersion = "11.2.3"
     implementation("com.mikepenz:aboutlibraries-core:$aboutLibrariesVersion")
     implementation("com.mikepenz:aboutlibraries-compose-m3:$aboutLibrariesVersion")
 }
