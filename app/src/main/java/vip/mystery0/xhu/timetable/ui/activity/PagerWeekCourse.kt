@@ -196,6 +196,7 @@ private fun WeekViewDialog(
     currentWeek: Int,
     onWeekChange: (Int) -> Unit = {},
 ) {
+    if (weekView.isEmpty()) return
     val options = weekView.map {
         Option(
             titleText = "第${it.weekNum}周",

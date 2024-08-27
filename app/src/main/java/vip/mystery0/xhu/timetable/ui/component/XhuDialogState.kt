@@ -36,10 +36,6 @@ class XhuDialogState(initialValue: Boolean = false) {
         showing = false
     }
 
-    fun toggle() {
-        showing = !showing
-    }
-
     companion object {
         fun Saver(): Saver<XhuDialogState, Boolean> = Saver(
             save = { it.showing },
