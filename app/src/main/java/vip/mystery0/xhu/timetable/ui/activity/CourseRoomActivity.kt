@@ -145,6 +145,7 @@ class CourseRoomActivity : BaseSelectComposeActivity() {
         columnSize: Int,
         onSelect: (List<Int>) -> Unit,
     ) {
+        if (selectList.isEmpty()) return
         if (show.showing) {
             var config = OptionConfig(mode = DisplayMode.LIST)
             if (columnSize > 1) {

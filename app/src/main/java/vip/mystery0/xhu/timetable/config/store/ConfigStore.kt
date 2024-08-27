@@ -71,7 +71,7 @@ class ConfigStore internal constructor() {
                 return Customisable(LocalDate.parse(value, Formatter.DATE), false)
             }
             // 默认值
-            return Customisable(LocalDate.of(2024, 2, 26), false)
+            return Customisable(LocalDate.of(2024, 9, 2), false)
         }
 
     //当前学年
@@ -99,7 +99,7 @@ class ConfigStore internal constructor() {
                 return Customisable(value, false)
             }
             // 默认值
-            return Customisable(2023, false)
+            return Customisable(2024, false)
         }
 
     //当前学期
@@ -127,7 +127,7 @@ class ConfigStore internal constructor() {
                 return Customisable(value, false)
             }
             // 默认值
-            return Customisable(2, false)
+            return Customisable(1, false)
         }
 
     //在周课表中显示自定义课程
