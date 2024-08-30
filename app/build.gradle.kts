@@ -192,7 +192,7 @@ dependencies {
     implementation("com.maxkeppeler.sheets-compose-dialogs:list:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:option:$sheetsComposeDialogsVersion")
     //lottie
-    implementation("com.airbnb.android:lottie-compose:6.5.0")
+    implementation("com.airbnb.android:lottie-compose:6.5.1")
     //room
     implementation("androidx.room:room-runtime:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
