@@ -25,15 +25,15 @@ val gitVersionName = "git rev-parse --short=8 HEAD".runCommand()
 val packageName = "vip.mystery0.xhu.timetable"
 
 android {
-    compileSdk = 34
-    buildToolsVersion = "34.0.0"
+    compileSdk = 35
+    buildToolsVersion = "35.0.0"
 
     defaultConfig {
         applicationId = packageName
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = gitVersionCode
-        versionName = "1.5.3"
+        versionName = "1.5.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -129,6 +129,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.13"
