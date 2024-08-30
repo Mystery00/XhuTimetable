@@ -182,6 +182,9 @@ val weekCourseContent: TabContent = @Composable { ext ->
         val multiAccountMode by viewModel.multiAccountMode.collectAsState()
         ShowCourseDialog(dialogState = courseDialogState, multiAccountMode = multiAccountMode)
 
+        if (ext.weekViewDialogState.showing && weekView.isEmpty()) {
+            ext.activity.toastString("请等待数据加载完成")
+        }
         WeekViewDialog(ext.weekViewDialogState, weekView, currentWeek) {
             viewModel.changeCurrentWeek(it)
         }
@@ -196,7 +199,12 @@ private fun WeekViewDialog(
     currentWeek: Int,
     onWeekChange: (Int) -> Unit = {},
 ) {
-    if (weekView.isEmpty()) return
+    if (!dialogState.showing) {
+        return
+    }
+    if (weekView.isEmpty()) {
+        return
+    }
     val options = weekView.map {
         Option(
             titleText = "第${it.weekNum}周",
