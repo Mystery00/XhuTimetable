@@ -11,9 +11,12 @@ import vip.mystery0.xhu.timetable.config.Customisable
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.UserStore
+import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
+import vip.mystery0.xhu.timetable.model.CampusInfo
 import vip.mystery0.xhu.timetable.model.event.EventType
+import vip.mystery0.xhu.timetable.repository.UserRepo
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -25,6 +28,8 @@ class ClassSettingsViewModel : ComposeViewModel() {
     val currentYearData: StateFlow<Customisable<Int>> = _currentYearData
     private val _currentTermData = MutableStateFlow(GlobalConfigStore.customNowTerm)
     val currentTermData: StateFlow<Customisable<Int>> = _currentTermData
+    private val _campusInfo = MutableStateFlow(CampusInfo.EMPTY)
+    val campusInfo: StateFlow<CampusInfo> = _campusInfo
     private val _showTomorrowCourseTimeData = MutableStateFlow<LocalTime?>(null)
     val showTomorrowCourseTimeData: StateFlow<LocalTime?> = _showTomorrowCourseTimeData
     private val _currentTermStartTime = MutableStateFlow(GlobalConfigStore.customTermStartDate)
@@ -36,6 +41,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
 
     init {
         viewModelScope.launch {
+            loadCampusList()
             _showTomorrowCourseTimeData.value = getConfigStore { showTomorrowCourseTime }
             _showCustomCourseData.value = getConfigStore { showCustomCourseOnWeek }
             _showCustomThingData.value = getConfigStore { showCustomThing }
@@ -54,6 +60,26 @@ class ClassSettingsViewModel : ComposeViewModel() {
                 tempArrayList.add(0, "自动获取")
                 tempArrayList
             }
+        }
+    }
+
+    private fun loadCampusList() {
+        viewModelScope.launch {
+            val mainUser = UserStore.mainUser()
+            _campusInfo.value = mainUser.withAutoLoginOnce {
+                UserRepo.getCampusList(it)
+            }
+        }
+    }
+
+    fun updateUserCampus(campus: String) {
+        viewModelScope.launch {
+            val mainUser = UserStore.mainUser()
+            mainUser.withAutoLoginOnce {
+                UserRepo.updateUserCampus(it, campus)
+            }
+            EventBus.post(EventType.CHANGE_CAMPUS)
+            loadCampusList()
         }
     }
 
