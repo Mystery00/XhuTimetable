@@ -142,23 +142,25 @@ class SchoolCalendarActivity : BaseSelectComposeActivity() {
                     onRefresh = { },
                 )
                 Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
-                    SubcomposeAsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(schoolCalendarData.imageUrl)
-                            .memoryCachePolicy(CachePolicy.ENABLED)
-                            .diskCachePolicy(CachePolicy.ENABLED)
-                            .listener(onError = { _, result ->
-                                (result.throwable.message ?: "加载失败").notBlankToast(true)
-                            })
-                            .build(),
-                        loading = {
-                            Box(contentAlignment = Alignment.Center) {
-                                CircularProgressIndicator(modifier = Modifier.size(48.dp))
-                            }
-                        },
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                    )
+                    if (schoolCalendarData.imageUrl.isNotBlank()) {
+                        SubcomposeAsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(schoolCalendarData.imageUrl)
+                                .memoryCachePolicy(CachePolicy.ENABLED)
+                                .diskCachePolicy(CachePolicy.ENABLED)
+                                .listener(onError = { _, result ->
+                                    (result.throwable.message ?: "加载失败").notBlankToast(true)
+                                })
+                                .build(),
+                            loading = {
+                                Box(contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                                }
+                            },
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
                 }
             }
         }
