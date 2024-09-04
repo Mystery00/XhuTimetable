@@ -1,9 +1,11 @@
 package vip.mystery0.xhu.timetable.base
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -12,6 +14,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.list.ListDialog
@@ -20,10 +23,11 @@ import com.maxkeppeler.sheets.list.models.ListSelection
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
 import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
+import vip.mystery0.xhu.timetable.ui.theme.ExtendedTheme
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
 abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
-    @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalLayoutApi::class)
     @Composable
     protected fun BuildUserSelectFilterChipContent(
         userSelect: List<UserSelect>,
@@ -48,7 +52,6 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
                         onDataLoad()
                     }
                 },
-                contentPadding = PaddingValues(2.dp),
                 shape = RoundedCornerShape(36.dp),
             ) {
                 Icon(painter = XhuIcons.Action.search, contentDescription = null)
@@ -64,7 +67,12 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
         onDataLoad: suspend () -> Unit,
     ) {
         val scope = rememberCoroutineScope()
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(ExtendedTheme.colorScheme.surfaceContainer),
+        ) {
             FilterChip(
                 selected = true,
                 onClick = {
@@ -81,7 +89,6 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
                         onDataLoad()
                     }
                 },
-                contentPadding = PaddingValues(2.dp),
                 shape = RoundedCornerShape(36.dp),
             ) {
                 Icon(painter = XhuIcons.Action.search, contentDescription = null)
@@ -101,7 +108,12 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
         onDataLoad: suspend () -> Unit,
     ) {
         val scope = rememberCoroutineScope()
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(ExtendedTheme.colorScheme.surfaceContainer),
+        ) {
             FilterChip(
                 selected = true,
                 onClick = {

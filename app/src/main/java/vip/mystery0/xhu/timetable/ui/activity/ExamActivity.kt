@@ -3,10 +3,10 @@ package vip.mystery0.xhu.timetable.ui.activity
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -43,7 +43,7 @@ import vip.mystery0.xhu.timetable.viewmodel.ExamViewModel
 class ExamActivity : BaseSelectComposeActivity() {
     private val viewModel: ExamViewModel by viewModels()
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
     @Composable
     override fun BuildContent() {
         val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
@@ -92,9 +92,11 @@ class ExamActivity : BaseSelectComposeActivity() {
                         }
                     )
                 },
-                itemContent = @Composable { item ->
-                    BuildItem(item)
-                }
+                listContent = {
+                    itemsIndexed(pager) { item ->
+                        BuildItem(item)
+                    }
+                },
             )
         }
         ShowUserDialog(selectList = userSelect, show = userDialog, onSelect = {
