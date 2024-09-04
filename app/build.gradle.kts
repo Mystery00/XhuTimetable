@@ -235,6 +235,8 @@ dependencies {
     val aboutLibrariesVersion = "11.2.3"
     implementation("com.mikepenz:aboutlibraries-core:$aboutLibrariesVersion")
     implementation("com.mikepenz:aboutlibraries-compose-m3:$aboutLibrariesVersion")
+    //zoomimage
+    implementation("io.github.panpf.zoomimage:zoomimage-compose-coil2:1.1.0-beta01")
 }
 
 aboutLibraries {
