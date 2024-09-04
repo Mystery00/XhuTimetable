@@ -44,7 +44,6 @@ import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
-import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.isIgnoringBatteryOptimizations
 import vip.mystery0.xhu.timetable.joinQQGroup
 import vip.mystery0.xhu.timetable.loadInBrowser
@@ -402,19 +401,6 @@ class SettingsActivity : BaseSelectComposeActivity() {
                         },
                         title = { Text(text = "点击加入『西瓜课表用户交流反馈』") },
                         onClick = { joinQQGroup(false) }
-                    )
-                }
-                XhuSettingsGroup(title = {
-                    Text(text = "重置设置")
-                }) {
-                    XhuSettingsMenuLink(
-                        title = { Text(text = "重置背景图片") },
-                        onClick = {
-                            scope.launch {
-                                setConfigStore { backgroundImage = null }
-                                "背景图已重置".toast()
-                            }
-                        }
                     )
                 }
                 XhuSettingsGroup(title = {
