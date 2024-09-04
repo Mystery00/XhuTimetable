@@ -10,6 +10,7 @@ import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.config.parseServerErrorWhenFailed
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.request.LoginRequest
+import vip.mystery0.xhu.timetable.model.request.SetCampusRequest
 import vip.mystery0.xhu.timetable.model.response.LoginResponse
 import java.security.KeyFactory
 import java.security.spec.X509EncodedKeySpec
@@ -48,5 +49,13 @@ object UserRepo : BaseDataRepo {
 
     suspend fun reloadUserInfo(token: String) = withContext(Dispatchers.IO) {
         userApi.reloadUserInfo(token)
+    }
+
+    suspend fun getCampusList(token: String) = withContext(Dispatchers.IO) {
+        userApi.getCampusList(token)
+    }
+
+    suspend fun updateUserCampus(token: String, campus: String) = withContext(Dispatchers.IO) {
+        userApi.updateUserCampus(token, SetCampusRequest(campus))
     }
 }

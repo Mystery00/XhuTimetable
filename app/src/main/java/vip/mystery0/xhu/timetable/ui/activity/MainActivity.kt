@@ -310,7 +310,8 @@ class MainActivity : BaseComposeActivity() {
 
                     EventType.CHANGE_CURRENT_YEAR_AND_TERM,
                     EventType.CHANGE_SHOW_CUSTOM_COURSE,
-                    EventType.CHANGE_SHOW_CUSTOM_THING -> {
+                    EventType.CHANGE_SHOW_CUSTOM_THING,
+                    EventType.CHANGE_CAMPUS -> {
                         viewModel.refreshCloudDataToState()
                     }
 

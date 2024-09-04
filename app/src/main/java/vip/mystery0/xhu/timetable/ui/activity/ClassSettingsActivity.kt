@@ -34,6 +34,7 @@ import vip.mystery0.xhu.timetable.base.BaseSelectComposeActivity
 import vip.mystery0.xhu.timetable.config.Customisable
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
 import vip.mystery0.xhu.timetable.config.store.EventBus
+import vip.mystery0.xhu.timetable.model.CampusInfo
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
 import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
@@ -57,6 +58,7 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
         val scope = rememberCoroutineScope()
         val currentYear by viewModel.currentYearData.collectAsState()
         val currentTerm by viewModel.currentTermData.collectAsState()
+        val campusInfo by viewModel.campusInfo.collectAsState()
         val showTomorrowCourseTime by viewModel.showTomorrowCourseTimeData.collectAsState()
         val currentTermStartTime by viewModel.currentTermStartTime.collectAsState()
         val showCustomCourse by viewModel.showCustomCourseData.collectAsState()
@@ -64,6 +66,7 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
         val showTomorrowCourseTimeState = rememberXhuDialogState()
         val yearAndTermState = rememberXhuDialogState()
         val termStartTimeState = rememberXhuDialogState()
+        val userCampusState = rememberXhuDialogState()
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -189,6 +192,26 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
                         },
                         onClick = {
                             termStartTimeState.show()
+                        }
+                    )
+                }
+                XhuSettingsGroup(title = {
+                    Text(text = "校区设置")
+                }) {
+                    XhuSettingsMenuLink(
+                        icon = {
+                            Icon(
+                                painter = XhuIcons.userCampus,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface,
+                            )
+                        },
+                        title = { Text(text = "更新当前主用户校区") },
+                        subtitle = {
+                            Text(text = "当前校区：${campusInfo.selected}")
+                        },
+                        onClick = {
+                            userCampusState.show()
                         }
                     )
                 }
@@ -322,6 +345,13 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
             dialogState = termStartTimeState,
             initDate = currentTermStartTime.data,
         )
+        if (campusInfo != CampusInfo.EMPTY) {
+            BuildUserCampusSelector(
+                dialogState = userCampusState,
+                selectList = campusInfo.items,
+                current = campusInfo.selected,
+            )
+        }
 
         HandleErrorMessage(flow = viewModel.errorMessage)
     }
@@ -420,5 +450,25 @@ class ClassSettingsActivity : BaseSelectComposeActivity(), KoinComponent {
                 )
             )
         }
+    }
+
+    @Composable
+    private fun BuildUserCampusSelector(
+        dialogState: XhuDialogState,
+        selectList: List<String>,
+        current: String,
+    ) {
+        val selectedIndex = selectList.indexOf(current)
+
+        ShowSelectDialog(
+            dialogTitle = "更改校区",
+            options = selectList,
+            selectIndex = selectedIndex,
+            state = dialogState,
+            onSelect = { _, campus ->
+                viewModel.updateUserCampus(campus)
+                "当前校区已更新".toast()
+            }
+        )
     }
 }

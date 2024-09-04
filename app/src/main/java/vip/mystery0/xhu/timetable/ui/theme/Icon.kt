@@ -38,6 +38,9 @@ object XhuIcons {
     val customStartTime: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_custom_start_time)
+    val userCampus: Painter
+        @Composable
+        get() = painterResource(R.drawable.ic_user_campus)
     val customCourseColor: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_custom_course_color)
