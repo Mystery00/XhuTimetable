@@ -19,12 +19,8 @@ import androidx.compose.ui.unit.sp
 
 // Regex containing the syntax tokens
 val symbolPattern by lazy {
-    Regex("""(https?://[^\s\t\n]+)|(`[^`]+`)|(@\w+)|(\*[\w]+\*)|(_[\w]+_)|(~[\w]+~)""")
+    Regex("""(https?://[^\s\t\n]+)|(`[^`]+`)|(@\w+)|(\*\w+\*)|(_\w+_)|(~\w+~)""")
 }
-
-typealias StringAnnotation = AnnotatedString.Range<String>
-// Pair returning styled content and annotation for ClickableText when matching syntax token
-typealias SymbolAnnotation = Pair<AnnotatedString, StringAnnotation?>
 
 /**
  * Format a message following Markdown-lite syntax
