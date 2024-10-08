@@ -64,17 +64,15 @@ class SplashImageActivity : BaseComposeActivity() {
         }
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        intent?.let {
-            val splashFilePath = it.getStringExtra(INTENT_SPLASH_FILE_PATH)
-            val splashId = it.getLongExtra(INTENT_SPLASH_ID, -1)
-            if (splashFilePath.isNullOrBlank() || splashId == -1L) {
-                toMain()
-                return
-            }
-            viewModel.startInit(splashFilePath, splashId)
+        val splashFilePath = intent.getStringExtra(INTENT_SPLASH_FILE_PATH)
+        val splashId = intent.getLongExtra(INTENT_SPLASH_ID, -1)
+        if (splashFilePath.isNullOrBlank() || splashId == -1L) {
+            toMain()
+            return
         }
+        viewModel.startInit(splashFilePath, splashId)
     }
 
     @Composable

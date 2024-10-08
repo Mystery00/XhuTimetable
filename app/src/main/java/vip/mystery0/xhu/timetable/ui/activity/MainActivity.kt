@@ -199,7 +199,7 @@ class MainActivity : BaseComposeActivity() {
                     )
                 }
                 HorizontalPager(
-                    beyondBoundsPageCount = 3,
+                    beyondViewportPageCount = 3,
                     state = pagerState,
                     modifier = Modifier.padding(paddingValues),
                 ) { page ->

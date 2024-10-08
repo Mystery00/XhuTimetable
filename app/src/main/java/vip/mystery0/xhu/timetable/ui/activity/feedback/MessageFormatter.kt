@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -12,6 +13,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 
 // Regex containing the syntax tokens
@@ -19,10 +22,6 @@ val symbolPattern by lazy {
     Regex("""(https?://[^\s\t\n]+)|(`[^`]+`)|(@\w+)|(\*[\w]+\*)|(_[\w]+_)|(~[\w]+~)""")
 }
 
-// Accepted annotations for the ClickableTextWrapper
-enum class SymbolAnnotationType {
-    PERSON, LINK
-}
 typealias StringAnnotation = AnnotatedString.Range<String>
 // Pair returning styled content and annotation for ClickableText when matching syntax token
 typealias SymbolAnnotation = Pair<AnnotatedString, StringAnnotation?>
@@ -57,20 +56,15 @@ fun messageFormatter(
             }
 
         for (token in tokens) {
+            //普通文本
             append(text.slice(cursorPosition until token.range.first))
 
-            val (annotatedString, stringAnnotation) = getSymbolAnnotation(
+            getSymbolAnnotation(
                 matchResult = token,
                 colors = MaterialTheme.colorScheme,
                 primary = primary,
                 codeSnippetBackground = codeSnippetBackground
             )
-            append(annotatedString)
-
-            if (stringAnnotation != null) {
-                val (item, start, end, tag) = stringAnnotation
-                addStringAnnotation(tag = tag, start = start, end = end, annotation = item)
-            }
 
             cursorPosition = token.range.last + 1
         }
@@ -89,75 +83,69 @@ fun messageFormatter(
  * @param matchResult is a regex result matching our syntax symbols
  * @return pair of AnnotatedString with annotation (optional) used inside the ClickableText wrapper
  */
-private fun getSymbolAnnotation(
+private fun AnnotatedString.Builder.getSymbolAnnotation(
     matchResult: MatchResult,
     colors: ColorScheme,
     primary: Boolean,
     codeSnippetBackground: Color
-): SymbolAnnotation {
-    return when (matchResult.value.first()) {
-        '@' -> SymbolAnnotation(
-            AnnotatedString(
-                text = matchResult.value,
-                spanStyle = SpanStyle(
+) {
+    when (matchResult.value.first()) {
+        '@' -> {
+            withStyle(
+                style = SpanStyle(
                     color = if (primary) colors.secondary else colors.primary,
                     fontWeight = FontWeight.Bold
                 )
-            ),
-            StringAnnotation(
-                item = matchResult.value.substring(1),
-                start = matchResult.range.first,
-                end = matchResult.range.last,
-                tag = SymbolAnnotationType.PERSON.name
-            )
-        )
-        '*' -> SymbolAnnotation(
-            AnnotatedString(
-                text = matchResult.value.trim('*'),
-                spanStyle = SpanStyle(fontWeight = FontWeight.Bold)
-            ),
-            null
-        )
-        '_' -> SymbolAnnotation(
-            AnnotatedString(
-                text = matchResult.value.trim('_'),
-                spanStyle = SpanStyle(fontStyle = FontStyle.Italic)
-            ),
-            null
-        )
-        '~' -> SymbolAnnotation(
-            AnnotatedString(
-                text = matchResult.value.trim('~'),
-                spanStyle = SpanStyle(textDecoration = TextDecoration.LineThrough)
-            ),
-            null
-        )
-        '`' -> SymbolAnnotation(
-            AnnotatedString(
-                text = matchResult.value.trim('`'),
-                spanStyle = SpanStyle(
+            ) {
+                append(matchResult.value)
+            }
+        }
+
+        '*' -> {
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(matchResult.value.trim('*'))
+            }
+        }
+
+        '_' -> {
+            withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
+                append(matchResult.value.trim('_'))
+            }
+        }
+
+        '~' -> {
+            withStyle(style = SpanStyle(textDecoration = TextDecoration.LineThrough)) {
+                append(matchResult.value.trim('~'))
+            }
+        }
+
+        '`' -> {
+            withStyle(
+                style = SpanStyle(
                     fontFamily = FontFamily.Monospace,
                     fontSize = 12.sp,
                     background = codeSnippetBackground,
                     baselineShift = BaselineShift(0.2f)
                 )
-            ),
-            null
-        )
-        'h' -> SymbolAnnotation(
-            AnnotatedString(
-                text = matchResult.value,
-                spanStyle = SpanStyle(
-                    color = if (primary) colors.secondary else colors.primary
-                )
-            ),
-            StringAnnotation(
-                item = matchResult.value,
-                start = matchResult.range.first,
-                end = matchResult.range.last,
-                tag = SymbolAnnotationType.LINK.name
-            )
-        )
-        else -> SymbolAnnotation(AnnotatedString(matchResult.value), null)
+            ) {
+                append(matchResult.value.trim('`'))
+            }
+        }
+
+        'h' -> {
+            withLink(
+                link = LinkAnnotation.Url(matchResult.value),
+            ) {
+                withStyle(
+                    style = SpanStyle(
+                        color = if (primary) colors.secondary else colors.primary
+                    )
+                ) {
+                    append(matchResult.value)
+                }
+            }
+        }
+
+        else -> append(matchResult.value)
     }
 }
