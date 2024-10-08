@@ -206,10 +206,6 @@ object AggregationLocalRepo : KoinComponent {
     ): List<CalendarWeekResponse> {
         val map = HashMap<LocalDate, MutableList<CalendarDayItemResponse>>(180)
 
-        if (map.isEmpty()) {
-            return emptyList()
-        }
-
         //课程列表
         queryAndMap(
             query = {
@@ -297,6 +293,10 @@ object AggregationLocalRepo : KoinComponent {
                     )
                 }
             })
+
+        if (map.isEmpty()) {
+            return emptyList()
+        }
         //组装数据结构
         val maxDate = minOf(map.keys.max(), startDate.plusWeeks(20))
         val result = ArrayList<CalendarWeekResponse>()
