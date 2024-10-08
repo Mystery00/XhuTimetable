@@ -206,6 +206,10 @@ object AggregationLocalRepo : KoinComponent {
     ): List<CalendarWeekResponse> {
         val map = HashMap<LocalDate, MutableList<CalendarDayItemResponse>>(180)
 
+        if (map.isEmpty()) {
+            return emptyList()
+        }
+
         //课程列表
         queryAndMap(
             query = {
