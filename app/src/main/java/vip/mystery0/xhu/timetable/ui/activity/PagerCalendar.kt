@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.contentColorFor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -166,16 +167,27 @@ fun BuildCalendarDay(sheet: CalendarSheet) {
                     modifier = Modifier
                         .padding(end = 12.dp)
                         .fillMaxWidth(),
-                    backgroundColor = it.color.copy(alpha = 0.6F),
+                    backgroundColor = it.color.copy(alpha = 0.8F),
                     shape = RoundedCornerShape(8.dp),
                     elevation = 0.dp,
                 ) {
+                    val contentColor = Color.White
                     Column(modifier = Modifier.padding(8.dp)) {
-                        Text(text = it.title, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = it.title,
+                            fontWeight = FontWeight.Bold,
+                            color = contentColor,
+                        )
                         if (it.subtitle.isNotBlank()) {
-                            Text(text = it.subtitle)
+                            Text(
+                                text = it.subtitle,
+                                color = contentColor,
+                            )
                         }
-                        Text(text = it.text)
+                        Text(
+                            text = it.text,
+                            color = contentColor,
+                        )
                     }
                 }
             }

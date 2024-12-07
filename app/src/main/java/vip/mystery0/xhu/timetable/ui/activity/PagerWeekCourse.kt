@@ -359,7 +359,6 @@ private fun BuildTimeItem(time: Int, itemHeight: Dp) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalComposeUiApi
 @Composable
 private fun BoxScope.ShowCourseDialog(
