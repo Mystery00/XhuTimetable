@@ -156,27 +156,27 @@ configurations {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.browser:browser:1.8.0")
     implementation("androidx.concurrent:concurrent-futures-ktx:1.2.0")
-    implementation("androidx.glance:glance:1.1.0")
-    implementation("androidx.glance:glance-appwidget:1.1.0")
+    implementation("androidx.glance:glance:1.1.1")
+    implementation("androidx.glance:glance-appwidget:1.1.1")
     //compose
-    implementation(platform("androidx.compose:compose-bom:2024.09.03"))
+    implementation(platform("androidx.compose:compose-bom:2024.11.00"))
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material3:material3-window-size-class")
     implementation("androidx.activity:activity-compose")
-    implementation("androidx.compose.animation:animation:1.7.3")
+    implementation("androidx.compose.animation:animation:1.7.5")
     //paging3
-    implementation("androidx.paging:paging-runtime-ktx:3.3.2")
-    implementation("androidx.paging:paging-compose:3.3.2")
+    implementation("androidx.paging:paging-runtime-ktx:3.3.4")
+    implementation("androidx.paging:paging-compose:3.3.4")
     //accompanist
     val accompanistVersion = "0.36.0"
     implementation("com.google.accompanist:accompanist-pager-indicators:$accompanistVersion")
@@ -193,13 +193,13 @@ dependencies {
     implementation("com.maxkeppeler.sheets-compose-dialogs:list:$sheetsComposeDialogsVersion")
     implementation("com.maxkeppeler.sheets-compose-dialogs:option:$sheetsComposeDialogsVersion")
     //lottie
-    implementation("com.airbnb.android:lottie-compose:6.5.2")
+    implementation("com.airbnb.android:lottie-compose:6.6.1")
     //room
     implementation("androidx.room:room-runtime:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     //work manager
-    implementation("androidx.work:work-runtime-ktx:2.9.1")
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
     //koin
     implementation("io.insert-koin:koin-android:4.0.0")
     implementation("io.insert-koin:koin-androidx-workmanager:4.0.0")
@@ -212,10 +212,10 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-moshi:2.11.0")
     //moshi
-    implementation("com.squareup.moshi:moshi:1.15.1")
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
+    implementation("com.squareup.moshi:moshi:1.15.2")
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
     //mmkv
-    implementation("com.tencent:mmkv-static:1.3.9")
+    implementation("com.tencent:mmkv-static:2.0.1")
     //preference
     implementation("me.zhanghai.compose.preference:library:1.1.1")
     //AppCenter
@@ -228,15 +228,15 @@ dependencies {
     implementation("com.featureprobe:client-sdk-android:2.0.2@aar")
     implementation("net.java.dev.jna:jna:5.15.0@aar")
     //jg-push
-    implementation("cn.jiguang.sdk:jpush-google:5.5.0")
-    implementation("cn.jiguang.sdk.plugin:huawei:5.5.0")
+    implementation("cn.jiguang.sdk:jpush-google:5.5.4")
+    implementation("cn.jiguang.sdk.plugin:huawei:5.5.4")
     implementation("com.huawei.hms:push:6.12.0.300")
     //AboutLibraries
     val aboutLibrariesVersion = "11.2.3"
     implementation("com.mikepenz:aboutlibraries-core:$aboutLibrariesVersion")
     implementation("com.mikepenz:aboutlibraries-compose-m3:$aboutLibrariesVersion")
     //zoomimage
-    implementation("io.github.panpf.zoomimage:zoomimage-compose-coil2:1.1.0-beta01")
+    implementation("io.github.panpf.zoomimage:zoomimage-compose-coil2:1.1.0-rc03")
 }
 
 aboutLibraries {
