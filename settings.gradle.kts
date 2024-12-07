@@ -1,17 +1,25 @@
 pluginManagement {
     repositories {
-        gradlePluginPortal()
-        google()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         mavenCentral()
+        gradlePluginPortal()
         maven("https://developer.huawei.com/repo/")
     }
 }
 dependencyResolutionManagement {
+    @Suppress("UnstableApiUsage")
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    @Suppress("UnstableApiUsage")
     repositories {
-        maven("https://jitpack.io")
         google()
         mavenCentral()
+        maven("https://jitpack.io")
         maven("https://developer.huawei.com/repo/")
     }
 }
