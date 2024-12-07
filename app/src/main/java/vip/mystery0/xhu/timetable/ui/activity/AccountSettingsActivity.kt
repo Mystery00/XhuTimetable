@@ -87,7 +87,6 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
-        val editMode = remember { mutableStateOf(false) }
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -102,40 +101,23 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                             )
                         }
                     },
-                    actions = {
-                        IconButton(onClick = {
-                            editMode.value = !editMode.value
-                        }) {
-                            Icon(
-                                painter = if (editMode.value) XhuIcons.Action.done else XhuIcons.Action.manage,
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        }
-                    }
                 )
             },
             floatingActionButton = {
-                AnimatedVisibility(
-                    visible = !editMode.value,
-                    enter = scaleIn(),
-                    exit = scaleOut(),
-                ) {
-                    ExtendedFloatingActionButton(
-                        text = { Text(text = "登录其他账号") },
-                        onClick = {
-                            intentTo(LoginActivity::class) {
-                                it.putExtra(INTENT_EXTRA, true)
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Rounded.Add,
-                                contentDescription = "登录其他账号",
-                            )
-                        },
-                    )
-                }
+                ExtendedFloatingActionButton(
+                    text = { Text(text = "登录其他账号") },
+                    onClick = {
+                        intentTo(LoginActivity::class) {
+                            it.putExtra(INTENT_EXTRA, true)
+                        }
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Add,
+                            contentDescription = "登录其他账号",
+                        )
+                    },
+                )
             }
         ) { paddingValues ->
             val customTodayUserTemplateDialog = rememberXhuDialogState()
@@ -212,7 +194,6 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                                 viewModel.logoutUser(userItem.studentId)
                             },
                             mainUser = userItem.main,
-                            showButton = editMode.value,
                         )
                     }
                 }
@@ -261,21 +242,24 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
                         })
                     Spacer(modifier = Modifier.height(4.dp))
                     Row {
-                        Text(text = "学号",
+                        Text(
+                            text = "学号",
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .padding(4.dp)
                                 .clickable {
                                     valueState.value += "{${AccountTitleTemplate.STUDENT_NO.tpl}}"
                                 })
-                        Text(text = "姓名",
+                        Text(
+                            text = "姓名",
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .padding(4.dp)
                                 .clickable {
                                     valueState.value += "{${AccountTitleTemplate.NAME.tpl}}"
                                 })
-                        Text(text = "昵称",
+                        Text(
+                            text = "昵称",
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .padding(4.dp)
@@ -322,7 +306,6 @@ private fun BuildItem(
     onLongClick: () -> Unit,
     onButtonClick: () -> Unit,
     mainUser: Boolean,
-    showButton: Boolean = true,
 ) {
     Card(
         modifier = Modifier
@@ -378,22 +361,16 @@ private fun BuildItem(
                         color = MaterialTheme.colorScheme.outline,
                     )
                 }
-                AnimatedVisibility(
-                    visible = showButton,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
+                TextButton(
+                    onClick = onButtonClick,
+                    colors = ButtonDefaults.textButtonColors(
+                        containerColor = Color.Red,
+                        contentColor = Color.White,
+                    ),
+                    modifier = Modifier.height(24.dp),
+                    contentPadding = PaddingValues(0.dp),
                 ) {
-                    TextButton(
-                        onClick = onButtonClick,
-                        colors = ButtonDefaults.textButtonColors(
-                            containerColor = Color.Red,
-                            contentColor = Color.White,
-                        ),
-                        modifier = Modifier.height(24.dp),
-                        contentPadding = PaddingValues(0.dp),
-                    ) {
-                        Text(text = "退出登录", fontSize = 12.sp)
-                    }
+                    Text(text = "退出登录", fontSize = 12.sp)
                 }
             }
         }
