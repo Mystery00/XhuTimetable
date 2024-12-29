@@ -11,19 +11,11 @@ import android.net.Uri
 import android.os.Environment
 import android.os.PowerManager
 import android.provider.Settings
-import android.util.Log
 import android.webkit.WebSettings
 import androidx.browser.customtabs.CustomTabsIntent
-import com.microsoft.appcenter.AppCenter
-import com.microsoft.appcenter.analytics.Analytics
-import com.microsoft.appcenter.crashes.AbstractCrashesListener
-import com.microsoft.appcenter.crashes.Crashes
-import com.microsoft.appcenter.crashes.ingestion.models.ErrorAttachmentLog
-import com.microsoft.appcenter.crashes.model.ErrorReport
 import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
-import vip.mystery0.xhu.timetable.config.store.UserStore
 import java.io.File
 
 @SuppressLint("StaticFieldLeak")
@@ -118,50 +110,40 @@ fun BaseComposeActivity.loadInBrowser(url: String) {
 
 fun registerAppCenter(application: Application) {
     if (GlobalConfigStore.allowSendCrashReport) {
-        if (BuildConfig.DEBUG) {
-            AppCenter.setLogLevel(Log.VERBOSE)
-        }
-        Crashes.setListener(object : AbstractCrashesListener() {
-            override fun getErrorAttachments(report: ErrorReport): MutableIterable<ErrorAttachmentLog> {
-                try {
-                    val loggedUserList = UserStore.blockLoggedUserList()
-                    val list = loggedUserList.map {
-                        mapOf(
-                            "studentId" to it.studentId,
-                            "token" to it.token,
-                        )
-                    }
-                    val attachment = ErrorAttachmentLog.attachmentWithText(
-                        "loggedUserList: $list}",
-                        "userInfo.txt"
-                    )
-                    return mutableListOf(attachment)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-                return mutableListOf()
-            }
-        })
-        AppCenter.setUserId(publicDeviceId)
-        AppCenter.start(
-            application,
-            "463eb268-c114-49de-880c-c596cf5be561",
-            Analytics::class.java,
-            Crashes::class.java
-        )
+//        Crashes.setListener(object : AbstractCrashesListener() {
+//            override fun getErrorAttachments(report: ErrorReport): MutableIterable<ErrorAttachmentLog> {
+//                try {
+//                    val loggedUserList = UserStore.blockLoggedUserList()
+//                    val list = loggedUserList.map {
+//                        mapOf(
+//                            "studentId" to it.studentId,
+//                            "token" to it.token,
+//                        )
+//                    }
+//                    val attachment = ErrorAttachmentLog.attachmentWithText(
+//                        "loggedUserList: $list}",
+//                        "userInfo.txt"
+//                    )
+//                    return mutableListOf(attachment)
+//                } catch (e: Exception) {
+//                    e.printStackTrace()
+//                }
+//                return mutableListOf()
+//            }
+//        })
     }
 }
 
 fun trackEvent(event: String) {
-    if (AppCenter.isConfigured() && GlobalConfigStore.allowSendCrashReport) {
-        Analytics.trackEvent(event)
-    }
+//    if (AppCenter.isConfigured() && GlobalConfigStore.allowSendCrashReport) {
+//        Analytics.trackEvent(event)
+//    }
 }
 
 fun trackError(error: Throwable) {
-    if (AppCenter.isConfigured() && GlobalConfigStore.allowSendCrashReport) {
-        Crashes.trackError(error)
-    }
+//    if (AppCenter.isConfigured() && GlobalConfigStore.allowSendCrashReport) {
+//        Crashes.trackError(error)
+//    }
 }
 
 fun BaseComposeActivity.joinQQGroup(loadInBrowser: Boolean) {
