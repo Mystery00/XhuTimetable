@@ -10,6 +10,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,12 +22,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -41,7 +48,8 @@ import vip.mystery0.xhu.timetable.utils.formatChinaDateTime
 import vip.mystery0.xhu.timetable.viewmodel.NoticeViewModel
 
 class NoticeActivity : BasePageComposeActivity() {
-    private val regex = Regex("(https?://[^\\s\\t\\n]+)|(\\d{4}\\d+)")
+    private val regex =
+        Regex("""(https?://[^\s\t\n]+)|(`[^`]+`)|(\*.+\*)|(_.+_)|(~.+~)|(\d{4}\d+)""")
 
     private val viewModel: NoticeViewModel by viewModels()
     private val clipboardManager: ClipboardManager by inject()
@@ -124,41 +132,12 @@ class NoticeActivity : BasePageComposeActivity() {
             var cursorPosition = 0
             for (token in tokens) {
                 append(text.slice(cursorPosition until token.range.first))
-                when (token.value.first()) {
-                    'h' -> {
-                        withLink(LinkAnnotation.Url(token.value)) {
-                            withStyle(
-                                style = SpanStyle(
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            ) {
-                                append(token.value)
-                            }
-                        }
-                    }
 
-                    else -> {
-                        withLink(
-                            LinkAnnotation.Clickable(
-                                tag = "NUMBER",
-                                linkInteractionListener = {
-                                    clipboardManager.setPrimaryClip(
-                                        ClipData.newPlainText("Number", token.value)
-                                    )
-                                })
-                        ) {
-                            withStyle(
-                                style = SpanStyle(
-                                    color = MaterialTheme.colorScheme.tertiary,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            ) {
-                                append(token.value)
-                            }
-                        }
-                    }
-                }
+                getSymbolAnnotation(
+                    matchResult = token,
+                    colors = MaterialTheme.colorScheme,
+                )
+
                 cursorPosition = token.range.last + 1
             }
 
@@ -178,6 +157,81 @@ class NoticeActivity : BasePageComposeActivity() {
                     color = MaterialTheme.colorScheme.onSurface
                 ),
             )
+        }
+    }
+
+    private fun AnnotatedString.Builder.getSymbolAnnotation(
+        matchResult: MatchResult,
+        colors: ColorScheme,
+    ) {
+        when (matchResult.value.first()) {
+            '*' -> {
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append(matchResult.value.trim('*'))
+                }
+            }
+
+            '_' -> {
+                withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
+                    append(matchResult.value.trim('_'))
+                }
+            }
+
+            '~' -> {
+                withStyle(style = SpanStyle(textDecoration = TextDecoration.LineThrough)) {
+                    append(matchResult.value.trim('~'))
+                }
+            }
+
+            '`' -> {
+                withStyle(
+                    style = SpanStyle(
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 12.sp,
+                        background = colors.primaryContainer,
+                        baselineShift = BaselineShift(0.2f)
+                    )
+                ) {
+                    append(matchResult.value.trim('`'))
+                }
+            }
+
+            'h' -> {
+                withLink(
+                    link = LinkAnnotation.Url(matchResult.value),
+                ) {
+                    withStyle(
+                        style = SpanStyle(
+                            color = colors.primary,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    ) {
+                        append(matchResult.value)
+                    }
+                }
+            }
+
+            else -> {
+                withLink(
+                    LinkAnnotation.Clickable(
+                        tag = "NUMBER",
+                        linkInteractionListener = {
+                            clipboardManager.setPrimaryClip(
+                                ClipData.newPlainText("Number", matchResult.value)
+                            )
+                        }
+                    )
+                ) {
+                    withStyle(
+                        style = SpanStyle(
+                            color = colors.tertiary,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    ) {
+                        append(matchResult.value)
+                    }
+                }
+            }
         }
     }
 }
