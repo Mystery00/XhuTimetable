@@ -71,9 +71,6 @@ object XhuIcons {
     val nightMode: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_night_mode)
-    val pageEffect: Painter
-        @Composable
-        get() = painterResource(id = R.drawable.ic_action_page_effect)
     val notifyCourse: Painter
         @Composable
         get() = painterResource(id = R.drawable.ic_action_notify_course)
@@ -159,12 +156,6 @@ object XhuIcons {
             get() = iconOf(
                 painterResource(R.drawable.ic_custom_course_close_night) to
                         painterResource(R.drawable.ic_custom_course_close)
-            )
-        val pull: Painter
-            @Composable
-            get() = iconOf(
-                painterResource(R.drawable.ic_custom_course_pull_night) to
-                        painterResource(R.drawable.ic_custom_course_pull)
             )
         val remark: Painter
             @Composable
@@ -268,24 +259,15 @@ object XhuIcons {
     }
 
     object Action {
-        val manage: Painter
-            @Composable
-            get() = painterResource(id = R.drawable.ic_action_manage)
         val done: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_action_done)
-        val more: Painter
-            @Composable
-            get() = painterResource(id = R.drawable.ic_action_more)
         val view: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_action_view)
         val send: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_action_send)
-        val download: Painter
-            @Composable
-            get() = painterResource(id = R.drawable.ic_action_download)
         val search: Painter
             @Composable
             get() = painterResource(id = R.drawable.ic_action_search)
