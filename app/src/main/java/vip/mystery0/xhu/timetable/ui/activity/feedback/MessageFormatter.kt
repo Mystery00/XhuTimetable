@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 
 // Regex containing the syntax tokens
 val symbolPattern by lazy {
-    Regex("""(https?://[^\s\t\n]+)|(`[^`]+`)|(@\w+)|(\*\w+\*)|(_\w+_)|(~\w+~)""")
+    Regex("""(https?://[^\s\t\n]+)|(`[^`]+`)|(@\w+)|(\*.+\*)|(_.+_)|(~.+~)""")
 }
 
 /**
