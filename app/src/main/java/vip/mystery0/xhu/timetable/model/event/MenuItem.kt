@@ -30,23 +30,9 @@ enum class MenuItem(
         { XhuIcons.Profile.score },
         { intentTo(ScoreActivity::class) },
     ),
-    QUERY_CET_SCORE(
-        { XhuIcons.Profile.cetScore },
-        { toCustomTabs(it.link) },
-    ),
     QUERY_FREE_ROOM(
         { XhuIcons.Profile.classroom },
         { intentTo(CourseRoomActivity::class) },
-    ),
-    ACADEMIC_REPORT(
-        { XhuIcons.Profile.academicReport },
-        { menu ->
-            if (menu.hint.isNotBlank()) {
-                toastString(menu.hint, true)
-            } else {
-                toastString("当前版本暂不支持该功能，请更新到最新版本", true)
-            }
-        },
     ),
     ACCOUNT_MANAGE(
         { XhuIcons.Profile.accountSettings },
