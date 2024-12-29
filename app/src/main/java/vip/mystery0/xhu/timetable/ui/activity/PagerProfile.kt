@@ -89,10 +89,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
                         )
                     } ?: XhuImages.defaultProfileImage
                     Image(
-                        painter = if (profileImage is Painter)
-                            profileImage
-                        else
-                            rememberAsyncImagePainter(model = profileImage),
+                        painter = profileImage as? Painter ?: rememberAsyncImagePainter(model = profileImage),
                         contentDescription = null,
                         modifier = Modifier
                             .padding(horizontal = 12.dp)

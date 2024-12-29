@@ -187,23 +187,11 @@ object XhuIcons {
                 painterResource(id = R.drawable.ic_score_night) to
                         painterResource(id = R.drawable.ic_score)
             )
-        val cetScore: Painter
-            @Composable
-            get() = iconOf(
-                painterResource(id = R.drawable.ic_cet_score_night) to
-                        painterResource(id = R.drawable.ic_cet_score)
-            )
         val classroom: Painter
             @Composable
             get() = iconOf(
                 painterResource(id = R.drawable.ic_classroom_night) to
                         painterResource(id = R.drawable.ic_classroom)
-            )
-        val academicReport: Painter
-            @Composable
-            get() = iconOf(
-                painterResource(id = R.drawable.ic_academic_report_night) to
-                        painterResource(id = R.drawable.ic_academic_report)
             )
         val accountSettings: Painter
             @Composable
