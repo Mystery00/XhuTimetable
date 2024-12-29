@@ -200,9 +200,6 @@ dependencies {
     implementation(libs.mmkv)
     //preference
     implementation(libs.compose.preference)
-    //AppCenter
-    implementation(libs.appcenter.analytics)
-    implementation(libs.appcenter.crashes)
     //ucrop
     implementation(libs.ucrop)
     //feature-probe

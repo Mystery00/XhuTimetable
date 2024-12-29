@@ -30,7 +30,6 @@ import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.clock.ClockDialog
 import com.maxkeppeler.sheets.clock.models.ClockConfig
 import com.maxkeppeler.sheets.clock.models.ClockSelection
-import com.microsoft.appcenter.crashes.model.TestCrashException
 import kotlinx.coroutines.launch
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.R
@@ -528,11 +527,12 @@ class SettingsActivity : BaseSelectComposeActivity() {
                             }
                         )
                         XhuSettingsMenuLink(
+                            enabled = false,
                             title = { Text(text = "测试崩溃") },
                             onClick = {
-                                scope.launch {
-                                    throw TestCrashException()
-                                }
+//                                scope.launch {
+//                                    throw TestCrashException()
+//                                }
                             },
                         )
                         val splashList by viewModel.splashList.collectAsState()
