@@ -45,7 +45,6 @@ import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.model.Gender
 import vip.mystery0.xhu.timetable.model.event.MenuItem
 import vip.mystery0.xhu.timetable.trackEvent
-import vip.mystery0.xhu.timetable.ui.theme.ExtendedTheme
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
 import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
@@ -128,7 +127,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
                             .padding(horizontal = 12.dp)
                             .size(12.dp)
                             .rotate(rotationAngle),
-                        tint = ExtendedTheme.colorScheme.surfaceContainer,
+                        tint = MaterialTheme.colorScheme.surfaceContainer,
                     )
                 }
                 if (targetExpanded) {
@@ -153,7 +152,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp)
-                .background(ExtendedTheme.colorScheme.surfaceContainer)
+                .background(MaterialTheme.colorScheme.surfaceContainer)
         )
 
         val menuList by viewModel.menu.collectAsState()
@@ -184,7 +183,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(1.dp)
-                            .background(ExtendedTheme.colorScheme.surfaceContainer)
+                            .background(MaterialTheme.colorScheme.surfaceContainer)
                     )
                 }
             }
@@ -192,7 +191,7 @@ val profileCourseContent: TabContent = @Composable { ext ->
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(6.dp)
-                    .background(ExtendedTheme.colorScheme.surfaceContainer)
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
             )
         }
     }
@@ -239,7 +238,7 @@ private fun BuildProfileItem(
             modifier = Modifier
                 .padding(end = 12.dp, start = if (showBadge) 10.dp else 12.dp)
                 .size(12.dp),
-            tint = ExtendedTheme.colorScheme.surfaceContainer,
+            tint = MaterialTheme.colorScheme.surfaceContainer,
         )
     }
 }

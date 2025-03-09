@@ -130,7 +130,7 @@ class JobHistoryActivity : BaseComposeActivity() {
                             state = lazyListState,
                             modifier = Modifier
                                 .fillMaxSize(),
-                            contentPadding = PaddingValues(4.dp),
+                            contentPadding = PaddingValues(vertical = 4.dp),
                         ) {
                             items(historyList.size) { index ->
                                 val item = historyList[index]

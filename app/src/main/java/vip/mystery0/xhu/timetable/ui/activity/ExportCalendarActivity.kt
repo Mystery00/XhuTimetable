@@ -138,7 +138,7 @@ class ExportCalendarActivity : BaseSelectComposeActivity() {
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxSize(),
-                            contentPadding = PaddingValues(4.dp),
+                            contentPadding = PaddingValues(vertical = 4.dp),
                         ) {
                             items(list.size) { index ->
                                 BuildItem(item = list[index], onClick = {

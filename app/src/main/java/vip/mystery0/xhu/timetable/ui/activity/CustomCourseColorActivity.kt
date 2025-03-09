@@ -104,7 +104,7 @@ class CustomCourseColorActivity : BaseComposeActivity() {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
-                contentPadding = PaddingValues(4.dp),
+                contentPadding = PaddingValues(vertical = 4.dp),
             ) {
                 if (list.isNotEmpty()) {
                     items(list.size) { index ->

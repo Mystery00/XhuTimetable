@@ -4,16 +4,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
@@ -23,7 +28,6 @@ import com.maxkeppeler.sheets.list.models.ListSelection
 import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
 import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
-import vip.mystery0.xhu.timetable.ui.theme.ExtendedTheme
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
 abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
@@ -34,9 +38,9 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
         showUserDialog: XhuDialogState,
         onDataLoad: suspend () -> Unit,
     ) {
-        val scope = rememberCoroutineScope()
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            FilterChip(
+        BuildSelectBaseContent(onDataLoad = onDataLoad) {
+            ElevatedFilterChip(
+                modifier = Modifier.align(Alignment.CenterVertically),
                 selected = true,
                 onClick = {
                     showUserDialog.show()
@@ -46,16 +50,6 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
                     Text(text = userString)
                 },
             )
-            OutlinedButton(
-                onClick = {
-                    scope.launch {
-                        onDataLoad()
-                    }
-                },
-                shape = RoundedCornerShape(36.dp),
-            ) {
-                Icon(painter = XhuIcons.Action.search, contentDescription = null)
-            }
         }
     }
 
@@ -66,14 +60,9 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
         showUserDialog: XhuDialogState,
         onDataLoad: suspend () -> Unit,
     ) {
-        val scope = rememberCoroutineScope()
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(ExtendedTheme.colorScheme.surfaceContainer),
-        ) {
-            FilterChip(
+        BuildSelectBaseContent(onDataLoad = onDataLoad) {
+            ElevatedFilterChip(
+                modifier = Modifier.align(Alignment.CenterVertically),
                 selected = true,
                 onClick = {
                     showUserDialog.show()
@@ -83,16 +72,6 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
                     Text(text = userString)
                 },
             )
-            OutlinedButton(
-                onClick = {
-                    scope.launch {
-                        onDataLoad()
-                    }
-                },
-                shape = RoundedCornerShape(36.dp),
-            ) {
-                Icon(painter = XhuIcons.Action.search, contentDescription = null)
-            }
         }
     }
 
@@ -107,14 +86,9 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
         showTermDialog: XhuDialogState,
         onDataLoad: suspend () -> Unit,
     ) {
-        val scope = rememberCoroutineScope()
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(ExtendedTheme.colorScheme.surfaceContainer),
-        ) {
-            FilterChip(
+        BuildSelectBaseContent(onDataLoad = onDataLoad) {
+            ElevatedFilterChip(
+                modifier = Modifier.align(Alignment.CenterVertically),
                 selected = true,
                 onClick = {
                     showUserDialog.show()
@@ -124,7 +98,8 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
                     Text(text = userString)
                 },
             )
-            FilterChip(
+            ElevatedFilterChip(
+                modifier = Modifier.align(Alignment.CenterVertically),
                 selected = true,
                 onClick = {
                     showYearDialog.show()
@@ -134,7 +109,8 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
                     Text(text = yearString)
                 },
             )
-            FilterChip(
+            ElevatedFilterChip(
+                modifier = Modifier.align(Alignment.CenterVertically),
                 selected = true,
                 onClick = {
                     showTermDialog.show()
@@ -144,16 +120,41 @@ abstract class BaseSelectComposeActivity : BasePageComposeActivity() {
                     Text(text = termString)
                 },
             )
+        }
+    }
+
+    @OptIn(ExperimentalLayoutApi::class)
+    @Composable
+    private fun BuildSelectBaseContent(
+        modifier: Modifier = Modifier,
+        onDataLoad: suspend () -> Unit,
+        chips: @Composable FlowRowScope.() -> Unit,
+    ) {
+        val scope = rememberCoroutineScope()
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .padding(horizontal = 8.dp),
+        ) {
+            chips()
             OutlinedButton(
+                modifier = Modifier
+                    .height(32.dp)
+                    .align(Alignment.CenterVertically),
                 onClick = {
                     scope.launch {
                         onDataLoad()
                     }
                 },
-                contentPadding = PaddingValues(2.dp),
-                shape = RoundedCornerShape(36.dp),
+                contentPadding = PaddingValues(0.dp),
+                shape = RoundedCornerShape(16.dp),
             ) {
-                Icon(painter = XhuIcons.Action.search, contentDescription = null)
+                Icon(
+                    painter = XhuIcons.Action.search,
+                    contentDescription = null,
+                )
             }
         }
     }

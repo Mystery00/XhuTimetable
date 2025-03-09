@@ -101,7 +101,7 @@ abstract class BasePageComposeActivity : BaseComposeActivity() {
                     state = state,
                     modifier = Modifier
                         .fillMaxSize(),
-                    contentPadding = PaddingValues(4.dp),
+                    contentPadding = PaddingValues(vertical = 4.dp),
                 ) {
                     listHeader?.let {
                         stickyHeader { it() }
