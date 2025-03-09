@@ -34,6 +34,7 @@ class ExpScoreViewModel : ComposeViewModel(), KoinComponent {
             _userSelect.value = initUserSelect()
             _yearSelect.value = initYearSelect()
             _termSelect.value = initTermSelect()
+            loadExpScoreList()
         }
     }
 
@@ -56,7 +57,8 @@ class ExpScoreViewModel : ComposeViewModel(), KoinComponent {
             val year = getSelectedYear(_yearSelect.value)
             val term = getSelectedTerm(_termSelect.value)
             val scoreList = ScoreRepo.fetchExpScoreList(selectedUser, year, term)
-            _expScoreListState.value = ExpScoreListState(scoreList = scoreList)
+            _expScoreListState.value =
+                ExpScoreListState(scoreList = scoreList, errorMessage = "数据加载完成！")
         }
     }
 

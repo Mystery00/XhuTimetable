@@ -163,7 +163,6 @@ dependencies {
     implementation(libs.androidx.paging3)
     implementation(libs.androidx.paging3.compose)
     //accompanist
-    implementation(libs.accompanist.pager.indicators)
     implementation(libs.accompanist.permissions)
     //sheets-compose-dialogs
     implementation(libs.sheets.compose.dialogs)

@@ -11,13 +11,11 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -70,7 +68,7 @@ abstract class BasePageComposeActivity : BaseComposeActivity() {
         boxContent = boxContent,
     )
 
-    @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+    @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
     @Composable
     protected fun <T : Any> BuildPaging(
         state: LazyListState = rememberLazyListState(),
@@ -82,19 +80,22 @@ abstract class BasePageComposeActivity : BaseComposeActivity() {
         alwaysShowList: Boolean = false,
         boxContent: @Composable BoxScope.() -> Unit = {},
     ) {
-        val append = pager.loadState.append
-        val isPageLoading = append is LoadState.Loading
         Box(
             Modifier
                 .padding(paddingValues)
                 .fillMaxSize(),
         ) {
-            val pullRefreshState = rememberPullRefreshState(
-                refreshing = refreshing,
+            val pullToRefreshState = rememberPullToRefreshState()
+            LaunchedEffect(pager.loadState.refresh) {
+                if (pager.loadState.refresh is LoadState.NotLoading) {
+                    pullToRefreshState.animateToHidden()
+                    toastString("数据加载完成！")
+                }
+            }
+            PullToRefreshBox(
+                isRefreshing = refreshing,
                 onRefresh = { pager.refresh() },
-            )
-            Box(
-                modifier = Modifier.pullRefresh(pullRefreshState),
+                state = pullToRefreshState,
             ) {
                 LazyColumn(
                     state = state,
@@ -105,7 +106,7 @@ abstract class BasePageComposeActivity : BaseComposeActivity() {
                     listHeader?.let {
                         stickyHeader { it() }
                     }
-                    if (!alwaysShowList && !isPageLoading && pager.itemCount == 0) {
+                    if (!alwaysShowList && pager.loadState.append !is LoadState.Loading && pager.itemCount == 0) {
                         item {
                             BuildNoDataLayout()
                         }
@@ -126,11 +127,6 @@ abstract class BasePageComposeActivity : BaseComposeActivity() {
                         }
                     }
                 }
-                PullRefreshIndicator(
-                    refreshing = refreshing || isPageLoading,
-                    state = pullRefreshState,
-                    Modifier.align(Alignment.TopCenter),
-                )
             }
             boxContent()
         }

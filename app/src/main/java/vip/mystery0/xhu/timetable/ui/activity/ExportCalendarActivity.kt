@@ -18,11 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,6 +34,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -77,8 +75,7 @@ class ExportCalendarActivity : BaseSelectComposeActivity() {
     private val viewModel: ExportCalendarViewModel by viewModels()
 
     @OptIn(
-        ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
-        ExperimentalMaterialApi::class
+        ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class
     )
     @Composable
     override fun BuildContent() {
@@ -131,11 +128,12 @@ class ExportCalendarActivity : BaseSelectComposeActivity() {
                         .padding(paddingValues)
                         .fillMaxSize(),
                 ) {
-                    val pullRefreshState = rememberPullRefreshState(
-                        refreshing = calendarAccountListState.loading,
-                        onRefresh = { viewModel.loadCalendarAccountList() },
-                    )
-                    Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+                    PullToRefreshBox(
+                        isRefreshing = calendarAccountListState.loading,
+                        onRefresh = {
+                            viewModel.loadCalendarAccountList()
+                        },
+                    ) {
                         val list = calendarAccountListState.list
                         LazyColumn(
                             modifier = Modifier
@@ -152,9 +150,10 @@ class ExportCalendarActivity : BaseSelectComposeActivity() {
                             BuildNoDataLayout()
                         }
                     }
-                    FloatingActionButton(modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(24.dp),
+                    FloatingActionButton(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(24.dp),
                         onClick = {
                             if (!calendarAccountListState.loading) {
                                 scope.launch {
@@ -170,7 +169,8 @@ class ExportCalendarActivity : BaseSelectComposeActivity() {
                 }
                 ExportBottomSheet(openBottomSheet, scope)
             } else {
-                BuildNoPermissionLayout(permissionDescription = "将课程导出到系统日历功能需要对${appName}授予“读取/写入日历”权限。\n没有这个权限，该功能无法运作",
+                BuildNoPermissionLayout(
+                    permissionDescription = "将课程导出到系统日历功能需要对${appName}授予“读取/写入日历”权限。\n没有这个权限，该功能无法运作",
                     onRequestPermission = {
                         calendarPermissionState.launchMultiplePermissionRequest()
                     })
@@ -396,7 +396,8 @@ class ExportCalendarActivity : BaseSelectComposeActivity() {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp)
-                                .clickable(interactionSource = remember { MutableInteractionSource() },
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
                                     indication = null,
                                     onClick = {
                                         reminderDialog.show()

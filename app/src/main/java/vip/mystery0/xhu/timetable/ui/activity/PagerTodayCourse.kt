@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -101,7 +100,6 @@ val todayCourseActions: TabAction = @Composable { ext ->
     false
 }
 
-@ExperimentalMaterialApi
 val todayCourseContent: TabContent = @Composable { ext ->
     val activity = ext.activity
     val viewModel = ext.viewModel
@@ -233,7 +231,6 @@ private fun DrawLine() {
     )
 }
 
-@ExperimentalMaterialApi
 @Composable
 private fun DrawPoemsCard(
     openBottomSheet: MutableState<Boolean>,
@@ -287,7 +284,6 @@ private fun DrawPoemsCard(
     }
 }
 
-@ExperimentalMaterialApi
 @Composable
 private fun DrawHoliday(holiday: HolidayView) {
     Row(
@@ -346,7 +342,6 @@ private fun DrawHoliday(holiday: HolidayView) {
     }
 }
 
-@ExperimentalMaterialApi
 @Composable
 private fun DrawThingCard(
     thing: TodayThingSheet,
@@ -486,7 +481,6 @@ private fun DrawThingCard(
     }
 }
 
-@ExperimentalMaterialApi
 @Composable
 private fun DrawCourseCard(
     course: TodayCourseSheet,

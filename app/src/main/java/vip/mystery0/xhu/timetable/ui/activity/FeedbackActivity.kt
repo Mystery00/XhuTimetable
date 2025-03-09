@@ -19,9 +19,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -32,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -58,7 +56,7 @@ import java.time.Instant
 class FeedbackActivity : BaseComposeActivity(), KoinComponent {
     private val viewModel: FeedbackViewModel by viewModels()
 
-    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
         val loading by viewModel.loading.collectAsState()
@@ -123,11 +121,12 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
                     .padding(paddingValues)
                     .fillMaxSize()
             ) {
-                val pullRefreshState = rememberPullRefreshState(
-                    refreshing = loading.loading,
-                    onRefresh = { viewModel.loadLastMessage(10) },
-                )
-                Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+                PullToRefreshBox(
+                    isRefreshing = loading.loading,
+                    onRefresh = {
+                        viewModel.loadLastMessage(10)
+                    },
+                ) {
                     Column(modifier = Modifier.fillMaxSize()) {
                         LazyColumn(
                             reverseLayout = true,

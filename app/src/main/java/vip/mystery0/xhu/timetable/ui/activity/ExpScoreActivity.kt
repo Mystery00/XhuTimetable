@@ -13,10 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,7 +40,6 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.ExpScoreViewModel
 
-@OptIn(ExperimentalMaterialApi::class)
 class ExpScoreActivity : BaseSelectComposeActivity() {
     private val viewModel: ExpScoreViewModel by viewModels()
 
@@ -86,14 +82,12 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
                         .padding(paddingValues)
                         .fillMaxSize(),
                 ) {
-                    val pullRefreshState = rememberPullRefreshState(
-                        refreshing = expScoreListState.loading,
+                    PullToRefreshBox(
+                        isRefreshing = expScoreListState.loading,
                         onRefresh = {
                             viewModel.loadExpScoreList()
                         },
-                    )
-
-                    Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+                    ) {
                         val scoreList = expScoreListState.scoreList
                         LazyColumn(
                             modifier = Modifier
@@ -137,11 +131,6 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
                                 }
                             }
                         }
-                        PullRefreshIndicator(
-                            refreshing = expScoreListState.loading,
-                            state = pullRefreshState,
-                            Modifier.align(Alignment.TopCenter),
-                        )
                     }
                 }
             }
