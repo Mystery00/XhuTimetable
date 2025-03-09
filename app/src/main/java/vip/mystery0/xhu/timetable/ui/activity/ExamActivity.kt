@@ -3,7 +3,6 @@ package vip.mystery0.xhu.timetable.ui.activity
 import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,7 +42,7 @@ import vip.mystery0.xhu.timetable.viewmodel.ExamViewModel
 class ExamActivity : BaseSelectComposeActivity() {
     private val viewModel: ExamViewModel by viewModels()
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
         val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)

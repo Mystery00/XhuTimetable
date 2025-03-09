@@ -1,39 +1,39 @@
 [versions]
-agp = "8.7.3"
-kotlin = "2.1.0"
+agp = "8.9.0"
+kotlin = "2.1.10"
 # https://github.com/google/ksp/releases
-ksp = "2.1.0-1.0.29"
-aboutlibraries = "11.1.4"
+ksp = "2.1.10-1.0.31"
+aboutlibraries = "11.6.3"
 
-composeBom = "2024.11.00"
+composeBom = "2025.02.00"
 material = "1.12.0"
 androidxCore = "1.15.0"
-androidxCompose = "1.9.3"
+androidxCompose = "1.10.1"
 androidxLifecycle = "2.8.7"
 androidxCompat = "1.7.0"
-androidxAnimation = "1.7.5"
+androidxAnimation = "1.7.8"
 androidxSplashScreen = "1.0.1"
 androidxBrowser = "1.8.0"
 androidxFuture = "1.2.0"
 androidxGlance = "1.1.1"
-androidxPaging = "3.3.4"
+androidxPaging = "3.3.6"
 androidxRoom = "2.6.1"
 androidxWorkManager = "2.10.0"
 
-aboutlibrariesDependencies = "11.2.3"
-accompanist = "0.36.0"
+aboutlibrariesDependencies = "11.6.3"
+accompanist = "0.37.2"
 sheetsComposeDdialogs = "1.3.0"
-lottie = "6.6.1"
-koin = "4.0.0"
+lottie = "6.6.3"
+koin = "4.0.2"
 coil = "2.7.0"
 retrofit = "2.11.0"
 moshi = "1.15.2"
-mmkv = "2.0.1"
+mmkv = "2.1.0"
 composePreference = "1.1.1"
-ucrop = "2.2.8"
+ucrop = "2.2.9"
 jpush = "5.5.4"
 hmsPush = "6.12.0.300"
-zoomimage = "1.1.0-rc03"
+zoomimage = "1.1.2"
 
 [libraries]
 gradle = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -63,7 +63,6 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidxRoom" }
 androidx-workmanager = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "androidxWorkManager" }
 
-accompanist-pager-indicators = { group = "com.google.accompanist", name = "accompanist-pager-indicators", version.ref = "accompanist" }
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 
 sheets-compose-dialogs = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "core", version.ref = "sheetsComposeDdialogs" }

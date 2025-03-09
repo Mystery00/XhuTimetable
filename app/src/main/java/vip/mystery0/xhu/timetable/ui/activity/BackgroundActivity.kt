@@ -18,11 +18,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -32,6 +29,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -97,7 +97,7 @@ class BackgroundActivity : BaseComposeActivity() {
             }
         }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
         val backgroundListState by viewModel.backgroundListState.collectAsState()
@@ -147,23 +147,30 @@ class BackgroundActivity : BaseComposeActivity() {
                     .padding(paddingValues)
                     .fillMaxSize()
             ) {
-                val pullRefreshState = rememberPullRefreshState(
-                    refreshing = backgroundListState.loading,
-                    onRefresh = { },
-                )
-                Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 120.dp),
-                        modifier = Modifier.fillMaxSize(),
-                    ) {
-                        items(
-                            items = backgroundListState.backgroundList,
-                            key = { it.backgroundId },
-                        ) { background ->
-                            PhotoItem(background)
-                        }
+                val pullToRefreshState = rememberPullToRefreshState()
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = 120.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pullToRefresh(
+                            state = pullToRefreshState,
+                            isRefreshing = backgroundListState.loading,
+                            onRefresh = {},
+                            enabled = false,
+                        ),
+                ) {
+                    items(
+                        items = backgroundListState.backgroundList,
+                        key = { it.backgroundId },
+                    ) { background ->
+                        PhotoItem(background)
                     }
                 }
+                Indicator(
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    isRefreshing = backgroundListState.loading,
+                    state = pullToRefreshState,
+                )
             }
         }
 

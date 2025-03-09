@@ -14,9 +14,9 @@ import vip.mystery0.xhu.timetable.repository.ExamRepo
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import java.time.LocalDate
 
-class ExamViewModel : PagingComposeViewModel<User, Exam>(
+class ExamViewModel : PagingComposeViewModel<PageRequest, Exam>(
     {
-        ExamRepo.getExamListStream(it)
+        ExamRepo.getExamListStream(it.user)
     }
 ) {
     companion object {
@@ -47,7 +47,7 @@ class ExamViewModel : PagingComposeViewModel<User, Exam>(
                 failed("选择用户为空，请重新选择")
                 return@launch
             }
-            loadData(selectedUser)
+            loadData(PageRequest(selectedUser))
         }
     }
 
@@ -58,6 +58,11 @@ class ExamViewModel : PagingComposeViewModel<User, Exam>(
         }
     }
 }
+
+data class PageRequest(
+    val user: User,
+    val requestTime: Long = System.currentTimeMillis(),
+)
 
 data class Exam(
     val courseColor: Color,

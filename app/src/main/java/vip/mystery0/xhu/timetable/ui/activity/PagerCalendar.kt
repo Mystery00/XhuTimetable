@@ -16,9 +16,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.contentColorFor
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -60,7 +59,6 @@ val calendarActions: TabAction = @Composable {
 }
 
 @OptIn(ExperimentalFoundationApi::class)
-@ExperimentalMaterialApi
 val calendarContent: TabContent = @Composable { ext ->
     val viewModel = ext.viewModel
 
@@ -167,9 +165,11 @@ fun BuildCalendarDay(sheet: CalendarSheet) {
                     modifier = Modifier
                         .padding(end = 12.dp)
                         .fillMaxWidth(),
-                    backgroundColor = it.color.copy(alpha = 0.8F),
+                    colors = CardDefaults.cardColors(
+                        containerColor = it.color.copy(alpha = 0.8F),
+                    ),
                     shape = RoundedCornerShape(8.dp),
-                    elevation = 0.dp,
+                    elevation = CardDefaults.elevatedCardElevation(0.dp),
                 ) {
                     val contentColor = Color.White
                     Column(modifier = Modifier.padding(8.dp)) {

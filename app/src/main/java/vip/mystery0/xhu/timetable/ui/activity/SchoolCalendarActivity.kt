@@ -8,9 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -18,6 +15,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,7 +33,7 @@ import vip.mystery0.xhu.timetable.viewmodel.SchoolCalendarViewModel
 class SchoolCalendarActivity : BaseSelectComposeActivity() {
     private val viewModel: SchoolCalendarViewModel by viewModels()
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
         val loading by viewModel.loading.collectAsState()
@@ -120,11 +118,10 @@ class SchoolCalendarActivity : BaseSelectComposeActivity() {
                     .padding(paddingValues)
                     .fillMaxSize()
             ) {
-                val pullRefreshState = rememberPullRefreshState(
-                    refreshing = loading.loading,
+                PullToRefreshBox(
+                    isRefreshing = loading.loading,
                     onRefresh = { },
-                )
-                Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+                ) {
                     if (schoolCalendarData.imageUrl.isNotBlank()) {
                         CoilZoomAsyncImage(
                             model = schoolCalendarData.cacheFile,

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.update
 import vip.mystery0.xhu.timetable.config.store.User
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -28,7 +29,7 @@ abstract class PagingComposeViewModel<REQ, RESP : Any>(
         .flatMapLatest {
             if (it == null) return@flatMapLatest flowOf(PagingData.empty())
             val dataFlow = pageLoader(it)
-            _refreshing.value = false
+            _refreshing.update { false }
             dataFlow
         }.cachedIn(viewModelScope)
     val pageState: Flow<PagingData<RESP>> = _pageState
@@ -37,7 +38,7 @@ abstract class PagingComposeViewModel<REQ, RESP : Any>(
     val refreshing: StateFlow<Boolean> = _refreshing
 
     protected suspend fun loadData(req: REQ) {
-        _refreshing.value = true
+        _refreshing.update { true }
         pageRequestFlow.emit(req)
     }
 

@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -65,7 +64,6 @@ import vip.mystery0.xhu.timetable.ui.theme.stateOf
 import vip.mystery0.xhu.timetable.utils.isTwiceClick
 import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
 
-@OptIn(ExperimentalMaterialApi::class)
 class MainActivity : BaseComposeActivity() {
     private val viewModel: MainViewModel by viewModels()
     private lateinit var addDialogState: XhuDialogState
@@ -355,7 +353,6 @@ class MainActivity : BaseComposeActivity() {
     }
 }
 
-@ExperimentalMaterialApi
 private enum class Tab(
     val label: String,
     val otherLabel: String = label,
@@ -394,7 +391,6 @@ private enum class Tab(
     ),
 }
 
-@ExperimentalMaterialApi
 private fun tabOfWhenEnableCalendar(index: Int): Tab = when (index) {
     0 -> Tab.TODAY
     1 -> Tab.WEEK
@@ -403,7 +399,6 @@ private fun tabOfWhenEnableCalendar(index: Int): Tab = when (index) {
     else -> Tab.PROFILE
 }
 
-@ExperimentalMaterialApi
 private fun tabOfWhenDisableCalendar(index: Int): Tab = when (index) {
     0 -> Tab.TODAY
     1 -> Tab.WEEK

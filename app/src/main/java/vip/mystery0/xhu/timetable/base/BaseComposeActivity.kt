@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -305,7 +304,7 @@ abstract class BaseComposeActivity : ComponentActivity(), KoinComponent {
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
                 unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
-                cursorColor = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+                cursorColor = LocalContentColor.current
             ),
             trailingIcon = {
                 AnimatedVisibility(

@@ -1,7 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -50,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.option.OptionDialog
 import com.maxkeppeler.sheets.option.models.DisplayMode
@@ -59,6 +57,7 @@ import com.maxkeppeler.sheets.option.models.OptionConfig
 import com.maxkeppeler.sheets.option.models.OptionSelection
 import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.WeekCourseView
+import vip.mystery0.xhu.timetable.ui.component.HorizontalPagerIndicator
 import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.WeekView
@@ -449,7 +448,6 @@ private fun BoxScope.ShowCourseDialog(
                     }
                 }
             }
-            @Suppress("DEPRECATION")
             HorizontalPagerIndicator(
                 pageCount = showList.size,
                 pagerState = pagerState,

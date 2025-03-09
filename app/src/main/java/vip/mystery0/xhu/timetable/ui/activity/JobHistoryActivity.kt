@@ -15,12 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -59,7 +56,7 @@ class JobHistoryActivity : BaseComposeActivity() {
         JPushInterface.getRegistrationID(this)
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
         val historyListState by viewModel.historyListState.collectAsState()
@@ -121,14 +118,12 @@ class JobHistoryActivity : BaseComposeActivity() {
                     .padding(paddingValues)
                     .fillMaxSize(),
             ) {
-                val pullRefreshState = rememberPullRefreshState(
-                    refreshing = historyListState.loading,
+                PullToRefreshBox(
+                    isRefreshing = historyListState.loading,
                     onRefresh = {
                         viewModel.loadHistoryList()
                     },
-                )
-
-                Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+                ) {
                     val historyList = historyListState.history
                     if (historyListState.loading || historyList.isNotEmpty()) {
                         LazyColumn(
@@ -142,11 +137,6 @@ class JobHistoryActivity : BaseComposeActivity() {
                                 BuildItem(item, jPushRegistrationId)
                             }
                         }
-                        PullRefreshIndicator(
-                            refreshing = historyListState.loading,
-                            state = pullRefreshState,
-                            Modifier.align(Alignment.TopCenter),
-                        )
                     } else {
                         BuildNoDataLayout()
                     }
