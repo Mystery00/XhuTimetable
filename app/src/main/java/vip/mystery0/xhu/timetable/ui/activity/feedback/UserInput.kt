@@ -64,7 +64,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import vip.mystery0.xhu.timetable.ui.theme.ExtendedTheme
 import vip.mystery0.xhu.timetable.ui.theme.MaterialIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
@@ -96,7 +95,7 @@ fun UserInput(
     var textFieldFocusState by remember { mutableStateOf(false) }
 
     Surface(
-        color = ExtendedTheme.colorScheme.surfaceContainer,
+        color = MaterialTheme.colorScheme.surfaceContainer,
     ) {
         Column(modifier = modifier) {
             UserInputText(
@@ -328,7 +327,7 @@ private fun UserInputText(
                     .fillMaxWidth()
                     .weight(1f)
                     .align(Alignment.Bottom)
-                    .background(ExtendedTheme.colorScheme.surfaceContainer)
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
             ) {
                 var lastFocusState by remember { mutableStateOf(false) }
                 val contentColor = LocalContentColor.current

@@ -18,16 +18,6 @@ object MaterialIcons {
                     close()
                 }
             }
-        val ArrowDropUp: ImageVector =
-            materialIcon(name = "TwoTone.ArrowDropUp") {
-                materialPath {
-                    moveTo(7.0f, 14.0f)
-                    lineToRelative(5.0f, -5.0f)
-                    lineToRelative(5.0f, 5.0f)
-                    horizontalLineTo(7.0f)
-                    close()
-                }
-            }
         val Clear: ImageVector =
             materialIcon(name = "TwoTone.Clear") {
                 materialPath {

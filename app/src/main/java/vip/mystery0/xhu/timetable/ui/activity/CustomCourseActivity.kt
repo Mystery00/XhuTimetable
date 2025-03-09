@@ -828,7 +828,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                         color = MaterialTheme.colorScheme.outline
                     )
                     BuildPaging(
-                        paddingValues = PaddingValues(4.dp),
+                        paddingValues = PaddingValues(vertical = 4.dp),
                         pager = allCoursePager,
                         refreshing = false,
                         listContent = {
@@ -853,7 +853,7 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                             .fillMaxWidth(),
                     ) {
                         LazyColumn(
-                            contentPadding = PaddingValues(4.dp),
+                            contentPadding = PaddingValues(vertical = 4.dp),
                         ) {
                             itemsIndexed(allCoursePager) { item ->
                                 BuildSearchResultItem(
