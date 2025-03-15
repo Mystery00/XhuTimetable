@@ -7,12 +7,12 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
-import android.net.Uri
 import android.os.Environment
 import android.os.PowerManager
 import android.provider.Settings
 import android.webkit.WebSettings
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.net.toUri
 import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.base.BaseComposeActivity
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
@@ -91,7 +91,7 @@ fun BaseComposeActivity.toCustomTabs(url: String) {
     try {
         val builder = CustomTabsIntent.Builder()
         val intent = builder.build()
-        intent.launchUrl(this, Uri.parse(url))
+        intent.launchUrl(this, url.toUri())
     } catch (e: Exception) {
         loadInBrowser(url)
     }
@@ -99,7 +99,7 @@ fun BaseComposeActivity.toCustomTabs(url: String) {
 
 fun BaseComposeActivity.loadInBrowser(url: String) {
     try {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+        val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         startActivity(intent)
