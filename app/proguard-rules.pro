@@ -77,6 +77,7 @@
 
 #不混淆项目代码
 -keep class vip.mystery0.xhu.timetable.** { *; }
+-keep class org.slf4j.impl.** { *; }
 
 #### Missing
 -dontwarn org.bouncycastle.jsse.BCSSLParameters
