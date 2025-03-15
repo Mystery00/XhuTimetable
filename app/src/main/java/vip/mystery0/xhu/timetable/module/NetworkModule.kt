@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit
 
 const val HTTP_CLIENT = "client"
 const val HTTP_CLIENT_POEMS = "poemsClient"
+const val HTTP_CLIENT_FEATURE_HUB = "featureClient"
 const val RETROFIT = "retrofit"
 const val RETROFIT_POEMS = "poemsRetrofit"
 const val RETROFIT_FILE = "fileRetrofit"
@@ -52,6 +53,12 @@ val networkModule = module {
         OkHttpClient.Builder()
             .addInterceptor(PoemsInterceptor())
             .addInterceptor(UserAgentInterceptor())
+            .build()
+    }
+    single(named(HTTP_CLIENT_FEATURE_HUB)) {
+        OkHttpClient.Builder()
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .readTimeout(5, TimeUnit.SECONDS)
             .build()
     }
 

@@ -48,8 +48,9 @@ android {
         ksp {
             arg(RoomSchemaArgProvider(File(projectDir, "schemas")))
         }
-        resourceConfigurations.add("en")
-        resourceConfigurations.add("zh")
+        androidResources.localeFilters.clear()
+        androidResources.localeFilters.add("en")
+        androidResources.localeFilters.add("zh")
     }
     signingConfigs {
         create("release") {
@@ -126,8 +127,8 @@ android {
     }
     packaging {
         resources {
-            excludes.add("/META-INF/{AL2.0,LGPL2.1}")
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "THIRD-PARTY.txt"
         }
     }
     externalNativeBuild {
@@ -201,11 +202,10 @@ dependencies {
     implementation(libs.compose.preference)
     //ucrop
     implementation(libs.ucrop)
-    //feature-probe
-    //noinspection UseTomlInstead
-    implementation("com.featureprobe:client-sdk-android:2.0.2@aar")
-    //noinspection UseTomlInstead
-    implementation("net.java.dev.jna:jna:5.15.0@aar")
+    //feature-hub
+    implementation(libs.feature.hub)
+    implementation(libs.jackson)
+    implementation(libs.jackson.datatype.jsr310)
     //jg-push
     implementation(libs.jpush.google)
     implementation(libs.jpush.plugin.huawei)
