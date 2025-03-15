@@ -5,7 +5,7 @@ kotlin = "2.1.10"
 ksp = "2.1.10-1.0.31"
 aboutlibraries = "11.6.3"
 
-composeBom = "2025.02.00"
+composeBom = "2025.03.00"
 material = "1.12.0"
 androidxCore = "1.15.0"
 androidxCompose = "1.10.1"
@@ -31,6 +31,7 @@ moshi = "1.15.2"
 mmkv = "2.1.0"
 composePreference = "1.1.1"
 ucrop = "2.2.9"
+featurehub = "2.2"
 jpush = "5.5.4"
 hmsPush = "6.12.0.300"
 zoomimage = "1.1.2"
@@ -95,6 +96,10 @@ mmkv = { group = "com.tencent", name = "mmkv-static", version.ref = "mmkv" }
 compose-preference = { group = "me.zhanghai.compose.preference", name = "library", version.ref = "composePreference" }
 
 ucrop = { group = "com.github.yalantis", name = "ucrop", version.ref = "ucrop" }
+
+feature-hub = { group = "io.featurehub.sdk", name = "java-client-android", version.ref = "featurehub" }
+jackson = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version = "2.18.3" }
+jackson-datatype-jsr310 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version = "2.18.3" }
 
 jpush-google = { group = "cn.jiguang.sdk", name = "jpush-google", version.ref = "jpush" }
 jpush-plugin-huawei = { group = "cn.jiguang.sdk.plugin", name = "huawei", version.ref = "jpush" }
