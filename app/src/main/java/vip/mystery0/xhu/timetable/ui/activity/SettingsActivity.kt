@@ -362,34 +362,34 @@ class SettingsActivity : BaseSelectComposeActivity() {
                             }
                         }
                     )
-                    ConfigSettingsCheckbox(
-                        icon = {
-                            Icon(
-                                painter = XhuIcons.allowUploadCrash,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurface,
-                            )
-                        },
-                        config = ConfigStore::allowSendCrashReport,
-                        scope = scope,
-                        title = { Text(text = "发送错误报告") },
-                        subtitle = {
-                            Text(text = "这将帮助我们更快的发现并解决问题")
-                        }
-                    )
-                    XhuSettingsMenuLink(
-                        title = { },
-                        subtitle = {
-                            Text(
-                                text = """
-                              我们使用Visual Studio App Center （由Microsoft提供）。
-                              
-                              设备唯一标识符使用SSAID，在 Android 8.0（API 级别 26）及更高版本中，SSAID 提供了一个在由同一开发者签名密钥签名的应用之间通用的标识符。
-                          """.trimIndent()
-                            )
-                        },
-                        onClick = {},
-                    )
+//                    ConfigSettingsCheckbox(
+//                        icon = {
+//                            Icon(
+//                                painter = XhuIcons.allowUploadCrash,
+//                                contentDescription = null,
+//                                tint = MaterialTheme.colorScheme.onSurface,
+//                            )
+//                        },
+//                        config = ConfigStore::allowSendCrashReport,
+//                        scope = scope,
+//                        title = { Text(text = "发送错误报告") },
+//                        subtitle = {
+//                            Text(text = "这将帮助我们更快的发现并解决问题")
+//                        }
+//                    )
+//                    XhuSettingsMenuLink(
+//                        title = { },
+//                        subtitle = {
+//                            Text(
+//                                text = """
+//                              我们使用Visual Studio App Center （由Microsoft提供）。
+//
+//                              设备唯一标识符使用SSAID，在 Android 8.0（API 级别 26）及更高版本中，SSAID 提供了一个在由同一开发者签名密钥签名的应用之间通用的标识符。
+//                          """.trimIndent()
+//                            )
+//                        },
+//                        onClick = {},
+//                    )
                     XhuSettingsMenuLink(
                         icon = {
                             Icon(
