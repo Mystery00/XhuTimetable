@@ -83,6 +83,12 @@ class MainActivity : BaseComposeActivity() {
         updateUIFromConfig()
     }
 
+    override fun onPause() {
+        addDialogState.hide()
+        weekViewDialogState.hide()
+        super.onPause()
+    }
+
     @OptIn(
         ExperimentalPermissionsApi::class,
         ExperimentalFoundationApi::class,
