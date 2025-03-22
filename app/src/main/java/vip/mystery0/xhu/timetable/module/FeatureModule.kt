@@ -14,13 +14,15 @@ import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.BuildConfig
 import vip.mystery0.xhu.timetable.appVersionCode
 import vip.mystery0.xhu.timetable.appVersionName
+import vip.mystery0.xhu.timetable.featureApiKey
 import vip.mystery0.xhu.timetable.publicDeviceId
 
 val featureModule = module {
     single<ClientContext> {
         val edgeUrl = "https://fh.api.mystery0.vip"
-        val apiKey = "65041db9-520c-4962-a512-34fd055abeae/41eFdAIdx5mMavrd4UYjJtpaz4UJEQWvFMTTmVhJ"
-        val fhConfig = EdgeFeatureHubConfig(edgeUrl, apiKey)
+
+        val apiKey = featureApiKey
+        val fhConfig = EdgeFeatureHubConfig(edgeUrl, featureApiKey)
         val httpClient = get<OkHttpClient>(named(HTTP_CLIENT_FEATURE_HUB))
         fhConfig.setEdgeService {
             FeatureHubClient(

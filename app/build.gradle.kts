@@ -63,6 +63,11 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
+            resValue(
+                "string",
+                "feature_api_key",
+                "65041db9-520c-4962-a512-34fd055abeae/41eFdAIdx5mMavrd4UYjJtpaz4UJEQWvFMTTmVhJ"
+            )
             resValue("string", "app_name", "西瓜课表-debug")
             resValue("string", "app_version_code", gitVersionCode.toString())
             resValue(
@@ -82,6 +87,11 @@ android {
         release {
             val nightly = System.getenv("NIGHTLY")?.toBoolean() == true
 
+            resValue(
+                "string",
+                "feature_api_key",
+                "491cab74-338f-4cfa-8192-3d7f985ed8b5/41eFdAIdx5mMavrd4UYjJtpaz4UJEQWvFMTTmVhJ"
+            )
             resValue("string", "app_name", "西瓜课表")
             resValue("string", "app_version_code", gitVersionCode.toString())
             if (nightly) {
@@ -218,4 +228,7 @@ dependencies {
 }
 
 aboutLibraries {
+    offlineMode = true
+    fetchRemoteLicense = false
+    fetchRemoteFunding = false
 }
