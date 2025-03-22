@@ -94,7 +94,9 @@ abstract class BasePageComposeActivity : BaseComposeActivity() {
             }
             PullToRefreshBox(
                 isRefreshing = refreshing,
-                onRefresh = { pager.refresh() },
+                onRefresh = {
+                    pager.refresh()
+                },
                 state = pullToRefreshState,
             ) {
                 LazyColumn(
