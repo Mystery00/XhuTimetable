@@ -43,6 +43,10 @@ const val appVersionCode: String = BuildConfig.VERSION_CODE.toString()
 val userAgent: String
     get() = WebSettings.getDefaultUserAgent(context)
 
+//FeatureHub ApiKey
+val featureApiKey: String
+    get() = context.getString(R.string.feature_api_key)
+
 @Suppress("DEPRECATION")
 fun isOnline(): Boolean {
     val connectivityManager =
