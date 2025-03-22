@@ -33,7 +33,7 @@ fun XhuFoldSettingsGroup(
             title = title,
             modifier = Modifier.clickable(
                 indication = null,
-                interactionSource = MutableInteractionSource(),
+                interactionSource = remember { MutableInteractionSource() },
             ) {
                 foldState.value = !foldState.value
             },
