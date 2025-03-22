@@ -6,6 +6,7 @@ on:
         description: '上一版本下载地址'
         required: true
         type: string
+        default: "https://xgkb.mystery0.vip"
       oldVersionCode:
         description: '上一版本版本号(只要code)'
         required: true
