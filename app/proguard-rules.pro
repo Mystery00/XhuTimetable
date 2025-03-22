@@ -78,6 +78,10 @@
 #不混淆项目代码
 -keep class vip.mystery0.xhu.timetable.** { *; }
 -keep class org.slf4j.impl.** { *; }
+# 不混淆FeatureHub
+-keep class io.featurehub.client.** { *; }
+-keep class io.featurehub.sse.model.** { *; }
+-keep class io.featurehub.android.** { *; }
 
 #### Missing
 -dontwarn org.bouncycastle.jsse.BCSSLParameters
@@ -132,13 +136,6 @@
 -keep class vip.mystery0.xhu.timetable.model.** { *; }
 -keepclassmembers class vip.mystery0.xhu.timetable.model.** { *; }
 
-#### EventBus
--keepattributes *Annotation*
--keepclassmembers class * {
-    @org.greenrobot.eventbus.Subscribe <methods>;
-}
--keep enum org.greenrobot.eventbus.ThreadMode { *; }
-
 #### UCrop
 -dontwarn com.yalantis.ucrop**
 -keep class com.yalantis.ucrop** { *; }
@@ -177,3 +174,32 @@
 -keep interface com.huawei.hms.analytics.type.HAParamType{*;}
 -keep class com.huawei.hms.analytics.HiAnalyticsInstance{*;}
 -keep class com.huawei.hms.analytics.HiAnalytics{*;}
+
+# Jackson
+-keep @com.fasterxml.jackson.annotation.JsonIgnoreProperties class * { *; }
+-keep @com.fasterxml.jackson.annotation.JsonCreator class * { *; }
+-keep @com.fasterxml.jackson.annotation.JsonValue class * { *; }
+-keep class com.fasterxml.** { *; }
+-keep class org.codehaus.** { *; }
+-keepnames class com.fasterxml.jackson.** { *; }
+-keepclassmembers public final enum com.fasterxml.jackson.annotation.JsonAutoDetect$Visibility {
+    public static final com.fasterxml.jackson.annotation.JsonAutoDetect$Visibility *;
+}
+
+# General
+-keepattributes SourceFile,LineNumberTable,*Annotation*,EnclosingMethod,Signature,Exceptions,InnerClasses
+# Proguard configuration for Jackson 2.x
+-keep class com.fasterxml.jackson.databind.ObjectMapper {
+    public <methods>;
+    protected <methods>;
+}
+-keep class com.fasterxml.jackson.databind.ObjectWriter {
+    public ** writeValueAsString(**);
+}
+-keepnames class com.fasterxml.jackson.** { *; }
+-dontwarn com.fasterxml.jackson.databind.**
+# Proguard configuration for Jackson 2.x
+-dontwarn com.fasterxml.jackson.databind.**
+-keepclassmembers class * {
+     @com.fasterxml.jackson.annotation.* *;
+}
