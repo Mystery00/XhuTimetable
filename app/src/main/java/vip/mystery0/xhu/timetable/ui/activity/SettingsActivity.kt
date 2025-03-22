@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
-import android.net.Uri
 import android.provider.Settings
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
@@ -24,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.core.net.toUri
 import cn.jpush.android.api.JPushInterface
 import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
@@ -311,7 +311,7 @@ class SettingsActivity : BaseSelectComposeActivity() {
                             } else {
                                 val intent =
                                     Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                                intent.data = Uri.parse("package:$packageName")
+                                intent.data = "package:$packageName".toUri()
                                 startActivity(intent)
                             }
                         }
