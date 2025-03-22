@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable.utils
 
 import androidx.compose.ui.graphics.Color
+import androidx.core.graphics.toColorInt
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import java.util.Locale
 
@@ -15,6 +16,6 @@ fun String.parseColorHexString(): Color {
     if (this.isBlank()) {
         return ColorPool.random
     }
-    val color = android.graphics.Color.parseColor(this)
+    val color = this.toColorInt()
     return Color(color)
 }
