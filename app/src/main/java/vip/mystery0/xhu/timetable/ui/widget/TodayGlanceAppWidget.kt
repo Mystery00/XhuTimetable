@@ -82,7 +82,7 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
                         Text(
                             text = dateString,
                             style = TextStyle(
-                                color = XhuColorProvider(Color.Black),
+                                color = ColorProvider(Color.Black),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                             ),
@@ -90,7 +90,7 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
                         Text(
                             text = stateGlance.timeTitle,
                             style = TextStyle(
-                                color = XhuColorProvider(Color.Black),
+                                color = ColorProvider(Color.Black),
                                 fontWeight = FontWeight.Bold,
                             ),
                         )
@@ -120,7 +120,7 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
                                 Text(
                                     text = "暂无数据",
                                     style = TextStyle(
-                                        color = XhuColorProvider(Color.Black),
+                                        color = ColorProvider(Color.Black),
                                         fontSize = 16.sp,
                                     ),
                                 )
@@ -161,7 +161,7 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
                         modifier = GlanceModifier.wrapContentSize(),
                         text = todayCourseGlance.time,
                         style = TextStyle(
-                            color = XhuColorProvider(Color.Black),
+                            color = ColorProvider(Color.Black),
                             textAlign = TextAlign.Center,
                         ),
                         maxLines = 2,
@@ -172,7 +172,7 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
                             .defaultWeight(),
                         text = todayCourseGlance.courseName,
                         style = TextStyle(
-                            color = XhuColorProvider(Color.Black),
+                            color = ColorProvider(Color.Black),
                             textAlign = TextAlign.Center,
                         ),
                         maxLines = 2,
@@ -183,7 +183,7 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
                             .width(128.dp),
                         text = todayCourseGlance.location,
                         style = TextStyle(
-                            color = XhuColorProvider(Color.Black),
+                            color = ColorProvider(Color.Black),
                             textAlign = TextAlign.Center,
                         ),
                         maxLines = 2,

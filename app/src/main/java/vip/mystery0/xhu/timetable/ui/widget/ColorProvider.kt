@@ -1,9 +1,11 @@
 package vip.mystery0.xhu.timetable.ui.widget
 
-import android.content.Context
+import android.annotation.SuppressLint
 import androidx.compose.ui.graphics.Color
 import androidx.glance.unit.ColorProvider
+import androidx.glance.unit.FixedColorProvider
 
-data class XhuColorProvider(val color: Color) : ColorProvider {
-    override fun getColor(context: Context) = color
+@SuppressLint("RestrictedApi")
+fun ColorProvider(color: Color): ColorProvider {
+    return FixedColorProvider(color)
 }

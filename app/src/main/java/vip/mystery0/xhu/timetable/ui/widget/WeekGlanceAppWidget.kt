@@ -86,7 +86,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                         Text(
                             text = dateString,
                             style = TextStyle(
-                                color = XhuColorProvider(Color.Black),
+                                color = ColorProvider(Color.Black),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                             ),
@@ -94,7 +94,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                         Text(
                             text = stateGlance.timeTitle,
                             style = TextStyle(
-                                color = XhuColorProvider(Color.Black),
+                                color = ColorProvider(Color.Black),
                                 fontWeight = FontWeight.Bold,
                             ),
                         )
@@ -113,7 +113,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                         modifier = GlanceModifier.width(dateItemWidth),
                         text = "${twoFormat.format(firstDay.monthValue)}\n月",
                         style = TextStyle(
-                            color = XhuColorProvider(Color.Black),
+                            color = ColorProvider(Color.Black),
                             fontSize = 12.sp,
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.Bold,
@@ -182,7 +182,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                                     Text(
                                         text = "暂无数据",
                                         style = TextStyle(
-                                            color = XhuColorProvider(Color.Black),
+                                            color = ColorProvider(Color.Black),
                                             fontSize = 16.sp,
                                         ),
                                     )
@@ -212,10 +212,10 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
         ) {
             Text(
                 modifier = GlanceModifier.fillMaxSize()
-                    .background(XhuColorProvider(backgroundColor)),
+                    .background(ColorProvider(backgroundColor)),
                 text = title,
                 style = TextStyle(
-                    color = XhuColorProvider(textColor),
+                    color = ColorProvider(textColor),
                     textAlign = TextAlign.Center,
                     fontSize = 10.sp,
                 ),
@@ -237,7 +237,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
             modifier = GlanceModifier.defaultWeight(),
             text = "${week}\n${date}",
             style = TextStyle(
-                color = XhuColorProvider(if (isToday) Color.Black else Color.Gray),
+                color = ColorProvider(if (isToday) Color.Black else Color.Gray),
                 textAlign = TextAlign.Center,
                 fontSize = 12.sp,
                 fontWeight = if (isToday) FontWeight.Bold else null,
@@ -255,7 +255,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
             Text(
                 text = "11",
                 style = TextStyle(
-                    color = XhuColorProvider(Color.Black),
+                    color = ColorProvider(Color.Black),
                     fontSize = 12.sp
                 )
             )
@@ -276,7 +276,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                 Text(
                     text = (2 * time - 1).toString(),
                     style = TextStyle(
-                        color = XhuColorProvider(Color.Black),
+                        color = ColorProvider(Color.Black),
                         fontSize = 12.sp
                     )
                 )
@@ -289,7 +289,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                 Text(
                     text = (2 * time).toString(),
                     style = TextStyle(
-                        color = XhuColorProvider(Color.Black),
+                        color = ColorProvider(Color.Black),
                         fontSize = 12.sp
                     )
                 )
