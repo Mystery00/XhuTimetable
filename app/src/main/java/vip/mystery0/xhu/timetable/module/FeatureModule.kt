@@ -2,7 +2,6 @@ package vip.mystery0.xhu.timetable.module
 
 import android.os.Build
 import android.util.Log
-import io.featurehub.android.FeatureHubClient
 import io.featurehub.client.ClientContext
 import io.featurehub.client.EdgeFeatureHubConfig
 import io.featurehub.sse.model.StrategyAttributeDeviceName
@@ -16,6 +15,7 @@ import vip.mystery0.xhu.timetable.appVersionCode
 import vip.mystery0.xhu.timetable.appVersionName
 import vip.mystery0.xhu.timetable.featureApiKey
 import vip.mystery0.xhu.timetable.publicDeviceId
+import vip.mystery0.xhu.timetable.utils.MyFeatureHubClient
 
 val featureModule = module {
     single<ClientContext> {
@@ -25,13 +25,13 @@ val featureModule = module {
         val fhConfig = EdgeFeatureHubConfig(edgeUrl, featureApiKey)
         val httpClient = get<OkHttpClient>(named(HTTP_CLIENT_FEATURE_HUB))
         fhConfig.setEdgeService {
-            FeatureHubClient(
+            MyFeatureHubClient(
                 edgeUrl,
-                listOf(apiKey),
+                apiKey,
                 fhConfig.repository,
                 httpClient,
                 fhConfig,
-                60
+                120L,
             )
         }
         fhConfig.repository.addReadynessListener {
@@ -45,6 +45,8 @@ val featureModule = module {
             .attr("model", Build.MODEL)
             .attr("rom", Build.DISPLAY)
             .attr("packageName", BuildConfig.APPLICATION_ID)
+            .attr("versionName", appVersionName)
+            .attr("versionCode", appVersionCode)
             .device(StrategyAttributeDeviceName.MOBILE)
             .platform(StrategyAttributePlatformName.ANDROID)
             .version("${appVersionName}-${appVersionCode}")
