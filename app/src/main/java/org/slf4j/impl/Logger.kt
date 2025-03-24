@@ -4,10 +4,13 @@ import android.util.Log
 import org.slf4j.Marker
 
 class Logger(private val name: String) : org.slf4j.Logger {
-    private fun formatMessage(format: String, vararg arguments: Any): String {
+    private fun formatMessage(format: String, vararg arguments: Any?): String {
+        if (arguments.isEmpty()) {
+            return format
+        }
         var output = format
         for (i in arguments.indices) {
-            output = output.replace("{}", arguments[i].toString(), true)
+            output = output.replace("{}", arguments[i]?.toString() ?: "null", true)
         }
         return output
     }
@@ -20,22 +23,22 @@ class Logger(private val name: String) : org.slf4j.Logger {
 
     override fun trace(msg: String) {}
 
-    override fun trace(format: String, arg: Any) = trace(formatMessage(format, arg))
+    override fun trace(format: String, arg: Any?) = trace(formatMessage(format, arg))
 
-    override fun trace(format: String, arg1: Any, arg2: Any) =
+    override fun trace(format: String, arg1: Any?, arg2: Any?) =
         trace(formatMessage(format, arg1, arg2))
 
-    override fun trace(format: String, vararg arguments: Any) =
+    override fun trace(format: String, vararg arguments: Any?) =
         trace(formatMessage(format, arguments))
 
     override fun trace(msg: String, t: Throwable) {}
 
     override fun trace(marker: Marker, msg: String) = trace(msg)
 
-    override fun trace(marker: Marker, format: String, arg: Any) =
+    override fun trace(marker: Marker, format: String, arg: Any?) =
         trace(marker, formatMessage(format, arg))
 
-    override fun trace(marker: Marker, format: String, arg1: Any, arg2: Any) =
+    override fun trace(marker: Marker, format: String, arg1: Any?, arg2: Any?) =
         trace(marker, formatMessage(format, arg1, arg2))
 
     override fun trace(marker: Marker, format: String, vararg argArray: Any) =
@@ -52,12 +55,12 @@ class Logger(private val name: String) : org.slf4j.Logger {
         Log.d(name, msg)
     }
 
-    override fun debug(format: String, arg: Any) = debug(formatMessage(format, arg))
+    override fun debug(format: String, arg: Any?) = debug(formatMessage(format, arg))
 
-    override fun debug(format: String, arg1: Any, arg2: Any) =
+    override fun debug(format: String, arg1: Any?, arg2: Any?) =
         debug(formatMessage(format, arg1, arg2))
 
-    override fun debug(format: String, vararg arguments: Any) =
+    override fun debug(format: String, vararg arguments: Any?) =
         debug(formatMessage(format, arguments))
 
     override fun debug(msg: String, t: Throwable) {
@@ -69,13 +72,13 @@ class Logger(private val name: String) : org.slf4j.Logger {
         debug(msg)
     }
 
-    override fun debug(marker: Marker, format: String, arg: Any) =
+    override fun debug(marker: Marker, format: String, arg: Any?) =
         debug(marker, formatMessage(format, arg))
 
-    override fun debug(marker: Marker, format: String, arg1: Any, arg2: Any) =
+    override fun debug(marker: Marker, format: String, arg1: Any?, arg2: Any?) =
         debug(marker, formatMessage(format, arg1, arg2))
 
-    override fun debug(marker: Marker, format: String, vararg arguments: Any) =
+    override fun debug(marker: Marker, format: String, vararg arguments: Any?) =
         debug(marker, formatMessage(format, arguments))
 
     override fun debug(marker: Marker, msg: String, t: Throwable) = debug(msg, t)
@@ -89,12 +92,12 @@ class Logger(private val name: String) : org.slf4j.Logger {
         Log.i(name, msg)
     }
 
-    override fun info(format: String, arg: Any) = info(formatMessage(format, arg))
+    override fun info(format: String, arg: Any?) = info(formatMessage(format, arg))
 
-    override fun info(format: String, arg1: Any, arg2: Any) =
+    override fun info(format: String, arg1: Any?, arg2: Any?) =
         info(formatMessage(format, arg1, arg2))
 
-    override fun info(format: String, vararg arguments: Any) =
+    override fun info(format: String, vararg arguments: Any?) =
         info(formatMessage(format, arguments))
 
     override fun info(msg: String, t: Throwable) {
@@ -106,13 +109,13 @@ class Logger(private val name: String) : org.slf4j.Logger {
         info(msg)
     }
 
-    override fun info(marker: Marker, format: String, arg: Any) =
+    override fun info(marker: Marker, format: String, arg: Any?) =
         info(marker, formatMessage(format, arg))
 
-    override fun info(marker: Marker, format: String, arg1: Any, arg2: Any) =
+    override fun info(marker: Marker, format: String, arg1: Any?, arg2: Any?) =
         info(marker, formatMessage(format, arg1, arg2))
 
-    override fun info(marker: Marker, format: String, vararg arguments: Any) =
+    override fun info(marker: Marker, format: String, vararg arguments: Any?) =
         info(marker, formatMessage(format, arguments))
 
     override fun info(marker: Marker, msg: String, t: Throwable) = info(msg, t)
@@ -126,12 +129,12 @@ class Logger(private val name: String) : org.slf4j.Logger {
         Log.w(name, msg)
     }
 
-    override fun warn(format: String, arg: Any) = warn(formatMessage(format, arg))
+    override fun warn(format: String, arg: Any?) = warn(formatMessage(format, arg))
 
-    override fun warn(format: String, arg1: Any, arg2: Any) =
+    override fun warn(format: String, arg1: Any?, arg2: Any?) =
         warn(formatMessage(format, arg1, arg2))
 
-    override fun warn(format: String, vararg arguments: Any) =
+    override fun warn(format: String, vararg arguments: Any?) =
         warn(formatMessage(format, arguments))
 
     override fun warn(msg: String, t: Throwable) {
@@ -143,13 +146,13 @@ class Logger(private val name: String) : org.slf4j.Logger {
         warn(msg)
     }
 
-    override fun warn(marker: Marker, format: String, arg: Any) =
+    override fun warn(marker: Marker, format: String, arg: Any?) =
         warn(marker, formatMessage(format, arg))
 
-    override fun warn(marker: Marker, format: String, arg1: Any, arg2: Any) =
+    override fun warn(marker: Marker, format: String, arg1: Any?, arg2: Any?) =
         warn(marker, formatMessage(format, arg1, arg2))
 
-    override fun warn(marker: Marker, format: String, vararg arguments: Any) =
+    override fun warn(marker: Marker, format: String, vararg arguments: Any?) =
         warn(marker, formatMessage(format, arguments))
 
     override fun warn(marker: Marker, msg: String, t: Throwable) = warn(msg, t)
@@ -163,12 +166,12 @@ class Logger(private val name: String) : org.slf4j.Logger {
         Log.e(name, msg)
     }
 
-    override fun error(format: String, arg: Any) = error(formatMessage(format, arg))
+    override fun error(format: String, arg: Any?) = error(formatMessage(format, arg))
 
-    override fun error(format: String, arg1: Any, arg2: Any) =
+    override fun error(format: String, arg1: Any?, arg2: Any?) =
         error(formatMessage(format, arg1, arg2))
 
-    override fun error(format: String, vararg arguments: Any) =
+    override fun error(format: String, vararg arguments: Any?) =
         error(formatMessage(format, arguments))
 
     override fun error(msg: String, t: Throwable) {
@@ -180,13 +183,13 @@ class Logger(private val name: String) : org.slf4j.Logger {
         error(msg)
     }
 
-    override fun error(marker: Marker, format: String, arg: Any) =
+    override fun error(marker: Marker, format: String, arg: Any?) =
         error(marker, formatMessage(format, arg))
 
-    override fun error(marker: Marker, format: String, arg1: Any, arg2: Any) =
+    override fun error(marker: Marker, format: String, arg1: Any?, arg2: Any?) =
         error(marker, formatMessage(format, arg1, arg2))
 
-    override fun error(marker: Marker, format: String, vararg arguments: Any) =
+    override fun error(marker: Marker, format: String, vararg arguments: Any?) =
         error(marker, formatMessage(format, arguments))
 
     override fun error(marker: Marker, msg: String, t: Throwable) = error(msg, t)
