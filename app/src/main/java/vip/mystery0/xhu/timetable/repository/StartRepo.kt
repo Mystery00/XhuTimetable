@@ -1,8 +1,12 @@
 package vip.mystery0.xhu.timetable.repository
 
+import android.util.Log
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.component.inject
@@ -24,6 +28,7 @@ import java.time.Duration
 object StartRepo : BaseDataRepo {
     private val commonApi: CommonApi by inject()
     private val menuApi: MenuApi by inject()
+    private val repoScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     val version = MutableSharedFlow<ClientVersion>(
         replay = 1,
@@ -71,7 +76,10 @@ object StartRepo : BaseDataRepo {
     }
 
     private fun localInit() {
-        //do nothing
+        Log.i("StartRepo", "Initializing with local data due to network issue or timeout.")
+        repoScope.launch {
+            version.emit(ClientVersion.EMPTY)
+        }
     }
 
     suspend fun checkVersion(forceBeta: Boolean) {
