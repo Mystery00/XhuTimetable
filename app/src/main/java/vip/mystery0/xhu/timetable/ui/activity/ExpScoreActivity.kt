@@ -107,20 +107,20 @@ class ExpScoreActivity : BaseSelectComposeActivity() {
                                 )
                             }
                             if (expScoreListState.loading || scoreList.isNotEmpty()) {
-                                scoreList.forEach {
+                                scoreList.forEach { score ->
                                     stickyHeader {
                                         Row(
                                             modifier = Modifier
                                                 .background(MaterialTheme.colorScheme.surfaceContainer)
                                                 .padding(12.dp),
                                         ) {
-                                            Text(text = it.courseName)
+                                            Text(text = score.courseName)
                                             Spacer(modifier = Modifier.weight(1f))
-                                            Text(text = "${it.totalScore}分")
+                                            Text(text = "${score.totalScore}分")
                                         }
                                     }
-                                    items(it.itemList.size) { index ->
-                                        val item = it.itemList[index]
+                                    items(score.itemList.size) { index ->
+                                        val item = score.itemList[index]
                                         BuildItem(item)
                                     }
                                 }

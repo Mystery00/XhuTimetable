@@ -22,6 +22,7 @@ object PushSetter : KoinComponent {
             return
         }
         JPushInterface.setDebugMode(false)
+        @Suppress("DEPRECATION")
         JCollectionAuth.setAuth(context, true)
         val config = JPushConfig()
         config.setjAppKey(apiKey)

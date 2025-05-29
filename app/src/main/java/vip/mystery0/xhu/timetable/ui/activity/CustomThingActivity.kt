@@ -154,7 +154,6 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                 paddingValues = paddingValues,
                 pager = pager,
                 refreshing = refreshing,
-                alwaysShowList = true,
                 listHeader = {
                     BuildUserSelectFilterChipContent(
                         userSelect = userSelect,
