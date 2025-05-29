@@ -96,6 +96,9 @@ class MainActivity : BaseComposeActivity() {
     )
     @Composable
     override fun BuildContent() {
+        LaunchedEffect(Unit) {
+            viewModel.init()
+        }
         ShowCheckUpdateDialog()
         val enableCalendarView by viewModel.enableCalendarView.collectAsState()
         val coroutineScope = rememberCoroutineScope()

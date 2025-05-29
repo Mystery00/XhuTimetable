@@ -154,7 +154,7 @@ class MainViewModel : ComposeViewModel() {
     private val _customUi = MutableStateFlow(CustomUi.DEFAULT)
     val customUi: StateFlow<CustomUi> = _customUi
 
-    init {
+    fun init() {
         viewModelScope.launch {
             loadFromConfig()
             val mainUser = UserStore.getMainUser()

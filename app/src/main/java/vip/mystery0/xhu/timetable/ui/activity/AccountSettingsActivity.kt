@@ -1,11 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import androidx.activity.viewModels
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -41,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -87,6 +83,9 @@ class AccountSettingsActivity : BaseComposeActivity(), KoinComponent {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun BuildContent() {
+        LaunchedEffect(Unit) {
+            viewModel.init()
+        }
         Scaffold(
             topBar = {
                 TopAppBar(

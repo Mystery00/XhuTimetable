@@ -63,7 +63,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
     private val _saveLoadingState = MutableStateFlow(LoadingState())
     val saveLoadingState: StateFlow<LoadingState> = _saveLoadingState
 
-    init {
+    fun init() {
         viewModelScope.launch {
             _userSelect.value = initUserSelect()
             _yearSelect.value = initYearSelect()

@@ -28,7 +28,7 @@ class ExportCalendarViewModel : ComposeViewModel() {
     private val _actionState = MutableStateFlow(ActionState())
     val actionState: StateFlow<ActionState> = _actionState
 
-    init {
+    fun init() {
         viewModelScope.launch {
             _userSelect.value = initUserSelect()
         }

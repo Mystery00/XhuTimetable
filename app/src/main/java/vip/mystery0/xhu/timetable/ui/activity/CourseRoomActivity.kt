@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -74,8 +75,11 @@ class CourseRoomActivity : BaseSelectComposeActivity() {
             finish()
         }
 
-        BackHandler {
-            onBack()
+        BackHandler(openBottomSheet.value) {
+            openBottomSheet.value = false
+        }
+        LaunchedEffect(Unit) {
+            viewModel.init()
         }
 
         Scaffold(

@@ -34,7 +34,7 @@ class ScoreViewModel : PagingComposeViewModel<PageRequest, ScoreResponse>(
     private val _scoreGpa = MutableStateFlow<ScoreGpaResponse?>(null)
     val scoreGpa: StateFlow<ScoreGpaResponse?> = _scoreGpa
 
-    init {
+    fun init() {
         viewModelScope.launch {
             _userSelect.value = initUserSelect()
             _yearSelect.value = initYearSelect()

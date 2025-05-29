@@ -36,7 +36,7 @@ class FeedbackViewModel : ComposeViewModel() {
 
     val messageState = MessageState(emptyList())
 
-    init {
+    fun init() {
         viewModelScope.launch {
             initWebSocket()
         }

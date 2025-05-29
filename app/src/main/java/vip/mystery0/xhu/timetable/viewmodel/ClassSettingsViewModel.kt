@@ -39,7 +39,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
     private val _showCustomThingData = MutableStateFlow(false)
     val showCustomThingData: StateFlow<Boolean> = _showCustomThingData
 
-    init {
+    fun init() {
         viewModelScope.launch {
             loadCampusList()
             _showTomorrowCourseTimeData.value = getConfigStore { showTomorrowCourseTime }

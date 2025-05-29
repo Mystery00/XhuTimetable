@@ -21,7 +21,7 @@ class AccountManagementViewModel : ComposeViewModel() {
     private val _customAccountTitle = MutableStateFlow(GlobalConfigStore.customAccountTitle)
     val customAccountTitle: StateFlow<CustomAccountTitle> = _customAccountTitle
 
-    init {
+    fun init() {
         loadLoggedUserList()
     }
 

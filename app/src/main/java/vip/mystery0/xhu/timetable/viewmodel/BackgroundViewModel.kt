@@ -62,7 +62,7 @@ class BackgroundViewModel : ComposeViewModel() {
         MutableStateFlow(DownloadProgressState(FileDownloadProgressState()))
     val progressState: StateFlow<DownloadProgressState> = _progressState
 
-    init {
+    fun init() {
         viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "load background list failed", throwable)
             _backgroundListState.value = BackgroundListState(

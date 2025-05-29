@@ -125,8 +125,11 @@ class CustomThingActivity : BaseSelectComposeActivity() {
             finish()
         }
 
-        BackHandler {
-            onBack()
+        BackHandler(openBottomSheet.value) {
+            openBottomSheet.value = false
+        }
+        LaunchedEffect(Unit) {
+            viewModel.init()
         }
 
         Scaffold(
@@ -528,7 +531,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                         startDateDialog.show()
                                     },
                                     indication = null,
-                                    interactionSource = MutableInteractionSource(),
+                                    interactionSource = remember { MutableInteractionSource() },
                                 ),
                             text = startTime.format(dateFormatter),
                         )
@@ -540,7 +543,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                             startTimeDialog.show()
                                         },
                                         indication = null,
-                                        interactionSource = MutableInteractionSource(),
+                                        interactionSource = remember { MutableInteractionSource() },
                                     ),
                                 text = startTime.format(Formatter.TIME_NO_SECONDS),
                             )
@@ -561,7 +564,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                             endDateDialog.show()
                                         },
                                         indication = null,
-                                        interactionSource = MutableInteractionSource(),
+                                        interactionSource = remember { MutableInteractionSource() },
                                     ),
                                 text = endTime.format(dateFormatter),
                             )
@@ -573,7 +576,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                                 endTimeDialog.show()
                                             },
                                             indication = null,
-                                            interactionSource = MutableInteractionSource(),
+                                            interactionSource = remember { MutableInteractionSource() },
                                         ),
                                     text = endTime.format(Formatter.TIME_NO_SECONDS),
                                 )
@@ -634,7 +637,7 @@ class CustomThingActivity : BaseSelectComposeActivity() {
                                 showColorDialog.show()
                             },
                             indication = null,
-                            interactionSource = MutableInteractionSource(),
+                            interactionSource = remember { MutableInteractionSource() },
                         ),
                     text = "设置颜色",
                 )
@@ -687,7 +690,7 @@ private fun BuildItem(
             .clickable(
                 onClick = onClick,
                 indication = null,
-                interactionSource = MutableInteractionSource(),
+                interactionSource = remember { MutableInteractionSource() },
             ),
         colors = CardDefaults.cardColors(
             containerColor = XhuColor.cardBackground,
