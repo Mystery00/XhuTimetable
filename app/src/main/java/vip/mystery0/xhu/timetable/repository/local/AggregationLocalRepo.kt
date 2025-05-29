@@ -294,11 +294,13 @@ object AggregationLocalRepo : KoinComponent {
                 }
             })
 
-        if (map.isEmpty()) {
-            return emptyList()
-        }
         //组装数据结构
-        val maxDate = minOf(map.keys.max(), startDate.plusWeeks(20))
+        val maxDate: LocalDate
+        if (map.isEmpty()) {
+            maxDate = startDate.plusWeeks(20)
+        } else {
+            maxDate = minOf(map.keys.max(), startDate.plusWeeks(20))
+        }
         val result = ArrayList<CalendarWeekResponse>()
         var weekNum = 0
         var thisWeekStartDate = startDate

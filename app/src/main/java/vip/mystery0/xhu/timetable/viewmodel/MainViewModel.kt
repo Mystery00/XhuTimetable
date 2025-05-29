@@ -898,6 +898,9 @@ data class CourseSheet(
         )
     }
 
+    val isEmptyInstance: Boolean
+        get() = showTitle == "" && color == Color.Unspecified && textColor == Color.Unspecified
+
     fun isEmpty(): Boolean = course.isEmpty()
 
     override fun equals(other: Any?): Boolean {

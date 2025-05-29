@@ -101,76 +101,81 @@ val weekCourseActions: TabAction = @Composable { ext ->
 
 @OptIn(ExperimentalComposeUiApi::class)
 val weekCourseContent: TabContent = @Composable { ext ->
+    val activity = ext.activity
     val viewModel = ext.viewModel
     val weekView by viewModel.weekView.collectAsState()
     val currentWeek by viewModel.week.collectAsState()
+    val tableCourse by viewModel.tableCourse.collectAsState()
     val courseDialogState = remember { mutableStateOf<List<WeekCourseView>>(emptyList()) }
 
     Box {
-        Column(modifier = Modifier.fillMaxSize()) {
-            //顶部日期栏
-            Row(
-                modifier = Modifier
-                    .background(Color.Black.copy(0.2F))
-            ) {
-                val firstDay by viewModel.dateStart.collectAsState()
-                Text(
-                    text = "${twoFormat.format(firstDay.monthValue)}\n月",
-                    color = Color.White,
-                    fontSize = 10.sp,
-                    modifier = Modifier.weight(0.3F),
-                    textAlign = TextAlign.Center,
-                )
-                for (i in 0..6) {
-                    val thisDay = firstDay.plusDays(i.toLong())
-                    BuildDateItem(
-                        week = thisDay.dayOfWeek.getDisplayName(
-                            TextStyle.SHORT,
-                            Locale.CHINESE
-                        ),
-                        date = if (thisDay.dayOfMonth == 1) "${twoFormat.format(thisDay.monthValue)}月" else "${
-                            twoFormat.format(
-                                thisDay.dayOfMonth
-                            )
-                        }日",
-                        isToday = LocalDate.now().dayOfWeek.value == i + 1
-                    )
-                }
-            }
-            //课程节次列表
-            Row(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                val customUi by viewModel.customUi.collectAsState()
-                Column(
+        if (tableCourse.isEmpty() || tableCourse.all { c -> c.isEmpty() || c.all { it.isEmptyInstance } }) {
+            activity.BuildNoDataLayout()
+        } else {
+            Column(modifier = Modifier.fillMaxSize()) {
+                //顶部日期栏
+                Row(
                     modifier = Modifier
-                        .weight(0.3F)
-                        .background(dateBackgroundColor)
+                        .background(Color.Black.copy(0.2F))
                 ) {
-                    for (time in 1..11) {
-                        BuildTimeItem(time = time, customUi.weekItemHeight.dp)
+                    val firstDay by viewModel.dateStart.collectAsState()
+                    Text(
+                        text = "${twoFormat.format(firstDay.monthValue)}\n月",
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        modifier = Modifier.weight(0.3F),
+                        textAlign = TextAlign.Center,
+                    )
+                    for (i in 0..6) {
+                        val thisDay = firstDay.plusDays(i.toLong())
+                        BuildDateItem(
+                            week = thisDay.dayOfWeek.getDisplayName(
+                                TextStyle.SHORT,
+                                Locale.CHINESE
+                            ),
+                            date = if (thisDay.dayOfMonth == 1) "${twoFormat.format(thisDay.monthValue)}月" else "${
+                                twoFormat.format(
+                                    thisDay.dayOfMonth
+                                )
+                            }日",
+                            isToday = LocalDate.now().dayOfWeek.value == i + 1
+                        )
                     }
                 }
-                val tableCourse by viewModel.tableCourse.collectAsState()
-                if (tableCourse.isNotEmpty()) {
-                    for (index in 0 until 7) {
-                        Column(modifier = Modifier.weight(1F)) {
-                            tableCourse.getOrElse(index) { emptyList() }.forEach { sheet ->
-                                if (!sheet.isEmpty()) {
-                                    BuildWeekItem(
-                                        customUi = customUi,
-                                        backgroundColor = sheet.color,
-                                        itemStep = sheet.step,
-                                        title = sheet.showTitle,
-                                        textColor = sheet.textColor,
-                                        showMore = sheet.course.size > 1,
-                                    ) {
-                                        courseDialogState.value = sheet.course
+                //课程节次列表
+                Row(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    val customUi by viewModel.customUi.collectAsState()
+                    Column(
+                        modifier = Modifier
+                            .weight(0.3F)
+                            .background(dateBackgroundColor)
+                    ) {
+                        for (time in 1..11) {
+                            BuildTimeItem(time = time, customUi.weekItemHeight.dp)
+                        }
+                    }
+                    if (tableCourse.isNotEmpty()) {
+                        for (index in 0 until 7) {
+                            Column(modifier = Modifier.weight(1F)) {
+                                tableCourse.getOrElse(index) { emptyList() }.forEach { sheet ->
+                                    if (!sheet.isEmpty()) {
+                                        BuildWeekItem(
+                                            customUi = customUi,
+                                            backgroundColor = sheet.color,
+                                            itemStep = sheet.step,
+                                            title = sheet.showTitle,
+                                            textColor = sheet.textColor,
+                                            showMore = sheet.course.size > 1,
+                                        ) {
+                                            courseDialogState.value = sheet.course
+                                        }
+                                    } else {
+                                        Spacer(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(customUi.weekItemHeight.dp * sheet.step)
+                                        )
                                     }
-                                } else {
-                                    Spacer(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(customUi.weekItemHeight.dp * sheet.step)
-                                    )
                                 }
                             }
                         }
