@@ -33,7 +33,7 @@ class SchoolCalendarViewModel : ComposeViewModel() {
     private val _schoolCalendarData = MutableStateFlow(SchoolCalendarData())
     val schoolCalendarData: StateFlow<SchoolCalendarData> = _schoolCalendarData
 
-    init {
+    fun init() {
         fun failed(message: String) {
             Log.w(TAG, "load school calendar list failed, $message")
             _loading.value = LoadingState(false, message)

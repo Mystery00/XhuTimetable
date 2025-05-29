@@ -11,7 +11,7 @@ class NoticeViewModel : PagingComposeViewModel<String, NoticeResponse>(
         NoticeRepo.getNoticeListStream()
     }
 ) {
-    init {
+    fun init() {
         viewModelScope.launch {
             loadData("")
         }

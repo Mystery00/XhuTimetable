@@ -21,7 +21,7 @@ class CustomCourseColorViewModel : ComposeViewModel(), KoinComponent {
     private val _listState = MutableStateFlow<List<Pair<String, Color>>>(emptyList())
     val listState: StateFlow<List<Pair<String, Color>>> = _listState
 
-    init {
+    fun init() {
         loadList("")
     }
 

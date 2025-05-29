@@ -27,7 +27,7 @@ class UrgeViewModel : PagingComposeViewModel<Long, UrgeItem>(
     val userName = MutableStateFlow("")
     val remainCount: StateFlow<Int> = UrgeRepo.remainCountFlow
 
-    init {
+    fun init() {
         viewModelScope.launch {
             userName.value = UserStore.getMainUser()?.info?.name ?: "未登录"
             loadData(0)

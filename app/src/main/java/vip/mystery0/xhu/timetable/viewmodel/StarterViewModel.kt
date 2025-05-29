@@ -48,7 +48,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
     private val _isLoginState = MutableStateFlow(false)
     val isLoginState: StateFlow<Boolean> = _isLoginState
 
-    init {
+    fun init() {
         viewModelScope.launch(networkErrorHandler { throwable ->
             Log.w(TAG, "init failed", throwable)
             _readyState.value =

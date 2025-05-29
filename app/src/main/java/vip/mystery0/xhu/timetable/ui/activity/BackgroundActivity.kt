@@ -33,6 +33,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -103,6 +104,9 @@ class BackgroundActivity : BaseComposeActivity() {
         val backgroundListState by viewModel.backgroundListState.collectAsState()
         val scope = rememberCoroutineScope()
 
+        LaunchedEffect(Unit) {
+            viewModel.init()
+        }
         Scaffold(
             topBar = {
                 TopAppBar(

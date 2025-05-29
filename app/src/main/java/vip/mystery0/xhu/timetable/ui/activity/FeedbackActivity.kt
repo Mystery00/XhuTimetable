@@ -32,6 +32,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -66,6 +67,9 @@ class FeedbackActivity : BaseComposeActivity(), KoinComponent {
         val wsState by viewModel.wsStatus.collectAsState()
         val adminStatus by viewModel.adminStatus.collectAsState()
 
+        LaunchedEffect(Unit) {
+            viewModel.init()
+        }
         Scaffold(
             topBar = {
                 TopAppBar(

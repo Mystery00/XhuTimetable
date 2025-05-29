@@ -5,7 +5,6 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -67,6 +67,9 @@ class CustomUiActivity : BaseComposeActivity() {
         val randomCourse by viewModel.randomCourse.collectAsState()
         val scope = rememberCoroutineScope()
 
+        LaunchedEffect(Unit) {
+            viewModel.init()
+        }
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -135,7 +138,7 @@ class CustomUiActivity : BaseComposeActivity() {
                                 .fillMaxWidth(),
                         ) {
                             Spacer(modifier = Modifier.weight(2.15F))
-                            BoxWithConstraints(modifier = Modifier.weight(3F)) {
+                            Box(modifier = Modifier.weight(3F)) {
                                 Row {
                                     //列数
                                     val columnSize = 3
@@ -309,21 +312,24 @@ class CustomUiActivity : BaseComposeActivity() {
                         })
                     Spacer(modifier = Modifier.height(4.dp))
                     Row {
-                        Text(text = "课程名称",
+                        Text(
+                            text = "课程名称",
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .padding(4.dp)
                                 .clickable {
                                     valueState.value += "{${TitleTemplate.COURSE_NAME.tpl}}"
                                 })
-                        Text(text = "上课地点",
+                        Text(
+                            text = "上课地点",
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .padding(4.dp)
                                 .clickable {
                                     valueState.value += "{${TitleTemplate.LOCATION.tpl}}"
                                 })
-                        Text(text = "教师名称",
+                        Text(
+                            text = "教师名称",
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .padding(4.dp)

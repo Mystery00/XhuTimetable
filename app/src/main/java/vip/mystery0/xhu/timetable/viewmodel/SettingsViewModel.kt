@@ -60,7 +60,7 @@ class SettingsViewModel : ComposeViewModel() {
 
     val version = MutableStateFlow<ClientVersion?>(null)
 
-    init {
+    fun init() {
         viewModelScope.launch {
             Theme.nightMode.value = getConfigStore { nightMode }
             _notifyTimeData.value = getConfigStore { notifyTime }

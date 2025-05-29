@@ -36,7 +36,7 @@ class CourseRoomViewModel : PagingComposeViewModel<ClassroomRequest,ClassroomRes
     val init: Boolean
         get() = pageRequestFlow.value == null
 
-    init {
+    fun init() {
         viewModelScope.launch {
             _areaSelect.value = initAreaSelect()
             _weekSelect.value = initIntSelect(1, 20) { "第${it}周" }

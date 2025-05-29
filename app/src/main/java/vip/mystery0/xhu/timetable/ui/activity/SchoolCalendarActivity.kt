@@ -1,7 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import android.content.Intent
-import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -42,14 +42,9 @@ class SchoolCalendarActivity : BaseSelectComposeActivity() {
 
         val selectDialogState = rememberXhuDialogState()
 
-        fun onBack() {
-            finish()
+        LaunchedEffect(Unit) {
+            viewModel.init()
         }
-        BackHandler(
-            onBack = {
-                onBack()
-            }
-        )
 
         Scaffold(
             topBar = {
@@ -57,7 +52,7 @@ class SchoolCalendarActivity : BaseSelectComposeActivity() {
                     title = { Text(text = "${title}（${schoolCalendarData.area}）") },
                     navigationIcon = {
                         IconButton(onClick = {
-                            onBack()
+                            finish()
                         }) {
                             Icon(
                                 painter = XhuIcons.back,

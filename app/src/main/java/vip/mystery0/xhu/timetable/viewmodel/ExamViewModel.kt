@@ -26,7 +26,7 @@ class ExamViewModel : PagingComposeViewModel<PageRequest, Exam>(
     private val _userSelect = MutableStateFlow<List<UserSelect>>(emptyList())
     val userSelect: StateFlow<List<UserSelect>> = _userSelect
 
-    init {
+    fun init() {
         viewModelScope.launch {
             _userSelect.value = initUserSelect()
             loadExamList()

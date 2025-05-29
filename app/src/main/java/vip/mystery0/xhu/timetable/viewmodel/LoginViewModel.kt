@@ -28,7 +28,7 @@ class LoginViewModel : ComposeViewModel() {
     private val _loginState = MutableStateFlow(LoginState())
     val loginState: StateFlow<LoginState> = _loginState
 
-    init {
+    fun init() {
         viewModelScope.launch {
             _loginLabel.value = FeatureString.LOGIN_LABEL.getValue()
         }

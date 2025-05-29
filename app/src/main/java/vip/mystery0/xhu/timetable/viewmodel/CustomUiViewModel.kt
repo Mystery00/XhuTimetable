@@ -29,7 +29,7 @@ class CustomUiViewModel : ComposeViewModel() {
     val weekTitleTextSize = MutableStateFlow(CustomUi.DEFAULT.weekTitleTextSize)
     val backgroundImageBlur = MutableStateFlow(CustomUi.DEFAULT.backgroundImageBlur)
 
-    init {
+    fun init() {
         loadCustomUi()
         refreshRandomCourse()
     }

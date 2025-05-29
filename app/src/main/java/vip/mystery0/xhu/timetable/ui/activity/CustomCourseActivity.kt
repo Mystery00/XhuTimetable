@@ -130,8 +130,11 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
             finish()
         }
 
-        BackHandler {
-            onBack()
+        BackHandler(openBottomSheet.value) {
+            openBottomSheet.value = false
+        }
+        LaunchedEffect(Unit) {
+            viewModel.init()
         }
 
         Scaffold(

@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
-import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -23,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -51,12 +51,8 @@ class ExamActivity : BaseSelectComposeActivity() {
 
         val userDialog = rememberXhuDialogState()
 
-        fun onBack() {
-            finish()
-        }
-
-        BackHandler {
-            onBack()
+        LaunchedEffect(Unit) {
+            viewModel.init()
         }
 
         Scaffold(
@@ -65,7 +61,7 @@ class ExamActivity : BaseSelectComposeActivity() {
                     title = { Text(text = title.toString()) },
                     navigationIcon = {
                         IconButton(onClick = {
-                            onBack()
+                            finish()
                         }) {
                             Icon(
                                 painter = XhuIcons.back,

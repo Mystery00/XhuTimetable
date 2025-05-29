@@ -60,6 +60,9 @@ class LoginActivity : BaseComposeActivity() {
         var usernameError by remember { mutableStateOf(false) }
         var passwordError by remember { mutableStateOf(false) }
 
+        LaunchedEffect(Unit) {
+            viewModel.init()
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()

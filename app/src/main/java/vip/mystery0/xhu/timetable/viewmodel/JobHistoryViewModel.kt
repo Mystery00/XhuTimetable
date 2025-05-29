@@ -20,7 +20,7 @@ class JobHistoryViewModel : ComposeViewModel() {
     private val _historyListState = MutableStateFlow(JobHistoryListState())
     val historyListState: StateFlow<JobHistoryListState> = _historyListState
 
-    init {
+    fun init() {
         loadHistoryList()
     }
 

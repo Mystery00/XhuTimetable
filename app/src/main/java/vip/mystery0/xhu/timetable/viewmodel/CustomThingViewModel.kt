@@ -32,7 +32,7 @@ class CustomThingViewModel : PagingComposeViewModel<PageRequest, CustomThingResp
     private val _saveLoadingState = MutableStateFlow(LoadingState(init = true))
     val saveLoadingState: StateFlow<LoadingState> = _saveLoadingState
 
-    init {
+    fun init() {
         viewModelScope.launch {
             _userSelect.value = initUserSelect()
             loadCustomThingList()

@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -65,8 +66,8 @@ class JobHistoryActivity : BaseComposeActivity() {
 
         val lazyListState = rememberLazyListState()
 
-        fun onBack() {
-            finish()
+        LaunchedEffect(Unit) {
+            viewModel.init()
         }
 
         Scaffold(
@@ -75,7 +76,7 @@ class JobHistoryActivity : BaseComposeActivity() {
                     title = { Text(text = title.toString()) },
                     navigationIcon = {
                         IconButton(onClick = {
-                            onBack()
+                            finish()
                         }) {
                             Icon(
                                 painter = XhuIcons.back,

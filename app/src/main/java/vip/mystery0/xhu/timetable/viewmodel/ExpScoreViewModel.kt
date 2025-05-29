@@ -29,7 +29,7 @@ class ExpScoreViewModel : ComposeViewModel(), KoinComponent {
     private val _expScoreListState = MutableStateFlow(ExpScoreListState())
     val expScoreListState: StateFlow<ExpScoreListState> = _expScoreListState
 
-    init {
+    fun init() {
         viewModelScope.launch {
             _userSelect.value = initUserSelect()
             _yearSelect.value = initYearSelect()

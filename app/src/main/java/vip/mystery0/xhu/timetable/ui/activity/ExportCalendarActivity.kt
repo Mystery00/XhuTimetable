@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
 import android.Manifest
+import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -100,6 +101,12 @@ class ExportCalendarActivity : BaseSelectComposeActivity() {
                 return
             }
             finish()
+        }
+        BackHandler(openBottomSheet.value) {
+            openBottomSheet.value = false
+        }
+        LaunchedEffect(Unit) {
+            viewModel.init()
         }
 
         Scaffold(

@@ -9,6 +9,7 @@ import android.view.ViewTreeObserver
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.animation.doOnEnd
@@ -27,6 +28,9 @@ class StartActivity : BaseComposeActivity() {
 
     @Composable
     override fun BuildContentWindow() {
+        LaunchedEffect(Unit) {
+            viewModel.init()
+        }
         val readyState by viewModel.readyState.collectAsState()
         val isLoginState by viewModel.isLoginState.collectAsState()
         HandleErrorMessage(errorMessage = readyState.errorMessage) {}

@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.ui.activity
 
-import androidx.activity.compose.BackHandler
 import androidx.activity.viewModels
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -23,6 +22,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,21 +60,16 @@ class ScoreActivity : BaseSelectComposeActivity() {
         val yearDialog = rememberXhuDialogState()
         val termDialog = rememberXhuDialogState()
 
-        fun onBack() {
-            finish()
+        LaunchedEffect(Unit) {
+            viewModel.init()
         }
-
-        BackHandler {
-            onBack()
-        }
-
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = { Text(text = title.toString()) },
                     navigationIcon = {
                         IconButton(onClick = {
-                            onBack()
+                            finish()
                         }) {
                             Icon(
                                 painter = XhuIcons.back,
