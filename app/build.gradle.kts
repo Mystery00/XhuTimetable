@@ -146,6 +146,7 @@ android {
             path = file("src/main/jni/CMakeLists.txt")
         }
     }
+    ndkVersion = "28.1.13356709"
 }
 
 configurations.all {
