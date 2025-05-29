@@ -25,14 +25,14 @@ val packageName = "vip.mystery0.xhu.timetable"
 
 android {
     namespace = packageName
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = packageName
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = gitVersionCode
-        versionName = "1.5.7"
+        versionName = "1.5.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -229,6 +229,8 @@ dependencies {
 
 aboutLibraries {
     offlineMode = true
-    fetchRemoteLicense = false
-    fetchRemoteFunding = false
+    collect {
+        fetchRemoteLicense = false
+        fetchRemoteFunding = false
+    }
 }
