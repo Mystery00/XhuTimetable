@@ -42,6 +42,7 @@ import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.ScoreViewModel
+import java.util.Locale
 
 class ScoreActivity : BaseSelectComposeActivity() {
     private val viewModel: ScoreViewModel by viewModels()
@@ -187,15 +188,15 @@ private fun BuildTermInfo(gpa: ScoreGpaResponse) {
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    text = "总成绩：${String.format("%.2f", gpa.totalScore)}",
+                    text = "总成绩：${String.format(Locale.CHINA, "%.2f", gpa.totalScore)}",
                     fontSize = 13.sp,
                 )
                 Text(
-                    text = "平均成绩：${String.format("%.2f", gpa.averageScore)}",
+                    text = "平均成绩：${String.format(Locale.CHINA, "%.2f", gpa.averageScore)}",
                     fontSize = 13.sp,
                 )
                 Text(
-                    text = "总学分：${String.format("%.2f", gpa.totalCredit)}",
+                    text = "总学分：${String.format(Locale.CHINA, "%.2f", gpa.totalCredit)}",
                     fontSize = 13.sp,
                 )
             }
@@ -205,7 +206,7 @@ private fun BuildTermInfo(gpa: ScoreGpaResponse) {
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    text = "GPA = ${String.format("%.2f", gpa.gpa)}",
+                    text = "GPA = ${String.format(Locale.CHINA, "%.2f", gpa.gpa)}",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                 )

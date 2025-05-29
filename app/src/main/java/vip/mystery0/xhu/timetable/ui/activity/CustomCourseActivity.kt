@@ -159,7 +159,6 @@ class CustomCourseActivity : BaseSelectComposeActivity() {
                 paddingValues = paddingValues,
                 pager = pager,
                 refreshing = refreshing,
-                alwaysShowList = true,
                 listHeader = {
                     BuildSelectFilterChipContent(
                         userSelect = userSelect,
