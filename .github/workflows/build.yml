@@ -39,7 +39,7 @@ jobs:
       - name: 解密签名
         run: |
           echo ${{ secrets.SIGN_KEY_BASE64 }} | base64 --decode > /tmp/key.jks
-          echo ${{ secrets.AG_CONNECT_JSON }} | base64 --decode > app/agconnect-services.json
+          echo ${{ secrets.AG_CONNECT_JSON }} | base64 --decode > composeApp/agconnect-services.json
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
