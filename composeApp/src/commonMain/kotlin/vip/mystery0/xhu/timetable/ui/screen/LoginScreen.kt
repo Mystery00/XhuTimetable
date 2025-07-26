@@ -1,0 +1,295 @@
+package vip.mystery0.xhu.timetable.ui.screen
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.twotone.AccountCircle
+import androidx.compose.material.icons.twotone.Clear
+import androidx.compose.material.icons.twotone.Lock
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
+import multiplatform.network.cmptoast.showToast
+import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.viewmodel.koinViewModel
+import vip.mystery0.xhu.timetable.base.appName
+import vip.mystery0.xhu.timetable.ui.component.ShowProgressDialog
+import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
+import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
+import vip.mystery0.xhu.timetable.ui.navigation.RouteLogin
+import vip.mystery0.xhu.timetable.ui.navigation.RouteMain
+import vip.mystery0.xhu.timetable.ui.navigation.replaceTo
+import vip.mystery0.xhu.timetable.viewmodel.LoginViewModel
+import xhutimetable.composeapp.generated.resources.Res
+import xhutimetable.composeapp.generated.resources.login_header
+
+@Composable
+fun LoginScreen(fromAccountManager: Boolean) {
+    val viewModel = koinViewModel<LoginViewModel>()
+
+    val navController = LocalNavController.current!!
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    val usernameFocusRequester = remember { FocusRequester() }
+    val passwordFocusRequester = remember { FocusRequester() }
+    var usernameError by remember { mutableStateOf(false) }
+    var passwordError by remember { mutableStateOf(false) }
+    val xhuDialogState = rememberXhuDialogState()
+
+    val loginState by viewModel.loginState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.init()
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Image(
+            modifier = Modifier.fillMaxWidth(),
+            painter = painterResource(Res.drawable.login_header),
+            contentDescription = null,
+            contentScale = ContentScale.FillWidth
+        )
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 48.dp)
+                .fillMaxHeight()
+        ) {
+            var username by remember { mutableStateOf("") }
+            var password by remember { mutableStateOf("") }
+            Spacer(
+                modifier = Modifier
+                    .height(62.dp)
+                    .fillMaxWidth()
+            )
+            OutlinedTextField(
+                modifier = Modifier
+                    .height(IntrinsicSize.Min)
+                    .fillMaxWidth()
+                    .onFocusChanged { focusState ->
+                        if (focusState.isFocused) {
+                            //持有焦点
+                            usernameError = username.isBlank()
+                        }
+                    }
+                    .focusRequester(usernameFocusRequester),
+                value = username,
+                onValueChange = {
+                    username = it
+                },
+                shape = RoundedCornerShape(18.dp),
+                leadingIcon = {
+                    Icon(Icons.TwoTone.AccountCircle, null)
+                },
+                trailingIcon = {
+                    if (username.isNotBlank()) {
+                        IconButton(onClick = { username = "" }) {
+                            Icon(Icons.TwoTone.Clear, null)
+                        }
+                    }
+                },
+                label = {
+                    Text(text = "学号")
+                },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedTextColor = MaterialTheme.colorScheme.primary,
+                    unfocusedTextColor = MaterialTheme.colorScheme.primary,
+                ),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next,
+                    keyboardType = KeyboardType.Number,
+                ),
+                maxLines = 1,
+                isError = usernameError,
+            )
+            Spacer(
+                modifier = Modifier
+                    .height(48.dp)
+                    .fillMaxWidth()
+            )
+            OutlinedTextField(
+                modifier = Modifier
+                    .height(IntrinsicSize.Min)
+                    .fillMaxWidth()
+                    .onFocusChanged { focusState ->
+                        if (focusState.isFocused) {
+                            //持有焦点
+                            passwordError = password.isBlank()
+                        }
+                    }
+                    .focusRequester(passwordFocusRequester),
+                value = password,
+                onValueChange = {
+                    password = it
+                },
+                shape = RoundedCornerShape(18.dp),
+                leadingIcon = {
+                    Icon(Icons.TwoTone.Lock, null)
+                },
+                trailingIcon = {
+                    if (password.isNotBlank()) {
+                        IconButton(onClick = { password = "" }) {
+                            Icon(Icons.TwoTone.Clear, null)
+                        }
+                    }
+                },
+                label = {
+                    Text(text = "密码")
+                },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedTextColor = MaterialTheme.colorScheme.primary,
+                    unfocusedTextColor = MaterialTheme.colorScheme.primary,
+                ),
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Password,
+                ),
+                keyboardActions = KeyboardActions(onDone = {
+                    if (doLogin(
+                            viewModel,
+                            username,
+                            password,
+                            usernameFocusRequester,
+                            passwordFocusRequester
+                        )
+                    ) {
+                        keyboardController?.hide()
+                    }
+                }),
+                maxLines = 1,
+                isError = passwordError,
+            )
+            val loginLabel by viewModel.loginLabel.collectAsState()
+            if (loginLabel.isNotBlank()) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    text = loginLabel,
+                    color = MaterialTheme.colorScheme.outline,
+                    fontSize = 12.sp,
+                )
+            }
+            Spacer(
+                modifier = Modifier
+                    .height(60.dp)
+                    .fillMaxWidth()
+            )
+            Button(
+                enabled = !loginState.loading,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
+                shape = RoundedCornerShape(36.dp),
+                onClick = {
+                    if (doLogin(
+                            viewModel,
+                            username,
+                            password,
+                            usernameFocusRequester,
+                            passwordFocusRequester
+                        )
+                    ) {
+                        keyboardController?.hide()
+                    }
+                }) {
+                Text(
+                    text = "登 录",
+                    fontSize = 16.sp
+                )
+            }
+        }
+    }
+    ShowProgressDialog(
+        showState = xhuDialogState,
+        text = "登录中...",
+        successText = if (loginState.success) "登录成功" else "",
+        errorText = loginState.errorMessage,
+    )
+    LaunchedEffect(loginState) {
+        if (loginState.loading) {
+            xhuDialogState.show()
+        } else if (!loginState.success) {
+            delay(1500L)
+            xhuDialogState.hide()
+        }
+        if (loginState.success) {
+            showToast("登录成功，欢迎使用${appName()}！")
+            delay(500L)
+            if (fromAccountManager) {
+                navController.popBackStack()
+            } else {
+                navController.replaceTo<RouteLogin>(RouteMain)
+            }
+        }
+    }
+}
+
+private fun doLogin(
+    viewModel: LoginViewModel,
+    username: String,
+    password: String,
+    usernameFocusRequester: FocusRequester,
+    passwordFocusRequester: FocusRequester,
+): Boolean {
+    when {
+        username.isBlank() -> {
+            usernameFocusRequester.requestFocus()
+            showToast("用户名不能为空")
+            return false
+        }
+
+        password.isBlank() -> {
+            passwordFocusRequester.requestFocus()
+            showToast("密码不能为空")
+            return false
+        }
+
+        else -> viewModel.login(username, password)
+    }
+    return true
+}

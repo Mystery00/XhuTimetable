@@ -1,0 +1,7 @@
+TEAM_ID=
+
+PRODUCT_NAME=XhuTimetable
+PRODUCT_BUNDLE_IDENTIFIER=vip.mystery0.xhu.timetable.XhuTimetable$(TEAM_ID)
+
+CURRENT_PROJECT_VERSION={gitVersionCode}
+MARKETING_VERSION={appVersionName}
