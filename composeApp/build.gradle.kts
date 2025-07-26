@@ -1,6 +1,3 @@
-import org.gradle.kotlin.dsl.implementation
-import org.gradle.kotlin.dsl.invoke
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -33,11 +30,9 @@ fun String.runCommand(workingDir: File = file("./")): String {
 }
 
 val packageName = "vip.mystery0.xhu.timetable"
-//val gitVersionCode: Int = "git rev-list HEAD --count".runCommand().toInt()
-val gitVersionCode: Int = 1
-//val gitVersionName = "git rev-parse --short=8 HEAD".runCommand()
-val gitVersionName = "hhh"
-val appVersionName = "1.5.8"
+val gitVersionCode: Int = "git rev-list HEAD --count".runCommand().toInt()
+val gitVersionName = "git rev-parse --short=8 HEAD".runCommand()
+val appVersionName = "1.6.0"
 
 kotlin {
     androidTarget {
