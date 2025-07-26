@@ -1,0 +1,69 @@
+name: "Build Commit"
+on:
+  push:
+    branches:
+      - master
+env:
+  OUTPUT_DIR: "composeApp/build/outputs/apk/release"
+  SIGN_KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}
+  SIGN_KEY_STORE_PASSWORD: ${{ secrets.SIGN_KEY_STORE_PASSWORD }}
+  SIGN_KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
+  SIGN_KEY_STORE_FILE: "/tmp/key.jks"
+  NIGHTLY: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 设置JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+      - name: 设置Android SDK
+        uses: android-actions/setup-android@v3
+      - name: 解密签名
+        run: |
+          echo ${{ secrets.SIGN_KEY_BASE64 }} | base64 --decode > /tmp/key.jks
+          echo ${{ secrets.AG_CONNECT_JSON }} | base64 --decode > app/agconnect-services.json
+      - run: chmod a+x gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-disabled: true
+      - name: 构建 APK
+        run: |
+          ./gradlew composeApp:exportLibraryDefinitions
+          ./gradlew assembleRelease
+      - name: 安装工具
+        run: |
+          sudo apt-get install jq
+      - name: 解析编译文件路径
+        id: apk
+        run: |
+          commitMessage=$(git show -s --format=%s)
+          OUTPUT_METADATA_FILE="${{ env.OUTPUT_DIR }}/output-metadata.json"
+          versionName=$(jq -r '.elements[0].versionName' $OUTPUT_METADATA_FILE)
+          versionCode=$(jq -r '.elements[0].versionCode' $OUTPUT_METADATA_FILE)
+          apkFile=$(jq -r '.elements[0].outputFile' $OUTPUT_METADATA_FILE)
+          cp "${{ env.OUTPUT_DIR }}/$apkFile" "${{ env.OUTPUT_DIR }}/XhuTimetable-$versionName-$versionCode.apk"
+          
+          echo ::set-output name=commitMessage::$commitMessage
+          echo ::set-output name=versionName::$versionName
+          echo ::set-output name=versionCode::$versionCode
+      - name: 发布版本
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.apk.outputs.versionName }}
+          prerelease: true
+          body: |
+            注意：该版本为测试版本，可能存在一些问题，不建议日常使用。
+            注意：该版本为测试版本，可能存在一些问题，不建议日常使用。
+            注意：该版本为测试版本，可能存在一些问题，不建议日常使用。
+            
+            ${{ steps.apk.outputs.commitMessage }}
+          files: |
+            ${{ env.OUTPUT_DIR }}/XhuTimetable-${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}.apk
