@@ -17,7 +17,7 @@ on:
         default: false
         type: boolean
 env:
-  OUTPUT_DIR: "app/build/outputs/apk/release"
+  OUTPUT_DIR: "composeApp/build/outputs/apk/release"
   SIGN_KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}
   SIGN_KEY_STORE_PASSWORD: ${{ secrets.SIGN_KEY_STORE_PASSWORD }}
   SIGN_KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
@@ -38,8 +38,8 @@ jobs:
         uses: android-actions/setup-android@v3
       - name: 解密签名
         run: |
-            echo ${{ secrets.SIGN_KEY_BASE64 }} | base64 --decode > /tmp/key.jks
-            echo ${{ secrets.AG_CONNECT_JSON }} | base64 --decode > app/agconnect-services.json
+          echo ${{ secrets.SIGN_KEY_BASE64 }} | base64 --decode > /tmp/key.jks
+          echo ${{ secrets.AG_CONNECT_JSON }} | base64 --decode > app/agconnect-services.json
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
@@ -54,9 +54,10 @@ jobs:
       - name: 解析编译文件路径
         id: apk
         run: |
-          versionName=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionName')
-          versionCode=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionCode')
-          apkFile=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].outputFile')
+          OUTPUT_METADATA_FILE="${{ env.OUTPUT_DIR }}/output-metadata.json"
+          versionName=$(jq -r '.elements[0].versionName' $OUTPUT_METADATA_FILE)
+          versionCode=$(jq -r '.elements[0].versionCode' $OUTPUT_METADATA_FILE)
+          apkFile=$(jq -r '.elements[0].outputFile' $OUTPUT_METADATA_FILE)
           
           cp "${{ env.OUTPUT_DIR }}/$apkFile" "patch/new.apk"
           
@@ -113,8 +114,9 @@ jobs:
       - name: 计算MD5
         id: result
         run: |
-          versionName=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionName')
-          versionCode=$(cat "${{ env.OUTPUT_DIR }}/output-metadata.json" | jq -r '.elements[0].versionCode')
+          OUTPUT_METADATA_FILE="${{ env.OUTPUT_DIR }}/output-metadata.json"
+          versionName=$(jq -r '.elements[0].versionName' $OUTPUT_METADATA_FILE)
+          versionCode=$(jq -r '.elements[0].versionCode' $OUTPUT_METADATA_FILE)
           echo "versionName=$versionName" >> $GITHUB_OUTPUT
           echo "versionCode=$versionCode" >> $GITHUB_OUTPUT
           
