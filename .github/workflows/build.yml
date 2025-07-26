@@ -1,0 +1,183 @@
+name: Build Android APK
+on:
+  workflow_dispatch:
+    inputs:
+      oldVersionUrl:
+        description: '上一版本下载地址'
+        required: true
+        type: string
+        default: "https://xgkb.mystery0.vip"
+      oldVersionCode:
+        description: '上一版本版本号(只要code)'
+        required: true
+        type: string
+      forceUpdate:
+        description: '是否强制更新'
+        required: true
+        default: false
+        type: boolean
+env:
+  OUTPUT_DIR: "composeApp/build/outputs/apk/release"
+  SIGN_KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}
+  SIGN_KEY_STORE_PASSWORD: ${{ secrets.SIGN_KEY_STORE_PASSWORD }}
+  SIGN_KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
+  SIGN_KEY_STORE_FILE: "/tmp/key.jks"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 设置JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+      - name: 设置Android SDK
+        uses: android-actions/setup-android@v3
+      - name: 解密签名
+        run: |
+          echo ${{ secrets.SIGN_KEY_BASE64 }} | base64 --decode > /tmp/key.jks
+          echo ${{ secrets.AG_CONNECT_JSON }} | base64 --decode > app/agconnect-services.json
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-disabled: true
+      - name: 构建 APK
+        run: ./gradlew assembleRelease
+      - name: 安装工具
+        run: |
+          sudo apt-get install jq bsdiff
+          mkdir patch
+          curl -# -o "patch/old.apk" ${{ inputs.oldVersionUrl }}
+      - name: 解析编译文件路径
+        id: apk
+        run: |
+          OUTPUT_METADATA_FILE="${{ env.OUTPUT_DIR }}/output-metadata.json"
+          versionName=$(jq -r '.elements[0].versionName' $OUTPUT_METADATA_FILE)
+          versionCode=$(jq -r '.elements[0].versionCode' $OUTPUT_METADATA_FILE)
+          apkFile=$(jq -r '.elements[0].outputFile' $OUTPUT_METADATA_FILE)
+          
+          cp "${{ env.OUTPUT_DIR }}/$apkFile" "patch/new.apk"
+          
+          echo "versionName=$versionName" >> $GITHUB_OUTPUT
+          echo "versionCode=$versionCode" >> $GITHUB_OUTPUT
+          echo "apkFile=$apkFile" >> $GITHUB_OUTPUT
+      - name: 生成 patch 文件
+        id: patch
+        run: |
+          patchFile="${{ inputs.oldVersionCode }}-${{ steps.apk.outputs.versionCode }}.patch"
+          echo "$patchFile" > patch_name
+          bsdiff "patch/old.apk" "patch/new.apk" "patch/$patchFile"
+          
+          echo "patchFile=$patchFile" >> $GITHUB_OUTPUT
+          
+          apkMd5=$(md5sum "patch/new.apk" | cut -d" " -f1)
+          patchMd5=$(md5sum "patch/$patchFile" | cut -d" " -f1)
+
+          echo "新版本：${{ steps.apk.outputs.versionName }}-${{ steps.apk.outputs.versionCode }}" >> $GITHUB_STEP_SUMMARY
+          echo "md5: $apkMd5" >> $GITHUB_STEP_SUMMARY
+          echo "==========================================" >> $GITHUB_STEP_SUMMARY
+          echo "增量包：${patchFile}" >> $GITHUB_STEP_SUMMARY
+          echo "md5: $patchMd5" >> $GITHUB_STEP_SUMMARY
+      - name: 发布版本
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.apk.outputs.versionName }}
+          prerelease: false
+          body_path: version.log
+          files: |
+            ${{ env.OUTPUT_DIR }}/${{ steps.apk.outputs.apkFile }}
+      - name: 上传文件
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-context
+          path: |
+            patch_name
+            version.log
+            patch/new.apk
+            patch/${{ steps.patch.outputs.patchFile }}
+            ${{ env.OUTPUT_DIR }}/output-metadata.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk-sign
+          path: ${{ env.OUTPUT_DIR }}/${{ steps.apk.outputs.apkFile }}
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: 下载部署文件
+        uses: actions/download-artifact@v4
+        with:
+          name: build-context
+      - name: 计算MD5
+        id: result
+        run: |
+          OUTPUT_METADATA_FILE="${{ env.OUTPUT_DIR }}/output-metadata.json"
+          versionName=$(jq -r '.elements[0].versionName' $OUTPUT_METADATA_FILE)
+          versionCode=$(jq -r '.elements[0].versionCode' $OUTPUT_METADATA_FILE)
+          echo "versionName=$versionName" >> $GITHUB_OUTPUT
+          echo "versionCode=$versionCode" >> $GITHUB_OUTPUT
+          
+          patchFile=$(cat patch_name)
+          echo "patchFile=$patchFile" >> $GITHUB_OUTPUT
+          
+          apkMd5=$(md5sum "patch/new.apk" | cut -d" " -f1)
+          patchMd5=$(md5sum "patch/$patchFile" | cut -d" " -f1)
+          
+          echo "apkMd5=$apkMd5" >> $GITHUB_OUTPUT
+          echo "patchMd5=$patchMd5" >> $GITHUB_OUTPUT
+      - name: 上传 APK 文件
+        id: upload_apk
+        uses: Mystery00/upload-actions@v1.14
+        with:
+          signUrl: "${{ secrets.SIGNATURE_API }}"
+          mimeType: "application/vnd.android.package-archive"
+          st: apk
+          filePath: "patch/new.apk"
+          title: "${{ steps.result.outputs.versionName }}-${{ steps.result.outputs.versionCode }}.apk"
+      - name: 上传 APK 文件
+        id: upload_patch
+        uses: Mystery00/upload-actions@v1.14
+        with:
+          signUrl: "${{ secrets.SIGNATURE_API }}"
+          mimeType: "text/x-diff"
+          st: apk
+          filePath: "patch/${{ steps.result.outputs.patchFile }}"
+          title: "${{ steps.result.outputs.patchFile }}"
+      - name: 发布新版本
+        run: |
+          apkResourceId=${{ steps.upload_apk.outputs.resId }}
+          patchResourceId=${{ steps.upload_patch.outputs.resId }}
+          
+          echo $apkResourceId
+          echo $patchResourceId
+          if [ -z "$apkResourceId" ]; then
+            echo "apkResourceId is empty"
+            exit 1
+          fi
+          if [ -z "$patchResourceId" ]; then
+            echo "patchResourceId is empty"
+            exit 1
+          fi
+          
+          updateLog=$(cat "version.log")
+          
+          json='{apkResourceId:$apkResourceId,apkMd5:$apkMd5,patchResourceId:$patchResourceId,patchMd5:$patchMd5,updateLog:$updateLog,versionCode:$versionCode,versionName:$versionName,lastVersionCode:$lastVersionCode,forceUpdate:$forceUpdate}'
+          requestJson=$(
+          jq \
+          --arg apkResourceId "$apkResourceId" \
+          --arg apkMd5 "${{ steps.result.outputs.apkMd5 }}" \
+          --arg patchResourceId "$patchResourceId" \
+          --arg patchMd5 "${{ steps.result.outputs.patchMd5 }}" \
+          --arg updateLog "${updateLog}" \
+          --arg versionCode "${{ steps.result.outputs.versionCode }}" \
+          --arg versionName "${{ steps.result.outputs.versionName }}" \
+          --arg lastVersionCode "${{ inputs.oldVersionCode }}" \
+          --arg forceUpdate "${{ inputs.forceUpdate }}" \
+          -n "$json"
+          )
+          curl -s -X POST "${{ secrets.NEW_VERSION_API }}" \
+            -H 'Content-Type: application/json' \
+            -d "$requestJson"
