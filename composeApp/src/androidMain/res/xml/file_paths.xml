@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <external-files-path
+        name="pic"
+        path="/Pictures" />
+    <external-files-path
+        name="dw"
+        path="/Download" />
+    <external-files-path
+        name="dcm"
+        path="/Documents" />
+    <external-cache-path
+        name="crash"
+        path="/crash/" />
+    <external-cache-path
+        name="update"
+        path="/update/" />
+</paths>

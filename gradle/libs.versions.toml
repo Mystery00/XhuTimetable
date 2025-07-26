@@ -1,119 +1,148 @@
 [versions]
-agp = "8.10.1"
-kotlin = "2.1.21"
+agp = "8.11.1"
+kotlin = "2.2.0"
 # https://github.com/google/ksp/releases
-ksp = "2.1.21-2.0.1"
-aboutlibraries = "12.1.2"
+ksp = "2.2.0-2.0.2"
 
-composeBom = "2025.05.01"
+composeMultiplatform = "1.8.2"
+aboutlibraries = "12.2.4"
+kotlinx-serialization = "1.9.0"
+
+android-compileSdk = "36"
+android-minSdk = "26"
+android-targetSdk = "36"
+androidx-activity = "1.10.1"
+androidx-appcompat = "1.7.1"
+androidx-splashscreen = "1.0.1"
+androidx-core = "1.16.0"
+androidx-lifecycle = "2.9.1"
+androidx-navigation = "2.9.0-beta04"
+androidx-browser = "1.8.0"
 material = "1.12.0"
-androidxCore = "1.16.0"
-androidxCompose = "1.10.1"
-androidxLifecycle = "2.9.0"
-androidxCompat = "1.7.0"
-androidxAnimation = "1.8.2"
-androidxSplashScreen = "1.0.1"
-androidxBrowser = "1.8.0"
-androidxFuture = "1.2.0"
-androidxGlance = "1.1.1"
-androidxPaging = "3.3.6"
-androidxRoom = "2.7.1"
-androidxWorkManager = "2.10.1"
-
-aboutlibrariesDependencies = "12.1.2"
-accompanist = "0.37.3"
-sheetsComposeDdialogs = "1.3.0"
-lottie = "6.6.6"
-koin = "4.0.4"
-coil = "2.7.0"
-retrofit = "3.0.0"
-moshi = "1.15.2"
+material-icons = "1.7.3"
+ktorfit = "2.6.1"
+ktor = "3.2.2"
+koin-bom = "4.1.0"
+coil-bom = "3.3.0"
+kermit = "2.0.6"
+cmptoast = "1.0.7"
+filekit = "0.10.0-beta04"
 mmkv = "2.2.2"
-composePreference = "1.1.1"
-ucrop = "2.2.10"
+room = "2.7.2"
+kotlin-crypto-hash = "0.7.0"
+cryptography = "0.5.0"
+compose-preference = "2.1.0"
+ios-settings = "1.3.0"
+work-runtime-ktx = "2.10.2"
+paging = "3.3.0-alpha02-0.5.1"
 featurehub = "2.2"
-jpush = "5.7.0"
-hmsPush = "6.13.0.300"
-zoomimage = "1.3.0"
+jackson = "2.19.2"
+auto-service-ksp = "1.2.0"
+auto-service = "1.1.1"
+sheets-compose-dialogs = "2.0.0-alpha03"
+zoomimage = "1.4.0-beta04"
 
 [libraries]
-gradle = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
-agcp = { group = "com.huawei.agconnect", name = "agcp", version = "1.9.1.301" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
+androidx-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "androidx-splashscreen" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
+androidx-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
+androidx-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "androidx-navigation" }
+androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
+androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx-browser" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work-runtime-ktx" }
 
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
-androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidxLifecycle" }
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxCompose" }
-androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-androidx-ui = { group = "androidx.compose.ui", name = "ui" }
-androidx-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
-androidx-material3-window-size = { group = "androidx.compose.material3", name = "material3-window-size-class" }
-androidx-material-icon = { group = "androidx.compose.material", name = "material-icons-core" }
-androidx-material-icon-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxCompat" }
-androidx-animation = { group = "androidx.compose.animation", name = "animation", version.ref = "androidxAnimation" }
-androidx-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "androidxSplashScreen" }
-androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "androidxBrowser" }
-androidx-concurrent-futures = { group = "androidx.concurrent", name = "concurrent-futures", version.ref = "androidxFuture" }
-androidx-glance = { group = "androidx.glance", name = "glance", version.ref = "androidxGlance" }
-androidx-glance-widget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "androidxGlance" }
-androidx-paging3 = { group = "androidx.paging", name = "paging-runtime-ktx", version.ref = "androidxPaging" }
-androidx-paging3-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "androidxPaging" }
-androidx-room = { group = "androidx.room", name = "room-runtime", version.ref = "androidxRoom" }
-androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "androidxRoom" }
-androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidxRoom" }
-androidx-workmanager = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "androidxWorkManager" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
 
-accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
+material-icon = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "material-icons" }
+material-icon-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "material-icons" }
 
-sheets-compose-dialogs = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "core", version.ref = "sheetsComposeDdialogs" }
-sheets-compose-dialogs-calendar = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "calendar", version.ref = "sheetsComposeDdialogs" }
-sheets-compose-dialogs-color = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "color", version.ref = "sheetsComposeDdialogs" }
-sheets-compose-dialogs-clock = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "clock", version.ref = "sheetsComposeDdialogs" }
-sheets-compose-dialogs-datetime = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "date-time", version.ref = "sheetsComposeDdialogs" }
-sheets-compose-dialogs-info = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "info", version.ref = "sheetsComposeDdialogs" }
-sheets-compose-dialogs-input = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "input", version.ref = "sheetsComposeDdialogs" }
-sheets-compose-dialogs-list = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "list", version.ref = "sheetsComposeDdialogs" }
-sheets-compose-dialogs-option = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "option", version.ref = "sheetsComposeDdialogs" }
+kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 
-lottie = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
+ktorfit = { module = "de.jensklingenberg.ktorfit:ktorfit-lib-light", version.ref = "ktorfit" }
 
-koin = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
-koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
-koin-workmanager = { group = "io.insert-koin", name = "koin-androidx-workmanager", version.ref = "koin" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-client-websockets = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
+ktor-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
-coil-gif = { group = "io.coil-kt", name = "coil-gif", version.ref = "coil" }
+koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
+koin-compose = { module = "io.insert-koin:koin-compose" }
+koin-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
+koin-navigation = { module = "io.insert-koin:koin-compose-viewmodel-navigation" }
+koin-android = { module = "io.insert-koin:koin-android" }
 
-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-retrofit-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
+coil-bom = { module = "io.coil-kt.coil3:coil-bom", version.ref = "coil-bom" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose" }
+coil-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3" }
+coil-cache-control = { module = "io.coil-kt.coil3:coil-network-cache-control" }
 
-moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "moshi" }
-moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshi" }
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+kermit-koin = { module = "co.touchlab:kermit-koin", version.ref = "kermit" }
 
-mmkv = { group = "com.tencent", name = "mmkv-static", version.ref = "mmkv" }
+cmptoast = { module = "network.chaintech:cmptoast", version.ref = "cmptoast" }
 
-compose-preference = { group = "me.zhanghai.compose.preference", name = "library", version.ref = "composePreference" }
+filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "filekit" }
+filekit-coil = { module = "io.github.vinceglb:filekit-coil", version.ref = "filekit" }
+filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
 
-ucrop = { group = "com.github.yalantis", name = "ucrop", version.ref = "ucrop" }
+mmkv-android = { module = "com.tencent:mmkv", version.ref = "mmkv" }
+
+aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutlibraries" }
+aboutlibraries-compose-core = { module = "com.mikepenz:aboutlibraries-compose-core", version.ref = "aboutlibraries" }
+aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibraries" }
+
+androidx-room = { module = "androidx.room:room-runtime", version.ref = "room" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+
+kotlin-crypto-hash-bom = { group = "org.kotlincrypto.hash", name = "bom", version.ref = "kotlin-crypto-hash" }
+kotlin-crypto-hash-md = { group = "org.kotlincrypto.hash", name = "md" }
+kotlin-crypto-hash-sha1 = { group = "org.kotlincrypto.hash", name = "sha1" }
+kotlin-crypto-hash-sha2 = { group = "org.kotlincrypto.hash", name = "sha2" }
+
+cryptography-bom = { group = "dev.whyoleg.cryptography", name = "cryptography-bom", version.ref = "cryptography" }
+cryptography-core = { group = "dev.whyoleg.cryptography", name = "cryptography-core" }
+cryptography-provider-optimal = { group = "dev.whyoleg.cryptography", name = "cryptography-provider-optimal" }
+
+compose-preference = { group = "me.zhanghai.compose.preference", name = "preference", version.ref = "compose-preference" }
+
+ios-settings = { group = "com.russhwolf", name = "multiplatform-settings", version.ref = "ios-settings" }
+
+paging-common = { module = "app.cash.paging:paging-common", version.ref = "paging" }
+paging-compose = { module = "app.cash.paging:paging-compose-common", version.ref = "paging" }
 
 feature-hub = { group = "io.featurehub.sdk", name = "java-client-android", version.ref = "featurehub" }
-jackson = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version = "2.19.0" }
-jackson-datatype-jsr310 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version = "2.19.0" }
+jackson = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
+jackson-datatype-jsr310 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version.ref = "jackson" }
 
-jpush-google = { group = "cn.jiguang.sdk", name = "jpush-google", version.ref = "jpush" }
-jpush-plugin-huawei = { group = "cn.jiguang.sdk.plugin", name = "huawei", version.ref = "jpush" }
-hms-push = { group = "com.huawei.hms", name = "push", version.ref = "hmsPush" }
+auto-service-ksp = { module = "dev.zacsweers.autoservice:auto-service-ksp", version.ref = "auto-service-ksp" }
+auto-service = { module = "com.google.auto.service:auto-service-annotations", version.ref = "auto-service" }
 
-aboutlibraries = { group = "com.mikepenz", name = "aboutlibraries-core", version.ref = "aboutlibrariesDependencies" }
-aboutlibraries-compose = { group = "com.mikepenz", name = "aboutlibraries-compose-m3", version.ref = "aboutlibrariesDependencies" }
+sheets-compose-dialogs = { group = "vip.mystery0.sheets-compose-dialogs", name = "core", version.ref = "sheets-compose-dialogs" }
+sheets-compose-dialogs-calendar = { group = "vip.mystery0.sheets-compose-dialogs", name = "calendar", version.ref = "sheets-compose-dialogs" }
+sheets-compose-dialogs-color = { group = "vip.mystery0.sheets-compose-dialogs", name = "color", version.ref = "sheets-compose-dialogs" }
+sheets-compose-dialogs-clock = { group = "vip.mystery0.sheets-compose-dialogs", name = "clock", version.ref = "sheets-compose-dialogs" }
+sheets-compose-dialogs-datetime = { group = "vip.mystery0.sheets-compose-dialogs", name = "date-time", version.ref = "sheets-compose-dialogs" }
+sheets-compose-dialogs-info = { group = "vip.mystery0.sheets-compose-dialogs", name = "info", version.ref = "sheets-compose-dialogs" }
+sheets-compose-dialogs-input = { group = "vip.mystery0.sheets-compose-dialogs", name = "input", version.ref = "sheets-compose-dialogs" }
+sheets-compose-dialogs-list = { group = "vip.mystery0.sheets-compose-dialogs", name = "list", version.ref = "sheets-compose-dialogs" }
+sheets-compose-dialogs-option = { group = "vip.mystery0.sheets-compose-dialogs", name = "option", version.ref = "sheets-compose-dialogs" }
+sheets-compose-dialogs-state = { group = "vip.mystery0.sheets-compose-dialogs", name = "state", version.ref = "sheets-compose-dialogs" }
 
-zoomimage = { group = "io.github.panpf.zoomimage", name = "zoomimage-compose-coil2", version.ref = "zoomimage" }
+zoomimage = { group = "io.github.panpf.zoomimage", name = "zoomimage-compose-coil3", version.ref = "zoomimage" }
 
 [plugins]
-android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-about-libraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
-huawei-ag-connect = { id = "com.huawei.agconnect" }
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
+composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
+composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlinSerialize = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlinKsp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
+ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
+room = { id = "androidx.room", version.ref = "room" }
