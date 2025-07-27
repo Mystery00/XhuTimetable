@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.model.response
 
-import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.atTime
 import kotlinx.datetime.plus
@@ -13,6 +12,7 @@ import vip.mystery0.xhu.timetable.utils.asInstant
 import vip.mystery0.xhu.timetable.utils.now
 import vip.mystery0.xhu.timetable.utils.parseJsonToMap
 import vip.mystery0.xhu.timetable.utils.toHexString
+import kotlin.time.Clock
 
 @Serializable
 data class CustomThingResponse(

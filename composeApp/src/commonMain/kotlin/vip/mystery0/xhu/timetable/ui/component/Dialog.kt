@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.maxkeppeker.sheets.core.models.base.Header
-import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.utils.BaseValues
 import com.maxkeppeler.sheets.state.StateDialog
 import com.maxkeppeler.sheets.state.models.ProgressIndicator
@@ -36,21 +36,18 @@ fun xhuHeader(title: String): Header =
 
 @Composable
 fun ShowProgressDialog(
-    showState: XhuDialogState,
+    useCaseState: UseCaseState,
     text: String,
     successText: String,
     errorText: String,
 ) {
-    if (!showState.showing) {
-        return
-    }
     val state = when {
         successText.isNotBlank() -> State.Success(successText)
         errorText.isNotBlank() -> State.Failure(errorText)
         else -> State.Loading(text, ProgressIndicator.Circular())
     }
     StateDialog(
-        state = rememberUseCaseState(visible = true),
+        state = useCaseState,
         config = StateConfig(state = state),
     )
 }

@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.model.response
 
-import kotlin.time.Clock
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.isoDayNumber
 import kotlinx.serialization.Serializable
@@ -8,6 +7,7 @@ import vip.mystery0.xhu.timetable.config.datetime.XhuInstant
 import vip.mystery0.xhu.timetable.config.datetime.XhuLocalDate
 import vip.mystery0.xhu.timetable.config.datetime.XhuLocalTime
 import vip.mystery0.xhu.timetable.utils.now
+import kotlin.time.Clock
 
 @Serializable
 data class CustomCourseResponse(

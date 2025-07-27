@@ -1,17 +1,9 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.isoDayNumber
 import vip.mystery0.xhu.timetable.base.PageRequest
 import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
 import vip.mystery0.xhu.timetable.base.TermSelectDataLoader
@@ -19,14 +11,10 @@ import vip.mystery0.xhu.timetable.base.UserSelectDataLoader
 import vip.mystery0.xhu.timetable.base.YearSelectDataLoader
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.EventBus
-import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.event.EventType
-import vip.mystery0.xhu.timetable.model.request.AllCourseRequest
 import vip.mystery0.xhu.timetable.model.request.CustomCourseRequest
-import vip.mystery0.xhu.timetable.model.response.AllCourseResponse
 import vip.mystery0.xhu.timetable.model.response.CustomCourseResponse
 import vip.mystery0.xhu.timetable.module.desc
-import vip.mystery0.xhu.timetable.repository.CourseRepo
 import vip.mystery0.xhu.timetable.repository.CustomCourseRepo
 
 class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseResponse>(

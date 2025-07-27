@@ -6,7 +6,6 @@ import io.github.vinceglb.filekit.exists
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
@@ -21,6 +20,7 @@ import vip.mystery0.xhu.timetable.utils.md5
 import vip.mystery0.xhu.timetable.utils.now
 import vip.mystery0.xhu.timetable.utils.sha1
 import vip.mystery0.xhu.timetable.utils.sha256
+import kotlin.time.Clock
 
 class StarterViewModel : ComposeViewModel(), KoinComponent {
     private val _readyState = MutableStateFlow(ReadyState(loading = true))

@@ -2,8 +2,8 @@ package vip.mystery0.xhu.timetable.config.store
 
 import co.touchlab.kermit.Logger
 import com.tencent.mmkv.MMKV
-import kotlin.time.Clock
 import kotlin.random.Random
+import kotlin.time.Clock
 
 val logger = Logger.withTag("Store")
 

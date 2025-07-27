@@ -1,15 +1,15 @@
 package vip.mystery0.xhu.timetable.utils
 
-import kotlin.time.Clock
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import vip.mystery0.xhu.timetable.config.store.Formatter
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
+import kotlin.time.Instant
 import kotlin.time.toDuration
 
 fun LocalDateTime.Companion.now(): LocalDateTime = Clock.System.now().asLocalDateTime()

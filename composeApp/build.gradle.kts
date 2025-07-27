@@ -83,6 +83,8 @@ kotlin {
             implementation(libs.jackson.datatype.jsr310)
             //auto-service
             implementation(libs.auto.service)
+            //accompanist
+            implementation(libs.accompanist.permissions)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

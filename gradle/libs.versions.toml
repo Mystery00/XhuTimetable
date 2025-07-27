@@ -41,6 +41,7 @@ auto-service-ksp = "1.2.0"
 auto-service = "1.1.1"
 sheets-compose-dialogs = "2.0.0-alpha03"
 zoomimage = "1.4.0-beta04"
+accompanist = "0.37.3"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
@@ -134,6 +135,8 @@ sheets-compose-dialogs-option = { group = "vip.mystery0.sheets-compose-dialogs",
 sheets-compose-dialogs-state = { group = "vip.mystery0.sheets-compose-dialogs", name = "state", version.ref = "sheets-compose-dialogs" }
 
 zoomimage = { group = "io.github.panpf.zoomimage", name = "zoomimage-compose-coil3", version.ref = "zoomimage" }
+
+accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

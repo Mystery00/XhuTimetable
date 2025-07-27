@@ -4,7 +4,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlin.time.Instant
 import kotlinx.datetime.format
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
@@ -12,6 +11,7 @@ import vip.mystery0.xhu.timetable.module.desc
 import vip.mystery0.xhu.timetable.repository.JobRepo
 import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import vip.mystery0.xhu.timetable.utils.chinaDateTime
+import kotlin.time.Instant
 
 class JobHistoryViewModel : ComposeViewModel() {
     private val _historyListState = MutableStateFlow(JobHistoryListState())

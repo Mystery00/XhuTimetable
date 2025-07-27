@@ -17,7 +17,6 @@ import androidx.compose.material.icons.twotone.Clear
 import androidx.compose.material.icons.twotone.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,13 +42,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import kotlinx.coroutines.delay
 import multiplatform.network.cmptoast.showToast
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.appName
 import vip.mystery0.xhu.timetable.ui.component.ShowProgressDialog
-import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.navigation.RouteLogin
 import vip.mystery0.xhu.timetable.ui.navigation.RouteMain
@@ -69,7 +68,7 @@ fun LoginScreen(fromAccountManager: Boolean) {
     val passwordFocusRequester = remember { FocusRequester() }
     var usernameError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
-    val xhuDialogState = rememberXhuDialogState()
+    val xhuDialogState = rememberUseCaseState()
 
     val loginState by viewModel.loginState.collectAsState()
 
@@ -245,7 +244,7 @@ fun LoginScreen(fromAccountManager: Boolean) {
         }
     }
     ShowProgressDialog(
-        showState = xhuDialogState,
+        useCaseState = xhuDialogState,
         text = "登录中...",
         successText = if (loginState.success) "登录成功" else "",
         errorText = loginState.errorMessage,

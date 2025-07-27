@@ -22,14 +22,16 @@ data class CalendarAccount(
             CalendarAccount("", studentId, studentName, -1L, 0, ColorPool.random)
     }
 
-    val displayName: String
-        get() {
-            val nowYear = GlobalConfigStore.nowYear
-            val nowTerm = GlobalConfigStore.nowTerm
-            return "${studentName}(${nowYear}-${nowYear + 1}-${nowTerm})@${appName()}"
-        }
+    val displayName: String by lazy {
+        val nowYear = GlobalConfigStore.nowYear
+        val nowTerm = GlobalConfigStore.nowTerm
+        "${studentName}(${nowYear}-${nowYear + 1}-${nowTerm})@${appName()}"
+    }
 
     fun generateAccountName(): String {
+        if (accountName.isNotBlank()) {
+            return accountName
+        }
         val nowYear = GlobalConfigStore.nowYear
         val nowTerm = GlobalConfigStore.nowTerm
         val name = "${studentId}(${nowYear}-${nowYear + 1}-${nowTerm})@${appName()}"

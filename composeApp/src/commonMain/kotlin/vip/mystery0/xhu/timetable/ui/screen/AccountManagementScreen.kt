@@ -1,6 +1,5 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,7 +24,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,9 +46,9 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import co.touchlab.kermit.Logger
 import com.maxkeppeker.sheets.core.models.base.SelectionButton
+import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.input.InputDialog
 import com.maxkeppeler.sheets.input.models.InputCustomView
@@ -64,11 +62,9 @@ import vip.mystery0.xhu.timetable.model.AccountTitleTemplate
 import vip.mystery0.xhu.timetable.model.CustomAccountTitle
 import vip.mystery0.xhu.timetable.model.Gender
 import vip.mystery0.xhu.timetable.model.event.EventType
-import vip.mystery0.xhu.timetable.ui.component.XhuDialogState
 import vip.mystery0.xhu.timetable.ui.component.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.component.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.component.preference.XhuSettingsMenuLink
-import vip.mystery0.xhu.timetable.ui.component.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.component.xhuHeader
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.navigation.RouteLogin
@@ -119,8 +115,8 @@ fun AccountManagementScreen() {
             )
         }
     ) { paddingValues ->
-        val customTodayUserTemplateDialog = rememberXhuDialogState()
-        val customWeekUserTemplateDialog = rememberXhuDialogState()
+        val customTodayUserTemplateDialog = rememberUseCaseState()
+        val customWeekUserTemplateDialog = rememberUseCaseState()
 
         val customAccountTitle by viewModel.customAccountTitle.collectAsState()
 
@@ -199,7 +195,7 @@ fun AccountManagementScreen() {
             BuildCustomUserTemplateDialog(
                 value = customAccountTitle.todayTemplate,
                 resetValue = CustomAccountTitle.DEFAULT.todayTemplate,
-                show = customTodayUserTemplateDialog,
+                useCaseState = customTodayUserTemplateDialog,
                 listener = { newValue ->
                     val copy = customAccountTitle.copy(todayTemplate = newValue)
                     viewModel.updateAccountTitleTemplate(copy)
@@ -207,7 +203,7 @@ fun AccountManagementScreen() {
             BuildCustomUserTemplateDialog(
                 value = customAccountTitle.weekTemplate,
                 resetValue = CustomAccountTitle.DEFAULT.weekTemplate,
-                show = customWeekUserTemplateDialog,
+                useCaseState = customWeekUserTemplateDialog,
                 listener = { newValue ->
                     val copy = customAccountTitle.copy(weekTemplate = newValue)
                     viewModel.updateAccountTitleTemplate(copy)
@@ -233,13 +229,10 @@ fun AccountManagementScreen() {
 private fun BuildCustomUserTemplateDialog(
     value: String,
     resetValue: String,
-    show: XhuDialogState,
+    useCaseState: UseCaseState,
     listener: (String) -> Unit,
 ) {
     val valueState = remember { mutableStateOf(value) }
-    if (!show.showing) {
-        return
-    }
     val inputOptions = listOf(
         InputCustomView(view = {
             Column(modifier = Modifier.padding(4.dp)) {
@@ -281,10 +274,7 @@ private fun BuildCustomUserTemplateDialog(
     )
     InputDialog(
         header = xhuHeader(title = "请输入模板内容"),
-        state = rememberUseCaseState(
-            visible = true,
-            onCloseRequest = { show.hide() },
-        ),
+        state = useCaseState,
         selection = InputSelection(
             input = inputOptions,
             onPositiveClick = {
@@ -294,7 +284,7 @@ private fun BuildCustomUserTemplateDialog(
             onExtraButtonClick = {
                 valueState.value = resetValue
                 listener(resetValue)
-                show.hide()
+                useCaseState.hide()
             },
         )
     )
