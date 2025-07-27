@@ -25,19 +25,6 @@ object UserStore {
     }
     private val mutex = Mutex()
 
-    fun blockLoggedUserList(): List<User> {
-        val list = Store.UserStore.getConfiguration(LOGGED_USER_LIST, emptySet<String>())
-        if (list.isEmpty()) return emptyList()
-        return list.mapNotNull { studentId ->
-            val key = studentId.userMapKey()
-            val json = Store.UserStore.getConfiguration(key, "")
-            if (json.isBlank()) return@mapNotNull null
-            userJson.decodeFromString<User>(json)
-        }
-    }
-
-    fun blockIsLogin(): Boolean = Store.UserStore.getConfiguration(MAIN_USER, "") != ""
-
     suspend fun isLogin(): Boolean = getMainUser() != null
 
     suspend fun setMainUser(user: User) {
@@ -198,5 +185,5 @@ data class User(
     //用户信息
     val info: UserInfo,
     //头像
-    var profileImage: String?,
+    var profileImage: String? = null,
 )

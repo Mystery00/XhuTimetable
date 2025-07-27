@@ -145,9 +145,9 @@ class BackgroundViewModel : ComposeViewModel() {
         }) {
             val nowList = _backgroundListState.value.backgroundList
             _backgroundListState.value = _backgroundListState.value.loadWithList(true)
-            val current = nowList.find { it.checked }!!
+            val current = nowList.find { it.checked }
             val selected = nowList.find { it.backgroundId == backgroundId }!!
-            if (current.backgroundId == backgroundId) {
+            if (current?.backgroundId == backgroundId) {
                 _backgroundListState.value = _backgroundListState.value.loadWithList(false)
                 return@launch
             }
