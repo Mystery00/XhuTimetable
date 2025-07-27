@@ -55,6 +55,10 @@
             android:exported="true"
             android:theme="@style/Theme.XhuTimetable.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.activity.ExportCalendarActivity"
+            android:exported="true"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
