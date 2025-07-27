@@ -1,9 +1,9 @@
 package vip.mystery0.xhu.timetable.model.ws
 
-import kotlin.time.Clock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import vip.mystery0.xhu.timetable.config.datetime.XhuInstant
+import kotlin.time.Clock
 
 @Serializable
 data class TextMessage(

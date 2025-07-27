@@ -3,7 +3,6 @@ package vip.mystery0.xhu.timetable.repository
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -27,6 +26,7 @@ import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import vip.mystery0.xhu.timetable.utils.betweenDays
 import vip.mystery0.xhu.timetable.utils.formatChina
 import vip.mystery0.xhu.timetable.utils.now
+import kotlin.time.Clock
 
 object WidgetRepo {
     /**

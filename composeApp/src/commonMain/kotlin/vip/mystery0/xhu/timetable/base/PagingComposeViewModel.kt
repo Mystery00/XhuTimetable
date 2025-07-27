@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlin.time.Clock
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.module.desc
+import kotlin.time.Clock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class PagingComposeViewModel<REQ, RESP : Any>(

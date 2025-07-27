@@ -3,7 +3,6 @@ package vip.mystery0.xhu.timetable.viewmodel
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
 import vip.mystery0.xhu.timetable.base.UserSelectDataLoader
@@ -12,6 +11,7 @@ import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.module.desc
 import vip.mystery0.xhu.timetable.repository.ExamRepo
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
+import kotlin.time.Clock
 
 class ExamViewModel : PagingComposeViewModel<PageRequest, Exam>(
     {

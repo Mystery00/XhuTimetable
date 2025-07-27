@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.DrawableResource
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 import vip.mystery0.xhu.timetable.base.ComposeViewModel

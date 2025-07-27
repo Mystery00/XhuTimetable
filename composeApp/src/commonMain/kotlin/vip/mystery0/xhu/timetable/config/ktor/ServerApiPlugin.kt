@@ -9,8 +9,6 @@ import io.ktor.content.TextContent
 import io.ktor.http.HttpHeaders
 import io.ktor.http.content.OutgoingContent
 import io.ktor.http.encodedPath
-import kotlinx.coroutines.delay
-import kotlin.time.Clock
 import kotlinx.serialization.json.Json
 import vip.mystery0.xhu.timetable.base.appVersionCode
 import vip.mystery0.xhu.timetable.base.appVersionName
@@ -19,6 +17,7 @@ import vip.mystery0.xhu.timetable.config.ErrorMessage
 import vip.mystery0.xhu.timetable.config.ServerError
 import vip.mystery0.xhu.timetable.utils.md5
 import vip.mystery0.xhu.timetable.utils.sha256
+import kotlin.time.Clock
 
 private val errorMessageJson = Json {
     isLenient = true
