@@ -262,19 +262,7 @@ fun ClassSettingsScreen() {
                         navController.navigateAndSave(RouteSchoolCalendar)
                     }
                 )
-                XhuSettingsMenuLink(
-                    icon = {
-                        Icon(
-                            painter = XhuIcons.exportCalendar,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface,
-                        )
-                    },
-                    title = { Text(text = "导出到日历") },
-                    onClick = {
-//                        intentTo(ExportCalendarActivity::class)
-                    }
-                )
+                ExportToCalendarSettings()
                 XhuActionSettingsCheckbox(
                     icon = {
                         Icon(
@@ -484,3 +472,6 @@ private fun BuildUserCampusSelector(
         }
     )
 }
+
+@Composable
+expect fun ExportToCalendarSettings()
