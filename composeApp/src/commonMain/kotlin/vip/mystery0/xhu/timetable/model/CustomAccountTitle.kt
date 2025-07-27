@@ -1,5 +1,8 @@
 package vip.mystery0.xhu.timetable.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class CustomAccountTitle(
     val todayTemplate: String = "{studentNo}({name})",
     val weekTemplate: String = "{studentNo}({name})",
