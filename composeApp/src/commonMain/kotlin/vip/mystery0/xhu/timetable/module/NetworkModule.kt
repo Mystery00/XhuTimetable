@@ -8,6 +8,7 @@ import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.UserAgent
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.websocket.WebSockets
@@ -66,6 +67,9 @@ val networkModule = module {
     single(named(HTTP_CLIENT)) {
         HttpClient(httpClientEngine()) {
             engine { httpClientEngineConfig(this, 20L) }
+            install(HttpTimeout) {
+                requestTimeoutMillis = 20000L
+            }
             install(ContentNegotiation) {
                 json(json)
             }
@@ -74,7 +78,10 @@ val networkModule = module {
             }
             install(ServerApiPlugin)
             install(UserAgent) {
-                agent = userAgent()
+                val userAgent = userAgent()
+                if (userAgent.isNotBlank()) {
+                    agent = userAgent
+                }
             }
         }
     }
@@ -89,7 +96,10 @@ val networkModule = module {
             }
             install(PoemsPlugin)
             install(UserAgent) {
-                agent = userAgent()
+                val userAgent = userAgent()
+                if (userAgent.isNotBlank()) {
+                    agent = userAgent
+                }
             }
         }
     }
@@ -106,7 +116,10 @@ val networkModule = module {
                 pingIntervalMillis = 5_000
             }
             install(UserAgent) {
-                agent = userAgent()
+                val userAgent = userAgent()
+                if (userAgent.isNotBlank()) {
+                    agent = userAgent
+                }
             }
         }
     }
@@ -114,7 +127,10 @@ val networkModule = module {
         HttpClient(httpClientEngine()) {
             engine { httpClientEngineConfig(this) }
             install(UserAgent) {
-                agent = userAgent()
+                val userAgent = userAgent()
+                if (userAgent.isNotBlank()) {
+                    agent = userAgent
+                }
             }
         }
     }
