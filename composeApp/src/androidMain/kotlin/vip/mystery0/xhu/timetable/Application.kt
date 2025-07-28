@@ -12,6 +12,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import vip.mystery0.xhu.timetable.config.mmkv.KermitMMKVLogger
 import vip.mystery0.xhu.timetable.module.moduleList
+import vip.mystery0.xhu.timetable.utils.ApplicationExceptionCatcher
 
 @SuppressLint("StaticFieldLeak")
 internal lateinit var context: Context
@@ -20,6 +21,7 @@ class Application : Application() {
     override fun onCreate() {
         super.onCreate()
         context = this
+        Thread.setDefaultUncaughtExceptionHandler(ApplicationExceptionCatcher(Thread.getDefaultUncaughtExceptionHandler()))
         callAppInit()
         startKoin {
             logger(KermitKoinLogger(Logger.withTag("koin")))

@@ -59,6 +59,11 @@
             android:name=".ui.activity.ExportCalendarActivity"
             android:exported="true"
             android:theme="@style/Theme.XhuTimetable.NoActionBar" />
+        <activity
+            android:name=".ui.activity.ErrorReportActivity"
+            android:exported="true"
+            android:process=":error_activity"
+            android:theme="@style/Theme.XhuTimetable.NoActionBar" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
