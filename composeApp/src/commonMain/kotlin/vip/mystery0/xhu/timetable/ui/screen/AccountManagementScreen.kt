@@ -25,6 +25,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -113,7 +114,8 @@ fun AccountManagementScreen() {
                     )
                 },
             )
-        }
+        },
+        floatingActionButtonPosition = FabPosition.Center,
     ) { paddingValues ->
         val customTodayUserTemplateDialog = rememberUseCaseState()
         val customWeekUserTemplateDialog = rememberUseCaseState()
@@ -191,6 +193,7 @@ fun AccountManagementScreen() {
                         mainUser = userItem.main,
                     )
                 }
+                Spacer(modifier = Modifier.height(70.dp))
             }
             BuildCustomUserTemplateDialog(
                 value = customAccountTitle.todayTemplate,
