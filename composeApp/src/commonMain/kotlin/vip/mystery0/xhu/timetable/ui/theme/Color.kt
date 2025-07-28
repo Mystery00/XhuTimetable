@@ -17,8 +17,7 @@ object XhuColor {
     val cardBackground: Color
         @Composable
         get() = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
-    val notThisWeekBackgroundColor: Color
-        get() = Color(0xFFe5e5e5)
+    val notThisWeekBackgroundColor = Color(0xFFe5e5e5)
 
     object Status {
         val beforeColor = Color(0xFF4CAF50)
