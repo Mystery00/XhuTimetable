@@ -1,6 +1,8 @@
 package vip.mystery0.xhu.timetable.repository
 
 import co.touchlab.kermit.Logger
+import io.ktor.client.call.body
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -91,10 +93,14 @@ object StartRepo : BaseDataRepo {
         }
         val versionChannel = getConfigStore { versionChannel }
         val alwaysShowNewVersion = getCacheStore { alwaysShowNewVersion }
-        val version = commonApi.checkVersion(
+        val versionResp = commonApi.checkVersion(
             if (forceBeta) true else versionChannel.isBeta(),
             alwaysShowNewVersion,
-        ) ?: return this.version.emit(ClientVersion.EMPTY)
+        )
+        if (versionResp.status == HttpStatusCode.NoContent) {
+            return this.version.emit(ClientVersion.EMPTY)
+        }
+        val version = versionResp.body<ClientVersion>()
         val ignoreList = getCacheStore { ignoreVersionList }
         val versionString = "${version.versionName}-${version.versionCode}"
         if (!ignoreList.contains(versionString)) {
