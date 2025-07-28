@@ -1,14 +1,17 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -110,44 +113,23 @@ fun QueryScoreScreen() {
                 )
             },
             listContent = {
-                stickyHeader {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surfaceContainer)
-                            .padding(12.dp)
-                            .clickable {
-                                showMoreInfo = !showMoreInfo
-                            },
-                    ) {
-                        Text(text = "显示更多信息")
-                        Spacer(modifier = Modifier.weight(1F))
-                        Switch(checked = showMoreInfo, onCheckedChange = null)
-                    }
-                }
                 if (gpa != null) {
-                    stickyHeader {
-                        Text(
-                            text = "学期总览",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.surfaceContainer)
-                                .padding(12.dp),
-                        )
-                    }
                     item {
                         BuildTermInfo(gpa!!)
                     }
                 }
-                stickyHeader {
-                    Text(
-                        text = "课程成绩列表",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surfaceContainer)
-                            .padding(12.dp),
-                    )
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(text = "课程成绩列表", fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.weight(1F))
+                        Text("显示更多信息")
+                        Switch(checked = showMoreInfo, onCheckedChange = { showMoreInfo = it })
+                    }
                 }
                 itemsIndexed(pager) { item ->
                     BuildItem(showMoreInfo, item)
@@ -184,39 +166,80 @@ private fun BuildTermInfo(gpa: ScoreGpaResponse) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = XhuColor.cardBackground,
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
         ),
     ) {
-        Row(modifier = Modifier.padding(8.dp)) {
-            Column(
-                modifier = Modifier
-                    .weight(1F),
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Text(
-                    text = "总成绩：${gpa.totalScore.formatWithDecimal(2)}",
-                    fontSize = 13.sp,
-                )
-                Text(
-                    text = "平均成绩：${gpa.averageScore.formatWithDecimal(2)}",
-                    fontSize = 13.sp,
-                )
-                Text(
-                    text = "总学分：${gpa.totalCredit.formatWithDecimal(2)}",
-                    fontSize = 13.sp,
-                )
+        Column(modifier = Modifier.padding(8.dp)) {
+            Row {
+                BuildTermInfoItem(title = "总成绩", value = gpa.totalScore.formatWithDecimal(2))
+                BuildTermInfoItem(title = "平均成绩", value = gpa.averageScore.formatWithDecimal(2))
             }
+            Row {
+                BuildTermInfoItem(title = "总学分", value = gpa.totalCredit.formatWithDecimal(2))
+                BuildTermInfoItem(
+                    title = "GPA",
+                    value = gpa.gpa.formatWithDecimal(2),
+                    showTips = true,
+                    onTipsClick = {
+
+                    })
+            }
+        }
+    }
+}
+
+@Composable
+private fun RowScope.BuildTermInfoItem(
+    title: String,
+    value: String,
+    showTips: Boolean = false,
+    onTipsClick: (() -> Unit)? = null,
+) {
+    Card(
+        modifier = Modifier.weight(1F)
+            .padding(8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        ),
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
             Column(
-                modifier = Modifier
-                    .weight(1F),
-                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(8.dp),
             ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = title,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    if (showTips) {
+                        IconButton(
+                            modifier = Modifier.size(12.dp),
+                            onClick = {
+                                onTipsClick?.invoke()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Info,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.outline
+                            )
+                        }
+                    }
+                }
                 Text(
-                    text = "GPA = ${gpa.gpa.formatWithDecimal(2)}",
-                    fontSize = 13.sp,
+                    text = value,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
@@ -242,20 +265,15 @@ private fun BuildItem(
                 Column(modifier = Modifier.weight(1F)) {
                     Text(
                         text = item.courseName,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     if (showMoreInfo) {
                         Text(
-                            text = item.courseType,
+                            text = "${item.courseType} | ${item.scoreType}",
                             color = MaterialTheme.colorScheme.outline,
-                            fontSize = 14.sp,
-                        )
-                        Text(
-                            text = item.scoreType,
-                            color = MaterialTheme.colorScheme.outline,
-                            fontSize = 14.sp,
+                            fontSize = 13.sp,
                         )
                         Text(
                             text = "课程学分：${item.credit}",
@@ -283,8 +301,9 @@ private fun BuildItem(
                 }
                 Text(
                     text = "${item.score}",
-                    color = if (item.score < 60) Color.Red else MaterialTheme.colorScheme.onSurface,
-                    fontSize = 16.sp,
+                    color = if (item.score < 60) Color.Red else Color(0XFF4BE683),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
                 )
             }
         }
