@@ -66,6 +66,7 @@ import vip.mystery0.xhu.timetable.ui.component.StateScreen
 import vip.mystery0.xhu.timetable.ui.component.TabAction
 import vip.mystery0.xhu.timetable.ui.component.TabContent
 import vip.mystery0.xhu.timetable.ui.component.TabTitle
+import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.formatChina
 import vip.mystery0.xhu.timetable.utils.now
@@ -296,20 +297,32 @@ fun BuildWeekItem(
     showMore: Boolean,
     onClick: () -> Unit,
 ) {
+    val showBackgroundColor =
+        if (backgroundColor == XhuColor.notThisWeekBackgroundColor) {
+            MaterialTheme.colorScheme.surfaceVariant
+        } else {
+            backgroundColor.copy(customUi.weekBackgroundAlpha)
+        }
+    val showTextColor =
+        if (backgroundColor == XhuColor.notThisWeekBackgroundColor) {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        } else {
+            textColor
+        }
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(customUi.weekItemHeight.dp * itemStep)
             .padding(1.dp)
             .background(
-                backgroundColor.copy(customUi.weekBackgroundAlpha),
+                showBackgroundColor,
                 RoundedCornerShape(customUi.weekItemCorner),
             )
             .clickable(onClick = onClick),
     ) {
         Text(
             text = title,
-            color = textColor,
+            color = showTextColor,
             textAlign = TextAlign.Center,
             fontSize = customUi.weekTitleTextSize.sp,
             modifier = Modifier.fillMaxSize(),

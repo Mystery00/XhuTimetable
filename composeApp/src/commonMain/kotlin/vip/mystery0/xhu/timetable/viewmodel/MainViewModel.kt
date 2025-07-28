@@ -786,7 +786,6 @@ class MainViewModel : ComposeViewModel() {
         viewModelScope.launch {
             _week.value = currentWeek
             val termStartDate = getConfigStore { termStartDate }
-            val currentWeek = WidgetRepo.calculateWeek()
             //获取缓存的课程数据
             val data = getMainPageData(forceLoadFromCloud = false, forceLoadFromLocal = true)
             val weekList = data.weekViewList
