@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +48,9 @@ fun BuildUserSelectFilterChipContent(
             label = {
                 val userString = userSelect.firstOrNull { it.selected }?.title ?: "查询中"
                 Text(text = userString)
+            },
+            trailingIcon = {
+                Icon(Icons.Default.ArrowDropDown, null)
             },
         )
     }
@@ -93,6 +98,9 @@ fun BuildSelectFilterChipContent(
                 val userString = userSelect.firstOrNull { it.selected }?.title ?: "查询中"
                 Text(text = userString)
             },
+            trailingIcon = {
+                Icon(Icons.Default.ArrowDropDown, null)
+            },
         )
         ElevatedFilterChip(
             modifier = Modifier.align(Alignment.CenterVertically),
@@ -104,6 +112,9 @@ fun BuildSelectFilterChipContent(
                 val yearString = yearSelect.firstOrNull { it.selected }?.title ?: "查询中"
                 Text(text = yearString)
             },
+            trailingIcon = {
+                Icon(Icons.Default.ArrowDropDown, null)
+            },
         )
         ElevatedFilterChip(
             modifier = Modifier.align(Alignment.CenterVertically),
@@ -114,6 +125,9 @@ fun BuildSelectFilterChipContent(
             label = {
                 val termString = termSelect.firstOrNull { it.selected }?.title ?: "查询中"
                 Text(text = termString)
+            },
+            trailingIcon = {
+                Icon(Icons.Default.ArrowDropDown, null)
             },
         )
     }

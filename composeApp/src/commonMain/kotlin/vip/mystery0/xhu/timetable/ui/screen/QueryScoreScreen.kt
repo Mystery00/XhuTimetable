@@ -34,6 +34,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.maxkeppeker.sheets.core.CoreDialog
+import com.maxkeppeker.sheets.core.models.CoreSelection
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
@@ -47,6 +50,7 @@ import vip.mystery0.xhu.timetable.ui.component.ShowYearDialog
 import vip.mystery0.xhu.timetable.ui.component.StateScreen
 import vip.mystery0.xhu.timetable.ui.component.collectAndHandleState
 import vip.mystery0.xhu.timetable.ui.component.itemsIndexed
+import vip.mystery0.xhu.timetable.ui.component.xhuHeader
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
@@ -163,6 +167,7 @@ fun QueryScoreScreen() {
 
 @Composable
 private fun BuildTermInfo(gpa: ScoreGpaResponse) {
+    val useCaseState = rememberUseCaseState()
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -183,11 +188,23 @@ private fun BuildTermInfo(gpa: ScoreGpaResponse) {
                     value = gpa.gpa.formatWithDecimal(2),
                     showTips = true,
                     onTipsClick = {
-
+                        useCaseState.show()
                     })
             }
         }
     }
+    CoreDialog(
+        state = useCaseState,
+        header = xhuHeader("提示信息"),
+        selection = CoreSelection(
+            withButtonView = true,
+            negativeButton = null,
+            onNegativeClick = null,
+        ),
+        body = {
+            Text("GPA为服务端计算，非教务系统真实数据，如果计算错误欢迎进行反馈")
+        }
+    )
 }
 
 @Composable
