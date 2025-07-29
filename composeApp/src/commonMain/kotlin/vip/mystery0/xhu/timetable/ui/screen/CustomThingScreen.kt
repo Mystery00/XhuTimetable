@@ -18,20 +18,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.EventNote
 import androidx.compose.material.icons.automirrored.rounded.Notes
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Schedule
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -56,13 +55,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.maxkeppeker.sheets.core.models.base.Header
 import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
@@ -82,6 +75,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.format
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
 import vip.mystery0.xhu.timetable.config.store.Formatter
@@ -90,13 +84,15 @@ import vip.mystery0.xhu.timetable.model.request.CustomThingRequest
 import vip.mystery0.xhu.timetable.model.response.CustomThingResponse
 import vip.mystery0.xhu.timetable.ui.component.BuildPaging
 import vip.mystery0.xhu.timetable.ui.component.BuildUserSelectFilterChipContent
+import vip.mystery0.xhu.timetable.ui.component.PageItemLayout
 import vip.mystery0.xhu.timetable.ui.component.ShowUserDialog
+import vip.mystery0.xhu.timetable.ui.component.StateScreen
+import vip.mystery0.xhu.timetable.ui.component.TextWithIcon
 import vip.mystery0.xhu.timetable.ui.component.collectAndHandleState
 import vip.mystery0.xhu.timetable.ui.component.isScrollingUp
 import vip.mystery0.xhu.timetable.ui.component.itemsIndexed
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import vip.mystery0.xhu.timetable.utils.chinaDateTime
@@ -106,6 +102,8 @@ import vip.mystery0.xhu.timetable.utils.thingDateFormatter
 import vip.mystery0.xhu.timetable.utils.thingDateTimeFormatter
 import vip.mystery0.xhu.timetable.utils.thingTimeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.CustomThingViewModel
+import xhutimetable.composeapp.generated.resources.Res
+import xhutimetable.composeapp.generated.resources.state_no_data
 
 @Composable
 fun CustomThingScreen() {
@@ -176,6 +174,17 @@ fun CustomThingScreen() {
                         updateCustomThing(item)
                     }
                 }
+            },
+            emptyState = {
+                StateScreen(
+                    title = "暂无自定义事项",
+                    buttonText = "再查一次",
+                    imageRes = painterResource(Res.drawable.state_no_data),
+                    verticalArrangement = Arrangement.Top,
+                    onButtonClick = {
+                        viewModel.loadCustomThingList()
+                    }
+                )
             },
         ) @Composable {
             AnimatedVisibility(
@@ -638,26 +647,16 @@ private fun BuildItem(
     item: CustomThingResponse,
     onClick: () -> Unit,
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .clickable(
-                onClick = onClick,
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() },
-            ),
-        colors = CardDefaults.cardColors(
-            containerColor = XhuColor.cardBackground,
+    PageItemLayout(
+        cardModifier = Modifier.clickable(
+            onClick = onClick,
+            indication = null,
+            interactionSource = MutableInteractionSource(),
         ),
-    ) {
-        Column(
-            modifier = Modifier.padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
+        header = {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Box(
                     modifier = Modifier.size(24.dp),
@@ -670,71 +669,49 @@ private fun BuildItem(
                         color = item.color.parseColorHexString()
                     ) {}
                 }
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = item.title,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    val startDateTime = item.startTime.asLocalDateTime()
-                    val endDateTime = item.endTime.asLocalDateTime()
-                    val timeText = buildString {
-                        if (item.allDay) {
-                            append(startDateTime.date.format(thingDateFormatter))
-                        } else {
-                            append(startDateTime.format(thingDateTimeFormatter))
+                Text(item.title)
+            }
+        },
+        content = {
+            val startDateTime = item.startTime.asLocalDateTime()
+            val endDateTime = item.endTime.asLocalDateTime()
+            val timeText = buildString {
+                if (item.allDay) {
+                    append(startDateTime.date.format(thingDateFormatter))
+                } else {
+                    append(startDateTime.format(thingDateTimeFormatter))
+                }
+                if (!item.saveAsCountDown) {
+                    when {
+                        item.allDay && startDateTime.date == endDateTime.date -> {}
+                        item.allDay && startDateTime.date != endDateTime.date -> {
+                            append(" - ")
+                            append(endDateTime.date.format(thingDateFormatter))
                         }
-                        if (!item.saveAsCountDown) {
-                            when {
-                                item.allDay && startDateTime.date == endDateTime.date -> {}
-                                item.allDay && startDateTime.date != endDateTime.date -> {
-                                    append(" - ")
-                                    append(endDateTime.date.format(thingDateFormatter))
-                                }
 
-                                !item.allDay && startDateTime.date == endDateTime.date -> {
-                                    append(" - ")
-                                    append(endDateTime.time.format(thingTimeFormatter))
-                                }
+                        !item.allDay && startDateTime.date == endDateTime.date -> {
+                            append(" - ")
+                            append(endDateTime.time.format(thingTimeFormatter))
+                        }
 
-                                !item.allDay && startDateTime.date != endDateTime.date -> {
-                                    append(" - ")
-                                    append(endDateTime.format(thingDateTimeFormatter))
-                                }
-                            }
+                        !item.allDay && startDateTime.date != endDateTime.date -> {
+                            append(" - ")
+                            append(endDateTime.format(thingDateTimeFormatter))
                         }
                     }
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                                append("时间：")
-                            }
-                            append(timeText)
-                        },
-                        fontSize = 14.sp,
-
-                        )
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                                append("地点：")
-                            }
-                            append(item.location.ifBlank { "未指定" })
-                        },
-                        fontSize = 14.sp,
-                    )
-                    Text(
-                        text = "添加时间：${
-                            item.createTime.asLocalDateTime().format(chinaDateTime)
-                        }",
-                        fontSize = 12.sp,
-                        fontStyle = FontStyle.Italic,
-                        color = MaterialTheme.colorScheme.outline,
-                    )
                 }
             }
+            TextWithIcon(
+                imageVector = Icons.AutoMirrored.Filled.EventNote,
+                text = "时间：${timeText}",
+            )
+            TextWithIcon(
+                imageVector = Icons.Filled.LocationOn,
+                text = "地点：${item.location.ifBlank { "未指定" }}",
+            )
+        },
+        footer = {
+            Text("添加时间：${item.createTime.asLocalDateTime().format(chinaDateTime)}")
         }
-    }
+    )
 }

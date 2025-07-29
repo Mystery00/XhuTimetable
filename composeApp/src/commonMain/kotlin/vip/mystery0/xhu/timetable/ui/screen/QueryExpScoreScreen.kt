@@ -3,16 +3,12 @@ package vip.mystery0.xhu.timetable.ui.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,8 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,12 +30,12 @@ import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
 import vip.mystery0.xhu.timetable.model.response.ExperimentScoreItemResponse
 import vip.mystery0.xhu.timetable.ui.component.BuildSelectFilterChipContent
+import vip.mystery0.xhu.timetable.ui.component.PageItemLayout
 import vip.mystery0.xhu.timetable.ui.component.ShowTermDialog
 import vip.mystery0.xhu.timetable.ui.component.ShowUserDialog
 import vip.mystery0.xhu.timetable.ui.component.ShowYearDialog
 import vip.mystery0.xhu.timetable.ui.component.StateScreen
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.ExpScoreViewModel
 import xhutimetable.composeapp.generated.resources.Res
@@ -166,49 +162,32 @@ fun QueryExpScoreScreen() {
 
 @Composable
 private fun BuildItem(item: ExperimentScoreItemResponse) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = XhuColor.cardBackground,
-        ),
-    ) {
-        Column(
-            modifier = Modifier.padding(8.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1F)) {
-                    Text(
-                        text = item.experimentProjectName,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        text = item.mustTest,
-                        color = MaterialTheme.colorScheme.outline,
-                        fontSize = 14.sp,
-                    )
-                    Text(
-                        text = "实验学分：${item.credit}",
-                        color = MaterialTheme.colorScheme.outline,
-                        fontSize = 14.sp,
-                    )
-                    if (item.scoreDescription.isNotBlank()) {
-                        Text(
-                            text = "成绩说明：${item.scoreDescription}",
-                            color = MaterialTheme.colorScheme.outline,
-                            fontSize = 14.sp,
-                        )
-                    }
-                }
+    PageItemLayout(
+        header = {
+            Row {
+                Text(text = item.experimentProjectName, modifier = Modifier.weight(1F))
                 Text(
                     text = "${item.score}",
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 16.sp,
+                    color = if (item.score < 60) Color.Red else Color(0XFF4BE683),
+                    fontWeight = FontWeight.Bold,
                 )
             }
-        }
-    }
+        },
+        footer = {
+            Text(
+                text = item.mustTest,
+                fontSize = 14.sp,
+            )
+            Text(
+                text = "实验学分：${item.credit}",
+                fontSize = 14.sp,
+            )
+            if (item.scoreDescription.isNotBlank()) {
+                Text(
+                    text = "成绩说明：${item.scoreDescription}",
+                    fontSize = 14.sp,
+                )
+            }
+        },
+    )
 }
