@@ -15,12 +15,10 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +37,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,12 +54,13 @@ import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
 import vip.mystery0.xhu.timetable.model.response.ClassroomResponse
 import vip.mystery0.xhu.timetable.ui.component.BuildPaging
+import vip.mystery0.xhu.timetable.ui.component.PageItemLayout
 import vip.mystery0.xhu.timetable.ui.component.ShowSingleSelectDialog
+import vip.mystery0.xhu.timetable.ui.component.TextWithIcon
 import vip.mystery0.xhu.timetable.ui.component.collectAndHandleState
 import vip.mystery0.xhu.timetable.ui.component.xhuHeader
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.formatChina
 import vip.mystery0.xhu.timetable.utils.formatWeekString
@@ -297,24 +295,10 @@ private fun CourseRoomBottomSheet(
 private fun BuildItem(
     item: ClassroomResponse,
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = XhuColor.cardBackground,
-        ),
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+    PageItemLayout(
+        header = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "教室编号：${item.roomNo}",
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 18.sp,
-                )
+                Text("教室编号：${item.roomNo}")
                 Spacer(modifier = Modifier.weight(1F))
                 val color = ColorPool.hash(item.roomName)
                 FilterChip(
@@ -330,40 +314,19 @@ private fun BuildItem(
                     )
                 )
             }
-            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+        },
+        content = {
             if (item.campus.isNotBlank()) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Icon(
-                        modifier = Modifier.size(14.dp),
-                        imageVector = Icons.Filled.LocationOn,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.outline,
-                    )
-                    Text(
-                        text = "校区：${item.campus}",
-                        color = MaterialTheme.colorScheme.outline,
-                    )
-                }
+                TextWithIcon(
+                    imageVector = Icons.Filled.LocationOn,
+                    text = "校区：${item.campus}",
+                )
             }
             if (item.roomType.isNotBlank()) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Icon(
-                        modifier = Modifier.size(14.dp),
-                        imageVector = Icons.Filled.MeetingRoom,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.outline,
-                    )
-                    Text(
-                        text = "场地类型：${item.roomType}",
-                        color = MaterialTheme.colorScheme.outline,
-                    )
-                }
+                TextWithIcon(
+                    imageVector = Icons.Filled.MeetingRoom,
+                    text = "场地类型：${item.roomType}",
+                )
             }
             if (item.roomRemark.isNotBlank()) {
                 Card {
@@ -377,5 +340,5 @@ private fun BuildItem(
                 }
             }
         }
-    }
+    )
 }

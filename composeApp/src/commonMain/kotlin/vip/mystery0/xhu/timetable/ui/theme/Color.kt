@@ -1,11 +1,9 @@
 package vip.mystery0.xhu.timetable.ui.theme
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.unit.dp
 import com.maxkeppeler.sheets.color.models.MultipleColors
 import vip.mystery0.xhu.timetable.utils.md5
 
@@ -16,7 +14,7 @@ private fun colorOf(pair: Pair<Color, Color>): Color =
 object XhuColor {
     val cardBackground: Color
         @Composable
-        get() = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
+        get() = MaterialTheme.colorScheme.surfaceContainer
     val notThisWeekBackgroundColor = Color(0xFFe5e5e5)
 
     object Status {

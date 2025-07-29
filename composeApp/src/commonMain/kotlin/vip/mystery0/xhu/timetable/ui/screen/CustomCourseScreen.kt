@@ -12,15 +12,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.EventNote
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -48,10 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.input.InputDialog
@@ -63,28 +60,33 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.format
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
 import vip.mystery0.xhu.timetable.model.request.CustomCourseRequest
 import vip.mystery0.xhu.timetable.model.response.CustomCourseResponse
 import vip.mystery0.xhu.timetable.ui.component.BuildPaging
 import vip.mystery0.xhu.timetable.ui.component.BuildSelectFilterChipContent
+import vip.mystery0.xhu.timetable.ui.component.PageItemLayout
 import vip.mystery0.xhu.timetable.ui.component.ShowMultiSelectDialog
 import vip.mystery0.xhu.timetable.ui.component.ShowSingleSelectDialog
 import vip.mystery0.xhu.timetable.ui.component.ShowTermDialog
 import vip.mystery0.xhu.timetable.ui.component.ShowUserDialog
 import vip.mystery0.xhu.timetable.ui.component.ShowYearDialog
+import vip.mystery0.xhu.timetable.ui.component.StateScreen
+import vip.mystery0.xhu.timetable.ui.component.TextWithIcon
 import vip.mystery0.xhu.timetable.ui.component.collectAndHandleState
 import vip.mystery0.xhu.timetable.ui.component.isScrollingUp
 import vip.mystery0.xhu.timetable.ui.component.itemsIndexed
 import vip.mystery0.xhu.timetable.ui.component.xhuHeader
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import vip.mystery0.xhu.timetable.utils.chinaDateTime
 import vip.mystery0.xhu.timetable.utils.formatWeekString
 import vip.mystery0.xhu.timetable.viewmodel.CustomCourseViewModel
+import xhutimetable.composeapp.generated.resources.Res
+import xhutimetable.composeapp.generated.resources.state_no_course_data
 
 @Composable
 fun CustomCourseScreen() {
@@ -168,6 +170,17 @@ fun CustomCourseScreen() {
                         }
                     }
                 }
+            },
+            emptyState = {
+                StateScreen(
+                    title = "暂无自定义课程数据",
+                    buttonText = "再查一次",
+                    imageRes = painterResource(Res.drawable.state_no_course_data),
+                    verticalArrangement = Arrangement.Top,
+                    onButtonClick = {
+                        viewModel.loadCustomCourseList()
+                    }
+                )
             },
         ) @Composable {
             AnimatedVisibility(
@@ -588,80 +601,43 @@ private fun BuildItem(
     item: CustomCourseResponse,
     onClick: () -> Unit,
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .clickable(
-                onClick = onClick,
-                indication = null,
-                interactionSource = MutableInteractionSource(),
-            ),
-        colors = CardDefaults.cardColors(
-            containerColor = XhuColor.cardBackground,
+    PageItemLayout(
+        cardModifier = Modifier.clickable(
+            onClick = onClick,
+            indication = null,
+            interactionSource = MutableInteractionSource(),
         ),
-    ) {
-        Column(
-            modifier = Modifier.padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = item.courseName,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+        header = {
+            Text(item.courseName)
+        },
+        content = {
             if (item.teacher.isNotBlank()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Image(painter = XhuIcons.CustomCourse.teacher, contentDescription = null)
-                    Text(text = "教师名称：${item.teacher}")
-                }
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Image(painter = XhuIcons.CustomCourse.week, contentDescription = null)
-                Text(
-                    text = buildString {
-                        append("上课星期：")
-                        append("第")
-                        append(item.weekStr)
-                        append(" 每周")
-                        append(item.day.formatWeekString())
-                    }
+                TextWithIcon(
+                    imageVector = Icons.Filled.Person,
+                    text = "教师名称：${item.teacher}",
                 )
             }
+            TextWithIcon(
+                imageVector = Icons.Filled.DateRange,
+                text = buildString {
+                    append("上课星期：")
+                    append("第")
+                    append(item.weekStr)
+                },
+            )
+            TextWithIcon(
+                imageVector = Icons.AutoMirrored.Filled.EventNote,
+                text = "上课时间：每周${item.day.formatWeekString()} 第 ${item.startDayTime}-${item.endDayTime} 节",
+            )
             if (item.location.isNotBlank()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Image(painter = XhuIcons.CustomCourse.location, contentDescription = null)
-                    Text(text = "上课地点：${item.location}")
-                }
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Image(painter = XhuIcons.CustomCourse.time, contentDescription = null)
-                Text(text = "上课时间：第 ${item.startDayTime}-${item.endDayTime} 节")
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = "添加时间：${item.createTime.asLocalDateTime().format(chinaDateTime)}",
-                    fontSize = 12.sp,
-                    fontStyle = FontStyle.Italic,
+                TextWithIcon(
+                    imageVector = Icons.Filled.LocationOn,
+                    text = "上课地点：${item.location}",
                 )
             }
+        },
+        footer = {
+            Text("添加时间：${item.createTime.asLocalDateTime().format(chinaDateTime)}")
         }
-    }
+    )
 }

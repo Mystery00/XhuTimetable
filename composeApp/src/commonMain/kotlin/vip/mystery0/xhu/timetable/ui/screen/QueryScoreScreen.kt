@@ -44,6 +44,7 @@ import vip.mystery0.xhu.timetable.model.response.ScoreGpaResponse
 import vip.mystery0.xhu.timetable.model.response.ScoreResponse
 import vip.mystery0.xhu.timetable.ui.component.BuildPaging
 import vip.mystery0.xhu.timetable.ui.component.BuildSelectFilterChipContent
+import vip.mystery0.xhu.timetable.ui.component.PageItemLayout
 import vip.mystery0.xhu.timetable.ui.component.ShowTermDialog
 import vip.mystery0.xhu.timetable.ui.component.ShowUserDialog
 import vip.mystery0.xhu.timetable.ui.component.ShowYearDialog
@@ -52,7 +53,6 @@ import vip.mystery0.xhu.timetable.ui.component.collectAndHandleState
 import vip.mystery0.xhu.timetable.ui.component.itemsIndexed
 import vip.mystery0.xhu.timetable.ui.component.xhuHeader
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.formatWithDecimal
 import vip.mystery0.xhu.timetable.viewmodel.ScoreViewModel
@@ -127,11 +127,11 @@ fun QueryScoreScreen() {
                         modifier = Modifier.fillMaxWidth()
                             .padding(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(text = "课程成绩列表", fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.weight(1F))
-                        Text("显示更多信息")
+                        Text("显示更多信息", fontSize = 14.sp)
                         Switch(checked = showMoreInfo, onCheckedChange = { showMoreInfo = it })
                     }
                 }
@@ -268,61 +268,43 @@ private fun BuildItem(
     showMoreInfo: Boolean,
     item: ScoreResponse,
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .animateContentSize(),
-        colors = CardDefaults.cardColors(
-            containerColor = XhuColor.cardBackground,
-        ),
-    ) {
-        Column(modifier = Modifier.padding(8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1F)) {
-                    Text(
-                        text = item.courseName,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    if (showMoreInfo) {
-                        Text(
-                            text = "${item.courseType} | ${item.scoreType}",
-                            color = MaterialTheme.colorScheme.outline,
-                            fontSize = 13.sp,
-                        )
-                        Text(
-                            text = "课程学分：${item.credit}",
-                            color = MaterialTheme.colorScheme.outline,
-                            fontSize = 14.sp,
-                        )
-                        Text(
-                            text = "课程绩点：${item.gpa}",
-                            color = MaterialTheme.colorScheme.outline,
-                            fontSize = 14.sp,
-                        )
-                        Text(
-                            text = "学分绩点：${item.creditGpa}",
-                            color = MaterialTheme.colorScheme.outline,
-                            fontSize = 14.sp,
-                        )
-                        if (item.scoreDescription.isNotBlank()) {
-                            Text(
-                                text = "成绩说明：${item.scoreDescription}",
-                                color = MaterialTheme.colorScheme.outline,
-                                fontSize = 14.sp,
-                            )
-                        }
-                    }
-                }
+    PageItemLayout(
+        cardModifier = Modifier.animateContentSize(),
+        header = {
+            Row {
+                Text(text = item.courseName, modifier = Modifier.weight(1F))
                 Text(
                     text = "${item.score}",
                     color = if (item.score < 60) Color.Red else Color(0XFF4BE683),
-                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                 )
             }
-        }
-    }
+        },
+        footer = if (showMoreInfo) {
+            {
+                Text(
+                    text = "${item.courseType} | ${item.scoreType}",
+                    fontSize = 14.sp,
+                )
+                Text(
+                    text = "课程学分：${item.credit}",
+                    fontSize = 14.sp,
+                )
+                Text(
+                    text = "课程绩点：${item.gpa}",
+                    fontSize = 14.sp,
+                )
+                Text(
+                    text = "学分绩点：${item.creditGpa}",
+                    fontSize = 14.sp,
+                )
+                if (item.scoreDescription.isNotBlank()) {
+                    Text(
+                        text = "成绩说明：${item.scoreDescription}",
+                        fontSize = 14.sp,
+                    )
+                }
+            }
+        } else null
+    )
 }
