@@ -2,16 +2,25 @@ package vip.mystery0.xhu.timetable.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.MeetingRoom
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +39,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
@@ -50,6 +61,7 @@ import vip.mystery0.xhu.timetable.ui.component.ShowSingleSelectDialog
 import vip.mystery0.xhu.timetable.ui.component.collectAndHandleState
 import vip.mystery0.xhu.timetable.ui.component.xhuHeader
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
+import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.formatChina
@@ -92,7 +104,7 @@ fun FreeCourseRoomScreen() {
                         openBottomSheet.value = true
                     }) {
                         Icon(
-                            painter = XhuIcons.Action.view,
+                            imageVector = Icons.Default.Search,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp),
                         )
@@ -288,51 +300,77 @@ private fun BuildItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = XhuColor.cardBackground,
         ),
     ) {
-        SelectionContainer {
-            Column(
-                modifier = Modifier.padding(8.dp),
-            ) {
-                if (item.roomNo.isNotBlank()) {
-                    Text(
-                        text = "教室编号：${item.roomNo}",
-                        modifier = Modifier.fillMaxWidth(),
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "教室编号：${item.roomNo}",
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 18.sp,
+                )
+                Spacer(modifier = Modifier.weight(1F))
+                val color = ColorPool.hash(item.roomName)
+                FilterChip(
+                    modifier = Modifier.widthIn(max = 156.dp),
+                    selected = true,
+                    onClick = {},
+                    label = {
+                        Text(text = item.roomName, textAlign = TextAlign.Center)
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = color.copy(alpha = 0.2F),
+                        selectedLabelColor = color,
                     )
-                }
-                if (item.roomName.isNotBlank()) {
-                    Text(
-                        text = "教室名称：${item.roomName}",
-                        modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+            if (item.campus.isNotBlank()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(
+                        modifier = Modifier.size(14.dp),
+                        imageVector = Icons.Filled.LocationOn,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.outline,
                     )
-                }
-                if (item.seatCount.isNotBlank()) {
-                    Text(
-                        text = "座位数：${item.seatCount}",
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-                if (item.campus.isNotBlank()) {
                     Text(
                         text = "校区：${item.campus}",
-                        modifier = Modifier.fillMaxWidth(),
                         color = MaterialTheme.colorScheme.outline,
                     )
                 }
-                if (item.roomType.isNotBlank()) {
+            }
+            if (item.roomType.isNotBlank()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(
+                        modifier = Modifier.size(14.dp),
+                        imageVector = Icons.Filled.MeetingRoom,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.outline,
+                    )
                     Text(
                         text = "场地类型：${item.roomType}",
-                        modifier = Modifier.fillMaxWidth(),
                         color = MaterialTheme.colorScheme.outline,
                     )
                 }
-                if (item.roomRemark.isNotBlank()) {
+            }
+            if (item.roomRemark.isNotBlank()) {
+                Card {
                     Text(
                         text = "备注：${item.roomRemark}",
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(12.dp),
                         color = MaterialTheme.colorScheme.outline,
                         fontSize = 12.sp,
                     )
