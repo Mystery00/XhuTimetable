@@ -1,12 +1,17 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.OpenInBrowser
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
@@ -18,9 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -30,17 +37,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.datetime.format
 import org.koin.compose.viewmodel.koinViewModel
+import vip.mystery0.xhu.timetable.model.response.NoticeActionType
 import vip.mystery0.xhu.timetable.model.response.NoticeResponse
+import vip.mystery0.xhu.timetable.model.response.parseNoticeActionType
 import vip.mystery0.xhu.timetable.ui.component.BuildPaging
+import vip.mystery0.xhu.timetable.ui.component.PageItemLayout
 import vip.mystery0.xhu.timetable.ui.component.collectAndHandleState
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
-import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuFonts
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.asLocalDateTime
@@ -91,39 +99,95 @@ fun NoticeScreen() {
 
 @Composable
 fun BuildItem(notice: NoticeResponse) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = XhuColor.cardBackground,
-        ),
-    ) {
-        Column(
-            modifier = Modifier.padding(8.dp)
-        ) {
-            Text(
-                text = notice.title,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-            )
+    val uriHandler = LocalUriHandler.current
+    PageItemLayout(
+        header = {
+            Text(notice.title)
+        },
+        content = {
             AnnotatedClickableText(
                 text = notice.content,
             )
             Text(
-                text = "发布于 ${notice.createTime.asLocalDateTime().format(chinaDateTime)}",
-                fontSize = 12.sp,
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.End,
+                fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.outline,
+                text = "发布时间：${notice.createTime.asLocalDateTime().format(chinaDateTime)}"
             )
+        },
+        footer = if (notice.actions.isEmpty()) null else {
+            {
+                notice.actions.forEach {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = it.text,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.weight(1F),
+                            fontSize = 16.sp,
+                        )
+                        when (parseNoticeActionType(it.actionType)) {
+                            NoticeActionType.COPY -> {
+                                ActionButton(
+                                    text = "复制",
+                                    imageVector = Icons.Rounded.ContentCopy,
+                                    onClick = {
+                                        copyToClipboard(it.metadata)
+                                    }
+                                )
+                            }
+
+                            NoticeActionType.OPEN_URI -> {
+                                ActionButton(
+                                    text = "访问",
+                                    imageVector = Icons.Rounded.OpenInBrowser,
+                                    onClick = {
+                                        uriHandler.openUri(it.metadata)
+                                    }
+                                )
+                            }
+
+                            else -> {
+                            }
+                        }
+                    }
+                }
+            }
         }
+    )
+}
+
+@Composable
+fun ActionButton(
+    text: String,
+    imageVector: ImageVector,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .clickable(
+                interactionSource = MutableInteractionSource(),
+                indication = null,
+                onClick = onClick
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.outline,
+            fontSize = 14.sp,
+        )
+        Spacer(modifier = Modifier.width(2.dp))
+        Icon(
+            modifier = Modifier.size(20.dp),
+            imageVector = imageVector,
+            contentDescription = null,
+        )
     }
 }
 
 private val regex =
-    Regex("""(https?://[^\s\t\n]+)|(`[^`]+`)|(\*.+\*)|(_.+_)|(~.+~)|(\d{4}\d+)""")
+    Regex("""(`[^`]+`)|(\*.+\*)|(_.+_)|(~.+~)""")
 
 @Composable
 fun AnnotatedClickableText(
@@ -199,39 +263,8 @@ private fun AnnotatedString.Builder.getSymbolAnnotation(
             }
         }
 
-        'h' -> {
-            withLink(
-                link = LinkAnnotation.Url(matchResult.value),
-            ) {
-                withStyle(
-                    style = SpanStyle(
-                        color = colors.primary,
-                        fontWeight = FontWeight.Bold,
-                    )
-                ) {
-                    append(matchResult.value)
-                }
-            }
-        }
-
         else -> {
-            withLink(
-                LinkAnnotation.Clickable(
-                    tag = "NUMBER",
-                    linkInteractionListener = {
-                        copyToClipboard(matchResult.value)
-                    }
-                )
-            ) {
-                withStyle(
-                    style = SpanStyle(
-                        color = colors.tertiary,
-                        fontWeight = FontWeight.Bold,
-                    )
-                ) {
-                    append(matchResult.value)
-                }
-            }
+            append(matchResult.value)
         }
     }
 }

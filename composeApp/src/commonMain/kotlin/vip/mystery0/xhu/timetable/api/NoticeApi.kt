@@ -13,6 +13,7 @@ interface NoticeApi {
         @Query("platform") platform: String = "ANDROID",
         @Query("index") index: Int,
         @Query("size") size: Int,
+        @Query("showActions") showActions: Boolean = true,
     ): PageResult<NoticeResponse>
 
     @GET("api/rest/external/notice/check")
