@@ -35,6 +35,7 @@ import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.ui.component.DownloadUpdateState
 import vip.mystery0.xhu.timetable.ui.component.addDownloadObserver
 import vip.mystery0.xhu.timetable.ui.component.removeDownloadObserver
+import vip.mystery0.xhu.timetable.ui.component.updateObserverProgress
 import vip.mystery0.xhu.timetable.ui.component.updateStatus
 import vip.mystery0.xhu.timetable.ui.notification.NOTIFICATION_CHANNEL_ID_DOWNLOAD
 import vip.mystery0.xhu.timetable.ui.notification.NotificationId
@@ -86,6 +87,7 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
         getDownloadUrl(versionName).notify()
 
         //获取下载地址
+        updateStatus(status = "正在获取下载地址...", patch = true, progress = 0)
         val versionUrl = StartRepo.getVersionUrl(versionId)
 
         Log.i(TAG, "save patch to ${file.absolutePath()}")
@@ -104,21 +106,23 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
                         progress = progress.progress.toInt(),
                         status = "${progress.progress.toInt()}%",
                     )
-                    updateProgress(state)
+                    updateObserverProgress(state)
                 }
             )
         }
+        updateStatus(status = "文件检查中...", patch = true, progress = 100)
         md5Checking().notify()
         //检查md5
         val md5 = withContext(Dispatchers.Default) {
             file.md5()
         }
-        updateStatus(status = "文件处理中", patch = true, progress = 100)
+        updateStatus(status = "文件处理中...", patch = true, progress = 100)
         if (!md5.equals(versionUrl.patchMd5, ignoreCase = true)) {
             throw DownloadError.MD5CheckFailed()
         }
         //md5校验通过，合并安装包
         patching().notify()
+        updateStatus(status = "正在合并安装包...", patch = true, progress = 100)
         val apkDir = PlatformFile(externalCacheDownloadDir, "apk")
         val apkFile = PlatformFile(apkDir, "${versionName}-${versionCode}.apk")
         try {
@@ -136,6 +140,7 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
         installIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
         val uri = FileProvider.getUriForFile(appContext, packageName(),  File(apkFile.absolutePath()))
         installIntent.setDataAndType(uri, "application/vnd.android.package-archive")
+        updateStatus(status = "安装中...", patch = true, progress = 100)
         appContext.startActivity(installIntent)
         return Result.success()
     }

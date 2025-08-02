@@ -1,9 +1,11 @@
 package vip.mystery0.xhu.timetable.ui.component
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -74,7 +76,7 @@ fun removeDownloadObserver(
     }
 }
 
-fun updateProgress(state: DownloadUpdateState) {
+fun updateObserverProgress(state: DownloadUpdateState) {
     coroutineScope.launch {
         downloadStateFlow.emit(state)
         if (state.patch) {
@@ -139,23 +141,32 @@ fun CheckUpdate(
                 style = MaterialTheme.typography.titleLarge,
             )
         }, text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 Text(text = version.updateLog)
-                Row(
-                    modifier = Modifier.height(48.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    if (downloadProgress.downloading) {
+                if (downloadProgress.downloading) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         LinearProgressIndicator(
                             progress = { downloadProgress.progress / 100F },
                             modifier = Modifier.weight(1F),
                         )
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = downloadProgress.status,
-                            modifier = Modifier.weight(0.2F),
+                            text = "${downloadProgress.progress}%",
+                            modifier = Modifier.width(64.dp),
                             textAlign = TextAlign.Center,
                         )
                     }
+                }
+                if (downloadProgress.status.isNotBlank()) {
+                    Text(
+                        text = downloadProgress.status,
+                    )
                 }
             }
         }, confirmButton = {
