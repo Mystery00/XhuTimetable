@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.config
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.serialization.Serializable
 import vip.mystery0.xhu.timetable.utils.isOnline
@@ -19,6 +20,7 @@ fun networkErrorHandler(handler: (Throwable) -> Unit): CoroutineExceptionHandler
             handler(NetworkNotConnectException())
             return@CoroutineExceptionHandler
         }
+        Logger.w("network error", throwable)
         handler(throwable)
     }
 
