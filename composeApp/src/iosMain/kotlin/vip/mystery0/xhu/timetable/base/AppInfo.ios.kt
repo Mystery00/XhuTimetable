@@ -1,8 +1,15 @@
 package vip.mystery0.xhu.timetable.base
 
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
+import kotlinx.cinterop.toKString
 import platform.Foundation.NSBundle
 import platform.Foundation.NSUUID
 import platform.UIKit.UIDevice
+import platform.posix.uname
+import platform.posix.utsname
 import vip.mystery0.xhu.timetable.config.store.Store
 import vip.mystery0.xhu.timetable.config.store.getConfiguration
 import vip.mystery0.xhu.timetable.config.store.setConfiguration
@@ -55,18 +62,21 @@ actual fun appVersionCode(): String = appVersionCode
 
 actual fun appVersionCodeNumber(): Long = appVersionCodeNumber
 
-actual fun systemVersion(): String {
-    TODO("Not yet implemented")
-}
+actual fun systemVersion(): String = "iOS ${UIDevice.currentDevice.systemVersion}"
 
-actual fun deviceFactory(): String {
-    TODO("Not yet implemented")
-}
+actual fun deviceFactory(): String = "iPhone"
 
-actual fun deviceModel(): String {
-    TODO("Not yet implemented")
+@OptIn(ExperimentalForeignApi::class)
+actual fun deviceModel(): String = memScoped {
+    val systemInfo = alloc<utsname>()
+    uname(systemInfo.ptr)
+    systemInfo.machine.toKString()
 }
 
 actual fun deviceRom(): String {
-    TODO("Not yet implemented")
+    val deviceModel = deviceModel()
+    return when (deviceModel) {
+        "i386", "x86_64", "arm64" -> "Simulator"
+        else -> "Physical"
+    }
 }

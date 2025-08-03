@@ -22,7 +22,7 @@ class Application : Application() {
         super.onCreate()
         context = this
         Thread.setDefaultUncaughtExceptionHandler(ApplicationExceptionCatcher(Thread.getDefaultUncaughtExceptionHandler()))
-        callAppInit()
+        initLogger()
         startKoin {
             logger(KermitKoinLogger(Logger.withTag("koin")))
             androidContext(this@Application)
