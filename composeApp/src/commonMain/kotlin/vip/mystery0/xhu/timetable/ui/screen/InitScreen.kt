@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -32,7 +34,7 @@ import vip.mystery0.xhu.timetable.ui.navigation.RouteSplashImage
 import vip.mystery0.xhu.timetable.ui.navigation.replaceTo
 import vip.mystery0.xhu.timetable.viewmodel.StarterViewModel
 import xhutimetable.composeapp.generated.resources.Res
-import xhutimetable.composeapp.generated.resources.ic_app_icon
+import xhutimetable.composeapp.generated.resources.ic_app_icon_o
 
 @Composable
 fun InitScreen() {
@@ -44,15 +46,15 @@ fun InitScreen() {
 
     Box(
         modifier = Modifier
-            .background(Color(0xFF3DDC84))
             .fillMaxSize()
+            .background(Color(0xFF2196F3))
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.align(Alignment.Center),
         ) {
             Image(
-                painter = painterResource(Res.drawable.ic_app_icon),
+                painter = painterResource(Res.drawable.ic_app_icon_o),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -61,6 +63,8 @@ fun InitScreen() {
             )
             Spacer(modifier = Modifier.height(64.dp))
             CircularProgressIndicator()
+            Spacer(modifier = Modifier.height(32.dp))
+            Text("应用加载中...", color = contentColorFor(Color(0xFF2196F3)))
         }
     }
     LaunchedEffect(Unit) {

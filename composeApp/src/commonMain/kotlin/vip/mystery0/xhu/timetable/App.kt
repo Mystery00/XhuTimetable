@@ -15,7 +15,9 @@ import io.github.vinceglb.filekit.coil.addPlatformFileSupport
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.navigation.Nav
 import vip.mystery0.xhu.timetable.ui.navigation.Navs
+import vip.mystery0.xhu.timetable.ui.theme.SetSystemAppearance
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
+import vip.mystery0.xhu.timetable.ui.theme.isDarkMode
 
 @Composable
 fun App(startRoute: Nav) {
@@ -30,6 +32,7 @@ fun App(startRoute: Nav) {
     }
     val navController = rememberNavController()
     XhuTimetableTheme {
+        SetSystemAppearance(isDark = isDarkMode())
         CompositionLocalProvider(LocalNavController provides navController) {
             NavHost(
                 navController = navController,
