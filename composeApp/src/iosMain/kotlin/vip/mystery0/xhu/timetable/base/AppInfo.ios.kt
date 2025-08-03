@@ -50,7 +50,7 @@ val appVersionCode: String =
 val appVersionCodeNumber: Long
     get() = runCatching { appVersionCode.toLong() }.getOrDefault(1L)
 
-actual fun publicDeviceId(): String = publicDeviceId
+actual fun publicDeviceId(): String = "ios-${publicDeviceId}"
 
 actual fun appName(): String = appName
 
