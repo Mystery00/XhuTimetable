@@ -47,6 +47,7 @@ actual inline fun <reified T> Store.setConfiguration(key: String, value: T) {
         is Float -> settings[key] = value
         is String -> settings[key] = value
         is Set<*> -> {
+            @Suppress("UNCHECKED_CAST")
             val text = mapJson.encodeToString(value as Set<String>)
             settings[key] = text
         }
