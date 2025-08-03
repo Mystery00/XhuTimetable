@@ -8,3 +8,7 @@ actual fun copyToClipboard(text: String) {
     val pasteboard = UIPasteboard.generalPasteboard
     pasteboard.string = text
 }
+
+actual fun forceExit() {
+    kotlin.system.exitProcess(10)
+}

@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.db
 
+import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
@@ -16,6 +17,7 @@ import vip.mystery0.xhu.timetable.model.entity.CustomCourseEntity
 import vip.mystery0.xhu.timetable.model.entity.CustomThingEntity
 import vip.mystery0.xhu.timetable.model.entity.ExperimentCourseEntity
 import vip.mystery0.xhu.timetable.model.entity.PracticalCourseEntity
+import vip.mystery0.xhu.timetable.module.AppDatabaseConstructor
 
 @Database(
     entities = [
@@ -29,6 +31,7 @@ import vip.mystery0.xhu.timetable.model.entity.PracticalCourseEntity
     version = 5
 )
 @TypeConverters(Converters::class)
+@ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun courseDao(): CourseDao
     abstract fun practicalCourseDao(): PracticalCourseDao
