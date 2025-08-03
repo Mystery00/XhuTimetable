@@ -12,3 +12,5 @@ actual fun platformModule(): Module = module {
             .setDriver(NativeSQLiteDriver())
     }
 }
+
+actual fun Throwable.desc(): String = this.stackTraceToString()
