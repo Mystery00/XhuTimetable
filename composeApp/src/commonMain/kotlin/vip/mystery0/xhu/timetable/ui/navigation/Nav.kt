@@ -16,6 +16,7 @@ import vip.mystery0.xhu.timetable.ui.screen.CustomThingScreen
 import vip.mystery0.xhu.timetable.ui.screen.CustomUiScreen
 import vip.mystery0.xhu.timetable.ui.screen.FeedbackScreen
 import vip.mystery0.xhu.timetable.ui.screen.FreeCourseRoomScreen
+import vip.mystery0.xhu.timetable.ui.screen.InitScreen
 import vip.mystery0.xhu.timetable.ui.screen.LoginScreen
 import vip.mystery0.xhu.timetable.ui.screen.MainScreen
 import vip.mystery0.xhu.timetable.ui.screen.NoticeScreen
@@ -24,10 +25,20 @@ import vip.mystery0.xhu.timetable.ui.screen.QueryExpScoreScreen
 import vip.mystery0.xhu.timetable.ui.screen.QueryScoreScreen
 import vip.mystery0.xhu.timetable.ui.screen.SchoolCalendarScreen
 import vip.mystery0.xhu.timetable.ui.screen.SettingsScreen
+import vip.mystery0.xhu.timetable.ui.screen.SplashImageScreen
 
 val LocalNavController = compositionLocalOf<NavController?> { null }
 
 interface Nav
+
+@Serializable
+object RouteInit : Nav
+
+@Serializable
+data class RouteSplashImage(
+    val splashFilePath: String?,
+    val splashId: Long,
+) : Nav
 
 @Serializable
 object RouteMain : Nav
@@ -87,6 +98,11 @@ val Navs: NavGraphBuilder.() -> Unit = {
     composable<RouteLogin> { backStackEntry ->
         val login: RouteLogin = backStackEntry.toRoute()
         LoginScreen(login.fromAccountManager)
+    }
+    composable<RouteInit> { InitScreen() }
+    composable<RouteSplashImage> { backStackEntry ->
+        val splash: RouteSplashImage = backStackEntry.toRoute()
+        SplashImageScreen(splash.splashFilePath, splash.splashId)
     }
     composable<RouteMain> { MainScreen() }
     composable<RouteQueryExam> { QueryExamScreen() }
