@@ -11,6 +11,7 @@ import multiplatform.network.cmptoast.AppContext
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import vip.mystery0.xhu.timetable.config.mmkv.KermitMMKVLogger
+import vip.mystery0.xhu.timetable.feature.FeatureHub
 import vip.mystery0.xhu.timetable.module.moduleList
 import vip.mystery0.xhu.timetable.utils.ApplicationExceptionCatcher
 
@@ -23,6 +24,7 @@ class Application : Application() {
         context = this
         Thread.setDefaultUncaughtExceptionHandler(ApplicationExceptionCatcher(Thread.getDefaultUncaughtExceptionHandler()))
         initLogger()
+        initFeature()
         startKoin {
             logger(KermitKoinLogger(Logger.withTag("koin")))
             androidContext(this@Application)
@@ -31,5 +33,10 @@ class Application : Application() {
         AppContext.apply { set(applicationContext) }
         val root = context.filesDir.absolutePath + "/mmkv"
         MMKV.initialize(this, root, null, MMKVLogLevel.LevelWarning, KermitMMKVLogger())
+    }
+
+    override fun onTerminate() {
+        FeatureHub.stop()
+        super.onTerminate()
     }
 }
