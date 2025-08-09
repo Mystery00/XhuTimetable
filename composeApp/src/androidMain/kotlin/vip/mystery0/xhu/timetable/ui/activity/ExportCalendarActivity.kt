@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -316,7 +317,7 @@ class ExportCalendarActivity : ComponentActivity() {
                             .clickable {
                                 dismissSheet()
                             },
-                        painter = XhuIcons.CustomCourse.close,
+                        imageVector = Icons.Rounded.Cancel,
                         contentDescription = null,
                     )
                     Spacer(modifier = Modifier.weight(1F))

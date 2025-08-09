@@ -11,8 +11,10 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -203,16 +205,19 @@ private fun RowScope.DrawNavigationItem(
                 painter = stateOf(checked = checked, pair = icon),
                 tint = Color.Unspecified,
                 modifier = Modifier.size(24.dp),
-                contentDescription = null
+                contentDescription = null,
             )
         },
-        alwaysShowLabel = false,
         label = {
             Text(text = label)
         },
         onClick = {
             onSelect()
         },
+        colors = NavigationBarItemDefaults.colors(
+            selectedIconColor = MaterialTheme.colorScheme.primary,
+            selectedTextColor = MaterialTheme.colorScheme.primary,
+        )
     )
 }
 

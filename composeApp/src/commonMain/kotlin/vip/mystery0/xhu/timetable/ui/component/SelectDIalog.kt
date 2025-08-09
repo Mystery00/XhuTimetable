@@ -8,10 +8,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ElevatedFilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -30,7 +31,6 @@ import vip.mystery0.xhu.timetable.base.Selectable
 import vip.mystery0.xhu.timetable.base.TermSelect
 import vip.mystery0.xhu.timetable.base.UserSelect
 import vip.mystery0.xhu.timetable.base.YearSelect
-import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
 @Composable
 fun BuildUserSelectFilterChipContent(
@@ -158,10 +158,10 @@ private fun BuildSelectBaseContent(
                 }
             },
             contentPadding = PaddingValues(0.dp),
-            shape = RoundedCornerShape(16.dp),
+            shape = FilterChipDefaults.shape,
         ) {
             Icon(
-                painter = XhuIcons.Action.search,
+                imageVector = Icons.Default.Search,
                 contentDescription = null,
             )
         }

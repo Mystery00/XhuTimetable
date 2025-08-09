@@ -50,20 +50,6 @@ import xhutimetable.composeapp.generated.resources.ic_classroom
 import xhutimetable.composeapp.generated.resources.ic_classroom_night
 import xhutimetable.composeapp.generated.resources.ic_corner_failed
 import xhutimetable.composeapp.generated.resources.ic_corner_success
-import xhutimetable.composeapp.generated.resources.ic_custom_course_close
-import xhutimetable.composeapp.generated.resources.ic_custom_course_close_night
-import xhutimetable.composeapp.generated.resources.ic_custom_course_location
-import xhutimetable.composeapp.generated.resources.ic_custom_course_location_night
-import xhutimetable.composeapp.generated.resources.ic_custom_course_remark
-import xhutimetable.composeapp.generated.resources.ic_custom_course_remark_night
-import xhutimetable.composeapp.generated.resources.ic_custom_course_teacher
-import xhutimetable.composeapp.generated.resources.ic_custom_course_teacher_night
-import xhutimetable.composeapp.generated.resources.ic_custom_course_time
-import xhutimetable.composeapp.generated.resources.ic_custom_course_time_night
-import xhutimetable.composeapp.generated.resources.ic_custom_course_title
-import xhutimetable.composeapp.generated.resources.ic_custom_course_title_night
-import xhutimetable.composeapp.generated.resources.ic_custom_course_week
-import xhutimetable.composeapp.generated.resources.ic_custom_course_week_night
 import xhutimetable.composeapp.generated.resources.ic_enable_calendar_view
 import xhutimetable.composeapp.generated.resources.ic_exam
 import xhutimetable.composeapp.generated.resources.ic_exam_night
@@ -238,51 +224,6 @@ object XhuIcons {
     val hot: Painter
         @Composable
         get() = painterResource(Res.drawable.ic_hot)
-
-    object CustomCourse {
-        val title: Painter
-            @Composable
-            get() = iconOf(
-                painterResource(Res.drawable.ic_custom_course_title_night) to
-                        painterResource(Res.drawable.ic_custom_course_title)
-            )
-        val teacher: Painter
-            @Composable
-            get() = iconOf(
-                painterResource(Res.drawable.ic_custom_course_teacher_night) to
-                        painterResource(Res.drawable.ic_custom_course_teacher)
-            )
-        val week: Painter
-            @Composable
-            get() = iconOf(
-                painterResource(Res.drawable.ic_custom_course_week_night) to
-                        painterResource(Res.drawable.ic_custom_course_week)
-            )
-        val time: Painter
-            @Composable
-            get() = iconOf(
-                painterResource(Res.drawable.ic_custom_course_time_night) to
-                        painterResource(Res.drawable.ic_custom_course_time)
-            )
-        val location: Painter
-            @Composable
-            get() = iconOf(
-                painterResource(Res.drawable.ic_custom_course_location_night) to
-                        painterResource(Res.drawable.ic_custom_course_location)
-            )
-        val close: Painter
-            @Composable
-            get() = iconOf(
-                painterResource(Res.drawable.ic_custom_course_close_night) to
-                        painterResource(Res.drawable.ic_custom_course_close)
-            )
-        val remark: Painter
-            @Composable
-            get() = iconOf(
-                painterResource(Res.drawable.ic_custom_course_remark_night) to
-                        painterResource(Res.drawable.ic_custom_course_remark)
-            )
-    }
 
     object Profile {
         val exam: Painter
