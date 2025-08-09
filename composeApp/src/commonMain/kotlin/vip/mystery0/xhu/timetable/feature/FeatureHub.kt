@@ -1,11 +1,8 @@
 package vip.mystery0.xhu.timetable.feature
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * 全局委托对象 (ViewModel)，作为 SDK 的唯一入口点。
@@ -16,6 +13,15 @@ object FeatureHub {
     private val repository = InMemoryFeatureRepository()
     private lateinit var client: FeatureHubClient
     private var isInitialized = false
+
+    val httpRequests = mutableListOf<Instant>()
+
+    fun record() {
+        httpRequests.add(Clock.System.now())
+        if (httpRequests.size > 5) {
+            httpRequests.removeAt(0)
+        }
+    }
 
     /**
      * 初始化 SDK。必须在使用前调用。
@@ -69,23 +75,5 @@ object FeatureHub {
      */
     fun getValue(key: String, defaultValue: String = ""): String {
         return repository.getFeature(key)?.value ?: defaultValue
-    }
-
-    /**
-     * [Composable] 函数，用于在 Compose UI 中获取并观察单个特征的状态。
-     * 当特征值在后台更新时，UI 会自动重组。
-     *
-     * @param key 要观察的特征的 key。
-     * @return 一个 Compose State 对象，持有最新的 Feature? 值。
-     */
-    @Composable
-    fun featureState(key: String): State<Feature?> {
-        if (!isInitialized) {
-            // 在Compose预览或未初始化时返回一个空状态
-            return MutableStateFlow<Feature?>(null).collectAsState()
-        }
-        // 从 repository 的 StateFlow 中派生出单个 feature 的 StateFlow，并转换为 Compose State
-        return repository.features.map { it[key] }
-            .collectAsState(initial = repository.getFeature(key))
     }
 }
