@@ -4,33 +4,36 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.EventNote
+import androidx.compose.material.icons.automirrored.twotone.ArrowForwardIos
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Cancel
+import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -256,6 +259,9 @@ private fun ShowCourseIndexDialog(
             resultListener = {
                 if (it != null) {
                     startResult = it + 1
+                    if (startResult > endResult) {
+                        endResult = startResult
+                    }
                 }
             }
         ),
@@ -269,6 +275,9 @@ private fun ShowCourseIndexDialog(
             resultListener = {
                 if (it != null) {
                     endResult = it + 1
+                    if (endResult < startResult) {
+                        startResult = endResult
+                    }
                 }
             }
         ),
@@ -382,6 +391,17 @@ private fun CustomCourseBottomSheet(
         return
     }
 
+    val horizontalPadding = 12.dp
+    val defaultColors = OutlinedTextFieldDefaults.colors()
+    val textColors = OutlinedTextFieldDefaults.colors(
+        unfocusedBorderColor = Color.Transparent,
+        disabledBorderColor = Color.Transparent,
+        disabledLabelColor = defaultColors.unfocusedLabelColor,
+        disabledTextColor = defaultColors.unfocusedTextColor,
+        disabledTrailingIconColor = defaultColors.unfocusedTrailingIconColor,
+        disabledLeadingIconColor = defaultColors.unfocusedLeadingIconColor,
+    )
+
     ModalBottomSheet(
         onDismissRequest = {
             focusManager.clearFocus()
@@ -389,29 +409,21 @@ private fun CustomCourseBottomSheet(
         },
         sheetState = sheetState,
     ) {
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Image(
-                modifier = Modifier
-                    .padding(12.dp)
-                    .clickable {
+        Column(verticalArrangement = Arrangement.spacedBy(horizontalPadding)) {
+            Row(
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(
+                    onClick = {
                         dismissSheet()
                     },
-                painter = XhuIcons.CustomCourse.close,
-                contentDescription = null,
-            )
-            Spacer(modifier = Modifier.weight(1F))
-            if (saveLoadingState.loading) {
-                TextButton(
-                    enabled = false,
-                    onClick = {}) {
-                    Text(text = "保存中...")
+                    modifier = Modifier.padding(12.dp)
+                ) {
+                    Icon(Icons.Rounded.Cancel, null)
                 }
-            } else {
-                if (customCourse.courseId != 0L) {
+                Spacer(modifier = Modifier.weight(1F))
+                if (customCourse.courseId != 0L && !saveLoadingState.loading) {
                     TextButton(
                         onClick = {
                             viewModel.deleteCustomCourse(customCourse.courseId)
@@ -419,177 +431,150 @@ private fun CustomCourseBottomSheet(
                         Text(text = "删除", color = Color.Red)
                     }
                 }
-                TextButton(
-                    onClick = {
-                        viewModel.saveCustomCourse(
-                            customCourse.courseId,
-                            CustomCourseRequest.buildOf(
-                                courseName,
-                                weekList,
-                                day,
-                                startDayTime,
-                                endDayTime,
-                                location,
-                                teacher,
+                if (!saveLoadingState.loading) {
+                    TextButton(
+                        onClick = {
+                            viewModel.saveCustomCourse(
+                                customCourse.courseId,
+                                CustomCourseRequest.buildOf(
+                                    courseName,
+                                    weekList,
+                                    day,
+                                    startDayTime,
+                                    endDayTime,
+                                    location,
+                                    teacher,
+                                )
                             )
-                        )
-                    }) {
-                    Text(text = "保存")
+                        }) {
+                        Text(text = "保存")
+                    }
+                }
+                if (saveLoadingState.loading) {
+                    TextButton(
+                        enabled = false,
+                        onClick = {
+                        }) {
+                        Text(text = "保存操作中...")
+                    }
                 }
             }
+            Card(modifier = Modifier.padding(horizontal = 12.dp)) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(horizontal = horizontalPadding),
+                        value = courseName,
+                        placeholder = {
+                            Text(text = "（必填）")
+                        },
+                        label = {
+                            Text(text = "课程名称")
+                        },
+                        onValueChange = { courseName = it },
+                        colors = textColors
+                    )
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(horizontal = horizontalPadding),
+                        value = teacher,
+                        placeholder = {
+                            Text(text = "（选填）")
+                        },
+                        label = {
+                            Text(text = "任课教师")
+                        },
+                        onValueChange = { teacher = it },
+                        colors = textColors
+                    )
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(horizontal = horizontalPadding),
+                        value = location,
+                        placeholder = {
+                            Text(text = "（选填）")
+                        },
+                        label = {
+                            Text(text = "上课地点")
+                        },
+                        onValueChange = { location = it },
+                        colors = textColors
+                    )
+                }
+            }
+            Card(modifier = Modifier.padding(horizontal = 12.dp)) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    OutlinedTextField(
+                        enabled = false,
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(horizontal = horizontalPadding)
+                            .clickable(
+                                interactionSource = MutableInteractionSource(),
+                                indication = null,
+                                onClick = {
+                                    weekDialog.show()
+                                }
+                            ),
+                        value = if (weekList.isEmpty()) "（不能为空）" else weekList.formatWeekString(),
+                        label = {
+                            Text(text = "上课周数")
+                        },
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.TwoTone.ArrowForwardIos,
+                                contentDescription = null,
+                                modifier = Modifier.padding(horizontal = 12.dp)
+                                    .size(16.dp),
+                                tint = MaterialTheme.colorScheme.onSurface,
+                            )
+                        },
+                        onValueChange = { },
+                        colors = textColors
+                    )
+                    OutlinedTextField(
+                        enabled = false,
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(horizontal = horizontalPadding)
+                            .clickable(
+                                interactionSource = MutableInteractionSource(),
+                                indication = null,
+                                onClick = {
+                                    courseIndexDialog.show()
+                                }
+                            ),
+                        value = "第 $startDayTime - $endDayTime 节",
+                        label = {
+                            Text(text = "上课时间")
+                        },
+                        trailingIcon = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    modifier = Modifier
+                                        .clickable(
+                                            onClick = {
+                                                weekIndexDialog.show()
+                                            },
+                                            indication = null,
+                                            interactionSource = MutableInteractionSource(),
+                                        ),
+                                    text = day.formatWeekString(),
+                                )
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.TwoTone.ArrowForwardIos,
+                                    contentDescription = null,
+                                    modifier = Modifier.padding(horizontal = 12.dp)
+                                        .size(16.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
+                        },
+                        onValueChange = { },
+                        colors = textColors
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.weight(1F))
         }
-        Column {
-            Row(
-                modifier = Modifier
-                    .defaultMinSize(minHeight = 48.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                TextField(
-                    modifier = Modifier.weight(1F),
-                    value = courseName,
-                    placeholder = {
-                        Text(text = "（必填）")
-                    },
-                    label = {
-                        Text(text = "课程名称")
-                    },
-                    leadingIcon = {
-                        Image(
-                            painter = XhuIcons.CustomCourse.title,
-                            contentDescription = null
-                        )
-                    },
-                    onValueChange = { courseName = it },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        errorContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                    )
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .defaultMinSize(minHeight = 48.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                TextField(
-                    modifier = Modifier.weight(1F),
-                    value = teacher,
-                    placeholder = {
-                        Text(text = "（选填）")
-                    },
-                    label = {
-                        Text(text = "任课教师")
-                    },
-                    leadingIcon = {
-                        Image(
-                            painter = XhuIcons.CustomCourse.teacher,
-                            contentDescription = null
-                        )
-                    },
-                    onValueChange = { teacher = it },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        errorContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                    )
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .defaultMinSize(minHeight = 48.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                TextField(
-                    modifier = Modifier.weight(1F),
-                    value = location,
-                    placeholder = {
-                        Text(text = "（选填）")
-                    },
-                    label = {
-                        Text(text = "上课地点")
-                    },
-                    leadingIcon = {
-                        Image(
-                            painter = XhuIcons.CustomCourse.location,
-                            contentDescription = null
-                        )
-                    },
-                    onValueChange = { location = it },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        errorContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                    )
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .defaultMinSize(minHeight = 64.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Image(
-                    modifier = Modifier.padding(12.dp),
-                    painter = XhuIcons.CustomCourse.week,
-                    contentDescription = null
-                )
-                Text(
-                    text = "上课周数${if (weekList.isEmpty()) "（不能为空）" else ""} ${weekList.formatWeekString()}",
-                    modifier = Modifier
-                        .weight(1F)
-                        .clickable(
-                            onClick = {
-                                weekDialog.show()
-                            },
-                            indication = null,
-                            interactionSource = MutableInteractionSource(),
-                        ),
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .defaultMinSize(minHeight = 48.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Image(
-                    modifier = Modifier.padding(12.dp),
-                    painter = XhuIcons.CustomCourse.time,
-                    contentDescription = null
-                )
-                Text(
-                    modifier = Modifier
-                        .weight(1F)
-                        .clickable(
-                            onClick = {
-                                courseIndexDialog.show()
-                            },
-                            indication = null,
-                            interactionSource = MutableInteractionSource(),
-                        ),
-                    text = "第 $startDayTime - $endDayTime 节",
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    modifier = Modifier
-                        .weight(1F)
-                        .clickable(
-                            onClick = {
-                                weekIndexDialog.show()
-                            },
-                            indication = null,
-                            interactionSource = MutableInteractionSource(),
-                        ),
-                    text = day.formatWeekString(),
-                )
-            }
-        }
-        Spacer(modifier = Modifier.weight(1F))
     }
 }
 
