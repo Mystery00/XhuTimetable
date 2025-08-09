@@ -206,6 +206,7 @@ private fun RowScope.DrawNavigationItem(
                 contentDescription = null
             )
         },
+        alwaysShowLabel = false,
         label = {
             Text(text = label)
         },

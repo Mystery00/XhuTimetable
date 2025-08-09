@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
@@ -158,9 +157,6 @@ fun CustomCourseScreen() {
                 )
             },
             listContent = {
-                stickyHeader {
-                    HorizontalDivider()
-                }
                 itemsIndexed(
                     pager,
                     key = { index -> pager[index]?.courseId ?: index }) { item ->
@@ -172,8 +168,9 @@ fun CustomCourseScreen() {
                 }
             },
             emptyState = {
+                val loadingErrorMessage by viewModel.loadingErrorMessage.collectAsState()
                 StateScreen(
-                    title = "暂无自定义课程数据",
+                    title = loadingErrorMessage ?: "暂无自定义课程数据",
                     buttonText = "再查一次",
                     imageRes = painterResource(Res.drawable.state_no_course_data),
                     verticalArrangement = Arrangement.Top,

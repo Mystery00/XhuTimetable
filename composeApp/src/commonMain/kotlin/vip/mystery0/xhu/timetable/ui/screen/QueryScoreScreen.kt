@@ -140,8 +140,9 @@ fun QueryScoreScreen() {
                 }
             },
             emptyState = {
+                val loadingErrorMessage by viewModel.loadingErrorMessage.collectAsState()
                 StateScreen(
-                    title = "暂无成绩数据",
+                    title = loadingErrorMessage ?: "暂无成绩数据",
                     buttonText = "再查一次",
                     imageRes = painterResource(Res.drawable.state_no_data),
                     verticalArrangement = Arrangement.Top,

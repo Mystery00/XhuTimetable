@@ -129,8 +129,9 @@ fun QueryExpScoreScreen() {
                             }
                         } else {
                             item {
+                                val loadingErrorMessage = expScoreListState.errorMessage
                                 StateScreen(
-                                    title = "暂无考试",
+                                    title = loadingErrorMessage.ifBlank { "暂无考试" },
                                     buttonText = "再查一次",
                                     imageRes = painterResource(Res.drawable.state_no_data),
                                     verticalArrangement = Arrangement.Top,
