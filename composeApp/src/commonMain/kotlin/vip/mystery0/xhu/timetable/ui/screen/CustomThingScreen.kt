@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -28,7 +29,6 @@ import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
@@ -164,9 +164,6 @@ fun CustomThingScreen() {
                 }
             },
             listContent = {
-                stickyHeader {
-                    HorizontalDivider()
-                }
                 itemsIndexed(
                     pager,
                     key = { index -> pager[index]?.thingId ?: index }) { item ->
@@ -176,8 +173,9 @@ fun CustomThingScreen() {
                 }
             },
             emptyState = {
+                val loadingErrorMessage by viewModel.loadingErrorMessage.collectAsState()
                 StateScreen(
-                    title = "暂无自定义事项",
+                    title = loadingErrorMessage ?: "暂无自定义事项",
                     buttonText = "再查一次",
                     imageRes = painterResource(Res.drawable.state_no_data),
                     verticalArrangement = Arrangement.Top,
@@ -481,6 +479,7 @@ private fun CustomThingBottomSheet(
                     .height(36.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                Spacer(modifier = Modifier.width(56.dp))
                 Text(
                     modifier = Modifier
                         .weight(1F)
@@ -515,6 +514,7 @@ private fun CustomThingBottomSheet(
                         .height(36.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    Spacer(modifier = Modifier.width(56.dp))
                     Text(
                         modifier = Modifier
                             .weight(1F)
@@ -547,6 +547,7 @@ private fun CustomThingBottomSheet(
                     .padding(horizontal = horizontalPadding),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                Spacer(modifier = Modifier.width(56.dp))
                 Text(
                     modifier = Modifier.weight(1F),
                     text = "存储为倒计时",

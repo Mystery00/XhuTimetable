@@ -8,6 +8,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -89,9 +90,13 @@ val profileCourseContent: TabContent = @Composable {
                 Row(
                     modifier = Modifier
                         .height(96.dp)
-                        .clickable {
-                            profileExpanded = if (mainUser == null) false else !targetExpanded
-                        },
+                        .clickable(
+                            interactionSource = MutableInteractionSource(),
+                            indication = null,
+                            onClick = {
+                                profileExpanded = if (mainUser == null) false else !targetExpanded
+                            }
+                        ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     val profileImage = mainUser?.let {
@@ -141,7 +146,7 @@ val profileCourseContent: TabContent = @Composable {
                             .padding(horizontal = 12.dp)
                             .size(12.dp)
                             .rotate(rotationAngle),
-                        tint = MaterialTheme.colorScheme.surfaceContainer,
+                        tint = MaterialTheme.colorScheme.onSurface,
                     )
                 }
                 if (targetExpanded) {

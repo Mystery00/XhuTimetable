@@ -101,8 +101,9 @@ fun QueryExamScreen() {
                 }
             },
             emptyState = {
+                val loadingErrorMessage by viewModel.loadingErrorMessage.collectAsState()
                 StateScreen(
-                    title = "暂无考试",
+                    title = loadingErrorMessage ?: "暂无考试",
                     buttonText = "再查一次",
                     imageRes = painterResource(Res.drawable.state_no_data),
                     verticalArrangement = Arrangement.Top,

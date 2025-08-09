@@ -5,6 +5,7 @@ import androidx.paging.LoadState
 import androidx.paging.LoadStates
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import io.ktor.client.plugins.HttpRequestTimeoutException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +33,9 @@ abstract class PagingComposeViewModel<REQ, RESP : Any>(
     private val _refreshing = MutableStateFlow(false)
     val refreshing: StateFlow<Boolean> = _refreshing
 
+    private val _loadingErrorMessage = MutableStateFlow<String?>(null)
+    val loadingErrorMessage: StateFlow<String?> = _loadingErrorMessage
+
     protected suspend fun loadData(req: REQ) {
         _refreshing.value = true
         pageRequestFlow.emit(req)
@@ -54,7 +58,14 @@ abstract class PagingComposeViewModel<REQ, RESP : Any>(
             ?.error
             ?.let {
                 logger.w("handle LoadState Error", it)
-                toastMessage(it.message ?: it.desc())
+                val errorMessage: String =
+                    if (it is HttpRequestTimeoutException) {
+                        "请求超时，请重试"
+                    } else {
+                        it.message ?: it.desc()
+                    }
+                toastMessage(errorMessage)
+                _loadingErrorMessage.value = errorMessage
             }
     }
 }
