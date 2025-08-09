@@ -77,12 +77,6 @@ kotlin {
             implementation(libs.androidx.room.ktx)
             //mmkv
             implementation(libs.mmkv.android)
-            //feature-hub
-            implementation(libs.feature.hub)
-            implementation(libs.jackson)
-            implementation(libs.jackson.datatype.jsr310)
-            //auto-service
-            implementation(libs.auto.service)
             //accompanist
             implementation(libs.accompanist.permissions)
         }
@@ -285,8 +279,6 @@ dependencies {
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
     add("kspIosX64", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
-
-    add("kspAndroid", libs.auto.service.ksp)
 }
 
 aboutLibraries {

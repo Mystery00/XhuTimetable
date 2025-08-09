@@ -547,7 +547,10 @@ private fun CustomCourseBottomSheet(
                             Text(text = "上课时间")
                         },
                         trailingIcon = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
                                 Text(
                                     modifier = Modifier
                                         .clickable(
@@ -562,8 +565,7 @@ private fun CustomCourseBottomSheet(
                                 Icon(
                                     imageVector = Icons.AutoMirrored.TwoTone.ArrowForwardIos,
                                     contentDescription = null,
-                                    modifier = Modifier.padding(horizontal = 12.dp)
-                                        .size(16.dp),
+                                    modifier = Modifier.size(16.dp),
                                     tint = MaterialTheme.colorScheme.onSurface,
                                 )
                             }

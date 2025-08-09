@@ -1,14 +1,12 @@
 package vip.mystery0.xhu.timetable.config
 
-expect fun featureEnabled(featureKey: String): Boolean?
-
-expect fun featureString(featureKey: String): String?
+import vip.mystery0.xhu.timetable.feature.FeatureHub
 
 enum class Feature(val key: String, private val defaultValue: Boolean) {
     JRSC("switch_jinrishici", false),
     ;
 
-    fun isEnabled(): Boolean = featureEnabled(key) ?: defaultValue
+    fun isEnabled(): Boolean = FeatureHub.isEnabled(key, defaultValue)
 }
 
 enum class FeatureString(val key: String, private val defaultValue: String) {
@@ -16,7 +14,7 @@ enum class FeatureString(val key: String, private val defaultValue: String) {
     LOGIN_LABEL("data_login_label", ""),
     ;
 
-    fun getValue(): String = featureString(key) ?: defaultValue
+    fun getValue(): String = FeatureHub.getValue(key, defaultValue)
 }
 
 fun trackEvent(event: String) {
