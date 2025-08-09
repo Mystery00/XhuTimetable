@@ -22,6 +22,7 @@ import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.format
 import multiplatform.network.cmptoast.showToast
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
@@ -32,6 +33,7 @@ import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
+import vip.mystery0.xhu.timetable.feature.FeatureHub
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.ui.component.ShowSingleSelectDialog
 import vip.mystery0.xhu.timetable.ui.component.preference.ConfigSettingsCheckbox
@@ -51,6 +53,8 @@ import vip.mystery0.xhu.timetable.ui.theme.NightMode
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.ui.theme.showNightModeSelectList
 import vip.mystery0.xhu.timetable.utils.MIN
+import vip.mystery0.xhu.timetable.utils.asLocalDateTime
+import vip.mystery0.xhu.timetable.utils.chinaDateTime
 import vip.mystery0.xhu.timetable.utils.copyToClipboard
 import vip.mystery0.xhu.timetable.viewmodel.SettingsViewModel
 
@@ -355,6 +359,18 @@ fun SettingsScreen() {
                         onClick = {
                             copyToClipboard(publicDeviceId())
                         },
+                    )
+                    XhuSettingsMenuLink(
+                        title = { Text(text = "FeatureHub 最近拉取时间") },
+                        subtitle = {
+                            Text(
+                                text = FeatureHub.httpRequests.joinToString("\n") {
+                                    it.asLocalDateTime().format(chinaDateTime)
+                                }
+                            )
+                        },
+                        onClick = {
+                        }
                     )
                     DeveloperSettings()
                 }

@@ -68,6 +68,7 @@ internal class FeatureHubClient(
      * 使用 ETag (If-None-Match) 缓存机制，如果服务器返回 304 Not Modified，则不处理响应体。
      */
     suspend fun fetchFeatures(context: FeatureHubContext) {
+        FeatureHub.record()
         val featureHeader = context.buildFeatureHeader()
         val url = URLBuilder(host).apply {
             path("features")
