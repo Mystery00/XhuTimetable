@@ -241,6 +241,24 @@ fun LoginScreen(fromAccountManager: Boolean) {
                     fontSize = 16.sp
                 )
             }
+            if (fromAccountManager) {
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary,
+                    ),
+                    shape = RoundedCornerShape(36.dp),
+                    onClick = {
+                        navController.popBackStack()
+                    }) {
+                    Text(
+                        text = "返回",
+                        fontSize = 16.sp
+                    )
+                }
+            }
         }
     }
     ShowProgressDialog(
