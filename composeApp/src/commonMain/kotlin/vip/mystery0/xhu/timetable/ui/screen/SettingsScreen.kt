@@ -33,6 +33,7 @@ import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
+import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.feature.FeatureHub
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.ui.component.ShowSingleSelectDialog
@@ -110,6 +111,16 @@ fun SettingsScreen() {
                     title = { Text(text = "自定义背景图片") },
                     onClick = {
                         navController.navigateAndSave(RouteBackground)
+                    }
+                )
+                XhuSettingsMenuLink(
+                    title = { Text(text = "强制重置背景图") },
+                    onClick = {
+                        scope.launch {
+                            setConfigStore { backgroundImage = null }
+                            EventBus.post(EventType.CHANGE_MAIN_BACKGROUND)
+                            showToast("重置成功")
+                        }
                     }
                 )
                 ConfigSettingsCheckbox(

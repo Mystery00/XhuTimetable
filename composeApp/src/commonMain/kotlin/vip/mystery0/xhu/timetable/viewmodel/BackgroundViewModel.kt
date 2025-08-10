@@ -1,10 +1,13 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.absolutePath
+import io.github.vinceglb.filekit.copyTo
 import io.github.vinceglb.filekit.createDirectories
 import io.github.vinceglb.filekit.exists
+import io.github.vinceglb.filekit.extension
 import io.github.vinceglb.filekit.nameWithoutExtension
 import io.github.vinceglb.filekit.parent
 import io.ktor.client.HttpClient
@@ -70,7 +73,7 @@ class BackgroundViewModel : ComposeViewModel() {
     }
 
     private suspend fun generateList(): List<Background> {
-        val backgroundFile = getConfigStore { backgroundImage }
+        var backgroundFile = getConfigStore { backgroundImage }
         val resultList =
             ArrayList(backgroundList.map {
                 Background(
@@ -85,28 +88,31 @@ class BackgroundViewModel : ComposeViewModel() {
             Background(0, 0L, imageResUri = XhuImages.defaultBackgroundImageUri)
         )
         backgroundFile?.let {
-            if (it.parent()!!.checkEqual(customImageDir)) {
+            val parent = runCatching { it.parent() }
+                .onFailure { Logger.w("get file parent failed") }
+                .getOrNull()
+            if (parent != null && parent.checkEqual(customImageDir)) {
                 //自定义的背景图，添加到第2位
                 resultList.add(
                     1,
-                    Background(-1, -1L, thumbnailUrl = it.absolutePath())
+                    Background(-1, -1L, thumbnailUrl = it.absolutePath(), checked = true)
                 )
+            } else if (parent == null) {
+                backgroundFile = null
             }
         }
-        when {
-            backgroundFile == null -> {
-                resultList[0].checked = true
-            }
+        if (resultList.all { !it.checked }) {
+            when {
+                backgroundFile == null -> {
+                    resultList[0].checked = true
+                }
 
-            backgroundFile.parent()!!.checkEqual(customImageDir) -> {
-                resultList[1].checked = true
-            }
-
-            else -> {
-                val fileName = backgroundFile.nameWithoutExtension
-                resultList.forEach {
-                    val hashKey = it.getHashKey()
-                    it.checked = fileName == hashKey
+                else -> {
+                    val fileName = backgroundFile.nameWithoutExtension
+                    resultList.forEach {
+                        val hashKey = it.getHashKey()
+                        it.checked = fileName == hashKey
+                    }
                 }
             }
         }
@@ -120,8 +126,13 @@ class BackgroundViewModel : ComposeViewModel() {
                 throwable.message ?: throwable.desc()
             )
         }) {
+            val cacheImageFile = PlatformFile(customImageDir, "background.${file.extension}")
+            if (!customImageDir.exists()) {
+                customImageDir.createDirectories(true)
+            }
+            file.copyTo(cacheImageFile)
             _backgroundListState.value = _backgroundListState.value.loadWithList(true)
-            setConfigStore { backgroundImage = file }
+            setConfigStore { backgroundImage = cacheImageFile }
             _backgroundListState.value =
                 BackgroundListState(
                     backgroundList = generateList(),

@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.config.store
 
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.absolutePath
+import io.github.vinceglb.filekit.isAbsolute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -345,7 +346,10 @@ class ConfigStore internal constructor() {
         }
         get() {
             val image = Store.ConfigStore.getConfiguration(backgroundImageKey, "")
-            return if (image.isBlank()) null else PlatformFile(image)
+            if (image.isBlank()) return null
+            val file = PlatformFile(image)
+            if (!file.isAbsolute()) return null
+            return file
         }
 
     //显示节假日信息
