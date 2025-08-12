@@ -56,15 +56,6 @@ object FeatureHub {
     }
 
     /**
-     * 停止轮询。
-     */
-    fun stop() {
-        if (isInitialized) {
-            client.stopPolling()
-        }
-    }
-
-    /**
      * 检查一个特征标志是否启用。
      * @param key 特征的 key。
      * @param defaultValue 如果找不到该特征，返回的默认值。

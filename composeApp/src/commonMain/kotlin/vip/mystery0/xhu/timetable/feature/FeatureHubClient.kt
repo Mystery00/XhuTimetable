@@ -125,6 +125,7 @@ internal class FeatureHubClient(
                 delay(pollingIntervalMs)
                 fetchFeatures(context)
             }
+            logger.i("Stop polling due to scope not active.")
         }
     }
 
