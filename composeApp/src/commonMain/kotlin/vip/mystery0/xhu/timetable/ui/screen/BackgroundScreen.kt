@@ -1,7 +1,7 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,14 +11,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.PermMedia
+import androidx.compose.material.icons.rounded.SettingsBackupRestore
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +37,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -43,9 +47,20 @@ import coil3.compose.LocalPlatformContext
 import coil3.compose.SubcomposeAsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import com.attafitamim.krop.core.crop.AspectRatio
+import com.attafitamim.krop.core.crop.CropError
+import com.attafitamim.krop.core.crop.CropResult
+import com.attafitamim.krop.core.crop.crop
+import com.attafitamim.krop.core.crop.cropperStyle
+import com.attafitamim.krop.core.crop.rememberImageCropper
+import com.attafitamim.krop.filekit.ImageFormat
+import com.attafitamim.krop.filekit.encodeToByteArray
+import com.attafitamim.krop.filekit.toImageSrc
+import com.attafitamim.krop.ui.ImageCropperDialog
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import kotlinx.coroutines.launch
+import multiplatform.network.cmptoast.showToast
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
@@ -63,10 +78,23 @@ fun BackgroundScreen() {
     val backgroundListState by viewModel.backgroundListState.collectAsState()
 
     val scope = rememberCoroutineScope()
+    val imageCropper = rememberImageCropper()
     val pickerLauncher = rememberFilePickerLauncher(FileKitType.Image) { imageFile ->
         val image = imageFile ?: return@rememberFilePickerLauncher
-        //TODO crop
-        viewModel.setCustomBackground(image)
+        scope.launch {
+            when (val result = imageCropper.crop(image.toImageSrc())) {
+                CropResult.Cancelled -> {}
+                is CropError -> {
+                    showToast("图片裁剪失败")
+                }
+
+                is CropResult.Success -> {
+                    val bitmap = result.bitmap
+                    val bytes = bitmap.encodeToByteArray(ImageFormat.JPEG)
+                    viewModel.setCustomBackground(bytes)
+                }
+            }
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -93,16 +121,7 @@ fun BackgroundScreen() {
                         }
                     }) {
                         Icon(
-                            painter = XhuIcons.reset,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    }
-                    IconButton(onClick = {
-                        pickerLauncher.launch()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Rounded.Add,
+                            imageVector = Icons.Rounded.SettingsBackupRestore,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp),
                         )
@@ -110,6 +129,19 @@ fun BackgroundScreen() {
                 }
             )
         },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    pickerLauncher.launch()
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.PermMedia,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                )
+            }
+        }
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -118,7 +150,7 @@ fun BackgroundScreen() {
         ) {
             val pullToRefreshState = rememberPullToRefreshState()
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 120.dp),
+                columns = GridCells.Fixed(3),
                 modifier = Modifier
                     .fillMaxSize()
                     .pullToRefresh(
@@ -148,6 +180,14 @@ fun BackgroundScreen() {
     val progressState by viewModel.progressState.collectAsState()
     ShowDownloadDialog(downloadProgressState = progressState)
 
+    val cropState = imageCropper.cropState
+    if (cropState != null) ImageCropperDialog(
+        state = cropState, style = cropperStyle(
+            shapes = emptyList(),
+            aspects = listOf(AspectRatio(9, 16))
+        )
+    )
+
     HandleErrorMessage(errorMessage = backgroundListState.errorMessage) {
         viewModel.clearErrorMessage()
     }
@@ -158,10 +198,24 @@ fun PhotoItem(background: Background, onSelect: () -> Unit) {
     val data = background.thumbnailUrl.ifBlank {
         background.imageResUri
     }
+
+    fun Modifier.borderWhen(
+        condition: Boolean,
+        border: BorderStroke,
+        shape: Shape,
+    ): Modifier =
+        if (condition) border(border, shape) else this
+
     Box(
         modifier = Modifier
-            .height(160.dp)
-            .width(120.dp)
+            .padding(6.dp)
+            .height(240.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .borderWhen(
+                background.checked,
+                BorderStroke(4.dp, MaterialTheme.colorScheme.primary),
+                MaterialTheme.shapes.medium,
+            )
             .clickable {
                 onSelect()
             },
@@ -169,7 +223,7 @@ fun PhotoItem(background: Background, onSelect: () -> Unit) {
         SubcomposeAsyncImage(
             model = ImageRequest.Builder(LocalPlatformContext.current)
                 .data(data)
-                .memoryCachePolicy(CachePolicy.ENABLED)
+                .memoryCachePolicy(CachePolicy.DISABLED)
                 .diskCachePolicy(CachePolicy.DISABLED)
                 .build(),
             loading = {
@@ -179,25 +233,18 @@ fun PhotoItem(background: Background, onSelect: () -> Unit) {
             },
             contentDescription = null,
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .clip(MaterialTheme.shapes.medium),
+            contentScale = ContentScale.Crop
         )
         if (background.checked) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxSize(),
-                color = Color.Transparent,
-                border = BorderStroke(
-                    width = 6.dp,
-                    color = MaterialTheme.colorScheme.secondary
-                ),
-            ) {}
-            Image(
-                painter = XhuIcons.checked,
-                modifier = Modifier
-                    .padding(8.dp)
-                    .align(Alignment.BottomEnd)
-                    .size(24.dp),
+            Icon(
+                imageVector = Icons.Rounded.CheckCircle,
                 contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(36.dp),
             )
         }
     }

@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.SettingsBackupRestore
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -90,7 +93,7 @@ fun CustomUiScreen() {
                         }
                     }) {
                         Icon(
-                            painter = XhuIcons.reset,
+                            imageVector = Icons.Rounded.SettingsBackupRestore,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp),
                         )
@@ -100,7 +103,7 @@ fun CustomUiScreen() {
                         showToast("设置已保存")
                     }) {
                         Icon(
-                            painter = XhuIcons.Action.done,
+                            imageVector = Icons.Rounded.CheckCircle,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp),
                         )

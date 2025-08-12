@@ -4,12 +4,12 @@ import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.absolutePath
-import io.github.vinceglb.filekit.copyTo
 import io.github.vinceglb.filekit.createDirectories
+import io.github.vinceglb.filekit.delete
 import io.github.vinceglb.filekit.exists
-import io.github.vinceglb.filekit.extension
 import io.github.vinceglb.filekit.nameWithoutExtension
 import io.github.vinceglb.filekit.parent
+import io.github.vinceglb.filekit.write
 import io.ktor.client.HttpClient
 import io.ktor.client.request.url
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +40,7 @@ import vip.mystery0.xhu.timetable.utils.formatFileSize
 import vip.mystery0.xhu.timetable.utils.md5
 import vip.mystery0.xhu.timetable.utils.sha1
 import vip.mystery0.xhu.timetable.utils.sha256
+import kotlin.time.Clock
 
 class BackgroundViewModel : ComposeViewModel() {
     private val fileClient: HttpClient by inject(named(HTTP_CLIENT_FILE))
@@ -119,19 +120,23 @@ class BackgroundViewModel : ComposeViewModel() {
         return resultList
     }
 
-    fun setCustomBackground(file: PlatformFile) {
+    fun setCustomBackground(bytes: ByteArray) {
         viewModelScope.launch(networkErrorHandler { throwable ->
             logger.w("set custom background failed", throwable)
             _backgroundListState.value = _backgroundListState.value.replaceMessage(
                 throwable.message ?: throwable.desc()
             )
         }) {
-            val cacheImageFile = PlatformFile(customImageDir, "background.${file.extension}")
+            val cacheImageFile = PlatformFile(
+                customImageDir,
+                "background-${Clock.System.now().toEpochMilliseconds()}.jpg"
+            )
             if (!customImageDir.exists()) {
                 customImageDir.createDirectories(true)
             }
-            file.copyTo(cacheImageFile)
+            cacheImageFile.write(bytes)
             _backgroundListState.value = _backgroundListState.value.loadWithList(true)
+            clearOldCustomImage()
             setConfigStore { backgroundImage = cacheImageFile }
             _backgroundListState.value =
                 BackgroundListState(
@@ -162,6 +167,7 @@ class BackgroundViewModel : ComposeViewModel() {
                 _backgroundListState.value = _backgroundListState.value.loadWithList(false)
                 return@launch
             }
+            clearOldCustomImage()
             when (backgroundId) {
                 0L -> setConfigStore { backgroundImage = null }
                 -1L -> return@launch
@@ -225,6 +231,20 @@ class BackgroundViewModel : ComposeViewModel() {
 
     fun clearErrorMessage() {
         _backgroundListState.value = _backgroundListState.value.copy(errorMessage = "")
+    }
+
+    suspend fun clearOldCustomImage() {
+        val oldImageFile = getConfigStore { backgroundImage }
+        if (oldImageFile == null) {
+            return
+        }
+        val parent = runCatching { oldImageFile.parent() }
+            .onFailure { Logger.w("get file parent failed") }
+            .getOrNull()
+        if (parent != null && parent.checkEqual(customImageDir)) {
+            runCatching { oldImageFile.delete() }
+                .onFailure { Logger.w("delete old custom image failed") }
+        }
     }
 }
 

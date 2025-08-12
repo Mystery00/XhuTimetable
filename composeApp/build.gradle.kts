@@ -155,6 +155,9 @@ kotlin {
             implementation(libs.sheets.compose.dialogs.state)
             //zoomimage
             implementation(libs.zoomimage)
+            //krop
+            implementation(libs.krop)
+            implementation(libs.krop.filekit)
         }
         iosMain.dependencies {
             //ktor

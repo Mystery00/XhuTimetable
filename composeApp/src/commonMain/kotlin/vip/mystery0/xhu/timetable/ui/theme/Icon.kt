@@ -71,7 +71,6 @@ import xhutimetable.composeapp.generated.resources.ic_profile_night
 import xhutimetable.composeapp.generated.resources.ic_profile_unchecked
 import xhutimetable.composeapp.generated.resources.ic_profile_unchecked_night
 import xhutimetable.composeapp.generated.resources.ic_radius_cell
-import xhutimetable.composeapp.generated.resources.ic_round_settings_backup_restore
 import xhutimetable.composeapp.generated.resources.ic_score
 import xhutimetable.composeapp.generated.resources.ic_score_night
 import xhutimetable.composeapp.generated.resources.ic_server_detect
@@ -203,9 +202,6 @@ object XhuIcons {
     val checked: Painter
         @Composable
         get() = painterResource(Res.drawable.ic_checked)
-    val reset: Painter
-        @Composable
-        get() = painterResource(Res.drawable.ic_round_settings_backup_restore)
     val close: Painter
         @Composable
         get() = painterResource(Res.drawable.ic_action_close)
