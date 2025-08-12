@@ -206,12 +206,12 @@ class CacheStore {
     var featurePullLastExecuteTime: List<LocalDateTime>
         set(value) {
             val list = if (value.size > 5) value.subList(0, 5) else value
-            val saveList = list.map { it.asInstant().toEpochMilliseconds().toString() }
+            val saveList = list.map { it.asInstant().toEpochMilliseconds().toString() }.toSet()
             Store.CacheStore.setConfiguration(featurePullLastExecuteTimeKey, saveList)
         }
         get() {
             val saveList =
                 Store.CacheStore.getConfiguration(featurePullLastExecuteTimeKey, emptySet<String>())
-            return saveList.map { Instant.fromEpochSeconds(it.toLong()).asLocalDateTime() }
+            return saveList.map { Instant.fromEpochMilliseconds(it.toLong()).asLocalDateTime() }
         }
 }
