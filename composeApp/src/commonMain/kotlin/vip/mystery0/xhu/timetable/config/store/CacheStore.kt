@@ -5,6 +5,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
 import kotlinx.datetime.plus
 import kotlinx.serialization.json.Json
@@ -12,6 +13,8 @@ import vip.mystery0.xhu.timetable.model.response.Holiday
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
 import vip.mystery0.xhu.timetable.utils.MIN
+import vip.mystery0.xhu.timetable.utils.asInstant
+import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import vip.mystery0.xhu.timetable.utils.now
 import kotlin.time.Instant
 
@@ -197,5 +200,18 @@ class CacheStore {
                 second = json.decodeFromString(tomorrowHoliday)
             }
             return Pair(first, second)
+        }
+
+    private val featurePullLastExecuteTimeKey = "featurePullLastExecuteTime"
+    var featurePullLastExecuteTime: List<LocalDateTime>
+        set(value) {
+            val list = if (value.size > 5) value.subList(0, 5) else value
+            val saveList = list.map { it.asInstant().toEpochMilliseconds().toString() }
+            Store.CacheStore.setConfiguration(featurePullLastExecuteTimeKey, saveList)
+        }
+        get() {
+            val saveList =
+                Store.CacheStore.getConfiguration(featurePullLastExecuteTimeKey, emptySet<String>())
+            return saveList.map { Instant.fromEpochSeconds(it.toLong()).asLocalDateTime() }
         }
 }

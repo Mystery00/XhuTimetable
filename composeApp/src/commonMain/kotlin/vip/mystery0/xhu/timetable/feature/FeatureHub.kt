@@ -1,8 +1,10 @@
 package vip.mystery0.xhu.timetable.feature
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineScope
+import vip.mystery0.xhu.timetable.config.store.setCacheStore
+import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import kotlin.time.Clock
-import kotlin.time.Instant
 
 /**
  * 全局委托对象 (ViewModel)，作为 SDK 的唯一入口点。
@@ -12,14 +14,13 @@ object FeatureHub {
     private val logger = Logger.withTag("FeatureHub")
     private val repository = InMemoryFeatureRepository()
     private lateinit var client: FeatureHubClient
+    private lateinit var context: FeatureHubContext
     private var isInitialized = false
 
-    val httpRequests = mutableListOf<Instant>()
-
-    fun record() {
-        httpRequests.add(Clock.System.now())
-        if (httpRequests.size > 5) {
-            httpRequests.removeAt(0)
+    suspend fun record() {
+        setCacheStore {
+            featurePullLastExecuteTime =
+                featurePullLastExecuteTime + Clock.System.now().asLocalDateTime()
         }
     }
 
@@ -39,13 +40,19 @@ object FeatureHub {
         logger.i("Initialized successfully.")
     }
 
+    fun setContext(context: FeatureHubContext) {
+        if (!isInitialized) throw IllegalStateException("FeatureHubSDK must be initialized before starting.")
+        this.context = context
+    }
+
     /**
      * 启动轮询。
      * 必须在 initialize() 之后调用。
      */
-    fun start(context: FeatureHubContext) {
+    fun start(scope: CoroutineScope) {
         if (!isInitialized) throw IllegalStateException("FeatureHubSDK must be initialized before starting.")
-        client.startPolling(context)
+        if (!::context.isInitialized) throw IllegalStateException("FeatureHubContext must be set before starting.")
+        client.startPolling(scope, context)
     }
 
     /**

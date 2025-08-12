@@ -6,12 +6,15 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.request.CachePolicy
 import io.github.vinceglb.filekit.coil.addPlatformFileSupport
+import vip.mystery0.xhu.timetable.feature.FeatureHub
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.navigation.Nav
 import vip.mystery0.xhu.timetable.ui.navigation.Navs
@@ -21,6 +24,10 @@ import vip.mystery0.xhu.timetable.ui.theme.isDarkMode
 
 @Composable
 fun App(startRoute: Nav) {
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(Unit) {
+        FeatureHub.start(scope)
+    }
     setSingletonImageLoaderFactory { context ->
         ImageLoader.Builder(context)
             .components {

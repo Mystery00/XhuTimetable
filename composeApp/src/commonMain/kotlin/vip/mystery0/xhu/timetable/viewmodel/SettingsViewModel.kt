@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.format
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
@@ -18,6 +19,7 @@ import vip.mystery0.xhu.timetable.repository.JobRepo
 import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.ui.theme.NightMode
 import vip.mystery0.xhu.timetable.ui.theme.Theme
+import vip.mystery0.xhu.timetable.utils.chinaDateTime
 import kotlin.time.Clock
 
 
@@ -36,12 +38,17 @@ class SettingsViewModel : ComposeViewModel() {
     private val _splashList = MutableStateFlow<List<Splash>>(emptyList())
     val splashList: StateFlow<List<Splash>> = _splashList
 
+    private val _featurePullTimeList = MutableStateFlow<List<String>>(emptyList())
+    val featurePullTimeList: StateFlow<List<String>> = _featurePullTimeList
+
     fun init() {
         viewModelScope.launch {
             Theme.nightMode.value = getConfigStore { nightMode }
             debugMode.value = getConfigStore { debugMode }
             _splashList.value = getCacheStore { splashList }
             _teamMemberData.value = StartRepo.loadTeamMemberList()
+            _featurePullTimeList.value = getCacheStore { featurePullLastExecuteTime }
+                .map { it.format(chinaDateTime) }
         }
     }
 
@@ -81,6 +88,13 @@ class SettingsViewModel : ComposeViewModel() {
             withContext(Dispatchers.IO) {
                 PoemsStore.token = null
             }
+        }
+    }
+
+    fun updateFeaturePullTime() {
+        viewModelScope.launch {
+            _featurePullTimeList.value = getCacheStore { featurePullLastExecuteTime }
+                .map { it.format(chinaDateTime) }
         }
     }
 

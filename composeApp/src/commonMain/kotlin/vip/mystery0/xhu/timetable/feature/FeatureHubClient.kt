@@ -12,7 +12,6 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.path
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -114,14 +113,11 @@ internal class FeatureHubClient(
      * 启动后台轮询任务。
      * 如果任务已在运行，则不会重复启动。
      */
-    fun startPolling(context: FeatureHubContext) {
-        if (pollingJob?.isActive == true) {
-            logger.i("Polling is already active.")
-            return
-        }
+    fun startPolling(scope: CoroutineScope, context: FeatureHubContext) {
+        stopPolling()
         logger.d("Starting polling with interval ${pollingIntervalMs}ms...")
         // 在一个独立的协程作用域中启动轮询
-        pollingJob = CoroutineScope(Dispatchers.Default).launch {
+        pollingJob = scope.launch {
             // 首次启动时立即获取一次
             fetchFeatures(context)
             // 循环执行，直到协程被取消
@@ -136,8 +132,10 @@ internal class FeatureHubClient(
      * 停止后台轮询任务。
      */
     fun stopPolling() {
-        logger.i("Stopping polling.")
-        pollingJob?.cancel()
+        if (pollingJob?.isActive == true) {
+            logger.i("Stopping polling.")
+            pollingJob?.cancel()
+        }
         pollingJob = null
     }
 }

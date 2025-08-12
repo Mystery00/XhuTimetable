@@ -35,5 +35,5 @@ fun initFeature() {
         .attr("versionName", appVersionName())
         .attr("versionCode", appVersionCode())
         .build()
-    FeatureHub.start(context)
+    FeatureHub.setContext(context)
 }
