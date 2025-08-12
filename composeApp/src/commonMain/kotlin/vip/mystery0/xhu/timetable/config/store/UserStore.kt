@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable.config.store
 
 import co.touchlab.kermit.Logger
+import io.ktor.client.plugins.HttpRequestTimeoutException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.sync.Mutex
@@ -8,6 +9,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import multiplatform.network.cmptoast.showToast
+import vip.mystery0.xhu.timetable.config.NetworkNotConnectException
 import vip.mystery0.xhu.timetable.config.ktor.ServerNeedLoginException
 import vip.mystery0.xhu.timetable.model.UserInfo
 import vip.mystery0.xhu.timetable.model.event.EventType
@@ -170,6 +173,9 @@ object UserStore {
                 return@withContext withContext(Dispatchers.IO) {
                     block(sessionToken)
                 }
+            } catch (e: HttpRequestTimeoutException) {
+                showToast("try catch 捕获到了请求超时异常")
+                throw NetworkNotConnectException()
             }
         }
 }

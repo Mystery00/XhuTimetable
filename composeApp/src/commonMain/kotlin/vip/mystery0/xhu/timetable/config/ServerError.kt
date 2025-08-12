@@ -1,8 +1,10 @@
 package vip.mystery0.xhu.timetable.config
 
 import co.touchlab.kermit.Logger
+import io.ktor.client.plugins.HttpRequestTimeoutException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.serialization.Serializable
+import multiplatform.network.cmptoast.showToast
 import vip.mystery0.xhu.timetable.utils.isOnline
 
 @Serializable
@@ -19,6 +21,9 @@ fun networkErrorHandler(handler: (Throwable) -> Unit): CoroutineExceptionHandler
             //没有网络，统一报错 网络连接失败
             handler(NetworkNotConnectException())
             return@CoroutineExceptionHandler
+        }
+        if (throwable is HttpRequestTimeoutException) {
+            showToast("协程异常处理器 捕获到了请求超时异常")
         }
         Logger.w("network error", throwable)
         handler(throwable)

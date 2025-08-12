@@ -11,6 +11,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.Customisable
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.UserStore
@@ -19,6 +20,7 @@ import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.CampusInfo
 import vip.mystery0.xhu.timetable.model.event.EventType
+import vip.mystery0.xhu.timetable.module.desc
 import vip.mystery0.xhu.timetable.repository.UserRepo
 import vip.mystery0.xhu.timetable.utils.MIN
 import vip.mystery0.xhu.timetable.utils.now
@@ -72,7 +74,10 @@ class ClassSettingsViewModel : ComposeViewModel() {
     }
 
     private fun loadCampusList() {
-        viewModelScope.launch {
+        viewModelScope.launch(networkErrorHandler { throwable ->
+            logger.w("load campus list failed", throwable)
+            toastMessage(throwable.message ?: throwable.desc())
+        }) {
             val mainUser = UserStore.mainUser()
             _campusInfo.value = mainUser.withAutoLoginOnce {
                 UserRepo.getCampusList(it)
@@ -81,7 +86,10 @@ class ClassSettingsViewModel : ComposeViewModel() {
     }
 
     fun updateUserCampus(campus: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(networkErrorHandler { throwable ->
+            logger.w("load campus list failed", throwable)
+            toastMessage(throwable.message ?: throwable.desc())
+        }) {
             val mainUser = UserStore.mainUser()
             mainUser.withAutoLoginOnce {
                 UserRepo.updateUserCampus(it, campus)
