@@ -315,6 +315,12 @@ fun SettingsScreen() {
                         navController.navigateAndSave(RouteAbout)
                     }
                 )
+                XhuSettingsMenuLink(
+                    title = { Text(text = "日志上报") },
+                    onClick = {
+                        showToast("待实现")
+                    }
+                )
             }
             TeamContent(title = "西瓜课表团队出品") {
                 val teamMember by viewModel.teamMemberData.collectAsState()
