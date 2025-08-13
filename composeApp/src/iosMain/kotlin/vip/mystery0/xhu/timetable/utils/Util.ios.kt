@@ -1,14 +1,18 @@
 package vip.mystery0.xhu.timetable.utils
 
 import co.touchlab.kermit.Logger
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.ExperimentalForeignApi
 import multiplatform.network.cmptoast.showToast
 import platform.SystemConfiguration.SCNetworkReachabilityCreateWithName
-import platform.SystemConfiguration.SCNetworkReachabilityFlags
 import platform.SystemConfiguration.SCNetworkReachabilityGetFlags
+import platform.SystemConfiguration.kSCNetworkFlagsConnectionRequired
+import platform.SystemConfiguration.kSCNetworkFlagsReachable
 import platform.UIKit.UIPasteboard
-import platform.posix.kSCNetworkFlagsConnectionRequired
-import platform.posix.kSCNetworkFlagsReachable
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.value
 
+@OptIn(ExperimentalForeignApi::class)
 actual fun isOnline(): Boolean {
     val reachability = SCNetworkReachabilityCreateWithName(null, "www.apple.com")
     if (reachability == null) {
@@ -16,18 +20,20 @@ actual fun isOnline(): Boolean {
         return false
     }
 
-    var flags: SCNetworkReachabilityFlags = 0u
-    if (!SCNetworkReachabilityGetFlags(reachability, flags.ptr)) {
-        Logger.w("isOnline: SCNetworkReachabilityGetFlags returned false")
-        return false
+    return memScoped {
+        val flags = alloc<SCNetworkReachabilityFlagsVar>()
+        if (!SCNetworkReachabilityGetFlags(reachability, flags.ptr)) {
+            Logger.w("isOnline: SCNetworkReachabilityGetFlags returned false")
+            return false
+        }
+
+        val isReachable = (flags.value and kSCNetworkFlagsReachable) != 0u
+        val needsConnection = (flags.value and kSCNetworkFlagsConnectionRequired) != 0u
+
+        val isOnline = isReachable && !needsConnection
+        Logger.i("isOnline: $isOnline, flags: ${flags.value}")
+        isOnline
     }
-
-    val isReachable = (flags and kSCNetworkFlagsReachable) != 0u
-    val needsConnection = (flags and kSCNetworkFlagsConnectionRequired) != 0u
-
-    val isOnline = isReachable && !needsConnection
-    Logger.i("isOnline: $isOnline, flags: $flags")
-    return isOnline
 }
 
 actual fun copyToClipboard(text: String) {
