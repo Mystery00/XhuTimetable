@@ -2,20 +2,20 @@ package vip.mystery0.xhu.timetable.utils
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.net.ConnectivityManager
 import android.widget.Toast
 import org.koin.java.KoinJavaComponent
 import vip.mystery0.xhu.timetable.base.appName
 import vip.mystery0.xhu.timetable.context
 import kotlin.system.exitProcess
 
-actual fun isOnline(): Boolean = true
-//@Suppress("DEPRECATION")
-//actual fun isOnline(): Boolean {
-//    val connectivityManager =
-//        KoinJavaComponent.get<ConnectivityManager>(ConnectivityManager::class.java)
-//    val networkInfo = connectivityManager.activeNetworkInfo
-//    return networkInfo?.isConnected == true
-//}
+@Suppress("DEPRECATION")
+actual fun isOnline(): Boolean {
+    val connectivityManager =
+        KoinJavaComponent.get<ConnectivityManager>(ConnectivityManager::class.java)
+    val networkInfo = connectivityManager.activeNetworkInfo
+    return networkInfo?.isConnected == true
+}
 
 actual fun copyToClipboard(text: String) {
     val clipboardManager =
