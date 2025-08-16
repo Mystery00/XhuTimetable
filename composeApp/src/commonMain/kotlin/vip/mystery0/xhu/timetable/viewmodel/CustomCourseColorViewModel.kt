@@ -4,9 +4,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.repository.CourseColorRepo
@@ -21,13 +21,13 @@ class CustomCourseColorViewModel : ComposeViewModel(), KoinComponent {
     }
 
     fun loadList(keywords: String) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             _listState.value = CourseColorRepo.getCourseColorList(keywords)
         }
     }
 
     fun updateColor(courseName: String, selectedColor: Color?) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             if (selectedColor != null) {
                 val color = selectedColor.toHexString()
                 CourseColorRepo.updateCourseColor(courseName, color)

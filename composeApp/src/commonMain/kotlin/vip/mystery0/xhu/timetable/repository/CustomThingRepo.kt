@@ -9,7 +9,6 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.CustomThingApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.base.buildPageSource
-import vip.mystery0.xhu.timetable.config.ServerError
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.model.request.CustomThingRequest
@@ -48,7 +47,7 @@ object CustomThingRepo : BaseDataRepo {
             customThingApi.createCustomThing(it, request)
         }
         if (!response) {
-            throw ServerError("创建自定义事项失败")
+            throw RuntimeException("创建自定义事项失败")
         }
     }
 
@@ -61,7 +60,7 @@ object CustomThingRepo : BaseDataRepo {
             customThingApi.updateCustomThing(it, thingId, request)
         }
         if (!response) {
-            throw ServerError("更新自定义事项失败")
+            throw RuntimeException("更新自定义事项失败")
         }
     }
 
@@ -73,7 +72,7 @@ object CustomThingRepo : BaseDataRepo {
             customThingApi.deleteCustomThing(it, thingId)
         }
         if (!response) {
-            throw ServerError("删除自定义事项失败")
+            throw RuntimeException("删除自定义事项失败")
         }
     }
 }

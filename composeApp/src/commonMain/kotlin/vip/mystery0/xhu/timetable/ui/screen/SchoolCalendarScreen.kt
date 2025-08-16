@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,8 +55,11 @@ fun SchoolCalendarScreen() {
 
     Scaffold(
         topBar = {
+            val currentArea = schoolCalendarData.area
+            val title = if (currentArea.isBlank()) "校历"
+            else "校历（${currentArea}）"
             CenterAlignedTopAppBar(
-                title = { Text(text = "校历（${schoolCalendarData.area}）") },
+                title = { Text(text = title) },
                 navigationIcon = {
                     IconButton(onClick = {
                         navController.popBackStack()
@@ -84,20 +88,24 @@ fun SchoolCalendarScreen() {
             )
         },
         floatingActionButton = {
-            Column(horizontalAlignment = Alignment.End) {
-                ExtendedFloatingActionButton(
-                    text = {
-                        Text(text = "切换校区")
-                    },
-                    onClick = {
-                        selectDialogState.show()
-                    },
-                    icon = {
-                        Icon(
-                            painter = XhuIcons.Action.switch,
-                            contentDescription = null,
-                        )
-                    })
+            AnimatedVisibility(
+                visible = area.isNotEmpty(),
+            ) {
+                Column(horizontalAlignment = Alignment.End) {
+                    ExtendedFloatingActionButton(
+                        text = {
+                            Text(text = "切换校区")
+                        },
+                        onClick = {
+                            selectDialogState.show()
+                        },
+                        icon = {
+                            Icon(
+                                painter = XhuIcons.Action.switch,
+                                contentDescription = null,
+                            )
+                        })
+                }
             }
         }
     ) { paddingValues ->

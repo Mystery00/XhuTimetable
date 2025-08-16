@@ -3,9 +3,9 @@ package vip.mystery0.xhu.timetable.viewmodel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.datetime.format
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.module.desc
 import vip.mystery0.xhu.timetable.repository.JobRepo
@@ -27,7 +27,7 @@ class JobHistoryViewModel : ComposeViewModel() {
             toastMessage(message)
         }
 
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load exp score list failed", throwable)
             failed(throwable.message ?: throwable.desc())
         }) {
@@ -62,7 +62,7 @@ class JobHistoryViewModel : ComposeViewModel() {
     }
 
     fun addAutoCheckScoreJob(registrationId: String) {
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("add auto check score job failed", throwable)
             toastMessage(throwable.message ?: throwable.desc())
         }) {

@@ -3,8 +3,8 @@ package vip.mystery0.xhu.timetable.viewmodel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
@@ -35,7 +35,7 @@ class CustomUiViewModel : ComposeViewModel() {
     }
 
     private fun loadCustomUi() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             val customUi = getConfigStore { customUi }
             _customUi.value = customUi
             weekItemHeight.value = customUi.weekItemHeight
@@ -49,20 +49,20 @@ class CustomUiViewModel : ComposeViewModel() {
     }
 
     fun refreshRandomCourse() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             _randomCourse.value = AggregationLocalRepo.getRandomCourseList(6)
         }
     }
 
     fun reset() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             setConfigStore { customUi = CustomUi.DEFAULT }
             loadCustomUi()
         }
     }
 
     fun update() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             val nowCustomUi = CustomUi(
                 weekItemHeight.value,
                 weekBackgroundAlpha.value,
@@ -77,7 +77,7 @@ class CustomUiViewModel : ComposeViewModel() {
     }
 
     fun save() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             val nowCustomUi = CustomUi(
                 weekItemHeight.value,
                 weekBackgroundAlpha.value,

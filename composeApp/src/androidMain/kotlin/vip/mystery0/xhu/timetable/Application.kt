@@ -15,7 +15,6 @@ import org.koin.core.context.startKoin
 import vip.mystery0.xhu.timetable.config.logger.FileLogWriter
 import vip.mystery0.xhu.timetable.config.mmkv.KermitMMKVLogger
 import vip.mystery0.xhu.timetable.module.moduleList
-import vip.mystery0.xhu.timetable.utils.ApplicationExceptionCatcher
 
 @SuppressLint("StaticFieldLeak")
 internal lateinit var context: Context
@@ -27,8 +26,8 @@ class Application : Application(), DefaultLifecycleObserver {
         super<Application>.onCreate()
         AppContext.apply { set(applicationContext) }
         context = this
-        Thread.setDefaultUncaughtExceptionHandler(ApplicationExceptionCatcher(Thread.getDefaultUncaughtExceptionHandler()))
         fileLogWriter = initLogger()
+        initCoroutine()
         initFeature()
         startKoin {
             logger(KermitKoinLogger(Logger.withTag("koin")))

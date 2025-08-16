@@ -9,7 +9,6 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.component.inject
@@ -17,6 +16,8 @@ import vip.mystery0.xhu.timetable.api.CommonApi
 import vip.mystery0.xhu.timetable.api.MenuApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.config.Customisable
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
+import vip.mystery0.xhu.timetable.config.coroutine.safeWithContext
 import vip.mystery0.xhu.timetable.config.store.MenuStore
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
@@ -26,6 +27,7 @@ import vip.mystery0.xhu.timetable.model.request.ClientInitRequest
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
 import vip.mystery0.xhu.timetable.model.response.VersionUrl
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -82,7 +84,7 @@ object StartRepo : BaseDataRepo {
 
     private fun localInit() {
         logger.i("Initializing with local data due to network issue or timeout.")
-        repoScope.launch {
+        repoScope.safeLaunch {
             version.emit(ClientVersion.EMPTY)
         }
     }
@@ -119,10 +121,15 @@ object StartRepo : BaseDataRepo {
         if (!isOnline) {
             return getCacheStore { teamMemberList }
         }
-        val teamMemberList = commonApi.getTeamMemberList()
-        setCacheStore {
-            this.teamMemberList = teamMemberList
+        return safeWithContext(EmptyCoroutineContext, onException = {
+            Logger.w("loadTeamMemberList failed: ${it.message}")
+            true
+        }, resultWhenException = { getCacheStore { teamMemberList } }) {
+            val teamMemberList = commonApi.getTeamMemberList()
+            setCacheStore {
+                this.teamMemberList = teamMemberList
+            }
+            teamMemberList
         }
-        return teamMemberList
     }
 }

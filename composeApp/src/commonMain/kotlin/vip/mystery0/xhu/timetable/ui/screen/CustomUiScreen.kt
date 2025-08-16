@@ -41,7 +41,6 @@ import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.input.InputDialog
 import com.maxkeppeler.sheets.input.models.InputCustomView
 import com.maxkeppeler.sheets.input.models.InputSelection
-import kotlinx.coroutines.launch
 import me.zhanghai.compose.preference.SliderPreference
 import multiplatform.network.cmptoast.showToast
 import org.jetbrains.compose.resources.painterResource
@@ -88,9 +87,7 @@ fun CustomUiScreen() {
                 },
                 actions = {
                     IconButton(onClick = {
-                        scope.launch {
-                            viewModel.reset()
-                        }
+                        viewModel.reset()
                     }) {
                         Icon(
                             imageVector = Icons.Rounded.SettingsBackupRestore,

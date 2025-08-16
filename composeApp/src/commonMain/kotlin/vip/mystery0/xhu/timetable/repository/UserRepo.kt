@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.repository
 
+import co.touchlab.kermit.Logger
 import dev.whyoleg.cryptography.CryptographyProvider
 import dev.whyoleg.cryptography.algorithms.AES
 import dev.whyoleg.cryptography.algorithms.EC
@@ -27,6 +28,7 @@ object UserRepo : BaseDataRepo {
         doLogin(user.studentId, user.password)
 
     suspend fun doLogin(username: String, password: String): LoginResponse {
+        Logger.d("doLogin: $username")
         val resp = withContext(Dispatchers.IO) { userApi.publicKey() }
         val (encryptPassword, clientPublicKey) = withContext(Dispatchers.Default) {
             val clientKeyPair = CryptographyProvider.Default.get(ECDH)
@@ -67,6 +69,7 @@ object UserRepo : BaseDataRepo {
     }
 
     suspend fun reloadUserInfo(token: String) = withContext(Dispatchers.IO) {
+        Logger.d("reload user info")
         userApi.reloadUserInfo(token)
     }
 

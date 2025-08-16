@@ -48,7 +48,6 @@ import com.maxkeppeler.sheets.list.ListDialog
 import com.maxkeppeler.sheets.list.models.ListOption
 import com.maxkeppeler.sheets.list.models.ListSelection
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.datetime.format
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -263,10 +262,8 @@ private fun DrawPoemsCard(
         ) {}
         Card(
             onClick = {
-                scope.launch {
-                    trackEvent("点击今日诗词")
-                    openBottomSheet.value = true
-                }
+                trackEvent("点击今日诗词")
+                openBottomSheet.value = true
             },
             modifier = Modifier
                 .padding(end = 8.dp)

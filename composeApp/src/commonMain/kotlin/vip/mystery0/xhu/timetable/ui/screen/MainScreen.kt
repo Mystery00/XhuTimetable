@@ -33,10 +33,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import co.touchlab.kermit.Logger
 import coil3.compose.AsyncImage
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.DrawableResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.trackEvent
 import vip.mystery0.xhu.timetable.model.event.EventType
@@ -131,7 +132,7 @@ fun MainScreen() {
                         tab = tab,
                         icon = tab.icon,
                     ) {
-                        coroutineScope.launch {
+                        coroutineScope.safeLaunch(Dispatchers.Main) {
                             pagerState.animateScrollToPage(index)
                         }
                     }

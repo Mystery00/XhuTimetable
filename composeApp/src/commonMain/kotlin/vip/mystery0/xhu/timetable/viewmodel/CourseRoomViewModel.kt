@@ -1,11 +1,11 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
 import vip.mystery0.xhu.timetable.base.SelectDataLoader
 import vip.mystery0.xhu.timetable.base.Selectable
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.model.request.ClassroomRequest
 import vip.mystery0.xhu.timetable.model.response.ClassroomResponse
@@ -27,7 +27,7 @@ class CourseRoomViewModel : PagingComposeViewModel<ClassroomRequest, ClassroomRe
         get() = pageRequestFlow.value == null
 
     fun init() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             areaSelect.init()
 
             weekSelect.customInit(1, 20) { "第${it}周" }
@@ -39,25 +39,25 @@ class CourseRoomViewModel : PagingComposeViewModel<ClassroomRequest, ClassroomRe
     }
 
     fun changeArea(area: String) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             areaSelect.setSelected(area)
         }
     }
 
     fun changeWeek(week: List<Int>) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             weekSelect.multiSetSelected(week)
         }
     }
 
     fun changeDay(day: List<Int>) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             daySelect.multiSetSelected(day)
         }
     }
 
     fun changeTime(time: List<Int>) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             timeSelect.multiSetSelected(time)
         }
     }
@@ -67,7 +67,7 @@ class CourseRoomViewModel : PagingComposeViewModel<ClassroomRequest, ClassroomRe
             logger.w("search failed: $message")
             toastMessage(message)
         }
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("search failed", throwable)
             failed(throwable.message ?: throwable.desc())
         }) {

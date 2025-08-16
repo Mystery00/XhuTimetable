@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
@@ -77,7 +77,7 @@ fun removeDownloadObserver(
 }
 
 fun updateObserverProgress(state: DownloadUpdateState) {
-    coroutineScope.launch {
+    coroutineScope.safeLaunch {
         downloadStateFlow.emit(state)
         if (state.patch) {
             patchDownloadObserver.values.forEach { it(state) }

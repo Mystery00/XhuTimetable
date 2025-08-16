@@ -7,6 +7,7 @@ import vip.mystery0.xhu.timetable.module.moduleList
 
 fun callAppInit() {
     initLogger()
+    initCoroutine()
     initFeature()
     startKoin {
         logger(KermitKoinLogger(Logger.withTag("koin")))

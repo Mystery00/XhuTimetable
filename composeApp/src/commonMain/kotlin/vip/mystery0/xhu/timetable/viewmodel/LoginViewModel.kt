@@ -4,11 +4,10 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
-import vip.mystery0.xhu.timetable.config.CoroutineStopException
 import vip.mystery0.xhu.timetable.config.FeatureString
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.User
@@ -25,7 +24,7 @@ class LoginViewModel : ComposeViewModel() {
     val loginState: StateFlow<LoginState> = _loginState
 
     fun init() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             _loginLabel.value = FeatureString.LOGIN_LABEL.getValue()
         }
     }
@@ -34,7 +33,7 @@ class LoginViewModel : ComposeViewModel() {
         username: String,
         password: String,
     ) {
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("login failed", throwable)
             _loginState.value =
                 LoginState(errorMessage = throwable.message ?: throwable.desc())
@@ -43,7 +42,7 @@ class LoginViewModel : ComposeViewModel() {
             withContext(Dispatchers.Default) {
                 if (UserStore.getUserByStudentId(username) != null) {
                     //账号已登录，不允许二次登陆
-                    throw CoroutineStopException("该用户已登录！")
+                    throw RuntimeException("该用户已登录！")
                 }
             }
             val loginResponse = UserRepo.doLogin(username, password)

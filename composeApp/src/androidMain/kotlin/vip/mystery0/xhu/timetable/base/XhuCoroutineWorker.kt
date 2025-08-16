@@ -13,7 +13,8 @@ import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
+import kotlin.coroutines.EmptyCoroutineContext
 
 @SuppressLint("RestrictedApi")
 abstract class XhuCoroutineWorker(
@@ -36,7 +37,7 @@ abstract class XhuCoroutineWorker(
     }
 
     final override fun startWork(): ListenableFuture<Result> {
-        coroutineScope.launch {
+        coroutineScope.safeLaunch(EmptyCoroutineContext) {
             try {
                 val result = doWork()
                 future.set(result)

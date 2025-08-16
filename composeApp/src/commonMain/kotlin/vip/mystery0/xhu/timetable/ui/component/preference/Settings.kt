@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.SwitchPreference
 import me.zhanghai.compose.preference.TwoTargetSwitchPreference
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.CacheStore
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
@@ -72,7 +72,7 @@ fun ConfigSettingsCheckbox(
     val state = rememberConfigState(
         property = config,
         onChange = {
-            scope.launch {
+            scope.safeLaunch {
                 setConfigStore { config.set(this, it) }
                 onCheckedChange(it)
             }
@@ -116,7 +116,7 @@ fun PoemsSettingsCheckbox(
     onCheckedChange: suspend (Boolean) -> Unit = { },
 ) {
     val state = rememberPoemsState(property = config) {
-        scope.launch { onCheckedChange(it) }
+        scope.safeLaunch { onCheckedChange(it) }
     }
     SwitchPreference(
         state = state,

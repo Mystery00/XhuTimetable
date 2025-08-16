@@ -3,10 +3,10 @@ package vip.mystery0.xhu.timetable.viewmodel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.PageRequest
 import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
 import vip.mystery0.xhu.timetable.base.UserSelectDataLoader
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.model.event.EventType
@@ -29,7 +29,7 @@ class CustomThingViewModel : PagingComposeViewModel<PageRequest, CustomThingResp
     val saveLoadingState: StateFlow<LoadingState> = _saveLoadingState
 
     fun init() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             userSelect.init()
             loadCustomThingList()
         }
@@ -41,14 +41,14 @@ class CustomThingViewModel : PagingComposeViewModel<PageRequest, CustomThingResp
             toastMessage(message)
         }
 
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load custom thing list failed", throwable)
             failed(throwable.message ?: throwable.desc())
         }) {
             val selectedUser = userSelect.getSelectedUser()
             if (selectedUser == null) {
                 failed("选择用户为空，请重新选择")
-                return@launch
+                return@safeLaunch
             }
             loadData(PageRequest(selectedUser, 1, 1))
         }
@@ -64,7 +64,7 @@ class CustomThingViewModel : PagingComposeViewModel<PageRequest, CustomThingResp
             toastMessage(message)
             _saveLoadingState.value = LoadingState(actionSuccess = false)
         }
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("save custom thing failed", throwable)
             failed(throwable.message ?: throwable.desc())
         }) {
@@ -78,13 +78,13 @@ class CustomThingViewModel : PagingComposeViewModel<PageRequest, CustomThingResp
             }
             if (request.startTime > request.endTime) {
                 failed("开始时间不能晚于结束时间")
-                return@launch
+                return@safeLaunch
             }
 
             val selectedUser = userSelect.getSelectedUser()
             if (selectedUser == null) {
                 failed("选择用户为空，请重新选择")
-                return@launch
+                return@safeLaunch
             }
             if (thingId == null || thingId == 0L) {
                 CustomThingRepo.createCustomThing(selectedUser, request)
@@ -103,7 +103,7 @@ class CustomThingViewModel : PagingComposeViewModel<PageRequest, CustomThingResp
             toastMessage(message)
             _saveLoadingState.value = LoadingState(actionSuccess = false)
         }
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("delete custom thing failed", throwable)
             failed(throwable.message ?: throwable.desc())
         }) {
@@ -112,7 +112,7 @@ class CustomThingViewModel : PagingComposeViewModel<PageRequest, CustomThingResp
             val selectedUser = userSelect.getSelectedUser()
             if (selectedUser == null) {
                 failed("选择用户为空，请重新选择")
-                return@launch
+                return@safeLaunch
             }
 
             CustomThingRepo.deleteCustomThing(selectedUser, thingId)
@@ -123,13 +123,13 @@ class CustomThingViewModel : PagingComposeViewModel<PageRequest, CustomThingResp
     }
 
     fun selectUser(studentId: String) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             userSelect.setSelected(studentId)
         }
     }
 
     private fun updateChange() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             EventBus.post(EventType.CHANGE_SHOW_CUSTOM_THING)
         }
         loadCustomThingList()

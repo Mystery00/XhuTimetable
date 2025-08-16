@@ -2,10 +2,10 @@ package vip.mystery0.xhu.timetable.viewmodel
 
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
 import vip.mystery0.xhu.timetable.base.UserSelectDataLoader
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.module.desc
@@ -21,7 +21,7 @@ class ExamViewModel : PagingComposeViewModel<PageRequest, Exam>(
     val userSelect = UserSelectDataLoader()
 
     fun init() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             userSelect.init()
             loadExamList()
         }
@@ -32,21 +32,21 @@ class ExamViewModel : PagingComposeViewModel<PageRequest, Exam>(
             logger.w("load exam list failed, $message")
             toastMessage(message)
         }
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load exam list failed", throwable)
             failed(throwable.message ?: throwable.desc())
         }) {
             val selectedUser = userSelect.getSelectedUser()
             if (selectedUser == null) {
                 failed("选择用户为空，请重新选择")
-                return@launch
+                return@safeLaunch
             }
             loadData(PageRequest(selectedUser))
         }
     }
 
     fun selectUser(studentId: String) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             userSelect.setSelected(studentId)
         }
     }

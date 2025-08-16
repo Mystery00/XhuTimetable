@@ -12,11 +12,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.externalPictureDir
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.module.HTTP_CLIENT_FILE
@@ -43,7 +43,7 @@ class SchoolCalendarViewModel : ComposeViewModel() {
             _loading.value = LoadingState(false, message)
         }
 
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("changeArea failed", throwable)
             failed(throwable.message ?: throwable.desc())
         }) {
@@ -56,7 +56,7 @@ class SchoolCalendarViewModel : ComposeViewModel() {
     }
 
     fun changeArea(area: String) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             _area.value.first { it.area == area }.let {
                 _schoolCalendarData.value = it.doCache(fileClient)
             }
@@ -73,7 +73,7 @@ data class SchoolCalendarData(
     val imageUrl: String = "",
     var cacheFile: PlatformFile? = null,
 ) {
-    private suspend fun cacheFile(): PlatformFile {
+    private fun cacheFile(): PlatformFile {
         val dir = PlatformFile(externalPictureDir, "calendar")
         if (!dir.exists()) {
             dir.createDirectories(true)
@@ -83,7 +83,7 @@ data class SchoolCalendarData(
     }
 
     suspend fun doCache(fileClient: HttpClient): SchoolCalendarData {
-        val file = withContext(Dispatchers.Default) { cacheFile() }
+        val file = cacheFile()
         cacheFile = file
         Logger.withTag("SchoolCalendarData")
             .i("doCache: save school calendar cache to ${file.absolutePath()}")

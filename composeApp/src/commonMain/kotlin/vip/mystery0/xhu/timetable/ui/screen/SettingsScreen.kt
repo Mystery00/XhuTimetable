@@ -20,13 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
-import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import multiplatform.network.cmptoast.showToast
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
 import vip.mystery0.xhu.timetable.base.appVersionCode
 import vip.mystery0.xhu.timetable.base.publicDeviceId
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
@@ -112,11 +112,11 @@ fun SettingsScreen() {
                 XhuSettingsMenuLink(
                     title = { Text(text = "强制重置背景图") },
                     onClick = {
-                        scope.launch {
+                        scope.safeLaunch {
                             setConfigStore { backgroundImage = null }
                             EventBus.post(EventType.CHANGE_MAIN_BACKGROUND)
-                            showToast("重置成功")
                         }
+                        showToast("重置成功")
                     }
                 )
                 ConfigSettingsCheckbox(
@@ -159,10 +159,10 @@ fun SettingsScreen() {
                     },
                     title = { Text(text = "清除启动图隐藏设置") },
                     onClick = {
-                        scope.launch {
+                        scope.safeLaunch {
                             setCacheStore { hideSplashBefore = LocalDate.MIN }
-                            showToast("清理成功")
                         }
+                        showToast("清理成功")
                     }
                 )
                 XhuSettingsMenuLink(
@@ -226,10 +226,10 @@ fun SettingsScreen() {
                     title = { Text(text = "重置Token") },
                     subtitle = { Text(text = "如果一直无法显示今日诗词，可能是缓存的Token出现了问题，点击此处可以进行重置") },
                     onClick = {
-                        scope.launch {
+                        scope.safeLaunch {
                             viewModel.resetPoemsToken()
-                            showToast("重置成功，重启应用后生效")
                         }
+                        showToast("重置成功，重启应用后生效")
                     }
                 )
             }

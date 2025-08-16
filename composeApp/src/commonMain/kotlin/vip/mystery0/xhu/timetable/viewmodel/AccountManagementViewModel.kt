@@ -3,8 +3,8 @@ package vip.mystery0.xhu.timetable.viewmodel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.UserStore
@@ -26,7 +26,7 @@ class AccountManagementViewModel : ComposeViewModel() {
     }
 
     fun loadLoggedUserList() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             val mainUserId = UserStore.getMainUserId()
             val userList = UserStore.loggedUserList()
             _loggedUserList.value =
@@ -46,7 +46,7 @@ class AccountManagementViewModel : ComposeViewModel() {
     }
 
     fun changeMainUser(studentId: String) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             UserStore.setMainUser(studentId)
             EventBus.post(EventType.CHANGE_MAIN_USER)
             loadLoggedUserList()
@@ -54,7 +54,7 @@ class AccountManagementViewModel : ComposeViewModel() {
     }
 
     fun reloadUserInfo(studentId: String) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             var loginUser = UserStore.getUserByStudentId(studentId)!!
             val userInfo = UserRepo.reloadUserInfo(loginUser.token)
             //再获取一次数据，避免更新用户信息的请求时token变了
@@ -66,7 +66,7 @@ class AccountManagementViewModel : ComposeViewModel() {
     }
 
     fun logoutUser(studentId: String) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             val result = UserStore.logout(studentId)
             if (result) {
                 EventBus.post(EventType.MAIN_USER_LOGOUT)
@@ -76,7 +76,7 @@ class AccountManagementViewModel : ComposeViewModel() {
     }
 
     fun updateAccountTitleTemplate(customAccountTitle: CustomAccountTitle) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             setConfigStore { this.customAccountTitle = customAccountTitle }
             _customAccountTitle.value = customAccountTitle
             EventBus.post(EventType.CHANGE_CUSTOM_ACCOUNT_TITLE)

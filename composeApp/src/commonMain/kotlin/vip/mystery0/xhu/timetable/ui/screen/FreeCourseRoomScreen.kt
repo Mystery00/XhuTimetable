@@ -48,11 +48,11 @@ import com.maxkeppeler.sheets.option.models.Option
 import com.maxkeppeler.sheets.option.models.OptionConfig
 import com.maxkeppeler.sheets.option.models.OptionSelection
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.model.response.ClassroomResponse
 import vip.mystery0.xhu.timetable.ui.component.BuildPaging
 import vip.mystery0.xhu.timetable.ui.component.PageItemLayout
@@ -222,7 +222,7 @@ private fun CourseRoomBottomSheet(
 
     fun dismissSheet() {
         scope
-            .launch { sheetState.hide() }
+            .safeLaunch { sheetState.hide() }
             .invokeOnCompletion {
                 if (!sheetState.isVisible) {
                     openBottomSheet.value = false
@@ -296,10 +296,8 @@ private fun CourseRoomBottomSheet(
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    scope.launch {
-                        viewModel.search()
-                        dismissSheet()
-                    }
+                    viewModel.search()
+                    dismissSheet()
                 }) {
                 Text(text = "查询")
             }

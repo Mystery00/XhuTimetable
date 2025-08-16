@@ -3,12 +3,12 @@ package vip.mystery0.xhu.timetable.viewmodel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.PageRequest
 import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
 import vip.mystery0.xhu.timetable.base.TermSelectDataLoader
 import vip.mystery0.xhu.timetable.base.UserSelectDataLoader
 import vip.mystery0.xhu.timetable.base.YearSelectDataLoader
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.model.event.EventType
@@ -30,7 +30,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
     val saveLoadingState: StateFlow<LoadingState> = _saveLoadingState
 
     fun init() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             userSelect.init()
             yearSelect.init()
             termSelect.init()
@@ -44,14 +44,14 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
             toastMessage(message)
         }
 
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load custom course list failed", throwable)
             failed(throwable.message ?: throwable.desc())
         }) {
             val selectedUser = userSelect.getSelectedUser()
             if (selectedUser == null) {
                 failed("选择用户为空，请重新选择")
-                return@launch
+                return@safeLaunch
             }
             val year = yearSelect.getSelectedYear()
             val term = termSelect.getSelectedTerm()
@@ -68,7 +68,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
             toastMessage(message)
             _saveLoadingState.value = LoadingState(actionSuccess = false)
         }
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("save custom course failed", throwable)
             failed(throwable.message ?: throwable.desc())
         }) {
@@ -77,13 +77,13 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
             val selectedUser = userSelect.getSelectedUser()
             if (selectedUser == null) {
                 failed("选择用户为空，请重新选择")
-                return@launch
+                return@safeLaunch
             }
             val year = yearSelect.getSelectedYear()
             val term = termSelect.getSelectedTerm()
             if (request.startDayTime > request.endDayTime) {
                 failed("开始节次不能大于结束节次")
-                return@launch
+                return@safeLaunch
             }
             request.year = year
             request.term = term
@@ -104,7 +104,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
             toastMessage(message)
             _saveLoadingState.value = LoadingState(actionSuccess = false)
         }
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("delete custom course failed", throwable)
             failed(throwable.message ?: throwable.desc())
         }) {
@@ -113,7 +113,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
             val selectedUser = userSelect.getSelectedUser()
             if (selectedUser == null) {
                 failed("选择用户为空，请重新选择")
-                return@launch
+                return@safeLaunch
             }
 
             CustomCourseRepo.deleteCustomCourse(selectedUser, courseId)
@@ -124,25 +124,25 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
     }
 
     fun selectUser(studentId: String) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             userSelect.setSelected(studentId)
         }
     }
 
     fun selectYear(year: Int) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             yearSelect.setSelected(year)
         }
     }
 
     fun selectTerm(term: Int) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             termSelect.setSelected(term)
         }
     }
 
     private fun updateChange() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             EventBus.post(EventType.CHANGE_SHOW_CUSTOM_COURSE)
         }
         loadCustomCourseList()

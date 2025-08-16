@@ -8,9 +8,9 @@ import io.ktor.websocket.close
 import io.ktor.websocket.send
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.HINT_NETWORK
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
@@ -36,14 +36,17 @@ class FeedbackViewModel : ComposeViewModel() {
     val messageState = MessageState(emptyList())
 
     fun init() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch(onException = networkErrorHandler {
+            logger.w("init failed", it)
+            _wsStatus.value = WebSocketState(WebSocketStatus.FAILED, it.message ?: it.desc())
+        }) {
             initWebSocket()
         }
         loadLastMessage(20)
     }
 
     fun loadLastMessage(size: Int) {
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load message list failed", throwable)
             _loading.value = LoadingState(
                 loading = false,
@@ -68,10 +71,10 @@ class FeedbackViewModel : ComposeViewModel() {
     }
 
     fun sendMessage(content: String) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             if (!isOnline()) {
                 _wsStatus.value = WebSocketState(WebSocketStatus.DISCONNECTED, HINT_NETWORK)
-                return@launch
+                return@safeLaunch
             }
             if (!isConnected()) {
                 _wsStatus.value =
@@ -79,17 +82,17 @@ class FeedbackViewModel : ComposeViewModel() {
                         WebSocketStatus.DISCONNECTED,
                         "网络连接异常，请点击右上角的图标进行重连"
                     )
-                return@launch
+                return@safeLaunch
             }
             webSocket?.send(content)
         }
     }
 
     fun connectWebSocket() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             if (isConnected()) {
                 //连接中，或者已经建立连接
-                return@launch
+                return@safeLaunch
             }
             initWebSocket()
         }
@@ -117,7 +120,7 @@ class FeedbackViewModel : ComposeViewModel() {
             _wsStatus.value = it
         }
         webSocket = FeedbackRepo.initWebSocket(statusConsumer)
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             FeedbackRepo.handleMessage(
                 webSocket!!,
                 messageConsumer,
@@ -128,7 +131,7 @@ class FeedbackViewModel : ComposeViewModel() {
     }
 
     override fun onCleared() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             webSocket?.close(CloseReason(1000, "客户端下线"))
         }
         super.onCleared()

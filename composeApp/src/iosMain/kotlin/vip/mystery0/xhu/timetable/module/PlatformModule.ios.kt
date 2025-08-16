@@ -13,4 +13,6 @@ actual fun platformModule(): Module = module {
     }
 }
 
-actual fun Throwable.desc(): String = this.stackTraceToString()
+actual fun Throwable.desc(): String = this::class.simpleName?.let {
+    "捕获异常：${it}"
+} ?: this.stackTraceToString()

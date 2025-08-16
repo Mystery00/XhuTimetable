@@ -21,12 +21,12 @@ import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.clock.ClockDialog
 import com.maxkeppeler.sheets.clock.models.ClockConfig
 import com.maxkeppeler.sheets.clock.models.ClockSelection
-import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.format
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.appName
 import vip.mystery0.xhu.timetable.base.packageName
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.CacheStore
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
 import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
@@ -197,10 +197,8 @@ actual fun UpdateSettings() {
         },
         title = { Text(text = "检查更新") },
         onClick = {
-            scope.launch {
-                viewModel.checkUpdate(false)
-                showShortToast("检查更新完成")
-            }
+            viewModel.checkUpdate(false)
+            showShortToast("检查更新完成")
         }
     )
     XhuSettingsMenuLink(
@@ -270,7 +268,7 @@ private fun ShowCheckUpdateDialog() {
         onIgnore = {
         },
         onClose = {
-            scope.launch {
+            scope.safeLaunch {
                 StartRepo.version.emit(ClientVersion.EMPTY)
             }
         },
@@ -306,10 +304,8 @@ actual fun DeveloperSettings() {
         },
         title = { Text(text = "直接检查测试版更新") },
         onClick = {
-            scope.launch {
-                viewModel.checkUpdate(true)
-                showShortToast("检查更新完成")
-            }
+            viewModel.checkUpdate(true)
+            showShortToast("检查更新完成")
         }
     )
     val version by viewModel.version.collectAsState()
@@ -361,7 +357,9 @@ actual fun DeveloperSettings() {
     XhuSettingsMenuLink(
         title = { Text(text = "测试崩溃") },
         onClick = {
-            throw RuntimeException("this is a test exception")
+            scope.safeLaunch {
+                throw RuntimeException("this is a test exception")
+            }
         },
     )
 //    XhuSettingsMenuLink(

@@ -16,12 +16,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.checkEqual
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.customImageDir
 import vip.mystery0.xhu.timetable.config.externalPictureDir
 import vip.mystery0.xhu.timetable.config.ktor.FileDownloadProgressState
@@ -55,7 +55,7 @@ class BackgroundViewModel : ComposeViewModel() {
     val progressState: StateFlow<DownloadProgressState> = _progressState
 
     fun init() {
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load background list failed", throwable)
             _backgroundListState.value = BackgroundListState(
                 loading = false,
@@ -121,7 +121,7 @@ class BackgroundViewModel : ComposeViewModel() {
     }
 
     fun setCustomBackground(bytes: ByteArray) {
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("set custom background failed", throwable)
             _backgroundListState.value = _backgroundListState.value.replaceMessage(
                 throwable.message ?: throwable.desc()
@@ -148,7 +148,7 @@ class BackgroundViewModel : ComposeViewModel() {
     }
 
     fun setBackground(backgroundId: Long) {
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("set background failed", throwable)
             _backgroundListState.value = _backgroundListState.value.replaceMessage(
                 throwable.message ?: throwable.desc()
@@ -165,12 +165,12 @@ class BackgroundViewModel : ComposeViewModel() {
             val selected = nowList.find { it.backgroundId == backgroundId }!!
             if (current?.backgroundId == backgroundId) {
                 _backgroundListState.value = _backgroundListState.value.loadWithList(false)
-                return@launch
+                return@safeLaunch
             }
             clearOldCustomImage()
             when (backgroundId) {
                 0L -> setConfigStore { backgroundImage = null }
-                -1L -> return@launch
+                -1L -> return@safeLaunch
                 else -> {
                     _progressState.value =
                         DownloadProgressState(

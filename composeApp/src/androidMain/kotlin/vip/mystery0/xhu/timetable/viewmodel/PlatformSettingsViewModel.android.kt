@@ -6,11 +6,11 @@ import androidx.work.WorkManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalTime
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.startUniqueWork
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
@@ -32,7 +32,7 @@ actual class PlatformSettingsViewModel : ComposeViewModel() {
     val version = MutableStateFlow<ClientVersion?>(null)
 
     fun init() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             _notifyTimeData.value = getConfigStore { notifyTime }
             _versionChannel.value = getConfigStore { versionChannel }
             StartRepo.version.collectLatest {
@@ -46,7 +46,7 @@ actual class PlatformSettingsViewModel : ComposeViewModel() {
     }
 
     fun updateNotifyTime(time: LocalTime?) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             setConfigStore { notifyTime = time }
             _notifyTimeData.value = getConfigStore { notifyTime }
             NotifySetter.setTrigger()
@@ -54,21 +54,21 @@ actual class PlatformSettingsViewModel : ComposeViewModel() {
     }
 
     fun updateVersionChannel(versionChannel: VersionChannel) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             setConfigStore { this.versionChannel = versionChannel }
             _versionChannel.value = getConfigStore { versionChannel }
         }
     }
 
     fun checkUpdate(forceBeta: Boolean) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             StartRepo.checkVersion(forceBeta)
         }
     }
 
     fun downloadApk() {
-        viewModelScope.launch {
-            val newVersion = version.value ?: return@launch
+        viewModelScope.safeLaunch {
+            val newVersion = version.value ?: return@safeLaunch
             workManager.startUniqueWork<DownloadApkWork>(
                 Data.Builder()
                     .putString(DownloadApkWork.ARG_VERSION_ID, newVersion.versionId.toString())
@@ -84,8 +84,8 @@ actual class PlatformSettingsViewModel : ComposeViewModel() {
     }
 
     fun downloadPatch() {
-        viewModelScope.launch {
-            val newVersion = version.value ?: return@launch
+        viewModelScope.safeLaunch {
+            val newVersion = version.value ?: return@safeLaunch
             workManager.startUniqueWork<DownloadPatchWork>(
                 Data.Builder()
                     .putString(DownloadPatchWork.ARG_VERSION_ID, newVersion.versionId.toString())

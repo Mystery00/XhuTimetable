@@ -7,7 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
@@ -21,6 +20,7 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.number
 import kotlinx.datetime.plus
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
@@ -137,7 +137,7 @@ class MainViewModel : ComposeViewModel() {
     val customUi: StateFlow<CustomUi> = _customUi
 
     init {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             loadFromConfig()
             val mainUser = UserStore.getMainUser()
             _mainUser.value = mainUser
@@ -168,7 +168,7 @@ class MainViewModel : ComposeViewModel() {
     }
 
     fun loadConfig() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             loadFromConfig()
         }
     }
@@ -178,14 +178,14 @@ class MainViewModel : ComposeViewModel() {
             return
         }
         if (isDarkMode.value == null && isDarkModeValue == null) return
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             if (isDarkModeValue != null) {
                 isDarkMode.value = isDarkModeValue
             }
             val disable = getConfigStore { disableBackgroundWhenNight }
             if (disable && isDarkMode.value!!) {
                 _backgroundImage.value = Unit
-                return@launch
+                return@safeLaunch
             } else {
                 _backgroundImage.value =
                     getConfigStore { backgroundImage } ?: XhuImages.defaultBackgroundImageUri
@@ -195,7 +195,7 @@ class MainViewModel : ComposeViewModel() {
     }
 
     fun checkMainUser() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             val mainUser = UserStore.getMainUser()
             _mainUser.value = mainUser
             _emptyUser.value = mainUser == null
@@ -203,7 +203,7 @@ class MainViewModel : ComposeViewModel() {
     }
 
     private fun showPoems() {
-        viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
+        viewModelScope.safeLaunch(CoroutineExceptionHandler { _, throwable ->
             logger.w("showPoems: ", throwable)
             trackError(throwable)
         }) {
@@ -212,7 +212,7 @@ class MainViewModel : ComposeViewModel() {
     }
 
     fun calculateTodayTitle() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             val showTomorrow = getConfigStore { showTomorrowCourseTime }?.let {
                 LocalTime.now() > it
             } ?: false
@@ -244,7 +244,7 @@ class MainViewModel : ComposeViewModel() {
      * 初始化时候加载数据的方法
      */
     fun loadLocalDataToState(changeWeekOnly: Boolean = false) {
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load local course list failed", throwable)
             _loading.value = false
             toastMessage(throwable.message ?: throwable.desc())
@@ -320,7 +320,7 @@ class MainViewModel : ComposeViewModel() {
      * 手动刷新加载数据的方法
      */
     fun refreshCloudDataToState() {
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load course list failed", throwable)
             _loading.value = false
             if (!GlobalConfigStore.showOldCourseWhenFailed) {
@@ -520,11 +520,11 @@ class MainViewModel : ComposeViewModel() {
      * 复用的加载今日节假日信息的方法
      */
     fun loadTodayHoliday() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             val showHoliday = getConfigStore { showHoliday }
             if (!showHoliday) {
                 _holiday.value = null
-                return@launch
+                return@safeLaunch
             }
             val (nowHoliday, tomorrowHoliday) = getCacheStore { holiday }
             val showTomorrow =
@@ -783,7 +783,7 @@ class MainViewModel : ComposeViewModel() {
     }
 
     fun changeCurrentWeek(currentWeek: Int) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             _week.value = currentWeek
             val termStartDate = getConfigStore { termStartDate }
             //获取缓存的课程数据

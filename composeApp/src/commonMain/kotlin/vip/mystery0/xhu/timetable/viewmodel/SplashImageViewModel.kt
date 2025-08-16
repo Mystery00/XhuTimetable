@@ -7,12 +7,12 @@ import io.github.vinceglb.filekit.exists
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.utils.now
@@ -32,13 +32,13 @@ class SplashImageViewModel : ComposeViewModel(), KoinComponent {
     val showSplashFile: StateFlow<PlatformFile?> = _showSplashFile
 
     fun skip() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             _timerState.value = 0
         }
     }
 
     fun hide() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             val hideDate = LocalDate.now().plus(7, DateTimeUnit.DAY)
             setCacheStore { hideSplashBefore = hideDate }
         }
@@ -48,17 +48,17 @@ class SplashImageViewModel : ComposeViewModel(), KoinComponent {
         splashFilePath: String,
         splashId: Long,
     ) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             val splashList = getCacheStore { splashList }
             val splash = splashList.firstOrNull() { it.splashId == splashId }
             if (splash == null) {
                 _timerState.value = 0
-                return@launch
+                return@safeLaunch
             }
             val file = PlatformFile(splashFilePath)
             if (!file.exists()) {
                 _timerState.value = 0
-                return@launch
+                return@safeLaunch
             }
             _showSplashBackgroundColor.value = splash.backgroundColor.parseColorHexString()
             _showSplashLocationUrl.value = splash.locationUrl

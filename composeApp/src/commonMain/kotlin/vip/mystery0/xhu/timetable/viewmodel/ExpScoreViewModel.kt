@@ -3,12 +3,12 @@ package vip.mystery0.xhu.timetable.viewmodel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.TermSelectDataLoader
 import vip.mystery0.xhu.timetable.base.UserSelectDataLoader
 import vip.mystery0.xhu.timetable.base.YearSelectDataLoader
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.model.response.ExperimentScoreResponse
 import vip.mystery0.xhu.timetable.module.desc
@@ -23,7 +23,7 @@ class ExpScoreViewModel : ComposeViewModel(), KoinComponent {
     val expScoreListState: StateFlow<ExpScoreListState> = _expScoreListState
 
     fun init() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             userSelect.init()
             yearSelect.init()
             termSelect.init()
@@ -37,7 +37,7 @@ class ExpScoreViewModel : ComposeViewModel(), KoinComponent {
             _expScoreListState.value = ExpScoreListState(errorMessage = message)
         }
 
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load exp score list failed", throwable)
             failed(throwable.message ?: throwable.desc())
         }) {
@@ -45,7 +45,7 @@ class ExpScoreViewModel : ComposeViewModel(), KoinComponent {
             val selectedUser = userSelect.getSelectedUser()
             if (selectedUser == null) {
                 failed("选择用户为空，请重新选择")
-                return@launch
+                return@safeLaunch
             }
             val year = yearSelect.getSelectedYear()
             val term = termSelect.getSelectedTerm()
@@ -56,19 +56,19 @@ class ExpScoreViewModel : ComposeViewModel(), KoinComponent {
     }
 
     fun selectUser(studentId: String) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             userSelect.setSelected(studentId)
         }
     }
 
     fun selectYear(year: Int) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             yearSelect.setSelected(year)
         }
     }
 
     fun selectTerm(term: Int) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             termSelect.setSelected(term)
         }
     }

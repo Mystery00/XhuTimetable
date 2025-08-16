@@ -28,9 +28,9 @@ import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.compose.rememberShareFileLauncher
 import io.github.vinceglb.filekit.exists
 import io.github.vinceglb.filekit.manualFileKitCoreInitialization
-import multiplatform.network.cmptoast.showToast
 import vip.mystery0.xhu.timetable.base.appVersionCode
 import vip.mystery0.xhu.timetable.base.appVersionName
+import vip.mystery0.xhu.timetable.config.toast.showLongToast
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
 import kotlin.system.exitProcess
 
@@ -102,12 +102,12 @@ class ErrorReportActivity : ComponentActivity() {
                         onClick = {
                             val logFilePath = intent.getStringExtra(EXTRA_LOG_FILE)
                             if (logFilePath.isNullOrBlank()) {
-                                showToast("日志文件不存在")
+                                showLongToast("日志文件不存在")
                                 return@Button
                             }
                             val logFile = PlatformFile(logFilePath)
                             if (!logFile.exists()) {
-                                showToast("日志文件不存在")
+                                showLongToast("日志文件不存在")
                                 return@Button
                             }
                             launcher.launch(logFile)

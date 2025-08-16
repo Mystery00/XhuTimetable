@@ -39,11 +39,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.format
 import multiplatform.network.cmptoast.showToast
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.model.ws.TextMessage
 import vip.mystery0.xhu.timetable.ui.component.feedback.UserInput
@@ -183,7 +184,7 @@ fun FeedbackScreen() {
                             viewModel.sendMessage(content)
                         },
                         resetScroll = {
-                            scope.launch {
+                            scope.safeLaunch(Dispatchers.Main) {
                                 lazyListState.scrollToItem(0)
                             }
                         },

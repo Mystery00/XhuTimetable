@@ -3,8 +3,8 @@ package vip.mystery0.xhu.timetable.viewmodel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.Menu
 import vip.mystery0.xhu.timetable.config.store.MenuStore
@@ -23,25 +23,25 @@ class PagerProfileViewModel : ComposeViewModel() {
     val menu: StateFlow<List<List<Menu>>> = _menu
 
     init {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             _menu.value = MenuStore.loadAllMenu()
         }
     }
 
     fun checkUnReadNotice() {
-        viewModelScope.launch(networkErrorHandler {
+        viewModelScope.safeLaunch(onException = networkErrorHandler {
             logger.w("check unread notice failed", it)
         }) {
-            if (!UserStore.isLogin()) return@launch
+            if (!UserStore.isLogin()) return@safeLaunch
             _hasUnReadNotice.value = NoticeRepo.checkNotice()
         }
     }
 
     fun checkUnReadFeedback() {
-        viewModelScope.launch(networkErrorHandler {
+        viewModelScope.safeLaunch(onException = networkErrorHandler {
             logger.w("check unread feedback failed", it)
         }) {
-            if (!UserStore.isLogin()) return@launch
+            if (!UserStore.isLogin()) return@safeLaunch
             _hasUnReadFeedback.value = FeedbackRepo.checkUnReadFeedback()
         }
     }

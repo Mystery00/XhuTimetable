@@ -59,11 +59,12 @@ import com.attafitamim.krop.filekit.toImageSrc
 import com.attafitamim.krop.ui.ImageCropperDialog
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 import multiplatform.network.cmptoast.showToast
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.ui.component.StateScreen
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
@@ -85,7 +86,7 @@ fun BackgroundScreen() {
     val imageCropper = rememberImageCropper()
     val pickerLauncher = rememberFilePickerLauncher(FileKitType.Image) { imageFile ->
         val image = imageFile ?: return@rememberFilePickerLauncher
-        scope.launch {
+        scope.safeLaunch(Dispatchers.Main) {
             when (val result = imageCropper.crop(image.toImageSrc())) {
                 CropResult.Cancelled -> {}
                 is CropError -> {
@@ -120,9 +121,7 @@ fun BackgroundScreen() {
                 },
                 actions = {
                     IconButton(onClick = {
-                        scope.launch {
-                            viewModel.setBackground(0L)
-                        }
+                        viewModel.setBackground(0L)
                     }) {
                         Icon(
                             imageVector = Icons.Rounded.SettingsBackupRestore,

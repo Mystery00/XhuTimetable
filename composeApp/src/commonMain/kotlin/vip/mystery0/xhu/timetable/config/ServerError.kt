@@ -2,9 +2,7 @@ package vip.mystery0.xhu.timetable.config
 
 import co.touchlab.kermit.Logger
 import io.ktor.client.plugins.HttpRequestTimeoutException
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.serialization.Serializable
-import multiplatform.network.cmptoast.showToast
 import vip.mystery0.xhu.timetable.utils.isOnline
 
 @Serializable
@@ -15,22 +13,23 @@ data class ErrorMessage(
 
 class ServerError(override val message: String) : RuntimeException(message)
 
-fun networkErrorHandler(handler: (Throwable) -> Unit): CoroutineExceptionHandler =
-    CoroutineExceptionHandler { _, throwable ->
-        if (!isOnline()) {
-            //没有网络，统一报错 网络连接失败
-            handler(NetworkNotConnectException())
-            return@CoroutineExceptionHandler
+fun networkErrorHandler(handler: (Throwable) -> Unit): ((throwable: Throwable) -> Boolean) = {
+    when {
+        !isOnline() -> {
+            handler(RuntimeException(HINT_NETWORK))
         }
-        if (throwable is HttpRequestTimeoutException) {
-            showToast("协程异常处理器 捕获到了请求超时异常")
-        }
-        Logger.w("network error", throwable)
-        handler(throwable)
-    }
 
-class CoroutineStopException(override val message: String) : RuntimeException(message)
+        it is HttpRequestTimeoutException -> {
+            handler(RuntimeException(HINT_REQUEST_TIMEOUT))
+        }
+
+        else -> {
+            Logger.w("network error", it)
+            handler(it)
+        }
+    }
+    true
+}
 
 const val HINT_NETWORK = "网络无法使用，请检查网络连接！"
-
-class NetworkNotConnectException : RuntimeException(HINT_NETWORK)
+const val HINT_REQUEST_TIMEOUT = "请求超时，请稍后再试！"

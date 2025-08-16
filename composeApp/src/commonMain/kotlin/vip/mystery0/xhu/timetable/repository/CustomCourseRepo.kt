@@ -9,7 +9,6 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.CustomCourseApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.base.buildPageSource
-import vip.mystery0.xhu.timetable.config.ServerError
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.model.request.CustomCourseRequest
@@ -50,7 +49,7 @@ object CustomCourseRepo : BaseDataRepo {
             customCourseApi.createCustomCourse(it, request)
         }
         if (!response) {
-            throw ServerError("创建自定义课程失败")
+            throw RuntimeException("创建自定义课程失败")
         }
     }
 
@@ -63,7 +62,7 @@ object CustomCourseRepo : BaseDataRepo {
             customCourseApi.updateCustomCourse(it, courseId, request)
         }
         if (!response) {
-            throw ServerError("更新自定义课程失败")
+            throw RuntimeException("更新自定义课程失败")
         }
     }
 
@@ -75,7 +74,7 @@ object CustomCourseRepo : BaseDataRepo {
             customCourseApi.deleteCustomCourse(it, courseId)
         }
         if (!response) {
-            throw ServerError("删除自定义课程失败")
+            throw RuntimeException("删除自定义课程失败")
         }
     }
 }

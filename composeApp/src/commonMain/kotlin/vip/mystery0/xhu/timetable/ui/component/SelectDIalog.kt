@@ -26,11 +26,11 @@ import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeler.sheets.list.ListDialog
 import com.maxkeppeler.sheets.list.models.ListOption
 import com.maxkeppeler.sheets.list.models.ListSelection
-import kotlinx.coroutines.launch
 import vip.mystery0.xhu.timetable.base.Selectable
 import vip.mystery0.xhu.timetable.base.TermSelect
 import vip.mystery0.xhu.timetable.base.UserSelect
 import vip.mystery0.xhu.timetable.base.YearSelect
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 
 @Composable
 fun BuildUserSelectFilterChipContent(
@@ -153,7 +153,7 @@ private fun BuildSelectBaseContent(
                 .height(32.dp)
                 .align(Alignment.CenterVertically),
             onClick = {
-                scope.launch {
+                scope.safeLaunch {
                     onDataLoad()
                 }
             },

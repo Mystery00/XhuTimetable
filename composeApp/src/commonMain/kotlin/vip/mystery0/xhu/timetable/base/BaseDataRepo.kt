@@ -1,7 +1,7 @@
 package vip.mystery0.xhu.timetable.base
 
 import org.koin.core.component.KoinComponent
-import vip.mystery0.xhu.timetable.config.NetworkNotConnectException
+import vip.mystery0.xhu.timetable.config.HINT_NETWORK
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
@@ -16,7 +16,7 @@ interface BaseDataRepo : KoinComponent {
             return
         }
         if (!isOnline) {
-            throw NetworkNotConnectException()
+            throw RuntimeException(HINT_NETWORK)
         }
     }
 

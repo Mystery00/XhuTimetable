@@ -12,12 +12,15 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.path
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.kotlincrypto.hash.sha2.SHA256
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
+import vip.mystery0.xhu.timetable.config.coroutine.safeWithContext
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
 
 /**
  * Feature Hub 客户端，负责与 Feature Hub API 进行通信。
@@ -67,15 +70,18 @@ internal class FeatureHubClient(
      * 使用 ETag (If-None-Match) 缓存机制，如果服务器返回 304 Not Modified，则不处理响应体。
      */
     suspend fun fetchFeatures(context: FeatureHubContext) {
-        FeatureHub.record()
-        val featureHeader = context.buildFeatureHeader()
-        val url = URLBuilder(host).apply {
-            path("features")
-            parameters.append("apiKey", sdkKey)
-            parameters.append("contextSha", calculateContextSha(featureHeader))
-        }.buildString()
-        logger.d("Fetching features from $url")
-        try {
+        safeWithContext(Dispatchers.Default, networkErrorHandler {
+            // 处理网络异常等问题
+            logger.w("Exception while fetching features: ${it.message}")
+        }, resultWhenException = {}) {
+            FeatureHub.record()
+            val featureHeader = context.buildFeatureHeader()
+            val url = URLBuilder(host).apply {
+                path("features")
+                parameters.append("apiKey", sdkKey)
+                parameters.append("contextSha", calculateContextSha(featureHeader))
+            }.buildString()
+            logger.d("Fetching features from $url")
             val response = client.get(url) {
                 header("x-featurehub", featureHeader)
                 // 如果我们有 etag，就将其添加到请求头中
@@ -103,9 +109,6 @@ internal class FeatureHubClient(
                     logger.w("Error fetching features. Status: ${response.status}")
                 }
             }
-        } catch (e: Exception) {
-            // 处理网络异常等问题
-            logger.w("Exception while fetching features: ${e.message}")
         }
     }
 
@@ -117,7 +120,7 @@ internal class FeatureHubClient(
         stopPolling()
         logger.d("Starting polling with interval ${pollingIntervalMs}ms...")
         // 在一个独立的协程作用域中启动轮询
-        pollingJob = scope.launch {
+        pollingJob = scope.safeLaunch {
             // 首次启动时立即获取一次
             fetchFeatures(context)
             // 循环执行，直到协程被取消

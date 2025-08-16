@@ -46,8 +46,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.LocalPlatformContext
 import coil3.compose.rememberAsyncImagePainter
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 import org.koin.compose.viewmodel.koinViewModel
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.trackEvent
 import vip.mystery0.xhu.timetable.model.Gender
 import vip.mystery0.xhu.timetable.model.event.MenuNavigator
@@ -192,7 +193,7 @@ val profileCourseContent: TabContent = @Composable {
                     title = menu.title,
                     showBadge = showBadge,
                     click = {
-                        coroutineScope.launch {
+                        coroutineScope.safeLaunch(Dispatchers.Main) {
                             trackEvent("点击菜单 ${menu.key}")
                             item.action(MenuNavigator(navController, uriHandler, context), menu)
                         }

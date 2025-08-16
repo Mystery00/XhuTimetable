@@ -5,12 +5,12 @@ import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.Customisable
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
@@ -50,7 +50,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
     val userCampusState = MutableStateFlow(UseCaseState())
 
     fun init() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             loadCampusList()
             _showTomorrowCourseTimeData.value = getConfigStore { showTomorrowCourseTime }
             _showCustomCourseData.value = getConfigStore { showCustomCourseOnWeek }
@@ -74,7 +74,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
     }
 
     private fun loadCampusList() {
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load campus list failed", throwable)
             toastMessage(throwable.message ?: throwable.desc())
         }) {
@@ -86,7 +86,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
     }
 
     fun updateUserCampus(campus: String) {
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load campus list failed", throwable)
             toastMessage(throwable.message ?: throwable.desc())
         }) {
@@ -100,7 +100,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
     }
 
     fun updateShowTomorrowCourseTime(time: LocalTime?) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             setConfigStore { showTomorrowCourseTime = time }
             _showTomorrowCourseTimeData.value = getConfigStore { showTomorrowCourseTime }
             EventBus.post(EventType.CHANGE_AUTO_SHOW_TOMORROW_COURSE)
@@ -108,7 +108,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
     }
 
     fun updateCurrentYearTerm(custom: Boolean, year: Int = -1, term: Int = -1) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             setConfigStore {
                 customNowYear =
                     if (custom) Customisable.custom(year) else Customisable.clearCustom(-1)
@@ -122,7 +122,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
     }
 
     fun updateTermStartTime(custom: Boolean, date: LocalDate) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             setConfigStore {
                 customTermStartDate =
                     if (custom) Customisable.custom(date) else Customisable.clearCustom(LocalDate.MIN)
@@ -133,7 +133,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
     }
 
     fun updateShowCustomCourse(showCustomCourseData: Boolean) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             setConfigStore { showCustomCourseOnWeek = showCustomCourseData }
             _showCustomCourseData.value = getConfigStore { showCustomCourseOnWeek }
             EventBus.post(EventType.CHANGE_SHOW_CUSTOM_COURSE)
@@ -141,7 +141,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
     }
 
     fun updateShowCustomThing(showCustomThingData: Boolean) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             setConfigStore { showCustomThing = showCustomThingData }
             _showCustomThingData.value = getConfigStore { showCustomThing }
             EventBus.post(EventType.CHANGE_SHOW_CUSTOM_THING)

@@ -5,11 +5,11 @@ import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.exists
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.config.clearDownloadDir
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.externalPictureDir
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.UserStore
@@ -30,7 +30,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
     val isLoginState: StateFlow<Boolean> = _isLoginState
 
     fun init() {
-        viewModelScope.launch(networkErrorHandler { throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("init failed", throwable)
             _readyState.value =
                 ReadyState(errorMessage = throwable.message ?: throwable.desc())
@@ -43,7 +43,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
             if (LocalDate.now() < hideTime) {
                 //已经设置了隐藏时间，且当前时间还未到达隐藏时间
                 _readyState.emit(ReadyState())
-                return@launch
+                return@safeLaunch
             }
             val dir = PlatformFile(externalPictureDir, "splash")
             val now = Clock.System.now()
@@ -64,7 +64,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
             val splash = splashList.randomOrNull()
             if (splash == null) {
                 _readyState.emit(ReadyState())
-                return@launch
+                return@safeLaunch
             }
             _readyState.emit(
                 ReadyState(

@@ -71,13 +71,13 @@ import com.maxkeppeler.sheets.color.models.ColorConfig
 import com.maxkeppeler.sheets.color.models.ColorSelection
 import com.maxkeppeler.sheets.color.models.SingleColor
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.format
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.model.CustomThing
 import vip.mystery0.xhu.timetable.model.request.CustomThingRequest
@@ -349,7 +349,7 @@ private fun CustomThingBottomSheet(
     fun dismissSheet() {
         focusManager.clearFocus()
         scope
-            .launch { sheetState.hide() }
+            .safeLaunch { sheetState.hide() }
             .invokeOnCompletion {
                 if (!sheetState.isVisible) {
                     openBottomSheet.value = false

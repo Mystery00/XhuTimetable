@@ -59,12 +59,12 @@ import com.maxkeppeler.sheets.input.models.InputHeader
 import com.maxkeppeler.sheets.input.models.InputRadioButtonGroup
 import com.maxkeppeler.sheets.input.models.InputSelection
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.format
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.model.request.CustomCourseRequest
 import vip.mystery0.xhu.timetable.model.response.CustomCourseResponse
 import vip.mystery0.xhu.timetable.ui.component.BuildPaging
@@ -164,9 +164,7 @@ fun CustomCourseScreen() {
                     pager,
                     key = { index -> pager[index]?.courseId ?: index }) { item ->
                     BuildItem(item) {
-                        scope.launch {
-                            updateCustomCourse(item)
-                        }
+                        updateCustomCourse(item)
                     }
                 }
             },
@@ -193,9 +191,7 @@ fun CustomCourseScreen() {
             ) {
                 FloatingActionButton(
                     onClick = {
-                        scope.launch {
-                            updateCustomCourse(CustomCourseResponse.init())
-                        }
+                        updateCustomCourse(CustomCourseResponse.init())
                     }) {
                     Icon(
                         imageVector = Icons.Rounded.Add,
@@ -373,7 +369,7 @@ private fun CustomCourseBottomSheet(
     fun dismissSheet() {
         focusManager.clearFocus()
         scope
-            .launch { sheetState.hide() }
+            .safeLaunch { sheetState.hide() }
             .invokeOnCompletion {
                 if (!sheetState.isVisible) {
                     openBottomSheet.value = false

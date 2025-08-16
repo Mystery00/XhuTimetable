@@ -5,10 +5,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.format
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
@@ -42,7 +42,7 @@ class SettingsViewModel : ComposeViewModel() {
     val featurePullTimeList: StateFlow<List<String>> = _featurePullTimeList
 
     fun init() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             Theme.nightMode.value = getConfigStore { nightMode }
             debugMode.value = getConfigStore { debugMode }
             _splashList.value = getCacheStore { splashList }
@@ -53,21 +53,21 @@ class SettingsViewModel : ComposeViewModel() {
     }
 
     fun updateNightMode(nightMode: NightMode) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             setConfigStore { this.nightMode = nightMode }
             Theme.nightMode.value = getConfigStore { nightMode }
         }
     }
 
     fun enableDebugMode() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             setConfigStore { debugMode = true }
             debugMode.value = true
         }
     }
 
     fun disableDebugMode() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             setConfigStore { debugMode = false }
             debugMode.value = false
         }
@@ -84,7 +84,7 @@ class SettingsViewModel : ComposeViewModel() {
     }
 
     fun resetPoemsToken() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             withContext(Dispatchers.IO) {
                 PoemsStore.token = null
             }
@@ -92,14 +92,14 @@ class SettingsViewModel : ComposeViewModel() {
     }
 
     fun updateFeaturePullTime() {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             _featurePullTimeList.value = getCacheStore { featurePullLastExecuteTime }
                 .map { it.format(chinaDateTime) }
         }
     }
 
     fun testPushChannel(registrationId: String) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             JobRepo.testPush(registrationId)
         }
     }

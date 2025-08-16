@@ -3,10 +3,10 @@ package vip.mystery0.xhu.timetable.viewmodel
 import androidx.lifecycle.viewModelScope
 import androidx.work.Data
 import androidx.work.WorkManager
-import kotlinx.coroutines.launch
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.startUniqueWork
+import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
@@ -17,7 +17,7 @@ actual class CheckUpdateVewModel : ComposeViewModel() {
     private val workManager: WorkManager by inject()
 
     fun downloadApk(newVersion: ClientVersion) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             workManager.startUniqueWork<DownloadApkWork>(
                 Data.Builder()
                     .putString(DownloadApkWork.ARG_VERSION_ID, newVersion.versionId.toString())
@@ -31,7 +31,7 @@ actual class CheckUpdateVewModel : ComposeViewModel() {
     }
 
     fun downloadPatch(newVersion: ClientVersion) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             workManager.startUniqueWork<DownloadPatchWork>(
                 Data.Builder()
                     .putString(DownloadPatchWork.ARG_VERSION_ID, newVersion.versionId.toString())
@@ -44,7 +44,7 @@ actual class CheckUpdateVewModel : ComposeViewModel() {
     }
 
     fun ignoreVersion(version: ClientVersion) {
-        viewModelScope.launch {
+        viewModelScope.safeLaunch {
             val ignore = getCacheStore { ignoreVersionList }
             val list = ignore + "${version.versionName}-${version.versionCode}"
             setCacheStore { ignoreVersionList = list }
