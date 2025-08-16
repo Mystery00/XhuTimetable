@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.ui.screen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,12 +42,14 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.datetime.format
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.model.response.NoticeActionType
 import vip.mystery0.xhu.timetable.model.response.NoticeResponse
 import vip.mystery0.xhu.timetable.model.response.parseNoticeActionType
 import vip.mystery0.xhu.timetable.ui.component.BuildPaging
 import vip.mystery0.xhu.timetable.ui.component.PageItemLayout
+import vip.mystery0.xhu.timetable.ui.component.StateScreen
 import vip.mystery0.xhu.timetable.ui.component.collectAndHandleState
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.theme.XhuFonts
@@ -55,6 +58,8 @@ import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import vip.mystery0.xhu.timetable.utils.chinaDateTime
 import vip.mystery0.xhu.timetable.utils.copyToClipboard
 import vip.mystery0.xhu.timetable.viewmodel.NoticeViewModel
+import xhutimetable.composeapp.generated.resources.Res
+import xhutimetable.composeapp.generated.resources.state_no_data
 
 @Composable
 fun NoticeScreen() {
@@ -65,7 +70,7 @@ fun NoticeScreen() {
     val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
 
     LaunchedEffect(Unit) {
-        viewModel.init()
+        viewModel.loadList()
     }
     Scaffold(
         topBar = {
@@ -92,6 +97,18 @@ fun NoticeScreen() {
             key = { index -> pager[index]?.noticeId ?: index },
             itemContent = @Composable { item ->
                 BuildItem(item)
+            },
+            emptyState = {
+                val loadingErrorMessage by viewModel.loadingErrorMessage.collectAsState()
+                StateScreen(
+                    title = loadingErrorMessage ?: "暂无数据",
+                    buttonText = "再查一次",
+                    imageRes = painterResource(Res.drawable.state_no_data),
+                    verticalArrangement = Arrangement.Top,
+                    onButtonClick = {
+                        viewModel.loadList()
+                    }
+                )
             },
         )
     }

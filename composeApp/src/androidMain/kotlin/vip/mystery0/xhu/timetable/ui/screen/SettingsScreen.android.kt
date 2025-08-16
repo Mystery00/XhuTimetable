@@ -24,13 +24,13 @@ import com.maxkeppeler.sheets.clock.models.ClockSelection
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.format
-import multiplatform.network.cmptoast.showToast
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.appName
 import vip.mystery0.xhu.timetable.base.packageName
 import vip.mystery0.xhu.timetable.config.store.CacheStore
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
 import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
+import vip.mystery0.xhu.timetable.config.toast.showShortToast
 import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
@@ -128,7 +128,7 @@ actual fun NotifySettings() {
             },
             onClick = {
                 if (isIgnoringBatteryOptimizations()) {
-                    showToast("已经在电池优化白名单中，无需重复设置")
+                    showShortToast("已经在电池优化白名单中，无需重复设置")
                 } else {
                     val intent =
                         Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
@@ -199,7 +199,7 @@ actual fun UpdateSettings() {
         onClick = {
             scope.launch {
                 viewModel.checkUpdate(false)
-                showToast("检查更新完成")
+                showShortToast("检查更新完成")
             }
         }
     )
@@ -308,7 +308,7 @@ actual fun DeveloperSettings() {
         onClick = {
             scope.launch {
                 viewModel.checkUpdate(true)
-                showToast("检查更新完成")
+                showShortToast("检查更新完成")
             }
         }
     )

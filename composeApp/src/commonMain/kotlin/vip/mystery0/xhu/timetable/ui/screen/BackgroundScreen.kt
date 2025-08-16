@@ -61,13 +61,17 @@ import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import kotlinx.coroutines.launch
 import multiplatform.network.cmptoast.showToast
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
+import vip.mystery0.xhu.timetable.ui.component.StateScreen
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.Background
 import vip.mystery0.xhu.timetable.viewmodel.BackgroundViewModel
 import vip.mystery0.xhu.timetable.viewmodel.DownloadProgressState
+import xhutimetable.composeapp.generated.resources.Res
+import xhutimetable.composeapp.generated.resources.state_no_data
 
 @Composable
 fun BackgroundScreen() {
@@ -149,23 +153,36 @@ fun BackgroundScreen() {
                 .fillMaxSize()
         ) {
             val pullToRefreshState = rememberPullToRefreshState()
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pullToRefresh(
-                        state = pullToRefreshState,
-                        isRefreshing = backgroundListState.loading,
-                        onRefresh = {},
-                        enabled = false,
-                    ),
-            ) {
-                items(
-                    items = backgroundListState.backgroundList,
-                    key = { it.backgroundId },
-                ) { background ->
-                    PhotoItem(background) {
-                        viewModel.setBackground(background.backgroundId)
+            if (backgroundListState.backgroundList.isEmpty() && backgroundListState.errorMessage.isNotBlank()) {
+                val loadingErrorMessage = backgroundListState.errorMessage
+                StateScreen(
+                    title = loadingErrorMessage,
+                    buttonText = "重新加载",
+                    imageRes = painterResource(Res.drawable.state_no_data),
+                    verticalArrangement = Arrangement.Top,
+                    onButtonClick = {
+                        viewModel.init()
+                    }
+                )
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pullToRefresh(
+                            state = pullToRefreshState,
+                            isRefreshing = backgroundListState.loading,
+                            onRefresh = {},
+                            enabled = false,
+                        ),
+                ) {
+                    items(
+                        items = backgroundListState.backgroundList,
+                        key = { it.backgroundId },
+                    ) { background ->
+                        PhotoItem(background) {
+                            viewModel.setBackground(background.backgroundId)
+                        }
                     }
                 }
             }

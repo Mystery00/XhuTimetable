@@ -44,10 +44,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import kotlinx.coroutines.delay
-import multiplatform.network.cmptoast.showToast
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.appName
+import vip.mystery0.xhu.timetable.config.toast.showShortToast
 import vip.mystery0.xhu.timetable.ui.component.ShowProgressDialog
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.navigation.RouteLogin
@@ -275,7 +275,7 @@ fun LoginScreen(fromAccountManager: Boolean) {
             xhuDialogState.hide()
         }
         if (loginState.success) {
-            showToast("登录成功，欢迎使用${appName()}！")
+            showShortToast("登录成功，欢迎使用${appName()}！")
             delay(500L)
             if (fromAccountManager) {
                 navController.popBackStack()
@@ -296,13 +296,13 @@ private fun doLogin(
     when {
         username.isBlank() -> {
             usernameFocusRequester.requestFocus()
-            showToast("用户名不能为空")
+            showShortToast("用户名不能为空")
             return false
         }
 
         password.isBlank() -> {
             passwordFocusRequester.requestFocus()
-            showToast("密码不能为空")
+            showShortToast("密码不能为空")
             return false
         }
 

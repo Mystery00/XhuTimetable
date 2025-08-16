@@ -1,10 +1,10 @@
 package vip.mystery0.xhu.timetable.ui.component
 
 import coil3.PlatformContext
-import multiplatform.network.cmptoast.showToast
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
 import platform.UIKit.popoverPresentationController
+import vip.mystery0.xhu.timetable.config.toast.showLongToast
 
 actual fun showSharePanel(context: PlatformContext, shareText: String) {
     val rootViewController = UIApplication.sharedApplication.keyWindow?.rootViewController
@@ -21,6 +21,6 @@ actual fun showSharePanel(context: PlatformContext, shareText: String) {
             completion = null
         )
     } else {
-        showToast("could not find root view controller to present share sheet")
+        showLongToast("could not find root view controller to present share sheet")
     }
 }

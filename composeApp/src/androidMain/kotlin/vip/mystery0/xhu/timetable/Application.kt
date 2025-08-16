@@ -25,6 +25,7 @@ class Application : Application(), DefaultLifecycleObserver {
 
     override fun onCreate() {
         super<Application>.onCreate()
+        AppContext.apply { set(applicationContext) }
         context = this
         Thread.setDefaultUncaughtExceptionHandler(ApplicationExceptionCatcher(Thread.getDefaultUncaughtExceptionHandler()))
         fileLogWriter = initLogger()
@@ -34,7 +35,6 @@ class Application : Application(), DefaultLifecycleObserver {
             androidContext(this@Application)
             modules(moduleList())
         }
-        AppContext.apply { set(applicationContext) }
         val root = context.filesDir.absolutePath + "/mmkv"
         MMKV.initialize(this, root, null, MMKVLogLevel.LevelWarning, KermitMMKVLogger())
     }

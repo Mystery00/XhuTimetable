@@ -2,9 +2,8 @@ package vip.mystery0.xhu.timetable.ui.screen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
-import multiplatform.network.cmptoast.ToastDuration
-import multiplatform.network.cmptoast.showToast
 import vip.mystery0.xhu.timetable.config.store.Menu
+import vip.mystery0.xhu.timetable.config.toast.showLongToast
 import vip.mystery0.xhu.timetable.model.event.MenuNavigator
 import vip.mystery0.xhu.timetable.ui.navigation.RouteAccountManagement
 import vip.mystery0.xhu.timetable.ui.navigation.RouteClassSettings
@@ -86,9 +85,9 @@ enum class MenuItem(
                 toCustomTabs(menu.link)
             } else {
                 if (menu.hint.isNotBlank()) {
-                    showToast(menu.hint, duration = ToastDuration.Long)
+                    showLongToast(menu.hint)
                 } else {
-                    showToast("当前版本暂不支持该功能，请更新到最新版本", duration = ToastDuration.Long)
+                    showLongToast("当前版本暂不支持该功能，请更新到最新版本")
                 }
             }
         }

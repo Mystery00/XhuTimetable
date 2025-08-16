@@ -45,7 +45,7 @@ import androidx.paging.PagingData
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.flow.Flow
-import multiplatform.network.cmptoast.showToast
+import vip.mystery0.xhu.timetable.config.toast.showShortToast
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 
 
@@ -113,7 +113,7 @@ fun <T : Any> BuildPaging(
         LaunchedEffect(pager.loadState.refresh) {
             if (pager.loadState.refresh is LoadState.NotLoading) {
                 pullToRefreshState.animateToHidden()
-                showToast("数据加载完成！")
+                showShortToast("数据加载完成！")
             }
         }
         PullToRefreshBox(

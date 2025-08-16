@@ -50,12 +50,14 @@ import com.maxkeppeler.sheets.option.models.OptionSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
 import vip.mystery0.xhu.timetable.model.response.ClassroomResponse
 import vip.mystery0.xhu.timetable.ui.component.BuildPaging
 import vip.mystery0.xhu.timetable.ui.component.PageItemLayout
 import vip.mystery0.xhu.timetable.ui.component.ShowSingleSelectDialog
+import vip.mystery0.xhu.timetable.ui.component.StateScreen
 import vip.mystery0.xhu.timetable.ui.component.TextWithIcon
 import vip.mystery0.xhu.timetable.ui.component.collectAndHandleState
 import vip.mystery0.xhu.timetable.ui.component.xhuHeader
@@ -67,6 +69,8 @@ import vip.mystery0.xhu.timetable.utils.formatWeekString
 import vip.mystery0.xhu.timetable.viewmodel.AreaSelect
 import vip.mystery0.xhu.timetable.viewmodel.CourseRoomViewModel
 import vip.mystery0.xhu.timetable.viewmodel.IntSelect
+import xhutimetable.composeapp.generated.resources.Res
+import xhutimetable.composeapp.generated.resources.state_no_course_data
 
 @Composable
 fun FreeCourseRoomScreen() {
@@ -118,7 +122,19 @@ fun FreeCourseRoomScreen() {
             key = { index -> pager[index]?.roomNo ?: index },
             itemContent = @Composable { item ->
                 BuildItem(item)
-            }
+            },
+            emptyState = {
+                val loadingErrorMessage by viewModel.loadingErrorMessage.collectAsState()
+                StateScreen(
+                    title = loadingErrorMessage ?: "暂无数据",
+                    buttonText = "再查一次",
+                    imageRes = painterResource(Res.drawable.state_no_course_data),
+                    verticalArrangement = Arrangement.Top,
+                    onButtonClick = {
+                        viewModel.search()
+                    }
+                )
+            },
         )
     }
 

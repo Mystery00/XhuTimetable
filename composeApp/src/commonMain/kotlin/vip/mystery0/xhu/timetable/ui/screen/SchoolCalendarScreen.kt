@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,13 +23,17 @@ import androidx.compose.ui.unit.dp
 import com.github.panpf.zoomimage.CoilZoomAsyncImage
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import io.github.vinceglb.filekit.dialogs.compose.rememberShareFileLauncher
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
 import vip.mystery0.xhu.timetable.config.trackEvent
 import vip.mystery0.xhu.timetable.ui.component.ShowSingleSelectDialog
+import vip.mystery0.xhu.timetable.ui.component.StateScreen
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.SchoolCalendarViewModel
+import xhutimetable.composeapp.generated.resources.Res
+import xhutimetable.composeapp.generated.resources.state_no_data
 
 @Composable
 fun SchoolCalendarScreen() {
@@ -112,7 +117,16 @@ fun SchoolCalendarScreen() {
                         modifier = Modifier.fillMaxSize(),
                     )
                 } else {
-                    Box(modifier = Modifier.fillMaxSize())
+                    StateScreen(
+                        modifier = Modifier.fillMaxSize(),
+                        title = loading.errorMessage.ifBlank { "暂无数据" },
+                        buttonText = "重新加载",
+                        imageRes = painterResource(Res.drawable.state_no_data),
+                        verticalArrangement = Arrangement.Top,
+                        onButtonClick = {
+                            viewModel.init()
+                        }
+                    )
                 }
             }
         }
