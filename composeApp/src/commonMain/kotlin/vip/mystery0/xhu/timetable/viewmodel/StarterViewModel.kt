@@ -33,7 +33,7 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("init failed", throwable)
             _readyState.value =
-                ReadyState(errorMessage = throwable.message ?: throwable.desc())
+                ReadyState(errorMessage = throwable.desc())
         }) {
             _isLoginState.value = UserStore.isLogin()
             clearDownloadDir()

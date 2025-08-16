@@ -45,7 +45,7 @@ class SchoolCalendarViewModel : ComposeViewModel() {
 
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("changeArea failed", throwable)
-            failed(throwable.message ?: throwable.desc())
+            failed(throwable.desc())
         }) {
             _loading.value = LoadingState(true)
             _area.value = SchoolCalendarRepo.getList()

@@ -59,7 +59,7 @@ class BackgroundViewModel : ComposeViewModel() {
             logger.w("load background list failed", throwable)
             _backgroundListState.value = BackgroundListState(
                 loading = false,
-                errorMessage = throwable.message ?: throwable.desc(),
+                errorMessage = throwable.desc(),
             )
         }) {
             _progressState.value =
@@ -124,7 +124,7 @@ class BackgroundViewModel : ComposeViewModel() {
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("set custom background failed", throwable)
             _backgroundListState.value = _backgroundListState.value.replaceMessage(
-                throwable.message ?: throwable.desc()
+                throwable.desc()
             )
         }) {
             val cacheImageFile = PlatformFile(
@@ -151,7 +151,7 @@ class BackgroundViewModel : ComposeViewModel() {
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("set background failed", throwable)
             _backgroundListState.value = _backgroundListState.value.replaceMessage(
-                throwable.message ?: throwable.desc()
+                throwable.desc()
             )
             _progressState.value =
                 DownloadProgressState(

@@ -36,7 +36,7 @@ class LoginViewModel : ComposeViewModel() {
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("login failed", throwable)
             _loginState.value =
-                LoginState(errorMessage = throwable.message ?: throwable.desc())
+                LoginState(errorMessage = throwable.desc())
         }) {
             _loginState.value = LoginState(loading = true)
             withContext(Dispatchers.Default) {

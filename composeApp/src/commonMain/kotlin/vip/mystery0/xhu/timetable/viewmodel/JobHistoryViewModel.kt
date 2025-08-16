@@ -29,7 +29,7 @@ class JobHistoryViewModel : ComposeViewModel() {
 
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load exp score list failed", throwable)
-            failed(throwable.message ?: throwable.desc())
+            failed(throwable.desc())
         }) {
             _historyListState.value = JobHistoryListState(loading = true)
             val historyList = JobRepo.fetchHistoryList().map {
@@ -64,7 +64,7 @@ class JobHistoryViewModel : ComposeViewModel() {
     fun addAutoCheckScoreJob(registrationId: String) {
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("add auto check score job failed", throwable)
-            toastMessage(throwable.message ?: throwable.desc())
+            toastMessage(throwable.desc())
         }) {
             JobRepo.addAutoCheckScoreJob(registrationId)
             loadHistoryList()

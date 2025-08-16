@@ -43,7 +43,7 @@ class CustomThingViewModel : PagingComposeViewModel<PageRequest, CustomThingResp
 
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load custom thing list failed", throwable)
-            failed(throwable.message ?: throwable.desc())
+            failed(throwable.desc())
         }) {
             val selectedUser = userSelect.getSelectedUser()
             if (selectedUser == null) {
@@ -66,7 +66,7 @@ class CustomThingViewModel : PagingComposeViewModel<PageRequest, CustomThingResp
         }
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("save custom thing failed", throwable)
-            failed(throwable.message ?: throwable.desc())
+            failed(throwable.desc())
         }) {
             _saveLoadingState.value = LoadingState(loading = true)
             if (saveAsCountdown) {
@@ -105,7 +105,7 @@ class CustomThingViewModel : PagingComposeViewModel<PageRequest, CustomThingResp
         }
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("delete custom thing failed", throwable)
-            failed(throwable.message ?: throwable.desc())
+            failed(throwable.desc())
         }) {
             _saveLoadingState.value = LoadingState(loading = true)
 

@@ -39,7 +39,7 @@ class ExamViewModel : PagingComposeViewModel<PageRequest, Exam>(
         }
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load exam list failed", throwable)
-            failed(throwable.message ?: throwable.desc())
+            failed(throwable.desc())
         }) {
             val selectedUser = userSelect.getSelectedUser()
             if (selectedUser == null) {

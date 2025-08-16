@@ -353,14 +353,6 @@ actual fun DeveloperSettings() {
         onClick = {
         }
     )
-    XhuSettingsMenuLink(
-        title = { Text(text = "测试崩溃") },
-        onClick = {
-            scope.safeLaunch {
-                throw RuntimeException("this is a test exception")
-            }
-        },
-    )
 //    XhuSettingsMenuLink(
 //        title = { Text(text = "测试推送通道") },
 //        onClick = {

@@ -106,7 +106,7 @@ class SettingsViewModel : ComposeViewModel() {
     fun reportLog() {
         viewModelScope.safeLaunch(onException = {
             Logger.e("generate report log failed", it)
-            toastMessage(it.message ?: it.desc())
+            toastMessage(it.desc())
             true
         }) {
             val file = fileLogWriter.prepareSendFile()

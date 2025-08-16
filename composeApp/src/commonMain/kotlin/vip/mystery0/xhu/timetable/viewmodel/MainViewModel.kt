@@ -247,7 +247,7 @@ class MainViewModel : ComposeViewModel() {
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load local course list failed", throwable)
             _loading.value = false
-            toastMessage(throwable.message ?: throwable.desc())
+            toastMessage(throwable.desc())
         }) {
             //设置加载状态
             _loading.value = true
@@ -326,7 +326,7 @@ class MainViewModel : ComposeViewModel() {
             if (!GlobalConfigStore.showOldCourseWhenFailed) {
                 _tableCourse.value = emptyList()
             }
-            toastMessage(throwable.message ?: throwable.desc())
+            toastMessage(throwable.desc())
         }) {
             //设置加载状态
             _loading.value = true

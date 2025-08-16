@@ -46,7 +46,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
 
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load custom course list failed", throwable)
-            failed(throwable.message ?: throwable.desc())
+            failed(throwable.desc())
         }) {
             val selectedUser = userSelect.getSelectedUser()
             if (selectedUser == null) {
@@ -70,7 +70,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
         }
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("save custom course failed", throwable)
-            failed(throwable.message ?: throwable.desc())
+            failed(throwable.desc())
         }) {
             _saveLoadingState.value = LoadingState(loading = true, actionSuccess = false)
 
@@ -106,7 +106,7 @@ class CustomCourseViewModel : PagingComposeViewModel<PageRequest, CustomCourseRe
         }
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("delete custom course failed", throwable)
-            failed(throwable.message ?: throwable.desc())
+            failed(throwable.desc())
         }) {
             _saveLoadingState.value = LoadingState(loading = true, actionSuccess = false)
 

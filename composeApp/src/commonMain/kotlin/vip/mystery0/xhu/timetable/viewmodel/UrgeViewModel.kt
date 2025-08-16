@@ -39,7 +39,7 @@ class UrgeViewModel : PagingComposeViewModel<Long, UrgeItem>(
         }
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("urge failed", throwable)
-            failed(throwable.message ?: throwable.desc())
+            failed(throwable.desc())
         }) {
             _urgeLoading.value = true
             trackEvent("催更")

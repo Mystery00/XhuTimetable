@@ -39,7 +39,7 @@ class ExpScoreViewModel : ComposeViewModel(), KoinComponent {
 
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load exp score list failed", throwable)
-            failed(throwable.message ?: throwable.desc())
+            failed(throwable.desc())
         }) {
             _expScoreListState.value = ExpScoreListState(loading = true)
             val selectedUser = userSelect.getSelectedUser()

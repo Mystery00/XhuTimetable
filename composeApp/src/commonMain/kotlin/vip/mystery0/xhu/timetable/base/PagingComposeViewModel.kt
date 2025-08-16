@@ -62,7 +62,7 @@ abstract class PagingComposeViewModel<REQ, RESP : Any>(
                     if (it is HttpRequestTimeoutException) {
                         "请求超时，请重试"
                     } else {
-                        it.message ?: it.desc()
+                        it.desc()
                     }
                 toastMessage(errorMessage)
                 _loadingErrorMessage.value = errorMessage

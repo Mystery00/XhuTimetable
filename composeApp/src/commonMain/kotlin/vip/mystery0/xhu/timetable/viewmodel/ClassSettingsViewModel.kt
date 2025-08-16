@@ -76,7 +76,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
     private fun loadCampusList() {
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load campus list failed", throwable)
-            toastMessage(throwable.message ?: throwable.desc())
+            toastMessage(throwable.desc())
         }) {
             val mainUser = UserStore.mainUser()
             _campusInfo.value = mainUser.withAutoLoginOnce {
@@ -88,7 +88,7 @@ class ClassSettingsViewModel : ComposeViewModel() {
     fun updateUserCampus(campus: String) {
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load campus list failed", throwable)
-            toastMessage(throwable.message ?: throwable.desc())
+            toastMessage(throwable.desc())
         }) {
             val mainUser = UserStore.mainUser()
             mainUser.withAutoLoginOnce {

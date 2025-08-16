@@ -36,4 +36,4 @@ private fun getDatabaseBuilder(ctx: Context): RoomDatabase.Builder<AppDatabase> 
     )
 }
 
-actual fun Throwable.desc(): String = this.javaClass.simpleName
+actual fun Throwable.desc(): String = this.message ?: this.javaClass.simpleName

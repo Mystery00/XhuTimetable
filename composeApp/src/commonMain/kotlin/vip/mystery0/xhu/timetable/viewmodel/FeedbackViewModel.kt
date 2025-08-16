@@ -38,7 +38,7 @@ class FeedbackViewModel : ComposeViewModel() {
     fun init() {
         viewModelScope.safeLaunch(onException = networkErrorHandler {
             logger.w("init failed", it)
-            _wsStatus.value = WebSocketState(WebSocketStatus.FAILED, it.message ?: it.desc())
+            _wsStatus.value = WebSocketState(WebSocketStatus.FAILED, it.desc())
         }) {
             initWebSocket()
         }
@@ -50,7 +50,7 @@ class FeedbackViewModel : ComposeViewModel() {
             logger.w("load message list failed", throwable)
             _loading.value = LoadingState(
                 loading = false,
-                errorMessage = throwable.message ?: throwable.desc(),
+                errorMessage = throwable.desc(),
             )
         }) {
             _loading.value = LoadingState(loading = true)

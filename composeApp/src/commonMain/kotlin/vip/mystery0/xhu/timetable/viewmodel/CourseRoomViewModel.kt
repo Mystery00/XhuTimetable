@@ -69,7 +69,7 @@ class CourseRoomViewModel : PagingComposeViewModel<ClassroomRequest, ClassroomRe
         }
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("search failed", throwable)
-            failed(throwable.message ?: throwable.desc())
+            failed(throwable.desc())
         }) {
             val area = areaSelect.getSelected()?.value ?: ""
             val week = weekSelect.getMultiSelected().map { it.value }

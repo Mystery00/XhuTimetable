@@ -33,7 +33,7 @@ class ExportCalendarViewModel : ComposeViewModel() {
         viewModelScope.safeLaunch(CoroutineExceptionHandler { _, throwable ->
             logger.w("load calendar account list failed", throwable)
             _calendarAccountListState.value = CalendarAccountListState(
-                errorMessage = throwable.message ?: throwable.desc()
+                errorMessage = throwable.desc()
             )
         }) {
             _calendarAccountListState.value = CalendarAccountListState(loading = true)
@@ -55,7 +55,7 @@ class ExportCalendarViewModel : ComposeViewModel() {
         }
         viewModelScope.safeLaunch(CoroutineExceptionHandler { _, throwable ->
             logger.w("export calendar failed", throwable)
-            failed(throwable.message ?: throwable.desc())
+            failed(throwable.desc())
         }) {
             _actionState.value = ActionState(loading = true, actionSuccess = false)
             val selectedUser = userSelect.getSelectedUser()
@@ -93,7 +93,7 @@ class ExportCalendarViewModel : ComposeViewModel() {
         viewModelScope.safeLaunch(CoroutineExceptionHandler { _, throwable ->
             logger.w("delete calendar account failed", throwable)
             _actionState.value = ActionState(
-                errorMessage = throwable.message ?: throwable.desc(),
+                errorMessage = throwable.desc(),
                 actionSuccess = false,
             )
         }) {
