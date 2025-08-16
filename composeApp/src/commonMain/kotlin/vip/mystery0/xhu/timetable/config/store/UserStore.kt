@@ -148,6 +148,7 @@ object UserStore {
                     block(token)
                 }
             } catch (_: ServerNeedLoginException) {
+                Logger.i("server need login, auto login it")
                 val sessionToken = mutex.withLock {
                     val newUser = userByStudentId(studentId)
                     val updated = this@withAutoLoginOnce.token != newUser.token

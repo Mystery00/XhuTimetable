@@ -46,6 +46,8 @@ kotlin {
         optIn.add("kotlin.time.ExperimentalTime")
         optIn.add("androidx.compose.material3.ExperimentalMaterial3Api")
         optIn.add("dev.whyoleg.cryptography.DelicateCryptographyApi")
+
+        freeCompilerArgs.add("-Xexpect-actual-classes")
     }
 
     listOf(

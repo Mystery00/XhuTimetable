@@ -2,7 +2,9 @@ package vip.mystery0.xhu.timetable.utils
 
 import kotlinx.serialization.json.Json
 
-val mapJson = Json {}
+val mapJson = Json {
+    isLenient = true
+}
 val json = Json {
     isLenient = true
     ignoreUnknownKeys = true
