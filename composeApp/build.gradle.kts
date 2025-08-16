@@ -81,6 +81,8 @@ kotlin {
             implementation(libs.mmkv.android)
             //accompanist
             implementation(libs.accompanist.permissions)
+            //apache-compress
+            implementation(libs.apache.compress)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

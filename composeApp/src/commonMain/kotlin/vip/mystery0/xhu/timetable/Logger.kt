@@ -7,8 +7,9 @@ import co.touchlab.kermit.Severity
 import co.touchlab.kermit.platformLogWriter
 import vip.mystery0.xhu.timetable.config.logger.FileLogWriter
 
-fun initLogger(): FileLogWriter {
-    val fileLogWriter = FileLogWriter()
+val fileLogWriter = FileLogWriter()
+
+fun initLogger() {
     Logger.setTag("XhuTimetable")
     var consoleMinSeverity = Severity.Warn
     if (isDebug) consoleMinSeverity = Severity.Verbose
@@ -18,7 +19,6 @@ fun initLogger(): FileLogWriter {
             platformLogWriter(NoTagFormatter),
         ), fileLogWriter
     )
-    return fileLogWriter
 }
 
 expect val isDebug: Boolean

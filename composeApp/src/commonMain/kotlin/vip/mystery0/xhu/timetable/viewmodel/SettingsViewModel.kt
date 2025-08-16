@@ -1,6 +1,9 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.dialogs.shareFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,8 +16,10 @@ import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
+import vip.mystery0.xhu.timetable.fileLogWriter
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
+import vip.mystery0.xhu.timetable.module.desc
 import vip.mystery0.xhu.timetable.repository.JobRepo
 import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.ui.theme.NightMode
@@ -95,6 +100,17 @@ class SettingsViewModel : ComposeViewModel() {
         viewModelScope.safeLaunch {
             _featurePullTimeList.value = getCacheStore { featurePullLastExecuteTime }
                 .map { it.format(chinaDateTime) }
+        }
+    }
+
+    fun reportLog() {
+        viewModelScope.safeLaunch(onException = {
+            Logger.e("generate report log failed", it)
+            toastMessage(it.message ?: it.desc())
+            true
+        }) {
+            val file = fileLogWriter.prepareSendFile()
+            FileKit.shareFile(file)
         }
     }
 

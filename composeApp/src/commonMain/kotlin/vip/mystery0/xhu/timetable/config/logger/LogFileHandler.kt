@@ -1,5 +1,7 @@
 package vip.mystery0.xhu.timetable.config.logger
 
+import io.github.vinceglb.filekit.PlatformFile
+
 expect class LogFileHandler() {
     fun enable(): Boolean
 
@@ -8,4 +10,8 @@ expect class LogFileHandler() {
      * Each platform will implement the specific file I/O logic here.
      */
     fun writeLogs(logs: List<String>)
+
+    fun clearOld()
+
+    suspend fun prepareSend(): PlatformFile
 }

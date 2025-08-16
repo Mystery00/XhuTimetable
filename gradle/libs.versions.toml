@@ -39,6 +39,7 @@ sheets-compose-dialogs = "2.0.0-alpha03"
 zoomimage = "1.4.0"
 krop = "0.2.0"
 accompanist = "0.37.3"
+apache-compress = "1.28.0"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
@@ -130,6 +131,8 @@ krop = { group = "com.attafitamim.krop", name = "ui", version.ref = "krop" }
 krop-filekit = { group = "com.attafitamim.krop", name = "extensions-filekit", version.ref = "krop" }
 
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
+
+apache-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "apache-compress" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

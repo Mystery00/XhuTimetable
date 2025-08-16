@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.config.logger
 
 import co.touchlab.kermit.LogWriter
 import co.touchlab.kermit.Severity
+import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -55,6 +56,7 @@ class FileLogWriter(
     }
 
     init {
+        fileHandler.clearOld()
         if (fileHandler.enable()) {
             start()
         }
@@ -139,5 +141,12 @@ class FileLogWriter(
         if (remainingLogs.isNotEmpty()) {
             fileHandler.writeLogs(remainingLogs)
         }
+    }
+
+    suspend fun prepareSendFile(): PlatformFile {
+        if (!fileHandler.enable()) {
+            throw RuntimeException("日志未启用，不允许此操作")
+        }
+        return fileHandler.prepareSend()
     }
 }

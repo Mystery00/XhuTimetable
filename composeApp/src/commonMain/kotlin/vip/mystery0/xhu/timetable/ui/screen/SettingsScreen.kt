@@ -318,7 +318,7 @@ fun SettingsScreen() {
                 XhuSettingsMenuLink(
                     title = { Text(text = "日志上报") },
                     onClick = {
-                        showToast("待实现")
+                        viewModel.reportLog()
                     }
                 )
             }

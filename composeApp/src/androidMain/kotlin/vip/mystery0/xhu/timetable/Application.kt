@@ -12,7 +12,6 @@ import com.tencent.mmkv.MMKVLogLevel
 import multiplatform.network.cmptoast.AppContext
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
-import vip.mystery0.xhu.timetable.config.logger.FileLogWriter
 import vip.mystery0.xhu.timetable.config.mmkv.KermitMMKVLogger
 import vip.mystery0.xhu.timetable.module.moduleList
 
@@ -20,13 +19,11 @@ import vip.mystery0.xhu.timetable.module.moduleList
 internal lateinit var context: Context
 
 class Application : Application(), DefaultLifecycleObserver {
-    private lateinit var fileLogWriter: FileLogWriter
-
     override fun onCreate() {
         super<Application>.onCreate()
         AppContext.apply { set(applicationContext) }
         context = this
-        fileLogWriter = initLogger()
+        initLogger()
         initCoroutine()
         initFeature()
         startKoin {
@@ -41,8 +38,6 @@ class Application : Application(), DefaultLifecycleObserver {
     override fun onStop(owner: LifecycleOwner) {
         super.onStop(owner)
         Logger.i("App is in the background. Stopping FileLogWriter to flush logs.")
-        if (::fileLogWriter.isInitialized) {
-            fileLogWriter.stop()
-        }
+        fileLogWriter.stop()
     }
 }
