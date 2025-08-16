@@ -13,7 +13,11 @@ import vip.mystery0.xhu.timetable.feature.FeatureHub
 
 expect fun sdkKey(): String
 
-expect fun platform(): String
+expect fun platform(): Platform
+
+enum class Platform {
+    ANDROID, IOS,
+}
 
 fun initFeature() {
     FeatureHub.initialize(
@@ -24,7 +28,7 @@ fun initFeature() {
     val context = ContextBuilder()
         .userKey(publicDeviceId())
         .device("mobile")
-        .platform(platform())
+        .platform(platform().name.lowercase())
         .version("${appVersionName()}-${appVersionCode()}")
         .attr("deviceId", publicDeviceId())
         .attr("systemVersion", systemVersion())

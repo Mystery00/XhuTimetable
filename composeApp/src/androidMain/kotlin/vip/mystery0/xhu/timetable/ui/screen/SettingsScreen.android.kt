@@ -184,7 +184,6 @@ actual fun UpdateSettings() {
 
     val versionChannel by viewModel.versionChannel.collectAsState()
 
-    val scope = rememberCoroutineScope()
     val checkVersionChannelState = rememberUseCaseState()
 
     XhuSettingsMenuLink(

@@ -29,7 +29,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
@@ -45,9 +44,11 @@ import me.zhanghai.compose.preference.SliderPreference
 import multiplatform.network.cmptoast.showToast
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
+import vip.mystery0.xhu.timetable.Platform
 import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.TitleTemplate
 import vip.mystery0.xhu.timetable.model.format
+import vip.mystery0.xhu.timetable.platform
 import vip.mystery0.xhu.timetable.ui.component.preference.XhuSettingsGroup
 import vip.mystery0.xhu.timetable.ui.component.preference.XhuSettingsMenuLink
 import vip.mystery0.xhu.timetable.ui.component.xhuHeader
@@ -65,8 +66,6 @@ fun CustomUiScreen() {
     val navController = LocalNavController.current!!
 
     val randomCourse by viewModel.randomCourse.collectAsState()
-
-    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         viewModel.init()
@@ -243,9 +242,9 @@ fun CustomUiScreen() {
                         })
                     XhuSettingsMenuLink(
                         title = { Text(text = "动态模糊说明") },
-                        subtitle = {
-                            Text(text = "仅 Android 12+ 可使用")
-                        },
+                        subtitle = if (platform() == Platform.ANDROID) {
+                            { Text(text = "仅 Android 12+ 可使用") }
+                        } else null,
                     )
                     XhuSettingsMenuLink(
                         title = { Text(text = "格子文本模板") },
