@@ -36,18 +36,15 @@ object ExamRepo : BaseDataRepo {
             initialLoadSize = 10,
         )
 
-    fun getExamListStream(user: User): Flow<PagingData<Exam>> =
+    fun getExamListStream(user: User, year: Int, term: Int): Flow<PagingData<Exam>> =
         Pager(
             config = globalPagingConfig,
             pagingSourceFactory = {
                 buildPageSource { index, size ->
                     checkForceLoadFromCloud(true)
 
-                    val nowYear = getConfigStore { nowYear }
-                    val nowTerm = getConfigStore { nowTerm }
-
                     val page = user.withAutoLoginOnce {
-                        examApi.examList(it, nowYear, nowTerm, index, size)
+                        examApi.examList(it, year, term, index, size)
                     }
                     val now = Clock.System.now()
                     withContext(Dispatchers.Default) {

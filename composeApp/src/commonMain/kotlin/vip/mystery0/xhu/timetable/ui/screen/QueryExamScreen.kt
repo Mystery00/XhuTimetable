@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.TipsAndUpdates
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
@@ -34,9 +36,12 @@ import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
+import vip.mystery0.xhu.timetable.config.toast.showLongToast
 import vip.mystery0.xhu.timetable.ui.component.BuildPaging
-import vip.mystery0.xhu.timetable.ui.component.BuildSelectFilterChipContentOnlyUser
+import vip.mystery0.xhu.timetable.ui.component.BuildSelectFilterChipContent
+import vip.mystery0.xhu.timetable.ui.component.ShowTermDialog
 import vip.mystery0.xhu.timetable.ui.component.ShowUserDialog
+import vip.mystery0.xhu.timetable.ui.component.ShowYearDialog
 import vip.mystery0.xhu.timetable.ui.component.StateScreen
 import vip.mystery0.xhu.timetable.ui.component.collectAndHandleState
 import vip.mystery0.xhu.timetable.ui.component.itemsIndexed
@@ -56,8 +61,12 @@ fun QueryExamScreen() {
     val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
 
     val userSelect by viewModel.userSelect.select.collectAsState()
+    val yearSelect by viewModel.yearSelect.select.collectAsState()
+    val termSelect by viewModel.termSelect.select.collectAsState()
 
     val userDialog by viewModel.userSelect.selectDialog.collectAsState()
+    val yearDialog by viewModel.yearSelect.selectDialog.collectAsState()
+    val termDialog by viewModel.termSelect.selectDialog.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.init()
@@ -78,6 +87,17 @@ fun QueryExamScreen() {
                         )
                     }
                 },
+                actions = {
+                    IconButton(onClick = {
+                        showLongToast("要查询补考信息，请手动将学年和学期切换到上一个学期")
+                    }) {
+                        Icon(
+                            imageVector = Icons.Rounded.TipsAndUpdates,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                }
             )
         },
     ) { paddingValues ->
@@ -87,9 +107,13 @@ fun QueryExamScreen() {
             pager = pager,
             refreshing = refreshing,
             listHeader = {
-                BuildSelectFilterChipContentOnlyUser(
+                BuildSelectFilterChipContent(
                     userSelect = userSelect,
+                    yearSelect = yearSelect,
+                    termSelect = termSelect,
                     showUserDialog = userDialog,
+                    showYearDialog = yearDialog,
+                    showTermDialog = termDialog,
                     onDataLoad = {
                         viewModel.loadExamList()
                     }
@@ -116,6 +140,12 @@ fun QueryExamScreen() {
     }
     ShowUserDialog(selectList = userSelect, useCaseState = userDialog, onSelect = {
         viewModel.selectUser(it.studentId)
+    })
+    ShowYearDialog(selectList = yearSelect, useCaseState = yearDialog, onSelect = {
+        viewModel.selectYear(it.value)
+    })
+    ShowTermDialog(selectList = termSelect, useCaseState = termDialog, onSelect = {
+        viewModel.selectTerm(it.value)
     })
 
     HandleErrorMessage(flow = viewModel.errorMessage)

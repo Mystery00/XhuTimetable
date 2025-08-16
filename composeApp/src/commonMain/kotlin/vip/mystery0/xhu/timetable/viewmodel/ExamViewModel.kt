@@ -3,26 +3,31 @@ package vip.mystery0.xhu.timetable.viewmodel
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
 import kotlinx.datetime.LocalDate
+import vip.mystery0.xhu.timetable.base.PageRequest
 import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
+import vip.mystery0.xhu.timetable.base.TermSelectDataLoader
 import vip.mystery0.xhu.timetable.base.UserSelectDataLoader
+import vip.mystery0.xhu.timetable.base.YearSelectDataLoader
 import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
-import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.module.desc
 import vip.mystery0.xhu.timetable.repository.ExamRepo
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
-import kotlin.time.Clock
 
 class ExamViewModel : PagingComposeViewModel<PageRequest, Exam>(
     {
-        ExamRepo.getExamListStream(it.user)
+        ExamRepo.getExamListStream(it.user, it.year, it.term)
     }
 ) {
     val userSelect = UserSelectDataLoader()
+    val yearSelect = YearSelectDataLoader()
+    val termSelect = TermSelectDataLoader()
 
     fun init() {
         viewModelScope.safeLaunch {
             userSelect.init()
+            yearSelect.init()
+            termSelect.init()
             loadExamList()
         }
     }
@@ -41,7 +46,9 @@ class ExamViewModel : PagingComposeViewModel<PageRequest, Exam>(
                 failed("选择用户为空，请重新选择")
                 return@safeLaunch
             }
-            loadData(PageRequest(selectedUser))
+            val year = yearSelect.getSelectedYear()
+            val term = termSelect.getSelectedTerm()
+            loadData(PageRequest(selectedUser, year, term))
         }
     }
 
@@ -50,12 +57,19 @@ class ExamViewModel : PagingComposeViewModel<PageRequest, Exam>(
             userSelect.setSelected(studentId)
         }
     }
-}
 
-data class PageRequest(
-    val user: User,
-    val requestTime: Long = Clock.System.now().toEpochMilliseconds(),
-)
+    fun selectYear(year: Int) {
+        viewModelScope.safeLaunch {
+            yearSelect.setSelected(year)
+        }
+    }
+
+    fun selectTerm(term: Int) {
+        viewModelScope.safeLaunch {
+            termSelect.setSelected(term)
+        }
+    }
+}
 
 data class Exam(
     val courseColor: Color,

@@ -23,6 +23,7 @@ import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import kotlinx.datetime.LocalDate
 import multiplatform.network.cmptoast.showToast
 import org.koin.compose.viewmodel.koinViewModel
+import vip.mystery0.xhu.timetable.Platform
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
 import vip.mystery0.xhu.timetable.base.appVersionCode
 import vip.mystery0.xhu.timetable.base.publicDeviceId
@@ -34,6 +35,7 @@ import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.event.EventType
+import vip.mystery0.xhu.timetable.platform
 import vip.mystery0.xhu.timetable.ui.component.ShowSingleSelectDialog
 import vip.mystery0.xhu.timetable.ui.component.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.component.preference.PoemsSettingsCheckbox
@@ -349,6 +351,7 @@ fun SettingsScreen() {
                     )
                     ConfigSettingsCheckbox(
                         config = ConfigStore::alwaysCrash,
+                        enabled = platform() == Platform.ANDROID,
                         scope = scope,
                         title = { Text(text = "始终显示崩溃信息") },
                         subtitle = {
