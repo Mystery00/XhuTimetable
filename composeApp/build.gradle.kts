@@ -70,6 +70,8 @@ kotlin {
             implementation(libs.androidx.splashscreen)
             implementation(libs.androidx.browser)
             implementation(libs.androidx.work.runtime.ktx)
+            implementation(libs.androidx.glance)
+            implementation(libs.androidx.glance.widget)
             implementation(libs.material)
             //ktor
             implementation(libs.ktor.client.okhttp)

@@ -15,6 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.animation.doOnEnd
+import androidx.core.content.pm.ShortcutManagerCompat
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.absolutePath
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -34,6 +35,7 @@ class StartActivity : ComponentActivity(), KoinComponent {
         setContent {
             BuildContentWindow()
         }
+        ShortcutManagerCompat.removeAllDynamicShortcuts(this)
     }
 
     @Composable

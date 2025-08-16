@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">XhuTimetable</string>
+    <string name="title_widget_today_course">今日课表</string>
+    <string name="title_widget_week_course">本周课表</string>
 </resources>
