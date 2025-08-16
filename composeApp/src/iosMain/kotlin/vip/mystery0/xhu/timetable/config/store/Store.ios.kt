@@ -21,7 +21,7 @@ fun getSettings(id: String): Settings =
         else -> throw NotImplementedError()
     }
 
-actual inline fun <reified T> Store.getConfiguration(key: String, defaultValue: T): T {
+actual inline fun <reified T> Store.getValue(key: String, defaultValue: T): T {
     val settings = getSettings(id)
     return when (defaultValue) {
         is Boolean -> settings.getBoolean(key, defaultValue)
@@ -38,7 +38,7 @@ actual inline fun <reified T> Store.getConfiguration(key: String, defaultValue: 
     } as T
 }
 
-actual inline fun <reified T> Store.setConfiguration(key: String, value: T) {
+actual inline fun <reified T> Store.setValue(key: String, value: T) {
     val settings = getSettings(id)
     when (value) {
         is Boolean -> settings[key] = value
@@ -55,12 +55,12 @@ actual inline fun <reified T> Store.setConfiguration(key: String, value: T) {
     }
 }
 
-actual fun Store.removeConfiguration(key: String) {
+actual fun Store.removeValue(key: String) {
     val settings = getSettings(id)
     settings.remove(key)
 }
 
-actual fun Store.removeAll() {
+actual fun Store.removeAllValue() {
     val settings = getSettings(id)
     settings.clear()
 }

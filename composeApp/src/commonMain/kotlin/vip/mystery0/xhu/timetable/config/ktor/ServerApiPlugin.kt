@@ -30,7 +30,9 @@ val ServerApiPlugin = createClientPlugin("ServerApiPlugin") {
         val contentType =
             content.contentType?.toString() ?: request.headers[HttpHeaders.ContentType]
         val body = getBodyString(content)
-        Logger.d("body: $body")
+        if (body.isNotBlank()) {
+            Logger.d("request body: $body")
+        }
         val signTime = Clock.System.now()
         val map = LinkedHashMap<String, String>()
         map["method"] = request.method.value.uppercase()
@@ -45,8 +47,9 @@ val ServerApiPlugin = createClientPlugin("ServerApiPlugin") {
         val signKey = request.headers["sessionToken"] ?: signTime.toEpochMilliseconds().toString()
         Logger.d("signKey: $signKey")
         val salt = "$signKey:XhuTimeTable".md5().uppercase()
-        Logger.d("sign: $sortMap:$salt")
+        Logger.d("sign string: $sortMap:$salt")
         val sign = "$sortMap:$salt".sha256().uppercase()
+        Logger.d("sign: $sign")
 
         request.header("sign", sign)
         request.header("signTime", signTime.toEpochMilliseconds().toString())
@@ -55,6 +58,7 @@ val ServerApiPlugin = createClientPlugin("ServerApiPlugin") {
         request.header("clientVersionCode", appVersionCode())
     }
     onResponse { resp ->
+        Logger.d("response http code: ${resp.status.value}")
         if (resp.status.value in 200..299) {
             return@onResponse
         }
@@ -62,7 +66,9 @@ val ServerApiPlugin = createClientPlugin("ServerApiPlugin") {
             throw ServerNeedLoginException()
         }
         val body = resp.bodyAsText()
-        Logger.d("body: $body")
+        if (body.isNotBlank()) {
+            Logger.d("response body: $body")
+        }
         if (body.isBlank()) {
             throw ServerError("response body is empty, http code: ${resp.status.value}")
         }

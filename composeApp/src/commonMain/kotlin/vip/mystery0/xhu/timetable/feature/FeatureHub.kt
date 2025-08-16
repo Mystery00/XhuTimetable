@@ -18,6 +18,7 @@ object FeatureHub {
     private var isInitialized = false
 
     suspend fun record() {
+        Logger.d("record feature pull")
         setCacheStore {
             featurePullLastExecuteTime =
                 featurePullLastExecuteTime + Clock.System.now().asLocalDateTime()

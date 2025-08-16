@@ -1,11 +1,8 @@
 package vip.mystery0.xhu.timetable.config.store
 
-import co.touchlab.kermit.Logger
 import com.tencent.mmkv.MMKV
 import kotlin.random.Random
 import kotlin.time.Clock
-
-val logger = Logger.withTag("Store")
 
 private val secret: String
     get() {
@@ -35,11 +32,10 @@ fun getMMKV(id: String): MMKV =
     }
 
 @Suppress("UNCHECKED_CAST")
-actual inline fun <reified T> Store.getConfiguration(
+actual inline fun <reified T> Store.getValue(
     key: String,
     defaultValue: T,
 ): T {
-    logger.d("getConfiguration($id): $key, default: $defaultValue")
     val kv = getMMKV(id)
     return when (defaultValue) {
         is Boolean -> kv.decodeBool(key, defaultValue)
@@ -53,11 +49,10 @@ actual inline fun <reified T> Store.getConfiguration(
 }
 
 @Suppress("UNCHECKED_CAST")
-actual inline fun <reified T> Store.setConfiguration(
+actual inline fun <reified T> Store.setValue(
     key: String,
     value: T,
 ) {
-    logger.d("setConfiguration($id): $key, value: $value")
     val kv = getMMKV(id)
     when (value) {
         is Boolean -> kv.encode(key, value)
@@ -70,12 +65,12 @@ actual inline fun <reified T> Store.setConfiguration(
     }
 }
 
-actual fun Store.removeConfiguration(key: String) {
+actual fun Store.removeValue(key: String) {
     val kv = getMMKV(id)
     kv.removeValueForKey(key)
 }
 
-actual fun Store.removeAll() {
+actual fun Store.removeAllValue() {
     val kv = getMMKV(id)
     kv.clearAll()
 }
