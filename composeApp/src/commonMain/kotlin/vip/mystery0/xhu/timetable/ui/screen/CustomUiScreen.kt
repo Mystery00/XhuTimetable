@@ -240,12 +240,12 @@ fun CustomUiScreen() {
                             viewModel.backgroundImageBlur.value = newValue
                             viewModel.update()
                         })
-                    XhuSettingsMenuLink(
-                        title = { Text(text = "动态模糊说明") },
-                        subtitle = if (platform() == Platform.ANDROID) {
-                            { Text(text = "仅 Android 12+ 可使用") }
-                        } else null,
-                    )
+                    if (platform() == Platform.ANDROID) {
+                        XhuSettingsMenuLink(
+                            title = { Text(text = "动态模糊说明") },
+                            subtitle = { Text(text = "仅 Android 12+ 可使用") },
+                        )
+                    }
                     XhuSettingsMenuLink(
                         title = { Text(text = "格子文本模板") },
                         subtitle = {
