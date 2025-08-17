@@ -17,37 +17,50 @@ jobs:
 
       - name: List and delete old nightly tags
         run: |
-          echo "Listing all tags:"
-          git tag -l
+          echo "Fetching all tags from remote to ensure we are up-to-date..."
+          git fetch origin --tags
 
-          # 获取所有以 .nightly 结尾的tag，并解析数字进行排序
+          # 创建一个数组，每个元素是 "版本号 完整的标签名" 的格式
           nightly_tags=()
           while IFS= read -r tag; do
-            if [[ $tag == *.nightly ]]; then
-              if [[ $tag =~ \.n([0-9]+)\.nightly$ ]]; then
-                nightly_tags+=("${BASH_REMATCH[1]} $tag")
-              fi
+            if [[ $tag =~ \.n([0-9]+)\.nightly$ ]]; then
+              # 将解析出的数字和完整的标签名作为一个数组元素添加
+              nightly_tags+=("${BASH_REMATCH[1]} $tag")
             fi
           done <<< "$(git tag -l '*.nightly')"
 
-          # 按数字降序排序
-          sorted_nightly_tags=($(echo "${nightly_tags[@]}" | tr ' ' '\n' | sort -k1,1nr))
+          # 检查是否找到了任何nightly标签
+          if [ ${#nightly_tags[@]} -eq 0 ]; then
+            echo "No nightly tags found matching the pattern. Exiting."
+            exit 0
+          fi
 
-          echo "Found and sorted nightly tags:"
-          for item in "${sorted_nightly_tags[@]}"; do
-            echo "$item"
-          done
+          echo "Found and will sort the following nightly tags:"
+          printf "%s\n" "${nightly_tags[@]}"
 
-          # 保留最近的10个，其余的删除
-          tags_to_delete=(${sorted_nightly_tags[@]:10})
+          mapfile -t sorted_tags < <(printf "%s\n" "${nightly_tags[@]}" | sort -k1,1nr)
+
+          echo "Sorted nightly tags (top 10 will be kept):"
+          printf "%s\n" "${sorted_tags[@]}"
+
+          # 从排序后的数组中，获取第11个及之后的所有元素作为待删除列表
+          tags_to_delete=("${sorted_tags[@]:10}")
 
           if [ ${#tags_to_delete[@]} -eq 0 ]; then
             echo "No old nightly tags to delete."
           else
-            echo "Tags to delete:"
+            echo "The following tags will be deleted:"
+            # 预先打印所有将要删除的标签
             for item in "${tags_to_delete[@]}"; do
-              tag_to_delete=$(echo "$item" | cut -d' ' -f2)
-              echo "Deleting tag: $tag_to_delete"
-              git push --delete origin "$tag_to_delete"
+              # 从 "版本号 标签名" 中提取出标签名（第二部分）
+              tag_name=$(echo "$item" | cut -d' ' -f2-)
+              echo "  - $tag_name"
+            done
+
+            # 循环执行删除操作
+            for item in "${tags_to_delete[@]}"; do
+              tag_name=$(echo "$item" | cut -d' ' -f2-)
+              echo "Deleting tag: $tag_name"
+              git push --delete origin "$tag_name"
             done
           fi
