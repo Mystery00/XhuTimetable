@@ -1,0 +1,53 @@
+name: Clear Nightly Tag
+
+on:
+  workflow_dispatch: # 允许手动触发
+  schedule:
+    - cron: '0 0 * * *' # 每天午夜执行
+
+jobs:
+  clear-nightly-tag:
+    name: Clear Nightly Tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 获取所有git历史和tags
+
+      - name: List and delete old nightly tags
+        run: |
+          echo "Listing all tags:"
+          git tag -l
+
+          # 获取所有以 .nightly 结尾的tag，并解析数字进行排序
+          nightly_tags=()
+          while IFS= read -r tag; do
+            if [[ $tag == *.nightly ]]; then
+              if [[ $tag =~ \.n([0-9]+)\.nightly$ ]]; then
+                nightly_tags+=("${BASH_REMATCH[1]} $tag")
+              fi
+            fi
+          done <<< "$(git tag -l '*.nightly')"
+
+          # 按数字降序排序
+          sorted_nightly_tags=($(echo "${nightly_tags[@]}" | tr ' ' '\n' | sort -k1,1nr))
+
+          echo "Found and sorted nightly tags:"
+          for item in "${sorted_nightly_tags[@]}"; do
+            echo "$item"
+          done
+
+          # 保留最近的10个，其余的删除
+          tags_to_delete=(${sorted_nightly_tags[@]:10})
+
+          if [ ${#tags_to_delete[@]} -eq 0 ]; then
+            echo "No old nightly tags to delete."
+          else
+            echo "Tags to delete:"
+            for item in "${tags_to_delete[@]}"; do
+              tag_to_delete=$(echo "$item" | cut -d' ' -f2)
+              echo "Deleting tag: $tag_to_delete"
+              git push --delete origin "$tag_to_delete"
+            done
+          fi
