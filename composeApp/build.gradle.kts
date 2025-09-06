@@ -32,7 +32,7 @@ fun String.runCommand(workingDir: File = file("./")): String {
 val packageName = "vip.mystery0.xhu.timetable"
 val gitVersionCode: Int = "git rev-list HEAD --count".runCommand().toInt()
 val gitVersionName = "git rev-parse --short=8 HEAD".runCommand()
-val appVersionName = "1.6.0"
+val appVersionName = "1.6.1"
 
 kotlin {
     androidTarget {
