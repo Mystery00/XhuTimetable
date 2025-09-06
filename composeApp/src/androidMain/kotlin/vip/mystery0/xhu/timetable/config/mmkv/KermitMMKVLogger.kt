@@ -31,4 +31,6 @@ class KermitMMKVLogger : MMKVHandler {
             MMKVLogLevel.LevelNone -> {}
         }
     }
+
+    override fun getNativeLogHandler(): Long = 0L
 }
