@@ -19,6 +19,3 @@ enum class FeatureString(val key: String, private val defaultValue: String) {
 
 fun trackEvent(event: String) {
 }
-
-fun trackError(error: Throwable) {
-}

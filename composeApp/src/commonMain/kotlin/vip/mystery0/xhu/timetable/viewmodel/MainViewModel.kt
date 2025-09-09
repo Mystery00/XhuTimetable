@@ -2,7 +2,6 @@ package vip.mystery0.xhu.timetable.viewmodel
 
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +28,6 @@ import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
-import vip.mystery0.xhu.timetable.config.trackError
 import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.TodayCourseView
 import vip.mystery0.xhu.timetable.model.TodayThingView
@@ -203,9 +201,8 @@ class MainViewModel : ComposeViewModel() {
     }
 
     private fun showPoems() {
-        viewModelScope.safeLaunch(CoroutineExceptionHandler { _, throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("showPoems: ", throwable)
-            trackError(throwable)
         }) {
             _poems.value = PoemsStore.loadPoems()
         }
