@@ -1,7 +1,6 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -9,6 +8,7 @@ import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.UserSelectDataLoader
 import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
+import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.model.CalendarAccount
 import vip.mystery0.xhu.timetable.module.desc
@@ -30,7 +30,7 @@ class ExportCalendarViewModel : ComposeViewModel() {
     }
 
     fun loadCalendarAccountList() {
-        viewModelScope.safeLaunch(CoroutineExceptionHandler { _, throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("load calendar account list failed", throwable)
             _calendarAccountListState.value = CalendarAccountListState(
                 errorMessage = throwable.desc()
@@ -53,7 +53,7 @@ class ExportCalendarViewModel : ComposeViewModel() {
             logger.w("export calendar failed, $message")
             _actionState.value = ActionState(errorMessage = message, actionSuccess = false)
         }
-        viewModelScope.safeLaunch(CoroutineExceptionHandler { _, throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("export calendar failed", throwable)
             failed(throwable.desc())
         }) {
@@ -90,7 +90,7 @@ class ExportCalendarViewModel : ComposeViewModel() {
     }
 
     fun deleteCalendarAccount(accountId: Long) {
-        viewModelScope.safeLaunch(CoroutineExceptionHandler { _, throwable ->
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("delete calendar account failed", throwable)
             _actionState.value = ActionState(
                 errorMessage = throwable.desc(),
