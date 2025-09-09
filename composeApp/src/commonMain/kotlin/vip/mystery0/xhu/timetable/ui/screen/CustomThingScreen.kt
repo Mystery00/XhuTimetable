@@ -11,13 +11,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.EventNote
 import androidx.compose.material.icons.automirrored.rounded.Notes
@@ -376,137 +379,107 @@ private fun CustomThingBottomSheet(
         },
         sheetState = sheetState,
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = horizontalPadding),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier = Modifier.fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(horizontalPadding)
         ) {
-            IconButton(
-                onClick = {
-                    dismissSheet()
-                },
-                modifier = Modifier.padding(12.dp)
-            ) {
-                Icon(Icons.Rounded.Cancel, null)
-            }
-            Spacer(modifier = Modifier.weight(1F))
-            if (customThing.thingId != 0L && !saveLoadingState.loading) {
-                TextButton(
-                    onClick = {
-                        viewModel.deleteCustomThing(customThing.thingId)
-                    }) {
-                    Text(text = "删除", color = Color.Red)
-                }
-            }
-            if (!saveLoadingState.loading) {
-                TextButton(
-                    onClick = {
-                        viewModel.saveCustomThing(
-                            customThing.thingId,
-                            CustomThingRequest.buildOf(
-                                thingTitle,
-                                location,
-                                allDay,
-                                startTime,
-                                endTime,
-                                remark,
-                                color,
-                                mapOf(
-                                    CustomThing.Key.SAVE_AS_COUNT_DOWN to saveAsCountdown.toString()
-                                )
-                            ),
-                            saveAsCountdown,
-                        )
-                    }) {
-                    Text(text = "保存")
-                }
-            }
-            if (saveLoadingState.loading) {
-                TextButton(
-                    enabled = false,
-                    onClick = {
-                    }) {
-                    Text(text = "保存操作中...")
-                }
-            }
-        }
-        Column {
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(horizontal = horizontalPadding),
-                value = thingTitle,
-                placeholder = {
-                    Text(text = "（必填）")
-                },
-                label = {
-                    Text(text = "标题")
-                },
-                onValueChange = { thingTitle = it },
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color.Transparent,
-                    disabledBorderColor = Color.Transparent,
-                    disabledLabelColor = OutlinedTextFieldDefaults.colors().unfocusedTextColor,
-                )
-            )
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(horizontal = horizontalPadding),
-                value = "",
-                enabled = false,
-                label = {
-                    Text(text = "全天")
-                },
-                leadingIcon = {
-                    Icon(Icons.Rounded.Schedule, null)
-                },
-                trailingIcon = {
-                    Switch(
-                        checked = allDay,
-                        onCheckedChange = { allDay = it },
-                    )
-                },
-                onValueChange = { },
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color.Transparent,
-                    disabledBorderColor = Color.Transparent,
-                    disabledLabelColor = OutlinedTextFieldDefaults.colors().unfocusedTextColor,
-                    disabledLeadingIconColor = OutlinedTextFieldDefaults.colors().unfocusedLeadingIconColor
-                )
-            )
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = horizontalPadding)
-                    .height(36.dp),
+                modifier = Modifier.padding(horizontal = horizontalPadding),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Spacer(modifier = Modifier.width(56.dp))
-                Text(
-                    modifier = Modifier
-                        .weight(1F)
-                        .clickable(
-                            onClick = {
-                                startDateDialog.show()
-                            },
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() },
-                        ),
-                    text = startTime.date.format(dateFormatter),
-                )
-                if (!allDay) {
-                    Text(
-                        modifier = Modifier
-                            .clickable(
-                                onClick = {
-                                    startTimeDialog.show()
-                                },
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() },
-                            ),
-                        text = startTime.time.format(Formatter.TIME_NO_SECONDS),
-                    )
+                IconButton(
+                    onClick = {
+                        dismissSheet()
+                    },
+                    modifier = Modifier.padding(12.dp)
+                ) {
+                    Icon(Icons.Rounded.Cancel, null)
+                }
+                Spacer(modifier = Modifier.weight(1F))
+                if (customThing.thingId != 0L && !saveLoadingState.loading) {
+                    TextButton(
+                        onClick = {
+                            viewModel.deleteCustomThing(customThing.thingId)
+                        }) {
+                        Text(text = "删除", color = Color.Red)
+                    }
+                }
+                if (!saveLoadingState.loading) {
+                    TextButton(
+                        onClick = {
+                            viewModel.saveCustomThing(
+                                customThing.thingId,
+                                CustomThingRequest.buildOf(
+                                    thingTitle,
+                                    location,
+                                    allDay,
+                                    startTime,
+                                    endTime,
+                                    remark,
+                                    color,
+                                    mapOf(
+                                        CustomThing.Key.SAVE_AS_COUNT_DOWN to saveAsCountdown.toString()
+                                    )
+                                ),
+                                saveAsCountdown,
+                            )
+                        }) {
+                        Text(text = "保存")
+                    }
+                }
+                if (saveLoadingState.loading) {
+                    TextButton(
+                        enabled = false,
+                        onClick = {
+                        }) {
+                        Text(text = "保存操作中...")
+                    }
                 }
             }
-            if (!saveAsCountdown) {
+            Column {
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = horizontalPadding),
+                    value = thingTitle,
+                    placeholder = {
+                        Text(text = "（必填）")
+                    },
+                    label = {
+                        Text(text = "标题")
+                    },
+                    onValueChange = { thingTitle = it },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedBorderColor = Color.Transparent,
+                        disabledBorderColor = Color.Transparent,
+                        disabledLabelColor = OutlinedTextFieldDefaults.colors().unfocusedTextColor,
+                    )
+                )
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = horizontalPadding),
+                    value = "",
+                    enabled = false,
+                    label = {
+                        Text(text = "全天")
+                    },
+                    leadingIcon = {
+                        Icon(Icons.Rounded.Schedule, null)
+                    },
+                    trailingIcon = {
+                        Switch(
+                            checked = allDay,
+                            onCheckedChange = { allDay = it },
+                        )
+                    },
+                    onValueChange = { },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedBorderColor = Color.Transparent,
+                        disabledBorderColor = Color.Transparent,
+                        disabledLabelColor = OutlinedTextFieldDefaults.colors().unfocusedTextColor,
+                        disabledLeadingIconColor = OutlinedTextFieldDefaults.colors().unfocusedLeadingIconColor
+                    )
+                )
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -520,126 +493,161 @@ private fun CustomThingBottomSheet(
                             .weight(1F)
                             .clickable(
                                 onClick = {
-                                    endDateDialog.show()
+                                    startDateDialog.show()
                                 },
                                 indication = null,
                                 interactionSource = remember { MutableInteractionSource() },
                             ),
-                        text = endTime.date.format(dateFormatter),
+                        text = startTime.date.format(dateFormatter),
                     )
                     if (!allDay) {
                         Text(
                             modifier = Modifier
                                 .clickable(
                                     onClick = {
-                                        endTimeDialog.show()
+                                        startTimeDialog.show()
                                     },
                                     indication = null,
                                     interactionSource = remember { MutableInteractionSource() },
                                 ),
-                            text = endTime.time.format(Formatter.TIME_NO_SECONDS),
+                            text = startTime.time.format(Formatter.TIME_NO_SECONDS),
                         )
                     }
                 }
+                if (!saveAsCountdown) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = horizontalPadding)
+                            .height(36.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Spacer(modifier = Modifier.width(56.dp))
+                        Text(
+                            modifier = Modifier
+                                .weight(1F)
+                                .clickable(
+                                    onClick = {
+                                        endDateDialog.show()
+                                    },
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                ),
+                            text = endTime.date.format(dateFormatter),
+                        )
+                        if (!allDay) {
+                            Text(
+                                modifier = Modifier
+                                    .clickable(
+                                        onClick = {
+                                            endTimeDialog.show()
+                                        },
+                                        indication = null,
+                                        interactionSource = remember { MutableInteractionSource() },
+                                    ),
+                                text = endTime.time.format(Formatter.TIME_NO_SECONDS),
+                            )
+                        }
+                    }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = horizontalPadding),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Spacer(modifier = Modifier.width(56.dp))
+                    Text(
+                        modifier = Modifier.weight(1F),
+                        text = "存储为倒计时",
+                    )
+                    Switch(
+                        checked = saveAsCountdown,
+                        onCheckedChange = {
+                            saveAsCountdown = it
+                            if (it) {
+                                //启用存储为倒计时，那么自动打开全天
+                                allDay = true
+                            }
+                        },
+                    )
+                }
             }
-            Row(
+            OutlinedTextField(
                 modifier = Modifier.fillMaxWidth()
                     .padding(horizontal = horizontalPadding),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Spacer(modifier = Modifier.width(56.dp))
-                Text(
-                    modifier = Modifier.weight(1F),
-                    text = "存储为倒计时",
+                value = location,
+                placeholder = {
+                    Text(text = "（选填）")
+                },
+                label = {
+                    Text(text = "地点")
+                },
+                leadingIcon = {
+                    Icon(Icons.Rounded.LocationOn, null)
+                },
+                onValueChange = { location = it },
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = Color.Transparent,
+                    disabledBorderColor = Color.Transparent,
+                    disabledLabelColor = OutlinedTextFieldDefaults.colors().unfocusedTextColor,
                 )
-                Switch(
-                    checked = saveAsCountdown,
-                    onCheckedChange = {
-                        saveAsCountdown = it
-                        if (it) {
-                            //启用存储为倒计时，那么自动打开全天
-                            allDay = true
-                        }
-                    },
+            )
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(horizontal = horizontalPadding)
+                    .clickable(
+                        onClick = {
+                            showColorDialog.show()
+                        },
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                    ),
+                value = "",
+                enabled = false,
+                label = {
+                    Text(text = "设置颜色")
+                },
+                leadingIcon = {
+                    Icon(Icons.Rounded.Palette, null)
+                },
+                trailingIcon = {
+                    Surface(
+                        shape = CircleShape,
+                        modifier = Modifier.size(24.dp),
+                        color = color
+                    ) {}
+                },
+                onValueChange = { },
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = Color.Transparent,
+                    disabledBorderColor = Color.Transparent,
+                    disabledLabelColor = OutlinedTextFieldDefaults.colors().unfocusedTextColor,
+                    disabledLeadingIconColor = OutlinedTextFieldDefaults.colors().unfocusedLeadingIconColor
                 )
-            }
+            )
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(horizontal = horizontalPadding),
+                value = remark,
+                placeholder = {
+                    Text(text = "（选填）")
+                },
+                label = {
+                    Text(text = "备注")
+                },
+                leadingIcon = {
+                    Icon(Icons.AutoMirrored.Rounded.Notes, null)
+                },
+                singleLine = false,
+                maxLines = 5,
+                onValueChange = { remark = it },
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = Color.Transparent,
+                    disabledBorderColor = Color.Transparent,
+                    disabledLabelColor = OutlinedTextFieldDefaults.colors().unfocusedTextColor,
+                )
+            )
         }
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = horizontalPadding),
-            value = location,
-            placeholder = {
-                Text(text = "（选填）")
-            },
-            label = {
-                Text(text = "地点")
-            },
-            leadingIcon = {
-                Icon(Icons.Rounded.LocationOn, null)
-            },
-            onValueChange = { location = it },
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = Color.Transparent,
-                disabledBorderColor = Color.Transparent,
-                disabledLabelColor = OutlinedTextFieldDefaults.colors().unfocusedTextColor,
-            )
-        )
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = horizontalPadding)
-                .clickable(
-                    onClick = {
-                        showColorDialog.show()
-                    },
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                ),
-            value = "",
-            enabled = false,
-            label = {
-                Text(text = "设置颜色")
-            },
-            leadingIcon = {
-                Icon(Icons.Rounded.Palette, null)
-            },
-            trailingIcon = {
-                Surface(
-                    shape = CircleShape,
-                    modifier = Modifier.size(24.dp),
-                    color = color
-                ) {}
-            },
-            onValueChange = { },
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = Color.Transparent,
-                disabledBorderColor = Color.Transparent,
-                disabledLabelColor = OutlinedTextFieldDefaults.colors().unfocusedTextColor,
-                disabledLeadingIconColor = OutlinedTextFieldDefaults.colors().unfocusedLeadingIconColor
-            )
-        )
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = horizontalPadding),
-            value = remark,
-            placeholder = {
-                Text(text = "（选填）")
-            },
-            label = {
-                Text(text = "备注")
-            },
-            leadingIcon = {
-                Icon(Icons.AutoMirrored.Rounded.Notes, null)
-            },
-            singleLine = false,
-            maxLines = 5,
-            onValueChange = { remark = it },
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = Color.Transparent,
-                disabledBorderColor = Color.Transparent,
-                disabledLabelColor = OutlinedTextFieldDefaults.colors().unfocusedTextColor,
-            )
-        )
-        Spacer(modifier = Modifier.weight(1F))
     }
 }
 

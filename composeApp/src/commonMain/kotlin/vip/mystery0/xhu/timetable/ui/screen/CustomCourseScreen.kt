@@ -10,10 +10,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.EventNote
 import androidx.compose.material.icons.automirrored.twotone.ArrowForwardIos
@@ -405,7 +408,11 @@ private fun CustomCourseBottomSheet(
         },
         sheetState = sheetState,
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(horizontalPadding)) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(horizontalPadding)
+        ) {
             Row(
                 modifier = Modifier.padding(horizontal = horizontalPadding),
                 verticalAlignment = Alignment.CenterVertically,
@@ -571,7 +578,6 @@ private fun CustomCourseBottomSheet(
                     )
                 }
             }
-            Spacer(modifier = Modifier.weight(1F))
         }
     }
 }
