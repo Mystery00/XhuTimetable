@@ -369,6 +369,8 @@ class MainViewModel : ComposeViewModel() {
         }
         val currentWeek = WidgetRepo.calculateWeek()
         _week.value = currentWeek
+        val termStartDate = getConfigStore { termStartDate }
+        _dateStart.value = termStartDate.plus(currentWeek.toLong() - 1, DateTimeUnit.WEEK)
 
         return currentWeek to loadFromCloud
     }
