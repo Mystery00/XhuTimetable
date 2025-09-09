@@ -2,15 +2,17 @@ package vip.mystery0.xhu.timetable.ui.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.material.icons.twotone.Clear
@@ -77,7 +79,8 @@ fun LoginScreen(fromAccountManager: Boolean) {
     }
     Column(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
     ) {
         Image(
             modifier = Modifier.fillMaxWidth(),
@@ -99,7 +102,6 @@ fun LoginScreen(fromAccountManager: Boolean) {
             )
             OutlinedTextField(
                 modifier = Modifier
-                    .height(IntrinsicSize.Min)
                     .fillMaxWidth()
                     .onFocusChanged { focusState ->
                         if (focusState.isFocused) {
@@ -146,7 +148,6 @@ fun LoginScreen(fromAccountManager: Boolean) {
             )
             OutlinedTextField(
                 modifier = Modifier
-                    .height(IntrinsicSize.Min)
                     .fillMaxWidth()
                     .onFocusChanged { focusState ->
                         if (focusState.isFocused) {
@@ -217,8 +218,7 @@ fun LoginScreen(fromAccountManager: Boolean) {
             )
             Button(
                 enabled = !loginState.loading,
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -243,8 +243,7 @@ fun LoginScreen(fromAccountManager: Boolean) {
             }
             if (fromAccountManager) {
                 Button(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary,
