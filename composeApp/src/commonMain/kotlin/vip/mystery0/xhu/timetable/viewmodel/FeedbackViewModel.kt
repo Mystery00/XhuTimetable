@@ -71,6 +71,7 @@ class FeedbackViewModel : ComposeViewModel() {
     }
 
     fun sendMessage(content: String) {
+        if (content.isBlank()) return
         viewModelScope.safeLaunch {
             if (!isOnline()) {
                 _wsStatus.value = WebSocketState(WebSocketStatus.DISCONNECTED, HINT_NETWORK)

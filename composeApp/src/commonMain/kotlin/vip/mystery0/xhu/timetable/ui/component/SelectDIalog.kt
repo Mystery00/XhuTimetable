@@ -57,27 +57,6 @@ fun BuildUserSelectFilterChipContent(
 }
 
 @Composable
-fun BuildSelectFilterChipContentOnlyUser(
-    userSelect: List<UserSelect>,
-    showUserDialog: UseCaseState,
-    onDataLoad: suspend () -> Unit,
-) {
-    BuildSelectBaseContent(onDataLoad = onDataLoad) {
-        ElevatedFilterChip(
-            modifier = Modifier.align(Alignment.CenterVertically),
-            selected = true,
-            onClick = {
-                showUserDialog.show()
-            },
-            label = {
-                val userString = userSelect.firstOrNull { it.selected }?.title ?: "查询中"
-                Text(text = userString)
-            },
-        )
-    }
-}
-
-@Composable
 fun BuildSelectFilterChipContent(
     userSelect: List<UserSelect>,
     yearSelect: List<YearSelect>,
