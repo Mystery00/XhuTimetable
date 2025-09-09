@@ -47,7 +47,9 @@ jobs:
         with:
           cache-disabled: true
       - name: 构建 APK
-        run: ./gradlew assembleRelease
+        run: |
+          ./gradlew composeApp:exportLibraryDefinitions
+          ./gradlew assembleRelease
       - name: 安装工具
         run: |
           sudo apt-get install jq bsdiff
