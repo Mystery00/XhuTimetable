@@ -14,6 +14,7 @@ import vip.mystery0.xhu.timetable.ui.navigation.Nav
 import vip.mystery0.xhu.timetable.ui.navigation.RouteLogin
 import vip.mystery0.xhu.timetable.ui.navigation.RouteMain
 import vip.mystery0.xhu.timetable.ui.navigation.RouteQueryExam
+import vip.mystery0.xhu.timetable.ui.navigation.RouteSettings
 
 class NavActivity : ComponentActivity() {
     companion object {
@@ -38,7 +39,7 @@ class NavActivity : ComponentActivity() {
             if (initRoute.isNullOrBlank()) {
                 App(RouteMain)
             } else {
-                val route = InitRoute.valueOf(initRoute)
+                val route = InitRoute.valueOf(initRoute.uppercase())
                 App(route.route)
             }
         }
@@ -47,5 +48,6 @@ class NavActivity : ComponentActivity() {
     enum class InitRoute(val route: Nav) {
         LOGIN(RouteLogin(false)),
         EXAM(RouteQueryExam),
+        SETTINGS(RouteSettings),
     }
 }
