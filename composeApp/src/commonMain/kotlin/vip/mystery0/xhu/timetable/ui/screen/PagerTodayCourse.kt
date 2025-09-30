@@ -34,7 +34,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,12 +46,12 @@ import androidx.compose.ui.unit.sp
 import com.maxkeppeler.sheets.list.ListDialog
 import com.maxkeppeler.sheets.list.models.ListOption
 import com.maxkeppeler.sheets.list.models.ListSelection
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.format
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.config.trackEvent
+import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.response.Poems
 import vip.mystery0.xhu.timetable.ui.component.StateScreen
 import vip.mystery0.xhu.timetable.ui.component.TabAction
@@ -114,9 +113,9 @@ val todayCourseActions: TabAction = @Composable {
 
 val todayCourseContent: TabContent = @Composable {
     val viewModel = koinViewModel<MainViewModel>()
-    val scope = rememberCoroutineScope()
     val openBottomSheet = rememberSaveable { mutableStateOf(false) }
     Box {
+        val customUi by viewModel.customUi.collectAsState()
         val poems by viewModel.poems.collectAsState()
         val holiday by viewModel.holiday.collectAsState()
         val todayThingList by viewModel.todayThing.collectAsState()
@@ -139,19 +138,24 @@ val todayCourseContent: TabContent = @Composable {
                     .verticalScroll(rememberScrollState()),
             ) {
                 poems?.let { value ->
-                    DrawPoemsCard(openBottomSheet, scope, poems = value)
+                    DrawPoemsCard(customUi, openBottomSheet, poems = value)
                 }
                 holiday?.let { holiday ->
-                    DrawHoliday(holiday = holiday)
+                    DrawHoliday(customUi = customUi, holiday = holiday)
                 }
                 todayThingList.forEach {
-                    DrawThingCard(thing = it, multiAccountMode = multiAccountMode)
+                    DrawThingCard(
+                        customUi = customUi,
+                        thing = it,
+                        multiAccountMode = multiAccountMode,
+                    )
                 }
                 todayCourseList.forEach {
                     DrawCourseCard(
+                        customUi = customUi,
                         course = it,
                         multiAccountMode = multiAccountMode,
-                        showStatus = showStatus
+                        showStatus = showStatus,
                     )
                 }
             }
@@ -245,8 +249,8 @@ private fun DrawLine() {
 
 @Composable
 private fun DrawPoemsCard(
+    customUi: CustomUi,
     openBottomSheet: MutableState<Boolean>,
-    scope: CoroutineScope,
     poems: Poems,
 ) {
     Row(
@@ -269,7 +273,7 @@ private fun DrawPoemsCard(
                 .padding(end = 8.dp)
                 .fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = XhuColor.cardBackground,
+                containerColor = XhuColor.cardBackground.copy(customUi.todayBackgroundAlpha),
             ),
         ) {
             Column(
@@ -295,7 +299,7 @@ private fun DrawPoemsCard(
 }
 
 @Composable
-private fun DrawHoliday(holiday: HolidayView) {
+private fun DrawHoliday(customUi: CustomUi, holiday: HolidayView) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(vertical = 4.dp)
@@ -312,7 +316,7 @@ private fun DrawHoliday(holiday: HolidayView) {
                 .padding(end = 8.dp)
                 .fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = XhuColor.cardBackground,
+                containerColor = XhuColor.cardBackground.copy(customUi.todayBackgroundAlpha),
             ),
         ) {
             Box {
@@ -354,6 +358,7 @@ private fun DrawHoliday(holiday: HolidayView) {
 
 @Composable
 private fun DrawThingCard(
+    customUi: CustomUi,
     thing: TodayThingSheet,
     multiAccountMode: Boolean,
 ) {
@@ -373,7 +378,7 @@ private fun DrawThingCard(
                 .padding(end = 8.dp)
                 .fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = XhuColor.cardBackground,
+                containerColor = XhuColor.cardBackground.copy(customUi.todayBackgroundAlpha),
             ),
         ) {
             Box {
@@ -508,7 +513,8 @@ private fun DrawThingCard(
 }
 
 @Composable
-private fun DrawCourseCard(
+fun DrawCourseCard(
+    customUi: CustomUi,
     course: TodayCourseSheet,
     multiAccountMode: Boolean,
     showStatus: Boolean,
@@ -529,7 +535,7 @@ private fun DrawCourseCard(
                 .padding(end = 8.dp)
                 .fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = XhuColor.cardBackground,
+                containerColor = XhuColor.cardBackground.copy(alpha = customUi.todayBackgroundAlpha),
             )
         ) {
             Row(

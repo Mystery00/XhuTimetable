@@ -17,11 +17,13 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.config.store.User
+import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.db.dao.CourseDao
 import vip.mystery0.xhu.timetable.db.dao.CustomCourseDao
 import vip.mystery0.xhu.timetable.db.dao.CustomThingDao
 import vip.mystery0.xhu.timetable.db.dao.ExperimentCourseDao
 import vip.mystery0.xhu.timetable.db.dao.PracticalCourseDao
+import vip.mystery0.xhu.timetable.model.TodayCourseView
 import vip.mystery0.xhu.timetable.model.WeekCourseView
 import vip.mystery0.xhu.timetable.model.entity.CourseEntity
 import vip.mystery0.xhu.timetable.model.entity.CustomCourseEntity
@@ -488,10 +490,13 @@ object AggregationLocalRepo : KoinComponent {
         }
     }
 
-    suspend fun getRandomCourseList(size: Int): List<WeekCourseView> {
+    suspend fun getRandomCourseList(
+        weekSize: Int,
+        todaySize: Int,
+    ): Pair<List<WeekCourseView>, List<TodayCourseView>> {
         val list = ArrayList<CourseEntity>()
         withContext(Dispatchers.IO) {
-            list.addAll(courseDao.queryRandomList(size * 5))
+            list.addAll(courseDao.queryRandomList(weekSize * 5))
         }
         if (list.isEmpty()) {
             list.add(
@@ -518,14 +523,14 @@ object AggregationLocalRepo : KoinComponent {
                 )
             )
         }
-        val resultList = withContext(Dispatchers.Default) {
-            while (list.size < size) {
-                //数量不够，强行复制
-                list.addAll(list)
-            }
-            list.shuffled().take(size)
+        while (list.size < weekSize) {
+            //数量不够，强行复制
+            list.addAll(list)
         }
-        return resultList.map {
+        val weekResultList = list.shuffled().take(weekSize)
+        val todayResultList = list.shuffled().take(todaySize)
+        val mainUser = UserStore.mainUser()
+        return weekResultList.map {
             WeekCourseView(
                 courseName = it.courseName,
                 weekStr = it.weekStr,
@@ -545,6 +550,21 @@ object AggregationLocalRepo : KoinComponent {
                 thisWeek = Random.nextBoolean()
                 backgroundColor =
                     if (thisWeek) ColorPool.hash(it.courseName) else XhuColor.notThisWeekBackgroundColor
+            }
+        } to todayResultList.map {
+            TodayCourseView(
+                courseName = it.courseName,
+                weekList = it.weekList,
+                day = DayOfWeek(it.dayIndex),
+                startDayTime = it.startDayTime,
+                endDayTime = it.endDayTime,
+                startTime = LocalTime.parse(it.startTime, Formatter.TIME_NO_SECONDS),
+                endTime = LocalTime.parse(it.endTime, Formatter.TIME_NO_SECONDS),
+                location = it.location,
+                teacher = it.teacher,
+                user = mainUser,
+            ).apply {
+                backgroundColor = ColorPool.hash(it.courseName)
             }
         }
     }

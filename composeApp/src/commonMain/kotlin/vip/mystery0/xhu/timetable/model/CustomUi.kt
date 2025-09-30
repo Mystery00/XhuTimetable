@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CustomUi(
+    val todayBackgroundAlpha: Float = 1F,
     val weekItemHeight: Float = 72F,
     val weekBackgroundAlpha: Float = 0.8F,
     val weekItemCorner: Float = 4F,

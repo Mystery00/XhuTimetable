@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -29,6 +30,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
@@ -65,7 +67,8 @@ fun CustomUiScreen() {
 
     val navController = LocalNavController.current!!
 
-    val randomCourse by viewModel.randomCourse.collectAsState()
+    val randomWeekCourse by viewModel.randomWeekCourse.collectAsState()
+    val randomTodayCourse by viewModel.randomTodayCourse.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.init()
@@ -119,7 +122,7 @@ fun CustomUiScreen() {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(320.dp)
+                    .height(360.dp)
                     .verticalScroll(rememberScrollState()),
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
@@ -131,21 +134,17 @@ fun CustomUiScreen() {
                             .fillMaxSize()
                             .blur(customUi.backgroundImageBlur.dp),
                     )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                    ) {
-                        Spacer(modifier = Modifier.weight(2.15F))
-                        Box(modifier = Modifier.weight(3F)) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(modifier = Modifier.width(240.dp)) {
                             Row {
                                 //列数
                                 val columnSize = 3
                                 //每一列数量
-                                val size = randomCourse.size / columnSize
+                                val size = randomWeekCourse.size / columnSize
                                 for (columnIndex in 0 until columnSize) {
                                     val start = columnIndex * size
                                     val end = (columnIndex + 1) * size
-                                    val list = randomCourse.subList(start, end)
+                                    val list = randomWeekCourse.subList(start, end)
                                     Column(modifier = Modifier.weight(1F)) {
                                         list.forEachIndexed { rowIndex, course ->
                                             val step = when {
@@ -171,7 +170,15 @@ fun CustomUiScreen() {
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.weight(2.15F))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        if (randomTodayCourse.isNotEmpty()) {
+                            DrawCourseCard(
+                                customUi = customUi,
+                                course = randomTodayCourse.first(),
+                                multiAccountMode = false,
+                                showStatus = false,
+                            )
+                        }
                     }
                 }
             }
@@ -187,7 +194,21 @@ fun CustomUiScreen() {
                     )
                 }
                 XhuSettingsGroup(title = {
-                    Text(text = "参数调整")
+                    Text(text = "今日课程页面")
+                }) {
+                    val todayBackgroundAlpha by viewModel.todayBackgroundAlpha.collectAsState()
+                    BuildSeekBar(
+                        title = "卡片透明度",
+                        value = todayBackgroundAlpha * 100,
+                        start = 30F,
+                        end = 100F,
+                        listener = { newValue ->
+                            viewModel.todayBackgroundAlpha.value = newValue / 100F
+                            viewModel.update()
+                        })
+                }
+                XhuSettingsGroup(title = {
+                    Text(text = "本周课程页面")
                 }) {
                     val weekItemHeight by viewModel.weekItemHeight.collectAsState()
                     BuildSeekBar(
