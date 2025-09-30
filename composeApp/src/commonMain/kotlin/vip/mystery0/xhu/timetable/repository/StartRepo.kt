@@ -73,13 +73,17 @@ object StartRepo : BaseDataRepo {
         version.emit(newVersion ?: ClientVersion.EMPTY)
 
         //处理菜单
-        val menuList = menuApi.list()
-        MenuStore.updateList(menuList.map { it.toMenu() })
+        initMenu()
 
         //处理节假日数据
         val nowHoliday = clientInitResponse.holiday
         val tomorrowHoliday = clientInitResponse.tomorrowHoliday
         setCacheStore { holiday = (nowHoliday to tomorrowHoliday) }
+    }
+
+    suspend fun initMenu() {
+        val menuList = menuApi.list()
+        MenuStore.updateList(menuList.map { it.toMenu() })
     }
 
     private fun localInit() {

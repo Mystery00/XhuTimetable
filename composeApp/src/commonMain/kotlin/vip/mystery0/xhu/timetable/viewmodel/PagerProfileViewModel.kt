@@ -11,6 +11,7 @@ import vip.mystery0.xhu.timetable.config.store.MenuStore
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.repository.FeedbackRepo
 import vip.mystery0.xhu.timetable.repository.NoticeRepo
+import vip.mystery0.xhu.timetable.repository.StartRepo
 
 class PagerProfileViewModel : ComposeViewModel() {
     private val _hasUnReadNotice = MutableStateFlow(false)
@@ -24,7 +25,12 @@ class PagerProfileViewModel : ComposeViewModel() {
 
     init {
         viewModelScope.safeLaunch {
-            _menu.value = MenuStore.loadAllMenu()
+            var menuList = MenuStore.loadAllMenu()
+            if (menuList.isEmpty()) {
+                StartRepo.initMenu()
+                menuList = MenuStore.loadAllMenu()
+            }
+            _menu.value = menuList
         }
     }
 
