@@ -92,7 +92,7 @@ class ErrorReportActivity : ComponentActivity() {
                 ) {
                     Button(
                         onClick = {
-                            uriHandler.openUri("https://blog.mystery0.vip/xgkb-group")
+                            uriHandler.openUri("https://blog.mystery0.vip/docs/xgkb/group")
                         },
                         modifier = Modifier.weight(1F),
                     ) {

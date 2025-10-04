@@ -241,7 +241,7 @@ fun SettingsScreen() {
                 XhuSettingsMenuLink(
                     title = { Text(text = "更新日志") },
                     onClick = {
-                        uriHandler.openUri("https://blog.mystery0.vip/xgkb-changelog")
+                        uriHandler.openUri("https://blog.mystery0.vip/docs/xgkb/changelog")
                     }
                 )
                 XhuSettingsMenuLink(
