@@ -71,6 +71,8 @@ import xhutimetable.composeapp.generated.resources.ic_profile_night
 import xhutimetable.composeapp.generated.resources.ic_profile_unchecked
 import xhutimetable.composeapp.generated.resources.ic_profile_unchecked_night
 import xhutimetable.composeapp.generated.resources.ic_radius_cell
+import xhutimetable.composeapp.generated.resources.ic_school_timetable
+import xhutimetable.composeapp.generated.resources.ic_school_timetable_night
 import xhutimetable.composeapp.generated.resources.ic_score
 import xhutimetable.composeapp.generated.resources.ic_score_night
 import xhutimetable.composeapp.generated.resources.ic_server_detect
@@ -239,6 +241,12 @@ object XhuIcons {
             get() = iconOf(
                 painterResource(Res.drawable.ic_classroom_night) to
                         painterResource(Res.drawable.ic_classroom)
+            )
+        val schoolTimetable: Painter
+            @Composable
+            get() = iconOf(
+                painterResource(Res.drawable.ic_school_timetable_night) to
+                        painterResource(Res.drawable.ic_school_timetable)
             )
         val accountSettings: Painter
             @Composable

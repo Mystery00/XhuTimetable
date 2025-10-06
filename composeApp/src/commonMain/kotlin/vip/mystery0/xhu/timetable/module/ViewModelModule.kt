@@ -21,6 +21,7 @@ import vip.mystery0.xhu.timetable.viewmodel.NoticeViewModel
 import vip.mystery0.xhu.timetable.viewmodel.PagerMainViewModel
 import vip.mystery0.xhu.timetable.viewmodel.PagerProfileViewModel
 import vip.mystery0.xhu.timetable.viewmodel.SchoolCalendarViewModel
+import vip.mystery0.xhu.timetable.viewmodel.SchoolTimetableViewModel
 import vip.mystery0.xhu.timetable.viewmodel.ScoreViewModel
 import vip.mystery0.xhu.timetable.viewmodel.SettingsViewModel
 import vip.mystery0.xhu.timetable.viewmodel.SplashImageViewModel
@@ -53,6 +54,7 @@ val viewModelModule = module {
     viewModel { SplashImageViewModel() }
     viewModel { StarterViewModel() }
     viewModel { UrgeViewModel() }
+    viewModel { SchoolTimetableViewModel() }
 
     platformViewModelModule(this)
 }

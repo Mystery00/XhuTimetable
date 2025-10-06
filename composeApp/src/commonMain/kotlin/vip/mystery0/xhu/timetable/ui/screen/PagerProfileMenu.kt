@@ -13,6 +13,7 @@ import vip.mystery0.xhu.timetable.ui.navigation.RouteNotice
 import vip.mystery0.xhu.timetable.ui.navigation.RouteQueryExam
 import vip.mystery0.xhu.timetable.ui.navigation.RouteQueryExpScore
 import vip.mystery0.xhu.timetable.ui.navigation.RouteQueryScore
+import vip.mystery0.xhu.timetable.ui.navigation.RouteSchoolTimetable
 import vip.mystery0.xhu.timetable.ui.navigation.RouteSettings
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
@@ -31,6 +32,10 @@ enum class MenuItem(
     QUERY_FREE_ROOM(
         { XhuIcons.Profile.classroom },
         { navigateTo(RouteFreeCourseRoom) }
+    ),
+    QUERY_TIMETABLE(
+        { XhuIcons.Profile.schoolTimetable },
+        { navigateTo(RouteSchoolTimetable) }
     ),
     ACCOUNT_MANAGE(
         { XhuIcons.Profile.accountSettings },

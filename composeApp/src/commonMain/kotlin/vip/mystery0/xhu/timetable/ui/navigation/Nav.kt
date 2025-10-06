@@ -24,6 +24,7 @@ import vip.mystery0.xhu.timetable.ui.screen.QueryExamScreen
 import vip.mystery0.xhu.timetable.ui.screen.QueryExpScoreScreen
 import vip.mystery0.xhu.timetable.ui.screen.QueryScoreScreen
 import vip.mystery0.xhu.timetable.ui.screen.SchoolCalendarScreen
+import vip.mystery0.xhu.timetable.ui.screen.SchoolTimetableScreen
 import vip.mystery0.xhu.timetable.ui.screen.SettingsScreen
 import vip.mystery0.xhu.timetable.ui.screen.SplashImageScreen
 
@@ -94,6 +95,9 @@ object RouteAbout : Nav
 @Serializable
 object RouteSchoolCalendar : Nav
 
+@Serializable
+object RouteSchoolTimetable : Nav
+
 val Navs: NavGraphBuilder.() -> Unit = {
     composable<RouteLogin> { backStackEntry ->
         val login: RouteLogin = backStackEntry.toRoute()
@@ -121,6 +125,7 @@ val Navs: NavGraphBuilder.() -> Unit = {
     composable<RouteFreeCourseRoom> { FreeCourseRoomScreen() }
     composable<RouteAbout> { AboutScreen() }
     composable<RouteSchoolCalendar> { SchoolCalendarScreen() }
+    composable<RouteSchoolTimetable> { SchoolTimetableScreen() }
 }
 
 inline fun <reified F : Any> NavController.replaceTo(target: Any) {

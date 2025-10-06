@@ -9,10 +9,9 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.CourseApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.base.buildPageSource
-import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
-import vip.mystery0.xhu.timetable.model.request.AllCourseRequest
-import vip.mystery0.xhu.timetable.model.response.AllCourseResponse
+import vip.mystery0.xhu.timetable.model.request.SchoolTimetableRequest
+import vip.mystery0.xhu.timetable.model.response.SchoolTimetableResponse
 
 object CourseRepo : BaseDataRepo {
     private val courseApi: CourseApi by inject()
@@ -24,21 +23,33 @@ object CourseRepo : BaseDataRepo {
         )
 
     fun getAllCourseListStream(
-        user: User,
-        year: Int,
-        term: Int,
-        request: AllCourseRequest,
-    ): Flow<PagingData<AllCourseResponse>> =
+        request: SchoolTimetableRequest,
+    ): Flow<PagingData<SchoolTimetableResponse>> =
         Pager(
             config = globalPagingConfig,
             pagingSourceFactory = {
                 buildPageSource { index, size ->
                     checkForceLoadFromCloud(true)
 
-                    user.withAutoLoginOnce {
-                        courseApi.allCourseList(it, year, term, index, size, request)
+                    mainUser().withAutoLoginOnce {
+                        courseApi.allCourseList(it, index, size, request)
                     }
                 }
             }
         ).flow
+
+    suspend fun loadCampusList(): Map<String, String> =
+        mainUser().withAutoLoginOnce {
+            courseApi.campusList(it)
+        }
+
+    suspend fun loadCollegeList(): Map<String, String> =
+        mainUser().withAutoLoginOnce {
+            courseApi.collegeList(it)
+        }
+
+    suspend fun loadMajorList(collegeId: String): Map<String, String> =
+        mainUser().withAutoLoginOnce {
+            courseApi.majorList(it, collegeId)
+        }
 }

@@ -3,7 +3,6 @@ package vip.mystery0.xhu.timetable.model.request
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.isoDayNumber
 import kotlinx.serialization.Serializable
-import vip.mystery0.xhu.timetable.model.response.AllCourseResponse
 
 @Serializable
 data class CustomCourseRequest(
@@ -36,22 +35,6 @@ data class CustomCourseRequest(
                 endDayTime,
                 location,
                 teacher,
-                emptyList(),
-                0,
-                0,
-            )
-
-        fun buildOf(
-            allCourseResponse: AllCourseResponse,
-        ): CustomCourseRequest =
-            CustomCourseRequest(
-                allCourseResponse.courseName,
-                allCourseResponse.weekList,
-                allCourseResponse.day.isoDayNumber,
-                allCourseResponse.startDayTime,
-                allCourseResponse.endDayTime,
-                allCourseResponse.location,
-                allCourseResponse.teacher,
                 emptyList(),
                 0,
                 0,
