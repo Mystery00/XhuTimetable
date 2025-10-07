@@ -103,10 +103,12 @@ object StartRepo : BaseDataRepo {
             if (forceBeta) true else versionChannel.isBeta(),
             alwaysShowNewVersion,
         )
+        logger.d("checkVersion: ${versionResp.status}")
         if (versionResp.status == HttpStatusCode.NoContent) {
             return this.version.emit(ClientVersion.EMPTY)
         }
         val version = versionResp.body<ClientVersion>()
+        logger.d("checkVersion: $version")
         val ignoreList = getCacheStore { ignoreVersionList }
         val versionString = "${version.versionName}-${version.versionCode}"
         if (!ignoreList.contains(versionString)) {
