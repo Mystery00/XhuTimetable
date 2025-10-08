@@ -1,4 +1,4 @@
-name: "Build Commit"
+name: Build Android Nightly
 on:
   push:
     branches:
