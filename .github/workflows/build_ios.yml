@@ -9,10 +9,12 @@ env:
   SIGN_KEY_STORE_PASSWORD: ${{ secrets.SIGN_KEY_STORE_PASSWORD }}
   SIGN_KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
   SIGN_KEY_STORE_FILE: "/tmp/key.jks"
+  GITHUB_USERNAME: ${{ secrets.NEXUS_USER }}
+  GITHUB_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
   XCODE_PROJECT: iosApp
   MOBILE_DIRECTORY: iosApp
 jobs:
-  build-for-iOS:
+  build:
     runs-on: macos-latest
     timeout-minutes: 40
     steps:
