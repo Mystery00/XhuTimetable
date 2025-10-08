@@ -1,6 +1,9 @@
 name: Build iOS Nightly
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feat_ios_build
 env:
   XCODE_PROJECT: iosApp
   MOBILE_DIRECTORY: iosApp
