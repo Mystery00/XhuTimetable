@@ -49,7 +49,7 @@ jobs:
         run: |
           # create variables
           CERTIFICATE_PATH=${{ runner.temp }}/build_certificate.p12
-          PP_PATH=${{ runner.temp }}/profile.mobileprovision
+          PP_PATH=${{ runner.temp }}/XhuTimetableProfile.mobileprovision
           KEYCHAIN_PATH=${{ runner.temp }}/app-signing.keychain-db
           
           # import certificate and provisioning profile from secrets
