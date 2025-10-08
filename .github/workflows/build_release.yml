@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Release
 on:
   workflow_dispatch:
     inputs:
@@ -6,7 +6,7 @@ on:
         description: '上一版本下载地址'
         required: true
         type: string
-        default: "https://xgkb.mystery0.vip"
+        default: "https://image.xgkb.mystery0.vip"
       oldVersionCode:
         description: '上一版本版本号(只要code)'
         required: true
@@ -18,14 +18,8 @@ on:
         type: boolean
 env:
   OUTPUT_DIR: "composeApp/build/outputs/apk/release"
-  SIGN_KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}
-  SIGN_KEY_STORE_PASSWORD: ${{ secrets.SIGN_KEY_STORE_PASSWORD }}
-  SIGN_KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
-  SIGN_KEY_STORE_FILE: "/tmp/key.jks"
-  GITHUB_USERNAME: ${{ secrets.NEXUS_USER }}
-  GITHUB_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 jobs:
-  build:
+  build_android:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,10 +37,15 @@ jobs:
           echo ${{ secrets.SIGN_KEY_BASE64 }} | base64 --decode > /tmp/key.jks
           echo ${{ secrets.AG_CONNECT_JSON }} | base64 --decode > composeApp/agconnect-services.json
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          cache-disabled: true
+        uses: gradle/actions/setup-gradle@v5
       - name: 构建 APK
+        env:
+          SIGN_KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}
+          SIGN_KEY_STORE_PASSWORD: ${{ secrets.SIGN_KEY_STORE_PASSWORD }}
+          SIGN_KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
+          SIGN_KEY_STORE_FILE: "/tmp/key.jks"
+          GITHUB_USERNAME: ${{ secrets.NEXUS_USER }}
+          GITHUB_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: |
           ./gradlew composeApp:exportLibraryDefinitions
           ./gradlew assembleRelease

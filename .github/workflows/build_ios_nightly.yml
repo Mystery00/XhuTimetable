@@ -5,16 +5,10 @@ on:
     branches:
       - feat_ios_build
 env:
-  SIGN_KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}
-  SIGN_KEY_STORE_PASSWORD: ${{ secrets.SIGN_KEY_STORE_PASSWORD }}
-  SIGN_KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
-  SIGN_KEY_STORE_FILE: "/tmp/key.jks"
-  GITHUB_USERNAME: ${{ secrets.NEXUS_USER }}
-  GITHUB_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
   XCODE_PROJECT: iosApp
   MOBILE_DIRECTORY: iosApp
 jobs:
-  build:
+  build_ios:
     runs-on: macos-latest
     timeout-minutes: 40
     steps:
@@ -32,10 +26,11 @@ jobs:
           echo ${{ secrets.AG_CONNECT_JSON }} | base64 --decode > composeApp/agconnect-services.json
       - run: chmod a+x gradlew
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          cache-disabled: true
+        uses: gradle/actions/setup-gradle@v5
       - name: 更新iOS应用版本号
+        env:
+          GITHUB_USERNAME: ${{ secrets.NEXUS_USER }}
+          GITHUB_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: |
           ./gradlew composeApp:exportLibraryDefinitions
           ./gradlew composeApp:updateAppleBuildVersion
@@ -91,13 +86,8 @@ jobs:
         run: |
           xcrun altool --validate-app -f ${{ runner.temp }}/export/${{ env.XCODE_PROJECT }}.ipa -t ios --apiKey ${{ secrets.IOS_APPSTORE_API_KEY_ID }} --apiIssuer ${{ secrets.IOS_APPSTORE_ISSUER_ID }}
           xcrun altool --upload-app -f ${{ runner.temp }}/export/${{ env.XCODE_PROJECT }}.ipa -t ios --apiKey ${{ secrets.IOS_APPSTORE_API_KEY_ID }} --apiIssuer ${{ secrets.IOS_APPSTORE_ISSUER_ID }}
-      - name: 发布版本
-        uses: softprops/action-gh-release@v2
+      - name: 上传文件
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: test-ios-1
-          prerelease: true
-          draft: true
-          body: |
-            注意：该版本为测试版本，可能存在一些问题，不建议日常使用。
-          files: |
-            ${{ runner.temp }}/export/${{ env.XCODE_PROJECT }}.ipa
+          name: ipa-build
+          path: ${{ runner.temp }}/export/${{ env.XCODE_PROJECT }}.ipa

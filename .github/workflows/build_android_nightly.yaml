@@ -10,8 +10,6 @@ env:
   SIGN_KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
   SIGN_KEY_STORE_FILE: "/tmp/key.jks"
   NIGHTLY: true
-  GITHUB_USERNAME: ${{ secrets.NEXUS_USER }}
-  GITHUB_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,10 +31,15 @@ jobs:
           echo ${{ secrets.AG_CONNECT_JSON }} | base64 --decode > composeApp/agconnect-services.json
       - run: chmod a+x gradlew
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          cache-disabled: true
+        uses: gradle/actions/setup-gradle@v5
       - name: 构建 APK
+        env:
+          SIGN_KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}
+          SIGN_KEY_STORE_PASSWORD: ${{ secrets.SIGN_KEY_STORE_PASSWORD }}
+          SIGN_KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
+          SIGN_KEY_STORE_FILE: "/tmp/key.jks"
+          GITHUB_USERNAME: ${{ secrets.NEXUS_USER }}
+          GITHUB_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: |
           ./gradlew composeApp:exportLibraryDefinitions
           ./gradlew composeApp:updateAppleBuildVersion
