@@ -323,20 +323,22 @@ private fun BuildItem(course: SchoolTimetableResponse, onClick: () -> Unit) {
                 }
             }
         },
-        footer = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "点击添加到课表",
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.weight(1F)
-                        .clickable(onClick = onClick),
-                    fontSize = 16.sp,
-                )
-                ActionButton(
-                    text = "蹭课",
-                    imageVector = Icons.Rounded.AppRegistration,
-                    onClick = onClick
-                )
+        footer = if (course.customCourseList.isEmpty()) null else {
+            {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "点击添加到课表",
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1F)
+                            .clickable(onClick = onClick),
+                        fontSize = 16.sp,
+                    )
+                    ActionButton(
+                        text = "蹭课",
+                        imageVector = Icons.Rounded.AppRegistration,
+                        onClick = onClick
+                    )
+                }
             }
         }
     )
