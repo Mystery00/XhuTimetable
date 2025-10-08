@@ -87,6 +87,11 @@ jobs:
         run: |
           mkdir -p ~/private_keys
           echo -n "$API_KEY_BASE64" | base64 --decode --output ~/private_keys/AuthKey_${{ secrets.IOS_APPSTORE_API_KEY_ID }}.p8
+      - name: 上传文件
+        uses: actions/upload-artifact@v4
+        with:
+          name: export-context
+          path: ${{ runner.temp }}/export/
       - name: 上传到Testflight
         run: |
           xcrun altool --validate-app -f ${{ runner.temp }}/export/${{ env.XCODE_PROJECT }}.ipa -t ios --apiKey ${{ secrets.IOS_APPSTORE_API_KEY_ID }} --apiIssuer ${{ secrets.IOS_APPSTORE_ISSUER_ID }}
