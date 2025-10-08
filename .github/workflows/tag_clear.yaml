@@ -1,14 +1,16 @@
 name: Clear Nightly Tag
 
 on:
-  workflow_dispatch: # 允许手动触发
+  workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *' # 每天午夜执行
+    - cron: '0 0 * * *'
 
 jobs:
   clear-nightly-tag:
     name: Clear Nightly Tag
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -63,4 +65,21 @@ jobs:
               echo "Deleting tag: $tag_name"
               git push --delete origin "$tag_name"
             done
+          fi
+      - name: List and delete all draft releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Searching for draft releases in ${{ github.repository }}..."
+
+          TAGS_TO_DELETE=$(gh api /repos/${{ github.repository }}/releases | jq -r '.[] | select(.draft == true) | .tag_name')
+
+          # 检查是否有需要删除的 tag
+          if [[ -z "$TAGS_TO_DELETE" ]]; then
+            echo "No draft releases found to delete."
+          else
+            echo "The following draft releases will be deleted:"
+            echo "$TAGS_TO_DELETE"
+            echo "$TAGS_TO_DELETE" | xargs -I {} gh release delete {} --repo ${{ github.repository }} --yes
+            echo "Deletion complete."
           fi
