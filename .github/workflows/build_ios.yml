@@ -5,6 +5,10 @@ on:
     branches:
       - feat_ios_build
 env:
+  SIGN_KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}
+  SIGN_KEY_STORE_PASSWORD: ${{ secrets.SIGN_KEY_STORE_PASSWORD }}
+  SIGN_KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
+  SIGN_KEY_STORE_FILE: "/tmp/key.jks"
   XCODE_PROJECT: iosApp
   MOBILE_DIRECTORY: iosApp
 jobs:
@@ -20,16 +24,20 @@ jobs:
         with:
           java-version: 21
           distribution: 'temurin'
+      - name: 解密签名
+        run: |
+          echo ${{ secrets.SIGN_KEY_BASE64 }} | base64 --decode > /tmp/key.jks
+          echo ${{ secrets.AG_CONNECT_JSON }} | base64 --decode > composeApp/agconnect-services.json
       - run: chmod a+x gradlew
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           cache-disabled: true
-      - name: 构建 APK
+      - name: 更新iOS应用版本号
         run: |
           ./gradlew composeApp:exportLibraryDefinitions
           ./gradlew composeApp:updateAppleBuildVersion
-      - name: Install the Apple certificate and provisioning profile
+      - name: 安装Apple证书
         id: profile
         env:
           IOS_CERTIFICATE: ${{ secrets.IOS_CERTIFICATE }}
@@ -60,24 +68,24 @@ jobs:
           # apply provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/$uuid.mobileprovision
-      - name: Build app for iOS
+      - name: 构建iOS APP
         run: |
           cd ${{ env.MOBILE_DIRECTORY }}
           xcodebuild PROVISIONING_PROFILE=${{ steps.profile.outputs.uuid }} -scheme ${{ env.XCODE_PROJECT }} clean archive -archivePath "Actions" -configuration Release -arch arm64
-      - name: export ipa
+      - name: 导出ipa
         env:
           EXPORT_PLIST: ${{ secrets.IOS_EXPORT_PRODUCTION }}
         run: |
           EXPORT_PLIST_PATH=${{ runner.temp }}/ExportOptions.plist
           echo -n "$EXPORT_PLIST" | base64 --decode --output $EXPORT_PLIST_PATH
           xcodebuild PROVISIONING_PROFILE=${{ steps.profile.outputs.uuid }} -exportArchive -archivePath ${{ env.MOBILE_DIRECTORY }}/Actions.xcarchive -exportOptionsPlist $EXPORT_PLIST_PATH -exportPath ${{ runner.temp }}/export
-      - name: decode API key
+      - name: 解密API密钥
         env:
           API_KEY_BASE64: ${{ secrets.IOS_APPSTORE_API_PRIVATE_KEY }}
         run: |
           mkdir -p ~/private_keys
           echo -n "$API_KEY_BASE64" | base64 --decode --output ~/private_keys/AuthKey_${{ secrets.IOS_APPSTORE_API_KEY_ID }}.p8
-      - name: Upload to testflight
+      - name: 上传到Testflight
         run: |
           xcrun altool --validate-app -f ${{ runner.temp }}/export/${{ env.XCODE_PROJECT }}.ipa -t ios --apiKey ${{ secrets.IOS_APPSTORE_API_KEY_ID }} --apiIssuer ${{ secrets.IOS_APPSTORE_ISSUER_ID }}
           xcrun altool --upload-app -f ${{ runner.temp }}/export/${{ env.XCODE_PROJECT }}.ipa -t ios --apiKey ${{ secrets.IOS_APPSTORE_API_KEY_ID }} --apiIssuer ${{ secrets.IOS_APPSTORE_ISSUER_ID }}
