@@ -21,6 +21,7 @@ Compose这个全新的UI框架重写了一遍西瓜课表（对，我们似乎�
 项目使用Gradle进行构建，因为Gradle脚本中绑定了签名信息，所以需要先拥有一个自己的签名（这一步就不明说了，如果你是Android开发，自然知道是什么意思，如果你只是一个普通人，没有必要去自行编译），然后在local.properties中设置相应的变量，查阅Gradle脚本可以得到具体的变量名称。
 准备工作（一个Android Studio、一个Android SDK、一个可靠的网络）做好之后，就可以通过以下命令进行自动编译和打包签名：
 ```shell
+./gradlew composeApp:exportLibraryDefinitions
 ./gradlew assembleRelease
 ```
 编译的签名APK文件在 `app/build/outputs/apk/release` 中。

@@ -53,9 +53,9 @@ jobs:
           apkFile=$(jq -r '.elements[0].outputFile' $OUTPUT_METADATA_FILE)
           cp "${{ env.OUTPUT_DIR }}/$apkFile" "${{ env.OUTPUT_DIR }}/XhuTimetable-$versionName-$versionCode.apk"
           
-          echo ::set-output name=commitMessage::$commitMessage
-          echo ::set-output name=versionName::$versionName
-          echo ::set-output name=versionCode::$versionCode
+          echo "commitMessage=$commitMessage" >> $GITHUB_OUTPUT
+          echo "versionName=$versionName" >> $GITHUB_OUTPUT
+          echo "versionCode=$versionCode" >> $GITHUB_OUTPUT
       - name: 发布版本
         uses: softprops/action-gh-release@v2
         with:
