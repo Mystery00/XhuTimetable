@@ -5,6 +5,10 @@ on:
     branches:
       - master
 env:
+  SIGN_KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}
+  SIGN_KEY_STORE_PASSWORD: ${{ secrets.SIGN_KEY_STORE_PASSWORD }}
+  SIGN_KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
+  SIGN_KEY_STORE_FILE: "/tmp/key.jks"
   XCODE_PROJECT: iosApp
   MOBILE_DIRECTORY: iosApp
 jobs:
@@ -32,10 +36,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
       - name: 更新iOS应用版本号
         env:
-          SIGN_KEY_ALIAS: ${{ secrets.SIGN_KEY_ALIAS }}
-          SIGN_KEY_STORE_PASSWORD: ${{ secrets.SIGN_KEY_STORE_PASSWORD }}
-          SIGN_KEY_PASSWORD: ${{ secrets.SIGN_KEY_PASSWORD }}
-          SIGN_KEY_STORE_FILE: "/tmp/key.jks"
           GITHUB_USERNAME: ${{ secrets.NEXUS_USER }}
           GITHUB_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: |
