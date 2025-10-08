@@ -8,7 +8,7 @@ env:
   XCODE_PROJECT: iosApp
   MOBILE_DIRECTORY: iosApp
 jobs:
-  build_ios:
+  build-ios:
     runs-on: macos-latest
     timeout-minutes: 40
     steps:
@@ -34,6 +34,9 @@ jobs:
         run: |
           ./gradlew composeApp:exportLibraryDefinitions
           ./gradlew composeApp:updateAppleBuildVersion
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest
       - name: 安装Apple证书
         id: profile
         env:

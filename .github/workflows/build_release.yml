@@ -19,7 +19,7 @@ on:
 env:
   OUTPUT_DIR: "composeApp/build/outputs/apk/release"
 jobs:
-  build_android:
+  build-android:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -107,7 +107,7 @@ jobs:
           name: apk-sign
           path: ${{ env.OUTPUT_DIR }}/${{ steps.apk.outputs.apkFile }}
   deploy:
-    needs: build
+    needs: build-android
     runs-on: self-hosted
     steps:
       - name: 下载部署文件
