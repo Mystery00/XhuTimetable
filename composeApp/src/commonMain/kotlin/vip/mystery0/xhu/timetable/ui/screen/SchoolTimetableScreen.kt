@@ -314,7 +314,7 @@ private fun BuildItem(course: SchoolTimetableResponse, onClick: () -> Unit) {
                     )
                     TextWithIcon(
                         imageVector = Icons.AutoMirrored.Filled.EventNote,
-                        text = "上课时间：${course.showTimeString}",
+                        text = "上课时间：${course.showTimeString.ifBlank { "无数据" }}",
                     )
                     TextWithIcon(
                         imageVector = Icons.Filled.LocationOn,
