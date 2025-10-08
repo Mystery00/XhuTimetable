@@ -47,7 +47,6 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import co.touchlab.kermit.Logger
 import com.maxkeppeker.sheets.core.models.base.SelectionButton
 import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
@@ -215,17 +214,6 @@ fun AccountManagementScreen() {
     }
 
     HandleErrorMessage(flow = viewModel.errorMessage)
-
-    LaunchedEffect(Unit) {
-        EventBus.flow.collect { event ->
-            event.getContentIfNotHandled()?.let { eventType ->
-                if (eventType == EventType.USER_LIST_CHANGED) {
-                    Logger.i("user list changed")
-                    viewModel.loadLoggedUserList()
-                }
-            }
-        }
-    }
 }
 
 @Composable
