@@ -92,9 +92,9 @@ data class UserItem(
     //性别
     val gender: Gender,
     //是否为主用户
-    var main: Boolean,
-    var xhuGrade: Int,
-    var college: String,
-    var majorName: String,
-    var majorDirection: String,
+    val main: Boolean,
+    val xhuGrade: Int,
+    val college: String,
+    val majorName: String,
+    val majorDirection: String,
 )

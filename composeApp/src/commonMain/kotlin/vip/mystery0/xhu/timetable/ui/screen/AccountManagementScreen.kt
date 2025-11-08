@@ -43,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -174,10 +173,6 @@ fun AccountManagementScreen() {
                 val loggedUserList by viewModel.loggedUserList.collectAsState()
                 loggedUserList.forEach { userItem ->
                     BuildItem(
-                        painter = ProfileImages.hash(
-                            userItem.userName,
-                            userItem.gender == Gender.MALE
-                        ),
                         user = userItem,
                         onClick = {
                             viewModel.changeMainUser(userItem.studentId)
@@ -283,7 +278,6 @@ private fun BuildCustomUserTemplateDialog(
 
 @Composable
 private fun BuildItem(
-    painter: Painter,
     user: UserItem,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
@@ -323,7 +317,10 @@ private fun BuildItem(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(RoundedCornerShape(16.dp)),
-                    painter = painter,
+                    painter = ProfileImages.hash(
+                        user.userName,
+                        user.gender == Gender.MALE
+                    ),
                     contentDescription = null
                 )
                 Column(modifier = Modifier.weight(1F)) {

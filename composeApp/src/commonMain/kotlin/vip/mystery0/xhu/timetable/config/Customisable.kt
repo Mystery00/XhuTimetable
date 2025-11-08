@@ -1,5 +1,8 @@
 package vip.mystery0.xhu.timetable.config
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class Customisable<T>(
     val data: T,
     val custom: Boolean,
