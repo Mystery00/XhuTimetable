@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
 import kotlinx.datetime.DayOfWeek
 import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
@@ -81,6 +82,7 @@ class CourseRoomViewModel : PagingComposeViewModel<ClassroomRequest, ClassroomRe
     }
 }
 
+@Immutable
 data class AreaSelect(
     val value: String,
     override val title: String,
@@ -114,6 +116,7 @@ class AreaSelectDataLoader : SelectDataLoader<AreaSelect, String>() {
     ): AreaSelect = t.copy(selected = selected)
 }
 
+@Immutable
 data class IntSelect(
     val value: Int,
     override val title: String,

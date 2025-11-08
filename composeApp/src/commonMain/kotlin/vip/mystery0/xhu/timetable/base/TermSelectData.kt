@@ -1,7 +1,9 @@
 package vip.mystery0.xhu.timetable.base
 
+import androidx.compose.runtime.Immutable
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 
+@Immutable
 data class TermSelect(
     val value: Int,
     override val title: String,

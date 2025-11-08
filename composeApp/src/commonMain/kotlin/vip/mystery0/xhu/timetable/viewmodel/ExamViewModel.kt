@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
 import kotlinx.datetime.LocalDate
@@ -71,6 +72,7 @@ class ExamViewModel : PagingComposeViewModel<PageRequest, Exam>(
     }
 }
 
+@Immutable
 data class Exam(
     val courseColor: Color,
     val date: LocalDate,

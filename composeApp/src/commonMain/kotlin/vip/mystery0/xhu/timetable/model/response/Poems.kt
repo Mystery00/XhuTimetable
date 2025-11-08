@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.model.response
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -12,6 +13,7 @@ data class PoemsSentence(
     val data: Poems,
 )
 
+@Immutable
 @Serializable
 data class Poems(
     val content: String,

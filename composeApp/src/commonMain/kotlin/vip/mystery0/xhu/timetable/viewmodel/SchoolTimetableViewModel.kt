@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -115,6 +116,7 @@ class SchoolTimetableViewModel :
     )
 }
 
+@Immutable
 data class CampusSelect(
     val value: String,
     override val title: String,
@@ -137,6 +139,7 @@ class CampusSelectDataLoader : SelectDataLoader<CampusSelect, String>() {
     ): CampusSelect = t.copy(selected = selected)
 }
 
+@Immutable
 data class CollegeSelect(
     val value: String,
     override val title: String,
@@ -159,6 +162,7 @@ class CollegeSelectDataLoader : SelectDataLoader<CollegeSelect, String>() {
     ): CollegeSelect = t.copy(selected = selected)
 }
 
+@Immutable
 data class MajorSelect(
     val value: String,
     override val title: String,

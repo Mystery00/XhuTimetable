@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.viewmodel
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -841,6 +842,7 @@ data class CourseSheet(
     }
 }
 
+@Immutable
 data class TodayCourseSheet(
     val courseName: String,
     val teacherName: String,
@@ -851,18 +853,17 @@ data class TodayCourseSheet(
     val color: Color,
     val showDate: LocalDate,
     val accountTitle: String,
+    val courseStatus: CourseStatus = CourseStatus.IN
 ) {
-    lateinit var courseStatus: CourseStatus
-
     fun calc(now: LocalDateTime): TodayCourseSheet {
         val startTime = showDate.atTime(timeText.first)
         val endTime = showDate.atTime(timeText.second)
-        courseStatus = when {
+        val courseStatus = when {
             now < startTime -> CourseStatus.BEFORE
             now > endTime -> CourseStatus.AFTER
             else -> CourseStatus.IN
         }
-        return this
+        return copy(courseStatus = courseStatus)
     }
 }
 
@@ -885,6 +886,7 @@ data class CalendarSheetWeek(
     val items: List<CalendarSheet>,
 )
 
+@Immutable
 data class CalendarSheet(
     val date: LocalDate,
     val title: String,
@@ -917,6 +919,7 @@ data class CalendarSheet(
     }
 }
 
+@Immutable
 data class CalendarSheetItem(
     val title: String,
     val subtitle: String,
@@ -934,9 +937,32 @@ enum class CourseStatus(
     BEFORE("未开始"), IN("开课中"), AFTER("已结束"),
 }
 
-class WeekView(
-    val weekNum: Int, val thisWeek: Boolean, val array: Array<Array<Boolean>>
-)
+@Immutable
+data class WeekView(
+    val weekNum: Int,
+    val thisWeek: Boolean,
+    val array: Array<Array<Boolean>>,
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as WeekView
+
+        if (weekNum != other.weekNum) return false
+        if (thisWeek != other.thisWeek) return false
+        if (!array.contentDeepEquals(other.array)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = weekNum
+        result = 31 * result + thisWeek.hashCode()
+        result = 31 * result + array.contentDeepHashCode()
+        return result
+    }
+}
 
 data class HolidayView(
     val showTitle: String,

@@ -1,9 +1,11 @@
 package vip.mystery0.xhu.timetable.base
 
+import androidx.compose.runtime.Immutable
 import kotlinx.datetime.Month
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 
+@Immutable
 data class YearSelect(
     val value: Int,
     override val title: String,

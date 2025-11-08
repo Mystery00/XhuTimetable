@@ -1,10 +1,12 @@
 package vip.mystery0.xhu.timetable.base
 
+import androidx.compose.runtime.Immutable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore
 
+@Immutable
 data class UserSelect(
     val studentId: String,
     val userName: String,

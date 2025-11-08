@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -220,6 +221,7 @@ fun <T> ShowMultiSelectDialog(
     ShowMultiSelectDialog(dialogTitle, selectList, useCaseState, onValueSelect, withButtonView)
 }
 
+@Immutable
 private data class SelectItem(
     override val title: String,
     override val selected: Boolean,

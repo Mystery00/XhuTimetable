@@ -1,8 +1,10 @@
 package vip.mystery0.xhu.timetable.model.response
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 import vip.mystery0.xhu.timetable.config.datetime.XhuInstant
 
+@Immutable
 @Serializable
 data class NoticeResponse(
     val noticeId: Int,
