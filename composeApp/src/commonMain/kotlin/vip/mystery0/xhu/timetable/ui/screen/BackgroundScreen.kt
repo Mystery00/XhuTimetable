@@ -179,7 +179,10 @@ fun BackgroundScreen() {
                         items = backgroundListState.backgroundList,
                         key = { it.backgroundId },
                     ) { background ->
-                        PhotoItem(background) {
+                        PhotoItem(
+                            background,
+                            background.backgroundId == backgroundListState.selectedBackgroundId,
+                        ) {
                             viewModel.setBackground(background.backgroundId)
                         }
                     }
@@ -210,7 +213,11 @@ fun BackgroundScreen() {
 }
 
 @Composable
-fun PhotoItem(background: Background, onSelect: () -> Unit) {
+fun PhotoItem(
+    background: Background,
+    isChecked: Boolean,
+    onSelect: () -> Unit,
+) {
     val data = background.thumbnailUrl.ifBlank {
         background.imageResUri
     }
@@ -228,7 +235,7 @@ fun PhotoItem(background: Background, onSelect: () -> Unit) {
             .height(240.dp)
             .clip(MaterialTheme.shapes.medium)
             .borderWhen(
-                background.checked,
+                isChecked,
                 BorderStroke(4.dp, MaterialTheme.colorScheme.primary),
                 MaterialTheme.shapes.medium,
             )
@@ -253,7 +260,7 @@ fun PhotoItem(background: Background, onSelect: () -> Unit) {
                 .clip(MaterialTheme.shapes.medium),
             contentScale = ContentScale.Crop
         )
-        if (background.checked) {
+        if (isChecked) {
             Icon(
                 imageVector = Icons.Rounded.CheckCircle,
                 contentDescription = null,

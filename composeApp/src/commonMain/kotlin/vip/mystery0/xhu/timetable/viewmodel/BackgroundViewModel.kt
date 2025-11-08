@@ -69,11 +69,16 @@ class BackgroundViewModel : ComposeViewModel() {
 
             backgroundList.clear()
             backgroundList.addAll(list)
-            _backgroundListState.value = BackgroundListState(backgroundList = generateList())
+            val (backgroundList, selectedBackgroundId) = generateList()
+            _backgroundListState.value = BackgroundListState(
+                backgroundList = backgroundList,
+                selectedBackgroundId = selectedBackgroundId,
+            )
         }
     }
 
-    private suspend fun generateList(): List<Background> {
+    private suspend fun generateList(): Pair<List<Background>, Long> {
+        var selectedBackgroundId: Long? = null
         var backgroundFile = getConfigStore { backgroundImage }
         val resultList =
             ArrayList(backgroundList.map {
@@ -96,28 +101,29 @@ class BackgroundViewModel : ComposeViewModel() {
                 //自定义的背景图，添加到第2位
                 resultList.add(
                     1,
-                    Background(-1, -1L, thumbnailUrl = it.absolutePath(), checked = true)
+                    Background(-1, -1L, thumbnailUrl = it.absolutePath())
                 )
+                selectedBackgroundId = -1L
             } else if (parent == null) {
                 backgroundFile = null
             }
         }
-        if (resultList.all { !it.checked }) {
+        if (resultList.firstOrNull { b -> b.backgroundId == selectedBackgroundId } == null) {
             when {
                 backgroundFile == null -> {
-                    resultList[0].checked = true
+                    selectedBackgroundId = 0L
                 }
 
                 else -> {
                     val fileName = backgroundFile.nameWithoutExtension
-                    resultList.forEach {
+                    selectedBackgroundId = resultList.first {
                         val hashKey = it.getHashKey()
-                        it.checked = fileName == hashKey
-                    }
+                        fileName == hashKey
+                    }.backgroundId
                 }
             }
         }
-        return resultList
+        return resultList to selectedBackgroundId!!
     }
 
     fun setCustomBackground(bytes: ByteArray) {
@@ -138,9 +144,11 @@ class BackgroundViewModel : ComposeViewModel() {
             _backgroundListState.value = _backgroundListState.value.loadWithList(true)
             clearOldCustomImage()
             setConfigStore { backgroundImage = cacheImageFile }
+            val (backgroundList, selectedBackgroundId) = generateList()
             _backgroundListState.value =
                 BackgroundListState(
-                    backgroundList = generateList(),
+                    backgroundList = backgroundList,
+                    selectedBackgroundId = selectedBackgroundId,
                     errorMessage = "背景图设置成功"
                 )
             EventBus.post(EventType.CHANGE_MAIN_BACKGROUND)
@@ -161,7 +169,8 @@ class BackgroundViewModel : ComposeViewModel() {
         }) {
             val nowList = _backgroundListState.value.backgroundList
             _backgroundListState.value = _backgroundListState.value.loadWithList(true)
-            val current = nowList.find { it.checked }
+            val current =
+                nowList.firstOrNull { b -> b.backgroundId == _backgroundListState.value.selectedBackgroundId }
             val selected = nowList.find { it.backgroundId == backgroundId }!!
             if (current?.backgroundId == backgroundId) {
                 _backgroundListState.value = _backgroundListState.value.loadWithList(false)
@@ -220,9 +229,11 @@ class BackgroundViewModel : ComposeViewModel() {
                         )
                 }
             }
+            val (backgroundList, selectedBackgroundId) = generateList()
             _backgroundListState.value =
                 BackgroundListState(
-                    backgroundList = generateList(),
+                    backgroundList = backgroundList,
+                    selectedBackgroundId = selectedBackgroundId,
                     errorMessage = "背景图设置成功"
                 )
             EventBus.post(EventType.CHANGE_MAIN_BACKGROUND)
@@ -251,6 +262,7 @@ class BackgroundViewModel : ComposeViewModel() {
 data class BackgroundListState(
     val loading: Boolean = false,
     val backgroundList: List<Background> = emptyList(),
+    val selectedBackgroundId: Long? = null,
     val errorMessage: String = "",
 ) {
     fun loadWithList(loading: Boolean) = BackgroundListState(
@@ -267,12 +279,11 @@ data class BackgroundListState(
 }
 
 data class Background(
-    var backgroundId: Long,
-    var resourceId: Long,
-    var thumbnailUrl: String = "",
-    var imageUrl: String = "",
-    var imageResUri: String? = null,
-    var checked: Boolean = false,
+    val backgroundId: Long,
+    val resourceId: Long,
+    val thumbnailUrl: String = "",
+    val imageUrl: String = "",
+    val imageResUri: String? = null,
 ) {
     fun getHashKey(): String {
         val name = "${backgroundId.toString().sha1()}-${thumbnailUrl.md5()}+${resourceId}"
