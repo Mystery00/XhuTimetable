@@ -96,7 +96,6 @@ fun FeedbackScreen() {
                             Icon(
                                 painter = XhuIcons.WsState.adminOnline,
                                 contentDescription = null,
-                                tint = Color.Unspecified,
                             )
                         }
                     }

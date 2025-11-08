@@ -70,8 +70,7 @@ object FeedbackRepo : BaseDataRepo {
                         val msg = parseMessage(frame.readText())
                         when (msg) {
                             is TextMessage -> {
-                                msg.generate(mainUser.studentId)
-                                messageConsumer(msg)
+                                messageConsumer(msg.copy(isMe = mainUser.studentId == msg.fromUserId))
                             }
 
                             else -> {
@@ -90,8 +89,7 @@ object FeedbackRepo : BaseDataRepo {
                 val msg = parseMessage(text.readText())
                 when (msg) {
                     is TextMessage -> {
-                        msg.generate(mainUser.studentId)
-                        messageConsumer(msg)
+                        messageConsumer(msg.copy(isMe = mainUser.studentId == msg.fromUserId))
                     }
 
                     else -> {
@@ -118,8 +116,9 @@ object FeedbackRepo : BaseDataRepo {
         val list = mainUser.withAutoLoginOnce {
             feedbackApi.pullMessage(it, lastId, size)
         }
-        list.forEach { it.generate(mainUser.studentId) }
-        return list.reversed()
+        return list.map {
+            it.copy(isMe = mainUser.studentId == it.fromUserId)
+        }.reversed()
     }
 
     suspend fun checkUnReadFeedback(): Boolean {
