@@ -11,6 +11,7 @@ import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.dialogs.init
 import vip.mystery0.xhu.timetable.App
 import vip.mystery0.xhu.timetable.ui.navigation.Nav
+import vip.mystery0.xhu.timetable.ui.navigation.RouteInit
 import vip.mystery0.xhu.timetable.ui.navigation.RouteLogin
 import vip.mystery0.xhu.timetable.ui.navigation.RouteMain
 import vip.mystery0.xhu.timetable.ui.navigation.RouteQueryExam
@@ -46,6 +47,7 @@ class NavActivity : ComponentActivity() {
     }
 
     enum class InitRoute(val route: Nav) {
+        PRIVACY(RouteInit),
         LOGIN(RouteLogin(false)),
         EXAM(RouteQueryExam),
         SETTINGS(RouteSettings),

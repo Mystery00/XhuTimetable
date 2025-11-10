@@ -48,6 +48,8 @@ import vip.mystery0.xhu.timetable.config.ktor.FileDownloadProgressState
 import vip.mystery0.xhu.timetable.config.ktor.PoemsPlugin
 import vip.mystery0.xhu.timetable.config.ktor.ServerApiPlugin
 
+const val PRIVACY_URL = "https://xgkb.mystery0.vip/privacy/index.html"
+
 const val HTTP_CLIENT = "client"
 const val HTTP_CLIENT_POEMS = "poemsClient"
 const val HTTP_CLIENT_WS = "wsClient"

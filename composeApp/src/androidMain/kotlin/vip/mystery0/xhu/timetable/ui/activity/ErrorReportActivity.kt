@@ -32,7 +32,6 @@ import vip.mystery0.xhu.timetable.base.appVersionCode
 import vip.mystery0.xhu.timetable.base.appVersionName
 import vip.mystery0.xhu.timetable.config.toast.showLongToast
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
-import kotlin.system.exitProcess
 
 class ErrorReportActivity : ComponentActivity() {
     companion object {
@@ -129,7 +128,6 @@ class ErrorReportActivity : ComponentActivity() {
 
     private fun killCurrentProcess() {
         finish()
-        android.os.Process.killProcess(android.os.Process.myPid())
-        exitProcess(10)
+        vip.mystery0.xhu.timetable.killCurrentProcess()
     }
 }

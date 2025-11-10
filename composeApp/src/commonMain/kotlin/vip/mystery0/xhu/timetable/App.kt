@@ -77,3 +77,5 @@ fun App(startRoute: Nav) {
         }
     }
 }
+
+expect fun killCurrentProcess()

@@ -2,25 +2,16 @@ package vip.mystery0.xhu.timetable.ui.activity
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewTreeObserver
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.core.animation.doOnEnd
 import androidx.core.content.pm.ShortcutManagerCompat
-import io.github.vinceglb.filekit.PlatformFile
-import io.github.vinceglb.filekit.absolutePath
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.component.KoinComponent
-import vip.mystery0.xhu.timetable.base.HandleErrorMessage
 import vip.mystery0.xhu.timetable.ui.activity.NavActivity.Companion.jumpToNav
 import vip.mystery0.xhu.timetable.viewmodel.StarterViewModel
 
@@ -32,48 +23,8 @@ class StartActivity : ComponentActivity(), KoinComponent {
         super.onCreate(savedInstanceState)
         keepSplashScreenLonger()
         customizeSplashScreenExit()
-        setContent {
-            BuildContentWindow()
-        }
         ShortcutManagerCompat.removeAllDynamicShortcuts(this)
-    }
-
-    @Composable
-    private fun BuildContentWindow() {
-        LaunchedEffect(Unit) {
-            viewModel.init()
-        }
-        val readyState by viewModel.readyState.collectAsState()
-        val isLoginState by viewModel.isLoginState.collectAsState()
-        HandleErrorMessage(errorMessage = readyState.errorMessage) {}
-        if (!readyState.loading) {
-            goToMainScreen(
-                isLoginState,
-                readyState.splashFile,
-                readyState.splashId,
-            )
-        }
-    }
-
-    private fun goToMainScreen(
-        isLogin: Boolean,
-        splashFile: PlatformFile?,
-        splashId: Long?,
-    ) {
-        if (!isLogin) {
-            jumpToNav(NavActivity.InitRoute.LOGIN)
-            finish()
-            return
-        }
-        if (splashFile == null || splashId == null) {
-            jumpToNav()
-            finish()
-            return
-        }
-        val splashFilePath = splashFile.absolutePath()
-        startActivity(Intent(this, SplashImageActivity::class.java).apply {
-            SplashImageActivity.setParams(this, splashFilePath, splashId)
-        })
+        jumpToNav(NavActivity.InitRoute.PRIVACY)
         finish()
     }
 

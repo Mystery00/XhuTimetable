@@ -12,6 +12,7 @@ import vip.mystery0.xhu.timetable.config.clearDownloadDir
 import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.externalPictureDir
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
+import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.module.desc
@@ -23,13 +24,23 @@ import vip.mystery0.xhu.timetable.utils.sha256
 import kotlin.time.Clock
 
 class StarterViewModel : ComposeViewModel(), KoinComponent {
+    private val _allowPrivacy = MutableStateFlow(GlobalCacheStore.allowPrivacy)
+    val allowPrivacy: StateFlow<Boolean> = _allowPrivacy
+
     private val _readyState = MutableStateFlow(ReadyState(loading = true))
     val readyState: StateFlow<ReadyState> = _readyState
 
     private val _isLoginState = MutableStateFlow(false)
     val isLoginState: StateFlow<Boolean> = _isLoginState
 
-    fun init() {
+    fun allowPrivacy() {
+        viewModelScope.safeLaunch {
+            getCacheStore { this.allowPrivacy = true }
+            _allowPrivacy.value = true
+        }
+    }
+
+    fun doInitAndReady() {
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
             logger.w("init failed", throwable)
             _readyState.value =

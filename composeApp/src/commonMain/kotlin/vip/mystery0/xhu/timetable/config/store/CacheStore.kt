@@ -30,6 +30,13 @@ suspend fun setCacheStore(block: suspend CacheStore.() -> Unit) =
 class CacheStore {
     private val json = Json { ignoreUnknownKeys = true }
 
+    private val privacyKey = "privacy"
+    var allowPrivacy: Boolean
+        set(value) {
+            Store.CacheStore.setConfiguration(privacyKey, value)
+        }
+        get() = Store.CacheStore.getConfiguration(privacyKey, false)
+
     //启动图
     private val splashListKey = "splashList"
     var splashList: List<Splash>
