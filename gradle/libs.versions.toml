@@ -22,6 +22,7 @@ androidx-navigation = "2.9.1"
 androidx-browser = "1.9.0"
 androidxGlance = "1.1.1"
 material = "1.13.0"
+material3 = "1.9.0-alpha04"
 material-icons = "1.7.3"
 ktorfit = "2.6.4"
 ktor = "3.3.2"
@@ -60,6 +61,7 @@ androidx-glance-widget = { group = "androidx.glance", name = "glance-appwidget",
 
 material = { module = "com.google.android.material:material", version.ref = "material" }
 
+material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
 material-icon = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "material-icons" }
 material-icon-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "material-icons" }
 

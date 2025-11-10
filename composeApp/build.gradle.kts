@@ -45,6 +45,7 @@ kotlin {
     compilerOptions {
         optIn.add("kotlin.time.ExperimentalTime")
         optIn.add("androidx.compose.material3.ExperimentalMaterial3Api")
+        optIn.add("androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
         optIn.add("dev.whyoleg.cryptography.DelicateCryptographyApi")
 
         freeCompilerArgs.add("-Xexpect-actual-classes")
@@ -89,9 +90,9 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
+            implementation(libs.material3)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             //common-viewmodel
             implementation(libs.androidx.lifecycle.viewmodel)

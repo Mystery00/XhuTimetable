@@ -10,9 +10,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.FlexibleBottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
@@ -119,7 +119,7 @@ fun MainScreen() {
         },
         bottomBar = {
             val showTomorrowCourse by viewModel.showTomorrowCourse.collectAsState()
-            NavigationBar {
+            FlexibleBottomAppBar {
                 val tabs = if (enableCalendarView) {
                     Tab.entries
                 } else {

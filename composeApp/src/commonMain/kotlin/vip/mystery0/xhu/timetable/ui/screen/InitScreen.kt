@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
@@ -82,7 +82,7 @@ fun InitScreen() {
                     .clip(CircleShape)
             )
             Spacer(modifier = Modifier.height(64.dp))
-            CircularProgressIndicator()
+            LoadingIndicator()
             Spacer(modifier = Modifier.height(32.dp))
             Text("应用加载中...", color = contentColorFor(Color(0xFF2196F3)))
         }

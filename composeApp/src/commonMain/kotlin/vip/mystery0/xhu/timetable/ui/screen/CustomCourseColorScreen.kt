@@ -8,15 +8,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,7 +44,6 @@ import com.maxkeppeler.sheets.color.models.ColorConfig
 import com.maxkeppeler.sheets.color.models.ColorSelection
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
-import vip.mystery0.xhu.timetable.ui.component.BuildSearchText
 import vip.mystery0.xhu.timetable.ui.component.StateScreen
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
@@ -58,10 +62,34 @@ fun CustomCourseColorScreen() {
     val list by viewModel.listState.collectAsState()
 
     val showColorDialog = rememberUseCaseState()
+    val searchBarState = rememberSearchBarState()
+    val textFieldState = rememberTextFieldState()
 
     var courseName by remember { mutableStateOf("") }
     var showSearchView by remember { mutableStateOf(false) }
-    var searchText by remember { mutableStateOf("") }
+
+    val inputField =
+        @Composable {
+            SearchBarDefaults.InputField(
+                modifier = Modifier,
+                searchBarState = searchBarState,
+                textFieldState = textFieldState,
+                onSearch = {
+                    viewModel.loadList(it)
+                },
+                placeholder = {
+                    Text(modifier = Modifier.clearAndSetSemantics {}, text = "搜索课程名称...")
+                },
+                trailingIcon = {
+                    IconButton(onClick = {
+                        viewModel.loadList("")
+                        showSearchView = false
+                    }) {
+                        Icon(XhuIcons.close, contentDescription = null)
+                    }
+                }
+            )
+        }
 
     LaunchedEffect(Unit) {
         viewModel.init()
@@ -69,7 +97,13 @@ fun CustomCourseColorScreen() {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = "自定义课程颜色") },
+                title = {
+                    if (showSearchView) {
+                        SearchBar(state = searchBarState, inputField = inputField)
+                    } else {
+                        Text(text = "自定义课程颜色")
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = {
                         navController.popBackStack()
@@ -81,21 +115,7 @@ fun CustomCourseColorScreen() {
                     }
                 },
                 actions = {
-                    if (showSearchView) {
-                        BuildSearchText(
-                            searchText = searchText,
-                            placeholderText = "请输入课程名称",
-                            onSearchTextChanged = {
-                                searchText = it
-                                viewModel.loadList(it)
-                            },
-                            onClearClick = {
-                                searchText = ""
-                                viewModel.loadList("")
-                                showSearchView = false
-                            }
-                        )
-                    } else {
+                    if (!showSearchView) {
                         IconButton(onClick = {
                             showSearchView = true
                         }) {
