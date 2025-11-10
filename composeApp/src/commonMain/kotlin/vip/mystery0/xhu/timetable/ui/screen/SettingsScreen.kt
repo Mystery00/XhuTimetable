@@ -214,14 +214,18 @@ fun SettingsScreen() {
                     config = PoemsStore::disablePoems,
                     title = { Text(text = "禁用今日诗词") }
                 ) {
-                    PoemsStore.disablePoems = it
+                    scope.safeLaunch {
+                        PoemsStore.disablePoems = it
+                    }
                     showToast("重启应用后生效")
                 }
                 PoemsSettingsCheckbox(
                     config = PoemsStore::showPoemsTranslate,
                     title = { Text(text = "显示诗词大意") }
                 ) {
-                    PoemsStore.showPoemsTranslate = it
+                    scope.safeLaunch {
+                        PoemsStore.showPoemsTranslate = it
+                    }
                     showToast("重启应用后生效")
                 }
                 XhuSettingsMenuLink(

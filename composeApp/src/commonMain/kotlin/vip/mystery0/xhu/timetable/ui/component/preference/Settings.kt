@@ -109,14 +109,13 @@ fun CacheSettingsCheckbox(
 fun PoemsSettingsCheckbox(
     modifier: Modifier = Modifier,
     config: KMutableProperty0<Boolean>,
-    scope: CoroutineScope = rememberCoroutineScope(),
     icon: @Composable () -> Unit = { },
     title: @Composable () -> Unit,
     subtitle: @Composable (() -> Unit)? = null,
-    onCheckedChange: suspend (Boolean) -> Unit = { },
+    onCheckedChange: (Boolean) -> Unit = { },
 ) {
     val state = rememberPoemsState(property = config) {
-        scope.safeLaunch { onCheckedChange(it) }
+        onCheckedChange(it)
     }
     SwitchPreference(
         state = state,
