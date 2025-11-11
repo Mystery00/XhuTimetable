@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import multiplatform.network.cmptoast.showToast
 
 @Composable
+expect fun HandleBackPress(backPressed: () -> Unit)
+
+@Composable
 fun HandleErrorMessage(flow: MutableStateFlow<String>) {
     val errorMessage by flow.collectAsState()
     HandleErrorMessage(errorMessage = errorMessage) {
