@@ -16,10 +16,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -84,11 +87,20 @@ fun QueryExpScoreScreen() {
                     .padding(paddingValues)
                     .fillMaxSize(),
             ) {
+                val pullToRefreshState = rememberPullToRefreshState()
                 PullToRefreshBox(
+                    state = pullToRefreshState,
                     isRefreshing = expScoreListState.loading,
                     onRefresh = {
                         viewModel.loadExpScoreList()
                     },
+                    indicator = {
+                        PullToRefreshDefaults.LoadingIndicator(
+                            state = pullToRefreshState,
+                            isRefreshing = expScoreListState.loading,
+                            modifier = Modifier.align(Alignment.TopCenter)
+                        )
+                    }
                 ) {
                     val scoreList = expScoreListState.scoreList
                     LazyColumn(

@@ -28,6 +28,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -128,11 +130,20 @@ fun FeedbackScreen() {
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
+            val pullToRefreshState = rememberPullToRefreshState()
             PullToRefreshBox(
+                state = pullToRefreshState,
                 isRefreshing = loading.loading,
                 onRefresh = {
                     viewModel.loadLastMessage(10)
                 },
+                indicator = {
+                    PullToRefreshDefaults.LoadingIndicator(
+                        state = pullToRefreshState,
+                        isRefreshing = loading.loading,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
+                }
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     LazyColumn(

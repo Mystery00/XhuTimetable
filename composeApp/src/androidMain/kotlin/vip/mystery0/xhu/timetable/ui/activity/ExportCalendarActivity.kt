@@ -40,6 +40,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -142,6 +144,7 @@ class ExportCalendarActivity : ComponentActivity() {
             },
         ) { paddingValues ->
             val calendarAccountListState by viewModel.calendarAccountListState.collectAsState()
+            val pullToRefreshState = rememberPullToRefreshState()
 
             Box(
                 modifier = Modifier
@@ -150,10 +153,18 @@ class ExportCalendarActivity : ComponentActivity() {
             ) {
                 if (calendarPermissionState.allPermissionsGranted) {
                     PullToRefreshBox(
+                        state = pullToRefreshState,
                         isRefreshing = calendarAccountListState.loading,
                         onRefresh = {
                             viewModel.loadCalendarAccountList()
                         },
+                        indicator = {
+                            PullToRefreshDefaults.LoadingIndicator(
+                                state = pullToRefreshState,
+                                isRefreshing = calendarAccountListState.loading,
+                                modifier = Modifier.align(Alignment.TopCenter)
+                            )
+                        }
                     ) {
                         val list = calendarAccountListState.list
                         LazyColumn(

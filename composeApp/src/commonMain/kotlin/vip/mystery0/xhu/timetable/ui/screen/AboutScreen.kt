@@ -24,7 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
-import com.mikepenz.aboutlibraries.ui.compose.rememberLibraries
+import com.mikepenz.aboutlibraries.ui.compose.produceLibraries
 import org.jetbrains.compose.resources.painterResource
 import vip.mystery0.xhu.timetable.base.appName
 import vip.mystery0.xhu.timetable.base.appVersionCode
@@ -50,7 +50,7 @@ fun AboutScreen() {
             )
         },
     ) { innerPadding ->
-        val libraries by rememberLibraries {
+        val libraries by produceLibraries {
             Res.readBytes("files/aboutlibraries.json").decodeToString()
         }
         LibrariesContainer(
