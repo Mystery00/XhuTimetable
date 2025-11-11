@@ -23,3 +23,4 @@ captures
 **/xcshareddata/WorkspaceSettings.xcsettings
 /iosApp/Pods/
 /iosApp/Configuration/Config.xcconfig
+/composeApp/release/
