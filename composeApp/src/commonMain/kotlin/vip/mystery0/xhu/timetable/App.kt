@@ -14,7 +14,10 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.request.CachePolicy
 import io.github.vinceglb.filekit.coil.addPlatformFileSupport
+import vip.mystery0.xhu.timetable.config.store.EventBus
+import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.feature.FeatureHub
+import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.navigation.Nav
 import vip.mystery0.xhu.timetable.ui.navigation.Navs
@@ -26,7 +29,16 @@ import vip.mystery0.xhu.timetable.ui.theme.isDarkMode
 fun App(startRoute: Nav) {
     val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
-        FeatureHub.start(scope)
+        val allowPrivacy = getCacheStore { allowPrivacy }
+        if (allowPrivacy) {
+            FeatureHub.start(scope)
+        } else {
+            EventBus.flow.collect { event ->
+                if (event.getContentIfNotHandled() == EventType.ALLOW_PRIVACY) {
+                    FeatureHub.start(scope)
+                }
+            }
+        }
     }
     setSingletonImageLoaderFactory { context ->
         ImageLoader.Builder(context)

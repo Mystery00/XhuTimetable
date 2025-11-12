@@ -394,6 +394,14 @@ fun SettingsScreen() {
                     )
                     DeveloperSettings()
                     XhuSettingsMenuLink(
+                        title = { Text(text = "撤销隐私授权") },
+                        onClick = {
+                            scope.safeLaunch {
+                                setCacheStore { allowPrivacy = false }
+                            }
+                        },
+                    )
+                    XhuSettingsMenuLink(
                         title = { Text(text = "测试崩溃") },
                         onClick = {
                             scope.safeLaunch {

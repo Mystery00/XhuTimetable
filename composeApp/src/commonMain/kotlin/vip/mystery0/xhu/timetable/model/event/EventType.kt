@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable.model.event
 
 enum class EventType {
+    ALLOW_PRIVACY,
     USER_LIST_CHANGED,
     CHANGE_MAIN_USER,
     MAIN_USER_LOGOUT,

@@ -12,9 +12,13 @@ import vip.mystery0.xhu.timetable.config.clearDownloadDir
 import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.externalPictureDir
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
+import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
+import vip.mystery0.xhu.timetable.config.store.setCacheStore
+import vip.mystery0.xhu.timetable.initFeature
+import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.module.desc
 import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.utils.md5
@@ -35,8 +39,10 @@ class StarterViewModel : ComposeViewModel(), KoinComponent {
 
     fun allowPrivacy() {
         viewModelScope.safeLaunch {
-            getCacheStore { this.allowPrivacy = true }
+            initFeature()
+            setCacheStore { this.allowPrivacy = true }
             _allowPrivacy.value = true
+            EventBus.post(EventType.ALLOW_PRIVACY)
         }
     }
 

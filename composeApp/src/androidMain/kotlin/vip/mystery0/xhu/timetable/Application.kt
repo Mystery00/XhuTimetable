@@ -13,6 +13,7 @@ import multiplatform.network.cmptoast.AppContext
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import vip.mystery0.xhu.timetable.config.mmkv.KermitMMKVLogger
+import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
 import vip.mystery0.xhu.timetable.module.moduleList
 
 @SuppressLint("StaticFieldLeak")
@@ -25,7 +26,6 @@ class Application : Application(), DefaultLifecycleObserver {
         context = this
         initLogger()
         initCoroutine()
-        initFeature()
         startKoin {
             logger(KermitKoinLogger(Logger.withTag("koin")))
             androidContext(this@Application)
@@ -33,6 +33,9 @@ class Application : Application(), DefaultLifecycleObserver {
         }
         val root = context.filesDir.absolutePath + "/mmkv"
         MMKV.initialize(this, root, null, MMKVLogLevel.LevelWarning, KermitMMKVLogger())
+        if (GlobalCacheStore.allowPrivacy) {
+            initFeature()
+        }
     }
 
     override fun onStop(owner: LifecycleOwner) {
