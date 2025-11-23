@@ -56,7 +56,7 @@ jobs:
           # import certificate and provisioning profile from secrets
           echo -n "$IOS_CERTIFICATE" | base64 --decode -o $CERTIFICATE_PATH
           echo -n "$IOS_PROVISION_PROFILE" | base64 --decode -o $PP_PATH
-          uuid=`grep UUID -A1 -a $PP_PATH | grep -io "[-A-F0-9]\{36\}"`
+          uuid=`grep UUID -A1 -a $PP_PATH | grep -io "[-A-F0-9]\\{36\\}"`
           echo "uuid=$uuid" >> $GITHUB_OUTPUT
           
           # create temporary keychain
@@ -71,10 +71,17 @@ jobs:
           # apply provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/$uuid.mobileprovision
+      - name: 缓存Xcode编译数据
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-xcode-build-${{ hashFiles('**/*.gradle.kts', '**/gradle.properties', 'iosApp/**/*.pbxproj') }}
+          restore-keys: |
+            ${{ runner.os }}-xcode-build-
       - name: 构建iOS APP
         run: |
           cd ${{ env.MOBILE_DIRECTORY }}
-          xcodebuild PROVISIONING_PROFILE=${{ steps.profile.outputs.uuid }} -scheme ${{ env.XCODE_PROJECT }} clean archive -archivePath "Actions" -configuration Release -arch arm64
+          xcodebuild PROVISIONING_PROFILE=${{ steps.profile.outputs.uuid }} -scheme ${{ env.XCODE_PROJECT }} archive -archivePath "Actions" -configuration Release -arch arm64
       - name: 导出ipa
         env:
           EXPORT_PLIST: ${{ secrets.IOS_EXPORT_PRODUCTION }}
