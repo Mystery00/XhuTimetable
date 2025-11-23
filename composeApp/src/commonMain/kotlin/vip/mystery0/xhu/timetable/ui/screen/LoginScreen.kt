@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.ui.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.twotone.Clear
 import androidx.compose.material.icons.twotone.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -39,9 +42,14 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.withLink
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
@@ -49,7 +57,9 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.appName
+import vip.mystery0.xhu.timetable.config.toast.showLongToast
 import vip.mystery0.xhu.timetable.config.toast.showShortToast
+import vip.mystery0.xhu.timetable.module.PRIVACY_URL
 import vip.mystery0.xhu.timetable.ui.component.ShowProgressDialog
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.navigation.RouteLogin
@@ -72,6 +82,7 @@ fun LoginScreen(fromAccountManager: Boolean) {
     val passwordFocusRequester = remember { FocusRequester() }
     var usernameError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
+    var checkedPrivacy by remember { mutableStateOf(fromAccountManager) }
 
     val xhuDialogState = rememberUseCaseState()
 
@@ -88,6 +99,11 @@ fun LoginScreen(fromAccountManager: Boolean) {
             password.isBlank() -> {
                 passwordFocusRequester.requestFocus()
                 showShortToast("密码不能为空")
+                return false
+            }
+
+            !checkedPrivacy -> {
+                showLongToast("请阅读并同意隐私协议")
                 return false
             }
 
@@ -224,6 +240,37 @@ fun LoginScreen(fromAccountManager: Boolean) {
                     color = MaterialTheme.colorScheme.outline,
                     fontSize = 12.sp,
                 )
+            }
+            Spacer(
+                modifier = Modifier
+                    .height(30.dp)
+                    .fillMaxWidth()
+            )
+            if (!fromAccountManager) {
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(
+                        checked = checkedPrivacy,
+                        onCheckedChange = {
+                            checkedPrivacy = it
+                        },
+                    )
+                    val text = buildAnnotatedString {
+                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
+                            append("我已阅读并同意")
+                        }
+                        withLink(LinkAnnotation.Url(PRIVACY_URL)) {
+                            append("《隐私协议》")
+                        }
+                    }
+                    Text(
+                        text = text,
+                        fontSize = 14.sp,
+                    )
+                }
             }
             Spacer(
                 modifier = Modifier
