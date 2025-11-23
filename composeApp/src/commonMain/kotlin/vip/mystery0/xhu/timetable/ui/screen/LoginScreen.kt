@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -118,6 +119,7 @@ fun LoginScreen(fromAccountManager: Boolean) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .imePadding()
             .verticalScroll(rememberScrollState())
     ) {
         Image(
@@ -179,7 +181,7 @@ fun LoginScreen(fromAccountManager: Boolean) {
             )
             Spacer(
                 modifier = Modifier
-                    .height(48.dp)
+                    .height(24.dp)
                     .fillMaxWidth()
             )
             OutlinedTextField(
@@ -243,38 +245,35 @@ fun LoginScreen(fromAccountManager: Boolean) {
             }
             Spacer(
                 modifier = Modifier
-                    .height(30.dp)
+                    .height(16.dp)
                     .fillMaxWidth()
             )
-            if (!fromAccountManager) {
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Checkbox(
-                        checked = checkedPrivacy,
-                        onCheckedChange = {
-                            checkedPrivacy = it
-                        },
-                    )
-                    val text = buildAnnotatedString {
-                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                            append("我已阅读并同意")
-                        }
-                        withLink(LinkAnnotation.Url(PRIVACY_URL)) {
-                            append("《隐私协议》")
-                        }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Checkbox(
+                    checked = checkedPrivacy,
+                    onCheckedChange = {
+                        checkedPrivacy = it
+                    },
+                )
+                val text = buildAnnotatedString {
+                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
+                        append("我已阅读并同意")
                     }
-                    Text(
-                        text = text,
-                        fontSize = 14.sp,
-                    )
+                    withLink(LinkAnnotation.Url(PRIVACY_URL)) {
+                        append("《隐私协议》")
+                    }
                 }
+                Text(
+                    text = text,
+                    fontSize = 14.sp,
+                )
             }
             Spacer(
                 modifier = Modifier
-                    .height(30.dp)
+                    .height(16.dp)
                     .fillMaxWidth()
             )
             Button(
