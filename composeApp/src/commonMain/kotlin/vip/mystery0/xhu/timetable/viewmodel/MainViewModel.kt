@@ -30,6 +30,7 @@ import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.model.CustomUi
+import vip.mystery0.xhu.timetable.model.PracticalCourseView
 import vip.mystery0.xhu.timetable.model.TodayCourseView
 import vip.mystery0.xhu.timetable.model.TodayThingView
 import vip.mystery0.xhu.timetable.model.WeekCourseView
@@ -103,6 +104,9 @@ class MainViewModel : ComposeViewModel() {
 
     private val _weekView = MutableStateFlow<List<WeekView>>(emptyList())
     val weekView: StateFlow<List<WeekView>> = _weekView
+
+    private val _practicalCourseList = MutableStateFlow<List<PracticalCourseShowView>>(emptyList())
+    val practicalCourseList: StateFlow<List<PracticalCourseShowView>> = _practicalCourseList
 
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
@@ -278,6 +282,8 @@ class MainViewModel : ComposeViewModel() {
                 )
                 //加载日历视图的数据
                 loadCalendar(currentWeek, calendarData, colorMap)
+                //加载实践课程
+                loadPracticalCourse(data.practicalCourseList)
             }
 
             if (loadFromCloud) {
@@ -307,6 +313,8 @@ class MainViewModel : ComposeViewModel() {
                     )
                     //加载日历视图的数据
                     loadCalendar(currentWeek, cloudCalendarData, colorMap)
+                    //加载实践课程
+                    loadPracticalCourse(cloudData.practicalCourseList)
                 }
                 toastMessage("数据同步成功！")
             }
@@ -349,6 +357,8 @@ class MainViewModel : ComposeViewModel() {
                 loadCourseToTable(currentWeek, currentWeek, cloudData.weekViewList, colorMap, false)
                 //加载日历视图的数据
                 loadCalendar(currentWeek, cloudCalendarData, colorMap)
+                //加载实践课程
+                loadPracticalCourse(cloudData.practicalCourseList)
             }
             toastMessage("数据同步成功！")
             _loading.value = false
@@ -688,7 +698,7 @@ class MainViewModel : ComposeViewModel() {
     ) {
         val now = LocalDate.now()
         var alreadySet = false
-        _calendarList.value = calendarList.map { week ->
+        val resultList = calendarList.map { week ->
             val titleBuilder = StringBuilder()
             titleBuilder.append("第").append(week.weekNum).append("周")
             titleBuilder.append("  ")
@@ -780,6 +790,25 @@ class MainViewModel : ComposeViewModel() {
                 items = dayItems,
             )
         }
+        _calendarList.value = resultList
+    }
+
+    /**
+     * 复用的加载实践课程数据的方法
+     */
+    private suspend fun loadPracticalCourse(courseList: List<PracticalCourseView>) {
+        val customAccountTitle = getConfigStore { customAccountTitle }
+        val resultList = courseList.map {
+            PracticalCourseShowView(
+                it.courseName,
+                it.teacherName,
+                it.showWeek,
+                it.credit,
+                it.color,
+                customAccountTitle.formatPracticalCourse(it.user.info),
+            )
+        }
+        _practicalCourseList.value = resultList
     }
 
     fun changeCurrentWeek(currentWeek: Int) {
@@ -967,4 +996,13 @@ data class WeekView(
 data class HolidayView(
     val showTitle: String,
     val color: Color,
+)
+
+data class PracticalCourseShowView(
+    val courseName: String,
+    val teacherName: String,
+    val showWeek: String,
+    val credit: Double,
+    val color: Color,
+    val accountTitle: String,
 )

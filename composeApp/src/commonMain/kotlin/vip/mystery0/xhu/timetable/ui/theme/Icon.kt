@@ -28,7 +28,6 @@ import xhutimetable.composeapp.generated.resources.ic_action_night_mode
 import xhutimetable.composeapp.generated.resources.ic_action_notify_course
 import xhutimetable.composeapp.generated.resources.ic_action_notify_exam
 import xhutimetable.composeapp.generated.resources.ic_action_notify_time
-import xhutimetable.composeapp.generated.resources.ic_action_qq_group
 import xhutimetable.composeapp.generated.resources.ic_action_school_calendar
 import xhutimetable.composeapp.generated.resources.ic_action_search
 import xhutimetable.composeapp.generated.resources.ic_action_send
@@ -48,8 +47,6 @@ import xhutimetable.composeapp.generated.resources.ic_class_settings
 import xhutimetable.composeapp.generated.resources.ic_class_settings_night
 import xhutimetable.composeapp.generated.resources.ic_classroom
 import xhutimetable.composeapp.generated.resources.ic_classroom_night
-import xhutimetable.composeapp.generated.resources.ic_corner_failed
-import xhutimetable.composeapp.generated.resources.ic_corner_success
 import xhutimetable.composeapp.generated.resources.ic_enable_calendar_view
 import xhutimetable.composeapp.generated.resources.ic_exam
 import xhutimetable.composeapp.generated.resources.ic_exam_night
@@ -58,7 +55,6 @@ import xhutimetable.composeapp.generated.resources.ic_exp_score_night
 import xhutimetable.composeapp.generated.resources.ic_feedback
 import xhutimetable.composeapp.generated.resources.ic_feedback_night
 import xhutimetable.composeapp.generated.resources.ic_github
-import xhutimetable.composeapp.generated.resources.ic_hot
 import xhutimetable.composeapp.generated.resources.ic_job
 import xhutimetable.composeapp.generated.resources.ic_job_night
 import xhutimetable.composeapp.generated.resources.ic_join_group
@@ -195,9 +191,6 @@ object XhuIcons {
     val allowUploadCrash: Painter
         @Composable
         get() = painterResource(Res.drawable.ic_action_allow_upload_crash)
-    val qqGroup: Painter
-        @Composable
-        get() = painterResource(Res.drawable.ic_action_qq_group)
     val poems: Painter
         @Composable
         get() = painterResource(Res.drawable.ic_poems)
@@ -213,15 +206,6 @@ object XhuIcons {
     val github: Painter
         @Composable
         get() = painterResource(Res.drawable.ic_github)
-    val cornerSuccess: Painter
-        @Composable
-        get() = painterResource(Res.drawable.ic_corner_success)
-    val cornerFailed: Painter
-        @Composable
-        get() = painterResource(Res.drawable.ic_corner_failed)
-    val hot: Painter
-        @Composable
-        get() = painterResource(Res.drawable.ic_hot)
 
     object Profile {
         val exam: Painter

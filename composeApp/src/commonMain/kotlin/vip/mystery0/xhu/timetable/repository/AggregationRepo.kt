@@ -11,6 +11,7 @@ import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.config.HINT_NETWORK
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.model.PracticalCourseView
 import vip.mystery0.xhu.timetable.model.TodayCourseView
 import vip.mystery0.xhu.timetable.model.TodayThingView
 import vip.mystery0.xhu.timetable.model.WeekCourseView
@@ -45,6 +46,7 @@ object AggregationRepo : BaseDataRepo {
         val todayViewList = ArrayList<TodayCourseView>()
         val weekViewList = ArrayList<WeekCourseView>()
         val todayThingList = ArrayList<TodayThingView>()
+        val practicalCourseList = ArrayList<PracticalCourseView>()
 
         val (loadFromCloud, loadWarning) = checkLoadFromCloud(
             forceLoadFromCloud,
@@ -91,6 +93,9 @@ object AggregationRepo : BaseDataRepo {
                     }
                     response.customThingList.forEach { customThing ->
                         todayThingList.add(TodayThingView.valueOf(customThing, user))
+                    }
+                    response.practicalCourseList.forEach { course ->
+                        practicalCourseList.add(PracticalCourseView.valueOf(course, user))
                     }
                     //保存数据到数据库
                     AggregationLocalRepo.saveResponse(
@@ -142,9 +147,18 @@ object AggregationRepo : BaseDataRepo {
                 response.customThingList.forEach { customThing ->
                     todayThingList.add(TodayThingView.valueOf(customThing, user))
                 }
+                response.practicalCourseList.forEach { course ->
+                    practicalCourseList.add(PracticalCourseView.valueOf(course, user))
+                }
             }
         }
-        return AggregationView(todayViewList, weekViewList, todayThingList, loadWarning)
+        return AggregationView(
+            todayViewList,
+            weekViewList,
+            todayThingList,
+            practicalCourseList,
+            loadWarning,
+        )
     }
 
     suspend fun fetchAggregationCalendarPage(

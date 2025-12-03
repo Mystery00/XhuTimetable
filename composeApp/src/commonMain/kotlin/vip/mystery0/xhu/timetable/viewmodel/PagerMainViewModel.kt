@@ -7,4 +7,5 @@ import vip.mystery0.xhu.timetable.base.ComposeViewModel
 class PagerMainViewModel : ComposeViewModel() {
     val showAddDialog = MutableStateFlow(UseCaseState())
     val showWeekViewDialog = MutableStateFlow(UseCaseState())
+    val showPracticalCourseSheet = MutableStateFlow(false)
 }

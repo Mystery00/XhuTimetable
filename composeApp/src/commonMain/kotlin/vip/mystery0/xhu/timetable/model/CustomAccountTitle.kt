@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 data class CustomAccountTitle(
     val todayTemplate: String = "{studentNo}({name})",
     val weekTemplate: String = "{studentNo}({name})",
+    val practicalCourseTemplate: String = "{studentNo}({name})",
 ) {
     companion object {
         val DEFAULT = CustomAccountTitle()
@@ -21,6 +22,14 @@ data class CustomAccountTitle(
 
     fun formatWeek(userInfo: UserInfo): String {
         var result = weekTemplate
+        for (titleTemplate in AccountTitleTemplate.entries) {
+            result = result.replace("{${titleTemplate.tpl}}", titleTemplate.action(userInfo))
+        }
+        return result
+    }
+
+    fun formatPracticalCourse(userInfo: UserInfo): String {
+        var result = practicalCourseTemplate
         for (titleTemplate in AccountTitleTemplate.entries) {
             result = result.replace("{${titleTemplate.tpl}}", titleTemplate.action(userInfo))
         }
