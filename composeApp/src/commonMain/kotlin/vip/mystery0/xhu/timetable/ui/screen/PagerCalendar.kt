@@ -172,7 +172,7 @@ val calendarContent: TabContent = @Composable {
                     },
                     icon = {
                         Icon(
-                            painter = XhuIcons.Action.weekView,
+                            painter = XhuIcons.Action.practicalCourse,
                             contentDescription = null,
                         )
                     }

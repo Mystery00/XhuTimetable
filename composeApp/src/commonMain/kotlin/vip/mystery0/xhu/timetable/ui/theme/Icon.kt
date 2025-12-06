@@ -62,6 +62,7 @@ import xhutimetable.composeapp.generated.resources.ic_join_group_night
 import xhutimetable.composeapp.generated.resources.ic_notice
 import xhutimetable.composeapp.generated.resources.ic_notice_night
 import xhutimetable.composeapp.generated.resources.ic_poems
+import xhutimetable.composeapp.generated.resources.ic_practical_course
 import xhutimetable.composeapp.generated.resources.ic_profile
 import xhutimetable.composeapp.generated.resources.ic_profile_night
 import xhutimetable.composeapp.generated.resources.ic_profile_unchecked
@@ -331,6 +332,9 @@ object XhuIcons {
         val weekView: Painter
             @Composable
             get() = painterResource(Res.drawable.ic_week_view)
+        val practicalCourse: Painter
+            @Composable
+            get() = painterResource(Res.drawable.ic_practical_course)
     }
 
     object WsState {
