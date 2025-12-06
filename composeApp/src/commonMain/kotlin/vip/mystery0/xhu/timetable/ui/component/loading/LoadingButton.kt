@@ -36,12 +36,12 @@ fun LoadingButton(
         }
     IconButton(
         onClick = onClick,
-        modifier = modifier
-            .graphicsLayer {
-                rotationZ = infiniteRotate
-            },
     ) {
         Icon(
+            modifier = modifier
+                .graphicsLayer {
+                    rotationZ = infiniteRotate
+                },
             painter = XhuIcons.Action.sync,
             contentDescription = null,
         )
