@@ -285,6 +285,10 @@ fun CustomUiScreen() {
                             showCustomNotTitleTemplateDialog.show()
                         }
                     )
+                }
+                XhuSettingsGroup(title = {
+                    Text(text = "温馨提示")
+                }) {
                     XhuSettingsMenuLink(title = { Text(text = "点击右上角的保存按钮才会生效") })
                 }
             }
