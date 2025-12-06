@@ -212,7 +212,8 @@ class CacheStore {
     private val featurePullLastExecuteTimeKey = "featurePullLastExecuteTime"
     var featurePullLastExecuteTime: List<LocalDateTime>
         set(value) {
-            val list = if (value.size > 5) value.subList(0, 5) else value
+            val vv = value.sortedDescending()
+            val list = if (vv.size > 5) vv.subList(0, 5) else vv
             val saveList = list.map { it.asInstant().toEpochMilliseconds().toString() }.toSet()
             Store.CacheStore.setConfiguration(featurePullLastExecuteTimeKey, saveList)
         }
