@@ -77,7 +77,7 @@ val profileCourseContent: TabContent = @Composable {
         val uriHandler = LocalUriHandler.current
         val context = LocalPlatformContext.current
         val coroutineScope = rememberCoroutineScope()
-        var profileExpanded by remember { mutableStateOf(true) }
+        var profileExpanded by remember { mutableStateOf(false) }
         val mainUser by viewModel.mainUser.collectAsState()
 
         AnimatedContent(

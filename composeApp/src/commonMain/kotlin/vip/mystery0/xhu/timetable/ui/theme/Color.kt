@@ -7,15 +7,11 @@ import androidx.compose.ui.graphics.toArgb
 import com.maxkeppeler.sheets.color.models.MultipleColors
 import vip.mystery0.xhu.timetable.utils.md5
 
-@Composable
-private fun colorOf(pair: Pair<Color, Color>): Color =
-    if (isDarkMode()) pair.first else pair.second
-
 object XhuColor {
     val cardBackground: Color
         @Composable
         get() = MaterialTheme.colorScheme.surfaceContainer
-    val notThisWeekBackgroundColor = Color(0xFFe5e5e5)
+    val notThisWeekBackgroundColor = Color(0xFFE5E5E5)
 
     object Status {
         val beforeColor = Color(0xFF4CAF50)
@@ -42,8 +38,8 @@ object ColorPool {
         Color(0xFFFF9800),
         Color(0xFFFF5722),
         Color(0xFF795548),
-        Color(0xFF9E9E9E),
-        Color(0xFF607D8B),
+        Color(0xFFAD1457),
+        Color(0xFF2E7D32),
     )
 
     val templateColors: MultipleColors = MultipleColors.ColorsInt(pool.map { it.toArgb() })
