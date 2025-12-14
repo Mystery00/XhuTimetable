@@ -222,7 +222,7 @@ fun PageItemLayout(
     Card(
         modifier = cardModifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp),
         colors = CardDefaults.cardColors(
             containerColor = XhuColor.cardBackground,
         ),

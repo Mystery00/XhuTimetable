@@ -272,7 +272,7 @@ private fun BuildItem(
     PageItemLayout(
         cardModifier = Modifier.animateContentSize(),
         header = {
-            Row {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = item.courseName, modifier = Modifier.weight(1F))
                 Text(
                     text = "${item.score}",
