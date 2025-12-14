@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -30,6 +31,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -42,7 +44,9 @@ import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.input.InputDialog
 import com.maxkeppeler.sheets.input.models.InputCustomView
 import com.maxkeppeler.sheets.input.models.InputSelection
+import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.SliderPreference
+import me.zhanghai.compose.preference.SwitchPreference
 import multiplatform.network.cmptoast.showToast
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -52,12 +56,12 @@ import vip.mystery0.xhu.timetable.model.TitleTemplate
 import vip.mystery0.xhu.timetable.model.format
 import vip.mystery0.xhu.timetable.platform
 import vip.mystery0.xhu.timetable.ui.component.preference.XhuSettingsGroup
-import vip.mystery0.xhu.timetable.ui.component.preference.XhuSettingsMenuLink
 import vip.mystery0.xhu.timetable.ui.component.xhuHeader
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
 import vip.mystery0.xhu.timetable.viewmodel.CustomUiViewModel
+import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
@@ -69,6 +73,8 @@ fun CustomUiScreen() {
 
     val randomWeekCourse by viewModel.randomWeekCourse.collectAsState()
     val randomTodayCourse by viewModel.randomTodayCourse.collectAsState()
+
+    var showPreview by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
         viewModel.init()
@@ -119,65 +125,71 @@ fun CustomUiScreen() {
         val showCustomNotTitleTemplateDialog = rememberUseCaseState()
 
         Column(modifier = Modifier.padding(paddingValues)) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(360.dp)
-                    .verticalScroll(rememberScrollState()),
-            ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Image(
-                        painter = painterResource(XhuImages.defaultBackgroundImage),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
+            AnimatedContent(
+                targetState = showPreview,
+            ) { targetShowPreview ->
+                if (targetShowPreview) {
+                    Row(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .blur(customUi.backgroundImageBlur.dp),
-                    )
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(modifier = Modifier.width(240.dp)) {
-                            Row {
-                                //列数
-                                val columnSize = 3
-                                //每一列数量
-                                val size = randomWeekCourse.size / columnSize
-                                for (columnIndex in 0 until columnSize) {
-                                    val start = columnIndex * size
-                                    val end = (columnIndex + 1) * size
-                                    val list = randomWeekCourse.subList(start, end)
-                                    Column(modifier = Modifier.weight(1F)) {
-                                        list.forEachIndexed { rowIndex, course ->
-                                            val step = when {
-                                                columnIndex == 0 && rowIndex == 1 -> 2
-                                                columnIndex == 2 && rowIndex == 1 -> 2
-                                                columnIndex == 1 && rowIndex == 0 -> 2
-                                                else -> 1
-                                            }
-                                            val title =
-                                                if (course.thisWeek) course.format(customUi.weekTitleTemplate)
-                                                else course.format(customUi.weekNotTitleTemplate)
-                                            BuildWeekItem(
-                                                customUi = customUi,
-                                                backgroundColor = course.backgroundColor,
-                                                itemStep = step,
-                                                title = title,
-                                                textColor = if (course.thisWeek) Color.White else Color.Gray,
-                                                showMore = Random.nextBoolean(),
-                                            ) {
+                            .fillMaxWidth()
+                            .height(360.dp)
+                            .verticalScroll(rememberScrollState()),
+                    ) {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Image(
+                                painter = painterResource(XhuImages.defaultBackgroundImage),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .blur(customUi.backgroundImageBlur.dp),
+                            )
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(modifier = Modifier.width(240.dp)) {
+                                    Row {
+                                        //列数
+                                        val columnSize = 3
+                                        //每一列数量
+                                        val size = randomWeekCourse.size / columnSize
+                                        for (columnIndex in 0 until columnSize) {
+                                            val start = columnIndex * size
+                                            val end = (columnIndex + 1) * size
+                                            val list = randomWeekCourse.subList(start, end)
+                                            Column(modifier = Modifier.weight(1F)) {
+                                                list.forEachIndexed { rowIndex, course ->
+                                                    val step = when {
+                                                        columnIndex == 0 && rowIndex == 1 -> 2
+                                                        columnIndex == 2 && rowIndex == 1 -> 2
+                                                        columnIndex == 1 && rowIndex == 0 -> 2
+                                                        else -> 1
+                                                    }
+                                                    val title =
+                                                        if (course.thisWeek) course.format(customUi.weekTitleTemplate)
+                                                        else course.format(customUi.weekNotTitleTemplate)
+                                                    BuildWeekItem(
+                                                        customUi = customUi,
+                                                        backgroundColor = course.backgroundColor,
+                                                        itemStep = step,
+                                                        title = title,
+                                                        textColor = if (course.thisWeek) Color.White else Color.Gray,
+                                                        showMore = Random.nextBoolean(),
+                                                    ) {
+                                                    }
+                                                }
                                             }
                                         }
                                     }
                                 }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                if (randomTodayCourse.isNotEmpty()) {
+                                    DrawCourseCard(
+                                        customUi = customUi,
+                                        course = randomTodayCourse.first(),
+                                        multiAccountMode = false,
+                                        showStatus = false,
+                                    )
+                                }
                             }
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        if (randomTodayCourse.isNotEmpty()) {
-                            DrawCourseCard(
-                                customUi = customUi,
-                                course = randomTodayCourse.first(),
-                                multiAccountMode = false,
-                                showStatus = false,
-                            )
                         }
                     }
                 }
@@ -186,12 +198,28 @@ fun CustomUiScreen() {
                 XhuSettingsGroup(title = {
                     Text(text = "操作")
                 }) {
-                    XhuSettingsMenuLink(
-                        title = { Text(text = "刷新课程列表") },
-                        onClick = {
-                            viewModel.refreshRandomCourse()
-                        }
+                    SwitchPreference(
+                        value = showPreview,
+                        onValueChange = {
+                            showPreview = it
+                        },
+                        title = { Text(text = "显示预览") },
+                        summary = {
+                            Text(text = "在顶部实时显示预览效果")
+                        },
                     )
+                    AnimatedContent(
+                        targetState = showPreview
+                    ) { targetShowPreview ->
+                        if (targetShowPreview) {
+                            Preference(
+                                title = { Text(text = "刷新课程列表") },
+                                onClick = {
+                                    viewModel.refreshRandomCourse()
+                                }
+                            )
+                        }
+                    }
                 }
                 XhuSettingsGroup(title = {
                     Text(text = "今日课程页面")
@@ -262,23 +290,23 @@ fun CustomUiScreen() {
                             viewModel.update()
                         })
                     if (platform() == Platform.ANDROID) {
-                        XhuSettingsMenuLink(
+                        Preference(
                             title = { Text(text = "动态模糊说明") },
-                            subtitle = { Text(text = "仅 Android 12+ 可使用") },
+                            summary = { Text(text = "仅 Android 12+ 可使用") },
                         )
                     }
-                    XhuSettingsMenuLink(
+                    Preference(
                         title = { Text(text = "格子文本模板") },
-                        subtitle = {
+                        summary = {
                             Text(text = "本周课程的文本格式")
                         },
                         onClick = {
                             showCustomTitleTemplateDialog.show()
                         }
                     )
-                    XhuSettingsMenuLink(
+                    Preference(
                         title = { Text(text = "非本周格子文本模板") },
-                        subtitle = {
+                        summary = {
                             Text(text = "非本周课程的文本格式")
                         },
                         onClick = {
@@ -289,7 +317,7 @@ fun CustomUiScreen() {
                 XhuSettingsGroup(title = {
                     Text(text = "温馨提示")
                 }) {
-                    XhuSettingsMenuLink(title = { Text(text = "点击右上角的保存按钮才会生效") })
+                    Preference(title = { Text(text = "点击右上角的保存按钮才会生效") })
                 }
             }
         }
@@ -386,6 +414,7 @@ private fun BuildSeekBar(
     end: Float,
     listener: (Float) -> Unit,
 ) {
+    val step = (end - start + 1).roundToInt()
     SliderPreference(
         value = 1F,
         onValueChange = {},
@@ -395,9 +424,8 @@ private fun BuildSeekBar(
         },
         title = { Text(text = title) },
         valueRange = start..end,
-        valueSteps = (end - start + 1).roundToInt(),
+        valueSteps = min(step, 30),
         enabled = enabled,
-        icon = {},
     )
 }
 
