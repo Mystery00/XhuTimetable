@@ -7,6 +7,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import vip.mystery0.xhu.timetable.config.Customisable
 import vip.mystery0.xhu.timetable.db.dao.CourseColorDao
 import vip.mystery0.xhu.timetable.db.dao.CourseDao
 import vip.mystery0.xhu.timetable.db.dao.CustomCourseDao
@@ -34,7 +35,7 @@ object CourseColorRepo : KoinComponent {
         }
     }
 
-    suspend fun getCourseColorList(keywords: String): List<Pair<String, Color>> {
+    suspend fun getCourseColorList(keywords: String): List<Pair<String, Customisable<Color>>> {
         val courseSet = ConcurrentSet<String>()
         withContext(Dispatchers.IO) {
             if (keywords.isBlank()) {
@@ -70,7 +71,12 @@ object CourseColorRepo : KoinComponent {
                 map[it.courseName] = it.color.parseColorHexString()
             }
             courseSet.map {
-                Pair(it, map[it] ?: ColorPool.hash(it))
+                val second = if (map.containsKey(it)) {
+                    Customisable.custom(map[it]!!)
+                } else {
+                    Customisable.default(ColorPool.hash(it))
+                }
+                Pair(it, second)
             }
         }
     }

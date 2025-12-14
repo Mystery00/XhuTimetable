@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
+import vip.mystery0.xhu.timetable.config.Customisable
 import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.model.event.EventType
@@ -13,8 +14,8 @@ import vip.mystery0.xhu.timetable.repository.CourseColorRepo
 import vip.mystery0.xhu.timetable.utils.toHexString
 
 class CustomCourseColorViewModel : ComposeViewModel(), KoinComponent {
-    private val _listState = MutableStateFlow<List<Pair<String, Color>>>(emptyList())
-    val listState: StateFlow<List<Pair<String, Color>>> = _listState
+    private val _listState = MutableStateFlow<List<Pair<String, Customisable<Color>>>>(emptyList())
+    val listState: StateFlow<List<Pair<String, Customisable<Color>>>> = _listState
 
     fun init() {
         loadList("")

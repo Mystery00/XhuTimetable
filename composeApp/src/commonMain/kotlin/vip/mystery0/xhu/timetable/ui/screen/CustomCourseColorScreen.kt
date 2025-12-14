@@ -1,11 +1,20 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
@@ -31,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maxkeppeker.sheets.core.models.base.Header
@@ -43,6 +53,7 @@ import com.maxkeppeler.sheets.color.models.ColorSelection
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleBackPress
+import vip.mystery0.xhu.timetable.config.Customisable
 import vip.mystery0.xhu.timetable.ui.component.StateScreen
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
@@ -81,8 +92,12 @@ fun CustomCourseColorScreen() {
             },
             trailingIcon = {
                 IconButton(onClick = {
-                    searchText = ""
-                    viewModel.loadList("")
+                    if (searchText.isNotEmpty()) {
+                        searchText = ""
+                        viewModel.loadList("")
+                    } else {
+                        showSearchView = false
+                    }
                 }) {
                     Icon(XhuIcons.close, contentDescription = null)
                 }
@@ -108,19 +123,37 @@ fun CustomCourseColorScreen() {
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    if (showSearchView) {
-                        val colors = SearchBarDefaults.colors()
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = SearchBarDefaults.inputFieldShape,
-                            color = colors.containerColor,
-                            contentColor = contentColorFor(colors.containerColor),
-                            tonalElevation = SearchBarDefaults.TonalElevation,
-                            shadowElevation = SearchBarDefaults.ShadowElevation,
-                            content = inputField,
-                        )
-                    } else {
-                        Text(text = "自定义课程颜色")
+                    AnimatedContent(
+                        targetState = showSearchView,
+                        transitionSpec = {
+                            val enterAnimation =
+                                scaleIn(initialScale = 0.8f) + fadeIn(initialAlpha = 0f)
+                            val exitAnimation =
+                                scaleOut(targetScale = 0.8f) + fadeOut(targetAlpha = 0f)
+                            (enterAnimation togetherWith exitAnimation).using(
+                                SizeTransform(clip = false)
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) { targetShowSearchView ->
+                        if (targetShowSearchView) {
+                            val colors = SearchBarDefaults.colors()
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = SearchBarDefaults.inputFieldShape,
+                                color = colors.containerColor,
+                                contentColor = contentColorFor(colors.containerColor),
+                                tonalElevation = SearchBarDefaults.TonalElevation,
+                                shadowElevation = SearchBarDefaults.ShadowElevation,
+                                content = inputField,
+                            )
+                        } else {
+                            Text(
+                                text = "自定义课程颜色",
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                            )
+                        }
                     }
                 },
                 navigationIcon = {
@@ -213,8 +246,8 @@ private fun BuildColorSelector(
 
 @Composable
 private fun BuildItem(
-    item: Pair<String, Color>,
-    onChangeClick: (Pair<String, Color>) -> Unit
+    item: Pair<String, Customisable<Color>>,
+    onChangeClick: (String) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -228,13 +261,28 @@ private fun BuildItem(
             modifier = Modifier.padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Surface(
-                shape = CircleShape,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .size(36.dp),
-                color = item.second
-            ) {}
+            Box(
+                modifier = Modifier.width(52.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (item.second.custom) {
+                    Surface(
+                        shape = CircleShape,
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .size(36.dp),
+                        color = item.second.data
+                    ) {}
+                } else {
+                    Surface(
+                        shape = CircleShape,
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .size(24.dp),
+                        color = item.second.data
+                    ) {}
+                }
+            }
             Text(
                 text = item.first,
                 modifier = Modifier
@@ -244,7 +292,7 @@ private fun BuildItem(
                 fontSize = 16.sp,
             )
             TextButton(onClick = {
-                onChangeClick(item)
+                onChangeClick(item.first)
             }) {
                 Text(
                     text = "修改"
