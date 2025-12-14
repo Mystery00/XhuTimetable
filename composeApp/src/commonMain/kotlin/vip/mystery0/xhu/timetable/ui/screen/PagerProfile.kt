@@ -80,42 +80,42 @@ val profileCourseContent: TabContent = @Composable {
         var profileExpanded by remember { mutableStateOf(false) }
         val mainUser by viewModel.mainUser.collectAsState()
 
-        AnimatedContent(
-            label = "个人信息动画",
-            targetState = profileExpanded,
-            transitionSpec = {
-                fadeIn() togetherWith fadeOut()
-            },
-        ) { targetExpanded ->
-            Column {
-                Row(
-                    modifier = Modifier
-                        .height(96.dp)
-                        .clickable(
-                            interactionSource = MutableInteractionSource(),
-                            indication = null,
-                            onClick = {
-                                profileExpanded = if (mainUser == null) false else !targetExpanded
-                            }
-                        ),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val profileImage = mainUser?.let {
-                        it.profileImage ?: ProfileImages.hash(
-                            it.info.name,
-                            it.info.gender == Gender.MALE
-                        )
-                    } ?: XhuImages.defaultProfileImage
-                    Image(
-                        painter = profileImage as? Painter
-                            ?: rememberAsyncImagePainter(model = profileImage),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .padding(horizontal = 12.dp)
-                            .size(60.dp)
-                            .clip(RoundedCornerShape(16.dp))
+        Column {
+            Row(
+                modifier = Modifier
+                    .height(96.dp)
+                    .clickable(
+                        interactionSource = MutableInteractionSource(),
+                        indication = null,
+                        onClick = {
+                            profileExpanded = if (mainUser == null) false else !profileExpanded
+                        }
+                    ),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                val profileImage = mainUser?.let {
+                    it.profileImage ?: ProfileImages.hash(
+                        it.info.name,
+                        it.info.gender == Gender.MALE
                     )
-                    Column(modifier = Modifier.weight(1F)) {
+                } ?: XhuImages.defaultProfileImage
+                Image(
+                    painter = profileImage as? Painter
+                        ?: rememberAsyncImagePainter(model = profileImage),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .size(60.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                )
+                AnimatedContent(
+                    modifier = Modifier.weight(1F),
+                    targetState = profileExpanded,
+                    transitionSpec = {
+                        fadeIn() togetherWith fadeOut()
+                    },
+                ) { targetExpanded ->
+                    Column {
                         var text = "账号未登录"
                         mainUser?.info?.let {
                             text = if (targetExpanded) {
@@ -136,20 +136,26 @@ val profileCourseContent: TabContent = @Composable {
                             color = MaterialTheme.colorScheme.outline
                         )
                     }
-                    val rotationAngle by animateFloatAsState(
-                        targetValue = if (profileExpanded) 90F else 0F,
-                        label = "个人信息动画",
-                    )
-                    Icon(
-                        imageVector = Icons.AutoMirrored.TwoTone.ArrowForwardIos,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .padding(horizontal = 12.dp)
-                            .size(12.dp)
-                            .rotate(rotationAngle),
-                        tint = MaterialTheme.colorScheme.onBackground,
-                    )
                 }
+                val rotationAngle by animateFloatAsState(
+                    targetValue = if (profileExpanded) 90F else 0F,
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.TwoTone.ArrowForwardIos,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .size(12.dp)
+                        .rotate(rotationAngle),
+                    tint = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+            AnimatedContent(
+                targetState = profileExpanded,
+                transitionSpec = {
+                    fadeIn() togetherWith fadeOut()
+                },
+            ) { targetExpanded ->
                 if (targetExpanded) {
                     mainUser?.info?.let { userInfo ->
                         Text(
