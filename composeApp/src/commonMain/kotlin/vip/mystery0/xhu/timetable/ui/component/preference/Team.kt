@@ -1,14 +1,17 @@
 package vip.mystery0.xhu.timetable.ui.component.preference
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -48,19 +51,24 @@ fun TeamItem(
 ) {
     Preference(
         icon = {
-            Icon(
-                modifier = Modifier.size(48.dp),
-                painter = rememberAsyncImagePainter(
-                    ImageRequest.Builder(LocalPlatformContext.current)
-                        .data(data = iconUrl)
-                        .apply {
-                            size(width = 192, height = 192)
-                        }
-                        .build()
-                ),
-                contentDescription = title,
-                tint = Color.Unspecified,
-            )
+            Box(
+                modifier = Modifier.width(48.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    modifier = Modifier.size(36.dp),
+                    painter = rememberAsyncImagePainter(
+                        ImageRequest.Builder(LocalPlatformContext.current)
+                            .data(data = iconUrl)
+                            .apply {
+                                size(width = 192, height = 192)
+                            }
+                            .build()
+                    ),
+                    contentDescription = title,
+                    tint = Color.Unspecified,
+                )
+            }
         },
         title = { Text(text = title) },
         summary = {

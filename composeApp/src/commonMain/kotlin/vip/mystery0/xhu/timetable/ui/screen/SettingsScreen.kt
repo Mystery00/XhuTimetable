@@ -26,6 +26,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.Platform
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
 import vip.mystery0.xhu.timetable.base.appVersionCode
+import vip.mystery0.xhu.timetable.base.appVersionName
 import vip.mystery0.xhu.timetable.base.publicDeviceId
 import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
@@ -194,7 +195,7 @@ fun SettingsScreen() {
                     title = { Text(text = "启用日历视图") },
                     subtitle = {
                         val text = buildString {
-                            append("启用后，可以以日历的视图中查看当前学期的所有课程")
+                            append("启用后，可以以日历的形式查看当前学期的所有课程")
                             if (GlobalConfigStore.multiAccountMode) {
                                 appendLine()
                                 append("【多账号模式下无法使用日历视图】")
@@ -244,6 +245,7 @@ fun SettingsScreen() {
             }) {
                 XhuSettingsMenuLink(
                     title = { Text(text = "更新日志") },
+                    subtitle = { Text(text = "当前版本：${appVersionName()}") },
                     onClick = {
                         uriHandler.openUri("https://blog.mystery0.vip/docs/xgkb/changelog")
                     }
@@ -323,6 +325,7 @@ fun SettingsScreen() {
                 )
                 XhuSettingsMenuLink(
                     title = { Text(text = "日志上报") },
+                    subtitle = { Text(text = "向开发者分享日志，可以辅助开发者分析存在的问题") },
                     onClick = {
                         viewModel.reportLog()
                     }
@@ -339,77 +342,76 @@ fun SettingsScreen() {
                 }
             }
             val debugMode by viewModel.debugMode.collectAsState()
-            if (debugMode) {
-                XhuFoldSettingsGroup(
-                    title = {
-                        Text(text = "开发者选项")
+            XhuFoldSettingsGroup(
+                title = {
+                    Text(text = "开发者选项")
+                },
+                foldState = !debugMode,
+            ) {
+                XhuActionSettingsCheckbox(
+                    title = { Text(text = "启用开发者模式") },
+                    onCheckedChange = {
+                        viewModel.disableDebugMode()
                     },
-                ) {
-                    XhuActionSettingsCheckbox(
-                        title = { Text(text = "启用开发者模式") },
-                        onCheckedChange = {
-                            viewModel.disableDebugMode()
-                        },
-                        checked = true,
-                        onClick = { }
-                    )
-                    ConfigSettingsCheckbox(
-                        config = ConfigStore::alwaysCrash,
-                        enabled = platform() == Platform.ANDROID,
-                        scope = scope,
-                        title = { Text(text = "始终显示崩溃信息") },
-                        subtitle = {
-                            Text(text = "不捕获全局异常")
+                    checked = true,
+                    onClick = { }
+                )
+                ConfigSettingsCheckbox(
+                    config = ConfigStore::alwaysCrash,
+                    enabled = platform() == Platform.ANDROID,
+                    scope = scope,
+                    title = { Text(text = "始终显示崩溃信息") },
+                    subtitle = {
+                        Text(text = "不捕获全局异常")
+                    }
+                )
+                val splashList by viewModel.splashList.collectAsState()
+                XhuSettingsMenuLink(
+                    title = { Text(text = "启动页信息") },
+                    subtitle = {
+                        Text(text = splashList.toString())
+                    },
+                    onClick = {
+                    },
+                )
+                XhuSettingsMenuLink(
+                    title = { Text(text = "设备id") },
+                    subtitle = {
+                        Text(text = publicDeviceId())
+                    },
+                    onClick = {
+                        copyToClipboard(publicDeviceId())
+                    },
+                )
+                val featurePullTimeList by viewModel.featurePullTimeList.collectAsState()
+                XhuSettingsMenuLink(
+                    title = { Text(text = "FeatureHub 最近拉取时间") },
+                    subtitle = {
+                        Text(
+                            text = featurePullTimeList.joinToString("\n")
+                        )
+                    },
+                    onClick = {
+                        viewModel.updateFeaturePullTime()
+                    }
+                )
+                DeveloperSettings()
+                XhuSettingsMenuLink(
+                    title = { Text(text = "撤销隐私授权") },
+                    onClick = {
+                        scope.safeLaunch {
+                            setCacheStore { allowPrivacy = false }
                         }
-                    )
-                    val splashList by viewModel.splashList.collectAsState()
-                    XhuSettingsMenuLink(
-                        title = { Text(text = "启动页信息") },
-                        subtitle = {
-                            Text(text = splashList.toString())
-                        },
-                        onClick = {
-                        },
-                    )
-                    XhuSettingsMenuLink(
-                        title = { Text(text = "设备id") },
-                        subtitle = {
-                            Text(text = publicDeviceId())
-                        },
-                        onClick = {
-                            copyToClipboard(publicDeviceId())
-                        },
-                    )
-                    val featurePullTimeList by viewModel.featurePullTimeList.collectAsState()
-                    XhuSettingsMenuLink(
-                        title = { Text(text = "FeatureHub 最近拉取时间") },
-                        subtitle = {
-                            Text(
-                                text = featurePullTimeList.joinToString("\n")
-                            )
-                        },
-                        onClick = {
-                            viewModel.updateFeaturePullTime()
+                    },
+                )
+                XhuSettingsMenuLink(
+                    title = { Text(text = "测试崩溃") },
+                    onClick = {
+                        scope.safeLaunch {
+                            throw RuntimeException("this is a test exception")
                         }
-                    )
-                    DeveloperSettings()
-                    XhuSettingsMenuLink(
-                        title = { Text(text = "撤销隐私授权") },
-                        onClick = {
-                            scope.safeLaunch {
-                                setCacheStore { allowPrivacy = false }
-                            }
-                        },
-                    )
-                    XhuSettingsMenuLink(
-                        title = { Text(text = "测试崩溃") },
-                        onClick = {
-                            scope.safeLaunch {
-                                throw RuntimeException("this is a test exception")
-                            }
-                        },
-                    )
-                }
+                    },
+                )
             }
         }
     }
