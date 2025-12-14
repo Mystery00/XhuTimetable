@@ -17,21 +17,24 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
-fun String.runCommand(workingDir: File = file("./")): String {
-    val parts = this.split("\\s".toRegex())
-    val proc = ProcessBuilder(*parts.toTypedArray())
-        .directory(workingDir)
-        .redirectOutput(ProcessBuilder.Redirect.PIPE)
-        .redirectError(ProcessBuilder.Redirect.PIPE)
-        .start()
-
-    proc.waitFor(1, TimeUnit.MINUTES)
-    return proc.inputStream.bufferedReader().readText().trim()
-}
-
 val packageName = "vip.mystery0.xhu.timetable"
-val gitVersionCode: Int = "git rev-list HEAD --count".runCommand().toInt()
-val gitVersionName = "git rev-parse --short=8 HEAD".runCommand()
+val gitVersionCode: Int = providers.exec {
+    commandLine(
+        "git",
+        "rev-list",
+        "HEAD",
+        "--count"
+    )
+}.standardOutput.asText.get().trim().toInt()
+val gitVersionName: String =
+    providers.exec {
+        commandLine(
+            "git",
+            "rev-parse",
+            "--short=8",
+            "HEAD"
+        )
+    }.standardOutput.asText.get().trim()
 val appVersionName = libs.versions.app.version.get()
 
 kotlin {
@@ -190,8 +193,6 @@ android {
             abiFilters.add("armeabi-v7a")
             abiFilters.add("arm64-v8a")
         }
-        manifestPlaceholders["JPUSH_APPKEY"] = ""
-        manifestPlaceholders["JPUSH_CHANNEL"] = "developer-default"
     }
     packaging {
         resources {
@@ -224,7 +225,6 @@ android {
                 "proguard-rules.pro"
             )
             versionNameSuffix = ".d$gitVersionCode.$gitVersionName"
-            manifestPlaceholders["JPUSH_PKGNAME"] = "${packageName}${applicationIdSuffix}"
         }
         release {
             val nightly = System.getenv("NIGHTLY")?.toBoolean() == true
@@ -263,7 +263,6 @@ android {
                 versionNameSuffix = ".r$gitVersionCode.$gitVersionName"
             }
             signingConfig = signingConfigs.getByName("sign")
-            manifestPlaceholders["JPUSH_PKGNAME"] = packageName
         }
     }
     compileOptions {
@@ -273,8 +272,9 @@ android {
     buildFeatures {
         buildConfig = true
     }
+    @Suppress("UnstableApiUsage")
     androidResources {
-        generateLocaleConfig = true
+        localeFilters.add("zh-rCN")
     }
     externalNativeBuild {
         cmake {
