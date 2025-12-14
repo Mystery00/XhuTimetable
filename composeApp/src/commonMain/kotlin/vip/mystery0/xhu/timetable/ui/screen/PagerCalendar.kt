@@ -134,6 +134,7 @@ val calendarContent: TabContent = @Composable {
                             ),
                             color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
                         )
                     }
                 }
@@ -292,6 +293,7 @@ fun BuildCalendarDay(sheet: CalendarSheet) {
                     fontSize = 12.sp,
                     color = color,
                     textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
                 )
             }
         }

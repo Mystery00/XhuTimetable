@@ -127,7 +127,7 @@ val profileCourseContent: TabContent = @Composable {
                         Text(
                             text,
                             fontSize = 17.sp,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = MaterialTheme.colorScheme.onBackground,
                             fontWeight = FontWeight.Bold,
                         )
                         Text(
@@ -147,7 +147,7 @@ val profileCourseContent: TabContent = @Composable {
                             .padding(horizontal = 12.dp)
                             .size(12.dp)
                             .rotate(rotationAngle),
-                        tint = MaterialTheme.colorScheme.onSurface,
+                        tint = MaterialTheme.colorScheme.onBackground,
                     )
                 }
                 if (targetExpanded) {
@@ -171,17 +171,15 @@ val profileCourseContent: TabContent = @Composable {
         HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(6.dp)
-                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .height(1.5.dp)
+                .background(MaterialTheme.colorScheme.outline)
         )
 
         val menuList by profileViewModel.menu.collectAsState()
         val hasUnReadNotice by profileViewModel.hasUnReadNotice.collectAsState()
         val hasUnReadFeedback by profileViewModel.hasUnReadFeedback.collectAsState()
         menuList.forEach {
-            val iterator = it.iterator()
-            while (iterator.hasNext()) {
-                val menu = iterator.next()
+            it.forEach { menu ->
                 val item = MenuItem.parseKey(menu.key.uppercase())
                 val showBadge = when (item) {
                     MenuItem.NOTICE -> hasUnReadNotice
@@ -198,21 +196,13 @@ val profileCourseContent: TabContent = @Composable {
                             item.action(MenuNavigator(navController, uriHandler, context), menu)
                         }
                     })
-                if (iterator.hasNext()) {
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .background(MaterialTheme.colorScheme.surfaceContainer)
-                    )
-                }
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(MaterialTheme.colorScheme.outline)
+                )
             }
-            HorizontalDivider(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .background(MaterialTheme.colorScheme.surfaceContainer)
-            )
         }
     }
 }
@@ -239,7 +229,7 @@ private fun BuildProfileItem(
         )
         Text(
             text = title,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 14.sp,
             modifier = Modifier
                 .weight(1F)
@@ -258,7 +248,7 @@ private fun BuildProfileItem(
             modifier = Modifier
                 .padding(end = 12.dp, start = if (showBadge) 10.dp else 12.dp)
                 .size(12.dp),
-            tint = MaterialTheme.colorScheme.onSurface,
+            tint = MaterialTheme.colorScheme.onBackground,
         )
     }
 }
