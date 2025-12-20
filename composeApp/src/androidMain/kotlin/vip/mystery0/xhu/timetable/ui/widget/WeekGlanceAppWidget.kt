@@ -9,6 +9,7 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.LocalContext
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
@@ -34,6 +35,7 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
+import androidx.glance.unit.FixedColorProvider
 import vip.mystery0.xhu.timetable.R
 import vip.mystery0.xhu.timetable.ui.activity.StartActivity
 import vip.mystery0.xhu.timetable.ui.widget.callback.UpdateWeekCourseActionCallback
@@ -62,11 +64,13 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
     @Composable
     private fun Content() {
         val stateGlance = currentState<WeekCourseStateGlance>()
+        val context = LocalContext.current
+        val colors = WidgetTheme.getColors(context)
 
         Box(
             modifier = GlanceModifier.padding(16.dp)
                 .fillMaxSize()
-                .background(color = Color.White),
+                .background(colors.surface),
         ) {
             Column {
                 Row(
@@ -86,7 +90,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                         Text(
                             text = dateString,
                             style = TextStyle(
-                                color = ColorProvider(Color.Black),
+                                color = colors.onSurface,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                             ),
@@ -94,7 +98,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                         Text(
                             text = stateGlance.timeTitle,
                             style = TextStyle(
-                                color = ColorProvider(Color.Black),
+                                color = colors.onSurface,
                                 fontWeight = FontWeight.Bold,
                             ),
                         )
@@ -103,6 +107,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                     Text(
                         modifier = GlanceModifier.clickable(actionStartActivity<StartActivity>()),
                         text = "查看更多 >",
+                        style = TextStyle(color = colors.onSurface),
                     )
                 }
                 Spacer(modifier = GlanceModifier.height(8.dp))
@@ -113,7 +118,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                         modifier = GlanceModifier.width(dateItemWidth),
                         text = "${twoFormat.format(firstDay.monthValue)}\n月",
                         style = TextStyle(
-                            color = ColorProvider(Color.Black),
+                            color = colors.onSurface,
                             fontSize = 12.sp,
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.Bold,
@@ -131,7 +136,8 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                                     thisDay.dayOfMonth
                                 )
                             }日",
-                            isToday = LocalDate.now().dayOfWeek.value == i + 1
+                            isToday = LocalDate.now().dayOfWeek.value == i + 1,
+                            colors = colors,
                         )
                     }
                 }
@@ -144,9 +150,9 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                                     .width(dateItemWidth)
                             ) {
                                 for (time in 1..5) {
-                                    BuildTimeItem(time = time)
+                                    BuildTimeItem(time = time, colors = colors)
                                 }
-                                BuildSingleTimeItem()
+                                BuildSingleTimeItem(colors = colors)
                             }
                             if (stateGlance.hasData) {
                                 for (index in 0 until 7) {
@@ -182,7 +188,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                                     Text(
                                         text = "暂无数据",
                                         style = TextStyle(
-                                            color = ColorProvider(Color.Black),
+                                            color = colors.onSurface,
                                             fontSize = 16.sp,
                                         ),
                                     )
@@ -212,10 +218,10 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
         ) {
             Text(
                 modifier = GlanceModifier.fillMaxSize()
-                    .background(ColorProvider(backgroundColor)),
+                    .background(FixedColorProvider(backgroundColor)),
                 text = title,
                 style = TextStyle(
-                    color = ColorProvider(textColor),
+                    color = FixedColorProvider(textColor),
                     textAlign = TextAlign.Center,
                     fontSize = 10.sp,
                 ),
@@ -232,12 +238,17 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun RowScope.BuildDateItem(week: String, date: String, isToday: Boolean = false) {
+    private fun RowScope.BuildDateItem(
+        week: String,
+        date: String,
+        isToday: Boolean = false,
+        colors: WidgetColors
+    ) {
         Text(
             modifier = GlanceModifier.defaultWeight(),
             text = "${week}\n${date}",
             style = TextStyle(
-                color = ColorProvider(if (isToday) Color.Black else Color.Gray),
+                color = if (isToday) colors.onSurface else colors.secondary,
                 textAlign = TextAlign.Center,
                 fontSize = 12.sp,
                 fontWeight = if (isToday) FontWeight.Bold else null,
@@ -246,7 +257,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun BuildSingleTimeItem() {
+    private fun BuildSingleTimeItem(colors: WidgetColors) {
         Box(
             modifier = GlanceModifier.fillMaxWidth()
                 .height(weekItemHeight),
@@ -255,7 +266,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
             Text(
                 text = "11",
                 style = TextStyle(
-                    color = ColorProvider(Color.Black),
+                    color = colors.onSurface,
                     fontSize = 12.sp
                 )
             )
@@ -263,7 +274,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun BuildTimeItem(time: Int) {
+    private fun BuildTimeItem(time: Int, colors: WidgetColors) {
         Column(
             modifier = GlanceModifier.fillMaxWidth()
                 .height(weekItemHeight * 2),
@@ -276,7 +287,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                 Text(
                     text = (2 * time - 1).toString(),
                     style = TextStyle(
-                        color = ColorProvider(Color.Black),
+                        color = colors.onSurface,
                         fontSize = 12.sp
                     )
                 )
@@ -289,7 +300,7 @@ class WeekGlanceAppWidget : GlanceAppWidget() {
                 Text(
                     text = (2 * time).toString(),
                     style = TextStyle(
-                        color = ColorProvider(Color.Black),
+                        color = colors.onSurface,
                         fontSize = 12.sp
                     )
                 )

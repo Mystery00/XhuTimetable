@@ -2,13 +2,13 @@ package vip.mystery0.xhu.timetable.ui.widget
 
 import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.LocalContext
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
@@ -58,11 +58,13 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
     @Composable
     private fun Content() {
         val stateGlance = currentState<TodayCourseStateGlance>()
+        val context = LocalContext.current
+        val colors = WidgetTheme.getColors(context)
 
         Box(
             modifier = GlanceModifier.padding(16.dp)
                 .fillMaxSize()
-                .background(color = Color.White),
+                .background(colors.surface),
         ) {
             Column {
                 Row(
@@ -82,7 +84,7 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
                         Text(
                             text = dateString,
                             style = TextStyle(
-                                color = ColorProvider(Color.Black),
+                                color = colors.onSurface,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                             ),
@@ -90,7 +92,7 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
                         Text(
                             text = stateGlance.timeTitle,
                             style = TextStyle(
-                                color = ColorProvider(Color.Black),
+                                color = colors.onSurface,
                                 fontWeight = FontWeight.Bold,
                             ),
                         )
@@ -99,13 +101,14 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
                     Text(
                         modifier = GlanceModifier.clickable(actionStartActivity<StartActivity>()),
                         text = "查看更多 >",
+                        style = TextStyle(color = colors.onSurface),
                     )
                 }
                 Spacer(modifier = GlanceModifier.height(8.dp))
                 LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
                     if (stateGlance.hasData) {
                         items(stateGlance.todayCourseList, CourseGlance::courseId) {
-                            BuildCourseItem(todayCourseGlance = it)
+                            BuildCourseItem(todayCourseGlance = it, colors = colors)
                         }
                     } else {
                         item {
@@ -120,7 +123,7 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
                                 Text(
                                     text = "暂无数据",
                                     style = TextStyle(
-                                        color = ColorProvider(Color.Black),
+                                        color = colors.onSurface,
                                         fontSize = 16.sp,
                                     ),
                                 )
@@ -133,7 +136,7 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun BuildCourseItem(todayCourseGlance: CourseGlance) {
+    private fun BuildCourseItem(todayCourseGlance: CourseGlance, colors: WidgetColors) {
         Box(modifier = GlanceModifier.padding(vertical = 4.dp)) {
             Row(
                 modifier = GlanceModifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -161,7 +164,7 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
                         modifier = GlanceModifier.wrapContentSize(),
                         text = todayCourseGlance.time,
                         style = TextStyle(
-                            color = ColorProvider(Color.Black),
+                            color = colors.onSurface,
                             textAlign = TextAlign.Center,
                         ),
                         maxLines = 2,
@@ -172,7 +175,7 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
                             .defaultWeight(),
                         text = todayCourseGlance.courseName,
                         style = TextStyle(
-                            color = ColorProvider(Color.Black),
+                            color = colors.onSurface,
                             textAlign = TextAlign.Center,
                         ),
                         maxLines = 2,
@@ -183,7 +186,7 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
                             .width(128.dp),
                         text = todayCourseGlance.location,
                         style = TextStyle(
-                            color = ColorProvider(Color.Black),
+                            color = colors.onSurface,
                             textAlign = TextAlign.Center,
                         ),
                         maxLines = 2,
