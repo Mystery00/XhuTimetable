@@ -34,8 +34,10 @@ fun App(startRoute: Nav) {
             FeatureHub.start(scope)
         } else {
             EventBus.flow.collect { event ->
-                if (event.getContentIfNotHandled() == EventType.ALLOW_PRIVACY) {
-                    FeatureHub.start(scope)
+                if (event.peekContent() == EventType.ALLOW_PRIVACY) {
+                    if (event.getContentIfNotHandled() == EventType.ALLOW_PRIVACY) {
+                        FeatureHub.start(scope)
+                    }
                 }
             }
         }
