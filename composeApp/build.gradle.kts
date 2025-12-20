@@ -203,6 +203,19 @@ android {
     signingConfigs {
         create("sign")
     }
+
+    flavorDimensions += "channel"
+    productFlavors {
+        create("standard") {
+            dimension = "channel"
+            buildConfigField("boolean", "ENABLE_UPDATE_CHECK", "true")
+        }
+        create("store") {
+            dimension = "channel"
+            buildConfigField("boolean", "ENABLE_UPDATE_CHECK", "false")
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"

@@ -23,6 +23,7 @@ import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
+import vip.mystery0.xhu.timetable.enableUpdateCheck
 import vip.mystery0.xhu.timetable.model.request.ClientInitRequest
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
@@ -62,6 +63,9 @@ object StartRepo : BaseDataRepo {
         }
         //新版本处理
         val newVersion = clientInitResponse.latestVersion?.let { version ->
+            if (!enableUpdateCheck) {
+                return@let null
+            }
             val ignoreList = getCacheStore { ignoreVersionList }
             val versionString = "${version.versionName}-${version.versionCode}"
             if (!ignoreList.contains(versionString)) {
@@ -95,6 +99,9 @@ object StartRepo : BaseDataRepo {
 
     suspend fun checkVersion(forceBeta: Boolean) {
         if (!isOnline) {
+            return
+        }
+        if (!enableUpdateCheck) {
             return
         }
         val versionChannel = getConfigStore { versionChannel }
