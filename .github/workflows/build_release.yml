@@ -17,7 +17,8 @@ on:
         default: false
         type: boolean
 env:
-  OUTPUT_DIR: "composeApp/build/outputs/apk/release"
+  STANDARD_OUTPUT_DIR: "composeApp/build/outputs/apk/standard/release"
+  STORE_OUTPUT_DIR: "composeApp/build/outputs/apk/store/release"
 jobs:
   build-android:
     runs-on: ubuntu-latest
@@ -57,16 +58,18 @@ jobs:
       - name: 解析编译文件路径
         id: apk
         run: |
-          OUTPUT_METADATA_FILE="${{ env.OUTPUT_DIR }}/output-metadata.json"
-          versionName=$(jq -r '.elements[0].versionName' $OUTPUT_METADATA_FILE)
-          versionCode=$(jq -r '.elements[0].versionCode' $OUTPUT_METADATA_FILE)
-          apkFile=$(jq -r '.elements[0].outputFile' $OUTPUT_METADATA_FILE)
+          versionName=$(jq -r '.elements[0].versionName' ${{ env.STANDARD_OUTPUT_DIR }}/output-metadata.json)
+          versionCode=$(jq -r '.elements[0].versionCode' ${{ env.STANDARD_OUTPUT_DIR }}/output-metadata.json)
           
-          cp "${{ env.OUTPUT_DIR }}/$apkFile" "patch/new.apk"
+          standardApkFile=$(jq -r '.elements[0].outputFile' ${{ env.STANDARD_OUTPUT_DIR }}/output-metadata.json)
+          storeApkFile=$(jq -r '.elements[0].outputFile' ${{ env.STORE_OUTPUT_DIR }}/output-metadata.json)
+          
+          cp "${{ env.STANDARD_OUTPUT_DIR }}/$standardApkFile" "patch/new.apk"
           
           echo "versionName=$versionName" >> $GITHUB_OUTPUT
           echo "versionCode=$versionCode" >> $GITHUB_OUTPUT
-          echo "apkFile=$apkFile" >> $GITHUB_OUTPUT
+          echo "standardApkFile=$standardApkFile" >> $GITHUB_OUTPUT
+          echo "storeApkFile=$storeApkFile" >> $GITHUB_OUTPUT
       - name: 生成 patch 文件
         id: patch
         run: |
@@ -91,7 +94,8 @@ jobs:
           prerelease: false
           body_path: version.log
           files: |
-            ${{ env.OUTPUT_DIR }}/${{ steps.apk.outputs.apkFile }}
+            ${{ env.STANDARD_OUTPUT_DIR }}/${{ steps.apk.outputs.standardApkFile }}
+            ${{ env.STORE_OUTPUT_DIR }}/${{ steps.apk.outputs.storeApkFile }}
       - name: 上传文件
         uses: actions/upload-artifact@v4
         with:
@@ -101,11 +105,7 @@ jobs:
             version.log
             patch/new.apk
             patch/${{ steps.patch.outputs.patchFile }}
-            ${{ env.OUTPUT_DIR }}/output-metadata.json
-      - uses: actions/upload-artifact@v4
-        with:
-          name: apk-sign
-          path: ${{ env.OUTPUT_DIR }}/${{ steps.apk.outputs.apkFile }}
+            ${{ env.STANDARD_OUTPUT_DIR }}/output-metadata.json
   deploy:
     needs: build-android
     runs-on: self-hosted
@@ -117,7 +117,7 @@ jobs:
       - name: 计算MD5
         id: result
         run: |
-          OUTPUT_METADATA_FILE="${{ env.OUTPUT_DIR }}/output-metadata.json"
+          OUTPUT_METADATA_FILE="${{ env.STANDARD_OUTPUT_DIR }}/output-metadata.json"
           versionName=$(jq -r '.elements[0].versionName' $OUTPUT_METADATA_FILE)
           versionCode=$(jq -r '.elements[0].versionCode' $OUTPUT_METADATA_FILE)
           echo "versionName=$versionName" >> $GITHUB_OUTPUT
