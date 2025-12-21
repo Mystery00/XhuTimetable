@@ -204,7 +204,7 @@ fun ActionButton(
 }
 
 private val regex =
-    Regex("""(`[^`]+`)|(\*.+\*)|(_.+_)|(~.+~)""")
+    Regex("""(`[^`]+`)|(\*.+?\*)|(_.+?_)|(~.+?~)""")
 
 @Composable
 fun AnnotatedClickableText(
