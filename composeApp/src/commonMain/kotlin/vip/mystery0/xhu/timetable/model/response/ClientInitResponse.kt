@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.model.response
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 import vip.mystery0.xhu.timetable.config.datetime.XhuInstant
 import vip.mystery0.xhu.timetable.config.datetime.XhuLocalDate
@@ -22,6 +23,7 @@ data class XhuStartTime(
     val nowTerm: Int,
 )
 
+@Immutable
 @Serializable
 data class ClientVersion(
     val versionId: Long,

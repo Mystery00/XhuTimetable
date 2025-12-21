@@ -26,17 +26,14 @@ import kotlinx.datetime.format
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.appName
 import vip.mystery0.xhu.timetable.base.packageName
-import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.CacheStore
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
 import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
 import vip.mystery0.xhu.timetable.config.toast.showShortToast
 import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
-import vip.mystery0.xhu.timetable.model.response.ClientVersion
-import vip.mystery0.xhu.timetable.repository.StartRepo
-import vip.mystery0.xhu.timetable.ui.component.CheckUpdate
 import vip.mystery0.xhu.timetable.ui.component.ShowSingleSelectDialog
+import vip.mystery0.xhu.timetable.ui.component.ShowUpdateDialog
 import vip.mystery0.xhu.timetable.ui.component.preference.CacheSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.component.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.component.preference.XhuActionSettingsCheckbox
@@ -217,7 +214,7 @@ actual fun UpdateSettings() {
             viewModel.updateVersionChannel(it)
         }
     )
-    ShowCheckUpdateDialog()
+    ShowUpdateDialog()
 }
 
 @Composable
@@ -243,56 +240,8 @@ private fun BuildVersionChannelDialog(
 }
 
 @Composable
-private fun ShowCheckUpdateDialog() {
-    val viewModel = koinViewModel<PlatformSettingsViewModel>()
-
-    val version by viewModel.version.collectAsState()
-
-    val scope = rememberCoroutineScope()
-
-    val newVersion = version ?: return
-    if (newVersion == ClientVersion.EMPTY) {
-        return
-    }
-    //需要提示版本更新
-    CheckUpdate(
-        version = newVersion,
-        onDownload = {
-            if (it) {
-                viewModel.downloadApk()
-            } else {
-                viewModel.downloadPatch()
-            }
-        },
-        onIgnore = {
-        },
-        onClose = {
-            scope.safeLaunch {
-                StartRepo.version.emit(ClientVersion.EMPTY)
-            }
-        },
-    )
-}
-
-@Composable
 actual fun DeveloperSettings() {
     val viewModel = koinViewModel<PlatformSettingsViewModel>()
-
-    val scope = rememberCoroutineScope()
-
-//    XhuSettingsMenuLink(
-//        title = { Text(text = "极光推送注册id") },
-//        subtitle = {
-//            Text(text = jPushRegistrationId ?: "无推送注册id")
-//        },
-//        onClick = {
-//            if (jPushRegistrationId.isNullOrBlank()) {
-//                showToast("推送注册id为空")
-//                return@XhuSettingsMenuLink
-//            }
-//            copyToClipboard(jPushRegistrationId)
-//        },
-//    )
     XhuSettingsMenuLink(
         icon = {
             Icon(
@@ -353,17 +302,4 @@ actual fun DeveloperSettings() {
         onClick = {
         }
     )
-//    XhuSettingsMenuLink(
-//        title = { Text(text = "测试推送通道") },
-//        onClick = {
-//            if (jPushRegistrationId.isNullOrBlank()) {
-//                showToast("推送注册id为空")
-//                return@XhuSettingsMenuLink
-//            }
-//            jPushRegistrationId?.let {
-//                viewModel.testPushChannel(it)
-//                showToast("推送通道测试完成")
-//            }
-//        },
-//    )
 }

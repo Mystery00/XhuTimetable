@@ -51,3 +51,6 @@ fun ShowProgressDialog(
         config = StateConfig(state = state),
     )
 }
+
+@Composable
+expect fun ShowUpdateDialog()

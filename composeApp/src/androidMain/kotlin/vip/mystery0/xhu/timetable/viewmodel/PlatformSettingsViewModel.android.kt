@@ -11,7 +11,9 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.base.ComposeViewModel
 import vip.mystery0.xhu.timetable.base.startUniqueWork
 import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
+import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
+import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
@@ -96,6 +98,15 @@ actual class PlatformSettingsViewModel : ComposeViewModel() {
                     )
                     .build()
             )
+        }
+    }
+
+    fun ignoreVersion() {
+        viewModelScope.safeLaunch {
+            val newVersion = version.value ?: return@safeLaunch
+            val ignore = getCacheStore { ignoreVersionList }
+            val list = ignore + "${newVersion.versionName}-${newVersion.versionCode}"
+            setCacheStore { ignoreVersionList = list }
         }
     }
 }

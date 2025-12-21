@@ -41,6 +41,7 @@ import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.trackEvent
 import vip.mystery0.xhu.timetable.model.event.EventType
+import vip.mystery0.xhu.timetable.ui.component.ShowUpdateDialog
 import vip.mystery0.xhu.timetable.ui.component.Tab
 import vip.mystery0.xhu.timetable.ui.component.loadCoilModelWithoutCache
 import vip.mystery0.xhu.timetable.ui.component.loading.LoadingButton
@@ -75,6 +76,7 @@ fun MainScreen() {
         viewModel.loadBackground(isDarkMode)
     }
     HandleEventBus()
+    ShowUpdateDialog()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
