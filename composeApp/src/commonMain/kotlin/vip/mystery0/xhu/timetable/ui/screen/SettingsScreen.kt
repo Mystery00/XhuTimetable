@@ -36,6 +36,7 @@ import vip.mystery0.xhu.timetable.config.store.PoemsStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.event.EventType
+import vip.mystery0.xhu.timetable.module.PRIVACY_URL
 import vip.mystery0.xhu.timetable.platform
 import vip.mystery0.xhu.timetable.ui.component.ShowSingleSelectDialog
 import vip.mystery0.xhu.timetable.ui.component.preference.ConfigSettingsCheckbox
@@ -302,6 +303,15 @@ fun SettingsScreen() {
                     },
                     onClick = {
                         uriHandler.openUri("https://beian.miit.gov.cn")
+                    }
+                )
+                XhuSettingsMenuLink(
+                    title = { Text(text = "隐私政策") },
+                    subtitle = {
+                        Text(text = PRIVACY_URL)
+                    },
+                    onClick = {
+                        uriHandler.openUri(PRIVACY_URL)
                     }
                 )
                 XhuSettingsMenuLink(
