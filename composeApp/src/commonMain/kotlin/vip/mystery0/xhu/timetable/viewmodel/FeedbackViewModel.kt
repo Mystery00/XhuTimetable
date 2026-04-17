@@ -90,7 +90,10 @@ class FeedbackViewModel : ComposeViewModel() {
     }
 
     fun connectWebSocket() {
-        viewModelScope.safeLaunch {
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
+            logger.w("connect websocket failed", throwable)
+            _wsStatus.value = WebSocketState(WebSocketStatus.DISCONNECTED, HINT_NETWORK)
+        }) {
             if (isConnected()) {
                 //连接中，或者已经建立连接
                 return@safeLaunch
