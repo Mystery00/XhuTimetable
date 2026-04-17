@@ -24,3 +24,5 @@ captures
 /iosApp/Pods/
 /iosApp/Configuration/Config.xcconfig
 /composeApp/release/
+/composeApp/standard/release/
+/composeApp/store/release/
