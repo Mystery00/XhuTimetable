@@ -50,6 +50,7 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuImages
 import vip.mystery0.xhu.timetable.utils.asInstant
 import vip.mystery0.xhu.timetable.utils.asLocalDateTime
+import vip.mystery0.xhu.timetable.utils.atStartWeek
 import vip.mystery0.xhu.timetable.utils.betweenDays
 import vip.mystery0.xhu.timetable.utils.calendarMonthFormatter
 import vip.mystery0.xhu.timetable.utils.calendarTimeFormatter
@@ -71,7 +72,7 @@ class MainViewModel : ComposeViewModel() {
     val todayTitle: StateFlow<String> = _todayTitle
 
     //日期栏开始时间
-    private val _dateStart = MutableStateFlow(LocalDate.now())
+    private val _dateStart = MutableStateFlow(LocalDate.now().atStartWeek())
     val dateStart: StateFlow<LocalDate> = _dateStart
 
     //当前周

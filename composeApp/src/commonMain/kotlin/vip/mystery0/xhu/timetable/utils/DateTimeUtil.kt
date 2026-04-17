@@ -1,8 +1,10 @@
 package vip.mystery0.xhu.timetable.utils
 
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.minus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import vip.mystery0.xhu.timetable.config.store.Formatter
@@ -28,6 +30,11 @@ fun Duration.Companion.between(start: Instant, end: Instant): Duration {
     val startMills = start.toEpochMilliseconds()
     val endMills = end.toEpochMilliseconds()
     return (endMills - startMills).toDuration(DurationUnit.MILLISECONDS)
+}
+
+fun LocalDate.atStartWeek(): LocalDate {
+    val dayOfWeek = this.dayOfWeek.ordinal
+    return this.minus(dayOfWeek, DateTimeUnit.DAY)
 }
 
 fun betweenDays(start: LocalDate, end: LocalDate): Long = end.toEpochDays() - start.toEpochDays()
