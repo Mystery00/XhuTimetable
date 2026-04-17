@@ -116,10 +116,10 @@ class BackgroundViewModel : ComposeViewModel() {
 
                 else -> {
                     val fileName = backgroundFile.nameWithoutExtension
-                    selectedBackgroundId = resultList.first {
+                    selectedBackgroundId = resultList.firstOrNull {
                         val hashKey = it.getHashKey()
                         fileName == hashKey
-                    }.backgroundId
+                    }?.backgroundId ?: 0L
                 }
             }
         }

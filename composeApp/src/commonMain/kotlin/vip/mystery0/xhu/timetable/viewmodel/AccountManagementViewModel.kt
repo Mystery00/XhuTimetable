@@ -55,11 +55,11 @@ class AccountManagementViewModel : ComposeViewModel() {
 
     fun reloadUserInfo(studentId: String) {
         viewModelScope.safeLaunch {
-            var loginUser = UserStore.getUserByStudentId(studentId)!!
+            val loginUser = UserStore.getUserByStudentId(studentId) ?: return@safeLaunch
             val userInfo = UserRepo.reloadUserInfo(loginUser.token)
             //再获取一次数据，避免更新用户信息的请求时token变了
-            loginUser = UserStore.getUserByStudentId(studentId)!!
-            val user = loginUser.copy(info = userInfo)
+            val latestUser = UserStore.getUserByStudentId(studentId) ?: loginUser
+            val user = latestUser.copy(info = userInfo)
             UserStore.updateUser(user)
             loadLoggedUserList()
         }

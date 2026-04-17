@@ -1,7 +1,8 @@
 package vip.mystery0.xhu.timetable.repository
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format
 import kotlinx.datetime.format.char
@@ -53,59 +54,67 @@ object AggregationRepo : BaseDataRepo {
             forceLoadFromLocal,
         )
         if (loadFromCloud) {
-            withContext(Dispatchers.Default) {
-                userList.forEach { user ->
-                    val response = user.withAutoLoginOnce {
-                        aggregationApi.pageMain(
-                            it,
+            // 并行请求各用户数据：每个用户独立会话，数据按 studentId 隔离
+            // withAutoLoginOnce 内部使用全局 mutex 串行化重新登录，保证 token 刷新不会串用户
+            val perUserResults = coroutineScope {
+                userList.map { user ->
+                    async {
+                        val response = user.withAutoLoginOnce {
+                            aggregationApi.pageMain(
+                                it,
+                                nowYear,
+                                nowTerm,
+                                showCustomCourse,
+                                showCustomThing,
+                            )
+                        }
+                        // 各用户数据按 studentId 隔离写入，可安全并发
+                        AggregationLocalRepo.saveResponse(
                             nowYear,
                             nowTerm,
+                            user,
+                            response,
                             showCustomCourse,
                             showCustomThing,
                         )
+                        user to response
                     }
-                    response.courseList.forEach { course ->
-                        todayViewList.add(TodayCourseView.valueOf(course, user))
-                        weekViewList.add(
-                            WeekCourseView.valueOf(
-                                course,
-                                customAccountTitle.formatWeek(user.info)
-                            )
+                }.awaitAll()
+            }
+            // 并行结束后顺序合并结果，避免并发写入共享列表
+            perUserResults.forEach { (user, response) ->
+                response.courseList.forEach { course ->
+                    todayViewList.add(TodayCourseView.valueOf(course, user))
+                    weekViewList.add(
+                        WeekCourseView.valueOf(
+                            course,
+                            customAccountTitle.formatWeek(user.info)
                         )
-                    }
-                    response.experimentCourseList.forEach { experimentCourse ->
-                        todayViewList.add(TodayCourseView.valueOf(experimentCourse, user))
-                        weekViewList.add(
-                            WeekCourseView.valueOf(
-                                experimentCourse,
-                                customAccountTitle.formatWeek(user.info)
-                            )
-                        )
-                    }
-                    response.customCourseList.forEach { customCourse ->
-                        todayViewList.add(TodayCourseView.valueOf(customCourse, user))
-                        weekViewList.add(
-                            WeekCourseView.valueOf(
-                                customCourse,
-                                customAccountTitle.formatWeek(user.info)
-                            )
-                        )
-                    }
-                    response.customThingList.forEach { customThing ->
-                        todayThingList.add(TodayThingView.valueOf(customThing, user))
-                    }
-                    response.practicalCourseList.forEach { course ->
-                        practicalCourseList.add(PracticalCourseView.valueOf(course, user))
-                    }
-                    //保存数据到数据库
-                    AggregationLocalRepo.saveResponse(
-                        nowYear,
-                        nowTerm,
-                        user,
-                        response,
-                        showCustomCourse,
-                        showCustomThing,
                     )
+                }
+                response.experimentCourseList.forEach { experimentCourse ->
+                    todayViewList.add(TodayCourseView.valueOf(experimentCourse, user))
+                    weekViewList.add(
+                        WeekCourseView.valueOf(
+                            experimentCourse,
+                            customAccountTitle.formatWeek(user.info)
+                        )
+                    )
+                }
+                response.customCourseList.forEach { customCourse ->
+                    todayViewList.add(TodayCourseView.valueOf(customCourse, user))
+                    weekViewList.add(
+                        WeekCourseView.valueOf(
+                            customCourse,
+                            customAccountTitle.formatWeek(user.info)
+                        )
+                    )
+                }
+                response.customThingList.forEach { customThing ->
+                    todayThingList.add(TodayThingView.valueOf(customThing, user))
+                }
+                response.practicalCourseList.forEach { course ->
+                    practicalCourseList.add(PracticalCourseView.valueOf(course, user))
                 }
             }
         } else {

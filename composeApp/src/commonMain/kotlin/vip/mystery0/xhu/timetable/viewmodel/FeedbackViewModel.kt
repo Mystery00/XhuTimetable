@@ -120,10 +120,11 @@ class FeedbackViewModel : ComposeViewModel() {
         val statusConsumer = { it: WebSocketState ->
             _wsStatus.value = it
         }
-        webSocket = FeedbackRepo.initWebSocket(statusConsumer)
+        val currentSocket = FeedbackRepo.initWebSocket(statusConsumer)
+        webSocket = currentSocket
         viewModelScope.safeLaunch {
             FeedbackRepo.handleMessage(
-                webSocket!!,
+                currentSocket,
                 messageConsumer,
                 systemMessageConsumer,
                 statusConsumer

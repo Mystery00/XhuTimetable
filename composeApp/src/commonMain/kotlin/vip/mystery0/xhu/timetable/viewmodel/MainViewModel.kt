@@ -186,7 +186,7 @@ class MainViewModel : ComposeViewModel() {
                 isDarkMode.value = isDarkModeValue
             }
             val disable = getConfigStore { disableBackgroundWhenNight }
-            if (disable && isDarkMode.value!!) {
+            if (disable && isDarkMode.value == true) {
                 _backgroundImage.value = Unit
                 return@safeLaunch
             } else {
