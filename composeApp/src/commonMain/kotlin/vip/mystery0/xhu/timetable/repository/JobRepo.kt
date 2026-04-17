@@ -3,8 +3,6 @@ package vip.mystery0.xhu.timetable.repository
 import dev.whyoleg.cryptography.CryptographyProvider
 import dev.whyoleg.cryptography.algorithms.RSA
 import dev.whyoleg.cryptography.algorithms.SHA1
-import io.ktor.util.decodeBase64String
-import io.ktor.util.encodeBase64
 import io.ktor.utils.io.core.toByteArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -17,6 +15,7 @@ import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.model.request.AutoCheckScoreRequest
 import vip.mystery0.xhu.timetable.model.response.JobHistoryResponse
+import kotlin.io.encoding.Base64
 
 object JobRepo : BaseDataRepo {
     private val jobApi: JobApi by inject()
@@ -41,11 +40,11 @@ object JobRepo : BaseDataRepo {
         val user = mainUser()
         val publicKey = withContext(Dispatchers.IO) { userApi.publicKey() }.publicKey
         val encryptPassword = withContext(Dispatchers.Default) {
-            val decodedPublicKey = publicKey.decodeBase64String()
+            val decodedPublicKey = Base64.decode(publicKey).decodeToString()
             val key = CryptographyProvider.Default.get(RSA.PKCS1)
                 .publicKeyDecoder(SHA1)
                 .decodeFromByteArray(RSA.PublicKey.Format.DER, decodedPublicKey.toByteArray())
-            key.encryptor().encrypt(user.password.toByteArray()).encodeBase64()
+            Base64.encode(key.encryptor().encrypt(user.password.toByteArray()))
         }
         val year = getConfigStore { nowYear }
         val term = getConfigStore { nowTerm }

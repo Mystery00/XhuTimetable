@@ -13,12 +13,12 @@ enum class Store(val id: String) {
 }
 
 internal inline fun <reified T> Store.getConfiguration(key: String, defaultValue: T): T {
-    logger.d("getConfiguration($id): $key, class type: ${defaultValue::class.simpleName}")
+    logger.d("getConfiguration($id): $key, class type: ${defaultValue!!::class.simpleName}")
     return getValue(key, defaultValue)
 }
 
 internal inline fun <reified T> Store.setConfiguration(key: String, value: T) {
-    logger.d("setConfiguration($id): $key, class type: ${value::class.simpleName}")
+    logger.d("setConfiguration($id): $key, class type: ${value!!::class.simpleName}")
     setValue(key, value)
 }
 

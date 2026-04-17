@@ -7,8 +7,6 @@ import dev.whyoleg.cryptography.algorithms.EC
 import dev.whyoleg.cryptography.algorithms.ECDH
 import dev.whyoleg.cryptography.algorithms.HKDF
 import dev.whyoleg.cryptography.algorithms.SHA256
-import io.ktor.util.decodeBase64Bytes
-import io.ktor.util.encodeBase64
 import io.ktor.utils.io.core.toByteArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -20,6 +18,7 @@ import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.request.LoginRequest
 import vip.mystery0.xhu.timetable.model.request.SetCampusRequest
 import vip.mystery0.xhu.timetable.model.response.LoginResponse
+import kotlin.io.encoding.Base64
 
 object UserRepo : BaseDataRepo {
     private val userApi: UserApi by inject()
@@ -38,9 +37,9 @@ object UserRepo : BaseDataRepo {
                 .publicKeyDecoder(curve = EC.Curve.P521)
                 .decodeFromByteArrayBlocking(
                     EC.PublicKey.Format.DER,
-                    resp.publicKey.decodeBase64Bytes()
+                    Base64.decode(resp.publicKey)
                 )
-            val nonce = resp.nonce.decodeBase64Bytes()
+            val nonce = Base64.decode(resp.nonce)
             val sharedSecret = clientKeyPair.privateKey.sharedSecretGenerator()
                 .generateSharedSecretToByteArrayBlocking(serverPublicKey)
             val cipher = CryptographyProvider.Default.get(AES.GCM)
@@ -52,10 +51,11 @@ object UserRepo : BaseDataRepo {
                 )
                 .cipher()
             val encryptedPassword =
-                cipher.encryptBlocking(password.toByteArray(), nonce).encodeBase64()
+                Base64.encode(cipher.encryptBlocking(password.toByteArray(), nonce))
             val clientPublicKey =
-                clientKeyPair.publicKey.encodeToByteArrayBlocking(EC.PublicKey.Format.DER)
-                    .encodeBase64()
+                Base64.encode(
+                    clientKeyPair.publicKey.encodeToByteArrayBlocking(EC.PublicKey.Format.DER)
+                )
             encryptedPassword to clientPublicKey
         }
         val loginRequest = LoginRequest(username, encryptPassword, resp.publicKey, clientPublicKey)

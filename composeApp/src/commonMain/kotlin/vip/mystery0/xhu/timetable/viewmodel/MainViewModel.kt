@@ -511,7 +511,7 @@ class MainViewModel : ComposeViewModel() {
                     append(endDateTime.format(thingDateTimeFormatter))
                 }
             }
-            val remainDays = betweenDays(LocalDate.now(), startDateTime.date).toLong()
+            val remainDays = betweenDays(LocalDate.now(), startDateTime.date)
             TodayThingSheet(
                 it.title,
                 it.location,

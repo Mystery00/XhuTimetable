@@ -44,7 +44,7 @@ actual inline fun <reified T> Store.getValue(
         is Float -> kv.decodeFloat(key, defaultValue)
         is String -> kv.decodeString(key, defaultValue)
         is Set<*> -> kv.decodeStringSet(key, defaultValue as Set<String>)
-        else -> throw IllegalArgumentException("Unsupported type: ${defaultValue::class.simpleName}")
+        else -> throw IllegalArgumentException("Unsupported type: ${defaultValue!!::class.simpleName}")
     } as T
 }
 
@@ -61,7 +61,7 @@ actual inline fun <reified T> Store.setValue(
         is Float -> kv.encode(key, value)
         is String -> kv.encode(key, value)
         is Set<*> -> kv.encode(key, value as Set<String>)
-        else -> throw IllegalArgumentException("Unsupported type: ${value::class.simpleName}")
+        else -> throw IllegalArgumentException("Unsupported type: ${value!!::class.simpleName}")
     }
 }
 
