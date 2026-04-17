@@ -176,7 +176,7 @@ private fun SelectorExpanded(
         when (currentSelector) {
             InputSelector.EMOJI -> EmojiSelector(onTextAdded, focusRequester)
             InputSelector.PICTURE -> FunctionalityNotAvailablePanel()
-            else -> {
+            InputSelector.NONE -> {
                 throw NotImplementedError()
             }
         }
