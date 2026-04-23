@@ -10,9 +10,9 @@ composeMultiplatform = "1.10.3"
 aboutlibraries = "14.0.1"
 kotlinx-serialization = "1.11.0"
 
-android-compileSdk = "36"
+android-compileSdk = "37"
 android-minSdk = "26"
-android-targetSdk = "36"
+android-targetSdk = "37"
 
 runtime = "1.10.3"
 ui = "1.10.3"
