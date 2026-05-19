@@ -12,31 +12,21 @@ import vip.mystery0.xhu.timetable.api.JobApi
 import vip.mystery0.xhu.timetable.api.UserApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
-import vip.mystery0.xhu.timetable.config.store.getConfigStore
-import vip.mystery0.xhu.timetable.model.request.AutoCheckScoreRequest
-import vip.mystery0.xhu.timetable.model.response.JobHistoryResponse
+import vip.mystery0.xhu.timetable.model.request.AutoScoreStartRequest
+import vip.mystery0.xhu.timetable.model.response.AutoScoreStartResponse
+import vip.mystery0.xhu.timetable.model.response.AutoScoreStatusResponse
+import vip.mystery0.xhu.timetable.platform
+import vip.mystery0.xhu.timetable.push.pushManager
 import kotlin.io.encoding.Base64
 
 object JobRepo : BaseDataRepo {
     private val jobApi: JobApi by inject()
     private val userApi: UserApi by inject()
 
-    suspend fun fetchHistoryList(): List<JobHistoryResponse> {
-        checkForceLoadFromCloud(true)
-
-        val response = mainUser().withAutoLoginOnce {
-            jobApi.getHistory(it)
-        }
-        return response
-    }
-
-    suspend fun testPush(registrationId: String) {
-        mainUser().withAutoLoginOnce {
-            jobApi.pushTest(it, registrationId)
-        }
-    }
-
-    suspend fun addAutoCheckScoreJob(registrationId: String) {
+    suspend fun startAutoScoreJob(): AutoScoreStartResponse {
+        val registrationId = pushManager.registrationId()
+            ?: pushManager.refreshRegistrationId()
+            ?: error("推送服务初始化失败，请稍后重试")
         val user = mainUser()
         val publicKey = withContext(Dispatchers.IO) { userApi.publicKey() }.publicKey
         val encryptPassword = withContext(Dispatchers.Default) {
@@ -46,18 +36,26 @@ object JobRepo : BaseDataRepo {
                 .decodeFromByteArray(RSA.PublicKey.Format.DER, decodedPublicKey.toByteArray())
             Base64.encode(key.encryptor().encrypt(user.password.toByteArray()))
         }
-        val year = getConfigStore { nowYear }
-        val term = getConfigStore { nowTerm }
-        val request = AutoCheckScoreRequest(
-            username = user.studentId,
+        val request = AutoScoreStartRequest(
             password = encryptPassword,
             publicKey = publicKey,
             registrationId = registrationId,
-            year = year,
-            term = term,
+            platform = platform().name,
         )
+        return mainUser().withAutoLoginOnce {
+            jobApi.startAutoScoreJob(it, request = request)
+        }
+    }
+
+    suspend fun stopAutoScoreJob() {
         mainUser().withAutoLoginOnce {
-            jobApi.autoCheckScore(it, request)
+            jobApi.stopAutoScoreJob(it)
+        }
+    }
+
+    suspend fun fetchAutoScoreJobStatus(): AutoScoreStatusResponse {
+        return mainUser().withAutoLoginOnce {
+            jobApi.getAutoScoreJobStatus(it)
         }
     }
 }

@@ -88,6 +88,9 @@ kotlin {
             implementation(libs.accompanist.permissions)
             //apache-compress
             implementation(libs.apache.compress)
+            //jpush
+            implementation(libs.jpush)
+            implementation(libs.jcore)
         }
         commonMain.dependencies {
             implementation(libs.runtime)
@@ -192,6 +195,10 @@ android {
             abiFilters.add("armeabi-v7a")
             abiFilters.add("arm64-v8a")
         }
+        manifestPlaceholders["JPUSH_PKGNAME"] = packageName
+        manifestPlaceholders["JPUSH_APPKEY"] = System.getenv("JPUSH_APPKEY") ?: ""
+        manifestPlaceholders["JPUSH_CHANNEL"] =
+            System.getenv("JPUSH_CHANNEL") ?: "developer-default"
     }
     packaging {
         resources {

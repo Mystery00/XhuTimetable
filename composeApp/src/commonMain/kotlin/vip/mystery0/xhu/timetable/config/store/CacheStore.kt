@@ -37,6 +37,17 @@ class CacheStore {
         }
         get() = Store.CacheStore.getConfiguration(privacyKey, false)
 
+    private val pushRegistrationIdKey = "pushRegistrationId"
+    var pushRegistrationId: String
+        set(value) {
+            if (value.isBlank()) {
+                Store.CacheStore.removeConfiguration(pushRegistrationIdKey)
+            } else {
+                Store.CacheStore.setConfiguration(pushRegistrationIdKey, value)
+            }
+        }
+        get() = Store.CacheStore.getConfiguration(pushRegistrationIdKey, "")
+
     //启动图
     private val splashListKey = "splashList"
     var splashList: List<Splash>

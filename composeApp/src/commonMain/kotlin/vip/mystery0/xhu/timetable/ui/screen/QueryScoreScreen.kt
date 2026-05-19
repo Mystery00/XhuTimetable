@@ -12,15 +12,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -55,6 +59,7 @@ import vip.mystery0.xhu.timetable.ui.component.xhuHeader
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.formatWithDecimal
+import vip.mystery0.xhu.timetable.viewmodel.AutoScoreSubscribeState
 import vip.mystery0.xhu.timetable.viewmodel.ScoreViewModel
 import xhutimetable.composeapp.generated.resources.Res
 import xhutimetable.composeapp.generated.resources.state_no_data
@@ -98,6 +103,9 @@ fun QueryScoreScreen() {
         var showMoreInfo by remember { mutableStateOf(true) }
         val refreshing by viewModel.refreshing.collectAsState()
         val gpa by viewModel.scoreGpa.collectAsState()
+        val autoScoreState by viewModel.autoScoreState.collectAsState()
+        var showStartAutoScoreDialog by remember { mutableStateOf(false) }
+        var showStopAutoScoreDialog by remember { mutableStateOf(false) }
         BuildPaging(
             paddingValues = paddingValues,
             pager = pager,
@@ -117,6 +125,14 @@ fun QueryScoreScreen() {
                 )
             },
             listContent = {
+                item {
+                    BuildAutoScoreSubscribeCard(
+                        state = autoScoreState,
+                        onStartClick = { showStartAutoScoreDialog = true },
+                        onStopClick = { showStopAutoScoreDialog = true },
+                        onRefreshClick = { viewModel.loadAutoScoreStatus() },
+                    )
+                }
                 if (gpa != null) {
                     item {
                         BuildTermInfo(gpa!!)
@@ -152,6 +168,48 @@ fun QueryScoreScreen() {
                 )
             }
         )
+        if (showStartAutoScoreDialog) {
+            AlertDialog(
+                onDismissRequest = { showStartAutoScoreDialog = false },
+                title = { Text("开启成绩变更提醒") },
+                text = {
+                    Text("开启后，服务端会在有效期内定时查询成绩。仅当成绩数据发生变化时发送通知，通知内容不包含具体成绩。你可以随时取消。")
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showStartAutoScoreDialog = false
+                        viewModel.startAutoScoreSubscribe()
+                    }) {
+                        Text("开启")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showStartAutoScoreDialog = false }) {
+                        Text("取消")
+                    }
+                }
+            )
+        }
+        if (showStopAutoScoreDialog) {
+            AlertDialog(
+                onDismissRequest = { showStopAutoScoreDialog = false },
+                title = { Text("取消成绩变更提醒") },
+                text = { Text("取消后，服务端将停止当前成绩查询订阅任务。") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showStopAutoScoreDialog = false
+                        viewModel.stopAutoScoreSubscribe()
+                    }) {
+                        Text("取消订阅")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showStopAutoScoreDialog = false }) {
+                        Text("返回")
+                    }
+                }
+            )
+        }
     }
     ShowUserDialog(selectList = userSelect, useCaseState = userDialog, onSelect = {
         viewModel.selectUser(it.studentId)
@@ -164,6 +222,98 @@ fun QueryScoreScreen() {
     })
 
     HandleErrorMessage(flow = viewModel.errorMessage)
+}
+
+@Composable
+private fun BuildAutoScoreSubscribeCard(
+    state: AutoScoreSubscribeState,
+    onStartClick: () -> Unit,
+    onStopClick: () -> Unit,
+    onRefreshClick: () -> Unit,
+) {
+    val active = state.hasActiveTask && state.status == "ACTIVE"
+    val statusText = when {
+        active -> "已开启"
+        state.status == "SUSPENDED" -> "已暂停"
+        state.status == "EXPIRED" -> "已到期"
+        state.status == "CANCELLED" -> "已取消"
+        else -> "未开启"
+    }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Column(modifier = Modifier.weight(1F)) {
+                    Text("成绩变更提醒", fontWeight = FontWeight.Bold)
+                    Text(
+                        text = statusText,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (active) {
+                    OutlinedButton(
+                        enabled = !state.loading,
+                        onClick = onStopClick,
+                    ) {
+                        Text("取消")
+                    }
+                } else {
+                    Button(
+                        enabled = !state.loading,
+                        onClick = onStartClick,
+                    ) {
+                        Text("开启")
+                    }
+                }
+            }
+            if (state.expireDate != null) {
+                Text("到期日期：${state.expireDate}", fontSize = 14.sp)
+            }
+            if (state.nextCheckTime != null) {
+                Text("下次检查：${state.nextCheckTime}", fontSize = 14.sp)
+            }
+            if (state.lastCheckTime != null) {
+                Text(
+                    text = "最近检查：${state.lastCheckTime}（${state.lastCheckResult ?: "未知"}）",
+                    fontSize = 14.sp,
+                )
+            }
+            if (state.status == "SUSPENDED") {
+                Text(
+                    text = "自动查分已暂停，请检查账号状态后重新开启。",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+            if (state.errorMessage.isNotBlank()) {
+                Text(
+                    text = state.errorMessage,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+            TextButton(
+                enabled = !state.loading,
+                onClick = onRefreshClick,
+            ) {
+                Text(if (state.loading) "刷新中..." else "刷新状态")
+            }
+        }
+    }
 }
 
 @Composable

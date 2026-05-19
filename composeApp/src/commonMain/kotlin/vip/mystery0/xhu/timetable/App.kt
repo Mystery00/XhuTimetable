@@ -18,6 +18,7 @@ import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.feature.FeatureHub
 import vip.mystery0.xhu.timetable.model.event.EventType
+import vip.mystery0.xhu.timetable.push.initPush
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.navigation.Nav
 import vip.mystery0.xhu.timetable.ui.navigation.Navs
@@ -32,11 +33,13 @@ fun App(startRoute: Nav) {
         val allowPrivacy = getCacheStore { allowPrivacy }
         if (allowPrivacy) {
             FeatureHub.start(scope)
+            initPush()
         } else {
             EventBus.flow.collect { event ->
                 if (event.peekContent() == EventType.ALLOW_PRIVACY) {
                     if (event.getContentIfNotHandled() == EventType.ALLOW_PRIVACY) {
                         FeatureHub.start(scope)
+                        initPush()
                     }
                 }
             }

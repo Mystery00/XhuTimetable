@@ -15,6 +15,7 @@ import vip.mystery0.xhu.timetable.ui.navigation.RouteInit
 import vip.mystery0.xhu.timetable.ui.navigation.RouteLogin
 import vip.mystery0.xhu.timetable.ui.navigation.RouteMain
 import vip.mystery0.xhu.timetable.ui.navigation.RouteQueryExam
+import vip.mystery0.xhu.timetable.ui.navigation.RouteQueryScore
 import vip.mystery0.xhu.timetable.ui.navigation.RouteSettings
 
 class NavActivity : ComponentActivity() {
@@ -50,6 +51,7 @@ class NavActivity : ComponentActivity() {
         PRIVACY(RouteInit),
         LOGIN(RouteLogin(false)),
         EXAM(RouteQueryExam),
+        SCORE(RouteQueryScore),
         SETTINGS(RouteSettings),
     }
 }

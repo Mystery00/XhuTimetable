@@ -6,5 +6,7 @@
 	<false/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>JPUSH_APPKEY</key>
+	<string>$(JPUSH_APPKEY)</string>
 </dict>
 </plist>

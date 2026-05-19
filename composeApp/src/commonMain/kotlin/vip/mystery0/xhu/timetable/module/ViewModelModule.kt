@@ -14,7 +14,6 @@ import vip.mystery0.xhu.timetable.viewmodel.CustomUiViewModel
 import vip.mystery0.xhu.timetable.viewmodel.ExamViewModel
 import vip.mystery0.xhu.timetable.viewmodel.ExpScoreViewModel
 import vip.mystery0.xhu.timetable.viewmodel.FeedbackViewModel
-import vip.mystery0.xhu.timetable.viewmodel.JobHistoryViewModel
 import vip.mystery0.xhu.timetable.viewmodel.LoginViewModel
 import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
 import vip.mystery0.xhu.timetable.viewmodel.NoticeViewModel
@@ -44,7 +43,6 @@ val viewModelModule = module {
     viewModel { ExamViewModel() }
     viewModel { ExpScoreViewModel() }
     viewModel { FeedbackViewModel() }
-    viewModel { JobHistoryViewModel() }
     viewModel { LoginViewModel() }
     viewModel { MainViewModel() }
     viewModel { NoticeViewModel() }
