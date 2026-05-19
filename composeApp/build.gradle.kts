@@ -37,6 +37,10 @@ val gitVersionName: String =
     }.standardOutput.asText.get().trim()
 val appVersionName = libs.versions.app.version.get()
 
+base {
+    archivesName.set("XhuTimetable-$appVersionName")
+}
+
 kotlin {
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
@@ -190,7 +194,6 @@ android {
         versionCode = gitVersionCode
         versionName = appVersionName
 
-        setProperty("archivesBaseName", "XhuTimetable-${versionName}")
         ndk {
             abiFilters.add("armeabi-v7a")
             abiFilters.add("arm64-v8a")
@@ -290,6 +293,7 @@ android {
     }
     buildFeatures {
         buildConfig = true
+        resValues = true
     }
     @Suppress("UnstableApiUsage")
     androidResources {

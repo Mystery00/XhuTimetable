@@ -11,20 +11,20 @@ import vip.mystery0.xhu.timetable.model.response.AutoScoreStartResponse
 import vip.mystery0.xhu.timetable.model.response.AutoScoreStatusResponse
 
 interface JobApi {
-    @POST("api/rest/job/start")
+    @POST("api/rest/external/job/start")
     suspend fun startAutoScoreJob(
         @Header("sessionToken") token: String,
         @Query("job") job: String = "auto-score",
         @Body request: AutoScoreStartRequest,
     ): AutoScoreStartResponse
 
-    @DELETE("api/rest/job/stop")
+    @DELETE("api/rest/external/job/stop")
     suspend fun stopAutoScoreJob(
         @Header("sessionToken") token: String,
         @Query("job") job: String = "auto-score",
     )
 
-    @GET("api/rest/job/status")
+    @GET("api/rest/external/job/status")
     suspend fun getAutoScoreJobStatus(
         @Header("sessionToken") token: String,
         @Query("job") job: String = "auto-score",
