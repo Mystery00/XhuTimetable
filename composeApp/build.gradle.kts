@@ -94,7 +94,6 @@ kotlin {
             implementation(libs.apache.compress)
             //jpush
             implementation(libs.jpush)
-            implementation(libs.jcore)
         }
         commonMain.dependencies {
             implementation(libs.runtime)
