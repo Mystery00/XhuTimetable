@@ -132,6 +132,11 @@
 -keep class com.huawei.hms.analytics.HiAnalyticsInstance{*;}
 -keep class com.huawei.hms.analytics.HiAnalytics{*;}
 
+#### vivo
+-dontwarn com.vivo.push.**
+-keep class com.vivo.push.**{*; }
+-keep class com.vivo.vms.**{*; }
+
 # Jackson
 -keep @com.fasterxml.jackson.annotation.JsonIgnoreProperties class * { *; }
 -keep @com.fasterxml.jackson.annotation.JsonCreator class * { *; }

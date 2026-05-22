@@ -26,3 +26,5 @@ captures
 /composeApp/release/
 /composeApp/standard/release/
 /composeApp/store/release/
+composeApp/agconnect-services.json
+composeApp/src/debug/agconnect-services.json

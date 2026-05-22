@@ -2,6 +2,13 @@ rootProject.name = "XhuTimetable"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "com.huawei.agconnect") {
+                useModule("com.huawei.agconnect:agcp:${requested.version}")
+            }
+        }
+    }
     repositories {
         google {
             mavenContent {
@@ -11,6 +18,12 @@ pluginManagement {
             }
         }
         mavenCentral()
+        maven {
+            url = uri("https://developer.huawei.com/repo/")
+            content {
+                includeGroupAndSubgroups("com.huawei")
+            }
+        }
         gradlePluginPortal()
     }
 }
@@ -32,6 +45,12 @@ dependencyResolutionManagement {
                 includeGroupAndSubgroups("androidx")
                 includeGroupAndSubgroups("com.android")
                 includeGroupAndSubgroups("com.google")
+            }
+        }
+        maven {
+            url = uri("https://developer.huawei.com/repo/")
+            content {
+                includeGroupAndSubgroups("com.huawei")
             }
         }
         mavenCentral()

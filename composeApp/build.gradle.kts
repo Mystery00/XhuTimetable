@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.kotlinSerialize)
     alias(libs.plugins.kotlinKsp)
+    alias(libs.plugins.huaweiAgconnect)
     alias(libs.plugins.aboutLibraries)
     alias(libs.plugins.ktorfit)
     alias(libs.plugins.room)
@@ -94,6 +95,9 @@ kotlin {
             implementation(libs.apache.compress)
             //jpush
             implementation(libs.jpush)
+            implementation(libs.jpush.plugin.huawei)
+            implementation(libs.jpush.plugin.huawei.hms)
+            implementation(libs.jpush.plugin.vivo)
         }
         commonMain.dependencies {
             implementation(libs.runtime)
@@ -199,6 +203,9 @@ android {
         }
         manifestPlaceholders["JPUSH_PKGNAME"] = packageName
         manifestPlaceholders["JPUSH_CHANNEL"] = libs.versions.pushChannel.get()
+        manifestPlaceholders["HUAWEI_APPID"] = libs.versions.huaweiPushAppId.get()
+        manifestPlaceholders["VIVO_APPID"] = libs.versions.vivoPushAppId.get()
+        manifestPlaceholders["VIVO_APPKEY"] = libs.versions.vivoPushAppKey.get()
     }
     packaging {
         resources {
