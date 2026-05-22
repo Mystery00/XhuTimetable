@@ -3,6 +3,7 @@ package vip.mystery0.xhu.timetable.viewmodel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.datetime.format
 import vip.mystery0.xhu.timetable.base.PageRequest
 import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
 import vip.mystery0.xhu.timetable.base.TermSelectDataLoader
@@ -17,6 +18,8 @@ import vip.mystery0.xhu.timetable.push.PushPermissionState
 import vip.mystery0.xhu.timetable.push.pushManager
 import vip.mystery0.xhu.timetable.repository.JobRepo
 import vip.mystery0.xhu.timetable.repository.ScoreRepo
+import vip.mystery0.xhu.timetable.utils.asLocalDateTime
+import vip.mystery0.xhu.timetable.utils.chinaDateTime
 
 class ScoreViewModel : PagingComposeViewModel<PageRequest, ScoreResponse>(
     {
@@ -104,8 +107,8 @@ class ScoreViewModel : PagingComposeViewModel<PageRequest, ScoreResponse>(
                 hasActiveTask = response.hasActiveTask,
                 status = response.status,
                 expireDate = response.expireDate?.toString(),
-                nextCheckTime = response.nextCheckTime,
-                lastCheckTime = response.lastCheckTime,
+                nextCheckTime = response.nextCheckTime?.asLocalDateTime()?.format(chinaDateTime),
+                lastCheckTime = response.lastCheckTime?.asLocalDateTime()?.format(chinaDateTime),
                 lastCheckResult = response.lastCheckResult,
             )
         }
