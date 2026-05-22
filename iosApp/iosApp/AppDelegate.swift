@@ -9,10 +9,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         let appKey = Bundle.main.object(forInfoDictionaryKey: "JPUSH_APPKEY") as? String ?? ""
+        let channel = Bundle.main.object(forInfoDictionaryKey: "JPUSH_CHANNEL") as? String ?? ""
         JPUSHService.setup(
             withOption: launchOptions,
             appKey: appKey,
-            channel: "App Store",
+            channel: channel,
             apsForProduction: true
         )
         UNUserNotificationCenter.current().delegate = self

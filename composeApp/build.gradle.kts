@@ -199,9 +199,7 @@ android {
             abiFilters.add("arm64-v8a")
         }
         manifestPlaceholders["JPUSH_PKGNAME"] = packageName
-        manifestPlaceholders["JPUSH_APPKEY"] = System.getenv("JPUSH_APPKEY") ?: ""
-        manifestPlaceholders["JPUSH_CHANNEL"] =
-            System.getenv("JPUSH_CHANNEL") ?: "developer-default"
+        manifestPlaceholders["JPUSH_CHANNEL"] = libs.versions.pushChannel.get()
     }
     packaging {
         resources {
@@ -228,6 +226,7 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
+            manifestPlaceholders["JPUSH_APPKEY"] = libs.versions.debugPushAppKey.get()
             resValue(
                 "string",
                 "feature_api_key",
@@ -251,6 +250,7 @@ android {
         release {
             val nightly = System.getenv("NIGHTLY")?.toBoolean() == true
 
+            manifestPlaceholders["JPUSH_APPKEY"] = libs.versions.releasePushAppKey.get()
             resValue(
                 "string",
                 "feature_api_key",
@@ -336,6 +336,9 @@ tasks.register("updateAppleBuildVersion") {
         val newContent = content
             .replace("{appVersionName}", appVersionName)
             .replace("{gitVersionCode}", gitVersionCode.toString())
+            .replace("{debugPushAppKey}", libs.versions.debugPushAppKey.get())
+            .replace("{releasePushAppKey}", libs.versions.releasePushAppKey.get())
+            .replace("{pushChannel}", libs.versions.pushChannel.get())
         config.writeText(newContent)
         println("Updated Config.xcconfig with version $appVersionName (Build $gitVersionCode)")
     }

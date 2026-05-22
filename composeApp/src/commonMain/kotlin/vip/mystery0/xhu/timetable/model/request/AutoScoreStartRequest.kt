@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AutoScoreStartRequest(
     val publicKey: String,
+    val clientPublicKey: String,
     val password: String,
     val registrationId: String,
     val platform: String,

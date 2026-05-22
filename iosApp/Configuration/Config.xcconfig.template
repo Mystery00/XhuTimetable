@@ -6,4 +6,6 @@ PRODUCT_BUNDLE_IDENTIFIER=vip.mystery0.xhu.timetable.XhuTimetable$(TEAM_ID)
 CURRENT_PROJECT_VERSION={gitVersionCode}
 MARKETING_VERSION={appVersionName}
 
-JPUSH_APPKEY=
+JPUSH_APPKEY={releasePushAppKey}
+JPUSH_APPKEY[config=Debug]={debugPushAppKey}
+JPUSH_CHANNEL={pushChannel}

@@ -6,6 +6,10 @@ ksp = "2.3.7"
 
 app-version = "1.6.6"
 
+debugPushAppKey = "eec3dd99777142256f3d7584"
+releasePushAppKey = "c369f81f3fc3aa7b6f455686"
+pushChannel = "developer-default"
+
 composeMultiplatform = "1.11.0"
 aboutlibraries = "14.2.0"
 kotlinx-serialization = "1.11.0"

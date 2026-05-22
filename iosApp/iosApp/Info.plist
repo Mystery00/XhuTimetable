@@ -8,5 +8,7 @@
 	<true/>
 	<key>JPUSH_APPKEY</key>
 	<string>$(JPUSH_APPKEY)</string>
+	<key>JPUSH_CHANNEL</key>
+	<string>$(JPUSH_CHANNEL)</string>
 </dict>
 </plist>
