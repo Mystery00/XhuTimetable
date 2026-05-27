@@ -22,6 +22,7 @@ import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
 import vip.mystery0.xhu.timetable.module.desc
 import vip.mystery0.xhu.timetable.repository.JobRepo
 import vip.mystery0.xhu.timetable.repository.StartRepo
+import vip.mystery0.xhu.timetable.push.pushManager
 import vip.mystery0.xhu.timetable.ui.theme.NightMode
 import vip.mystery0.xhu.timetable.ui.theme.Theme
 import vip.mystery0.xhu.timetable.utils.chinaDateTime
@@ -46,6 +47,9 @@ class SettingsViewModel : ComposeViewModel() {
     private val _featurePullTimeList = MutableStateFlow<List<String>>(emptyList())
     val featurePullTimeList: StateFlow<List<String>> = _featurePullTimeList
 
+    private val _pushRegistrationId = MutableStateFlow("")
+    val pushRegistrationId: StateFlow<String> = _pushRegistrationId
+
     fun init() {
         viewModelScope.safeLaunch {
             Theme.nightMode.value = getConfigStore { nightMode }
@@ -54,6 +58,7 @@ class SettingsViewModel : ComposeViewModel() {
             _teamMemberData.value = StartRepo.loadTeamMemberList()
             _featurePullTimeList.value = getCacheStore { featurePullLastExecuteTime }
                 .map { it.format(chinaDateTime) }
+            _pushRegistrationId.value = pushManager.registrationId().orEmpty()
         }
     }
 

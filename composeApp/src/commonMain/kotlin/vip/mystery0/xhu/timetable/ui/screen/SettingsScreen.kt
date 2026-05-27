@@ -244,6 +244,7 @@ fun SettingsScreen() {
             XhuSettingsGroup(title = {
                 Text(text = "应用关于")
             }) {
+                val pushRegistrationId by viewModel.pushRegistrationId.collectAsState()
                 XhuSettingsMenuLink(
                     title = { Text(text = "更新日志") },
                     subtitle = { Text(text = "当前版本：${appVersionName()}") },
@@ -291,6 +292,20 @@ fun SettingsScreen() {
                     onClick = {
                         uriHandler.openUri("https://www.jinrishici.com")
                     }
+                )
+                XhuSettingsMenuLink(
+                    title = { Text(text = "极光推送注册id") },
+                    subtitle = {
+                        Text(text = pushRegistrationId.ifBlank { "暂无" })
+                    },
+                    onClick = {
+                        if (pushRegistrationId.isBlank()) {
+                            showToast("暂无推送注册id")
+                        } else {
+                            copyToClipboard(pushRegistrationId)
+                            showToast("已复制")
+                        }
+                    },
                 )
             }
             XhuSettingsGroup(title = {
