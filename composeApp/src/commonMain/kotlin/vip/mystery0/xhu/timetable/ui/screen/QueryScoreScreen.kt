@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -80,6 +81,11 @@ fun QueryScoreScreen() {
     val yearDialog by viewModel.yearSelect.selectDialog.collectAsState()
     val termDialog by viewModel.termSelect.selectDialog.collectAsState()
 
+    val autoScoreState by viewModel.autoScoreState.collectAsState()
+    var showAutoScoreDialog by remember { mutableStateOf(false) }
+    var showStartAutoScoreDialog by remember { mutableStateOf(false) }
+    var showStopAutoScoreDialog by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         viewModel.init()
     }
@@ -97,15 +103,21 @@ fun QueryScoreScreen() {
                         )
                     }
                 },
+                actions = {
+                    IconButton(onClick = { showAutoScoreDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Rounded.NotificationsActive,
+                            contentDescription = "成绩变更提醒",
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                }
             )
         },
     ) { paddingValues ->
         var showMoreInfo by remember { mutableStateOf(true) }
         val refreshing by viewModel.refreshing.collectAsState()
         val gpa by viewModel.scoreGpa.collectAsState()
-        val autoScoreState by viewModel.autoScoreState.collectAsState()
-        var showStartAutoScoreDialog by remember { mutableStateOf(false) }
-        var showStopAutoScoreDialog by remember { mutableStateOf(false) }
         BuildPaging(
             paddingValues = paddingValues,
             pager = pager,
@@ -125,14 +137,6 @@ fun QueryScoreScreen() {
                 )
             },
             listContent = {
-                item {
-                    BuildAutoScoreSubscribeCard(
-                        state = autoScoreState,
-                        onStartClick = { showStartAutoScoreDialog = true },
-                        onStopClick = { showStopAutoScoreDialog = true },
-                        onRefreshClick = { viewModel.loadAutoScoreStatus() },
-                    )
-                }
                 if (gpa != null) {
                     item {
                         BuildTermInfo(gpa!!)
@@ -168,6 +172,27 @@ fun QueryScoreScreen() {
                 )
             }
         )
+        if (showAutoScoreDialog) {
+            AlertDialog(
+                onDismissRequest = { showAutoScoreDialog = false },
+                title = { Text("成绩变更提醒") },
+                text = {
+                    BuildAutoScoreSubscribeContent(
+                        state = autoScoreState,
+                        onStartClick = {
+                            showAutoScoreDialog = false
+                            showStartAutoScoreDialog = true
+                        },
+                        onStopClick = {
+                            showAutoScoreDialog = false
+                            showStopAutoScoreDialog = true
+                        },
+                        onRefreshClick = { viewModel.loadAutoScoreStatus() },
+                    )
+                },
+                confirmButton = {},
+            )
+        }
         if (showStartAutoScoreDialog) {
             AlertDialog(
                 onDismissRequest = { showStartAutoScoreDialog = false },
@@ -225,7 +250,7 @@ fun QueryScoreScreen() {
 }
 
 @Composable
-private fun BuildAutoScoreSubscribeCard(
+private fun BuildAutoScoreSubscribeContent(
     state: AutoScoreSubscribeState,
     onStartClick: () -> Unit,
     onStopClick: () -> Unit,
@@ -239,79 +264,69 @@ private fun BuildAutoScoreSubscribeCard(
         state.status == "CANCELLED" -> "已取消"
         else -> "未开启"
     }
-    Card(
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        ),
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Column(modifier = Modifier.weight(1F)) {
-                    Text("成绩变更提醒", fontWeight = FontWeight.Bold)
-                    Text(
-                        text = statusText,
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+            Column(modifier = Modifier.weight(1F)) {
+                Text("任务状态", fontWeight = FontWeight.Bold)
+                Text(
+                    text = statusText,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (active) {
+                OutlinedButton(
+                    enabled = !state.loading,
+                    onClick = onStopClick,
+                ) {
+                    Text("取消")
                 }
-                if (active) {
-                    OutlinedButton(
-                        enabled = !state.loading,
-                        onClick = onStopClick,
-                    ) {
-                        Text("取消")
-                    }
-                } else {
-                    Button(
-                        enabled = !state.loading,
-                        onClick = onStartClick,
-                    ) {
-                        Text("开启")
-                    }
+            } else {
+                Button(
+                    enabled = !state.loading,
+                    onClick = onStartClick,
+                ) {
+                    Text("开启")
                 }
             }
-            if (state.expireDate != null) {
-                Text("到期日期：${state.expireDate}", fontSize = 14.sp)
-            }
-            if (state.nextCheckTime != null) {
-                Text("下次检查：${state.nextCheckTime}", fontSize = 14.sp)
-            }
-            if (state.lastCheckTime != null) {
-                Text(
-                    text = "最近检查：${state.lastCheckTime}（${state.lastCheckResult ?: "未知"}）",
-                    fontSize = 14.sp,
-                )
-            }
-            if (state.status == "SUSPENDED") {
-                Text(
-                    text = "自动查分已暂停，请检查账号状态后重新开启。",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-            if (state.errorMessage.isNotBlank()) {
-                Text(
-                    text = state.errorMessage,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-            TextButton(
-                enabled = !state.loading,
-                onClick = onRefreshClick,
-            ) {
-                Text(if (state.loading) "刷新中..." else "刷新状态")
-            }
+        }
+        Text("到期时间：${state.expireDate ?: "暂无"}", fontSize = 14.sp)
+        Text("下次检查时间：${state.nextCheckTime ?: "暂无"}", fontSize = 14.sp)
+        Text(
+            text = if (state.lastCheckTime == null) {
+                "上次执行结果：暂无"
+            } else {
+                "上次执行结果：${state.lastCheckTime}（${state.lastCheckResult ?: "未知"}）"
+            },
+            fontSize = 14.sp,
+        )
+        if (state.status == "SUSPENDED") {
+            Text(
+                text = "自动查分已暂停，请检查账号状态后重新开启。",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+        if (state.errorMessage.isNotBlank()) {
+            Text(
+                text = state.errorMessage,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+        TextButton(
+            enabled = !state.loading,
+            onClick = onRefreshClick,
+        ) {
+            Text(if (state.loading) "刷新中..." else "刷新状态")
         }
     }
 }
