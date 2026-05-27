@@ -20,6 +20,7 @@ import vip.mystery0.xhu.timetable.fileLogWriter
 import vip.mystery0.xhu.timetable.model.response.Splash
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
 import vip.mystery0.xhu.timetable.module.desc
+import vip.mystery0.xhu.timetable.repository.JobRepo
 import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.ui.theme.NightMode
 import vip.mystery0.xhu.timetable.ui.theme.Theme
@@ -110,6 +111,16 @@ class SettingsViewModel : ComposeViewModel() {
         }) {
             val file = fileLogWriter.prepareSendFile()
             FileKit.shareFile(file)
+        }
+    }
+
+    fun startPushTest() {
+        viewModelScope.safeLaunch(onException = {
+            toastMessage(it.desc())
+            true
+        }) {
+            JobRepo.startClientTestJob()
+            toastMessage("测试请求已发送，请等待服务端推送（1分钟后、10分钟后）")
         }
     }
 }

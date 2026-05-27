@@ -405,6 +405,15 @@ fun SettingsScreen() {
                         viewModel.updateFeaturePullTime()
                     }
                 )
+                XhuSettingsMenuLink(
+                    title = { Text(text = "推送测试") },
+                    subtitle = {
+                        Text(text = "请求服务端发送测试推送")
+                    },
+                    onClick = {
+                        viewModel.startPushTest()
+                    },
+                )
                 DeveloperSettings()
                 XhuSettingsMenuLink(
                     title = { Text(text = "撤销隐私授权") },

@@ -16,6 +16,7 @@ import vip.mystery0.xhu.timetable.api.UserApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.model.request.AutoScoreStartRequest
+import vip.mystery0.xhu.timetable.model.request.ClientTestRequest
 import vip.mystery0.xhu.timetable.model.response.AutoScoreStartResponse
 import vip.mystery0.xhu.timetable.model.response.AutoScoreStatusResponse
 import vip.mystery0.xhu.timetable.platform
@@ -82,6 +83,16 @@ object JobRepo : BaseDataRepo {
     suspend fun fetchAutoScoreJobStatus(): AutoScoreStatusResponse {
         return mainUser().withAutoLoginOnce {
             jobApi.getAutoScoreJobStatus(it)
+        }
+    }
+
+    suspend fun startClientTestJob() {
+        val registrationId = pushManager.registrationId()
+            ?: pushManager.refreshRegistrationId()
+            ?: error("推送服务初始化失败，请稍后重试")
+        val request = ClientTestRequest(registrationId = registrationId)
+        mainUser().withAutoLoginOnce {
+            jobApi.startClientTestJob(it, request = request)
         }
     }
 }
