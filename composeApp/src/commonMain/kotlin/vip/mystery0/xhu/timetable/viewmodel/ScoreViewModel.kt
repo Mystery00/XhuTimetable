@@ -19,7 +19,8 @@ import vip.mystery0.xhu.timetable.push.pushManager
 import vip.mystery0.xhu.timetable.repository.JobRepo
 import vip.mystery0.xhu.timetable.repository.ScoreRepo
 import vip.mystery0.xhu.timetable.utils.asLocalDateTime
-import vip.mystery0.xhu.timetable.utils.chinaDateTime
+import vip.mystery0.xhu.timetable.utils.chinaDateTimeNoSeconds
+import vip.mystery0.xhu.timetable.utils.dateFormatter
 
 class ScoreViewModel : PagingComposeViewModel<PageRequest, ScoreResponse>(
     {
@@ -106,9 +107,11 @@ class ScoreViewModel : PagingComposeViewModel<PageRequest, ScoreResponse>(
             _autoScoreState.value = AutoScoreSubscribeState(
                 hasActiveTask = response.hasActiveTask,
                 status = response.status,
-                expireDate = response.expireDate?.toString(),
-                nextCheckTime = response.nextCheckTime?.asLocalDateTime()?.format(chinaDateTime),
-                lastCheckTime = response.lastCheckTime?.asLocalDateTime()?.format(chinaDateTime),
+                expireDate = response.expireDate?.format(dateFormatter),
+                nextCheckTime = response.nextCheckTime?.asLocalDateTime()
+                    ?.format(chinaDateTimeNoSeconds),
+                lastCheckTime = response.lastCheckTime?.asLocalDateTime()
+                    ?.format(chinaDateTimeNoSeconds),
                 lastCheckResult = response.lastCheckResult,
             )
         }

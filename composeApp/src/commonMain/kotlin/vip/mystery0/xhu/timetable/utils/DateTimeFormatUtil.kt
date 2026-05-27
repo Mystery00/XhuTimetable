@@ -70,6 +70,19 @@ val chinaDateTime = LocalDateTime.Format {
     second()
     char('秒')
 }
+val chinaDateTimeNoSeconds = LocalDateTime.Format {
+    year()
+    char('年')
+    monthNumber()
+    char('月')
+    day()
+    char('日')
+    char(' ')
+    hour()
+    char('时')
+    minute()
+    char('分')
+}
 
 fun DayOfWeek.formatChina(): String =
     when (this.isoDayNumber) {

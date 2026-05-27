@@ -274,14 +274,8 @@ private fun BuildAutoScoreSubscribeContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Column(modifier = Modifier.weight(1F)) {
-                Text("任务状态", fontWeight = FontWeight.Bold)
-                Text(
-                    text = statusText,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            Text("任务状态：${statusText}", fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.weight(1F))
             if (active) {
                 OutlinedButton(
                     enabled = !state.loading,
@@ -298,14 +292,11 @@ private fun BuildAutoScoreSubscribeContent(
                 }
             }
         }
-        Text("到期时间：${state.expireDate ?: "暂无"}", fontSize = 14.sp)
+        Text("任务过期时间：${state.expireDate ?: "暂无"}", fontSize = 14.sp)
         Text("下次检查时间：${state.nextCheckTime ?: "暂无"}", fontSize = 14.sp)
+        Text("上次执行时间：${state.lastCheckTime ?: "暂无"}", fontSize = 14.sp)
         Text(
-            text = if (state.lastCheckTime == null) {
-                "上次执行结果：暂无"
-            } else {
-                "上次执行结果：${state.lastCheckTime}（${state.lastCheckResult ?: "未知"}）"
-            },
+            text = "上次执行结果：${state.lastCheckResult ?: "未知"}",
             fontSize = 14.sp,
         )
         if (state.status == "SUSPENDED") {
