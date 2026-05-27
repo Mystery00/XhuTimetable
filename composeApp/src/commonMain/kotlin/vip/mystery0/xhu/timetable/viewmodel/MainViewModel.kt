@@ -7,6 +7,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
@@ -62,6 +64,8 @@ import vip.mystery0.xhu.timetable.utils.thingDateTimeFormatter
 import kotlin.time.Clock
 
 class MainViewModel : ComposeViewModel() {
+
+    private val courseLoadMutex = Mutex()
 
     val version = MutableStateFlow<ClientVersion?>(null)
 
@@ -252,74 +256,79 @@ class MainViewModel : ComposeViewModel() {
             _loading.value = false
             toastMessage(throwable.desc())
         }) {
-            //设置加载状态
-            _loading.value = true
-            //加载课表相关配置项
-            val (currentWeek, loadFromCloud) = loadCourseConfig(forceUpdate = false)
-            //获取缓存的课程数据
-            val data = getMainPageData(forceLoadFromCloud = false, forceLoadFromLocal = true)
-            val calendarData = AggregationRepo.fetchAggregationCalendarPage(
-                forceLoadFromCloud = false,
-                forceLoadFromLocal = true
-            )
-            //获取自定义颜色列表
-            val colorMap = CourseColorRepo.getRawCourseColorList()
-            withContext(Dispatchers.Default) {
-                //加载今日列表的数据
-                loadTodayCourse(
-                    currentWeek,
-                    data.todayViewList,
-                    colorMap,
-                )
-                //加载今日事项
-                loadTodayThing(data.todayThingList)
-                //加载周列表的数据
-                loadCourseToTable(
-                    currentWeek,
-                    currentWeek,
-                    data.weekViewList,
-                    colorMap,
-                    changeWeekOnly,
-                )
-                //加载日历视图的数据
-                loadCalendar(currentWeek, calendarData, colorMap)
-                //加载实践课程
-                loadPracticalCourse(data.practicalCourseList)
-            }
+            courseLoadMutex.withLock {
+                try {
+                    //设置加载状态
+                    _loading.value = true
+                    //加载课表相关配置项
+                    val (currentWeek, loadFromCloud) = loadCourseConfig(forceUpdate = false)
+                    //获取缓存的课程数据
+                    val data = getMainPageData(forceLoadFromCloud = false, forceLoadFromLocal = true)
+                    val calendarData = AggregationRepo.fetchAggregationCalendarPage(
+                        forceLoadFromCloud = false,
+                        forceLoadFromLocal = true
+                    )
+                    //获取自定义颜色列表
+                    val colorMap = CourseColorRepo.getRawCourseColorList()
+                    withContext(Dispatchers.Default) {
+                        //加载今日列表的数据
+                        loadTodayCourse(
+                            currentWeek,
+                            data.todayViewList,
+                            colorMap,
+                        )
+                        //加载今日事项
+                        loadTodayThing(data.todayThingList)
+                        //加载周列表的数据
+                        loadCourseToTable(
+                            currentWeek,
+                            currentWeek,
+                            data.weekViewList,
+                            colorMap,
+                            changeWeekOnly,
+                        )
+                        //加载日历视图的数据
+                        loadCalendar(currentWeek, calendarData, colorMap)
+                        //加载实践课程
+                        loadPracticalCourse(data.practicalCourseList)
+                    }
 
-            if (loadFromCloud) {
-                //需要从云端加载数据
-                val cloudData =
-                    getMainPageData(forceLoadFromCloud = true, forceLoadFromLocal = false)
-                val cloudCalendarData = AggregationRepo.fetchAggregationCalendarPage(
-                    forceLoadFromCloud = true,
-                    forceLoadFromLocal = false
-                )
-                withContext(Dispatchers.Default) {
-                    //加载今日列表的数据
-                    loadTodayCourse(
-                        currentWeek,
-                        cloudData.todayViewList,
-                        colorMap,
-                    )
-                    //加载今日事项
-                    loadTodayThing(cloudData.todayThingList)
-                    //加载周列表的数据
-                    loadCourseToTable(
-                        currentWeek,
-                        currentWeek,
-                        cloudData.weekViewList,
-                        colorMap,
-                        changeWeekOnly,
-                    )
-                    //加载日历视图的数据
-                    loadCalendar(currentWeek, cloudCalendarData, colorMap)
-                    //加载实践课程
-                    loadPracticalCourse(cloudData.practicalCourseList)
+                    if (loadFromCloud) {
+                        //需要从云端加载数据
+                        val cloudData =
+                            getMainPageData(forceLoadFromCloud = true, forceLoadFromLocal = false)
+                        val cloudCalendarData = AggregationRepo.fetchAggregationCalendarPage(
+                            forceLoadFromCloud = true,
+                            forceLoadFromLocal = false
+                        )
+                        withContext(Dispatchers.Default) {
+                            //加载今日列表的数据
+                            loadTodayCourse(
+                                currentWeek,
+                                cloudData.todayViewList,
+                                colorMap,
+                            )
+                            //加载今日事项
+                            loadTodayThing(cloudData.todayThingList)
+                            //加载周列表的数据
+                            loadCourseToTable(
+                                currentWeek,
+                                currentWeek,
+                                cloudData.weekViewList,
+                                colorMap,
+                                changeWeekOnly,
+                            )
+                            //加载日历视图的数据
+                            loadCalendar(currentWeek, cloudCalendarData, colorMap)
+                            //加载实践课程
+                            loadPracticalCourse(cloudData.practicalCourseList)
+                        }
+                        toastMessage("数据同步成功！")
+                    }
+                } finally {
+                    _loading.value = false
                 }
-                toastMessage("数据同步成功！")
             }
-            _loading.value = false
         }
     }
 
@@ -335,37 +344,52 @@ class MainViewModel : ComposeViewModel() {
             }
             toastMessage(throwable.desc())
         }) {
-            //设置加载状态
-            _loading.value = true
-            //加载课表相关配置项
-            val (currentWeek, _) = loadCourseConfig(forceUpdate = false)
-            //从云端加载数据
-            val cloudData = getMainPageData(forceLoadFromCloud = true, forceLoadFromLocal = false)
-            val cloudCalendarData = AggregationRepo
-                .fetchAggregationCalendarPage(forceLoadFromCloud = true, forceLoadFromLocal = false)
-            //获取自定义颜色列表
-            val colorMap = CourseColorRepo.getRawCourseColorList()
-            withContext(Dispatchers.Default) {
-                //加载今日列表的数据
-                loadTodayCourse(
-                    currentWeek,
-                    cloudData.todayViewList,
-                    colorMap,
-                )
-                //加载今日事项
-                loadTodayThing(cloudData.todayThingList)
-                //加载周列表的数据
-                loadCourseToTable(currentWeek, currentWeek, cloudData.weekViewList, colorMap, false)
-                //加载日历视图的数据
-                loadCalendar(currentWeek, cloudCalendarData, colorMap)
-                //加载实践课程
-                loadPracticalCourse(cloudData.practicalCourseList)
+            courseLoadMutex.withLock {
+                try {
+                    //设置加载状态
+                    _loading.value = true
+                    //加载课表相关配置项
+                    val (currentWeek, _) = loadCourseConfig(forceUpdate = false)
+                    //从云端加载数据
+                    val cloudData = getMainPageData(
+                        forceLoadFromCloud = true,
+                        forceLoadFromLocal = false,
+                    )
+                    val cloudCalendarData = AggregationRepo.fetchAggregationCalendarPage(
+                        forceLoadFromCloud = true,
+                        forceLoadFromLocal = false,
+                    )
+                    //获取自定义颜色列表
+                    val colorMap = CourseColorRepo.getRawCourseColorList()
+                    withContext(Dispatchers.Default) {
+                        //加载今日列表的数据
+                        loadTodayCourse(
+                            currentWeek,
+                            cloudData.todayViewList,
+                            colorMap,
+                        )
+                        //加载今日事项
+                        loadTodayThing(cloudData.todayThingList)
+                        //加载周列表的数据
+                        loadCourseToTable(
+                            currentWeek,
+                            currentWeek,
+                            cloudData.weekViewList,
+                            colorMap,
+                            false,
+                        )
+                        //加载日历视图的数据
+                        loadCalendar(currentWeek, cloudCalendarData, colorMap)
+                        //加载实践课程
+                        loadPracticalCourse(cloudData.practicalCourseList)
+                    }
+                    toastMessage("数据同步成功！")
+                } finally {
+                    _loading.value = false
+                }
             }
-            toastMessage("数据同步成功！")
-            _loading.value = false
         }
     }
-
     /**
      * 复用的加载课表相关配置项的方法
      * @return 是否需要从云端加载课表

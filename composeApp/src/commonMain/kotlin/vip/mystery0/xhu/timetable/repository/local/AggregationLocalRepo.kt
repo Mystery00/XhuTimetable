@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.repository.local
 
+import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -18,6 +19,7 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore
+import vip.mystery0.xhu.timetable.db.AppDatabase
 import vip.mystery0.xhu.timetable.db.dao.CourseDao
 import vip.mystery0.xhu.timetable.db.dao.CustomCourseDao
 import vip.mystery0.xhu.timetable.db.dao.CustomThingDao
@@ -47,6 +49,7 @@ import kotlin.random.Random
 import kotlin.time.Instant
 
 object AggregationLocalRepo : KoinComponent {
+    private val database: AppDatabase by inject()
     private val courseDao: CourseDao by inject()
     private val practicalCourseDao: PracticalCourseDao by inject()
     private val experimentCourseDao: ExperimentCourseDao by inject()
@@ -356,140 +359,132 @@ object AggregationLocalRepo : KoinComponent {
         containCustomCourse: Boolean,
         containCustomThing: Boolean,
     ) {
-        //删除所有旧数据
         withContext(Dispatchers.IO) {
-            courseDao.queryList(user.studentId, year, term).forEach {
-                courseDao.delete(it)
-            }
-            practicalCourseDao.queryList(user.studentId, year, term).forEach {
-                practicalCourseDao.delete(it)
-            }
-            experimentCourseDao.queryList(user.studentId, year, term).forEach {
-                experimentCourseDao.delete(it)
-            }
-            if (containCustomCourse) {
-                customCourseDao.queryList(user.studentId, year, term).forEach {
-                    customCourseDao.delete(it)
+            database.withTransaction {
+                //删除所有旧数据，并在同一个事务中写入新数据，避免并发同步交错写入重复课程。
+                courseDao.queryList(user.studentId, year, term).forEach {
+                    courseDao.delete(it)
                 }
-            }
-            if (containCustomThing) {
-                customThingDao.queryList(user.studentId).forEach {
-                    customThingDao.delete(it)
+                practicalCourseDao.queryList(user.studentId, year, term).forEach {
+                    practicalCourseDao.delete(it)
                 }
-            }
-        }
-        response.courseList.forEach {
-            val entity = CourseEntity(
-                courseName = it.courseName,
-                weekStr = it.weekStr,
-                weekList = it.weekList,
-                dayIndex = it.dayIndex,
-                startDayTime = it.startDayTime,
-                endDayTime = it.endDayTime,
-                startTime = it.startTime.format(Formatter.TIME_NO_SECONDS),
-                endTime = it.endTime.format(Formatter.TIME_NO_SECONDS),
-                location = it.location,
-                teacher = it.teacher,
-                extraData = it.extraData,
-                campus = it.campus,
-                courseType = it.courseType,
-                credit = it.credit,
-                courseCodeType = it.courseCodeType,
-                courseCodeFlag = it.courseCodeFlag,
-                year = year,
-                term = term,
-                studentId = user.studentId,
-            )
-            withContext(Dispatchers.IO) {
-                courseDao.insert(entity)
-            }
-        }
-        response.practicalCourseList.forEach {
-            val entity = PracticalCourseEntity(
-                courseName = it.courseName,
-                weekStr = it.weekStr,
-                weekList = it.weekList,
-                teacher = it.teacher,
-                campus = it.campus,
-                credit = it.credit,
-                year = year,
-                term = term,
-                studentId = user.studentId,
-            )
-            withContext(Dispatchers.IO) {
-                practicalCourseDao.insert(entity)
-            }
-        }
-        response.experimentCourseList.forEach {
-            val entity = ExperimentCourseEntity(
-                courseName = it.courseName,
-                experimentProjectName = it.experimentProjectName,
-                teacherName = it.teacherName,
-                experimentGroupName = it.experimentGroupName,
-                weekStr = it.weekStr,
-                weekList = it.weekList,
-                dayIndex = it.dayIndex,
-                startDayTime = it.startDayTime,
-                endDayTime = it.endDayTime,
-                startTime = it.startTime.format(Formatter.TIME_NO_SECONDS),
-                endTime = it.endTime.format(Formatter.TIME_NO_SECONDS),
-                region = it.region,
-                location = it.location,
-                year = year,
-                term = term,
-                studentId = user.studentId,
-            )
-            withContext(Dispatchers.IO) {
-                experimentCourseDao.insert(entity)
-            }
-        }
-        if (containCustomCourse) {
-            response.customCourseList.forEach {
-                val entity = CustomCourseEntity(
-                    courseId = it.courseId,
-                    courseName = it.courseName,
-                    weekStr = it.weekStr,
-                    weekList = it.weekList,
-                    dayIndex = it.dayIndex,
-                    startDayTime = it.startDayTime,
-                    endDayTime = it.endDayTime,
-                    startTime = it.startTime.format(Formatter.TIME_NO_SECONDS),
-                    endTime = it.endTime.format(Formatter.TIME_NO_SECONDS),
-                    location = it.location,
-                    teacher = it.teacher,
-                    extraData = it.extraData,
-                    createTime = it.createTime.toEpochMilliseconds(),
-                    year = year,
-                    term = term,
-                    studentId = user.studentId,
-                )
-                withContext(Dispatchers.IO) {
-                    customCourseDao.insert(entity)
+                experimentCourseDao.queryList(user.studentId, year, term).forEach {
+                    experimentCourseDao.delete(it)
                 }
-            }
-        }
-        if (containCustomThing) {
-            response.customThingList.forEach {
-                val entity = CustomThingEntity(
-                    thingId = it.thingId,
-                    title = it.title,
-                    location = it.location,
-                    allDay = it.allDay,
-                    startTime = it.startTime.toEpochMilliseconds(),
-                    endTime = it.endTime.toEpochMilliseconds(),
-                    remark = it.remark,
-                    color = it.color,
-                    metadata = it.metadata,
-                    createTime = it.createTime.toEpochMilliseconds(),
-                    studentId = user.studentId,
-                )
-                withContext(Dispatchers.IO) {
-                    customThingDao.insert(entity)
+                if (containCustomCourse) {
+                    customCourseDao.queryList(user.studentId, year, term).forEach {
+                        customCourseDao.delete(it)
+                    }
+                }
+                if (containCustomThing) {
+                    customThingDao.queryList(user.studentId).forEach {
+                        customThingDao.delete(it)
+                    }
+                }
+
+                response.courseList.forEach {
+                    val entity = CourseEntity(
+                        courseName = it.courseName,
+                        weekStr = it.weekStr,
+                        weekList = it.weekList,
+                        dayIndex = it.dayIndex,
+                        startDayTime = it.startDayTime,
+                        endDayTime = it.endDayTime,
+                        startTime = it.startTime.format(Formatter.TIME_NO_SECONDS),
+                        endTime = it.endTime.format(Formatter.TIME_NO_SECONDS),
+                        location = it.location,
+                        teacher = it.teacher,
+                        extraData = it.extraData,
+                        campus = it.campus,
+                        courseType = it.courseType,
+                        credit = it.credit,
+                        courseCodeType = it.courseCodeType,
+                        courseCodeFlag = it.courseCodeFlag,
+                        year = year,
+                        term = term,
+                        studentId = user.studentId,
+                    )
+                    courseDao.insert(entity)
+                }
+                response.practicalCourseList.forEach {
+                    val entity = PracticalCourseEntity(
+                        courseName = it.courseName,
+                        weekStr = it.weekStr,
+                        weekList = it.weekList,
+                        teacher = it.teacher,
+                        campus = it.campus,
+                        credit = it.credit,
+                        year = year,
+                        term = term,
+                        studentId = user.studentId,
+                    )
+                    practicalCourseDao.insert(entity)
+                }
+                response.experimentCourseList.forEach {
+                    val entity = ExperimentCourseEntity(
+                        courseName = it.courseName,
+                        experimentProjectName = it.experimentProjectName,
+                        teacherName = it.teacherName,
+                        experimentGroupName = it.experimentGroupName,
+                        weekStr = it.weekStr,
+                        weekList = it.weekList,
+                        dayIndex = it.dayIndex,
+                        startDayTime = it.startDayTime,
+                        endDayTime = it.endDayTime,
+                        startTime = it.startTime.format(Formatter.TIME_NO_SECONDS),
+                        endTime = it.endTime.format(Formatter.TIME_NO_SECONDS),
+                        region = it.region,
+                        location = it.location,
+                        year = year,
+                        term = term,
+                        studentId = user.studentId,
+                    )
+                    experimentCourseDao.insert(entity)
+                }
+                if (containCustomCourse) {
+                    response.customCourseList.forEach {
+                        val entity = CustomCourseEntity(
+                            courseId = it.courseId,
+                            courseName = it.courseName,
+                            weekStr = it.weekStr,
+                            weekList = it.weekList,
+                            dayIndex = it.dayIndex,
+                            startDayTime = it.startDayTime,
+                            endDayTime = it.endDayTime,
+                            startTime = it.startTime.format(Formatter.TIME_NO_SECONDS),
+                            endTime = it.endTime.format(Formatter.TIME_NO_SECONDS),
+                            location = it.location,
+                            teacher = it.teacher,
+                            extraData = it.extraData,
+                            createTime = it.createTime.toEpochMilliseconds(),
+                            year = year,
+                            term = term,
+                            studentId = user.studentId,
+                        )
+                        customCourseDao.insert(entity)
+                    }
+                }
+                if (containCustomThing) {
+                    response.customThingList.forEach {
+                        val entity = CustomThingEntity(
+                            thingId = it.thingId,
+                            title = it.title,
+                            location = it.location,
+                            allDay = it.allDay,
+                            startTime = it.startTime.toEpochMilliseconds(),
+                            endTime = it.endTime.toEpochMilliseconds(),
+                            remark = it.remark,
+                            color = it.color,
+                            metadata = it.metadata,
+                            createTime = it.createTime.toEpochMilliseconds(),
+                            studentId = user.studentId,
+                        )
+                        customThingDao.insert(entity)
+                    }
                 }
             }
         }
     }
-
     suspend fun getRandomCourseList(
         weekSize: Int,
         todaySize: Int,
