@@ -1,6 +1,7 @@
 package vip.mystery0.xhu.timetable.repository.local
 
-import androidx.room.withTransaction
+import androidx.room.immediateTransaction
+import androidx.room.useWriterConnection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -360,7 +361,8 @@ object AggregationLocalRepo : KoinComponent {
         containCustomThing: Boolean,
     ) {
         withContext(Dispatchers.IO) {
-            database.withTransaction {
+            database.useWriterConnection { transactor ->
+                transactor.immediateTransaction {
                 //删除所有旧数据，并在同一个事务中写入新数据，避免并发同步交错写入重复课程。
                 courseDao.queryList(user.studentId, year, term).forEach {
                     courseDao.delete(it)
@@ -481,6 +483,7 @@ object AggregationLocalRepo : KoinComponent {
                         )
                         customThingDao.insert(entity)
                     }
+                }
                 }
             }
         }
