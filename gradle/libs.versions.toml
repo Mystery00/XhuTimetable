@@ -15,7 +15,7 @@ vivoPushAppId = "106019804"
 vivoPushAppKey = "541b767405526bc0812d2faa8d75ec04"
 
 composeMultiplatform = "1.11.0"
-aboutlibraries = "14.2.0"
+aboutlibraries = "14.2.1"
 kotlinx-serialization = "1.11.0"
 
 android-compileSdk = "37"
