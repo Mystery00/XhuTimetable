@@ -338,6 +338,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = vip.mystery0.xhu.timetable;
+				PRODUCT_NAME = XhuTimetable;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = XhuTimetableProfile;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -381,6 +382,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = vip.mystery0.xhu.timetable;
+				PRODUCT_NAME = XhuTimetable;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = XhuTimetableProfile;
 				SWIFT_EMIT_LOC_STRINGS = YES;
