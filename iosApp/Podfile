@@ -1,7 +1,25 @@
 platform :ios, '15.0'
 
 target 'iosApp' do
-  use_frameworks!
-
+  # JPush 是 Objective-C 静态库，通过 Bridging Header 桥接到 Swift；
+  # 不开启 use_frameworks!，避免与 KMP 生成的静态 ComposeApp.framework 混用产生 link 异常。
   pod 'JPush'
+end
+
+# 让 CocoaPods 生成的 xcconfig 反向引入项目自定义配置（Config.xcconfig 由
+# updateAppleBuildVersion gradle 任务从 Config.xcconfig.template 注入业务变量），
+# 这样 baseConfiguration 指向 Pods xcconfig 时，业务变量与 Bridging Header 设置仍生效。
+# 路径解析以 Pods xcconfig 自身位置为基准：iosApp/Pods/Target Support Files/Pods-iosApp/ → iosApp/Configuration/。
+post_install do |installer|
+  include_line = '#include "../../../Configuration/Config.xcconfig"'
+  pattern = File.join(installer.config.installation_root, 'Pods/Target Support Files/Pods-*/Pods-*.xcconfig')
+  Dir.glob(pattern).each do |xcconfig_path|
+    content = File.read(xcconfig_path)
+    # 清理之前可能写错的 include 行（路径不对或用 #include? 静默失败的版本）
+    cleaned = content.lines.reject { |l| l.strip.start_with?('#include') && l.include?('Configuration/Config.xcconfig') }.join
+    new_content = "#{include_line}\n#{cleaned}"
+    next if content == new_content
+    File.write(xcconfig_path, new_content)
+    puts "[Podfile] Patched #{File.basename(xcconfig_path)} to include Config.xcconfig"
+  end
 end

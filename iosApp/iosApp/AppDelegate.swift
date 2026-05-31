@@ -1,7 +1,6 @@
 import UIKit
 import UserNotifications
 import ComposeApp
-import JPush
 
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(

@@ -9,3 +9,19 @@ MARKETING_VERSION={appVersionName}
 JPUSH_APPKEY={releasePushAppKey}
 JPUSH_APPKEY[config=Debug]={debugPushAppKey}
 JPUSH_CHANNEL={pushChannel}
+
+// JPush 6.x 为 Objective-C 静态库，通过 Bridging Header 暴露给 Swift
+SWIFT_OBJC_BRIDGING_HEADER = iosApp/iosApp-Bridging-Header.h
+
+// CocoaPods 1.16.2 在 Xcode 16 PBXFileSystemSynchronizedRootGroup 项目下未生成
+// [CP] Copy XCFrameworks build phase，故直接指向 .xcframework 内部 slice 路径。
+HEADER_SEARCH_PATHS = $(inherited) "${SRCROOT}/Pods/JCore/jcore-ios-5.4.0.xcframework/ios-arm64/Headers" "${SRCROOT}/Pods/JPush/jpush-ios-6.1.0.xcframework/ios-arm64/Headers"
+HEADER_SEARCH_PATHS[sdk=iphonesimulator*] = $(inherited) "${SRCROOT}/Pods/JCore/jcore-ios-5.4.0.xcframework/ios-arm64_x86_64-simulator/Headers" "${SRCROOT}/Pods/JPush/jpush-ios-6.1.0.xcframework/ios-arm64_x86_64-simulator/Headers"
+
+LIBRARY_SEARCH_PATHS = $(inherited) "${SRCROOT}/Pods/JCore/jcore-ios-5.4.0.xcframework/ios-arm64" "${SRCROOT}/Pods/JPush/jpush-ios-6.1.0.xcframework/ios-arm64"
+LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*] = $(inherited) "${SRCROOT}/Pods/JCore/jcore-ios-5.4.0.xcframework/ios-arm64_x86_64-simulator" "${SRCROOT}/Pods/JPush/jpush-ios-6.1.0.xcframework/ios-arm64_x86_64-simulator"
+
+// androidx.sqlite 的 NativeSQLiteDriver 通过 cinterop 引用了 sqlite3_load_extension，
+// 但 Apple iOS SDK 的 libsqlite3 编译时禁用了该符号 (SQLITE_OMIT_LOAD_EXTENSION)。
+// 用 -Wl,-U 让 linker 容忍这一个 undefined 符号；Room 运行时不调用 load_extension 即可。
+OTHER_LDFLAGS = $(inherited) -Wl,-U,_sqlite3_load_extension

@@ -1,0 +1,20 @@
+PODS:
+  - JCore (5.4.0)
+  - JPush (6.1.0):
+    - JCore (> 5.1.1)
+
+DEPENDENCIES:
+  - JPush
+
+SPEC REPOS:
+  trunk:
+    - JCore
+    - JPush
+
+SPEC CHECKSUMS:
+  JCore: 97f24c92979f9923ef5cfdbd626a29e9504215dd
+  JPush: 891c497687be788b094bde368d51289355ee1112
+
+PODFILE CHECKSUM: ef022e5670b64d7bc9e8631f90652f1d5c3b18ea
+
+COCOAPODS: 1.16.2
