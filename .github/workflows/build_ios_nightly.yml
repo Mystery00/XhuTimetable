@@ -77,14 +77,10 @@ jobs:
           path: ~/Library/Developer/Xcode/DerivedData
           key: xcode-build
           restore-keys: xcode-build
-      - name: 安装 iOS 依赖
-        run: |
-          cd ${{ env.MOBILE_DIRECTORY }}
-          pod install --repo-update
       - name: 构建iOS APP
         run: |
           cd ${{ env.MOBILE_DIRECTORY }}
-          xcodebuild PROVISIONING_PROFILE=${{ steps.profile.outputs.uuid }} -workspace ${{ env.XCODE_PROJECT }}.xcworkspace -scheme ${{ env.XCODE_PROJECT }} archive -archivePath "Actions" -configuration Release -arch arm64
+          xcodebuild PROVISIONING_PROFILE=${{ steps.profile.outputs.uuid }} -project ${{ env.XCODE_PROJECT }}.xcodeproj -scheme ${{ env.XCODE_PROJECT }} archive -archivePath "Actions" -configuration Release -arch arm64
       - name: 导出ipa
         env:
           EXPORT_PLIST: ${{ secrets.IOS_EXPORT_PRODUCTION }}
