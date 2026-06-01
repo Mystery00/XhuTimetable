@@ -77,6 +77,11 @@ jobs:
           path: ~/Library/Developer/Xcode/DerivedData
           key: xcode-build
           restore-keys: xcode-build
+      - name: 选择 Xcode 26.2
+        # macos-15-arm64 默认仍是 Xcode 16.4 (iPhoneOS18.5.sdk)，但 Compose
+        # Multiplatform 1.11.0 在 CMPLayoutRegion.o 中强引用 iOS 26 才有的
+        # UIViewLayoutRegion 类，必须切到 Xcode 26.2 才能链接通过。
+        run: sudo xcode-select -s /Applications/Xcode_26.2.app
       - name: 构建iOS APP
         run: |
           cd ${{ env.MOBILE_DIRECTORY }}
