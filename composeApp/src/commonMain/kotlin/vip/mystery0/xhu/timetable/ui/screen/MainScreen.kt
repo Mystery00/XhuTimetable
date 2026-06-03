@@ -61,7 +61,7 @@ import vip.mystery0.xhu.timetable.viewmodel.PagerProfileViewModel
 fun MainScreen() {
     val viewModel = koinViewModel<MainViewModel>()
 
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
 
     val isDarkMode = isDarkMode()
 

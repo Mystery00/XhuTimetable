@@ -56,7 +56,7 @@ import xhutimetable.composeapp.generated.resources.state_no_data
 fun QueryExamScreen() {
     val viewModel = koinViewModel<ExamViewModel>()
 
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
 
     val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
 

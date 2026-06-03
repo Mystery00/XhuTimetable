@@ -48,7 +48,7 @@ import xhutimetable.composeapp.generated.resources.state_no_data
 fun QueryExpScoreScreen() {
     val viewModel = koinViewModel<ExpScoreViewModel>()
 
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
 
     val expScoreListState by viewModel.expScoreListState.collectAsState()
 

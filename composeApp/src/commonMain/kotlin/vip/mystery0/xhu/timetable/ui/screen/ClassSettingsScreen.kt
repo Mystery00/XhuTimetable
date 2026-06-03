@@ -62,7 +62,7 @@ import vip.mystery0.xhu.timetable.viewmodel.ClassSettingsViewModel
 fun ClassSettingsScreen() {
     val viewModel = koinViewModel<ClassSettingsViewModel>()
 
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
 
     val currentYear by viewModel.currentYearData.collectAsState()
     val currentTerm by viewModel.currentTermData.collectAsState()

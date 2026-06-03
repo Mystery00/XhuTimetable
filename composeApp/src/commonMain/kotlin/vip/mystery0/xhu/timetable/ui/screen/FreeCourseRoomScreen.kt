@@ -76,7 +76,7 @@ import xhutimetable.composeapp.generated.resources.state_no_course_data
 fun FreeCourseRoomScreen() {
     val viewModel = koinViewModel<CourseRoomViewModel>()
 
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
     val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
 
     val scope = rememberCoroutineScope()

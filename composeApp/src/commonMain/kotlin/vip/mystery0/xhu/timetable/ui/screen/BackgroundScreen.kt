@@ -78,7 +78,7 @@ import xhutimetable.composeapp.generated.resources.state_no_data
 fun BackgroundScreen() {
     val viewModel = koinViewModel<BackgroundViewModel>()
 
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
 
     val backgroundListState by viewModel.backgroundListState.collectAsState()
 

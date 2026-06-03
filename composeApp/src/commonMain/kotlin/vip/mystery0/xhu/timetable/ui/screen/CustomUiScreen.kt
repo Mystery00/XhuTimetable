@@ -69,7 +69,7 @@ import kotlin.random.Random
 fun CustomUiScreen() {
     val viewModel = koinViewModel<CustomUiViewModel>()
 
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
 
     val randomWeekCourse by viewModel.randomWeekCourse.collectAsState()
     val randomTodayCourse by viewModel.randomTodayCourse.collectAsState()

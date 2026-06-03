@@ -28,7 +28,7 @@ import vip.mystery0.xhu.timetable.ui.screen.SchoolTimetableScreen
 import vip.mystery0.xhu.timetable.ui.screen.SettingsScreen
 import vip.mystery0.xhu.timetable.ui.screen.SplashImageScreen
 
-val LocalNavController = compositionLocalOf<NavController?> { null }
+val LocalNavController = compositionLocalOf<NavController> { error("LocalNavController not provided") }
 
 interface Nav
 

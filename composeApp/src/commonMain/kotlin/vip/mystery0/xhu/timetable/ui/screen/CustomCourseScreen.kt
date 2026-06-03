@@ -97,7 +97,7 @@ import xhutimetable.composeapp.generated.resources.state_no_course_data
 fun CustomCourseScreen() {
     val viewModel = koinViewModel<CustomCourseViewModel>()
 
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
 
     val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
 

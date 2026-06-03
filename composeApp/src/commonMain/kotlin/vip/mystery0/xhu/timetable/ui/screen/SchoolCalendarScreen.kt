@@ -42,7 +42,7 @@ import xhutimetable.composeapp.generated.resources.state_no_data
 fun SchoolCalendarScreen() {
     val viewModel = koinViewModel<SchoolCalendarViewModel>()
 
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
 
     val loading by viewModel.loading.collectAsState()
     val area by viewModel.area.collectAsState()

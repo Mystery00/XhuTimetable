@@ -78,7 +78,7 @@ import vip.mystery0.xhu.timetable.viewmodel.UserItem
 fun AccountManagementScreen() {
     val viewModel = koinViewModel<AccountManagementViewModel>()
 
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
 
     LaunchedEffect(Unit) {
         viewModel.init()

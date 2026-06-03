@@ -73,7 +73,7 @@ val profileCourseContent: TabContent = @Composable {
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState()),
     ) {
-        val navController = LocalNavController.current!!
+        val navController = LocalNavController.current
         val uriHandler = LocalUriHandler.current
         val context = LocalPlatformContext.current
         val coroutineScope = rememberCoroutineScope()

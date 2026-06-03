@@ -64,7 +64,7 @@ import kotlin.time.Instant
 fun FeedbackScreen() {
     val viewModel = koinViewModel<FeedbackViewModel>()
 
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
 
     val loading by viewModel.loading.collectAsState()
     val lazyListState = rememberLazyListState()

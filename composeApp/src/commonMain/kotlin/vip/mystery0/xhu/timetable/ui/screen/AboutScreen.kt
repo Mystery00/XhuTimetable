@@ -35,7 +35,7 @@ import xhutimetable.composeapp.generated.resources.ic_app_icon
 
 @Composable
 fun AboutScreen() {
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(

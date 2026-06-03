@@ -69,7 +69,7 @@ import xhutimetable.composeapp.generated.resources.state_no_data
 fun QueryScoreScreen() {
     val viewModel = koinViewModel<ScoreViewModel>()
 
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
 
     val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
 

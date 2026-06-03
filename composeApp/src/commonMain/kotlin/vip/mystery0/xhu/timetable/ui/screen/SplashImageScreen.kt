@@ -143,7 +143,7 @@ private fun ToMain(
         toMain()
         return
     }
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
 
     navController.replaceTo<RouteSplashImage>(RouteMain)
 }

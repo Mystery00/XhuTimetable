@@ -660,7 +660,7 @@ fun DrawCourseCard(
 @Composable
 private fun ShowAddDialog() {
     val pagerViewModel = koinViewModel<PagerMainViewModel>()
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
     val userCaseState by pagerViewModel.showAddDialog.collectAsState()
     ListDialog(
         header = xhuHeader(title = "添加数据"),

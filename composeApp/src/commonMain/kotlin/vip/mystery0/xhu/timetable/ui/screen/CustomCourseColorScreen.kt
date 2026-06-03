@@ -67,7 +67,7 @@ import xhutimetable.composeapp.generated.resources.state_no_data
 fun CustomCourseColorScreen() {
     val viewModel = koinViewModel<CustomCourseColorViewModel>()
 
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
 
     val list by viewModel.listState.collectAsState()
 

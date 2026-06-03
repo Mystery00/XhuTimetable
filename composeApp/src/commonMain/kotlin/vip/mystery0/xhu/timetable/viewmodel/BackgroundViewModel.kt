@@ -78,7 +78,7 @@ class BackgroundViewModel : ComposeViewModel() {
     }
 
     private suspend fun generateList(): Pair<List<Background>, Long> {
-        var selectedBackgroundId: Long? = null
+        var selectedBackgroundId: Long = 0L
         var backgroundFile = getConfigStore { backgroundImage }
         val resultList =
             ArrayList(backgroundList.map {

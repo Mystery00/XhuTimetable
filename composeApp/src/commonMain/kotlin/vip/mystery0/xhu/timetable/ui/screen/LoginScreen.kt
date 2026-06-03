@@ -74,7 +74,7 @@ import xhutimetable.composeapp.generated.resources.login_header
 fun LoginScreen(fromAccountManager: Boolean) {
     val viewModel = koinViewModel<LoginViewModel>()
 
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
     var username by remember { mutableStateOf("") }

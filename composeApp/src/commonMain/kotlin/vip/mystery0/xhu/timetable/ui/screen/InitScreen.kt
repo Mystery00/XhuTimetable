@@ -53,7 +53,7 @@ import xhutimetable.composeapp.generated.resources.ic_app_icon_o
 @Composable
 fun InitScreen() {
     val viewModel = koinViewModel<StarterViewModel>()
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
 
     val allowPrivacy by viewModel.allowPrivacy.collectAsState()
     val readyState by viewModel.readyState.collectAsState()

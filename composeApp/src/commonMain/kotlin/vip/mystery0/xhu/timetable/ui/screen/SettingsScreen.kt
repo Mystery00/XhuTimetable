@@ -63,7 +63,7 @@ import vip.mystery0.xhu.timetable.viewmodel.SettingsViewModel
 fun SettingsScreen() {
     val viewModel = koinViewModel<SettingsViewModel>()
 
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
     val uriHandler = LocalUriHandler.current
 
     val nightMode by viewModel.nightMode.collectAsState()

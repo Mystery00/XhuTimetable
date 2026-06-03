@@ -70,7 +70,7 @@ import xhutimetable.composeapp.generated.resources.state_no_course_data
 fun SchoolTimetableScreen() {
     val viewModel = koinViewModel<SchoolTimetableViewModel>()
 
-    val navController = LocalNavController.current!!
+    val navController = LocalNavController.current
     val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
 
     val scope = rememberCoroutineScope()

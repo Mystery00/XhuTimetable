@@ -21,7 +21,7 @@ interface CourseDao {
         term: Int,
     ): List<CourseEntity>
 
-    @Query("select * from tb_course group by courseName limit :size")
+    @Query("select * from tb_course group by courseName order by random() limit :size")
     suspend fun queryRandomList(size: Int): List<CourseEntity>
 
     @Query("select courseName from tb_course group by courseName")
