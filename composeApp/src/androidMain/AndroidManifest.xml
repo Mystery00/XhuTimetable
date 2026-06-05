@@ -117,6 +117,15 @@
         <meta-data
             android:name="JPUSH_APPKEY"
             android:value="${JPUSH_APPKEY}" />
+        <meta-data
+            android:name="OPPO_APPKEY"
+            android:value="${OPPO_APPKEY}" />
+        <meta-data
+            android:name="OPPO_APPID"
+            android:value="${OPPO_APPID}" />
+        <meta-data
+            android:name="OPPO_APPSECRET"
+            android:value="${OPPO_APPSECRET}" />
     </application>
 
 </manifest>

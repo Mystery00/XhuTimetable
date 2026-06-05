@@ -137,6 +137,11 @@
 -keep class com.vivo.push.**{*; }
 -keep class com.vivo.vms.**{*; }
 
+#### oppo
+-dontwarn com.heytap.**
+-keep class com.heytap.**{*; }
+-keep class com.heytap.mcssdk.**{*; }
+
 # Jackson
 -keep @com.fasterxml.jackson.annotation.JsonIgnoreProperties class * { *; }
 -keep @com.fasterxml.jackson.annotation.JsonCreator class * { *; }

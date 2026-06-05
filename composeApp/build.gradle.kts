@@ -94,9 +94,12 @@ kotlin {
             //apache-compress
             implementation(libs.apache.compress)
             //jpush
+            implementation(libs.androidx.annotation)
+            implementation(libs.gson)
             implementation(libs.jpush)
             implementation(libs.jpush.plugin.huawei)
             implementation(libs.jpush.plugin.huawei.hms)
+            implementation(libs.jpush.plugin.oppo)
             implementation(libs.jpush.plugin.vivo)
         }
         commonMain.dependencies {
@@ -204,6 +207,9 @@ android {
         manifestPlaceholders["JPUSH_PKGNAME"] = packageName
         manifestPlaceholders["JPUSH_CHANNEL"] = libs.versions.pushChannel.get()
         manifestPlaceholders["HUAWEI_APPID"] = libs.versions.huaweiPushAppId.get()
+        manifestPlaceholders["OPPO_APPKEY"] = libs.versions.oppoPushAppKey.get()
+        manifestPlaceholders["OPPO_APPID"] = libs.versions.oppoPushAppId.get()
+        manifestPlaceholders["OPPO_APPSECRET"] = libs.versions.oppoPushAppSecret.get()
         manifestPlaceholders["VIVO_APPID"] = libs.versions.vivoPushAppId.get()
         manifestPlaceholders["VIVO_APPKEY"] = libs.versions.vivoPushAppKey.get()
     }

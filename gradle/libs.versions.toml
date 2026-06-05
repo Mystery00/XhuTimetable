@@ -11,6 +11,9 @@ debugPushAppKey = "eec3dd99777142256f3d7584"
 releasePushAppKey = "c369f81f3fc3aa7b6f455686"
 pushChannel = "developer-default"
 huaweiPushAppId = "107716133"
+oppoPushAppKey = "d3ff34938be54631a2259bcf3e8eaa8c"
+oppoPushAppId = "36747764"
+oppoPushAppSecret = "f20b68dd4bf94a799d26ac5ec98bd5ba"
 vivoPushAppId = "106019804"
 vivoPushAppKey = "541b767405526bc0812d2faa8d75ec04"
 
@@ -30,7 +33,8 @@ foundation = "1.11.0"
 androidx-activity = "1.13.0"
 androidx-appcompat = "1.7.1"
 androidx-splashscreen = "1.2.0"
-androidx-core = "1.18.0"
+androidx-core = "1.19.0"
+androidx-annotation = "1.10.0"
 androidx-lifecycle = "2.10.0"
 androidx-navigation = "2.9.2"
 androidx-browser = "1.10.0"
@@ -58,10 +62,12 @@ zoomimage = "1.4.0"
 krop = "0.2.0"
 accompanist = "0.37.3"
 apache-compress = "1.28.0"
+gson = "2.14.0"
 jpush = "6.1.1"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
+androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
 androidx-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "androidx-splashscreen" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
@@ -159,9 +165,11 @@ krop-filekit = { group = "com.attafitamim.krop", name = "extensions-filekit", ve
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 
 apache-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "apache-compress" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 jpush = { group = "cn.jiguang.sdk", name = "jpush-google", version.ref = "jpush" }
 jpush-plugin-huawei = { group = "cn.jiguang.sdk.plugin", name = "huawei", version.ref = "jpush" }
 jpush-plugin-huawei-hms = { group = "com.huawei.hms", name = "push", version = "6.13.0.301" }
+jpush-plugin-oppo = { group = "cn.jiguang.sdk.plugin", name = "oppo", version.ref = "jpush" }
 jpush-plugin-vivo = { group = "cn.jiguang.sdk.plugin", name = "vivo", version.ref = "jpush" }
 
 [plugins]
