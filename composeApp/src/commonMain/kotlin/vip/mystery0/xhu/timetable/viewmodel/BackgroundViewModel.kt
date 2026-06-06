@@ -78,7 +78,7 @@ class BackgroundViewModel : ComposeViewModel() {
     }
 
     private suspend fun generateList(): Pair<List<Background>, Long> {
-        var selectedBackgroundId: Long = 0L
+        var selectedBackgroundId = 0L
         var backgroundFile = getConfigStore { backgroundImage }
         val resultList =
             ArrayList(backgroundList.map {
@@ -123,7 +123,7 @@ class BackgroundViewModel : ComposeViewModel() {
                 }
             }
         }
-        return resultList to selectedBackgroundId!!
+        return resultList to selectedBackgroundId
     }
 
     fun setCustomBackground(bytes: ByteArray) {
