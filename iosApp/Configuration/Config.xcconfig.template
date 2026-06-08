@@ -22,7 +22,5 @@ LIBRARY_SEARCH_PATHS = $(inherited) "${SRCROOT}/Frameworks/jcore-ios-5.4.0.xcfra
 LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*] = $(inherited) "${SRCROOT}/Frameworks/jcore-ios-5.4.0.xcframework/ios-arm64_x86_64-simulator" "${SRCROOT}/Frameworks/jpush-ios-6.1.0.xcframework/ios-arm64_x86_64-simulator"
 
 // -ObjC：让 OC category（JPush 内部用到）正确合并；
-// -lJCore -lJPush：链接 vendor 的静态库；
-// -Wl,-U,_sqlite3_load_extension：iOS SDK libsqlite3 编译时禁用了该符号，
-//   androidx.sqlite cinterop 仅引用未调用，告诉 linker 容忍 undefined。
-OTHER_LDFLAGS = $(inherited) -ObjC -lJCore -lJPush -Wl,-U,_sqlite3_load_extension
+// -lJCore -lJPush：链接 vendor 的静态库。
+OTHER_LDFLAGS = $(inherited) -ObjC -lJCore -lJPush
