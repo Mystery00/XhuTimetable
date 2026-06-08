@@ -51,6 +51,8 @@ cmptoast = "1.0.71"
 filekit = "0.14.1"
 mmkv = "2.4.0"
 room = "2.8.4"
+# 与 Room 2.8.4 传递依赖的 AndroidX SQLite 版本保持一致。
+androidx-sqlite = "2.6.2"
 kotlin-crypto-hash = "0.8.0"
 cryptography = "0.6.0"
 compose-preference = "2.2.0"
@@ -127,6 +129,7 @@ aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3",
 androidx-room = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "androidx-sqlite" }
 
 kotlin-crypto-hash-bom = { group = "org.kotlincrypto.hash", name = "bom", version.ref = "kotlin-crypto-hash" }
 kotlin-crypto-hash-md = { group = "org.kotlincrypto.hash", name = "md" }

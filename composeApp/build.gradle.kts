@@ -66,7 +66,6 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
-            linkerOpts.add("-lsqlite3")
         }
     }
     
@@ -184,6 +183,8 @@ kotlin {
         iosMain.dependencies {
             //ktor
             implementation(libs.ktor.client.darwin)
+            //sqlite
+            implementation(libs.androidx.sqlite.bundled)
             implementation(libs.ios.settings)
         }
     }

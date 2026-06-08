@@ -1,7 +1,7 @@
 package vip.mystery0.xhu.timetable.module
 
 import androidx.room.RoomDatabase
-import androidx.sqlite.driver.NativeSQLiteDriver
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import co.touchlab.kermit.Logger
 import io.ktor.client.engine.darwin.DarwinHttpRequestException
 import org.koin.core.module.Module
@@ -12,7 +12,7 @@ import vip.mystery0.xhu.timetable.db.AppDatabase
 actual fun platformModule(): Module = module {
     single<RoomDatabase.Builder<AppDatabase>> {
         getDatabaseBuilder()
-            .setDriver(NativeSQLiteDriver())
+            .setDriver(BundledSQLiteDriver())
     }
 }
 
