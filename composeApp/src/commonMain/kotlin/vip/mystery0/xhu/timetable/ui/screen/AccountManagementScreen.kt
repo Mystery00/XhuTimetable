@@ -104,6 +104,8 @@ import vip.mystery0.xhu.timetable.ui.component.preference.XhuSettingsMenuLink
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.navigation.RouteLogin
 import vip.mystery0.xhu.timetable.ui.navigation.navigateAndSave
+import vip.mystery0.xhu.timetable.ui.theme.ColorPool
+import vip.mystery0.xhu.timetable.ui.theme.CourseColorHelper
 import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
 import vip.mystery0.xhu.timetable.ui.theme.UserAvatarImage
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
@@ -612,6 +614,37 @@ private fun AvatarPickerBottomSheet(
 }
 
 @Composable
+private fun AccountMonogramBadge(
+    userName: String,
+    studentId: String,
+) {
+    val accent = ColorPool.hash(studentId.ifBlank { userName })
+    val initial = userName
+        .substringAfterLast('-')
+        .trim()
+        .firstOrNull()
+        ?.uppercaseChar()
+        ?.toString()
+        ?: studentId.takeLast(2).ifBlank { "学" }
+
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = accent.copy(alpha = 0.16f),
+        border = BorderStroke(1.dp, accent.copy(alpha = 0.32f)),
+        modifier = Modifier.size(46.dp),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = initial,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = CourseColorHelper.accentText(accent),
+            )
+        }
+    }
+}
+
+@Composable
 private fun AccountUserCard(
     user: UserItem,
     onClick: () -> Unit,
@@ -639,13 +672,9 @@ private fun AccountUserCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                UserAvatarImage(
+                AccountMonogramBadge(
                     userName = user.userName,
-                    isMale = user.gender == Gender.MALE,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(52.dp)
-                        .clip(RoundedCornerShape(14.dp)),
+                    studentId = user.studentId,
                 )
                 Column(
                     modifier = Modifier.weight(1f),
