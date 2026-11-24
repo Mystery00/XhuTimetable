@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable.ui.component
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -15,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -35,20 +37,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.LoadStates
 import androidx.paging.PagingData
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.flow.Flow
-import vip.mystery0.xhu.timetable.config.toast.showShortToast
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
-
 
 @Composable
 fun <T : Any> Flow<PagingData<T>>.collectAndHandleState(
@@ -56,7 +56,6 @@ fun <T : Any> Flow<PagingData<T>>.collectAndHandleState(
 ): LazyPagingItems<T> {
     val lazyPagingItem = collectAsLazyPagingItems()
 
-    // Handle the different load state event
     val pagingLoadStates = lazyPagingItem.loadState.mediator ?: lazyPagingItem.loadState.source
     LaunchedEffect(pagingLoadStates) {
         handleLoadStates(pagingLoadStates)
@@ -114,7 +113,6 @@ fun <T : Any> BuildPaging(
         LaunchedEffect(pager.loadState.refresh) {
             if (pager.loadState.refresh is LoadState.NotLoading) {
                 pullToRefreshState.animateToHidden()
-                showShortToast("数据加载完成！")
             }
         }
         PullToRefreshBox(
@@ -134,28 +132,30 @@ fun <T : Any> BuildPaging(
             LazyColumn(
                 state = state,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(vertical = 4.dp),
+                contentPadding = PaddingValues(bottom = 24.dp),
             ) {
                 listHeader?.let {
                     stickyHeader { it() }
                 }
-                if (!alwaysShowList && pager.loadState.append !is LoadState.Loading && pager.itemCount == 0) {
+                if (!alwaysShowList && !refreshing && pager.loadState.append !is LoadState.Loading && pager.itemCount == 0) {
                     item {
                         emptyState()
                     }
                 } else {
                     listContent()
-                    when (pager.loadState.append) {
-                        is LoadState.Loading -> {
-                            item { BuildPageFooter(text = "数据加载中，请稍后……") }
-                        }
+                    if (pager.itemCount > 0) {
+                        when (pager.loadState.append) {
+                            is LoadState.Loading -> {
+                                item { BuildPageFooter(text = "正在加载更多…") }
+                            }
 
-                        is LoadState.Error -> {
-                            item { BuildPageFooter(text = "数据加载失败，请重试") }
-                        }
+                            is LoadState.Error -> {
+                                item { BuildPageFooter(text = "加载失败，下拉刷新重试") }
+                            }
 
-                        is LoadState.NotLoading -> {
-                            item { BuildPageFooter(text = "o(´^｀)o 再怎么滑也没有啦~") }
+                            is LoadState.NotLoading -> {
+                                item { BuildPageFooter(text = "已经到底啦") }
+                            }
                         }
                     }
                 }
@@ -170,10 +170,14 @@ fun BuildPageFooter(text: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp),
+            .padding(vertical = 20.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = text, fontSize = 14.sp, color = MaterialTheme.colorScheme.outline)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+        )
     }
 }
 
@@ -215,52 +219,95 @@ fun LazyListState.isScrollingUp(): Boolean {
 @Composable
 fun PageItemLayout(
     cardModifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
     header: (@Composable () -> Unit)? = null,
     content: (@Composable () -> Unit)? = null,
     footer: (@Composable () -> Unit)? = null,
 ) {
-    Card(
-        modifier = cardModifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = XhuColor.cardBackground,
-        ),
-    ) {
+    val shape = RoundedCornerShape(18.dp)
+    val baseModifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 16.dp, vertical = 6.dp)
+        .clip(shape)
+        .then(cardModifier)
+
+    val cardContent: @Composable () -> Unit = {
         Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             header?.let {
                 ProvideTextStyle(
-                    LocalTextStyle.current.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 18.sp,
+                    MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 ) {
                     header.invoke()
                 }
                 if (content != null) {
-                    HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp))
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+                    )
                 }
             }
-            content?.invoke()
+            content?.let {
+                ProvideTextStyle(
+                    MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                ) {
+                    content.invoke()
+                }
+            }
             if (header != null && footer != null && content == null) {
-                HorizontalDivider(modifier = Modifier.fillMaxWidth())
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+                )
             }
             footer?.let {
                 if (content != null) {
-                    HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(top = 4.dp))
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+                    )
                 }
                 ProvideTextStyle(
-                    LocalTextStyle.current.copy(
-                        color = MaterialTheme.colorScheme.outline,
-                        fontSize = 12.sp,
+                    MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 ) {
                     footer.invoke()
                 }
             }
+        }
+    }
+
+    val cardColors = CardDefaults.cardColors(
+        containerColor = XhuColor.cardBackground,
+    )
+    val border = BorderStroke(
+        width = 0.5.dp,
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+    )
+
+    if (onClick != null) {
+        Card(
+            onClick = onClick,
+            modifier = baseModifier,
+            shape = shape,
+            colors = cardColors,
+            border = border,
+        ) {
+            cardContent()
+        }
+    } else {
+        Card(
+            modifier = baseModifier,
+            shape = shape,
+            colors = cardColors,
+            border = border,
+        ) {
+            cardContent()
         }
     }
 }
@@ -269,21 +316,24 @@ fun PageItemLayout(
 fun TextWithIcon(
     imageVector: ImageVector,
     text: String,
-    color: Color = MaterialTheme.colorScheme.outline,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
 ) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Icon(
-            modifier = Modifier.size(18.dp),
+            modifier = Modifier
+                .padding(top = 2.dp)
+                .size(16.dp),
             imageVector = imageVector,
             contentDescription = null,
-            tint = color,
+            tint = color.copy(alpha = 0.85f),
         )
         Text(
             text = text,
             color = color,
+            style = LocalTextStyle.current,
         )
     }
 }

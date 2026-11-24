@@ -4,20 +4,24 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -28,7 +32,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 @Composable
 fun StateScreen(
@@ -42,24 +45,21 @@ fun StateScreen(
 ) {
     val (alphaAnim, scaleAnim) = animateFadeAndScale()
 
-    BoxWithConstraints(
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(32.dp)
+            .padding(horizontal = 32.dp, vertical = 40.dp),
+        contentAlignment = if (verticalArrangement == Arrangement.Top) Alignment.TopCenter else Alignment.Center,
     ) {
-        val layoutModifier = Modifier
-            .fillMaxSize()
-            .alpha(alphaAnim)
-            .scale(scaleAnim)
-
         Column(
-            modifier = layoutModifier,
+            modifier = Modifier
+                .alpha(alphaAnim)
+                .scale(scaleAnim),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = verticalArrangement
+            verticalArrangement = Arrangement.Center,
         ) {
             ImageSection(imageRes)
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             TextSection(title, subtitle, buttonText, onButtonClick)
         }
     }
@@ -73,37 +73,37 @@ private fun TextSection(
     onButtonClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .padding(horizontal = 16.dp),
+        modifier = Modifier.padding(horizontal = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = title,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
         if (subtitle.isNotBlank()) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = subtitle,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
         }
-        Spacer(modifier = Modifier.height(16.dp))
-
         if (buttonText.isNotBlank()) {
-            Button(
+            Spacer(modifier = Modifier.height(20.dp))
+            FilledTonalButton(
                 onClick = onButtonClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.onBackground,
-                    contentColor = MaterialTheme.colorScheme.background
-                )
+                shape = RoundedCornerShape(14.dp),
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 10.dp),
             ) {
-                Text(text = buttonText)
+                Text(
+                    text = buttonText,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                )
             }
         }
     }
@@ -114,31 +114,36 @@ private fun ImageSection(imageRes: Painter) {
     Image(
         painter = imageRes,
         contentDescription = null,
-        contentScale = ContentScale.FillHeight,
+        contentScale = ContentScale.Fit,
         modifier = Modifier
-            .height(200.dp)
+            .height(176.dp)
             .clip(MaterialTheme.shapes.large)
     )
 }
 
 @Composable
 internal fun animateFadeAndScale(): Pair<Float, Float> {
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        visible = true
+    }
+
     val alpha by animateFloatAsState(
-        targetValue = 1f,
+        targetValue = if (visible) 1f else 0f,
         animationSpec = tween(
-            durationMillis = 800,
+            durationMillis = 420,
             easing = FastOutSlowInEasing
         ),
-        label = "alpha"
+        label = "stateAlpha"
     )
 
     val scale by animateFloatAsState(
-        targetValue = 1f,
+        targetValue = if (visible) 1f else 0.94f,
         animationSpec = tween(
-            durationMillis = 600,
+            durationMillis = 360,
             easing = FastOutSlowInEasing
         ),
-        label = "scale"
+        label = "stateScale"
     )
 
     return alpha to scale

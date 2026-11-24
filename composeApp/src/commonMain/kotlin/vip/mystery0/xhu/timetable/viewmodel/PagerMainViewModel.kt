@@ -8,4 +8,9 @@ class PagerMainViewModel : ComposeViewModel() {
     val showAddDialog = MutableStateFlow(UseCaseState())
     val showWeekViewDialog = MutableStateFlow(UseCaseState())
     val showPracticalCourseSheet = MutableStateFlow(false)
+
+    // 纯 UI 层跨平台弹窗/Sheet 控制状态
+    val showAddSheet = MutableStateFlow(false)
+    val showWeekPickerSheet = MutableStateFlow(false)
+    val calendarDisplayTitle = MutableStateFlow<String?>(null)
 }

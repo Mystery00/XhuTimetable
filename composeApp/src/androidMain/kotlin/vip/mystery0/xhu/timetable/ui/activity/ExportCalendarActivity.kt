@@ -5,33 +5,41 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Cancel
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.NotificationsActive
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -58,14 +66,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
-import com.maxkeppeler.sheets.list.ListDialog
-import com.maxkeppeler.sheets.list.models.ListOption
-import com.maxkeppeler.sheets.list.models.ListSelection
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.dialogs.init
 import kotlinx.coroutines.CoroutineScope
@@ -73,13 +76,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import vip.mystery0.xhu.timetable.base.UserSelect
 import vip.mystery0.xhu.timetable.base.appName
 import vip.mystery0.xhu.timetable.model.CalendarAccount
 import vip.mystery0.xhu.timetable.ui.component.ShowProgressDialog
-import vip.mystery0.xhu.timetable.ui.component.ShowSingleSelectDialog
 import vip.mystery0.xhu.timetable.ui.component.StateScreen
-import vip.mystery0.xhu.timetable.ui.component.xhuHeader
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuConfirmDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuSingleSelectDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.rememberXhuDialogState
+import vip.mystery0.xhu.timetable.ui.screen.FilterSelectorRow
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
@@ -112,14 +116,18 @@ class ExportCalendarActivity : ComponentActivity() {
             )
         )
 
-        if (calendarPermissionState.allPermissionsGranted) {
-            viewModel.loadCalendarAccountList()
+        // 修复原版在 Composable 主体直接调用导致每次重组重复刷新的 Bug
+        LaunchedEffect(calendarPermissionState.allPermissionsGranted) {
+            if (calendarPermissionState.allPermissionsGranted) {
+                viewModel.loadCalendarAccountList()
+            }
         }
 
         val openBottomSheet = rememberSaveable { mutableStateOf(false) }
-
         val scope = rememberCoroutineScope()
         val exportLoadingDialog = rememberUseCaseState()
+        val deleteConfirmState = rememberXhuDialogState()
+        var pendingDeleteAccount by remember { mutableStateOf<CalendarAccount?>(null) }
 
         LaunchedEffect(Unit) {
             viewModel.init()
@@ -128,14 +136,18 @@ class ExportCalendarActivity : ComponentActivity() {
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
-                    title = { Text(text = "日历导出管理") },
+                    title = {
+                        Text(
+                            text = "日历导出管理",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    },
                     navigationIcon = {
-                        IconButton(onClick = {
-                            finish()
-                        }) {
+                        IconButton(onClick = { finish() }) {
                             Icon(
                                 painter = XhuIcons.back,
-                                contentDescription = null,
+                                contentDescription = "返回",
                                 modifier = Modifier.size(24.dp),
                             )
                         }
@@ -155,9 +167,7 @@ class ExportCalendarActivity : ComponentActivity() {
                     PullToRefreshBox(
                         state = pullToRefreshState,
                         isRefreshing = calendarAccountListState.loading,
-                        onRefresh = {
-                            viewModel.loadCalendarAccountList()
-                        },
+                        onRefresh = { viewModel.loadCalendarAccountList() },
                         indicator = {
                             PullToRefreshDefaults.LoadingIndicator(
                                 state = pullToRefreshState,
@@ -167,49 +177,52 @@ class ExportCalendarActivity : ComponentActivity() {
                         }
                     ) {
                         val list = calendarAccountListState.list
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            contentPadding = PaddingValues(vertical = 4.dp),
-                        ) {
-                            items(list.size) { index ->
-                                BuildItem(item = list[index], onClick = {
-                                    viewModel.deleteCalendarAccount(it.accountId)
-                                })
-                            }
-                        }
-                        if (list.isEmpty()) {
+                        if (list.isEmpty() && !calendarAccountListState.loading) {
                             StateScreen(
-                                title = "暂无数据",
+                                title = "暂无已导出的日历账户",
+                                subtitle = "点击右下角 + 按钮将本学期课程导出至系统日历",
                                 imageRes = painterResource(Res.drawable.state_no_data),
-                                verticalArrangement = Arrangement.Top,
                             )
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                items(list, key = { it.accountId }) { item ->
+                                    BuildCalendarAccountCard(
+                                        item = item,
+                                        onDeleteClick = {
+                                            pendingDeleteAccount = item
+                                            deleteConfirmState.show()
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
                     FloatingActionButton(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(24.dp),
+                            .padding(20.dp),
                         onClick = {
                             if (!calendarAccountListState.loading) {
-                                scope.launch {
-                                    openBottomSheet.value = true
-                                }
+                                openBottomSheet.value = true
                             }
-                        }) {
+                        }
+                    ) {
                         Icon(
                             imageVector = Icons.Rounded.Add,
-                            contentDescription = null,
+                            contentDescription = "导出新日历",
                         )
                     }
                     ExportBottomSheet(openBottomSheet, scope)
                 } else {
                     StateScreen(
-                        title = "权限不足",
-                        subtitle = "将课程导出到系统日历功能需要对${appName()}授予“读取/写入日历”权限。\n没有这个权限，该功能无法运作",
-                        buttonText = "授权",
+                        title = "需要日历读写权限",
+                        subtitle = "将课程导出到系统日历功能需要向${appName()}授予“读取/写入日历”权限。",
+                        buttonText = "前往授权",
                         imageRes = painterResource(Res.drawable.state_no_permission),
-                        verticalArrangement = Arrangement.Top,
                         onButtonClick = {
                             calendarPermissionState.launchMultiplePermissionRequest()
                         }
@@ -217,10 +230,26 @@ class ExportCalendarActivity : ComponentActivity() {
                 }
             }
         }
+
+        pendingDeleteAccount?.let { account ->
+            XhuConfirmDialog(
+                state = deleteConfirmState,
+                title = "删除导出日历",
+                message = "确认删除「${account.studentName} (${account.studentId})」在系统日历中的 ${account.eventNum} 个课程日程吗？",
+                icon = { Icon(Icons.Rounded.DeleteOutline, contentDescription = null) },
+                confirmText = "确认删除",
+                isDestructive = true,
+                onConfirm = {
+                    viewModel.deleteCalendarAccount(account.accountId)
+                    pendingDeleteAccount = null
+                },
+            )
+        }
+
         val exportAccountState by viewModel.actionState.collectAsState()
         ShowProgressDialog(
             useCaseState = exportLoadingDialog,
-            text = "数据导出中...",
+            text = "正在导出日程…",
             successText = if (exportAccountState.actionSuccess) "导出完成" else "",
             errorText = exportAccountState.errorMessage,
         )
@@ -228,41 +257,10 @@ class ExportCalendarActivity : ComponentActivity() {
             if (exportAccountState.loading) {
                 exportLoadingDialog.show()
             } else {
-                delay(1500L)
+                delay(1200L)
                 exportLoadingDialog.hide()
             }
         }
-    }
-
-    @Composable
-    private fun ShowSelectExportUserDialog(
-        selectList: List<UserSelect>,
-        useCaseState: UseCaseState,
-        onSelect: (UserSelect) -> Unit,
-    ) {
-        ShowSingleSelectDialog("请选择要导出的账号", selectList, useCaseState, onSelect)
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    private fun ShowReminderDialog(
-        useCaseState: UseCaseState,
-        onSelect: (Int) -> Unit = { },
-    ) {
-        val options = listOf(5, 10, 15, 20, 30)
-        ListDialog(
-            header = xhuHeader(title = "请选择要添加的提醒时间"),
-            state = useCaseState,
-            selection = ListSelection.Single(
-                options = options.map {
-                    ListOption(
-                        titleText = "开始前 $it 分钟提醒",
-                    )
-                },
-            ) { index, _ ->
-                onSelect(options[index])
-            },
-        )
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -274,31 +272,44 @@ class ExportCalendarActivity : ComponentActivity() {
         val userSelect by viewModel.userSelect.select.collectAsState()
         val actionState by viewModel.actionState.collectAsState()
 
-        val userDialog by viewModel.userSelect.selectDialog.collectAsState()
-
-        val reminderDialog = rememberUseCaseState()
-        val sheetState = rememberModalBottomSheetState()
+        val userDialogState = rememberXhuDialogState()
+        val reminderDialogState = rememberXhuDialogState()
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
         var includeCustomCourse by remember { mutableStateOf(false) }
         var includeCustomThing by remember { mutableStateOf(false) }
         val reminder = remember { mutableStateListOf<Int>() }
 
-        ShowSelectExportUserDialog(selectList = userSelect, useCaseState = userDialog, onSelect = {
-            viewModel.selectUser(it.studentId)
-        })
-        ShowReminderDialog(useCaseState = reminderDialog) {
-            if (!reminder.contains(it)) {
-                reminder.add(it)
-            }
-        }
+        XhuSingleSelectDialog(
+            state = userDialogState,
+            title = "选择要导出的账号",
+            options = userSelect,
+            selectedIndex = userSelect.indexOfFirst { it.selected },
+            itemLabel = { "${it.userName} (${it.studentId})" },
+            onSelect = { _, item -> viewModel.selectUser(item.studentId) },
+        )
+
+        val reminderOptions = listOf(5, 10, 15, 20, 30)
+        XhuSingleSelectDialog(
+            state = reminderDialogState,
+            title = "添加课前提醒时间",
+            options = reminderOptions,
+            selectedIndex = -1,
+            itemLabel = { "开始前 $it 分钟提醒" },
+            onSelect = { _, minutes ->
+                if (!reminder.contains(minutes)) {
+                    reminder.add(minutes)
+                    reminder.sort()
+                }
+            },
+        )
 
         fun dismissSheet() {
-            scope.launch { sheetState.hide() }
-                .invokeOnCompletion {
-                    if (!sheetState.isVisible) {
-                        openBottomSheet.value = false
-                    }
+            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                if (!sheetState.isVisible) {
+                    openBottomSheet.value = false
                 }
+            }
         }
 
         LaunchedEffect(actionState.loading) {
@@ -307,154 +318,162 @@ class ExportCalendarActivity : ComponentActivity() {
             }
         }
 
-        if (!openBottomSheet.value) {
-            return
-        }
+        if (!openBottomSheet.value) return
 
         ModalBottomSheet(
-            onDismissRequest = {
-                openBottomSheet.value = false
-            },
+            onDismissRequest = { openBottomSheet.value = false },
             sheetState = sheetState,
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 20.dp, bottom = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
                 Row(
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Image(
-                        modifier = Modifier
-                            .padding(12.dp)
-                            .clickable {
-                                dismissSheet()
-                            },
-                        imageVector = Icons.Rounded.Cancel,
-                        contentDescription = null,
+                    IconButton(onClick = { dismissSheet() }) {
+                        Icon(Icons.Rounded.Close, contentDescription = "关闭")
+                    }
+                    Text(
+                        text = "导出到系统日历",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f),
                     )
-                    Spacer(modifier = Modifier.weight(1F))
-                    TextButton(onClick = {
-                        viewModel.exportCalendar(includeCustomCourse, includeCustomThing, reminder)
-                    }) {
-                        Text(text = "导出")
+                    Button(
+                        shape = RoundedCornerShape(12.dp),
+                        onClick = {
+                            viewModel.exportCalendar(includeCustomCourse, includeCustomThing, reminder)
+                        }
+                    ) {
+                        Text("开始导出")
                     }
                 }
-                Row(
+
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(12.dp),
-                        painter = XhuIcons.multiUser,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                    )
-                    val selected = userSelect.firstOrNull { it.selected }
-                    val userString =
-                        selected?.let { "账号：${it.userName}(${it.studentId})" }
-                            ?: "选择导出的账号"
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                userDialog.show()
-                            },
-                        text = userString,
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(12.dp),
-                        painter = XhuIcons.customCourse,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        modifier = Modifier.weight(1F),
-                        text = "包含自定义课程",
-                    )
-                    Switch(
-                        checked = includeCustomCourse,
-                        onCheckedChange = { includeCustomCourse = it },
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(12.dp),
-                        painter = XhuIcons.customThing,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        modifier = Modifier.weight(1F),
-                        text = "包含自定义事项",
-                    )
-                    Switch(
-                        checked = includeCustomThing,
-                        onCheckedChange = { includeCustomThing = it },
-                    )
-                }
-                Row(
-                    modifier = Modifier.defaultMinSize(minHeight = 48.dp),
-                ) {
-                    Icon(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(12.dp),
-                        painter = XhuIcons.notifyCourse,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Column(
-                        modifier = Modifier.weight(1F),
-                    ) {
-                        reminder.forEach {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(48.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Text(
-                                    text = "事件开始前 $it 分钟提醒",
-                                    modifier = Modifier.weight(1F),
-                                )
-                                IconButton(onClick = {
-                                    reminder.remove(it)
-                                }) {
-                                    Icon(
-                                        painter = XhuIcons.close,
-                                        contentDescription = null
-                                    )
-                                }
-                            }
-                        }
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        val selected = userSelect.firstOrNull { it.selected }
+                        FilterSelectorRow(
+                            icon = Icons.Rounded.Person,
+                            label = "导出账号",
+                            value = selected?.let { "${it.userName} (${it.studentId})" } ?: "请选择账号",
+                            highlighted = selected != null,
+                            onClick = { userDialogState.show() },
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                        )
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(48.dp)
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null,
-                                    onClick = {
-                                        reminderDialog.show()
-                                    }),
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
-                                text = "添加提醒",
+                                text = "包含自定义课程",
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.weight(1f),
                             )
+                            Switch(
+                                checked = includeCustomCourse,
+                                onCheckedChange = { includeCustomCourse = it },
+                            )
+                        }
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "包含自定义事项",
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Switch(
+                                checked = includeCustomThing,
+                                onCheckedChange = { includeCustomThing = it },
+                            )
+                        }
+                    }
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.NotificationsActive,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "课前日程提醒",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.weight(1f),
+                            )
+                            TextButton(onClick = { reminderDialogState.show() }) {
+                                Text("添加提醒")
+                            }
+                        }
+                        if (reminder.isEmpty()) {
+                            Text(
+                                text = "未设置提醒（点击右上角添加）",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(bottom = 4.dp),
+                            )
+                        } else {
+                            reminder.forEach { minutes ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        text = "开始前 $minutes 分钟提醒",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                    IconButton(
+                                        onClick = { reminder.remove(minutes) },
+                                        modifier = Modifier.size(36.dp),
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Close,
+                                            contentDescription = "移除提醒",
+                                            modifier = Modifier.size(18.dp),
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -464,47 +483,53 @@ class ExportCalendarActivity : ComponentActivity() {
 }
 
 @Composable
-private fun BuildItem(
-    item: CalendarAccount, onClick: (CalendarAccount) -> Unit
+private fun BuildCalendarAccountCard(
+    item: CalendarAccount,
+    onDeleteClick: () -> Unit,
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = XhuColor.cardBackground,
-        ),
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = XhuColor.cardBackground),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
     ) {
         Row(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Surface(
                 shape = CircleShape,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .size(36.dp),
-                color = item.color
+                modifier = Modifier.size(36.dp),
+                color = item.color,
             ) {}
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1F)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "${item.studentName}(${item.studentId})",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
+                    text = "${item.studentName} (${item.studentId})",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    text = "共 ${item.eventNum} 个事项",
+                    text = "共导出 ${item.eventNum} 个日程事项",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            TextButton(onClick = {
-                onClick(item)
-            }) {
-                Text(
-                    text = "删除"
+            FilledTonalIconButton(
+                onClick = onDeleteClick,
+                colors = IconButtonDefaults.filledTonalIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                ),
+                modifier = Modifier.size(40.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.DeleteOutline,
+                    contentDescription = "删除日历",
+                    modifier = Modifier.size(18.dp),
                 )
             }
         }

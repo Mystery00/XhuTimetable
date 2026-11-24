@@ -1,31 +1,42 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.EventNote
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.rounded.AccountBalance
 import androidx.compose.material.icons.rounded.AppRegistration
+import androidx.compose.material.icons.rounded.FilterList
+import androidx.compose.material.icons.rounded.LocationCity
+import androidx.compose.material.icons.rounded.School
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -40,10 +51,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
-import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import kotlinx.coroutines.CoroutineScope
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -52,15 +62,13 @@ import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.model.response.SchoolTimetableResponse
 import vip.mystery0.xhu.timetable.ui.component.BuildPaging
 import vip.mystery0.xhu.timetable.ui.component.PageItemLayout
-import vip.mystery0.xhu.timetable.ui.component.ShowSingleSelectDialog
 import vip.mystery0.xhu.timetable.ui.component.StateScreen
 import vip.mystery0.xhu.timetable.ui.component.TextWithIcon
 import vip.mystery0.xhu.timetable.ui.component.collectAndHandleState
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuSingleSelectDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
-import vip.mystery0.xhu.timetable.viewmodel.CampusSelect
-import vip.mystery0.xhu.timetable.viewmodel.CollegeSelect
-import vip.mystery0.xhu.timetable.viewmodel.MajorSelect
 import vip.mystery0.xhu.timetable.viewmodel.SchoolTimetableViewModel
 import xhutimetable.composeapp.generated.resources.Res
 import xhutimetable.composeapp.generated.resources.state_no_course_data
@@ -69,13 +77,17 @@ import xhutimetable.composeapp.generated.resources.state_no_course_data
 @Composable
 fun SchoolTimetableScreen() {
     val viewModel = koinViewModel<SchoolTimetableViewModel>()
-
     val navController = LocalNavController.current
     val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
-
     val scope = rememberCoroutineScope()
 
-    val openBottomSheet = rememberSaveable { mutableStateOf(true) }
+    val openFilterSheet = rememberSaveable { mutableStateOf(false) }
+    var courseName by rememberSaveable { mutableStateOf("") }
+    var teacherName by rememberSaveable { mutableStateOf("") }
+
+    val campusSelect by viewModel.campusSelect.select.collectAsState()
+    val collegeSelect by viewModel.collegeSelect.select.collectAsState()
+    val majorSelect by viewModel.majorSelect.select.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.init()
@@ -84,25 +96,26 @@ fun SchoolTimetableScreen() {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("全校课表查询") },
+                title = {
+                    Text(
+                        text = "全校课表查询",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        navController.popBackStack()
-                    }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             painter = XhuIcons.back,
-                            contentDescription = null,
+                            contentDescription = "返回",
                         )
                     }
                 },
                 actions = {
-                    IconButton(onClick = {
-                        openBottomSheet.value = true
-                    }) {
+                    IconButton(onClick = { openFilterSheet.value = true }) {
                         Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
+                            imageVector = Icons.Rounded.FilterList,
+                            contentDescription = "搜索与筛选",
                         )
                     }
                 }
@@ -114,230 +127,296 @@ fun SchoolTimetableScreen() {
             pager = pager,
             refreshing = !viewModel.init && pager.loadState.refresh is LoadState.Loading,
             key = { index -> index },
-            itemContent = @Composable { item ->
-                BuildItem(item) {
+            listHeader = {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 1.dp,
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        FilterChip(
+                            selected = campusSelect.any { it.selected },
+                            onClick = { openFilterSheet.value = true },
+                            label = { Text(campusSelect.firstOrNull { it.selected }?.title ?: "校区") },
+                        )
+                        FilterChip(
+                            selected = collegeSelect.any { it.selected },
+                            onClick = { openFilterSheet.value = true },
+                            label = { Text(collegeSelect.firstOrNull { it.selected }?.title ?: "学院") },
+                        )
+                        FilterChip(
+                            selected = majorSelect.any { it.selected },
+                            onClick = { openFilterSheet.value = true },
+                            label = { Text(majorSelect.firstOrNull { it.selected }?.title ?: "专业") },
+                        )
+                        if (courseName.isNotBlank()) {
+                            FilterChip(
+                                selected = true,
+                                onClick = { openFilterSheet.value = true },
+                                label = { Text("课程：$courseName") },
+                            )
+                        }
+                        if (teacherName.isNotBlank()) {
+                            FilterChip(
+                                selected = true,
+                                onClick = { openFilterSheet.value = true },
+                                label = { Text("教师：$teacherName") },
+                            )
+                        }
+                    }
+                }
+            },
+            itemContent = { item ->
+                BuildSchoolCourseCard(item) {
                     viewModel.saveAsCustomCourse(item)
                 }
             },
             emptyState = {
                 val loadingErrorMessage by viewModel.loadingErrorMessage.collectAsState()
-                StateScreen(
-                    title = loadingErrorMessage ?: "暂无数据",
-                    imageRes = painterResource(Res.drawable.state_no_course_data),
-                    verticalArrangement = Arrangement.Top,
-                )
+                if (viewModel.init) {
+                    StateScreen(
+                        title = "按条件搜索全校课程",
+                        subtitle = "支持按校区、学院、专业、课程名或教师名查找，并可一键蹭课加入课表",
+                        buttonText = "开始搜索",
+                        imageRes = painterResource(Res.drawable.state_no_course_data),
+                        onButtonClick = { openFilterSheet.value = true }
+                    )
+                } else {
+                    StateScreen(
+                        title = loadingErrorMessage ?: "未找到匹配课程",
+                        buttonText = "修改搜索条件",
+                        imageRes = painterResource(Res.drawable.state_no_course_data),
+                        onButtonClick = { openFilterSheet.value = true }
+                    )
+                }
             }
         )
 
-        SchoolTimetableBottomSheet(openBottomSheet, scope)
+        SchoolTimetableFilterSheet(
+            openBottomSheet = openFilterSheet,
+            scope = scope,
+            courseName = courseName,
+            onCourseNameChange = { courseName = it },
+            teacherName = teacherName,
+            onTeacherNameChange = { teacherName = it },
+        )
 
         HandleErrorMessage(flow = viewModel.errorMessage)
     }
 }
 
-@Composable
-private fun ShowCampusDialog(
-    selectList: List<CampusSelect>,
-    useCaseState: UseCaseState,
-    onSelect: (CampusSelect) -> Unit,
-) {
-    ShowSingleSelectDialog(
-        dialogTitle = "请选择要查询的校区",
-        selectList = selectList,
-        useCaseState = useCaseState,
-        onSelect = onSelect,
-    )
-}
-
-@Composable
-private fun ShowCollegeDialog(
-    selectList: List<CollegeSelect>,
-    useCaseState: UseCaseState,
-    onSelect: (CollegeSelect) -> Unit,
-) {
-    ShowSingleSelectDialog(
-        dialogTitle = "请选择要查询的学院",
-        selectList = selectList,
-        useCaseState = useCaseState,
-        onSelect = onSelect,
-    )
-}
-
-@Composable
-private fun ShowMajorDialog(
-    selectList: List<MajorSelect>,
-    useCaseState: UseCaseState,
-    onSelect: (MajorSelect) -> Unit,
-) {
-    if (selectList.isEmpty()) {
-        useCaseState.hide()
-        return
-    }
-    ShowSingleSelectDialog(
-        dialogTitle = "请选择要查询的专业",
-        selectList = selectList,
-        useCaseState = useCaseState,
-        onSelect = onSelect,
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SchoolTimetableBottomSheet(
+private fun SchoolTimetableFilterSheet(
     openBottomSheet: MutableState<Boolean>,
     scope: CoroutineScope,
+    courseName: String,
+    onCourseNameChange: (String) -> Unit,
+    teacherName: String,
+    onTeacherNameChange: (String) -> Unit,
 ) {
     val viewModel = koinViewModel<SchoolTimetableViewModel>()
 
     val campusSelect by viewModel.campusSelect.select.collectAsState()
     val collegeSelect by viewModel.collegeSelect.select.collectAsState()
     val majorSelect by viewModel.majorSelect.select.collectAsState()
-    var courseName by remember { mutableStateOf("") }
-    var teacherName by remember { mutableStateOf("") }
 
-    val campusDialog by viewModel.campusSelect.selectDialog.collectAsState()
-    val collegeDialog by viewModel.collegeSelect.selectDialog.collectAsState()
-    val majorDialog by viewModel.majorSelect.selectDialog.collectAsState()
+    val campusDialogState = rememberXhuDialogState()
+    val collegeDialogState = rememberXhuDialogState()
+    val majorDialogState = rememberXhuDialogState()
 
-    val sheetState = rememberModalBottomSheetState()
-
-    ShowCampusDialog(campusSelect, campusDialog) {
-        viewModel.selectCampus(it.value)
-    }
-    ShowCollegeDialog(collegeSelect, collegeDialog) {
-        viewModel.selectCollege(it.value)
-    }
-    ShowMajorDialog(majorSelect, majorDialog) {
-        viewModel.selectMajor(it.value)
-    }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     fun dismissSheet() {
-        scope
-            .safeLaunch { sheetState.hide() }
-            .invokeOnCompletion {
-                if (!sheetState.isVisible) {
-                    openBottomSheet.value = false
-                }
+        scope.safeLaunch { sheetState.hide() }.invokeOnCompletion {
+            if (!sheetState.isVisible) {
+                openBottomSheet.value = false
             }
+        }
     }
 
-    if (!openBottomSheet.value) {
-        return
-    }
+    XhuSingleSelectDialog(
+        state = campusDialogState,
+        title = "选择校区",
+        options = campusSelect,
+        selectedIndex = campusSelect.indexOfFirst { it.selected },
+        itemLabel = { it.title },
+        onSelect = { _, item -> viewModel.selectCampus(item.value) },
+    )
+    XhuSingleSelectDialog(
+        state = collegeDialogState,
+        title = "选择学院",
+        options = collegeSelect,
+        selectedIndex = collegeSelect.indexOfFirst { it.selected },
+        itemLabel = { it.title },
+        onSelect = { _, item -> viewModel.selectCollege(item.value) },
+    )
+    XhuSingleSelectDialog(
+        state = majorDialogState,
+        title = "选择专业",
+        options = majorSelect,
+        selectedIndex = majorSelect.indexOfFirst { it.selected },
+        itemLabel = { it.title },
+        onSelect = { _, item -> viewModel.selectMajor(item.value) },
+    )
+
+    if (!openBottomSheet.value) return
 
     ModalBottomSheet(
-        onDismissRequest = {
-            openBottomSheet.value = false
-        },
+        onDismissRequest = { openBottomSheet.value = false },
         sheetState = sheetState,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .verticalScroll(rememberScrollState())
+                .padding(start = 20.dp, end = 20.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            OutlinedButton(
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.outline),
+            Text(
+                text = "全校课表搜索",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+
+            Surface(
+                shape = RoundedCornerShape(18.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
                 modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    campusDialog.show()
-                }) {
-                val selected = campusSelect.firstOrNull { it.selected }
-                val text = selected?.let { "查询校区：${it.title}" } ?: "请选择要查询的校区"
-                Text(text = text)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    val campus = campusSelect.firstOrNull { it.selected }
+                    FilterSelectorRow(
+                        icon = Icons.Rounded.LocationCity,
+                        label = "查询校区",
+                        value = campus?.title ?: "全部校区",
+                        highlighted = campus != null,
+                        onClick = { campusDialogState.show() },
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 52.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                    )
+                    val college = collegeSelect.firstOrNull { it.selected }
+                    FilterSelectorRow(
+                        icon = Icons.Rounded.AccountBalance,
+                        label = "查询学院",
+                        value = college?.title ?: "全部学院",
+                        highlighted = college != null,
+                        onClick = { collegeDialogState.show() },
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 52.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                    )
+                    val major = majorSelect.firstOrNull { it.selected }
+                    FilterSelectorRow(
+                        icon = Icons.Rounded.School,
+                        label = "查询专业",
+                        value = major?.title ?: if (majorSelect.isEmpty()) "请先选学院" else "全部专业",
+                        highlighted = major != null,
+                        onClick = {
+                            if (majorSelect.isNotEmpty()) majorDialogState.show()
+                        },
+                    )
+                }
             }
-            OutlinedButton(
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.outline),
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    collegeDialog.show()
-                }) {
-                val selected = collegeSelect.firstOrNull { it.selected }
-                val text = selected?.let { "查询学院：${it.title}" } ?: "请选择要查询的学院"
-                Text(text = text)
-            }
-            OutlinedButton(
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.outline),
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    majorDialog.show()
-                }) {
-                val selected = majorSelect.firstOrNull { it.selected }
-                val text = selected?.let { "查询专业：${it.title}" } ?: "请选择要查询的专业"
-                Text(text = text)
-            }
+
             OutlinedTextField(
                 value = courseName,
-                onValueChange = { courseName = it },
-                label = { Text("课程名称") },
-                modifier = Modifier.fillMaxWidth()
+                onValueChange = onCourseNameChange,
+                label = { Text("课程名称（选填）") },
+                shape = RoundedCornerShape(14.dp),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
             )
             OutlinedTextField(
                 value = teacherName,
-                onValueChange = { teacherName = it },
-                label = { Text("教师名称") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Button(
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                onValueChange = onTeacherNameChange,
+                label = { Text("教师姓名（选填）") },
+                shape = RoundedCornerShape(14.dp),
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
+            )
+
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(14.dp),
                 onClick = {
                     viewModel.loadSchoolTimetable(
-                        courseName = courseName,
-                        teacherName = teacherName,
+                        courseName = courseName.trim(),
+                        teacherName = teacherName.trim(),
                     )
                     dismissSheet()
-                }) {
-                Text(text = "查询")
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Search,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "查询课程",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
             }
         }
     }
 }
 
-
 @Composable
-private fun BuildItem(course: SchoolTimetableResponse, onClick: () -> Unit) {
+private fun BuildSchoolCourseCard(course: SchoolTimetableResponse, onClick: () -> Unit) {
     PageItemLayout(
         header = {
-            Text("课程名称：${course.courseName}")
+            Text(course.courseName)
         },
         content = {
-            ProvideTextStyle(
-                value = LocalTextStyle.current.copy(fontSize = 13.sp),
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    TextWithIcon(
-                        imageVector = Icons.Filled.Person,
-                        text = "教师名称：${course.teacher}",
-                    )
-                    TextWithIcon(
-                        imageVector = Icons.AutoMirrored.Filled.EventNote,
-                        text = "上课时间：${course.showTimeString.ifBlank { "无数据" }}",
-                    )
-                    TextWithIcon(
-                        imageVector = Icons.Filled.LocationOn,
-                        text = "上课地点：${course.location}",
-                    )
-                }
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                TextWithIcon(
+                    imageVector = Icons.Filled.Person,
+                    text = "教师：${course.teacher.ifBlank { "未知" }}",
+                )
+                TextWithIcon(
+                    imageVector = Icons.AutoMirrored.Filled.EventNote,
+                    text = "时间：${course.showTimeString.ifBlank { "暂无时间数据" }}",
+                )
+                TextWithIcon(
+                    imageVector = Icons.Filled.LocationOn,
+                    text = "地点：${course.location.ifBlank { "暂无地点数据" }}",
+                )
             }
         },
         footer = if (course.customCourseList.isEmpty()) null else {
             {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "点击添加到课表",
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.weight(1F)
-                            .clickable(onClick = onClick),
-                        fontSize = 16.sp,
-                    )
-                    ActionButton(
-                        text = "蹭课",
-                        imageVector = Icons.Rounded.AppRegistration,
-                        onClick = onClick
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    FilledTonalButton(
+                        onClick = onClick,
+                        shape = RoundedCornerShape(12.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.AppRegistration,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("蹭课 · 添加到课表")
+                    }
                 }
             }
         }

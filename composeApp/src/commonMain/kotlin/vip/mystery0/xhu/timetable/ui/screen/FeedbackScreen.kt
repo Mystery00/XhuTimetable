@@ -1,28 +1,33 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -30,7 +35,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,12 +42,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.format
-import multiplatform.network.cmptoast.showToast
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
 import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
@@ -63,7 +67,6 @@ import kotlin.time.Instant
 @Composable
 fun FeedbackScreen() {
     val viewModel = koinViewModel<FeedbackViewModel>()
-
     val navController = LocalNavController.current
 
     val loading by viewModel.loading.collectAsState()
@@ -76,50 +79,68 @@ fun FeedbackScreen() {
     LaunchedEffect(Unit) {
         viewModel.init()
     }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = "意见反馈") },
+                title = {
+                    val (statusText, statusColor) = when {
+                        wsState.status == WebSocketStatus.CONNECTING -> "正在连接…" to Color(0xFFFFA000)
+                        wsState.status == WebSocketStatus.FAILED || wsState.status == WebSocketStatus.DISCONNECTED ->
+                            "连接已断开 · 点击重连" to MaterialTheme.colorScheme.error
+                        adminStatus.online -> "管理员在线" to Color(0xFF2E7D32)
+                        else -> "已连接 · 留言即可收到回复" to MaterialTheme.colorScheme.primary
+                    }
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable(
+                                enabled = wsState.status != WebSocketStatus.CONNECTED
+                            ) {
+                                viewModel.connectWebSocket()
+                            }
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                    ) {
+                        Text(
+                            text = "意见反馈",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(7.dp)
+                                    .clip(CircleShape)
+                                    .background(statusColor)
+                            )
+                            Text(
+                                text = statusText,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        navController.popBackStack()
-                    }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             painter = XhuIcons.back,
-                            contentDescription = null,
+                            contentDescription = "返回",
                         )
                     }
                 },
                 actions = {
-                    if (adminStatus.online) {
-                        IconButton(onClick = {
-                            showToast("管理员当前正在线上，发送消息管理员可以实时接收到")
-                        }) {
+                    if (wsState.status != WebSocketStatus.CONNECTED) {
+                        IconButton(onClick = { viewModel.connectWebSocket() }) {
                             Icon(
-                                painter = XhuIcons.WsState.adminOnline,
-                                contentDescription = null,
+                                imageVector = Icons.Rounded.Refresh,
+                                contentDescription = "重新连接",
                             )
                         }
-                    }
-                    IconButton(onClick = {
-                        viewModel.connectWebSocket()
-                    }) {
-                        val icon = when (wsState.status) {
-                            WebSocketStatus.CONNECTED -> XhuIcons.WsState.connected
-                            WebSocketStatus.CONNECTING -> XhuIcons.WsState.connecting
-                            WebSocketStatus.DISCONNECTED -> XhuIcons.WsState.disconnected
-                            WebSocketStatus.FAILED -> XhuIcons.WsState.failed
-                        }
-                        val tint = when (wsState.status) {
-                            WebSocketStatus.CONNECTED, WebSocketStatus.CONNECTING -> LocalContentColor.current
-
-                            WebSocketStatus.DISCONNECTED, WebSocketStatus.FAILED -> Color.Unspecified
-                        }
-                        Icon(
-                            painter = icon,
-                            contentDescription = null,
-                            tint = tint,
-                        )
                     }
                 }
             )
@@ -134,9 +155,7 @@ fun FeedbackScreen() {
             PullToRefreshBox(
                 state = pullToRefreshState,
                 isRefreshing = loading.loading,
-                onRefresh = {
-                    viewModel.loadLastMessage(10)
-                },
+                onRefresh = { viewModel.loadLastMessage(10) },
                 indicator = {
                     PullToRefreshDefaults.LoadingIndicator(
                         state = pullToRefreshState,
@@ -148,9 +167,8 @@ fun FeedbackScreen() {
                 Column(modifier = Modifier.fillMaxSize()) {
                     LazyColumn(
                         reverseLayout = true,
-                        contentPadding = WindowInsets.statusBars.add(WindowInsets(top = 90.dp))
-                            .asPaddingValues(),
-                        modifier = Modifier.weight(1F),
+                        contentPadding = PaddingValues(vertical = 12.dp),
+                        modifier = Modifier.weight(1f),
                         state = lazyListState,
                     ) {
                         val messages = viewModel.messageState.messages
@@ -191,7 +209,7 @@ fun FeedbackScreen() {
                     }
                     UserInput(
                         onMessageSent = { content ->
-                            viewModel.sendMessage(content)
+                            viewModel.sendMessage(content.trim())
                         },
                         resetScroll = {
                             scope.safeLaunch(Dispatchers.Main) {
@@ -210,12 +228,14 @@ fun FeedbackScreen() {
         HandleErrorMessage(errorMessage = wsState.errorMessage) {
             viewModel.clearWebSocketErrorMessage()
         }
-        HandleErrorMessage(errorMessage = adminStatus.message) {
-            viewModel.clearAdminOnlineMessage()
+        // 不再通过干扰性黑框 Toast 弹出“管理员下线”，已整合在顶栏状态副标题中
+        LaunchedEffect(adminStatus.message) {
+            if (adminStatus.message.isNotBlank()) {
+                viewModel.clearAdminOnlineMessage()
+            }
         }
     }
 }
-
 
 @Composable
 fun Message(
@@ -224,15 +244,13 @@ fun Message(
     isFirstMessage: Boolean,
     isLastMessage: Boolean,
 ) {
-    val spaceBetween = if (isLastMessage) modifier.padding(top = 8.dp) else modifier
-    Row(
-        modifier = spaceBetween,
-    ) {
+    val spaceBetween = if (isLastMessage) modifier.padding(top = 6.dp) else modifier
+    Row(modifier = spaceBetween) {
         TextMessage(
             msg = msg,
             isFirstMessage = isFirstMessage,
             modifier = Modifier
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 14.dp)
                 .weight(1f),
         )
     }
@@ -249,32 +267,27 @@ fun TextMessage(
         horizontalAlignment = if (msg.isMe) Alignment.End else Alignment.Start,
     ) {
         ChatItemBubble(msg)
-        if (isFirstMessage) {
-            // Last bubble before next author
-            Spacer(modifier = Modifier.height(8.dp))
-        } else {
-            // Between bubbles
-            Spacer(modifier = Modifier.height(4.dp))
-        }
+        Spacer(modifier = Modifier.height(if (isFirstMessage) 8.dp else 4.dp))
     }
 }
 
-private val ReceiveChatBubbleShape = RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
-private val SendChatBubbleShape = RoundedCornerShape(20.dp, 20.dp, 4.dp, 20.dp)
+private val ReceiveChatBubbleShape = RoundedCornerShape(4.dp, 18.dp, 18.dp, 18.dp)
+private val SendChatBubbleShape = RoundedCornerShape(18.dp, 18.dp, 4.dp, 18.dp)
 
 @Composable
 private fun DayHeader(dayString: String) {
     Row(
         modifier = Modifier
-            .padding(vertical = 8.dp, horizontal = 16.dp)
-            .height(16.dp)
+            .fillMaxWidth()
+            .padding(vertical = 10.dp, horizontal = 24.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         DayHeaderLine()
         Text(
             text = dayString,
-            modifier = Modifier.padding(horizontal = 16.dp),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.outline
+            modifier = Modifier.padding(horizontal = 12.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         DayHeaderLine()
     }
@@ -283,58 +296,47 @@ private fun DayHeader(dayString: String) {
 @Composable
 private fun RowScope.DayHeaderLine() {
     HorizontalDivider(
-        modifier = Modifier
-            .weight(1f)
-            .align(Alignment.CenterVertically),
-        color = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)
+        modifier = Modifier.weight(1f),
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
     )
 }
 
 @Composable
-private fun ChatItemBubble(
-    textMessage: TextMessage,
-) {
+private fun ChatItemBubble(textMessage: TextMessage) {
     val backgroundBubbleColor = if (textMessage.isMe) {
-        MaterialTheme.colorScheme.primaryContainer
+        MaterialTheme.colorScheme.primary
     } else {
-        MaterialTheme.colorScheme.secondaryContainer
+        MaterialTheme.colorScheme.surfaceContainerHigh
     }
-    val shape = if (textMessage.isMe) {
-        SendChatBubbleShape
-    } else {
-        ReceiveChatBubbleShape
-    }
-    Column {
-        Surface(
-            color = backgroundBubbleColor,
-            shape = shape
-        ) {
-            ClickableMessage(
-                textMessage = textMessage,
-            )
-        }
+    val shape = if (textMessage.isMe) SendChatBubbleShape else ReceiveChatBubbleShape
+
+    Surface(
+        color = backgroundBubbleColor,
+        shape = shape,
+        modifier = Modifier.widthIn(max = 290.dp),
+    ) {
+        ClickableMessage(textMessage = textMessage)
     }
 }
 
 @Composable
-fun ClickableMessage(
-    textMessage: TextMessage,
-) {
+fun ClickableMessage(textMessage: TextMessage) {
+    val cleanText = textMessage.content.trimEnd('\n', '\r')
     val styledMessage = messageFormatter(
-        text = textMessage.content,
+        text = cleanText,
         primary = textMessage.isMe
     )
     val textColor = if (textMessage.isMe) {
-        MaterialTheme.colorScheme.onPrimaryContainer
+        MaterialTheme.colorScheme.onPrimary
     } else {
-        MaterialTheme.colorScheme.onSecondaryContainer
+        MaterialTheme.colorScheme.onSurface
     }
 
     SelectionContainer {
         BasicText(
             text = styledMessage,
-            modifier = Modifier.padding(16.dp),
-            style = TextStyle.Default.copy(color = textColor),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            style = MaterialTheme.typography.bodyMedium.copy(color = textColor),
         )
     }
 }

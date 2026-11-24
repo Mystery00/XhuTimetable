@@ -79,9 +79,21 @@ class MainViewModel : ComposeViewModel() {
     private val _dateStart = MutableStateFlow(LocalDate.now().atStartWeek())
     val dateStart: StateFlow<LocalDate> = _dateStart
 
-    //当前周
+    //当前显示的周（随用户切换变化）
     private val _week = MutableStateFlow(1)
     val week: StateFlow<Int> = _week
+
+    //真实当前周（由开学日期计算，不随手动切周变化）
+    private val _actualCurrentWeek = MutableStateFlow(1)
+    val actualCurrentWeek: StateFlow<Int> = _actualCurrentWeek
+
+    //开学日期（供周课表按周次直接计算日期头）
+    private val _termStartDate = MutableStateFlow(LocalDate.now().atStartWeek())
+    val termStartDate: StateFlow<LocalDate> = _termStartDate
+
+    //1..20 周预计算课表缓存，支撑本周课表左右丝滑翻页
+    private val _allWeekTables = MutableStateFlow<Map<Int, List<List<CourseSheet>>>>(emptyMap())
+    val allWeekTables: StateFlow<Map<Int, List<List<CourseSheet>>>> = _allWeekTables
 
     //今日诗词
     private val _poems = MutableStateFlow<Poems?>(null)
@@ -212,6 +224,10 @@ class MainViewModel : ComposeViewModel() {
             _mainUser.value = mainUser
             _emptyUser.value = mainUser == null
         }
+    }
+
+    fun reloadPoems() {
+        showPoems()
     }
 
     private fun showPoems() {
@@ -405,8 +421,10 @@ class MainViewModel : ComposeViewModel() {
             loadFromCloud = getCacheStore { lastSyncCourse } < LocalDate.now()
         }
         val currentWeek = WidgetRepo.calculateWeek()
+        _actualCurrentWeek.value = currentWeek
         _week.value = currentWeek
         val termStartDate = getConfigStore { termStartDate }
+        _termStartDate.value = termStartDate
         _dateStart.value = termStartDate.plus(currentWeek.toLong() - 1, DateTimeUnit.WEEK)
         logger.i(
             "Week header loaded: viewModel=${hashCode()}, today=${LocalDate.now()}, " +
@@ -613,34 +631,35 @@ class MainViewModel : ComposeViewModel() {
      * @param courseList 课程列表
      * @param changeWeekOnly 是否只是切换周数
      */
-    private suspend fun loadCourseToTable(
-        currentWeek: Int,
+    private fun buildTableForWeek(
         showWeek: Int,
         courseList: List<WeekCourseView>,
         colorMap: Map<String, Color>,
-        changeWeekOnly: Boolean,
-    ) {
-        //设置是否本周以及课程颜色
-        courseList.forEach {
-            it.thisWeek = it.weekList.contains(showWeek)
-            it.backgroundColor = colorMap[it.courseName] ?: ColorPool.hash(it.courseName)
-            it.generateKey()
+        showNotThisWeek: Boolean,
+        customUi: CustomUi,
+    ): List<List<CourseSheet>> {
+        val cloned = courseList.map { course ->
+            course.copy().apply {
+                thisWeek = weekList.contains(showWeek)
+                backgroundColor = colorMap[courseName] ?: ColorPool.hash(courseName)
+                generateKey()
+            }
         }
-        //组建表格的数据结构
         val expandTableCourse = Array(7) { day ->
             Array(11) { index ->
                 CourseSheet.empty(1, index + 1, day + 1)
             }
         }
-        //平铺课程
-        courseList.forEach { course ->
+        cloned.forEach { course ->
             val day = course.day.isoDayNumber - 1
-            (course.startDayTime..course.endDayTime).forEach { time ->
-                //填充表格
-                expandTableCourse[day][time - 1].course.add(course)
+            if (day in 0..6) {
+                (course.startDayTime..course.endDayTime).forEach { time ->
+                    if (time in 1..11) {
+                        expandTableCourse[day][time - 1].course.add(course)
+                    }
+                }
             }
         }
-        //使用key判断格子内容是否相同，相同则合并
         val tableCourse = Array(7) { day ->
             val dayArray = expandTableCourse[day]
             val first = dayArray.first()
@@ -665,27 +684,24 @@ class MainViewModel : ComposeViewModel() {
             }
             result
         }
-        //处理显示的信息
         tableCourse.forEach { array ->
             array.forEach { sheet ->
                 if (sheet.course.isNotEmpty()) {
                     sheet.course.sort()
                     val show = sheet.course.first()
-                    sheet.course = ArrayList(sheet.course.sortedBy { it.weekList.first() })
+                    sheet.course = ArrayList(sheet.course.sortedBy { it.weekList.firstOrNull() ?: 0 })
                     if (show.thisWeek) {
-                        sheet.showTitle = show.format(_customUi.value.weekTitleTemplate)
+                        sheet.showTitle = show.format(customUi.weekTitleTemplate)
                         sheet.color = colorMap[show.courseName] ?: ColorPool.hash(show.courseName)
                         sheet.textColor = Color.White
                     } else {
-                        sheet.showTitle = show.format(_customUi.value.weekNotTitleTemplate)
+                        sheet.showTitle = show.format(customUi.weekNotTitleTemplate)
                         sheet.color = XhuColor.notThisWeekBackgroundColor
                         sheet.textColor = Color.Gray
                     }
                 }
             }
         }
-        //过滤非本周课程
-        val showNotThisWeek = getConfigStore { showNotThisWeek }
         if (!showNotThisWeek) {
             tableCourse.forEach { array ->
                 array.forEach { sheet ->
@@ -695,31 +711,55 @@ class MainViewModel : ComposeViewModel() {
                 }
             }
         }
-        _tableCourse.value = tableCourse.toList()
+        return tableCourse.toList()
+    }
+
+    private suspend fun loadCourseToTable(
+        currentWeek: Int,
+        showWeek: Int,
+        courseList: List<WeekCourseView>,
+        colorMap: Map<String, Color>,
+        changeWeekOnly: Boolean,
+    ) {
+        val showNotThisWeek = getConfigStore { showNotThisWeek }
+        val customUi = _customUi.value
+        val currentTable = buildTableForWeek(showWeek, courseList, colorMap, showNotThisWeek, customUi)
+        _tableCourse.value = currentTable
+
+        val allTables = LinkedHashMap<Int, List<List<CourseSheet>>>(20)
+        for (w in 1..20) {
+            allTables[w] = if (w == showWeek) {
+                currentTable
+            } else {
+                buildTableForWeek(w, courseList, colorMap, showNotThisWeek, customUi)
+            }
+        }
+        _allWeekTables.value = allTables
 
         if (changeWeekOnly) {
-            //仅仅只是切换周，那么不需要重新渲染周预览
             return
         }
 
-        //计算顶部周视图
         val weekViewArray = Array(20) { index ->
             WeekView(index + 1, currentWeek == index + 1, Array(5) { Array(5) { false } })
         }
-        for (dayIndex in 0 until 5) {
-            val dayArray = expandTableCourse[dayIndex]
-            for (itemIndex in 0 until 10) {
-                val sheet = dayArray[itemIndex]
-                sheet.course.forEach {
-                    it.weekList.forEach { week ->
-                        weekViewArray[week - 1].array[dayIndex][itemIndex / 2] = true
+        courseList.forEach { course ->
+            val dayIndex = course.day.isoDayNumber - 1
+            if (dayIndex in 0 until 5) {
+                (course.startDayTime..course.endDayTime).forEach { time ->
+                    val itemIndex = time - 1
+                    if (itemIndex in 0 until 10) {
+                        course.weekList.forEach { week ->
+                            if (week in 1..20) {
+                                weekViewArray[week - 1].array[dayIndex][itemIndex / 2] = true
+                            }
+                        }
                     }
                 }
             }
         }
         _weekView.value = weekViewArray.toList()
     }
-
     /**
      * 复用的加载本周课表的方法
      * @param currentWeek 当前周
@@ -849,13 +889,17 @@ class MainViewModel : ComposeViewModel() {
         viewModelScope.safeLaunch {
             _week.value = currentWeek
             val termStartDate = getConfigStore { termStartDate }
-            //获取缓存的课程数据
-            val data = getMainPageData(forceLoadFromCloud = false, forceLoadFromLocal = true)
-            val weekList = data.weekViewList
-            //获取自定义颜色列表
-            val colorMap = CourseColorRepo.getRawCourseColorList()
-            loadCourseToTable(currentWeek, currentWeek, weekList, colorMap, true)
+            _termStartDate.value = termStartDate
             _dateStart.value = termStartDate.plus(currentWeek.toLong() - 1, DateTimeUnit.WEEK)
+            val cached = _allWeekTables.value[currentWeek]
+            if (cached != null) {
+                _tableCourse.value = cached
+            } else {
+                val data = getMainPageData(forceLoadFromCloud = false, forceLoadFromLocal = true)
+                val weekList = data.weekViewList
+                val colorMap = CourseColorRepo.getRawCourseColorList()
+                loadCourseToTable(_actualCurrentWeek.value, currentWeek, weekList, colorMap, true)
+            }
             logger.i(
                 "Week header changed: viewModel=${hashCode()}, today=${LocalDate.now()}, " +
                     "termStartDate=$termStartDate, week=$currentWeek, dateStart=${_dateStart.value}, " +

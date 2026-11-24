@@ -1,42 +1,49 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.EventNote
-import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Cancel
-import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Palette
-import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -55,27 +62,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.maxkeppeker.sheets.core.models.base.Header
-import com.maxkeppeker.sheets.core.models.base.UseCaseState
-import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
-import com.maxkeppeler.sheets.calendar.CalendarDialog
-import com.maxkeppeler.sheets.calendar.models.CalendarConfig
-import com.maxkeppeler.sheets.calendar.models.CalendarSelection
-import com.maxkeppeler.sheets.calendar.models.CalendarStyle
-import com.maxkeppeler.sheets.clock.ClockDialog
-import com.maxkeppeler.sheets.clock.models.ClockConfig
-import com.maxkeppeler.sheets.clock.models.ClockSelection
-import com.maxkeppeler.sheets.color.ColorDialog
-import com.maxkeppeler.sheets.color.models.ColorConfig
-import com.maxkeppeler.sheets.color.models.ColorSelection
-import com.maxkeppeler.sheets.color.models.SingleColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.LocalTime
 import kotlinx.datetime.format
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -92,6 +87,11 @@ import vip.mystery0.xhu.timetable.ui.component.ShowUserDialog
 import vip.mystery0.xhu.timetable.ui.component.StateScreen
 import vip.mystery0.xhu.timetable.ui.component.TextWithIcon
 import vip.mystery0.xhu.timetable.ui.component.collectAndHandleState
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuColorPickerDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuConfirmDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuDatePickerDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuTimePickerDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.component.isScrollingUp
 import vip.mystery0.xhu.timetable.ui.component.itemsIndexed
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
@@ -111,16 +111,13 @@ import xhutimetable.composeapp.generated.resources.state_no_data
 @Composable
 fun CustomThingScreen() {
     val viewModel = koinViewModel<CustomThingViewModel>()
-
     val navController = LocalNavController.current
-
     val pager = viewModel.pageState.collectAndHandleState(viewModel::handleLoadState)
 
     val userSelect by viewModel.userSelect.select.collectAsState()
-    val userDialog by viewModel.userSelect.selectDialog.collectAsState()
+    val userDialogState = rememberXhuDialogState()
 
     val scope = rememberCoroutineScope()
-
     val openBottomSheet = rememberSaveable { mutableStateOf(false) }
     val customThingState = remember { mutableStateOf(CustomThingResponse.init()) }
 
@@ -136,14 +133,18 @@ fun CustomThingScreen() {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = "自定义事项") },
+                title = {
+                    Text(
+                        text = "自定义事项",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        navController.popBackStack()
-                    }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             painter = XhuIcons.back,
-                            contentDescription = null,
+                            contentDescription = "返回",
                         )
                     }
                 },
@@ -159,18 +160,18 @@ fun CustomThingScreen() {
             pager = pager,
             refreshing = refreshing,
             listHeader = {
-                BuildUserSelectFilterChipContent(
+                vip.mystery0.xhu.timetable.ui.component.BuildUserSelectFilterBar(
                     userSelect = userSelect,
-                    showUserDialog = userDialog,
-                ) {
-                    viewModel.loadCustomThingList()
-                }
+                    onUserClick = { userDialogState.show() },
+                    onRefresh = { viewModel.loadCustomThingList() }
+                )
             },
             listContent = {
                 itemsIndexed(
                     pager,
-                    key = { index -> pager[index]?.thingId ?: index }) { item ->
-                    BuildItem(item) {
+                    key = { index -> pager[index]?.thingId ?: index }
+                ) { item ->
+                    BuildCustomThingCard(item) {
                         updateCustomThing(item)
                     }
                 }
@@ -179,36 +180,34 @@ fun CustomThingScreen() {
                 val loadingErrorMessage by viewModel.loadingErrorMessage.collectAsState()
                 StateScreen(
                     title = loadingErrorMessage ?: "暂无自定义事项",
+                    subtitle = "点击右下角 + 按钮，添加作业提醒、日程或倒计时",
                     buttonText = "再查一次",
                     imageRes = painterResource(Res.drawable.state_no_data),
-                    verticalArrangement = Arrangement.Top,
-                    onButtonClick = {
-                        viewModel.loadCustomThingList()
-                    }
+                    onButtonClick = { viewModel.loadCustomThingList() }
                 )
             },
-        ) @Composable {
+        ) {
             AnimatedVisibility(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(24.dp),
+                    .padding(20.dp),
                 visible = isScrollingUp,
-                enter = slideInVertically(initialOffsetY = { it }),
-                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                enter = fadeIn() + scaleIn(),
+                exit = fadeOut() + scaleOut(),
             ) {
                 FloatingActionButton(
-                    onClick = {
-                        updateCustomThing(CustomThingResponse.init())
-                    }) {
+                    onClick = { updateCustomThing(CustomThingResponse.init()) }
+                ) {
                     Icon(
                         imageVector = Icons.Rounded.Add,
-                        contentDescription = null,
+                        contentDescription = "添加自定义事项",
                     )
                 }
             }
         }
     }
-    ShowUserDialog(selectList = userSelect, useCaseState = userDialog, onSelect = {
+
+    ShowUserDialog(selectList = userSelect, state = userDialogState, onSelect = {
         viewModel.selectUser(it.studentId)
     })
     CustomThingBottomSheet(customThingState, openBottomSheet, scope)
@@ -216,82 +215,7 @@ fun CustomThingScreen() {
     HandleErrorMessage(flow = viewModel.errorMessage)
 }
 
-@Composable
-private fun BuildDateSelector(
-    useCaseState: UseCaseState,
-    initData: LocalDateTime,
-    onDateChange: (LocalDateTime) -> Unit,
-) {
-    val date = initData.date
-    val time = initData.time
-
-    CalendarDialog(
-        header = Header.Default(
-            title = "请选择日期",
-        ),
-        state = useCaseState,
-        selection = CalendarSelection.Date(
-            selectedDate = date,
-        ) {
-            onDateChange(LocalDateTime(it, time))
-        },
-        config = CalendarConfig(
-            yearSelection = true,
-            monthSelection = true,
-            style = CalendarStyle.MONTH,
-        )
-    )
-}
-
-@Composable
-private fun BuildTimeSelector(
-    useCaseState: UseCaseState,
-    initData: LocalDateTime,
-    onDateChange: (LocalDateTime) -> Unit,
-) {
-    val date = initData.date
-    val time = initData.time
-
-    ClockDialog(
-        header = Header.Default(
-            title = "请选择时间",
-        ),
-        state = useCaseState,
-        selection = ClockSelection.HoursMinutes(
-        ) { hour, minutes ->
-            onDateChange(LocalDateTime(date, LocalTime(hour, minutes)))
-        },
-        config = ClockConfig(
-            defaultTime = time,
-            is24HourFormat = true,
-        )
-    )
-}
-
-@Composable
-private fun BuildColorSelector(
-    useCaseState: UseCaseState,
-    initData: Color,
-    onDateChange: (Color) -> Unit,
-) {
-    ColorDialog(
-        header = Header.Default(
-            title = "请选择需要修改的颜色",
-        ),
-        state = useCaseState,
-        selection = ColorSelection(
-            selectedColor = SingleColor(initData.toArgb()),
-            onSelectColor = {
-                onDateChange(Color(it))
-            }
-        ),
-        config = ColorConfig(
-            templateColors = ColorPool.templateColors,
-            allowCustomColorAlphaValues = false,
-        )
-    )
-}
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CustomThingBottomSheet(
     customThingState: MutableState<CustomThingResponse>,
@@ -299,16 +223,17 @@ private fun CustomThingBottomSheet(
     scope: CoroutineScope,
 ) {
     val viewModel = koinViewModel<CustomThingViewModel>()
-
-    val startDateDialog = rememberUseCaseState()
-    val startTimeDialog = rememberUseCaseState()
-    val endDateDialog = rememberUseCaseState()
-    val endTimeDialog = rememberUseCaseState()
-    val showColorDialog = rememberUseCaseState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val focusManager = LocalFocusManager.current
+
+    val startDateDialog = rememberXhuDialogState()
+    val startTimeDialog = rememberXhuDialogState()
+    val endDateDialog = rememberXhuDialogState()
+    val endTimeDialog = rememberXhuDialogState()
+    val colorDialog = rememberXhuDialogState()
+    val deleteConfirmDialog = rememberXhuDialogState()
 
     val saveLoadingState by viewModel.saveLoadingState.collectAsState()
-
     val customThing = customThingState.value
 
     var thingTitle by remember { mutableStateOf(customThing.title) }
@@ -320,44 +245,26 @@ private fun CustomThingBottomSheet(
     var remark by remember { mutableStateOf(customThing.remark) }
     var color by remember { mutableStateOf(customThing.color.parseColorHexString()) }
 
-    LaunchedEffect(customThing) {
-        thingTitle = customThing.title
-        location = customThing.location
-        allDay = customThing.allDay
-        saveAsCountdown = customThing.saveAsCountDown
-        startTime = customThing.startTime.asLocalDateTime()
-        endTime = customThing.endTime.asLocalDateTime()
-        remark = customThing.remark
-        color = customThing.color.parseColorHexString()
-    }
-
-    val focusManager = LocalFocusManager.current
-
-    BuildDateSelector(startDateDialog, startTime) {
-        startTime = it
-    }
-    BuildTimeSelector(startTimeDialog, startTime) {
-        startTime = it
-    }
-    BuildDateSelector(endDateDialog, endTime) {
-        endTime = it
-    }
-    BuildTimeSelector(endTimeDialog, endTime) {
-        endTime = it
-    }
-    BuildColorSelector(showColorDialog, color) {
-        color = it
+    LaunchedEffect(customThing, openBottomSheet.value) {
+        if (openBottomSheet.value) {
+            thingTitle = customThing.title
+            location = customThing.location
+            allDay = customThing.allDay
+            saveAsCountdown = customThing.saveAsCountDown
+            startTime = customThing.startTime.asLocalDateTime()
+            endTime = customThing.endTime.asLocalDateTime()
+            remark = customThing.remark
+            color = customThing.color.parseColorHexString()
+        }
     }
 
     fun dismissSheet() {
         focusManager.clearFocus()
-        scope
-            .safeLaunch { sheetState.hide() }
-            .invokeOnCompletion {
-                if (!sheetState.isVisible) {
-                    openBottomSheet.value = false
-                }
+        scope.safeLaunch { sheetState.hide() }.invokeOnCompletion {
+            if (!sheetState.isVisible) {
+                openBottomSheet.value = false
             }
+        }
     }
 
     LaunchedEffect(saveLoadingState.loading) {
@@ -366,11 +273,55 @@ private fun CustomThingBottomSheet(
         }
     }
 
-    if (!openBottomSheet.value) {
-        return
-    }
+    // 自研跨平台日期/时间/颜色/删除确认弹窗
+    XhuDatePickerDialog(
+        state = startDateDialog,
+        title = if (saveAsCountdown) "选择目标日期" else "选择开始日期",
+        initialDate = startTime.date,
+        onSelectDate = { newDate ->
+            startTime = LocalDateTime(newDate, startTime.time)
+            if (endTime.date < newDate) {
+                endTime = LocalDateTime(newDate, endTime.time)
+            }
+        },
+    )
+    XhuTimePickerDialog(
+        state = startTimeDialog,
+        title = "选择开始时间",
+        initialTime = startTime.time,
+        onSelectTime = { newTime -> startTime = LocalDateTime(startTime.date, newTime) },
+    )
+    XhuDatePickerDialog(
+        state = endDateDialog,
+        title = "选择结束日期",
+        initialDate = endTime.date,
+        onSelectDate = { newDate -> endTime = LocalDateTime(newDate, endTime.time) },
+    )
+    XhuTimePickerDialog(
+        state = endTimeDialog,
+        title = "选择结束时间",
+        initialTime = endTime.time,
+        onSelectTime = { newTime -> endTime = LocalDateTime(endTime.date, newTime) },
+    )
+    XhuColorPickerDialog(
+        state = colorDialog,
+        title = "选择主题颜色",
+        initialColor = color,
+        onSelectColor = { color = it },
+    )
+    XhuConfirmDialog(
+        state = deleteConfirmDialog,
+        title = "删除自定义事项",
+        message = "确认删除事项「${customThing.title}」吗？删除后将无法恢复。",
+        icon = { Icon(Icons.Rounded.DeleteOutline, contentDescription = null) },
+        confirmText = "删除",
+        isDestructive = true,
+        onConfirm = { viewModel.deleteCustomThing(customThing.thingId) },
+    )
 
-    val horizontalPadding = 12.dp
+    if (!openBottomSheet.value) return
+
+    val isEdit = customThing.thingId != 0L
 
     ModalBottomSheet(
         onDismissRequest = {
@@ -380,305 +331,339 @@ private fun CustomThingBottomSheet(
         sheetState = sheetState,
     ) {
         Column(
-            modifier = Modifier.fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(horizontalPadding)
+            modifier = Modifier
+                .fillMaxWidth()
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(start = 20.dp, end = 20.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
+            // 清晰顶部标题与操作栏
             Row(
-                modifier = Modifier.padding(horizontal = horizontalPadding),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                IconButton(
+                IconButton(onClick = { dismissSheet() }) {
+                    Icon(Icons.Rounded.Close, contentDescription = "关闭")
+                }
+                Text(
+                    text = if (isEdit) "编辑自定义事项" else "新建自定义事项",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f),
+                )
+                if (isEdit && !saveLoadingState.loading) {
+                    IconButton(onClick = { deleteConfirmDialog.show() }) {
+                        Icon(
+                            imageVector = Icons.Rounded.DeleteOutline,
+                            contentDescription = "删除",
+                            tint = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+                Button(
+                    enabled = !saveLoadingState.loading,
+                    shape = RoundedCornerShape(12.dp),
                     onClick = {
-                        dismissSheet()
-                    },
-                    modifier = Modifier.padding(12.dp)
+                        viewModel.saveCustomThing(
+                            customThing.thingId,
+                            CustomThingRequest.buildOf(
+                                thingTitle,
+                                location,
+                                allDay,
+                                startTime,
+                                endTime,
+                                remark,
+                                color,
+                                mapOf(
+                                    CustomThing.Key.SAVE_AS_COUNT_DOWN to saveAsCountdown.toString()
+                                )
+                            ),
+                            saveAsCountdown,
+                        )
+                    }
                 ) {
-                    Icon(Icons.Rounded.Cancel, null)
-                }
-                Spacer(modifier = Modifier.weight(1F))
-                if (customThing.thingId != 0L && !saveLoadingState.loading) {
-                    TextButton(
-                        onClick = {
-                            viewModel.deleteCustomThing(customThing.thingId)
-                        }) {
-                        Text(text = "删除", color = Color.Red)
+                    if (saveLoadingState.loading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
                     }
-                }
-                if (!saveLoadingState.loading) {
-                    TextButton(
-                        onClick = {
-                            viewModel.saveCustomThing(
-                                customThing.thingId,
-                                CustomThingRequest.buildOf(
-                                    thingTitle,
-                                    location,
-                                    allDay,
-                                    startTime,
-                                    endTime,
-                                    remark,
-                                    color,
-                                    mapOf(
-                                        CustomThing.Key.SAVE_AS_COUNT_DOWN to saveAsCountdown.toString()
-                                    )
-                                ),
-                                saveAsCountdown,
-                            )
-                        }) {
-                        Text(text = "保存")
-                    }
-                }
-                if (saveLoadingState.loading) {
-                    TextButton(
-                        enabled = false,
-                        onClick = {
-                        }) {
-                        Text(text = "保存操作中...")
-                    }
+                    Text(if (saveLoadingState.loading) "保存中" else "保存")
                 }
             }
-            Column {
-                OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(horizontal = horizontalPadding),
-                    value = thingTitle,
-                    placeholder = {
-                        Text(text = "（必填）")
-                    },
-                    label = {
-                        Text(text = "标题")
-                    },
-                    onValueChange = { thingTitle = it },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = Color.Transparent,
-                        disabledBorderColor = Color.Transparent,
-                        disabledLabelColor = OutlinedTextFieldDefaults.colors().unfocusedTextColor,
-                    )
-                )
-                OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(horizontal = horizontalPadding),
-                    value = "",
-                    enabled = false,
-                    label = {
-                        Text(text = "全天")
-                    },
-                    leadingIcon = {
-                        Icon(Icons.Rounded.Schedule, null)
-                    },
-                    trailingIcon = {
-                        Switch(
-                            checked = allDay,
-                            onCheckedChange = { allDay = it },
-                        )
-                    },
-                    onValueChange = { },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = Color.Transparent,
-                        disabledBorderColor = Color.Transparent,
-                        disabledLabelColor = OutlinedTextFieldDefaults.colors().unfocusedTextColor,
-                        disabledLeadingIconColor = OutlinedTextFieldDefaults.colors().unfocusedLeadingIconColor
-                    )
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = horizontalPadding)
-                        .height(36.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Spacer(modifier = Modifier.width(56.dp))
-                    Text(
-                        modifier = Modifier
-                            .weight(1F)
-                            .clickable(
-                                onClick = {
-                                    startDateDialog.show()
-                                },
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() },
-                            ),
-                        text = startTime.date.format(dateFormatter),
-                    )
-                    if (!allDay) {
-                        Text(
-                            modifier = Modifier
-                                .clickable(
-                                    onClick = {
-                                        startTimeDialog.show()
-                                    },
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() },
-                                ),
-                            text = startTime.time.format(Formatter.TIME_NO_SECONDS),
-                        )
-                    }
-                }
-                if (!saveAsCountdown) {
+
+            // 标题与地点
+            OutlinedTextField(
+                value = thingTitle,
+                onValueChange = { thingTitle = it },
+                label = { Text("事项标题 *") },
+                placeholder = { Text("例如：英语四级考试 / 课程论文提交") },
+                shape = RoundedCornerShape(14.dp),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            // 时间与倒计时配置卡片
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = horizontalPadding)
-                            .height(36.dp),
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Spacer(modifier = Modifier.width(56.dp))
-                        Text(
-                            modifier = Modifier
-                                .weight(1F)
-                                .clickable(
-                                    onClick = {
-                                        endDateDialog.show()
-                                    },
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() },
-                                ),
-                            text = endTime.date.format(dateFormatter),
-                        )
-                        if (!allDay) {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                modifier = Modifier
-                                    .clickable(
-                                        onClick = {
-                                            endTimeDialog.show()
-                                        },
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                    ),
-                                text = endTime.time.format(Formatter.TIME_NO_SECONDS),
+                                text = "存储为倒计时",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
                             )
+                            Text(
+                                text = "在今日课程页置顶显示剩余天数",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Switch(
+                            checked = saveAsCountdown,
+                            onCheckedChange = {
+                                saveAsCountdown = it
+                                if (it) allDay = true
+                            },
+                        )
+                    }
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = "全天事项",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Switch(
+                            checked = allDay,
+                            enabled = !saveAsCountdown,
+                            onCheckedChange = { allDay = it },
+                        )
+                    }
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                    )
+                    DateTimeFieldRow(
+                        label = if (saveAsCountdown) "目标日期" else "开始时间",
+                        dateText = startTime.date.format(dateFormatter),
+                        timeText = if (!allDay) startTime.time.format(Formatter.TIME_NO_SECONDS) else null,
+                        onDateClick = { startDateDialog.show() },
+                        onTimeClick = { startTimeDialog.show() },
+                    )
+                    if (!saveAsCountdown) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                        )
+                        DateTimeFieldRow(
+                            label = "结束时间",
+                            dateText = endTime.date.format(dateFormatter),
+                            timeText = if (!allDay) endTime.time.format(Formatter.TIME_NO_SECONDS) else null,
+                            onDateClick = { endDateDialog.show() },
+                            onTimeClick = { endTimeDialog.show() },
+                        )
+                    }
+                }
+            }
+
+            // 内联主题色快速点选 + 自定义调色盘入口
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            text = "标签颜色",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        TextButton(onClick = { colorDialog.show() }) {
+                            Icon(
+                                imageVector = Icons.Rounded.Palette,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("更多颜色")
+                        }
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        ColorPool.allColors.take(10).forEach { preset ->
+                            val selected = (preset.toArgb() and 0x00FFFFFF) == (color.toArgb() and 0x00FFFFFF)
+                            Box(
+                                modifier = Modifier
+                                    .size(34.dp)
+                                    .clip(CircleShape)
+                                    .background(preset)
+                                    .then(
+                                        if (selected) Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+                                        else Modifier
+                                    )
+                                    .clickable { color = preset },
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                if (selected) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Check,
+                                        contentDescription = null,
+                                        tint = if (preset.luminance() > 0.55f) Color.Black else Color.White,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                }
+                            }
                         }
                     }
                 }
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(horizontal = horizontalPadding),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Spacer(modifier = Modifier.width(56.dp))
-                    Text(
-                        modifier = Modifier.weight(1F),
-                        text = "存储为倒计时",
-                    )
-                    Switch(
-                        checked = saveAsCountdown,
-                        onCheckedChange = {
-                            saveAsCountdown = it
-                            if (it) {
-                                //启用存储为倒计时，那么自动打开全天
-                                allDay = true
-                            }
-                        },
-                    )
-                }
             }
+
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(horizontal = horizontalPadding),
                 value = location,
-                placeholder = {
-                    Text(text = "（选填）")
-                },
-                label = {
-                    Text(text = "地点")
-                },
-                leadingIcon = {
-                    Icon(Icons.Rounded.LocationOn, null)
-                },
                 onValueChange = { location = it },
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color.Transparent,
-                    disabledBorderColor = Color.Transparent,
-                    disabledLabelColor = OutlinedTextFieldDefaults.colors().unfocusedTextColor,
-                )
+                label = { Text("地点（选填）") },
+                shape = RoundedCornerShape(14.dp),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
             )
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(horizontal = horizontalPadding)
-                    .clickable(
-                        onClick = {
-                            showColorDialog.show()
-                        },
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() },
-                    ),
-                value = "",
-                enabled = false,
-                label = {
-                    Text(text = "设置颜色")
-                },
-                leadingIcon = {
-                    Icon(Icons.Rounded.Palette, null)
-                },
-                trailingIcon = {
-                    Surface(
-                        shape = CircleShape,
-                        modifier = Modifier.size(24.dp),
-                        color = color
-                    ) {}
-                },
-                onValueChange = { },
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color.Transparent,
-                    disabledBorderColor = Color.Transparent,
-                    disabledLabelColor = OutlinedTextFieldDefaults.colors().unfocusedTextColor,
-                    disabledLeadingIconColor = OutlinedTextFieldDefaults.colors().unfocusedLeadingIconColor
-                )
-            )
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(horizontal = horizontalPadding),
                 value = remark,
-                placeholder = {
-                    Text(text = "（选填）")
-                },
-                label = {
-                    Text(text = "备注")
-                },
-                leadingIcon = {
-                    Icon(Icons.AutoMirrored.Rounded.Notes, null)
-                },
-                singleLine = false,
-                maxLines = 5,
                 onValueChange = { remark = it },
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color.Transparent,
-                    disabledBorderColor = Color.Transparent,
-                    disabledLabelColor = OutlinedTextFieldDefaults.colors().unfocusedTextColor,
-                )
+                label = { Text("备注（选填）") },
+                shape = RoundedCornerShape(14.dp),
+                minLines = 2,
+                maxLines = 5,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }
 }
 
 @Composable
-private fun BuildItem(
+private fun DateTimeFieldRow(
+    label: String,
+    dateText: String,
+    timeText: String?,
+    onDateClick: () -> Unit,
+    onTimeClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+        Surface(
+            onClick = onDateClick,
+            shape = RoundedCornerShape(10.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        ) {
+            Text(
+                text = dateText,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            )
+        }
+        if (timeText != null) {
+            Surface(
+                onClick = onTimeClick,
+                shape = RoundedCornerShape(10.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHighest,
+            ) {
+                Text(
+                    text = timeText,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BuildCustomThingCard(
     item: CustomThingResponse,
     onClick: () -> Unit,
 ) {
     PageItemLayout(
-        cardModifier = Modifier.clickable(
-            onClick = onClick,
-            indication = null,
-            interactionSource = MutableInteractionSource(),
-        ),
+        onClick = onClick,
         header = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Box(
-                    modifier = Modifier.size(24.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
+                    modifier = Modifier
+                        .size(12.dp)
+                        .clip(CircleShape)
+                        .background(item.color.parseColorHexString())
+                )
+                Text(
+                    text = item.title,
+                    modifier = Modifier.weight(1f),
+                )
+                if (item.saveAsCountDown) {
                     Surface(
-                        shape = CircleShape,
-                        modifier = Modifier
-                            .size(16.dp),
-                        color = item.color.parseColorHexString()
-                    ) {}
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                    ) {
+                        Text(
+                            text = "倒计时",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
+                        )
+                    }
                 }
-                Text(item.title)
             }
         },
         content = {
@@ -710,17 +695,21 @@ private fun BuildItem(
                     }
                 }
             }
-            TextWithIcon(
-                imageVector = Icons.AutoMirrored.Filled.EventNote,
-                text = "时间：${timeText}",
-            )
-            TextWithIcon(
-                imageVector = Icons.Filled.LocationOn,
-                text = "地点：${item.location.ifBlank { "未指定" }}",
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                TextWithIcon(
+                    imageVector = Icons.AutoMirrored.Filled.EventNote,
+                    text = "时间：$timeText",
+                )
+                if (item.location.isNotBlank()) {
+                    TextWithIcon(
+                        imageVector = Icons.Filled.LocationOn,
+                        text = "地点：${item.location}",
+                    )
+                }
+            }
         },
         footer = {
-            Text("添加时间：${item.createTime.asLocalDateTime().format(chinaDateTime)}")
+            Text("添加于 ${item.createTime.asLocalDateTime().format(chinaDateTime)}")
         }
     )
 }

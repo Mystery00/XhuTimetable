@@ -7,6 +7,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import vip.mystery0.xhu.timetable.ui.screen.calendarActions
 import vip.mystery0.xhu.timetable.ui.screen.calendarContent
 import vip.mystery0.xhu.timetable.ui.screen.calendarTitleBar
+import vip.mystery0.xhu.timetable.ui.screen.profileCourseActions
 import vip.mystery0.xhu.timetable.ui.screen.profileCourseContent
 import vip.mystery0.xhu.timetable.ui.screen.profileCourseTitleBar
 import vip.mystery0.xhu.timetable.ui.screen.todayCourseActions
@@ -24,6 +25,7 @@ internal enum class Tab(
     val titleBar: TabTitle? = null,
     val actions: TabAction? = null,
     val content: TabContent,
+    val useBackgroundImage: Boolean = true,
 ) {
     TODAY(
         label = "今日",
@@ -32,6 +34,7 @@ internal enum class Tab(
         titleBar = todayCourseTitleBar,
         actions = todayCourseActions,
         content = todayCourseContent,
+        useBackgroundImage = true,
     ),
     WEEK(
         label = "本周",
@@ -39,6 +42,7 @@ internal enum class Tab(
         titleBar = weekCourseTitleBar,
         actions = weekCourseActions,
         content = weekCourseContent,
+        useBackgroundImage = true,
     ),
     CALENDAR(
         label = "月历",
@@ -46,12 +50,15 @@ internal enum class Tab(
         titleBar = calendarTitleBar,
         actions = calendarActions,
         content = calendarContent,
+        useBackgroundImage = true,
     ),
     PROFILE(
         label = "我的",
         icon = XhuStateIcons.profile,
         titleBar = profileCourseTitleBar,
+        actions = profileCourseActions,
         content = profileCourseContent,
+        useBackgroundImage = false,
     ),
 }
 

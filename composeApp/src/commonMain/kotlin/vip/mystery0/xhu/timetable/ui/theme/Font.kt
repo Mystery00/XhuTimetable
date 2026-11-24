@@ -10,26 +10,26 @@ object XhuFonts {
 
     fun Typography.globalSet(fontFamily: FontFamily): Typography =
         copy(
-            displayLarge = this.displayLarge.globalSet(fontFamily),
-            displayMedium = this.displayMedium.globalSet(fontFamily),
-            displaySmall = this.displaySmall.globalSet(fontFamily),
-            headlineLarge = this.headlineLarge.globalSet(fontFamily),
-            headlineMedium = this.headlineMedium.globalSet(fontFamily),
-            headlineSmall = this.headlineSmall.globalSet(fontFamily),
-            titleLarge = this.titleLarge.globalSet(fontFamily),
-            titleMedium = this.titleMedium.globalSet(fontFamily),
-            titleSmall = this.titleSmall.globalSet(fontFamily),
-            bodyLarge = this.bodyLarge.globalSet(fontFamily),
-            bodyMedium = this.bodyMedium.globalSet(fontFamily),
-            bodySmall = this.bodySmall.globalSet(fontFamily),
-            labelLarge = this.labelLarge.globalSet(fontFamily),
-            labelMedium = this.labelMedium.globalSet(fontFamily),
-            labelSmall = this.labelSmall.globalSet(fontFamily),
+            displayLarge = this.displayLarge.globalSet(fontFamily, 1.2f),
+            displayMedium = this.displayMedium.globalSet(fontFamily, 1.2f),
+            displaySmall = this.displaySmall.globalSet(fontFamily, 1.22f),
+            headlineLarge = this.headlineLarge.globalSet(fontFamily, 1.25f),
+            headlineMedium = this.headlineMedium.globalSet(fontFamily, 1.25f),
+            headlineSmall = this.headlineSmall.globalSet(fontFamily, 1.28f),
+            titleLarge = this.titleLarge.globalSet(fontFamily, 1.3f),
+            titleMedium = this.titleMedium.globalSet(fontFamily, 1.32f),
+            titleSmall = this.titleSmall.globalSet(fontFamily, 1.32f),
+            bodyLarge = this.bodyLarge.globalSet(fontFamily, 1.42f),
+            bodyMedium = this.bodyMedium.globalSet(fontFamily, 1.42f),
+            bodySmall = this.bodySmall.globalSet(fontFamily, 1.38f),
+            labelLarge = this.labelLarge.globalSet(fontFamily, 1.28f),
+            labelMedium = this.labelMedium.globalSet(fontFamily, 1.28f),
+            labelSmall = this.labelSmall.globalSet(fontFamily, 1.25f),
         )
 
-    private fun TextStyle.globalSet(fontFamily: FontFamily) =
+    private fun TextStyle.globalSet(fontFamily: FontFamily, lineHeightEm: Float) =
         copy(
-            lineHeight = 1.2.em,
+            lineHeight = lineHeightEm.em,
             fontFamily = fontFamily,
         )
 }

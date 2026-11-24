@@ -1,10 +1,14 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AutoMode
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -17,31 +21,23 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import com.maxkeppeker.sheets.core.models.base.Header
-import com.maxkeppeker.sheets.core.models.base.SelectionButton
-import com.maxkeppeker.sheets.core.models.base.UseCaseState
-import com.maxkeppeler.sheets.calendar.CalendarDialog
-import com.maxkeppeler.sheets.calendar.models.CalendarConfig
-import com.maxkeppeler.sheets.calendar.models.CalendarSelection
-import com.maxkeppeler.sheets.calendar.models.CalendarStyle
-import com.maxkeppeler.sheets.clock.ClockDialog
-import com.maxkeppeler.sheets.clock.models.ClockConfig
-import com.maxkeppeler.sheets.clock.models.ClockSelection
-import kotlinx.datetime.DateTimeUnit
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.format
-import kotlinx.datetime.plus
 import multiplatform.network.cmptoast.showToast
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
-import vip.mystery0.xhu.timetable.config.Customisable
 import vip.mystery0.xhu.timetable.config.store.ConfigStore
 import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.model.CampusInfo
 import vip.mystery0.xhu.timetable.model.TermStartChangeAlert
 import vip.mystery0.xhu.timetable.model.event.EventType
-import vip.mystery0.xhu.timetable.ui.component.ShowSingleSelectDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuDatePickerDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuSingleSelectDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuTimePickerDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.component.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.component.preference.XhuActionSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.component.preference.XhuSettingsGroup
@@ -55,14 +51,12 @@ import vip.mystery0.xhu.timetable.ui.navigation.navigateAndSave
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.MIN
 import vip.mystery0.xhu.timetable.utils.dateFormatter
-import vip.mystery0.xhu.timetable.utils.now
 import vip.mystery0.xhu.timetable.utils.timeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.ClassSettingsViewModel
 
 @Composable
 fun ClassSettingsScreen() {
     val viewModel = koinViewModel<ClassSettingsViewModel>()
-
     val navController = LocalNavController.current
 
     val currentYear by viewModel.currentYearData.collectAsState()
@@ -73,27 +67,34 @@ fun ClassSettingsScreen() {
     val serverTermStartDate by viewModel.serverTermStartDate.collectAsState()
     val showCustomCourse by viewModel.showCustomCourseData.collectAsState()
     val showCustomThing by viewModel.showCustomThingData.collectAsState()
-    val showTomorrowCourseTimeState by viewModel.showTomorrowCourseTimeState.collectAsState()
-    val yearAndTermState by viewModel.yearAndTermState.collectAsState()
-    val termStartTimeState by viewModel.termStartTimeState.collectAsState()
-    val userCampusState by viewModel.userCampusState.collectAsState()
+    val selectList by viewModel.selectYearAndTermList.collectAsState()
+
+    val tomorrowTimeDialog = rememberXhuDialogState()
+    val yearTermDialog = rememberXhuDialogState()
+    val termStartDialog = rememberXhuDialogState()
+    val campusDialog = rememberXhuDialogState()
 
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         viewModel.init()
     }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = "课程设置") },
+                title = {
+                    Text(
+                        text = "课程设置",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        navController.popBackStack()
-                    }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             painter = XhuIcons.back,
-                            contentDescription = null,
+                            contentDescription = "返回",
                         )
                     }
                 },
@@ -106,9 +107,7 @@ fun ClassSettingsScreen() {
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState()),
         ) {
-            XhuSettingsGroup(title = {
-                Text(text = "显示设置")
-            }) {
+            XhuSettingsGroup(title = { Text("显示设置") }) {
                 ConfigSettingsCheckbox(
                     config = ConfigStore::showNotThisWeek,
                     scope = scope,
@@ -119,7 +118,8 @@ fun ClassSettingsScreen() {
                             tint = MaterialTheme.colorScheme.onSurface,
                         )
                     },
-                    title = { Text(text = "显示非本周课程") }
+                    title = { Text("显示非本周课程") },
+                    subtitle = { Text("在周课表中以灰阶展示非当前周次的课程") },
                 ) {
                     EventBus.post(EventType.CHANGE_SHOW_NOT_THIS_WEEK)
                 }
@@ -133,33 +133,43 @@ fun ClassSettingsScreen() {
                             tint = MaterialTheme.colorScheme.onSurface,
                         )
                     },
-                    title = { Text(text = "显示今日课程状态") }
+                    title = { Text("显示今日课程状态") },
+                    subtitle = { Text("标注课程的未开始、开课中、已结束状态") },
                 ) {
                     EventBus.post(EventType.CHANGE_SHOW_STATUS)
                 }
                 XhuActionSettingsCheckbox(
-                    title = { Text(text = "自动显示明日课程") },
-                    subtitle = {
-                        Text(
-                            text = if (showTomorrowCourseTime != null)
-                                "在每天的 ${showTomorrowCourseTime!!.format(timeFormatter)} 后今日课程页面显示明日的课表"
-                            else
-                                "此功能已禁用，今日课程页面只会显示今日的课表"
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Rounded.AutoMode,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface,
                         )
                     },
-                    onCheckedChange = {
-                        viewModel.updateShowTomorrowCourseTime(null)
+                    title = { Text("自动显示明日课程") },
+                    subtitle = {
+                        Text(
+                            text = if (showTomorrowCourseTime != null) {
+                                "每天 ${showTomorrowCourseTime!!.format(timeFormatter)} 后自动切换显示明日课表"
+                            } else {
+                                "已关闭，点击开关可开启并设定切换时间"
+                            }
+                        )
                     },
-                    checkboxEnabled = showTomorrowCourseTime != null,
+                    onCheckedChange = { checked ->
+                        if (checked) {
+                            tomorrowTimeDialog.show()
+                        } else {
+                            viewModel.updateShowTomorrowCourseTime(null)
+                        }
+                    },
+                    checkboxEnabled = true,
                     checked = showTomorrowCourseTime != null,
-                    onClick = {
-                        showTomorrowCourseTimeState.show()
-                    }
+                    onClick = { tomorrowTimeDialog.show() }
                 )
             }
-            XhuSettingsGroup(title = {
-                Text(text = "时间设置")
-            }) {
+
+            XhuSettingsGroup(title = { Text("学期与时间") }) {
                 XhuSettingsMenuLink(
                     icon = {
                         Icon(
@@ -168,23 +178,12 @@ fun ClassSettingsScreen() {
                             tint = MaterialTheme.colorScheme.onSurface,
                         )
                     },
-                    title = { Text(text = "更改当前学期") },
+                    title = { Text("更改当前学期") },
                     subtitle = {
-                        val text = buildString {
-                            append("当前学期：")
-                            append("${currentYear.data}学年")
-                            append(" ")
-                            append("第${currentTerm.data}学期")
-                            if (!currentYear.custom && !currentTerm.custom) {
-                                appendLine()
-                                append("【根据当前时间自动计算所得】")
-                            }
-                        }
-                        Text(text = text)
+                        val suffix = if (!currentYear.custom && !currentTerm.custom) "（自动计算）" else "（已自定义）"
+                        Text("${currentYear.data}学年 第${currentTerm.data}学期 $suffix")
                     },
-                    onClick = {
-                        yearAndTermState.show()
-                    }
+                    onClick = { yearTermDialog.show() }
                 )
                 XhuSettingsMenuLink(
                     icon = {
@@ -194,36 +193,28 @@ fun ClassSettingsScreen() {
                             tint = MaterialTheme.colorScheme.onSurface,
                         )
                     },
-                    title = { Text(text = "更改开学时间") },
+                    title = { Text("更改开学时间") },
                     subtitle = {
                         val text = buildString {
                             if (currentTermStartTime.custom) {
-                                append("当前设置：${currentTermStartTime.data.format(dateFormatter)}【已自定义】")
+                                append("当前设置：${currentTermStartTime.data.format(dateFormatter)}（已自定义）")
                                 appendLine()
                                 val diffDays =
                                     currentTermStartTime.data.toEpochDays() - serverTermStartDate.toEpochDays()
                                 val diffText = when {
-                                    diffDays == 0L -> "（与云端一致）"
-                                    diffDays > 0L -> "（比云端推迟 ${TermStartChangeAlert.formatDaysDiff(diffDays, false)}）"
-                                    else -> "（比云端提前 ${TermStartChangeAlert.formatDaysDiff(-diffDays, false)}）"
+                                    diffDays == 0L -> "与云端一致"
+                                    diffDays > 0L -> "比云端推迟 ${TermStartChangeAlert.formatDaysDiff(diffDays, false)}"
+                                    else -> "比云端提前 ${TermStartChangeAlert.formatDaysDiff(-diffDays, false)}"
                                 }
-                                append("云端最新：${serverTermStartDate.format(dateFormatter)}$diffText")
+                                append("云端最新：${serverTermStartDate.format(dateFormatter)}（$diffText）")
                             } else {
-                                append("当前开学时间：${currentTermStartTime.data.format(dateFormatter)}")
-                                appendLine()
-                                append("【从云端自动获取】")
+                                append("${currentTermStartTime.data.format(dateFormatter)}（从云端自动获取）")
                             }
                         }
-                        Text(text = text)
+                        Text(text)
                     },
-                    onClick = {
-                        termStartTimeState.show()
-                    }
+                    onClick = { termStartDialog.show() }
                 )
-            }
-            XhuSettingsGroup(title = {
-                Text(text = "校区设置")
-            }) {
                 XhuSettingsMenuLink(
                     icon = {
                         Icon(
@@ -232,18 +223,15 @@ fun ClassSettingsScreen() {
                             tint = MaterialTheme.colorScheme.onSurface,
                         )
                     },
-                    title = { Text(text = "更新当前主用户校区") },
-                    subtitle = {
-                        Text(text = "当前校区：${campusInfo.selected}")
-                    },
+                    title = { Text("当前主用户校区") },
+                    subtitle = { Text("当前：${campusInfo.selected.ifBlank { "加载中…" }}") },
                     onClick = {
-                        userCampusState.show()
+                        if (campusInfo != CampusInfo.EMPTY) campusDialog.show()
                     }
                 )
             }
-            XhuSettingsGroup(title = {
-                Text(text = "自定义设置")
-            }) {
+
+            XhuSettingsGroup(title = { Text("个性化与数据管理") }) {
                 XhuSettingsMenuLink(
                     icon = {
                         Icon(
@@ -252,29 +240,10 @@ fun ClassSettingsScreen() {
                             tint = MaterialTheme.colorScheme.onSurface,
                         )
                     },
-                    title = { Text(text = "自定义课程颜色") },
-                    onClick = {
-                        navController.navigateAndSave(RouteCustomCourseColor)
-                    }
+                    title = { Text("自定义课程颜色") },
+                    subtitle = { Text("为单门课程指定专属主题色") },
+                    onClick = { navController.navigateAndSave(RouteCustomCourseColor) }
                 )
-            }
-            XhuSettingsGroup(title = {
-                Text(text = "额外功能")
-            }) {
-                XhuSettingsMenuLink(
-                    icon = {
-                        Icon(
-                            painter = XhuIcons.schoolCalendar,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface,
-                        )
-                    },
-                    title = { Text(text = "查看校历") },
-                    onClick = {
-                        navController.navigateAndSave(RouteSchoolCalendar)
-                    }
-                )
-                ExportToCalendarSettings()
                 XhuActionSettingsCheckbox(
                     icon = {
                         Icon(
@@ -283,21 +252,13 @@ fun ClassSettingsScreen() {
                             tint = MaterialTheme.colorScheme.onSurface,
                         )
                     },
-                    title = { Text(text = "自定义课程") },
+                    title = { Text("自定义课程") },
                     subtitle = {
-                        val text = if (showCustomCourse)
-                            "当前：在课程表中显示自定义课程信息"
-                        else
-                            "当前：不显示自定义课程信息"
-                        Text(text = text)
+                        Text(if (showCustomCourse) "已开启在课表中展示 · 点击管理" else "已隐藏 · 点击管理")
                     },
-                    onCheckedChange = {
-                        viewModel.updateShowCustomCourse(it)
-                    },
+                    onCheckedChange = { viewModel.updateShowCustomCourse(it) },
                     checked = showCustomCourse,
-                    onClick = {
-                        navController.navigateAndSave(RouteCustomCourse)
-                    }
+                    onClick = { navController.navigateAndSave(RouteCustomCourse) }
                 )
                 XhuActionSettingsCheckbox(
                     icon = {
@@ -307,22 +268,29 @@ fun ClassSettingsScreen() {
                             tint = MaterialTheme.colorScheme.onSurface,
                         )
                     },
-                    title = { Text(text = "自定义事项") },
+                    title = { Text("自定义事项") },
                     subtitle = {
-                        val text = if (showCustomThing)
-                            "当前：在今日课程页面中显示自定义事项列表"
-                        else
-                            "当前：不显示自定义事项列表"
-                        Text(text = text)
+                        Text(if (showCustomThing) "已开启在今日页展示 · 点击管理" else "已隐藏 · 点击管理")
                     },
-                    onCheckedChange = {
-                        viewModel.updateShowCustomThing(it)
-                    },
+                    onCheckedChange = { viewModel.updateShowCustomThing(it) },
                     checked = showCustomThing,
-                    onClick = {
-                        navController.navigateAndSave(RouteCustomThing)
-                    }
+                    onClick = { navController.navigateAndSave(RouteCustomThing) }
                 )
+            }
+
+            XhuSettingsGroup(title = { Text("实用工具") }) {
+                XhuSettingsMenuLink(
+                    icon = {
+                        Icon(
+                            painter = XhuIcons.schoolCalendar,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface,
+                        )
+                    },
+                    title = { Text("查看校历") },
+                    onClick = { navController.navigateAndSave(RouteSchoolCalendar) }
+                )
+                ExportToCalendarSettings()
                 ConfigSettingsCheckbox(
                     config = ConfigStore::showHoliday,
                     scope = scope,
@@ -333,156 +301,76 @@ fun ClassSettingsScreen() {
                             tint = MaterialTheme.colorScheme.onSurface,
                         )
                     },
-                    title = { Text(text = "显示节假日信息") }
+                    title = { Text("显示节假日信息") },
+                    subtitle = { Text("在今日课程顶部提示法定节假日与调休安排") },
                 ) {
                     EventBus.post(EventType.CHANGE_SHOW_HOLIDAY)
                 }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
-    BuildTimeSelector(
-        useCaseState = showTomorrowCourseTimeState,
-        initTime = showTomorrowCourseTime ?: LocalTime.now(),
-        onSet = {
-            viewModel.updateShowTomorrowCourseTime(it)
-        }
+
+    // 自研时间选择对话框
+    XhuTimePickerDialog(
+        state = tomorrowTimeDialog,
+        title = "自动切换明日课表时间",
+        initialTime = showTomorrowCourseTime ?: LocalTime(21, 0),
+        extraButtonText = if (showTomorrowCourseTime != null) "关闭功能" else null,
+        onExtraButtonClick = { viewModel.updateShowTomorrowCourseTime(null) },
+        onSelectTime = { viewModel.updateShowTomorrowCourseTime(it) },
     )
-    val selectList by viewModel.selectYearAndTermList.collectAsState()
-    BuildYearAndTermSelector(
-        useCaseState = yearAndTermState,
-        selectList = selectList,
-        currentYear = currentYear,
-        currentTerm = currentTerm,
-        onSet = { custom, year, term ->
-            viewModel.updateCurrentYearTerm(custom, year, term)
-        }
-    )
-    BuildTermStartTimeSelector(
-        useCaseState = termStartTimeState,
-        initDate = currentTermStartTime.data,
-        onSet = { custom, date ->
-            viewModel.updateTermStartTime(custom, date)
-        }
-    )
-    if (campusInfo != CampusInfo.EMPTY) {
-        BuildUserCampusSelector(
-            useCaseState = userCampusState,
-            selectList = campusInfo.items,
-            current = campusInfo.selected,
-            onSet = {
-                viewModel.updateUserCampus(it)
-                showToast("当前校区已更新")
+
+    // 自研学年学期单选对话框
+    val currentString = "${currentYear.data}-${currentYear.data + 1}学年 第${currentTerm.data}学期"
+    val selectedYearTermIndex = if (currentYear.custom || currentTerm.custom) {
+        selectList.indexOf(currentString)
+    } else 0
+    XhuSingleSelectDialog(
+        state = yearTermDialog,
+        title = "更改当前学期",
+        options = selectList,
+        selectedIndex = selectedYearTermIndex,
+        onSelect = { index, _ ->
+            if (index == 0) {
+                viewModel.updateCurrentYearTerm(false, 0, 0)
+            } else {
+                val select = selectList[index]
+                val year = select.substring(0, 4).toInt()
+                val term = select.substring(13, 14).toInt()
+                viewModel.updateCurrentYearTerm(true, year, term)
             }
+        },
+    )
+
+    // 自研开学日期选择对话框
+    XhuDatePickerDialog(
+        state = termStartDialog,
+        title = "更改开学时间",
+        initialDate = currentTermStartTime.data,
+        extraButtonText = "自动获取",
+        onExtraButtonClick = {
+            viewModel.updateTermStartTime(false, LocalDate.MIN)
+        },
+        onSelectDate = { viewModel.updateTermStartTime(true, it) },
+    )
+
+    // 自研校区单选对话框
+    if (campusInfo != CampusInfo.EMPTY) {
+        XhuSingleSelectDialog(
+            state = campusDialog,
+            title = "切换校区",
+            options = campusInfo.items,
+            selectedIndex = campusInfo.items.indexOf(campusInfo.selected),
+            onSelect = { _, campus ->
+                viewModel.updateUserCampus(campus)
+                showToast("当前校区已更新")
+            },
         )
     }
 
     HandleErrorMessage(flow = viewModel.errorMessage)
-}
-
-@Composable
-private fun BuildTimeSelector(
-    useCaseState: UseCaseState,
-    initTime: LocalTime,
-    onSet: (LocalTime) -> Unit,
-) {
-    ClockDialog(
-        header = Header.Default(
-            title = "请选择时间",
-        ),
-        state = useCaseState,
-        selection = ClockSelection.HoursMinutes { hour, minutes ->
-            onSet(LocalTime(hour, minutes))
-        },
-        config = ClockConfig(
-            defaultTime = initTime,
-            is24HourFormat = true,
-        )
-    )
-}
-
-@Composable
-private fun BuildYearAndTermSelector(
-    useCaseState: UseCaseState,
-    selectList: List<String>,
-    currentYear: Customisable<Int>,
-    currentTerm: Customisable<Int>,
-    onSet: (Boolean, Int, Int) -> Unit,
-) {
-    val currentString =
-        "${currentYear.data}-${currentYear.data + 1}学年 第${currentTerm.data}学期"
-    val selectedIndex =
-        if (currentYear.custom || currentTerm.custom)
-            selectList.indexOf(currentString)
-        else
-            0
-
-    ShowSingleSelectDialog(
-        dialogTitle = "更改当前学期",
-        options = selectList,
-        selectIndex = selectedIndex,
-        useCaseState = useCaseState,
-        onSelect = { index, _ ->
-            if (index == 0) {
-                onSet(false, 0, 0)
-            } else {
-                val select = selectList[index]
-                val year = select.substring(0, 4)
-                val term = select.substring(13, 14)
-                onSet(true, year.toInt(), term.toInt())
-            }
-        },
-    )
-}
-
-@Composable
-private fun BuildTermStartTimeSelector(
-    useCaseState: UseCaseState,
-    initDate: LocalDate,
-    onSet: (Boolean, LocalDate) -> Unit,
-) {
-    CalendarDialog(
-        header = Header.Default(
-            title = "更改开学时间",
-        ),
-        state = useCaseState,
-        selection = CalendarSelection.Date(
-            selectedDate = initDate,
-            extraButton = SelectionButton(text = "自动获取"),
-            onExtraButtonClick = {
-                useCaseState.hide()
-                onSet(false, LocalDate.MIN)
-            },
-        ) {
-            onSet(true, it)
-        },
-        config = CalendarConfig(
-            cameraDate = initDate,
-            yearSelection = true,
-            monthSelection = true,
-            style = CalendarStyle.MONTH,
-            boundary = LocalDate(2015, 1, 1)..LocalDate.now().plus(1, DateTimeUnit.YEAR),
-        )
-    )
-}
-
-@Composable
-private fun BuildUserCampusSelector(
-    useCaseState: UseCaseState,
-    selectList: List<String>,
-    current: String,
-    onSet: (String) -> Unit,
-) {
-    val selectedIndex = selectList.indexOf(current)
-
-    ShowSingleSelectDialog(
-        dialogTitle = "更改校区",
-        options = selectList,
-        selectIndex = selectedIndex,
-        useCaseState = useCaseState,
-        onSelect = { _, campus ->
-            onSet(campus)
-        }
-    )
 }
 
 @Composable

@@ -7,6 +7,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,19 +16,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,20 +46,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.maxkeppeker.sheets.core.models.base.Header
-import com.maxkeppeker.sheets.core.models.base.SelectionButton
-import com.maxkeppeker.sheets.core.models.base.UseCaseState
-import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
-import com.maxkeppeler.sheets.color.ColorDialog
-import com.maxkeppeler.sheets.color.models.ColorConfig
-import com.maxkeppeler.sheets.color.models.ColorSelection
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleBackPress
 import vip.mystery0.xhu.timetable.config.Customisable
 import vip.mystery0.xhu.timetable.ui.component.StateScreen
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuColorPickerDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
@@ -66,14 +66,13 @@ import xhutimetable.composeapp.generated.resources.state_no_data
 @Composable
 fun CustomCourseColorScreen() {
     val viewModel = koinViewModel<CustomCourseColorViewModel>()
-
     val navController = LocalNavController.current
-
     val list by viewModel.listState.collectAsState()
 
-    val showColorDialog = rememberUseCaseState()
+    val colorDialogState = rememberXhuDialogState()
 
-    var courseName by remember { mutableStateOf("") }
+    var editingCourseName by remember { mutableStateOf("") }
+    var editingCourseColor by remember { mutableStateOf(ColorPool.safeGet(0)) }
     var showSearchView by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
 
@@ -88,7 +87,7 @@ fun CustomCourseColorScreen() {
             expanded = false,
             onExpandedChange = {},
             placeholder = {
-                Text(modifier = Modifier.clearAndSetSemantics {}, text = "搜索课程名称...")
+                Text(modifier = Modifier.clearAndSetSemantics {}, text = "搜索课程名称…")
             },
             trailingIcon = {
                 IconButton(onClick = {
@@ -99,7 +98,7 @@ fun CustomCourseColorScreen() {
                         showSearchView = false
                     }
                 }) {
-                    Icon(XhuIcons.close, contentDescription = null)
+                    Icon(XhuIcons.close, contentDescription = "关闭搜索")
                 }
             }
         )
@@ -119,6 +118,7 @@ fun CustomCourseColorScreen() {
     LaunchedEffect(Unit) {
         viewModel.init()
     }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -126,15 +126,14 @@ fun CustomCourseColorScreen() {
                     AnimatedContent(
                         targetState = showSearchView,
                         transitionSpec = {
-                            val enterAnimation =
-                                scaleIn(initialScale = 0.8f) + fadeIn(initialAlpha = 0f)
-                            val exitAnimation =
-                                scaleOut(targetScale = 0.8f) + fadeOut(targetAlpha = 0f)
+                            val enterAnimation = scaleIn(initialScale = 0.9f) + fadeIn()
+                            val exitAnimation = scaleOut(targetScale = 0.9f) + fadeOut()
                             (enterAnimation togetherWith exitAnimation).using(
                                 SizeTransform(clip = false)
                             )
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        label = "courseColorSearchBar",
                     ) { targetShowSearchView ->
                         if (targetShowSearchView) {
                             val colors = SearchBarDefaults.colors()
@@ -144,12 +143,13 @@ fun CustomCourseColorScreen() {
                                 color = colors.containerColor,
                                 contentColor = contentColorFor(colors.containerColor),
                                 tonalElevation = SearchBarDefaults.TonalElevation,
-                                shadowElevation = SearchBarDefaults.ShadowElevation,
                                 content = inputField,
                             )
                         } else {
                             Text(
                                 text = "自定义课程颜色",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center,
                             )
@@ -157,23 +157,19 @@ fun CustomCourseColorScreen() {
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        back()
-                    }) {
+                    IconButton(onClick = ::back) {
                         Icon(
                             painter = XhuIcons.back,
-                            contentDescription = null,
+                            contentDescription = "返回",
                         )
                     }
                 },
                 actions = {
                     if (!showSearchView) {
-                        IconButton(onClick = {
-                            showSearchView = true
-                        }) {
+                        IconButton(onClick = { showSearchView = true }) {
                             Icon(
                                 painter = XhuIcons.Action.search,
-                                contentDescription = null,
+                                contentDescription = "搜索课程",
                             )
                         }
                     }
@@ -181,122 +177,113 @@ fun CustomCourseColorScreen() {
             )
         },
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(vertical = 4.dp),
-        ) {
-            if (list.isNotEmpty()) {
-                items(list.size) { index ->
-                    BuildItem(
-                        item = list[index],
-                        onChangeClick = {
-                            courseName = list[index].first
-                            showColorDialog.show()
-                        })
+        if (list.isEmpty()) {
+            Box(modifier = Modifier.padding(paddingValues)) {
+                StateScreen(
+                    title = if (searchText.isNotBlank()) "未找到匹配课程" else "暂无课程数据",
+                    imageRes = painterResource(Res.drawable.state_no_data),
+                )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(list, key = { it.first }) { item ->
+                    BuildCourseColorCard(
+                        item = item,
+                        onClick = {
+                            editingCourseName = item.first
+                            editingCourseColor = item.second.data
+                            colorDialogState.show()
+                        },
+                        onResetClick = {
+                            viewModel.updateColor(item.first, null)
+                        },
+                    )
                 }
             }
-        }
-        if (list.isEmpty()) {
-            StateScreen(
-                title = "暂无数据",
-                imageRes = painterResource(Res.drawable.state_no_data),
-            )
         }
     }
-    BuildColorSelector(
-        useCaseState = showColorDialog,
-        onSetDefault = {
-            viewModel.updateColor(courseName, null)
+
+    XhuColorPickerDialog(
+        state = colorDialogState,
+        title = editingCourseName.ifBlank { "修改课程颜色" },
+        initialColor = editingCourseColor,
+        extraButtonText = "恢复默认",
+        onExtraButtonClick = {
+            viewModel.updateColor(editingCourseName, null)
         },
-        onSetColor = {
-            viewModel.updateColor(courseName, it)
-        }
+        onSelectColor = { newColor ->
+            viewModel.updateColor(editingCourseName, newColor)
+        },
     )
 }
 
 @Composable
-private fun BuildColorSelector(
-    useCaseState: UseCaseState,
-    onSetDefault: () -> Unit,
-    onSetColor: (Color) -> Unit,
-) {
-    ColorDialog(
-        header = Header.Default(
-            title = "请选择需要修改的颜色",
-        ),
-        state = useCaseState,
-        selection = ColorSelection(
-            extraButton = SelectionButton(text = "重置为默认"),
-            onExtraButtonClick = {
-                useCaseState.hide()
-                onSetDefault()
-            },
-            onSelectColor = {
-                onSetColor(Color(it))
-            }
-        ),
-        config = ColorConfig(
-            templateColors = ColorPool.templateColors,
-            allowCustomColorAlphaValues = false,
-        )
-    )
-}
-
-@Composable
-private fun BuildItem(
+private fun BuildCourseColorCard(
     item: Pair<String, Customisable<Color>>,
-    onChangeClick: (String) -> Unit
+    onClick: () -> Unit,
+    onResetClick: () -> Unit,
 ) {
+    val isCustom = item.second.custom
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = XhuColor.cardBackground,
-        ),
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = XhuColor.cardBackground),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
     ) {
         Row(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Box(
-                modifier = Modifier.width(52.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (item.second.custom) {
-                    Surface(
-                        shape = CircleShape,
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .size(36.dp),
-                        color = item.second.data
-                    ) {}
-                } else {
-                    Surface(
-                        shape = CircleShape,
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .size(24.dp),
-                        color = item.second.data
-                    ) {}
-                }
-            }
+            Surface(
+                shape = CircleShape,
+                color = item.second.data,
+                border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
+                modifier = Modifier.size(34.dp),
+            ) {}
+
             Text(
                 text = item.first,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1F),
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
             )
-            TextButton(onClick = {
-                onChangeClick(item.first)
-            }) {
-                Text(
-                    text = "修改"
-                )
+
+            if (isCustom) {
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                ) {
+                    Text(
+                        text = "已自定义",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
+                    )
+                }
+                IconButton(
+                    onClick = onResetClick,
+                    modifier = Modifier.size(36.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.RestartAlt,
+                        contentDescription = "恢复默认颜色",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
             }
         }
     }

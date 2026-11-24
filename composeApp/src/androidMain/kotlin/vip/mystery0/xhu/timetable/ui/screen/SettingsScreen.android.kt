@@ -5,6 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.PowerManager
 import android.provider.Settings
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.BatteryChargingFull
+import androidx.compose.material.icons.rounded.SystemUpdateAlt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -15,12 +18,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
-import com.maxkeppeker.sheets.core.models.base.Header
-import com.maxkeppeker.sheets.core.models.base.UseCaseState
-import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
-import com.maxkeppeler.sheets.clock.ClockDialog
-import com.maxkeppeler.sheets.clock.models.ClockConfig
-import com.maxkeppeler.sheets.clock.models.ClockSelection
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.format
 import org.koin.compose.viewmodel.koinViewModel
@@ -32,8 +29,10 @@ import vip.mystery0.xhu.timetable.config.store.GlobalCacheStore
 import vip.mystery0.xhu.timetable.config.toast.showShortToast
 import vip.mystery0.xhu.timetable.context
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
-import vip.mystery0.xhu.timetable.ui.component.ShowSingleSelectDialog
 import vip.mystery0.xhu.timetable.ui.component.ShowUpdateDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuSingleSelectDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuTimePickerDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.component.preference.CacheSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.component.preference.ConfigSettingsCheckbox
 import vip.mystery0.xhu.timetable.ui.component.preference.XhuActionSettingsCheckbox
@@ -43,7 +42,6 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import vip.mystery0.xhu.timetable.utils.chinaDateTime
 import vip.mystery0.xhu.timetable.utils.formatFileSize
-import vip.mystery0.xhu.timetable.utils.now
 import vip.mystery0.xhu.timetable.utils.timeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.PlatformSettingsViewModel
 
@@ -51,21 +49,16 @@ import vip.mystery0.xhu.timetable.viewmodel.PlatformSettingsViewModel
 @Composable
 actual fun NotifySettings() {
     val viewModel = koinViewModel<PlatformSettingsViewModel>()
-
     val context = LocalContext.current
-
     val notifyTime by viewModel.notifyTimeData.collectAsState()
-
     val scope = rememberCoroutineScope()
-    val showNotifyTimeState = rememberUseCaseState()
+    val notifyTimeDialog = rememberXhuDialogState()
 
     LaunchedEffect(Unit) {
         viewModel.init()
     }
 
-    XhuSettingsGroup(title = {
-        Text(text = "通知设置")
-    }) {
+    XhuSettingsGroup(title = { Text("通知提醒") }) {
         ConfigSettingsCheckbox(
             config = ConfigStore::notifyCourse,
             scope = scope,
@@ -76,7 +69,7 @@ actual fun NotifySettings() {
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             },
-            title = { Text(text = "课程提醒") }
+            title = { Text("课程提醒") }
         )
         ConfigSettingsCheckbox(
             config = ConfigStore::notifyExam,
@@ -88,10 +81,10 @@ actual fun NotifySettings() {
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             },
-            title = { Text(text = "考试提醒") }
+            title = { Text("考试提醒") }
         )
         XhuActionSettingsCheckbox(
-            title = { Text(text = "提醒时间") },
+            title = { Text("每日提醒时间") },
             icon = {
                 Icon(
                     painter = XhuIcons.notifyTime,
@@ -101,34 +94,39 @@ actual fun NotifySettings() {
             },
             subtitle = {
                 Text(
-                    text = if (notifyTime != null)
-                        "将会在每天的 ${notifyTime!!.format(timeFormatter)} 提醒"
-                    else
-                        "提醒功能已禁用"
+                    text = if (notifyTime != null) {
+                        "将在每天 ${notifyTime!!.format(timeFormatter)} 发送提醒"
+                    } else {
+                        "已关闭，点击开关即可开启并设定时间"
+                    }
                 )
             },
-            onCheckedChange = {
-                viewModel.updateNotifyTime(null)
+            onCheckedChange = { checked ->
+                if (checked) {
+                    notifyTimeDialog.show()
+                } else {
+                    viewModel.updateNotifyTime(null)
+                }
             },
-            checkboxEnabled = notifyTime != null,
+            checkboxEnabled = true,
             checked = notifyTime != null,
-            onClick = {
-                showNotifyTimeState.show()
-            }
+            onClick = { notifyTimeDialog.show() }
         )
         XhuSettingsMenuLink(
-            title = { Text(text = "设置忽略电池优化") },
-            subtitle = {
-                Text(
-                    text = "为了确保提醒功能正常，请将 ${appName()} 添加到系统电池优化白名单中，点击即可前往设置"
+            icon = {
+                Icon(
+                    imageVector = Icons.Rounded.BatteryChargingFull,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface,
                 )
             },
+            title = { Text("忽略电池优化") },
+            subtitle = { Text("将 ${appName()} 加入白名单，避免后台提醒被系统拦截") },
             onClick = {
                 if (isIgnoringBatteryOptimizations()) {
                     showShortToast("已经在电池优化白名单中，无需重复设置")
                 } else {
-                    val intent =
-                        Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                    val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
                     intent.data = "package:${packageName()}".toUri()
                     context.startActivity(intent)
                 }
@@ -136,33 +134,13 @@ actual fun NotifySettings() {
         )
     }
 
-    BuildTimeSelector(
-        useCaseState = showNotifyTimeState,
-        initTime = notifyTime ?: LocalTime.now(),
-        onSelect = {
-            viewModel.updateNotifyTime(it)
-        }
-    )
-}
-
-@Composable
-private fun BuildTimeSelector(
-    useCaseState: UseCaseState,
-    initTime: LocalTime,
-    onSelect: (LocalTime) -> Unit
-) {
-    ClockDialog(
-        header = Header.Default(
-            title = "请选择时间",
-        ),
-        state = useCaseState,
-        selection = ClockSelection.HoursMinutes { hour, minutes ->
-            onSelect(LocalTime(hour, minutes))
-        },
-        config = ClockConfig(
-            defaultTime = initTime,
-            is24HourFormat = true,
-        )
+    XhuTimePickerDialog(
+        state = notifyTimeDialog,
+        title = "选择每日提醒时间",
+        initialTime = notifyTime ?: LocalTime(20, 30),
+        extraButtonText = if (notifyTime != null) "关闭提醒" else null,
+        onExtraButtonClick = { viewModel.updateNotifyTime(null) },
+        onSelectTime = { viewModel.updateNotifyTime(it) },
     )
 }
 
@@ -178,10 +156,8 @@ private fun isIgnoringBatteryOptimizations(): Boolean {
 @Composable
 actual fun UpdateSettings() {
     val viewModel = koinViewModel<PlatformSettingsViewModel>()
-
     val versionChannel by viewModel.versionChannel.collectAsState()
-
-    val checkVersionChannelState = rememberUseCaseState()
+    val channelDialog = rememberXhuDialogState()
 
     XhuSettingsMenuLink(
         icon = {
@@ -191,52 +167,35 @@ actual fun UpdateSettings() {
                 tint = MaterialTheme.colorScheme.onSurface,
             )
         },
-        title = { Text(text = "检查更新") },
+        title = { Text("检查更新") },
         onClick = {
             viewModel.checkUpdate(false)
-            showShortToast("检查更新完成")
+            showShortToast("正在检查更新…")
         }
     )
     XhuSettingsMenuLink(
-        title = { Text(text = "版本更新渠道") },
-        subtitle = {
-            Text(text = "重启应用后生效")
+        icon = {
+            Icon(
+                imageVector = Icons.Rounded.SystemUpdateAlt,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface,
+            )
         },
-        onClick = {
-            checkVersionChannelState.show()
-        }
+        title = { Text("版本更新渠道") },
+        subtitle = { Text("当前：${versionChannel.title}（更改后重启生效）") },
+        onClick = { channelDialog.show() }
     )
 
-    BuildVersionChannelDialog(
-        useCaseState = checkVersionChannelState,
-        initChannel = versionChannel,
-        onSelect = {
-            viewModel.updateVersionChannel(it)
-        }
+    val list = VersionChannel.selectList()
+    XhuSingleSelectDialog(
+        state = channelDialog,
+        title = "修改更新渠道",
+        options = list,
+        selectedIndex = list.indexOf(versionChannel).coerceAtLeast(0),
+        itemLabel = { it.title },
+        onSelect = { _, select -> viewModel.updateVersionChannel(select) },
     )
     ShowUpdateDialog()
-}
-
-@Composable
-private fun BuildVersionChannelDialog(
-    useCaseState: UseCaseState,
-    initChannel: VersionChannel,
-    onSelect: (VersionChannel) -> Unit
-) {
-    val list = VersionChannel.selectList()
-    var selectedMode = list.indexOf(initChannel)
-    if (selectedMode == -1) selectedMode = 0
-
-    ShowSingleSelectDialog(
-        dialogTitle = "修改更新渠道",
-        options = list,
-        selectIndex = selectedMode,
-        itemTransform = { it.title },
-        useCaseState = useCaseState,
-        onSelect = { _, select ->
-            onSelect(select)
-        },
-    )
 }
 
 @Composable
@@ -250,7 +209,7 @@ actual fun DeveloperSettings() {
                 tint = MaterialTheme.colorScheme.onSurface,
             )
         },
-        title = { Text(text = "直接检查测试版更新") },
+        title = { Text("直接检查测试版更新") },
         onClick = {
             viewModel.checkUpdate(true)
             showShortToast("检查更新完成")
@@ -258,48 +217,36 @@ actual fun DeveloperSettings() {
     )
     val version by viewModel.version.collectAsState()
     XhuSettingsMenuLink(
-        title = { Text(text = "新版本信息") },
-        subtitle = {
-            Text(text = version?.toString() ?: "无版本")
-        },
-        onClick = {
-        },
+        title = { Text("新版本信息") },
+        subtitle = { Text(version?.toString() ?: "无版本") },
+        onClick = {},
     )
     CacheSettingsCheckbox(
         config = CacheStore::alwaysShowNewVersion,
-        title = { Text(text = "始终显示新版本弹窗") }
+        title = { Text("始终显示新版本弹窗") }
     )
     XhuSettingsMenuLink(
-        title = { Text(text = "测试下载最新安装包") },
-        subtitle = {
-            Text(text = version?.apkSize?.formatFileSize() ?: "无版本")
-        },
+        title = { Text("测试下载最新安装包") },
+        subtitle = { Text(version?.apkSize?.formatFileSize() ?: "无版本") },
         onClick = {
-            if (version != null) {
-                viewModel.downloadApk()
-            }
+            if (version != null) viewModel.downloadApk()
         },
     )
     XhuSettingsMenuLink(
-        title = { Text(text = "测试下载最新增量包") },
-        subtitle = {
-            Text(text = version?.patchSize?.formatFileSize() ?: "无版本")
-        },
+        title = { Text("测试下载最新增量包") },
+        subtitle = { Text(version?.patchSize?.formatFileSize() ?: "无版本") },
         onClick = {
-            if (version != null) {
-                viewModel.downloadPatch()
-            }
+            if (version != null) viewModel.downloadPatch()
         },
     )
     XhuSettingsMenuLink(
-        title = { Text(text = "NotifyWork 上一次执行时间") },
+        title = { Text("NotifyWork 上一次执行时间") },
         subtitle = {
             Text(
-                text = GlobalCacheStore.notifyWorkLastExecuteTime.asLocalDateTime()
+                GlobalCacheStore.notifyWorkLastExecuteTime.asLocalDateTime()
                     .format(chinaDateTime)
             )
         },
-        onClick = {
-        }
+        onClick = {}
     )
 }

@@ -11,8 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PrivacyTip
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
@@ -22,7 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,27 +30,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import com.maxkeppeker.sheets.core.models.base.Header
-import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
-import com.maxkeppeler.sheets.info.InfoDialog
-import com.maxkeppeler.sheets.info.models.InfoBody
-import com.maxkeppeler.sheets.info.models.InfoSelection
 import io.github.vinceglb.filekit.absolutePath
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
+import vip.mystery0.xhu.timetable.base.appName
 import vip.mystery0.xhu.timetable.killCurrentProcess
 import vip.mystery0.xhu.timetable.module.PRIVACY_URL
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.navigation.RouteInit
 import vip.mystery0.xhu.timetable.ui.navigation.RouteLogin
@@ -72,86 +72,100 @@ fun InitScreen() {
     val allowPrivacy by viewModel.allowPrivacy.collectAsState()
     val readyState by viewModel.readyState.collectAsState()
 
-    val useCaseState = rememberUseCaseState(
-        visible = false,
-        onCloseRequest = {}
-    )
+    val privacyDialogState = rememberXhuDialogState(initialVisible = false)
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF2196F3))
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.align(Alignment.Center),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Image(
-                painter = painterResource(Res.drawable.ic_app_icon_o),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
+            Surface(
+                shape = RoundedCornerShape(32.dp),
+                tonalElevation = 4.dp,
+                shadowElevation = 6.dp,
+                modifier = Modifier.size(104.dp),
+            ) {
+                Image(
+                    painter = painterResource(Res.drawable.ic_app_icon_o),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(32.dp))
+                )
+            }
+            Text(
+                text = appName(),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
             )
-            Spacer(modifier = Modifier.height(64.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             LoadingIndicator()
-            Spacer(modifier = Modifier.height(32.dp))
-            Text("应用加载中...", color = contentColorFor(Color(0xFF2196F3)))
+            Text(
+                text = "正在准备课表数据…",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
-        InfoDialog(
-            state = useCaseState,
-            properties = DialogProperties(
-                dismissOnBackPress = false,
-                dismissOnClickOutside = false,
-            ),
-            header = Header.Default(
-                title = "隐私政策",
-            ),
-            body = InfoBody.Custom {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
+    }
+
+    // 自研跨平台隐私政策对话框：主次按钮层级清晰
+    XhuDialog(
+        state = privacyDialogState,
+        title = "隐私政策提示",
+        icon = { Icon(Icons.Rounded.PrivacyTip, contentDescription = null) },
+        dismissOnBackPress = false,
+        dismissOnClickOutside = false,
+        dismissButtonText = "不同意并退出",
+        onDismissButtonClick = { killCurrentProcess() },
+        confirmButtonText = "同意并继续",
+        onConfirmButtonClick = {
+            privacyDialogState.hide()
+            viewModel.allowPrivacy()
+        },
+    ) {
+        val linkColor = MaterialTheme.colorScheme.primary
+        Text(
+            text = buildAnnotatedString {
+                append("本应用尊重并保护所有用户的个人隐私权。为了向你提供课程表同步、成绩与考试查询等服务，本应用会按照隐私政策的规定使用必要信息。请仔细阅读 ")
+                withLink(
+                    LinkAnnotation.Url(
+                        url = PRIVACY_URL,
+                        styles = TextLinkStyles(
+                            style = SpanStyle(
+                                color = linkColor,
+                                fontWeight = FontWeight.SemiBold,
+                                textDecoration = TextDecoration.Underline,
+                            )
+                        )
+                    )
                 ) {
-                    Text(buildAnnotatedString {
-                        append("本应用尊重并保护所有用户的个人隐私权。")
-                        append("为了给您提供更准确、更有人性化的服务，本应用会按照隐私政策的规定使用您的个人信息。")
-                        append("可阅读 ")
-                        withLink(LinkAnnotation.Url(PRIVACY_URL)) {
-                            append("隐私政策")
-                        }
-                        append(" 。")
-                    })
-                    Spacer(modifier = Modifier.height(36.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Button(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = {
-                                viewModel.allowPrivacy()
-                            }) {
-                            Text("同意")
-                        }
-                        Button(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = {
-                                killCurrentProcess()
-                            }) {
-                            Text("不同意并退出APP")
-                        }
-                    }
+                    append("《隐私政策》")
                 }
+                append("。")
             },
-            selection = InfoSelection(withButtonView = false),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+
     HandleErrorMessage(errorMessage = readyState.errorMessage) {}
 
     LaunchedEffect(allowPrivacy) {
         if (allowPrivacy) {
+            privacyDialogState.hide()
             viewModel.doInitAndReady()
         } else {
-            useCaseState.show()
+            privacyDialogState.show()
         }
     }
+
     readyState.termStartChangeAlert?.let { alert ->
         fun formatTermDate(date: LocalDate): String =
             "${date.format(dateFormatter)}（${date.dayOfWeek.formatWeekString()}）"
@@ -187,7 +201,7 @@ fun InitScreen() {
                     )
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(14.dp),
                         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                     ) {
                         Column(
@@ -230,37 +244,28 @@ fun InitScreen() {
                 }
             },
             confirmButton = {
-                Button(
-                    onClick = {
-                        viewModel.syncTermStartDate()
-                    }
-                ) {
+                Button(onClick = { viewModel.syncTermStartDate() }) {
                     Text(text = "同步云端")
                 }
             },
             dismissButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.keepCustomTermStartDate()
-                    }
-                ) {
+                TextButton(onClick = { viewModel.keepCustomTermStartDate() }) {
                     Text(text = "保留自定义")
                 }
             },
         )
     }
 
-    if (readyState.canNavigate) {
-        if (!readyState.isLogin) {
-            navController.replaceTo<RouteInit>(RouteLogin(false))
-            return
+    LaunchedEffect(readyState.canNavigate, readyState.isLogin, readyState.splashFile, readyState.splashId) {
+        if (readyState.canNavigate) {
+            if (!readyState.isLogin) {
+                navController.replaceTo<RouteInit>(RouteLogin(false))
+            } else if (readyState.splashFile == null || readyState.splashId == null) {
+                navController.replaceTo<RouteInit>(RouteMain)
+            } else {
+                val splashFilePath = readyState.splashFile!!.absolutePath()
+                navController.replaceTo<RouteInit>(RouteSplashImage(splashFilePath, readyState.splashId!!))
+            }
         }
-        if (readyState.splashFile == null || readyState.splashId == null) {
-            navController.replaceTo<RouteInit>(RouteMain)
-            return
-        }
-
-        val splashFilePath = readyState.splashFile!!.absolutePath()
-        navController.replaceTo<RouteInit>(RouteSplashImage(splashFilePath, readyState.splashId!!))
     }
 }
