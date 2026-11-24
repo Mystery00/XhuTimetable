@@ -33,6 +33,7 @@ fun XhuConfirmDialog(
     confirmText: String = "确定",
     dismissText: String = "取消",
     isDestructive: Boolean = false,
+    onDismiss: (() -> Unit)? = null,
     onConfirm: () -> Unit,
 ) {
     XhuDialog(
@@ -40,6 +41,10 @@ fun XhuConfirmDialog(
         title = title,
         icon = icon,
         dismissButtonText = dismissText,
+        onDismissButtonClick = {
+            state.hide()
+            onDismiss?.invoke()
+        },
         confirmButtonText = confirmText,
         isDestructive = isDestructive,
         onConfirmButtonClick = {

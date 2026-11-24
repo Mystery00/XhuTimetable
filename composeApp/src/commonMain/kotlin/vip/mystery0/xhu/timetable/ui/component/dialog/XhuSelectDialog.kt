@@ -95,9 +95,9 @@ fun <T> XhuSingleSelectDialog(
                 val isSelected = index == currentSelection
                 val containerColor by animateColorAsState(
                     targetValue = if (isSelected) {
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f)
                     } else {
-                        MaterialTheme.colorScheme.surfaceContainerLowest
+                        MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.55f)
                     },
                     label = "singleSelectBg",
                 )
@@ -105,7 +105,7 @@ fun <T> XhuSingleSelectDialog(
                     targetValue = if (isSelected) {
                         MaterialTheme.colorScheme.primary
                     } else {
-                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
                     },
                     label = "singleSelectBorder",
                 )
@@ -276,9 +276,9 @@ fun <T> XhuMultiSelectDialog(
                     val isSelected = selectedIndices.contains(index)
                     val containerColor by animateColorAsState(
                         targetValue = if (isSelected) {
-                            MaterialTheme.colorScheme.primaryContainer
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f)
                         } else {
-                            MaterialTheme.colorScheme.surfaceContainerLowest
+                            MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.55f)
                         },
                         label = "multiGridBg",
                     )
@@ -286,7 +286,7 @@ fun <T> XhuMultiSelectDialog(
                         targetValue = if (isSelected) {
                             MaterialTheme.colorScheme.primary
                         } else {
-                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
                         },
                         label = "multiGridBorder",
                     )
@@ -341,9 +341,9 @@ fun <T> XhuMultiSelectDialog(
                     val isSelected = selectedIndices.contains(index)
                     val containerColor by animateColorAsState(
                         targetValue = if (isSelected) {
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
                         } else {
-                            MaterialTheme.colorScheme.surfaceContainerLowest
+                            MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.55f)
                         },
                         label = "multiListBg",
                     )
@@ -352,8 +352,8 @@ fun <T> XhuMultiSelectDialog(
                         shape = RoundedCornerShape(14.dp),
                         color = containerColor,
                         border = BorderStroke(
-                            1.dp,
-                            if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+                            if (isSelected) 1.5.dp else 1.dp,
+                            if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
                         ),
                         modifier = Modifier
                             .fillMaxWidth()

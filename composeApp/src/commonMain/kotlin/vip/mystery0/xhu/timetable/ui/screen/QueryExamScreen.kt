@@ -65,7 +65,7 @@ import vip.mystery0.xhu.timetable.viewmodel.Exam
 import vip.mystery0.xhu.timetable.viewmodel.ExamStatus
 import vip.mystery0.xhu.timetable.viewmodel.ExamViewModel
 import xhutimetable.composeapp.generated.resources.Res
-import xhutimetable.composeapp.generated.resources.state_no_data
+import xhutimetable.composeapp.generated.resources.state_no_exam
 
 @Composable
 fun QueryExamScreen() {
@@ -145,7 +145,7 @@ fun QueryExamScreen() {
                     title = loadingErrorMessage ?: "当前学期暂无考试安排",
                     subtitle = "如需查询补考信息，可点击顶部学年/学期切换至上一学期",
                     buttonText = "重新查询",
-                    imageRes = painterResource(Res.drawable.state_no_data),
+                    imageRes = painterResource(Res.drawable.state_no_exam),
                     onButtonClick = {
                         viewModel.loadExamList()
                     }

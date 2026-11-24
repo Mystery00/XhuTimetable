@@ -125,7 +125,7 @@ fun SchoolCalendarScreen() {
                 .fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
-            if (schoolCalendarData.imageUrl.isNotBlank()) {
+            if (schoolCalendarData.cacheFile != null) {
                 CoilZoomAsyncImage(
                     model = schoolCalendarData.cacheFile,
                     contentDescription = "校历图片",

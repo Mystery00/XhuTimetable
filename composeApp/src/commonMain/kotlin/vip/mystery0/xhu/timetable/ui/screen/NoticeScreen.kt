@@ -59,7 +59,7 @@ import vip.mystery0.xhu.timetable.utils.chinaDateTime
 import vip.mystery0.xhu.timetable.utils.copyToClipboard
 import vip.mystery0.xhu.timetable.viewmodel.NoticeViewModel
 import xhutimetable.composeapp.generated.resources.Res
-import xhutimetable.composeapp.generated.resources.state_no_data
+import xhutimetable.composeapp.generated.resources.state_no_message
 
 @Composable
 fun NoticeScreen() {
@@ -106,7 +106,7 @@ fun NoticeScreen() {
                 StateScreen(
                     title = loadingErrorMessage ?: "暂无通知公告",
                     buttonText = "重新加载",
-                    imageRes = painterResource(Res.drawable.state_no_data),
+                    imageRes = painterResource(Res.drawable.state_no_message),
                     onButtonClick = { viewModel.loadList() }
                 )
             },

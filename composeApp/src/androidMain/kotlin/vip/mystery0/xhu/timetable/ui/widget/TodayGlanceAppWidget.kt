@@ -2,16 +2,17 @@ package vip.mystery0.xhu.timetable.ui.widget
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
-import androidx.glance.Image
-import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
+import androidx.glance.LocalSize
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.lazy.LazyColumn
@@ -24,21 +25,17 @@ import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
-import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
-import androidx.glance.layout.size
 import androidx.glance.layout.width
-import androidx.glance.layout.wrapContentHeight
-import androidx.glance.layout.wrapContentSize
 import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
-import vip.mystery0.xhu.timetable.shared.R
+import androidx.glance.unit.FixedColorProvider
 import vip.mystery0.xhu.timetable.androidAppConfiguration
 import vip.mystery0.xhu.timetable.ui.widget.callback.UpdateTodayCourseActionCallback
 import vip.mystery0.xhu.timetable.ui.widget.state.CourseGlance
@@ -46,6 +43,14 @@ import vip.mystery0.xhu.timetable.ui.widget.state.TodayCourseStateGlance
 import vip.mystery0.xhu.timetable.ui.widget.state.TodayGlanceStateDefinition
 
 class TodayGlanceAppWidget : GlanceAppWidget() {
+    companion object {
+        private val SMALL_SIZE = DpSize(120.dp, 110.dp)
+        private val MEDIUM_SIZE = DpSize(240.dp, 110.dp)
+        private val LARGE_SIZE = DpSize(240.dp, 220.dp)
+    }
+
+    override val sizeMode: SizeMode = SizeMode.Responsive(setOf(SMALL_SIZE, MEDIUM_SIZE, LARGE_SIZE))
+
     override val stateDefinition: GlanceStateDefinition<TodayCourseStateGlance> =
         TodayGlanceStateDefinition()
 
@@ -57,75 +62,126 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
 
     @Composable
     private fun Content() {
-        val stateGlance = currentState<TodayCourseStateGlance>()
+        val state = currentState<TodayCourseStateGlance>()
         val context = LocalContext.current
         val colors = WidgetTheme.getColors(context)
+        val size = LocalSize.current
+        val isCompact = size.width < 200.dp
 
+        if (isCompact) {
+            NextCourseCardContent(
+                state = state,
+                colors = colors,
+                onRefreshAction = actionRunCallback<UpdateTodayCourseActionCallback>(),
+            )
+        } else {
+            TodayListContent(state = state, colors = colors)
+        }
+    }
+
+    @Composable
+    private fun TodayListContent(
+        state: TodayCourseStateGlance,
+        colors: WidgetColors,
+    ) {
         Box(
-            modifier = GlanceModifier.padding(16.dp)
+            modifier = GlanceModifier
                 .fillMaxSize()
-                .background(colors.surface),
+                .background(colors.surface)
+                .cornerRadius(20.dp)
+                .padding(14.dp),
         ) {
-            Column {
+            Column(modifier = GlanceModifier.fillMaxSize()) {
+                // 顶部标题栏：左击刷新，右击打开主应用
                 Row(
                     modifier = GlanceModifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Column(modifier = GlanceModifier.clickable(actionRunCallback<UpdateTodayCourseActionCallback>())) {
-                        val dateString = stateGlance.date.let {
-                            buildString {
-                                append(it.year)
-                                append("/")
-                                append(it.monthValue)
-                                append("/")
-                                append(it.dayOfMonth)
+                    Column(
+                        modifier = GlanceModifier
+                            .defaultWeight()
+                            .clickable(actionRunCallback<UpdateTodayCourseActionCallback>()),
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "今日课程",
+                                style = TextStyle(
+                                    color = colors.onSurface,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                ),
+                            )
+                            Spacer(modifier = GlanceModifier.width(6.dp))
+                            Box(
+                                modifier = GlanceModifier
+                                    .background(colors.primaryContainer)
+                                    .cornerRadius(8.dp)
+                                    .padding(horizontal = 6.dp, vertical = 2.dp),
+                            ) {
+                                Text(
+                                    text = state.weekBadgeText,
+                                    style = TextStyle(
+                                        color = colors.onPrimaryContainer,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Medium,
+                                    ),
+                                )
                             }
                         }
+                        Spacer(modifier = GlanceModifier.height(2.dp))
                         Text(
-                            text = dateString,
+                            text = state.dateLabel,
                             style = TextStyle(
-                                color = colors.onSurface,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                            ),
-                        )
-                        Text(
-                            text = stateGlance.timeTitle,
-                            style = TextStyle(
-                                color = colors.onSurface,
-                                fontWeight = FontWeight.Bold,
+                                color = colors.onSurfaceVariant,
+                                fontSize = 11.sp,
                             ),
                         )
                     }
-                    Spacer(modifier = GlanceModifier.padding(8.dp).defaultWeight())
-                    Text(
-                        modifier = GlanceModifier.clickable(actionStartActivity(androidAppConfiguration.launcherActivity)),
-                        text = "查看更多 >",
-                        style = TextStyle(color = colors.onSurface),
-                    )
+                    Box(
+                        modifier = GlanceModifier
+                            .clickable(actionStartActivity(androidAppConfiguration.launcherActivity))
+                            .padding(horizontal = 4.dp, vertical = 4.dp),
+                    ) {
+                        Text(
+                            text = "打开 ›",
+                            style = TextStyle(
+                                color = colors.primary,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium,
+                            ),
+                        )
+                    }
                 }
+
                 Spacer(modifier = GlanceModifier.height(8.dp))
-                LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
-                    if (stateGlance.hasData) {
-                        items(stateGlance.todayCourseList, CourseGlance::courseId) {
-                            BuildCourseItem(todayCourseGlance = it, colors = colors)
+
+                when {
+                    state.isLoggedOut -> {
+                        WidgetEmptyBlock(
+                            title = "打开西瓜课表同步课程",
+                            colors = colors,
+                        )
+                    }
+
+                    state.remainingItems.isEmpty() -> {
+                        val emptyText = if (state.hasCourseToday) {
+                            "今日课程已全部结束"
+                        } else {
+                            "今天没有课程，享受自由时光"
                         }
-                    } else {
-                        item {
-                            Column(
-                                modifier = GlanceModifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                            ) {
-                                Image(
-                                    provider = ImageProvider(R.drawable.ic_no_data),
-                                    contentDescription = null,
-                                )
-                                Text(
-                                    text = "暂无数据",
-                                    style = TextStyle(
-                                        color = colors.onSurface,
-                                        fontSize = 16.sp,
-                                    ),
+                        WidgetEmptyBlock(
+                            title = emptyText,
+                            colors = colors,
+                        )
+                    }
+
+                    else -> {
+                        LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
+                            items(state.remainingItems, CourseGlance::courseId) { item ->
+                                BuildCourseRow(
+                                    item = item,
+                                    nowMillis = state.nowMillis,
+                                    colors = colors,
                                 )
                             }
                         }
@@ -136,63 +192,94 @@ class TodayGlanceAppWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun BuildCourseItem(todayCourseGlance: CourseGlance, colors: WidgetColors) {
-        Box(modifier = GlanceModifier.padding(vertical = 4.dp)) {
+    private fun BuildCourseRow(
+        item: CourseGlance,
+        nowMillis: Long,
+        colors: WidgetColors,
+    ) {
+        val ongoing = item.isOngoing(nowMillis)
+        Box(
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .padding(vertical = 3.dp)
+                .clickable(actionStartActivity(androidAppConfiguration.launcherActivity)),
+        ) {
             Row(
-                modifier = GlanceModifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    .background(color = todayCourseGlance.color.copy(alpha = 0.5F))
-                    .cornerRadius(4.dp),
+                modifier = GlanceModifier
+                    .fillMaxWidth()
+                    .background(colors.surfaceContainer)
+                    .cornerRadius(12.dp)
+                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(modifier = GlanceModifier.fillMaxHeight()) {
-                    for (i in 0 until 4) {
-                        Image(
-                            provider = ImageProvider(R.drawable.ic_circle),
-                            contentDescription = null,
-                            modifier = GlanceModifier.size(8.dp)
-                                .defaultWeight(),
-                        )
-                    }
+                // 左侧彩色圆角竖条（与 iOS TodayWidgetView 和主界面视觉统一）
+                Box(
+                    modifier = GlanceModifier
+                        .width(4.dp)
+                        .height(30.dp)
+                        .background(FixedColorProvider(item.color))
+                        .cornerRadius(2.dp),
+                ) {}
+
+                Spacer(modifier = GlanceModifier.width(9.dp))
+
+                Column(modifier = GlanceModifier.defaultWeight()) {
+                    Text(
+                        text = item.courseName,
+                        style = TextStyle(
+                            color = colors.onSurface,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                        maxLines = 1,
+                    )
+                    Spacer(modifier = GlanceModifier.height(1.dp))
+                    val sub = item.location.ifBlank { if (item.isThing) "自定义事项" else "课程" }
+                    Text(
+                        text = if (ongoing) "正在上课 · $sub" else sub,
+                        style = TextStyle(
+                            color = if (ongoing) FixedColorProvider(item.color) else colors.onSurfaceVariant,
+                            fontSize = 11.sp,
+                        ),
+                        maxLines = 1,
+                    )
                 }
+
                 Spacer(modifier = GlanceModifier.width(8.dp))
-                Row(
-                    modifier = GlanceModifier.padding(vertical = 8.dp)
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        modifier = GlanceModifier.wrapContentSize(),
-                        text = todayCourseGlance.time,
-                        style = TextStyle(
-                            color = colors.onSurface,
-                            textAlign = TextAlign.Center,
-                        ),
-                        maxLines = 2,
-                    )
-                    Spacer(modifier = GlanceModifier.width(8.dp))
-                    Text(
-                        modifier = GlanceModifier.wrapContentHeight()
-                            .defaultWeight(),
-                        text = todayCourseGlance.courseName,
-                        style = TextStyle(
-                            color = colors.onSurface,
-                            textAlign = TextAlign.Center,
-                        ),
-                        maxLines = 2,
-                    )
-                    Spacer(modifier = GlanceModifier.width(8.dp))
-                    Text(
-                        modifier = GlanceModifier.wrapContentHeight()
-                            .width(128.dp),
-                        text = todayCourseGlance.location,
-                        style = TextStyle(
-                            color = colors.onSurface,
-                            textAlign = TextAlign.Center,
-                        ),
-                        maxLines = 2,
-                    )
-                }
+
+                Text(
+                    text = item.time,
+                    style = TextStyle(
+                        color = if (item.isThing) FixedColorProvider(item.color) else colors.onSurfaceVariant,
+                        fontSize = 11.sp,
+                        fontWeight = if (item.isThing || ongoing) FontWeight.Medium else FontWeight.Normal,
+                        textAlign = TextAlign.End,
+                    ),
+                    maxLines = 2,
+                )
             }
         }
+    }
+}
+
+@Composable
+internal fun WidgetEmptyBlock(
+    title: String,
+    colors: WidgetColors,
+) {
+    Box(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .clickable(actionStartActivity(androidAppConfiguration.launcherActivity)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = title,
+            style = TextStyle(
+                color = colors.onSurfaceVariant,
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center,
+            ),
+        )
     }
 }

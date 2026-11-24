@@ -1,7 +1,12 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -70,7 +75,7 @@ import vip.mystery0.xhu.timetable.utils.formatWithDecimal
 import vip.mystery0.xhu.timetable.viewmodel.AutoScoreSubscribeState
 import vip.mystery0.xhu.timetable.viewmodel.ScoreViewModel
 import xhutimetable.composeapp.generated.resources.Res
-import xhutimetable.composeapp.generated.resources.state_no_data
+import xhutimetable.composeapp.generated.resources.state_no_score
 
 @Composable
 fun QueryScoreScreen() {
@@ -187,7 +192,7 @@ fun QueryScoreScreen() {
                 StateScreen(
                     title = loadingErrorMessage ?: "暂无成绩数据",
                     buttonText = "再查一次",
-                    imageRes = painterResource(Res.drawable.state_no_data),
+                    imageRes = painterResource(Res.drawable.state_no_score),
                     onButtonClick = {
                         viewModel.loadScoreList()
                         viewModel.loadScoreGpa()
@@ -475,8 +480,7 @@ private fun BuildScoreCard(
         onClick = { expanded = !expanded },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 5.dp)
-            .animateContentSize(),
+            .padding(horizontal = 16.dp, vertical = 5.dp),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = XhuColor.cardBackground),
         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
@@ -485,7 +489,6 @@ private fun BuildScoreCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -521,8 +524,17 @@ private fun BuildScoreCard(
                 }
             }
 
-            AnimatedVisibility(visible = expanded) {
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically(
+                    animationSpec = tween(240, easing = FastOutSlowInEasing)
+                ) + fadeIn(animationSpec = tween(180)),
+                exit = shrinkVertically(
+                    animationSpec = tween(220, easing = FastOutSlowInEasing)
+                ) + fadeOut(animationSpec = tween(140)),
+            ) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Spacer(modifier = Modifier.height(10.dp))
                     HorizontalDivider(
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
                     )

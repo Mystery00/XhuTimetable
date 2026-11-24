@@ -71,7 +71,7 @@ import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.SchoolTimetableViewModel
 import xhutimetable.composeapp.generated.resources.Res
-import xhutimetable.composeapp.generated.resources.state_no_course_data
+import xhutimetable.composeapp.generated.resources.state_no_search_result
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -185,14 +185,14 @@ fun SchoolTimetableScreen() {
                         title = "按条件搜索全校课程",
                         subtitle = "支持按校区、学院、专业、课程名或教师名查找，并可一键蹭课加入课表",
                         buttonText = "开始搜索",
-                        imageRes = painterResource(Res.drawable.state_no_course_data),
+                        imageRes = painterResource(Res.drawable.state_no_search_result),
                         onButtonClick = { openFilterSheet.value = true }
                     )
                 } else {
                     StateScreen(
                         title = loadingErrorMessage ?: "未找到匹配课程",
                         buttonText = "修改搜索条件",
-                        imageRes = painterResource(Res.drawable.state_no_course_data),
+                        imageRes = painterResource(Res.drawable.state_no_search_result),
                         onButtonClick = { openFilterSheet.value = true }
                     )
                 }

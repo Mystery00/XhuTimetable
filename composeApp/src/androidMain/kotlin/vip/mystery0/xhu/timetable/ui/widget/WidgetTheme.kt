@@ -16,10 +16,16 @@ import vip.mystery0.xhu.timetable.ui.theme.NightMode
 data class WidgetColors(
     val primary: ColorProvider,
     val onPrimary: ColorProvider,
+    val primaryContainer: ColorProvider,
+    val onPrimaryContainer: ColorProvider,
     val surface: ColorProvider,
+    val surfaceContainer: ColorProvider,
     val onSurface: ColorProvider,
+    val onSurfaceVariant: ColorProvider,
     val secondary: ColorProvider,
     val onSecondary: ColorProvider,
+    val outlineVariant: ColorProvider,
+    val isDark: Boolean,
 )
 
 object WidgetTheme {
@@ -40,18 +46,24 @@ object WidgetTheme {
                 if (isDark) DarkColorScheme else LightColorScheme
             }
 
-        return createColors(scheme)
+        return createColors(scheme, isDark)
     }
 
     @SuppressLint("RestrictedApi")
-    private fun createColors(scheme: ColorScheme): WidgetColors {
+    private fun createColors(scheme: ColorScheme, isDark: Boolean): WidgetColors {
         return WidgetColors(
             primary = ColorProvider(scheme.primary),
             onPrimary = ColorProvider(scheme.onPrimary),
+            primaryContainer = ColorProvider(scheme.primaryContainer),
+            onPrimaryContainer = ColorProvider(scheme.onPrimaryContainer),
             surface = ColorProvider(scheme.surface),
+            surfaceContainer = ColorProvider(scheme.surfaceContainerLow),
             onSurface = ColorProvider(scheme.onSurface),
+            onSurfaceVariant = ColorProvider(scheme.onSurfaceVariant),
             secondary = ColorProvider(scheme.secondary),
             onSecondary = ColorProvider(scheme.onSecondary),
+            outlineVariant = ColorProvider(scheme.outlineVariant),
+            isDark = isDark,
         )
     }
 }

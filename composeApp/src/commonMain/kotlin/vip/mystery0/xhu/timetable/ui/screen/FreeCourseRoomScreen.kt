@@ -88,7 +88,7 @@ import vip.mystery0.xhu.timetable.utils.formatWeekString
 import vip.mystery0.xhu.timetable.utils.now
 import vip.mystery0.xhu.timetable.viewmodel.CourseRoomViewModel
 import xhutimetable.composeapp.generated.resources.Res
-import xhutimetable.composeapp.generated.resources.state_no_course_data
+import xhutimetable.composeapp.generated.resources.state_no_classroom
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -210,7 +210,7 @@ fun FreeCourseRoomScreen() {
                         title = "设置条件查询空闲教室",
                         subtitle = "选择校区楼栋、周次、星期与节次，快速找到安静的自习教室",
                         buttonText = "设置查询条件",
-                        imageRes = painterResource(Res.drawable.state_no_course_data),
+                        imageRes = painterResource(Res.drawable.state_no_classroom),
                         onButtonClick = { openFilterSheet.value = true }
                     )
                 } else {
@@ -218,7 +218,7 @@ fun FreeCourseRoomScreen() {
                         title = loadingErrorMessage ?: "该时段暂无空闲教室",
                         subtitle = "可以尝试调整教学楼区域或节次条件",
                         buttonText = "修改查询条件",
-                        imageRes = painterResource(Res.drawable.state_no_course_data),
+                        imageRes = painterResource(Res.drawable.state_no_classroom),
                         onButtonClick = { openFilterSheet.value = true }
                     )
                 }

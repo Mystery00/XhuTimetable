@@ -28,7 +28,7 @@ import vip.mystery0.xhu.timetable.utils.sha256
 class SchoolCalendarViewModel : ComposeViewModel() {
     private val fileClient: HttpClient by inject(named(HTTP_CLIENT_FILE))
 
-    private val _loading = MutableStateFlow(LoadingState())
+    private val _loading = MutableStateFlow(LoadingState(true))
     val loading: StateFlow<LoadingState> = _loading
 
     private val _area = MutableStateFlow<List<SchoolCalendarData>>(emptyList())
@@ -44,22 +44,30 @@ class SchoolCalendarViewModel : ComposeViewModel() {
         }
 
         viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
-            logger.w("changeArea failed", throwable)
+            logger.w("init school calendar failed", throwable)
             failed(throwable.desc())
         }) {
             _loading.value = LoadingState(true)
-            _area.value = SchoolCalendarRepo.getList()
+            val list = SchoolCalendarRepo.getList()
                 .map { SchoolCalendarData(it.area, it.imageUrl) }
+            _area.value = list
+            val first = list.firstOrNull()
+            if (first != null) {
+                _schoolCalendarData.value = first.doCache(fileClient)
+            }
             _loading.value = LoadingState(false)
-            changeArea(_area.value.first().area)
         }
     }
 
     fun changeArea(area: String) {
-        viewModelScope.safeLaunch {
-            _area.value.first { it.area == area }.let {
-                _schoolCalendarData.value = it.doCache(fileClient)
-            }
+        viewModelScope.safeLaunch(onException = networkErrorHandler { throwable ->
+            logger.w("changeArea failed", throwable)
+            _loading.value = LoadingState(false, throwable.desc())
+        }) {
+            val target = _area.value.firstOrNull { it.area == area } ?: return@safeLaunch
+            _loading.value = LoadingState(true)
+            _schoolCalendarData.value = target.doCache(fileClient)
+            _loading.value = LoadingState(false)
         }
     }
 

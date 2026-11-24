@@ -106,7 +106,7 @@ import vip.mystery0.xhu.timetable.utils.thingDateTimeFormatter
 import vip.mystery0.xhu.timetable.utils.thingTimeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.CustomThingViewModel
 import xhutimetable.composeapp.generated.resources.Res
-import xhutimetable.composeapp.generated.resources.state_no_data
+import xhutimetable.composeapp.generated.resources.state_no_thing
 
 @Composable
 fun CustomThingScreen() {
@@ -182,7 +182,7 @@ fun CustomThingScreen() {
                     title = loadingErrorMessage ?: "暂无自定义事项",
                     subtitle = "点击右下角 + 按钮，添加作业提醒、日程或倒计时",
                     buttonText = "再查一次",
-                    imageRes = painterResource(Res.drawable.state_no_data),
+                    imageRes = painterResource(Res.drawable.state_no_thing),
                     onButtonClick = { viewModel.loadCustomThingList() }
                 )
             },

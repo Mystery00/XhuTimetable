@@ -109,7 +109,12 @@ val calendarActions: TabAction = @Composable {
         BadgedBox(
             badge = {
                 if (practicalList.isNotEmpty()) {
-                    Badge { Text(practicalList.size.toString()) }
+                    Badge(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    ) {
+                        Text(practicalList.size.toString())
+                    }
                 }
             }
         ) {

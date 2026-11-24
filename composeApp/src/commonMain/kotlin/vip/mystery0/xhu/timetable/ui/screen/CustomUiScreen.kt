@@ -470,6 +470,10 @@ fun CustomUiScreen() {
         message = "你修改了课表界面参数但尚未保存，是否保存后退出？",
         confirmText = "保存并退出",
         dismissText = "直接放弃",
+        onDismiss = {
+            hasUnsavedChanges = false
+            navController.popBackStack()
+        },
         onConfirm = {
             viewModel.save()
             hasUnsavedChanges = false

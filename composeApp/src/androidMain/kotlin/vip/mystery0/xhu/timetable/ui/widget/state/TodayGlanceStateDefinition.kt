@@ -11,9 +11,12 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import vip.mystery0.xhu.timetable.repository.WidgetRepo
 import vip.mystery0.xhu.timetable.ui.widget.widgetDataStoreFile
+import vip.mystery0.xhu.timetable.widget.WidgetSnapshotRepo
 import java.io.File
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 
 class TodayGlanceStateDefinition : GlanceStateDefinition<TodayCourseStateGlance> {
     override suspend fun getDataStore(
@@ -29,24 +32,62 @@ class TodayCourseDataStore : DataStore<TodayCourseStateGlance> {
     private val dataFlow = MutableStateFlow(TodayCourseStateGlance.EMPTY)
 
     override val data: Flow<TodayCourseStateGlance> = flow {
-        val currentWeek = withContext(Dispatchers.Default) { WidgetRepo.calculateWeek() }
-        val todayCourseList =
-            withContext(Dispatchers.Default) { WidgetRepo.getTodayList(currentWeek) }
+        val now = LocalDate.now()
+        val nowMillis = System.currentTimeMillis()
+        val snapshot = withContext(Dispatchers.Default) { WidgetSnapshotRepo.generate() }
         val timeTitle = withContext(Dispatchers.Default) { WidgetRepo.calculateDateTitle(false) }
+
+        if (snapshot.state == "loggedOut") {
+            emit(
+                TodayCourseStateGlance(
+                    timeTitle = timeTitle,
+                    date = now,
+                    currentWeek = 0,
+                    todayCourseList = emptyList(),
+                    isLoggedOut = true,
+                    nowMillis = nowMillis,
+                )
+            )
+            return@flow
+        }
+
+        val todayKey = now.toString()
+        val snapshotDay = snapshot.days.firstOrNull { it.date == todayKey }
+        val currentWeek = snapshotDay?.week ?: withContext(Dispatchers.Default) { WidgetRepo.calculateWeek() }
+        val items = snapshotDay?.items?.mapIndexed { index, item ->
+            CourseGlance(
+                courseId = index.toLong(),
+                courseName = item.title,
+                location = item.location,
+                time = item.timeText,
+                color = Color(item.colorArgb.toInt()),
+                startMillis = item.startMillis,
+                endMillis = item.endMillis,
+                isThing = item.kind == "thing",
+            )
+        } ?: withContext(Dispatchers.Default) {
+            WidgetRepo.getTodayList(currentWeek).mapIndexed { index, item ->
+                CourseGlance(
+                    courseId = index.toLong(),
+                    courseName = item.title,
+                    location = item.location,
+                    time = item.showTime.joinToString("–"),
+                    color = item.color,
+                    startMillis = item.startTime,
+                    endMillis = item.startTime + 90 * 60 * 1000L,
+                    isThing = false,
+                )
+            }
+        }
+
         emit(
             TodayCourseStateGlance(
-                timeTitle,
-                LocalDate.now(),
-                currentWeek,
-                todayCourseList.mapIndexed { index, item ->
-                    CourseGlance(
-                        index.toLong(),
-                        item.title,
-                        item.location,
-                        item.showTime.joinToString("\n"),
-                        item.color,
-                    )
-                },
+                timeTitle = timeTitle,
+                date = now,
+                currentWeek = currentWeek,
+                todayCourseList = items,
+                isLoggedOut = false,
+                nowMillis = nowMillis,
             )
         )
     }
@@ -61,12 +102,36 @@ data class TodayCourseStateGlance(
     val currentWeek: Int,
     val todayCourseList: List<CourseGlance>,
     val week: DayOfWeek = date.dayOfWeek,
+    val isLoggedOut: Boolean = false,
+    val nowMillis: Long = System.currentTimeMillis(),
 ) {
     val hasData: Boolean
         get() = todayCourseList.isNotEmpty()
 
+    val hasCourseToday: Boolean
+        get() = todayCourseList.any { !it.isThing }
+
+    val remainingItems: List<CourseGlance>
+        get() = todayCourseList.filter { it.isThing || it.endMillis > nowMillis }
+
+    val nextCourse: CourseGlance?
+        get() = todayCourseList.firstOrNull { !it.isThing && it.endMillis > nowMillis }
+
+    val dateLabel: String
+        get() {
+            val weekName = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.CHINESE)
+            return "${date.monthValue}月${date.dayOfMonth}日 $weekName"
+        }
+
+    val weekBadgeText: String
+        get() = when {
+            currentWeek <= 0 -> "未开学"
+            currentWeek > 20 -> "已结课"
+            else -> "第${currentWeek}周"
+        }
+
     companion object {
-        val EMPTY = TodayCourseStateGlance("数据初始化中……", LocalDate.now(), 0, emptyList())
+        val EMPTY = TodayCourseStateGlance("数据加载中…", LocalDate.now(), 0, emptyList())
     }
 }
 
@@ -76,4 +141,9 @@ data class CourseGlance(
     val location: String,
     val time: String,
     val color: Color,
-)
+    val startMillis: Long = 0L,
+    val endMillis: Long = 0L,
+    val isThing: Boolean = false,
+) {
+    fun isOngoing(nowMillis: Long): Boolean = !isThing && startMillis in 1..nowMillis && endMillis > nowMillis
+}

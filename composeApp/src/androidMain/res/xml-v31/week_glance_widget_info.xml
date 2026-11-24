@@ -5,6 +5,6 @@
     android:previewImage="@mipmap/widget_preview_week"
     android:resizeMode="horizontal|vertical"
     android:targetCellWidth="4"
-    android:targetCellHeight="2"
+    android:targetCellHeight="4"
     android:updatePeriodMillis="1800001"
     android:widgetCategory="home_screen" />

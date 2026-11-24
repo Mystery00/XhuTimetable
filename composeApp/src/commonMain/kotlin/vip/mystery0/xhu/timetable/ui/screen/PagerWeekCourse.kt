@@ -166,7 +166,6 @@ val weekCourseTitleBar: TabTitle = @Composable {
 
 val weekCourseActions: TabAction = @Composable {
     val viewModel = koinViewModel<MainViewModel>()
-    val pagerViewModel = koinViewModel<PagerMainViewModel>()
     val week by viewModel.week.collectAsState()
     val actualWeek by viewModel.actualCurrentWeek.collectAsState()
 
@@ -186,15 +185,6 @@ val weekCourseActions: TabAction = @Composable {
                 tint = MaterialTheme.colorScheme.primary,
             )
         }
-    }
-    IconButton(
-        onClick = { pagerViewModel.showWeekPickerSheet.value = true },
-        modifier = Modifier.fillMaxHeight(),
-    ) {
-        Icon(
-            painter = XhuIcons.Action.weekView,
-            contentDescription = "周次总览",
-        )
     }
     true
 }
@@ -458,93 +448,102 @@ private fun WeekPickerBottomSheet(
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(4),
+            // 完整展示 4x5 共 20 周，避免与 Sheet 下滑关闭手势产生嵌套滚动冲突
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 420.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(vertical = 4.dp),
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                items(displayWeeks, key = { it.weekNum }) { item ->
-                    val isSelected = item.weekNum == currentWeek
-                    val isActual = item.thisWeek || item.weekNum == actualWeek
-                    Surface(
-                        onClick = { onWeekSelect(item.weekNum) },
-                        shape = RoundedCornerShape(14.dp),
-                        color = when {
-                            isSelected -> MaterialTheme.colorScheme.primaryContainer
-                            isActual -> MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.55f)
-                            else -> MaterialTheme.colorScheme.surfaceContainerLow
-                        },
-                        border = when {
-                            isSelected -> BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
-                            isActual -> BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                            else -> BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                        },
+                displayWeeks.chunked(4).forEach { rowWeeks ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(86.dp)
-                                .padding(vertical = 8.dp, horizontal = 4.dp),
-                        ) {
-                            if (isActual) {
-                                Surface(
-                                    shape = RoundedCornerShape(6.dp),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.align(Alignment.TopEnd),
-                                ) {
-                                    Text(
-                                        text = "今",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontSize = 8.sp,
-                                        lineHeight = 10.sp,
-                                        color = MaterialTheme.colorScheme.onPrimary,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
-                                    )
-                                }
-                            }
-                            Column(
-                                modifier = Modifier.align(Alignment.Center),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(6.dp),
+                        rowWeeks.forEach { item ->
+                            val isSelected = item.weekNum == currentWeek
+                            val isActual = item.thisWeek || item.weekNum == actualWeek
+                            Surface(
+                                onClick = { onWeekSelect(item.weekNum) },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(14.dp),
+                                color = when {
+                                    isSelected -> MaterialTheme.colorScheme.primaryContainer
+                                    isActual -> MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.55f)
+                                    else -> MaterialTheme.colorScheme.surfaceContainerLow
+                                },
+                                border = when {
+                                    isSelected -> BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
+                                    isActual -> BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                                    else -> BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+                                },
                             ) {
-                                Canvas(modifier = Modifier.size(32.dp)) {
-                                    val itemH = size.height / 5f
-                                    val itemW = size.width / 5f
-                                    val radius = min(itemH, itemW) / 2f - 1.2f
-                                    for (day in 0 until 5) {
-                                        for (slot in 0 until 5) {
-                                            val light = item.array.getOrElse(slot) { emptyArray() }
-                                                .getOrElse(day) { false }
-                                            drawCircle(
-                                                color = if (light) activeDotColor else inactiveDotColor,
-                                                center = Offset(
-                                                    x = itemW * slot + itemW / 2f,
-                                                    y = itemH * day + itemH / 2f,
-                                                ),
-                                                radius = radius.coerceAtLeast(1f),
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(74.dp)
+                                        .padding(vertical = 6.dp, horizontal = 4.dp),
+                                ) {
+                                    if (isActual) {
+                                        Surface(
+                                            shape = RoundedCornerShape(6.dp),
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.align(Alignment.TopEnd),
+                                        ) {
+                                            Text(
+                                                text = "今",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontSize = 8.sp,
+                                                lineHeight = 10.sp,
+                                                color = MaterialTheme.colorScheme.onPrimary,
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
                                             )
                                         }
                                     }
+                                    Column(
+                                        modifier = Modifier.align(Alignment.Center),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                                    ) {
+                                        Canvas(modifier = Modifier.size(30.dp)) {
+                                            val itemH = size.height / 5f
+                                            val itemW = size.width / 5f
+                                            val radius = min(itemH, itemW) / 2f - 1.2f
+                                            for (day in 0 until 5) {
+                                                for (slot in 0 until 5) {
+                                                    val light = item.array.getOrElse(slot) { emptyArray() }
+                                                        .getOrElse(day) { false }
+                                                    drawCircle(
+                                                        color = if (light) activeDotColor else inactiveDotColor,
+                                                        center = Offset(
+                                                            x = itemW * slot + itemW / 2f,
+                                                            y = itemH * day + itemH / 2f,
+                                                        ),
+                                                        radius = radius.coerceAtLeast(1f),
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        Text(
+                                            text = "第${item.weekNum}周",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = if (isSelected || isActual) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (isSelected) {
+                                                MaterialTheme.colorScheme.onPrimaryContainer
+                                            } else {
+                                                MaterialTheme.colorScheme.onSurface
+                                            },
+                                            maxLines = 1,
+                                        )
+                                    }
                                 }
-                                Text(
-                                    text = "第${item.weekNum}周",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = if (isSelected || isActual) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (isSelected) {
-                                        MaterialTheme.colorScheme.onPrimaryContainer
-                                    } else {
-                                        MaterialTheme.colorScheme.onSurface
-                                    },
-                                    maxLines = 1,
-                                )
                             }
+                        }
+                        repeat(4 - rowWeeks.size) {
+                            Spacer(modifier = Modifier.weight(1f))
                         }
                     }
                 }

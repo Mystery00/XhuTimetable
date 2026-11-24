@@ -49,7 +49,7 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.ExpScoreViewModel
 import xhutimetable.composeapp.generated.resources.Res
-import xhutimetable.composeapp.generated.resources.state_no_data
+import xhutimetable.composeapp.generated.resources.state_no_score
 
 @Composable
 fun QueryExpScoreScreen() {
@@ -171,7 +171,7 @@ fun QueryExpScoreScreen() {
                             StateScreen(
                                 title = loadingErrorMessage.ifBlank { "暂无实验成绩数据" },
                                 buttonText = "再查一次",
-                                imageRes = painterResource(Res.drawable.state_no_data),
+                                imageRes = painterResource(Res.drawable.state_no_score),
                                 onButtonClick = { viewModel.loadExpScoreList() }
                             )
                         }

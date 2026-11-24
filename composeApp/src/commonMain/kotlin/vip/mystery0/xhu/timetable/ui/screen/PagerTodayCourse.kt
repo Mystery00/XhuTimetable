@@ -1,6 +1,12 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -568,9 +574,7 @@ private fun DrawThingCard(
                 remarkExpanded = !remarkExpanded
             }
         },
-        modifier = Modifier
-            .fillMaxWidth()
-            .animateContentSize(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = XhuColor.cardBackground.copy(alpha = customUi.todayBackgroundAlpha),
@@ -580,20 +584,21 @@ private fun DrawThingCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(IntrinsicSize.Min)
-                .padding(horizontal = 14.dp, vertical = 14.dp),
+                .drawBehind {
+                    val barWidth = 4.dp.toPx()
+                    val inset = 14.dp.toPx()
+                    val barHeight = (size.height - inset * 2).coerceAtLeast(0f)
+                    drawRoundRect(
+                        color = accent,
+                        topLeft = Offset(inset, inset),
+                        size = Size(barWidth, barHeight),
+                        cornerRadius = CornerRadius(barWidth, barWidth),
+                    )
+                }
+                .padding(start = 28.dp, end = 14.dp, top = 14.dp, bottom = 14.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // 左侧圆角色条
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .fillMaxHeight()
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(accent)
-            )
-
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -655,15 +660,23 @@ private fun DrawThingCard(
                 }
 
                 if (thing.remark.isNotBlank()) {
-                    Text(
-                        text = thing.remark,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontStyle = FontStyle.Normal,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
-                        maxLines = if (remarkExpanded) Int.MAX_VALUE else 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(top = 2.dp),
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 2.dp)
+                            .animateContentSize(
+                                animationSpec = tween(260, easing = FastOutSlowInEasing)
+                            ),
+                    ) {
+                        Text(
+                            text = thing.remark,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontStyle = FontStyle.Normal,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                            maxLines = if (remarkExpanded) Int.MAX_VALUE else 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
             }
 
