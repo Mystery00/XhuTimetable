@@ -88,7 +88,7 @@ import vip.mystery0.xhu.timetable.ui.navigation.replaceTo
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.LoginViewModel
 import xhutimetable.composeapp.generated.resources.Res
-import xhutimetable.composeapp.generated.resources.ic_app_icon_o
+import xhutimetable.composeapp.generated.resources.ic_app_icon
 import xhutimetable.composeapp.generated.resources.login_header
 
 @Composable
@@ -234,7 +234,7 @@ fun LoginScreen(fromAccountManager: Boolean) {
                 // 品牌 Logo 徽章骑缝居中
                 Surface(
                     shape = RoundedCornerShape(22.dp),
-                    tonalElevation = 4.dp,
+                    color = Color(0xFF3DDC84),
                     shadowElevation = 8.dp,
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.background),
                     modifier = Modifier
@@ -242,7 +242,7 @@ fun LoginScreen(fromAccountManager: Boolean) {
                         .size(74.dp),
                 ) {
                     Image(
-                        painter = painterResource(Res.drawable.ic_app_icon_o),
+                        painter = painterResource(Res.drawable.ic_app_icon),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -271,10 +271,32 @@ fun LoginScreen(fromAccountManager: Boolean) {
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
+                    val subtitleLinkColor = MaterialTheme.colorScheme.primary
+                    val subtitleText = buildAnnotatedString {
+                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                            append("请使用西华大学")
+                        }
+                        withLink(
+                            LinkAnnotation.Url(
+                                url = "https://jwc.xhu.edu.cn",
+                                styles = TextLinkStyles(
+                                    style = SpanStyle(
+                                        color = subtitleLinkColor,
+                                        fontWeight = FontWeight.Medium,
+                                        textDecoration = TextDecoration.Underline,
+                                    )
+                                )
+                            )
+                        ) {
+                            append("教务系统")
+                        }
+                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                            append("账号登录")
+                        }
+                    }
                     Text(
-                        text = "请使用西华大学统一身份认证 / 教务账号登录",
+                        text = subtitleText,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
 

@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.LinkAnnotation
@@ -65,7 +66,7 @@ import vip.mystery0.xhu.timetable.utils.dateFormatter
 import vip.mystery0.xhu.timetable.utils.formatWeekString
 import vip.mystery0.xhu.timetable.viewmodel.StarterViewModel
 import xhutimetable.composeapp.generated.resources.Res
-import xhutimetable.composeapp.generated.resources.ic_app_icon_o
+import xhutimetable.composeapp.generated.resources.ic_app_icon
 import xhutimetable.composeapp.generated.resources.splash_image_bottom
 
 @Composable
@@ -90,12 +91,12 @@ fun InitScreen() {
         ) {
             Surface(
                 shape = RoundedCornerShape(32.dp),
-                tonalElevation = 4.dp,
+                color = Color(0xFF3DDC84),
                 shadowElevation = 6.dp,
                 modifier = Modifier.size(104.dp),
             ) {
                 Image(
-                    painter = painterResource(Res.drawable.ic_app_icon_o),
+                    painter = painterResource(Res.drawable.ic_app_icon),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
