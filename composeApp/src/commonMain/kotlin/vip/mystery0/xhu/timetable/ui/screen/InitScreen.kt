@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.PrivacyTip
@@ -30,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -63,6 +66,7 @@ import vip.mystery0.xhu.timetable.utils.formatWeekString
 import vip.mystery0.xhu.timetable.viewmodel.StarterViewModel
 import xhutimetable.composeapp.generated.resources.Res
 import xhutimetable.composeapp.generated.resources.ic_app_icon_o
+import xhutimetable.composeapp.generated.resources.splash_image_bottom
 
 @Composable
 fun InitScreen() {
@@ -113,6 +117,19 @@ fun InitScreen() {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+
+        // 底部品牌字标（与系统启动屏无缝衔接）
+        Image(
+            painter = painterResource(Res.drawable.splash_image_bottom),
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f)),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 28.dp)
+                .width(156.dp),
+        )
     }
 
     // 自研跨平台隐私政策对话框：主次按钮层级清晰

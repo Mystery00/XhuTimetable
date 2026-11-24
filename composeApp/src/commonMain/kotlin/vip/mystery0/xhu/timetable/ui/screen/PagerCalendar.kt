@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -365,8 +366,8 @@ fun BuildCalendarMonthHeader(sheet: CalendarSheet) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(148.dp)
             .padding(horizontal = 16.dp, vertical = 6.dp)
+            .aspectRatio(16f / 9f)
             .clip(RoundedCornerShape(20.dp))
     ) {
         AsyncImage(
@@ -380,10 +381,9 @@ fun BuildCalendarMonthHeader(sheet: CalendarSheet) {
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Black.copy(alpha = 0.38f),
-                            Color.Transparent,
-                        )
+                        0.0f to Color.Black.copy(alpha = 0.42f),
+                        0.32f to Color.Transparent,
+                        1.0f to Color.Transparent,
                     )
                 )
         )

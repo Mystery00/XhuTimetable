@@ -4,7 +4,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -25,7 +24,6 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MeetingRoom
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.FilterList
-import androidx.compose.material.icons.rounded.LocationCity
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Today
@@ -33,7 +31,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,7 +51,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -63,21 +59,18 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.isoDayNumber
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
 import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.model.response.ClassroomResponse
-import vip.mystery0.xhu.timetable.repository.WidgetRepo
 import vip.mystery0.xhu.timetable.ui.component.BuildPaging
 import vip.mystery0.xhu.timetable.ui.component.PageItemLayout
 import vip.mystery0.xhu.timetable.ui.component.StateScreen
 import vip.mystery0.xhu.timetable.ui.component.TextWithIcon
 import vip.mystery0.xhu.timetable.ui.component.collectAndHandleState
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuDialogState
 import vip.mystery0.xhu.timetable.ui.component.dialog.XhuMultiSelectDialog
-import vip.mystery0.xhu.timetable.ui.component.dialog.XhuSingleSelectDialog
 import vip.mystery0.xhu.timetable.ui.component.dialog.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
@@ -85,10 +78,17 @@ import vip.mystery0.xhu.timetable.ui.theme.CourseColorHelper
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.formatChina
 import vip.mystery0.xhu.timetable.utils.formatWeekString
-import vip.mystery0.xhu.timetable.utils.now
 import vip.mystery0.xhu.timetable.viewmodel.CourseRoomViewModel
 import xhutimetable.composeapp.generated.resources.Res
 import xhutimetable.composeapp.generated.resources.state_no_classroom
+
+private val QUICK_PERIOD_PRESETS = listOf(
+    "1-2节" to listOf(1, 2),
+    "3-4节" to listOf(3, 4),
+    "5-6节" to listOf(5, 6),
+    "7-8节" to listOf(7, 8),
+    "9-10节" to listOf(9, 10),
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,6 +99,9 @@ fun FreeCourseRoomScreen() {
     val scope = rememberCoroutineScope()
 
     val openFilterSheet = rememberSaveable { mutableStateOf(false) }
+    val weekDialogState = rememberXhuDialogState()
+    val dayDialogState = rememberXhuDialogState()
+    val timeDialogState = rememberXhuDialogState()
 
     val areaSelect by viewModel.areaSelect.select.collectAsState()
     val weekSelect by viewModel.weekSelect.select.collectAsState()
@@ -144,7 +147,7 @@ fun FreeCourseRoomScreen() {
             refreshing = !viewModel.init && pager.loadState.refresh is LoadState.Loading,
             key = { index -> pager[index]?.roomNo ?: index },
             listHeader = {
-                val selectedArea = areaSelect.firstOrNull { it.selected }?.title ?: "全部区域"
+                val selectedArea = areaSelect.firstOrNull { it.selected }
                 val selectedWeeks = weekSelect.filter { it.selected }.map { it.value }
                 val selectedDays = daySelect.filter { it.selected }.map { DayOfWeek(it.value).formatChina() }
                 val selectedTimes = timeSelect.filter { it.selected }.map { it.value }
@@ -163,36 +166,36 @@ fun FreeCourseRoomScreen() {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         FilterChip(
-                            selected = areaSelect.any { it.selected },
+                            selected = selectedArea != null && selectedArea.value.isNotEmpty(),
                             onClick = { openFilterSheet.value = true },
-                            label = { Text(selectedArea) },
+                            label = { Text(selectedArea?.title ?: "全部区域") },
                         )
                         FilterChip(
                             selected = selectedWeeks.isNotEmpty(),
-                            onClick = { openFilterSheet.value = true },
+                            onClick = { weekDialogState.show() },
                             label = {
                                 Text(
-                                    if (selectedWeeks.isEmpty()) "周次"
+                                    if (selectedWeeks.isEmpty()) "周次*"
                                     else selectedWeeks.formatWeekString()
                                 )
                             },
                         )
                         FilterChip(
                             selected = selectedDays.isNotEmpty(),
-                            onClick = { openFilterSheet.value = true },
+                            onClick = { dayDialogState.show() },
                             label = {
                                 Text(
-                                    if (selectedDays.isEmpty()) "星期"
+                                    if (selectedDays.isEmpty()) "星期*"
                                     else selectedDays.joinToString(",")
                                 )
                             },
                         )
                         FilterChip(
                             selected = selectedTimes.isNotEmpty(),
-                            onClick = { openFilterSheet.value = true },
+                            onClick = { timeDialogState.show() },
                             label = {
                                 Text(
-                                    if (selectedTimes.isEmpty()) "节次"
+                                    if (selectedTimes.isEmpty()) "节次*"
                                     else "第${selectedTimes.joinToString(",")}节"
                                 )
                             },
@@ -208,15 +211,19 @@ fun FreeCourseRoomScreen() {
                 if (viewModel.init) {
                     StateScreen(
                         title = "设置条件查询空闲教室",
-                        subtitle = "选择校区楼栋、周次、星期与节次，快速找到安静的自习教室",
-                        buttonText = "设置查询条件",
+                        subtitle = "已为你预选当前周次、今天星期与当前时段节次，可直接查询或调整条件",
+                        buttonText = "开始查询",
                         imageRes = painterResource(Res.drawable.state_no_classroom),
-                        onButtonClick = { openFilterSheet.value = true }
+                        onButtonClick = {
+                            if (!viewModel.search()) {
+                                openFilterSheet.value = true
+                            }
+                        }
                     )
                 } else {
                     StateScreen(
                         title = loadingErrorMessage ?: "该时段暂无空闲教室",
-                        subtitle = "可以尝试调整教学楼区域或节次条件",
+                        subtitle = "可以尝试调整教学楼区域、周次或节次条件",
                         buttonText = "修改查询条件",
                         imageRes = painterResource(Res.drawable.state_no_classroom),
                         onButtonClick = { openFilterSheet.value = true }
@@ -226,7 +233,13 @@ fun FreeCourseRoomScreen() {
         )
     }
 
-    CourseRoomFilterSheet(openFilterSheet, scope)
+    CourseRoomFilterSheet(
+        openBottomSheet = openFilterSheet,
+        scope = scope,
+        weekDialogState = weekDialogState,
+        dayDialogState = dayDialogState,
+        timeDialogState = timeDialogState,
+    )
 
     HandleErrorMessage(flow = viewModel.errorMessage)
 }
@@ -236,6 +249,9 @@ fun FreeCourseRoomScreen() {
 private fun CourseRoomFilterSheet(
     openBottomSheet: MutableState<Boolean>,
     scope: CoroutineScope,
+    weekDialogState: XhuDialogState,
+    dayDialogState: XhuDialogState,
+    timeDialogState: XhuDialogState,
 ) {
     val viewModel = koinViewModel<CourseRoomViewModel>()
 
@@ -243,11 +259,6 @@ private fun CourseRoomFilterSheet(
     val weekSelect by viewModel.weekSelect.select.collectAsState()
     val daySelect by viewModel.daySelect.select.collectAsState()
     val timeSelect by viewModel.timeSelect.select.collectAsState()
-
-    val areaDialogState = rememberXhuDialogState()
-    val weekDialogState = rememberXhuDialogState()
-    val dayDialogState = rememberXhuDialogState()
-    val timeDialogState = rememberXhuDialogState()
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -259,14 +270,6 @@ private fun CourseRoomFilterSheet(
         }
     }
 
-    XhuSingleSelectDialog(
-        state = areaDialogState,
-        title = "选择查询区域",
-        options = areaSelect,
-        selectedIndex = areaSelect.indexOfFirst { it.selected },
-        itemLabel = { it.title },
-        onSelect = { _, item -> viewModel.changeArea(item.value) },
-    )
     XhuMultiSelectDialog(
         state = weekDialogState,
         title = "选择查询周次",
@@ -275,8 +278,13 @@ private fun CourseRoomFilterSheet(
         itemLabel = { it.title },
         gridColumns = 4,
         showQuickActions = true,
-        allowEmpty = true,
-        onConfirm = { _, items -> viewModel.changeWeek(items.map { it.value }) },
+        allowEmpty = false,
+        onConfirm = { _, items ->
+            viewModel.changeWeek(items.map { it.value })
+            if (!openBottomSheet.value && !viewModel.init) {
+                viewModel.search()
+            }
+        },
     )
     XhuMultiSelectDialog(
         state = dayDialogState,
@@ -285,8 +293,13 @@ private fun CourseRoomFilterSheet(
         initialSelectedIndices = daySelect.mapIndexedNotNull { idx, item -> if (item.selected) idx else null },
         itemLabel = { it.title },
         gridColumns = 4,
-        allowEmpty = true,
-        onConfirm = { _, items -> viewModel.changeDay(items.map { it.value }) },
+        allowEmpty = false,
+        onConfirm = { _, items ->
+            viewModel.changeDay(items.map { it.value })
+            if (!openBottomSheet.value && !viewModel.init) {
+                viewModel.search()
+            }
+        },
     )
     XhuMultiSelectDialog(
         state = timeDialogState,
@@ -296,8 +309,13 @@ private fun CourseRoomFilterSheet(
         itemLabel = { it.title },
         gridColumns = 4,
         showQuickActions = true,
-        allowEmpty = true,
-        onConfirm = { _, items -> viewModel.changeTime(items.map { it.value }) },
+        allowEmpty = false,
+        onConfirm = { _, items ->
+            viewModel.changeTime(items.map { it.value })
+            if (!openBottomSheet.value && !viewModel.init) {
+                viewModel.search()
+            }
+        },
     )
 
     if (!openBottomSheet.value) return
@@ -324,14 +342,7 @@ private fun CourseRoomFilterSheet(
                     fontWeight = FontWeight.Bold,
                 )
                 TextButton(
-                    onClick = {
-                        scope.safeLaunch {
-                            val currentWeek = WidgetRepo.calculateWeek().coerceIn(1, 20)
-                            val todayDay = LocalDate.now().dayOfWeek.isoDayNumber
-                            viewModel.changeWeek(listOf(currentWeek))
-                            viewModel.changeDay(listOf(todayDay))
-                        }
-                    }
+                    onClick = { viewModel.selectTodayDefault() }
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Today,
@@ -339,14 +350,14 @@ private fun CourseRoomFilterSheet(
                         modifier = Modifier.size(16.dp),
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("设为今天")
+                    Text("设为当前时段")
                 }
             }
 
-            // 快捷区域芯片（单选直接点选，减少弹窗层级）
+            // 教学区域（可选，默认全部区域）
             if (areaSelect.isNotEmpty()) {
                 Text(
-                    text = "教学区域",
+                    text = "教学区域（可选）",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -364,7 +375,27 @@ private fun CourseRoomFilterSheet(
                 }
             }
 
-            // 周次 / 星期 / 节次 选择卡片组
+            // 快捷节次一键选择
+            val currentTimes = timeSelect.filter { it.selected }.map { it.value }
+            Text(
+                text = "常用节次快选",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                QUICK_PERIOD_PRESETS.forEach { (label, periods) ->
+                    FilterChip(
+                        selected = currentTimes == periods,
+                        onClick = { viewModel.changeTime(periods) },
+                        label = { Text(label) },
+                    )
+                }
+            }
+
+            // 周次 / 星期 / 节次 必选卡片组
             Surface(
                 shape = RoundedCornerShape(18.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -375,8 +406,8 @@ private fun CourseRoomFilterSheet(
                     val weekList = weekSelect.filter { it.selected }.map { it.value }
                     FilterSelectorRow(
                         icon = Icons.Rounded.CalendarMonth,
-                        label = "查询周次",
-                        value = if (weekList.isEmpty()) "不限 / 点击选择" else weekList.formatWeekString(),
+                        label = "查询周次 *",
+                        value = if (weekList.isEmpty()) "请选择（必选）" else weekList.formatWeekString(),
                         highlighted = weekList.isNotEmpty(),
                         onClick = { weekDialogState.show() },
                     )
@@ -387,8 +418,8 @@ private fun CourseRoomFilterSheet(
                     val dayList = daySelect.filter { it.selected }.map { DayOfWeek(it.value).formatChina() }
                     FilterSelectorRow(
                         icon = Icons.Rounded.Today,
-                        label = "查询星期",
-                        value = if (dayList.isEmpty()) "不限 / 点击选择" else dayList.joinToString("、"),
+                        label = "查询星期 *",
+                        value = if (dayList.isEmpty()) "请选择（必选）" else dayList.joinToString("、"),
                         highlighted = dayList.isNotEmpty(),
                         onClick = { dayDialogState.show() },
                     )
@@ -396,12 +427,11 @@ private fun CourseRoomFilterSheet(
                         modifier = Modifier.padding(start = 52.dp),
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
                     )
-                    val timeList = timeSelect.filter { it.selected }.map { it.value }
                     FilterSelectorRow(
                         icon = Icons.Rounded.Schedule,
-                        label = "查询节次",
-                        value = if (timeList.isEmpty()) "不限 / 点击选择" else "第 ${timeList.joinToString(",")} 节",
-                        highlighted = timeList.isNotEmpty(),
+                        label = "查询节次 *",
+                        value = if (currentTimes.isEmpty()) "请选择（必选）" else "第 ${currentTimes.joinToString(",")} 节",
+                        highlighted = currentTimes.isNotEmpty(),
                         onClick = { timeDialogState.show() },
                     )
                 }
@@ -415,8 +445,9 @@ private fun CourseRoomFilterSheet(
                     .height(48.dp),
                 shape = RoundedCornerShape(14.dp),
                 onClick = {
-                    viewModel.search()
-                    dismissSheet()
+                    if (viewModel.search()) {
+                        dismissSheet()
+                    }
                 }
             ) {
                 Icon(

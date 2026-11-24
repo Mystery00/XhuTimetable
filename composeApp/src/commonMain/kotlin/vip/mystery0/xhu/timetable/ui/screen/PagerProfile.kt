@@ -53,7 +53,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.LocalPlatformContext
-import coil3.compose.rememberAsyncImagePainter
 import kotlinx.coroutines.Dispatchers
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
@@ -67,8 +66,7 @@ import vip.mystery0.xhu.timetable.ui.component.TabTitle
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.navigation.RouteAccountManagement
 import vip.mystery0.xhu.timetable.ui.navigation.navigateAndSave
-import vip.mystery0.xhu.timetable.ui.theme.ProfileImages
-import vip.mystery0.xhu.timetable.ui.theme.XhuImages
+import vip.mystery0.xhu.timetable.ui.theme.UserAvatarImage
 import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
 import vip.mystery0.xhu.timetable.viewmodel.PagerProfileViewModel
 
@@ -154,19 +152,13 @@ val profileCourseContent: TabContent = @Composable {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
-                    val profileImage = mainUser?.let {
-                        it.profileImage ?: ProfileImages.hash(
-                            it.info.name,
-                            it.info.gender == Gender.MALE
-                        )
-                    } ?: XhuImages.defaultProfileImage
-                    Image(
-                        painter = profileImage as? Painter
-                            ?: rememberAsyncImagePainter(model = profileImage),
+                    UserAvatarImage(
+                        userName = mainUser?.info?.name,
+                        isMale = mainUser?.info?.gender == Gender.MALE,
                         contentDescription = null,
                         modifier = Modifier
                             .size(58.dp)
-                            .clip(RoundedCornerShape(16.dp))
+                            .clip(RoundedCornerShape(16.dp)),
                     )
                     Column(
                         modifier = Modifier.weight(1f),

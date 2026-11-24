@@ -6,14 +6,17 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
@@ -25,13 +28,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.EventNote
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material3.Button
@@ -68,6 +71,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.DayOfWeek
@@ -80,14 +84,14 @@ import vip.mystery0.xhu.timetable.model.request.CustomCourseRequest
 import vip.mystery0.xhu.timetable.model.response.CustomCourseResponse
 import vip.mystery0.xhu.timetable.ui.component.BuildPaging
 import vip.mystery0.xhu.timetable.ui.component.BuildSelectFilterChipContent
-import vip.mystery0.xhu.timetable.ui.component.PageItemLayout
 import vip.mystery0.xhu.timetable.ui.component.ShowTermDialog
 import vip.mystery0.xhu.timetable.ui.component.ShowUserDialog
 import vip.mystery0.xhu.timetable.ui.component.ShowYearDialog
 import vip.mystery0.xhu.timetable.ui.component.StateScreen
-import vip.mystery0.xhu.timetable.ui.component.TextWithIcon
 import vip.mystery0.xhu.timetable.ui.component.collectAndHandleState
 import vip.mystery0.xhu.timetable.ui.component.dialog.XhuConfirmDialog
+import vip.mystery0.xhu.timetable.ui.theme.ColorPool
+import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.component.dialog.XhuDialog
 import vip.mystery0.xhu.timetable.ui.component.dialog.XhuSingleSelectDialog
 import vip.mystery0.xhu.timetable.ui.component.dialog.rememberXhuDialogState
@@ -611,37 +615,149 @@ private fun BuildCustomCourseCard(
     item: CustomCourseResponse,
     onClick: () -> Unit,
 ) {
-    PageItemLayout(
+    val accentColor = ColorPool.hash(item.courseName)
+    Surface(
         onClick = onClick,
-        header = {
-            Text(item.courseName)
-        },
-        content = {
-            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                if (item.teacher.isNotBlank()) {
-                    TextWithIcon(
-                        imageVector = Icons.Filled.Person,
-                        text = "教师：${item.teacher}",
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = XhuColor.cardBackground,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
+                .padding(start = 12.dp, top = 14.dp, end = 16.dp, bottom = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(accentColor),
+            )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = item.courseName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
                     )
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                    ) {
+                        Text(
+                            text = "每${item.day.formatWeekString()} · ${item.startDayTime}-${item.endDayTime}节",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
+                        )
+                    }
                 }
-                TextWithIcon(
-                    imageVector = Icons.Filled.DateRange,
-                    text = "周数：第${item.weekStr}",
-                )
-                TextWithIcon(
-                    imageVector = Icons.AutoMirrored.Filled.EventNote,
-                    text = "时间：每${item.day.formatWeekString()} 第 ${item.startDayTime}-${item.endDayTime} 节",
-                )
-                if (item.location.isNotBlank()) {
-                    TextWithIcon(
-                        imageVector = Icons.Filled.LocationOn,
-                        text = "地点：${item.location}",
+
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 9.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        CourseMetaRow(
+                            icon = Icons.Rounded.DateRange,
+                            tint = MaterialTheme.colorScheme.primary,
+                            text = "第${item.weekStr}",
+                        )
+                        if (item.location.isNotBlank()) {
+                            CourseMetaRow(
+                                icon = Icons.Rounded.LocationOn,
+                                tint = MaterialTheme.colorScheme.tertiary,
+                                text = item.location,
+                            )
+                        }
+                        if (item.teacher.isNotBlank()) {
+                            CourseMetaRow(
+                                icon = Icons.Rounded.Person,
+                                tint = MaterialTheme.colorScheme.secondary,
+                                text = item.teacher,
+                            )
+                        }
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = "添加于 ${item.createTime.asLocalDateTime().format(chinaDateTime)}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f),
                     )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        Text(
+                            text = "编辑",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                        )
+                        Icon(
+                            imageVector = Icons.Rounded.ChevronRight,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                        )
+                    }
                 }
             }
-        },
-        footer = {
-            Text("添加于 ${item.createTime.asLocalDateTime().format(chinaDateTime)}")
         }
-    )
+    }
+}
+
+@Composable
+private fun CourseMetaRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    tint: androidx.compose.ui.graphics.Color,
+    text: String,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(15.dp),
+            tint = tint,
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 }

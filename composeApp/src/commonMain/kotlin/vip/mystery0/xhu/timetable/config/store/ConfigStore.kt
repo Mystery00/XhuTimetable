@@ -367,4 +367,17 @@ class ConfigStore internal constructor() {
             Store.ConfigStore.setConfiguration(showHolidayKey, value)
         }
         get() = Store.ConfigStore.getConfiguration(showHolidayKey, true)
+
+    //本地自定义头像（仅本地生效，全局通用，不区分账号，不上传服务端）
+    //空字符串表示默认按性别自动匹配；"builtin:<key>"表示内置头像；"file:<path>"表示本地相册裁剪文件
+    private val customAvatarKey = "customAvatar"
+    var customAvatar: String
+        set(value) {
+            if (value.isBlank()) {
+                Store.ConfigStore.removeConfiguration(customAvatarKey)
+            } else {
+                Store.ConfigStore.setConfiguration(customAvatarKey, value)
+            }
+        }
+        get() = Store.ConfigStore.getConfiguration(customAvatarKey, "")
 }

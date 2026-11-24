@@ -1,9 +1,21 @@
 package vip.mystery0.xhu.timetable.ui.theme
 
+import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.compose.rememberAsyncImagePainter
+import coil3.request.ImageRequest
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import vip.mystery0.xhu.timetable.config.store.GlobalConfigStore
 import vip.mystery0.xhu.timetable.utils.md5
 import xhutimetable.composeapp.generated.resources.Res
 import xhutimetable.composeapp.generated.resources.ic_account_settings
@@ -388,7 +400,27 @@ object XhuImages {
         get() = Res.getUri("drawable/icon.xml")
 }
 
+data class BuiltinAvatar(
+    val key: String,
+    val label: String,
+    val resource: DrawableResource,
+)
+
 object ProfileImages {
+    const val BUILTIN_PREFIX = "builtin:"
+    const val FILE_PREFIX = "file:"
+
+    val builtinAvatars: List<BuiltinAvatar> = listOf(
+        BuiltinAvatar("boy1", "清爽学长", Res.drawable.img_boy1),
+        BuiltinAvatar("boy2", "阳光运动", Res.drawable.img_boy2),
+        BuiltinAvatar("boy3", "文艺书生", Res.drawable.img_boy3),
+        BuiltinAvatar("boy4", "活力少年", Res.drawable.img_boy4),
+        BuiltinAvatar("girl1", "温柔学姐", Res.drawable.img_girl1),
+        BuiltinAvatar("girl2", "元气少女", Res.drawable.img_girl2),
+        BuiltinAvatar("girl3", "知性清新", Res.drawable.img_girl3),
+        BuiltinAvatar("girl4", "软萌可人", Res.drawable.img_girl4),
+    )
+
     private val boyPool = listOf(
         Res.drawable.img_boy1,
         Res.drawable.img_boy2,
@@ -402,6 +434,15 @@ object ProfileImages {
         Res.drawable.img_girl4,
     )
 
+    private val _customAvatarFlow = MutableStateFlow(GlobalConfigStore.customAvatar)
+    val customAvatarFlow: StateFlow<String> = _customAvatarFlow
+
+    fun updateCustomAvatar(value: String) {
+        _customAvatarFlow.value = value
+    }
+
+    fun findBuiltin(key: String): BuiltinAvatar? = builtinAvatars.firstOrNull { it.key == key }
+
     @Composable
     fun hash(
         userName: String,
@@ -410,5 +451,56 @@ object ProfileImages {
         val md5Int = userName.md5().substring(0, 2).toInt(16)
         val pool = if (boy) boyPool else girlPool
         return painterResource(pool[md5Int % pool.size])
+    }
+}
+
+@Composable
+fun UserAvatarImage(
+    userName: String?,
+    isMale: Boolean,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = null,
+) {
+    val customAvatar by ProfileImages.customAvatarFlow.collectAsState()
+    val fallbackPainter = if (!userName.isNullOrBlank()) {
+        ProfileImages.hash(userName, isMale)
+    } else {
+        rememberAsyncImagePainter(model = XhuImages.defaultProfileImage)
+    }
+
+    when {
+        customAvatar.startsWith(ProfileImages.FILE_PREFIX) -> {
+            val filePath = customAvatar.removePrefix(ProfileImages.FILE_PREFIX)
+            AsyncImage(
+                model = ImageRequest.Builder(LocalPlatformContext.current)
+                    .data(filePath)
+                    .build(),
+                contentDescription = contentDescription,
+                contentScale = ContentScale.Crop,
+                placeholder = fallbackPainter,
+                error = fallbackPainter,
+                modifier = modifier,
+            )
+        }
+
+        customAvatar.startsWith(ProfileImages.BUILTIN_PREFIX) -> {
+            val key = customAvatar.removePrefix(ProfileImages.BUILTIN_PREFIX)
+            val builtin = ProfileImages.findBuiltin(key)
+            Image(
+                painter = if (builtin != null) painterResource(builtin.resource) else fallbackPainter,
+                contentDescription = contentDescription,
+                contentScale = ContentScale.Crop,
+                modifier = modifier,
+            )
+        }
+
+        else -> {
+            Image(
+                painter = fallbackPainter,
+                contentDescription = contentDescription,
+                contentScale = ContentScale.Crop,
+                modifier = modifier,
+            )
+        }
     }
 }

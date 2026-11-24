@@ -55,6 +55,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
@@ -88,6 +89,7 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.LoginViewModel
 import xhutimetable.composeapp.generated.resources.Res
 import xhutimetable.composeapp.generated.resources.ic_app_icon_o
+import xhutimetable.composeapp.generated.resources.login_header
 
 @Composable
 fun LoginScreen(fromAccountManager: Boolean) {
@@ -159,62 +161,85 @@ fun LoginScreen(fromAccountManager: Boolean) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.background,
-                    )
-                )
-            )
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
                 .navigationBarsPadding()
                 .imePadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp),
+                .verticalScroll(rememberScrollState()),
         ) {
-            // 顶部返回按钮（从账号管理页跳转时显示）
-            if (fromAccountManager) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            painter = XhuIcons.back,
-                            contentDescription = "返回",
-                        )
-                    }
-                    Text(
-                        text = "添加其他账号",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                }
-            } else {
-                Spacer(modifier = Modifier.height(36.dp))
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // 品牌头部区
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+            // 顶部校园插画头图 + 柔和渐变衔接
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(236.dp),
             ) {
+                Image(
+                    painter = painterResource(Res.drawable.login_header),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Black.copy(alpha = 0.18f),
+                                    Color.Transparent,
+                                    MaterialTheme.colorScheme.background.copy(alpha = 0.72f),
+                                    MaterialTheme.colorScheme.background,
+                                )
+                            )
+                        )
+                )
+
+                // 从账号管理页跳转时显示浮层返回按钮
+                if (fromAccountManager) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .statusBarsPadding()
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Surface(
+                            onClick = { navController.popBackStack() },
+                            shape = RoundedCornerShape(14.dp),
+                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.82f),
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Icon(
+                                    painter = XhuIcons.back,
+                                    contentDescription = "返回",
+                                    modifier = Modifier.size(18.dp),
+                                )
+                                Text(
+                                    text = "返回",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Medium,
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // 品牌 Logo 徽章骑缝居中
                 Surface(
-                    shape = RoundedCornerShape(24.dp),
+                    shape = RoundedCornerShape(22.dp),
                     tonalElevation = 4.dp,
-                    shadowElevation = 6.dp,
-                    modifier = Modifier.size(76.dp),
+                    shadowElevation = 8.dp,
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.background),
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .size(74.dp),
                 ) {
                     Image(
                         painter = painterResource(Res.drawable.ic_app_icon_o),
@@ -222,21 +247,36 @@ fun LoginScreen(fromAccountManager: Boolean) {
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxSize()
-                            .clip(RoundedCornerShape(24.dp)),
+                            .clip(RoundedCornerShape(22.dp)),
                     )
                 }
-                Text(
-                    text = if (fromAccountManager) "登录新账号" else "欢迎使用西瓜课表",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-                Text(
-                    text = "请使用西华大学统一身份认证 / 教务账号登录",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
             }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+            ) {
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // 品牌标题区
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        text = if (fromAccountManager) "登录新账号" else "欢迎使用西瓜课表",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    Text(
+                        text = "请使用西华大学统一身份认证 / 教务账号登录",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -474,6 +514,7 @@ fun LoginScreen(fromAccountManager: Boolean) {
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+            }
         }
     }
 

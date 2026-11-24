@@ -1,11 +1,16 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,13 +20,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.EventNote
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.rounded.AccountBalance
-import androidx.compose.material.icons.rounded.AppRegistration
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.LocationCity
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.School
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
@@ -51,7 +56,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import kotlinx.coroutines.CoroutineScope
@@ -61,13 +70,13 @@ import vip.mystery0.xhu.timetable.base.HandleErrorMessage
 import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.model.response.SchoolTimetableResponse
 import vip.mystery0.xhu.timetable.ui.component.BuildPaging
-import vip.mystery0.xhu.timetable.ui.component.PageItemLayout
 import vip.mystery0.xhu.timetable.ui.component.StateScreen
-import vip.mystery0.xhu.timetable.ui.component.TextWithIcon
 import vip.mystery0.xhu.timetable.ui.component.collectAndHandleState
 import vip.mystery0.xhu.timetable.ui.component.dialog.XhuSingleSelectDialog
 import vip.mystery0.xhu.timetable.ui.component.dialog.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
+import vip.mystery0.xhu.timetable.ui.theme.ColorPool
+import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.viewmodel.SchoolTimetableViewModel
 import xhutimetable.composeapp.generated.resources.Res
@@ -378,47 +387,156 @@ private fun SchoolTimetableFilterSheet(
 
 @Composable
 private fun BuildSchoolCourseCard(course: SchoolTimetableResponse, onClick: () -> Unit) {
-    PageItemLayout(
-        header = {
-            Text(course.courseName)
-        },
-        content = {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                TextWithIcon(
-                    imageVector = Icons.Filled.Person,
-                    text = "教师：${course.teacher.ifBlank { "未知" }}",
-                )
-                TextWithIcon(
-                    imageVector = Icons.AutoMirrored.Filled.EventNote,
-                    text = "时间：${course.showTimeString.ifBlank { "暂无时间数据" }}",
-                )
-                TextWithIcon(
-                    imageVector = Icons.Filled.LocationOn,
-                    text = "地点：${course.location.ifBlank { "暂无地点数据" }}",
-                )
-            }
-        },
-        footer = if (course.customCourseList.isEmpty()) null else {
-            {
+    val accentColor = ColorPool.hash(course.courseName)
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = XhuColor.cardBackground,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
+                .padding(start = 12.dp, top = 14.dp, end = 16.dp, bottom = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(accentColor),
+            )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    FilledTonalButton(
-                        onClick = onClick,
-                        shape = RoundedCornerShape(12.dp),
+                    Text(
+                        text = course.courseName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.78f),
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.AppRegistration,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Person,
+                                contentDescription = null,
+                                modifier = Modifier.size(13.dp),
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                            )
+                            Text(
+                                text = course.teacher.ifBlank { "未知教师" },
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 9.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        SchoolCourseMetaRow(
+                            icon = Icons.Rounded.Schedule,
+                            tint = MaterialTheme.colorScheme.primary,
+                            text = course.showTimeString.ifBlank { "暂无时间数据" },
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("蹭课 · 添加到课表")
+                        SchoolCourseMetaRow(
+                            icon = Icons.Rounded.LocationOn,
+                            tint = MaterialTheme.colorScheme.tertiary,
+                            text = course.location.ifBlank { "暂无地点数据" },
+                        )
+                    }
+                }
+
+                if (course.customCourseList.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            text = "共 ${course.customCourseList.size} 个上课时段",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                        )
+                        FilledTonalButton(
+                            onClick = onClick,
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                            modifier = Modifier.height(34.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Add,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "蹭课 · 加入课表",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
                     }
                 }
             }
         }
-    )
+    }
+}
+
+@Composable
+private fun SchoolCourseMetaRow(
+    icon: ImageVector,
+    tint: Color,
+    text: String,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(15.dp),
+            tint = tint,
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 }

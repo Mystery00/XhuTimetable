@@ -51,7 +51,7 @@ class ExpScoreViewModel : ComposeViewModel(), KoinComponent {
             val term = termSelect.getSelectedTerm()
             val scoreList = ScoreRepo.fetchExpScoreList(selectedUser, year, term)
             _expScoreListState.value =
-                ExpScoreListState(scoreList = scoreList, errorMessage = "数据加载完成！")
+                ExpScoreListState(scoreList = scoreList)
         }
     }
 

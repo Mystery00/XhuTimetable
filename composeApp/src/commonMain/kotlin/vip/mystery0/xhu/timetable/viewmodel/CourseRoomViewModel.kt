@@ -3,6 +3,9 @@ package vip.mystery0.xhu.timetable.viewmodel
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.isoDayNumber
 import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
 import vip.mystery0.xhu.timetable.base.SelectDataLoader
 import vip.mystery0.xhu.timetable.base.Selectable
@@ -12,11 +15,19 @@ import vip.mystery0.xhu.timetable.model.request.ClassroomRequest
 import vip.mystery0.xhu.timetable.model.response.ClassroomResponse
 import vip.mystery0.xhu.timetable.module.desc
 import vip.mystery0.xhu.timetable.repository.ClassroomRepo
+import vip.mystery0.xhu.timetable.repository.WidgetRepo
 import vip.mystery0.xhu.timetable.utils.formatChina
+import vip.mystery0.xhu.timetable.utils.now
+import kotlin.time.Clock
 
-class CourseRoomViewModel : PagingComposeViewModel<ClassroomRequest, ClassroomResponse>(
-    {
-        ClassroomRepo.getClassroomListStream(it)
+data class ClassroomSearchParam(
+    val request: ClassroomRequest,
+    val requestTime: Long = Clock.System.now().toEpochMilliseconds(),
+)
+
+class CourseRoomViewModel : PagingComposeViewModel<ClassroomSearchParam, ClassroomResponse>(
+    { param ->
+        ClassroomRepo.getClassroomListStream(param.request)
     }
 ) {
     val areaSelect = AreaSelectDataLoader()
@@ -29,14 +40,38 @@ class CourseRoomViewModel : PagingComposeViewModel<ClassroomRequest, ClassroomRe
 
     fun init() {
         viewModelScope.safeLaunch {
+            if (areaSelect.select.value.isNotEmpty()) return@safeLaunch
             areaSelect.init()
-
             weekSelect.customInit(1, 20) { "第${it}周" }
-            daySelect.customInit(1, 7) {
-                DayOfWeek(it).formatChina()
-            }
-            timeSelect.customInit(1, 12) { "第${it}节" }
+            daySelect.customInit(1, 7) { DayOfWeek(it).formatChina() }
+            timeSelect.customInit(1, 11) { "第${it}节" }
+
+            // 默认填充当前周、今天星期与当前/下一时段节次，避免首次查询因必选参数为空报错
+            applyTodayDefault()
         }
+    }
+
+    fun selectTodayDefault() {
+        viewModelScope.safeLaunch {
+            applyTodayDefault()
+        }
+    }
+
+    private suspend fun applyTodayDefault() {
+        val currentWeek = WidgetRepo.calculateWeek().coerceIn(1, 20)
+        val todayDay = LocalDate.now().dayOfWeek.isoDayNumber
+        val defaultPeriods = suggestCurrentPeriods(LocalTime.now())
+        weekSelect.multiSetSelected(listOf(currentWeek))
+        daySelect.multiSetSelected(listOf(todayDay))
+        timeSelect.multiSetSelected(defaultPeriods)
+    }
+
+    private fun suggestCurrentPeriods(now: LocalTime): List<Int> = when {
+        now < LocalTime(10, 5) -> listOf(1, 2)
+        now < LocalTime(12, 0) -> listOf(3, 4)
+        now < LocalTime(15, 35) -> listOf(5, 6)
+        now < LocalTime(17, 30) -> listOf(7, 8)
+        else -> listOf(9, 10)
     }
 
     fun changeArea(area: String) {
@@ -63,7 +98,29 @@ class CourseRoomViewModel : PagingComposeViewModel<ClassroomRequest, ClassroomRe
         }
     }
 
-    fun search() {
+    fun search(): Boolean {
+        val area = areaSelect.getSelectedSnapshot()?.value ?: ""
+        val week = weekSelect.getMultiSelectedSnapshot().map { it.value }
+        val day = daySelect.getMultiSelectedSnapshot().map { it.value }
+        val time = timeSelect.getMultiSelectedSnapshot().map { it.value }
+
+        when {
+            week.isEmpty() -> {
+                toastMessage("请至少选择一个查询周次")
+                return false
+            }
+
+            day.isEmpty() -> {
+                toastMessage("请至少选择一个查询星期")
+                return false
+            }
+
+            time.isEmpty() -> {
+                toastMessage("请至少选择一个查询节次")
+                return false
+            }
+        }
+
         fun failed(message: String) {
             logger.w("search failed: $message")
             toastMessage(message)
@@ -72,13 +129,10 @@ class CourseRoomViewModel : PagingComposeViewModel<ClassroomRequest, ClassroomRe
             logger.w("search failed", throwable)
             failed(throwable.desc())
         }) {
-            val area = areaSelect.getSelected()?.value ?: ""
-            val week = weekSelect.getMultiSelected().map { it.value }
-            val day = daySelect.getMultiSelected().map { it.value }
-            val time = timeSelect.getMultiSelected().map { it.value }
             val request = ClassroomRequest(area, week, day, time)
-            pageRequestFlow.emit(request)
+            loadData(ClassroomSearchParam(request))
         }
+        return true
     }
 }
 
@@ -91,9 +145,11 @@ data class AreaSelect(
 
 class AreaSelectDataLoader : SelectDataLoader<AreaSelect, String>() {
     override suspend fun initSelect(): List<AreaSelect> {
-        fun buildAreaSelect(title: String) = AreaSelect(title, title, false)
+        fun buildAreaSelect(title: String, value: String = title, selected: Boolean = false) =
+            AreaSelect(value, title, selected)
 
         return listOf(
+            buildAreaSelect("全部区域", value = "", selected = true),
             buildAreaSelect("一教"),
             buildAreaSelect("二教"),
             buildAreaSelect("三教"),
@@ -107,6 +163,8 @@ class AreaSelectDataLoader : SelectDataLoader<AreaSelect, String>() {
             buildAreaSelect("宜宾"),
         )
     }
+
+    fun getSelectedSnapshot(): AreaSelect? = select.value.firstOrNull { it.selected }
 
     override fun valueId(value: AreaSelect): String = value.value
 
@@ -133,6 +191,8 @@ class IntSelectDataLoader : SelectDataLoader<IntSelect, Int>() {
     ) {
         select.value = (start..end).map { IntSelect(it, title(it), false) }
     }
+
+    fun getMultiSelectedSnapshot(): List<IntSelect> = select.value.filter { it.selected }
 
     override fun valueId(value: IntSelect): Int = value.value
 

@@ -13,9 +13,12 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,13 +29,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.EventNote
-import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -66,28 +71,32 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.daysUntil
 import kotlinx.datetime.format
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.base.HandleErrorMessage
 import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
+import vip.mystery0.xhu.timetable.config.datetime.XhuLocalDate
 import vip.mystery0.xhu.timetable.config.store.Formatter
 import vip.mystery0.xhu.timetable.model.CustomThing
 import vip.mystery0.xhu.timetable.model.request.CustomThingRequest
 import vip.mystery0.xhu.timetable.model.response.CustomThingResponse
 import vip.mystery0.xhu.timetable.ui.component.BuildPaging
 import vip.mystery0.xhu.timetable.ui.component.BuildUserSelectFilterChipContent
-import vip.mystery0.xhu.timetable.ui.component.PageItemLayout
 import vip.mystery0.xhu.timetable.ui.component.ShowUserDialog
 import vip.mystery0.xhu.timetable.ui.component.StateScreen
-import vip.mystery0.xhu.timetable.ui.component.TextWithIcon
 import vip.mystery0.xhu.timetable.ui.component.collectAndHandleState
 import vip.mystery0.xhu.timetable.ui.component.dialog.XhuColorPickerDialog
+import vip.mystery0.xhu.timetable.ui.theme.XhuColor
+import vip.mystery0.xhu.timetable.utils.now
 import vip.mystery0.xhu.timetable.ui.component.dialog.XhuConfirmDialog
 import vip.mystery0.xhu.timetable.ui.component.dialog.XhuDatePickerDialog
 import vip.mystery0.xhu.timetable.ui.component.dialog.XhuTimePickerDialog
@@ -634,82 +643,215 @@ private fun BuildCustomThingCard(
     item: CustomThingResponse,
     onClick: () -> Unit,
 ) {
-    PageItemLayout(
+    val accentColor = item.color.parseColorHexString()
+    val startDateTime = item.startTime.asLocalDateTime()
+    val endDateTime = item.endTime.asLocalDateTime()
+    val timeText = buildString {
+        if (item.allDay) {
+            append(startDateTime.date.format(thingDateFormatter))
+        } else {
+            append(startDateTime.format(thingDateTimeFormatter))
+        }
+        if (!item.saveAsCountDown) {
+            when {
+                item.allDay && startDateTime.date == endDateTime.date -> {}
+                item.allDay && startDateTime.date != endDateTime.date -> {
+                    append(" - ")
+                    append(endDateTime.date.format(thingDateFormatter))
+                }
+
+                !item.allDay && startDateTime.date == endDateTime.date -> {
+                    append(" - ")
+                    append(endDateTime.time.format(thingTimeFormatter))
+                }
+
+                !item.allDay && startDateTime.date != endDateTime.date -> {
+                    append(" - ")
+                    append(endDateTime.format(thingDateTimeFormatter))
+                }
+            }
+        }
+    }
+
+    val (badgeText, badgeContainer, badgeContent) = when {
+        item.saveAsCountDown -> {
+            val days = XhuLocalDate.now().daysUntil(startDateTime.date)
+            when {
+                days > 0 -> Triple(
+                    "还剩 $days 天",
+                    MaterialTheme.colorScheme.tertiaryContainer,
+                    MaterialTheme.colorScheme.onTertiaryContainer,
+                )
+
+                days == 0 -> Triple(
+                    "就在今天",
+                    MaterialTheme.colorScheme.primaryContainer,
+                    MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+
+                else -> Triple(
+                    "已过 ${-days} 天",
+                    MaterialTheme.colorScheme.surfaceContainerHighest,
+                    MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+
+        item.allDay -> Triple(
+            "全天事项",
+            MaterialTheme.colorScheme.secondaryContainer,
+            MaterialTheme.colorScheme.onSecondaryContainer,
+        )
+
+        else -> Triple(
+            "日程提醒",
+            MaterialTheme.colorScheme.surfaceContainerHighest,
+            MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+
+    Surface(
         onClick = onClick,
-        header = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = XhuColor.cardBackground,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
+                .padding(start = 12.dp, top = 14.dp, end = 16.dp, bottom = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(accentColor),
+            )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(12.dp)
-                        .clip(CircleShape)
-                        .background(item.color.parseColorHexString())
-                )
-                Text(
-                    text = item.title,
-                    modifier = Modifier.weight(1f),
-                )
-                if (item.saveAsCountDown) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = item.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
                     Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                        shape = RoundedCornerShape(10.dp),
+                        color = badgeContainer,
                     ) {
                         Text(
-                            text = "倒计时",
+                            text = badgeText,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = badgeContent,
+                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
+                        )
+                    }
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 9.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        ThingMetaRow(
+                            icon = Icons.Rounded.Schedule,
+                            tint = MaterialTheme.colorScheme.primary,
+                            text = timeText,
+                        )
+                        if (item.location.isNotBlank()) {
+                            ThingMetaRow(
+                                icon = Icons.Rounded.LocationOn,
+                                tint = MaterialTheme.colorScheme.tertiary,
+                                text = item.location,
+                            )
+                        }
+                        if (item.remark.isNotBlank()) {
+                            ThingMetaRow(
+                                icon = Icons.AutoMirrored.Rounded.Notes,
+                                tint = MaterialTheme.colorScheme.secondary,
+                                text = item.remark,
+                            )
+                        }
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = "添加于 ${item.createTime.asLocalDateTime().format(chinaDateTime)}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f),
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        Text(
+                            text = "编辑",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer,
-                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                        )
+                        Icon(
+                            imageVector = Icons.Rounded.ChevronRight,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
                         )
                     }
                 }
             }
-        },
-        content = {
-            val startDateTime = item.startTime.asLocalDateTime()
-            val endDateTime = item.endTime.asLocalDateTime()
-            val timeText = buildString {
-                if (item.allDay) {
-                    append(startDateTime.date.format(thingDateFormatter))
-                } else {
-                    append(startDateTime.format(thingDateTimeFormatter))
-                }
-                if (!item.saveAsCountDown) {
-                    when {
-                        item.allDay && startDateTime.date == endDateTime.date -> {}
-                        item.allDay && startDateTime.date != endDateTime.date -> {
-                            append(" - ")
-                            append(endDateTime.date.format(thingDateFormatter))
-                        }
-
-                        !item.allDay && startDateTime.date == endDateTime.date -> {
-                            append(" - ")
-                            append(endDateTime.time.format(thingTimeFormatter))
-                        }
-
-                        !item.allDay && startDateTime.date != endDateTime.date -> {
-                            append(" - ")
-                            append(endDateTime.format(thingDateTimeFormatter))
-                        }
-                    }
-                }
-            }
-            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                TextWithIcon(
-                    imageVector = Icons.AutoMirrored.Filled.EventNote,
-                    text = "时间：$timeText",
-                )
-                if (item.location.isNotBlank()) {
-                    TextWithIcon(
-                        imageVector = Icons.Filled.LocationOn,
-                        text = "地点：${item.location}",
-                    )
-                }
-            }
-        },
-        footer = {
-            Text("添加于 ${item.createTime.asLocalDateTime().format(chinaDateTime)}")
         }
-    )
+    }
+}
+
+@Composable
+private fun ThingMetaRow(
+    icon: ImageVector,
+    tint: Color,
+    text: String,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(15.dp),
+            tint = tint,
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 }
