@@ -1,8 +1,16 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -38,9 +46,11 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.DateRange
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -75,6 +85,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.datetime.format
 import multiplatform.network.cmptoast.showToast
 import org.jetbrains.compose.resources.painterResource
@@ -96,6 +107,7 @@ import vip.mystery0.xhu.timetable.ui.navigation.navigateAndSave
 import vip.mystery0.xhu.timetable.ui.theme.CourseColorHelper
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
+import vip.mystery0.xhu.timetable.ui.theme.isDarkMode
 import vip.mystery0.xhu.timetable.utils.copyToClipboard
 import vip.mystery0.xhu.timetable.utils.formatWithDecimal
 import vip.mystery0.xhu.timetable.viewmodel.CourseStatus
@@ -104,21 +116,26 @@ import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
 import vip.mystery0.xhu.timetable.viewmodel.PagerMainViewModel
 import vip.mystery0.xhu.timetable.viewmodel.TodayCourseSheet
 import vip.mystery0.xhu.timetable.viewmodel.TodayThingSheet
+import vip.mystery0.xhu.timetable.viewmodel.TodayWeekDayItem
 import xhutimetable.composeapp.generated.resources.Res
 import xhutimetable.composeapp.generated.resources.state_no_course_data
 
 val todayCourseTitleBar: TabTitle = @Composable {
     val viewModel = koinViewModel<MainViewModel>()
-    val title by viewModel.todayTitle.collectAsState()
     val showTomorrow by viewModel.showTomorrowCourse.collectAsState()
+    val isCustomDate by viewModel.isTodayDateCustomSelected.collectAsState()
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = title.ifBlank { "今日课程" },
+            text = when {
+                isCustomDate -> "日程预览"
+                showTomorrow -> "明日课程"
+                else -> "今日课程"
+            },
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
         )
-        if (showTomorrow) {
+        if (showTomorrow && !isCustomDate) {
             Text(
                 text = "已自动切换至明日课表",
                 style = MaterialTheme.typography.labelSmall,
@@ -132,7 +149,24 @@ val todayCourseActions: TabAction = @Composable {
     val viewModel = koinViewModel<MainViewModel>()
     val pagerViewModel = koinViewModel<PagerMainViewModel>()
     val loading by viewModel.loading.collectAsState()
+    val isCustomDate by viewModel.isTodayDateCustomSelected.collectAsState()
 
+    AnimatedVisibility(
+        visible = isCustomDate,
+        enter = fadeIn() + scaleIn(),
+        exit = fadeOut() + scaleOut(),
+    ) {
+        IconButton(
+            onClick = { viewModel.resetTodayDateToDefault() },
+            modifier = Modifier.fillMaxHeight(),
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Today,
+                contentDescription = "回到今天",
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        }
+    }
     if (loading) {
         LoadingButton(
             loadingValue = LoadingValue.Loading,
@@ -168,6 +202,13 @@ val todayCourseContent: TabContent = @Composable {
     val showStatus by viewModel.showStatus.collectAsState()
     val loading by viewModel.loading.collectAsState()
 
+    val selectedDate by viewModel.selectedTodayDate.collectAsState()
+    val headerDateText by viewModel.selectedTodayHeaderText.collectAsState()
+    val yearTermLabel by viewModel.currentYearTermLabel.collectAsState()
+    val weekDays by viewModel.todayWeekDays.collectAsState()
+    val isCustomDate by viewModel.isTodayDateCustomSelected.collectAsState()
+    val showTomorrow by viewModel.showTomorrowCourse.collectAsState()
+
     val pullToRefreshState = rememberPullToRefreshState()
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -186,118 +227,107 @@ val todayCourseContent: TabContent = @Composable {
                 )
             }
         ) {
-            if (poems == null && holiday == null && todayThingList.isEmpty() && todayCourseList.isEmpty()) {
-                StateScreen(
-                    title = "今天没有课哦~",
-                    subtitle = "可以好好放松一下，或者安排些自己的学习计划",
-                    buttonText = "刷新课表",
-                    imageRes = painterResource(Res.drawable.state_no_course_data),
-                    onButtonClick = {
-                        viewModel.refreshCloudDataToState()
-                    }
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    // 顶部轻量化日程摘要胶囊
-                    if (todayCourseList.isNotEmpty() || todayThingList.isNotEmpty()) {
-                        item(key = "summary_header") {
-                            TodaySummaryStrip(
-                                courseCount = todayCourseList.size,
-                                thingCount = todayThingList.size,
-                                alpha = customUi.todayBackgroundAlpha,
-                            )
-                        }
-                    }
-
-                    // 今日诗词卡片
-                    poems?.let { value ->
-                        item(key = "poems_card") {
-                            DrawPoemsCard(
-                                customUi = customUi,
-                                openBottomSheet = openPoemsSheet,
-                                poems = value,
-                            )
-                        }
-                    }
-
-                    // 节假日横幅
-                    holiday?.let { holidayItem ->
-                        item(key = "holiday_card") {
-                            DrawHoliday(
-                                customUi = customUi,
-                                holiday = holidayItem,
-                            )
-                        }
-                    }
-
-                    // 自定义事项与倒计时
-                    if (todayThingList.isNotEmpty()) {
-                        item(key = "thing_section_label") {
-                            SectionHeaderLabel(text = "日程与倒计时")
-                        }
-                        items(todayThingList) { thing ->
-                            DrawThingCard(
-                                customUi = customUi,
-                                thing = thing,
-                                multiAccountMode = multiAccountMode,
-                            )
-                        }
-                    }
-
-                    // 今日课程列表
-                    if (todayCourseList.isNotEmpty()) {
-                        if (todayThingList.isNotEmpty()) {
-                            item(key = "course_section_label") {
-                                SectionHeaderLabel(text = "课程安排")
-                            }
-                        }
-                        items(todayCourseList) { course ->
-                            DrawCourseCard(
-                                customUi = customUi,
-                                course = course,
-                                multiAccountMode = multiAccountMode,
-                                showStatus = showStatus,
-                                onClick = { selectedCourse = course },
-                            )
-                        }
-                    } else if (todayThingList.isNotEmpty() || poems != null) {
-                        item(key = "no_course_hint") {
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(18.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = XhuColor.cardBackground.copy(alpha = customUi.todayBackgroundAlpha),
-                                ),
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 28.dp, horizontal = 16.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                                ) {
-                                    Text(
-                                        text = "今日暂无课程安排",
-                                        style = MaterialTheme.typography.titleSmall,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                    )
-                                    Text(
-                                        text = "下拉可从云端同步最新课表",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    item { Spacer(modifier = Modifier.height(12.dp)) }
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                // 顶部超课风格日期头 + 7天周历切换条
+                item(key = "today_week_header") {
+                    TodayWeekStripHeader(
+                        dateHeaderText = headerDateText,
+                        yearTermLabel = yearTermLabel,
+                        weekDays = weekDays,
+                        showBackToToday = isCustomDate,
+                        showTomorrowBadge = showTomorrow && !isCustomDate,
+                        alpha = customUi.todayBackgroundAlpha,
+                        onSelectDate = { date -> viewModel.selectTodayDate(date) },
+                        onResetToday = { viewModel.resetTodayDateToDefault() },
+                    )
                 }
+
+                // 节假日横幅
+                holiday?.let { holidayItem ->
+                    item(key = "holiday_card") {
+                        DrawHoliday(
+                            customUi = customUi,
+                            holiday = holidayItem,
+                        )
+                    }
+                }
+
+                // 今日诗词卡片
+                poems?.let { value ->
+                    item(key = "poems_card") {
+                        DrawPoemsCard(
+                            customUi = customUi,
+                            openBottomSheet = openPoemsSheet,
+                            poems = value,
+                        )
+                    }
+                }
+
+                // 自定义事项与倒计时
+                if (todayThingList.isNotEmpty()) {
+                    item(key = "thing_section_label") {
+                        SectionHeaderLabel(text = "日程与倒计时")
+                    }
+                    items(todayThingList) { thing ->
+                        DrawThingCard(
+                            customUi = customUi,
+                            thing = thing,
+                            multiAccountMode = multiAccountMode,
+                        )
+                    }
+                }
+
+                // 当日课程时间轴列表
+                if (todayCourseList.isNotEmpty()) {
+                    if (todayThingList.isNotEmpty()) {
+                        item(key = "course_section_label") {
+                            SectionHeaderLabel(text = "课程安排")
+                        }
+                    }
+                    items(
+                        items = todayCourseList,
+                        key = { "${selectedDate}_${it.courseName}_${it.timeString}_${it.accountTitle}_${it.location}" },
+                    ) { course ->
+                        DrawCourseCard(
+                            customUi = customUi,
+                            course = course,
+                            multiAccountMode = multiAccountMode,
+                            showStatus = showStatus,
+                            onClick = { selectedCourse = course },
+                        )
+                    }
+                } else {
+                    item(key = "no_course_hint") {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = XhuColor.cardBackground.copy(alpha = customUi.todayBackgroundAlpha),
+                            ),
+                            border = BorderStroke(
+                                0.5.dp,
+                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                            ),
+                        ) {
+                            StateScreen(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 24.dp),
+                                title = if (isCustomDate) "这一天没有课哦~" else "今天没有课哦~",
+                                subtitle = "点击上方日期可查看本周其他天的课程安排",
+                                buttonText = "刷新课表",
+                                imageRes = painterResource(Res.drawable.state_no_course_data),
+                                onButtonClick = { viewModel.refreshCloudDataToState() },
+                            )
+                        }
+                    }
+                }
+
+                item { Spacer(modifier = Modifier.height(12.dp)) }
             }
         }
 
@@ -319,11 +349,232 @@ val todayCourseContent: TabContent = @Composable {
 }
 
 @Composable
+private fun TodayWeekStripHeader(
+    dateHeaderText: String,
+    yearTermLabel: String,
+    weekDays: List<TodayWeekDayItem>,
+    showBackToToday: Boolean,
+    showTomorrowBadge: Boolean,
+    alpha: Float,
+    onSelectDate: (kotlinx.datetime.LocalDate) -> Unit,
+    onResetToday: () -> Unit,
+) {
+    val isDark = isDarkMode()
+    val containerColor = MaterialTheme.colorScheme.surface.copy(
+        alpha = (alpha * if (isDark) 0.84f else 0.90f).coerceIn(0.62f, 0.96f)
+    )
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        color = containerColor,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            // 第一行：11月25日 第12周 | 周三  2026-2027 第1学期
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    AnimatedContent(
+                        targetState = dateHeaderText.ifBlank { "今日课程" },
+                        transitionSpec = {
+                            fadeIn(tween(180)) togetherWith fadeOut(tween(140))
+                        },
+                        label = "todayHeaderDateText",
+                    ) { text ->
+                        Text(
+                            text = text,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                        )
+                    }
+                    if (yearTermLabel.isNotBlank()) {
+                        Text(
+                            text = yearTermLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+                if (showBackToToday) {
+                    Surface(
+                        onClick = onResetToday,
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                    ) {
+                        Text(
+                            text = "回今天",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        )
+                    }
+                } else if (showTomorrowBadge) {
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                    ) {
+                        Text(
+                            text = "明日",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        )
+                    }
+                }
+            }
+
+            // 第二行：Mon 23 ~ Sun 29 胶囊日期选择条
+            if (weekDays.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    weekDays.forEach { dayItem ->
+                        WeekDayPillItem(
+                            item = dayItem,
+                            modifier = Modifier.weight(1f),
+                            onClick = { onSelectDate(dayItem.date) },
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WeekDayPillItem(
+    item: TodayWeekDayItem,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    val isDark = isDarkMode()
+    val selectedBg = if (isDark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+    val selectedFg = if (isDark) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.surface
+    val unselectedBg = if (isDark) {
+        MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f)
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerLowest
+    }
+
+    val containerColor by animateColorAsState(
+        targetValue = if (item.isSelected) selectedBg else unselectedBg,
+        animationSpec = tween(200, easing = FastOutSlowInEasing),
+        label = "weekDayPillBg",
+    )
+    val dayNumberColor by animateColorAsState(
+        targetValue = when {
+            item.isSelected -> selectedFg
+            item.isToday -> MaterialTheme.colorScheme.primary
+            else -> MaterialTheme.colorScheme.onSurface
+        },
+        animationSpec = tween(200, easing = FastOutSlowInEasing),
+        label = "weekDayPillNumber",
+    )
+    val weekShortColor by animateColorAsState(
+        targetValue = when {
+            item.isSelected -> selectedFg.copy(alpha = 0.82f)
+            item.isToday -> MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
+        },
+        animationSpec = tween(200, easing = FastOutSlowInEasing),
+        label = "weekDayPillWeek",
+    )
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Surface(
+            onClick = onClick,
+            shape = RoundedCornerShape(22.dp),
+            color = containerColor,
+            border = if (!item.isSelected && item.isToday) {
+                BorderStroke(1.2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.65f))
+            } else {
+                null
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(58.dp),
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = item.weekShort,
+                    fontSize = 11.sp,
+                    lineHeight = 13.sp,
+                    fontWeight = if (item.isSelected || item.isToday) FontWeight.Medium else FontWeight.Normal,
+                    color = weekShortColor,
+                    maxLines = 1,
+                )
+                Spacer(modifier = Modifier.height(3.dp))
+                Text(
+                    text = item.dayNumber,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontSize = 16.sp,
+                        lineHeight = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFeatureSettings = "tnum",
+                    ),
+                    color = dayNumberColor,
+                    maxLines = 1,
+                )
+            }
+        }
+        Box(
+            modifier = Modifier.height(6.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (item.isSelected || item.hasCourse) {
+                Box(
+                    modifier = Modifier
+                        .size(if (item.isSelected) 5.dp else 4.dp)
+                        .clip(CircleShape)
+                        .background(
+                            when {
+                                item.isSelected -> selectedBg
+                                item.isToday -> MaterialTheme.colorScheme.primary
+                                else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                            }
+                        )
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun SectionHeaderLabel(text: String) {
     Surface(
         shape = RoundedCornerShape(8.dp),
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
-        modifier = Modifier.padding(top = 4.dp),
+        modifier = Modifier.padding(top = 2.dp),
     ) {
         Text(
             text = text,
@@ -332,43 +583,6 @@ private fun SectionHeaderLabel(text: String) {
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
         )
-    }
-}
-
-@Composable
-private fun TodaySummaryStrip(
-    courseCount: Int,
-    thingCount: Int,
-    alpha: Float,
-) {
-    val summaryText = buildString {
-        if (courseCount > 0) append("$courseCount 门课程")
-        if (courseCount > 0 && thingCount > 0) append(" · ")
-        if (thingCount > 0) append("$thingCount 项日程")
-    }
-    Surface(
-        shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = (alpha * 0.92f).coerceIn(0.6f, 0.95f)),
-        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.Schedule,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(16.dp),
-            )
-            Text(
-                text = summaryText,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
     }
 }
 
@@ -735,178 +949,236 @@ fun DrawCourseCard(
     showStatus: Boolean,
     onClick: (() -> Unit)? = null,
 ) {
+    val isDark = isDarkMode()
     val accent = CourseColorHelper.accentText(course.color)
     val isFinished = showStatus && course.courseStatus == CourseStatus.AFTER
     val isInProgress = showStatus && course.courseStatus == CourseStatus.IN
+    val isNextCourse = showStatus && course.isNextCourse && !isInProgress
+
+    val nextBadgeContainer = if (isDark) Color(0xFF4F7B16) else Color(0xFFAEEA4F)
+    val nextBadgeContent = if (isDark) Color(0xFFE9FFB8) else Color(0xFF1A3300)
 
     val cardShape = RoundedCornerShape(18.dp)
-    val cardBorder = if (isInProgress) {
-        BorderStroke(1.2.dp, accent.copy(alpha = 0.65f))
-    } else {
-        BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+    val cardBorder = when {
+        isInProgress -> BorderStroke(1.2.dp, accent.copy(alpha = 0.65f))
+        isNextCourse -> BorderStroke(1.dp, nextBadgeContainer.copy(alpha = if (isDark) 0.75f else 0.95f))
+        else -> BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
     }
 
-    val cardContent: @Composable () -> Unit = {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Min)
-                .alpha(if (isFinished) 0.72f else 1f)
-                .padding(horizontal = 14.dp, vertical = 14.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            // 左侧时间列（保留西瓜课表特色小图标）
-            Column(
-                modifier = Modifier.width(46.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(3.dp),
-            ) {
-                Icon(
-                    painter = XhuIcons.todayWaterMelon,
-                    contentDescription = null,
-                    tint = accent,
-                    modifier = Modifier.size(16.dp),
-                )
-                Text(
-                    text = course.timeText.first.format(Formatter.TIME_NO_SECONDS),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    text = course.timeText.second.format(Formatter.TIME_NO_SECONDS),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-
-            // 彩色圆角指示条
-            Box(
+    val cardInner: @Composable () -> Unit = {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
                 modifier = Modifier
-                    .width(4.dp)
-                    .fillMaxHeight()
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(accent)
-            )
-
-            // 右侧主信息区
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(5.dp),
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min)
+                    .padding(
+                        start = 14.dp,
+                        end = 16.dp,
+                        top = 14.dp,
+                        bottom = if (isInProgress || isNextCourse) 10.dp else 14.dp,
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.Top,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                // 极细课程主题色条，保留西瓜课表每门课专属辨识度
+                Box(
+                    modifier = Modifier
+                        .width(3.5.dp)
+                        .fillMaxHeight()
+                        .padding(vertical = 2.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(accent)
+                )
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(5.dp),
                 ) {
-                    Text(
-                        text = course.courseName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.85f),
-                    ) {
-                        Text(
-                            text = course.timeString,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
-                        )
-                    }
-                }
-
-                if (course.location.isNotBlank()) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.Top,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.LocationOn,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(14.dp),
-                        )
                         Text(
-                            text = course.location,
+                            text = course.courseName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
+                        )
+                        if (multiAccountMode && course.accountTitle.isNotBlank()) {
+                            AccountBadge(text = course.accountTitle)
+                        } else if (isFinished) {
+                            CourseStatusBadge(status = CourseStatus.AFTER)
+                        }
+                    }
+
+                    if (course.location.isNotBlank()) {
+                        Text(
+                            text = "上课地点：${course.location}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
-                }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
                     if (course.teacherName.isNotBlank()) {
-                        Row(
-                            modifier = Modifier.weight(1f),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(5.dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Person,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(14.dp),
-                            )
-                            Text(
-                                text = course.teacherName,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                    } else {
-                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            text = "上课老师：${course.teacherName}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
 
-                    if (multiAccountMode && course.accountTitle.isNotBlank()) {
-                        AccountBadge(text = course.accountTitle)
+                    if (multiAccountMode && isFinished) {
+                        CourseStatusBadge(status = CourseStatus.AFTER)
                     }
+                }
+            }
 
-                    if (showStatus) {
-                        CourseStatusBadge(status = course.courseStatus)
+            // 左下角高亮贴边胶囊（超课风格“下一节课” / “上课中”）
+            if (isInProgress) {
+                Surface(
+                    shape = RoundedCornerShape(topEnd = 12.dp, bottomStart = 18.dp),
+                    color = XhuColor.Status.inContainer(),
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(XhuColor.Status.inContent())
+                        )
+                        Text(
+                            text = "上课中",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = XhuColor.Status.inContent(),
+                        )
                     }
+                }
+            } else if (isNextCourse) {
+                Surface(
+                    shape = RoundedCornerShape(topEnd = 12.dp, bottomStart = 18.dp),
+                    color = nextBadgeContainer,
+                ) {
+                    Text(
+                        text = "下一节课",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = nextBadgeContent,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
+                    )
                 }
             }
         }
     }
 
-    if (onClick != null) {
-        Card(
-            onClick = onClick,
-            modifier = Modifier.fillMaxWidth(),
-            shape = cardShape,
-            colors = CardDefaults.cardColors(
-                containerColor = XhuColor.cardBackground.copy(alpha = customUi.todayBackgroundAlpha),
+    // 超课时间轴双栏布局：左侧节次+起止时间 + 纤细竖向轴线 + 右侧清爽卡片
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+            .alpha(if (isFinished) 0.68f else 1f),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // 左侧节次与起止时间栏（加柔和底衬，确保带壁纸背景时依然清晰可读）
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = MaterialTheme.colorScheme.surface.copy(
+                alpha = (customUi.todayBackgroundAlpha * if (isDark) 0.56f else 0.72f).coerceIn(0.45f, 0.86f)
             ),
-            border = cardBorder,
+            modifier = Modifier.width(58.dp),
         ) {
-            cardContent()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+                Text(
+                    text = course.timeString,
+                    fontSize = 12.sp,
+                    lineHeight = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    softWrap = false,
+                )
+                Text(
+                    text = course.timeText.first.format(Formatter.TIME_NO_SECONDS),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 11.sp,
+                        lineHeight = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontFeatureSettings = "tnum",
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    softWrap = false,
+                )
+                Text(
+                    text = course.timeText.second.format(Formatter.TIME_NO_SECONDS),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 11.sp,
+                        lineHeight = 13.sp,
+                        fontFeatureSettings = "tnum",
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f),
+                    maxLines = 1,
+                    softWrap = false,
+                )
+            }
         }
-    } else {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = cardShape,
-            colors = CardDefaults.cardColors(
-                containerColor = XhuColor.cardBackground.copy(alpha = customUi.todayBackgroundAlpha),
-            ),
-            border = cardBorder,
-        ) {
-            cardContent()
+
+        // 纤细柔和竖向时间轴分隔线
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .width(1.dp)
+                .fillMaxHeight()
+                .padding(vertical = 8.dp)
+                .background(
+                    when {
+                        isInProgress -> accent.copy(alpha = 0.55f)
+                        isNextCourse -> nextBadgeContainer.copy(alpha = 0.85f)
+                        else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+                    }
+                )
+        )
+
+        // 右侧清爽课程卡片
+        if (onClick != null) {
+            Card(
+                onClick = onClick,
+                modifier = Modifier.weight(1f),
+                shape = cardShape,
+                colors = CardDefaults.cardColors(
+                    containerColor = XhuColor.cardBackground.copy(alpha = customUi.todayBackgroundAlpha),
+                ),
+                border = cardBorder,
+            ) {
+                cardInner()
+            }
+        } else {
+            Card(
+                modifier = Modifier.weight(1f),
+                shape = cardShape,
+                colors = CardDefaults.cardColors(
+                    containerColor = XhuColor.cardBackground.copy(alpha = customUi.todayBackgroundAlpha),
+                ),
+                border = cardBorder,
+            ) {
+                cardInner()
+            }
         }
     }
 }
@@ -1026,6 +1298,26 @@ private fun TodayCourseDetailSheet(
                     label = "任课教师",
                     value = course.teacherName,
                 )
+            }
+            if (course.weekStr.isNotBlank()) {
+                DetailInfoRow(
+                    icon = Icons.Rounded.DateRange,
+                    label = "上课周次",
+                    value = course.weekStr,
+                )
+            }
+            if (course.extraData.isNotEmpty()) {
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+                )
+                course.extraData.forEach { extra ->
+                    DetailInfoRow(
+                        icon = Icons.Rounded.Info,
+                        label = "附加信息",
+                        value = extra,
+                        copyable = true,
+                    )
+                }
             }
         }
     }

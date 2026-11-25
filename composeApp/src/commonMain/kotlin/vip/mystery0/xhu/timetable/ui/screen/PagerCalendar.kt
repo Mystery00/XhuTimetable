@@ -28,12 +28,16 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Notes
+import androidx.compose.material.icons.rounded.AccessTime
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -65,14 +69,21 @@ import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
+import kotlinx.datetime.format
 import org.koin.compose.viewmodel.koinViewModel
+import vip.mystery0.xhu.timetable.config.store.Formatter
+import vip.mystery0.xhu.timetable.model.WeekCourseView
+import vip.mystery0.xhu.timetable.model.response.CalendarDayItemType
 import vip.mystery0.xhu.timetable.ui.component.TabAction
 import vip.mystery0.xhu.timetable.ui.component.TabContent
 import vip.mystery0.xhu.timetable.ui.component.TabTitle
 import vip.mystery0.xhu.timetable.ui.theme.CourseColorHelper
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.ui.theme.isDarkMode
+import vip.mystery0.xhu.timetable.utils.dateFormatter
+import vip.mystery0.xhu.timetable.utils.formatChina
 import vip.mystery0.xhu.timetable.viewmodel.CalendarSheet
+import vip.mystery0.xhu.timetable.viewmodel.CalendarSheetItem
 import vip.mystery0.xhu.timetable.viewmodel.CalendarSheetType
 import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
 import vip.mystery0.xhu.timetable.viewmodel.PagerMainViewModel
@@ -134,8 +145,13 @@ val calendarContent: TabContent = @Composable {
 
     val calendarList by viewModel.calendarList.collectAsState()
     val practicalCourseList by viewModel.practicalCourseList.collectAsState()
+    val actualWeek by viewModel.actualCurrentWeek.collectAsState()
+    val multiAccountMode by viewModel.multiAccountMode.collectAsState()
     val openPracticalSheet by pagerViewModel.showPracticalCourseSheet.collectAsState()
     val isDark = isDarkMode()
+
+    val courseDialogState = remember { mutableStateOf<List<WeekCourseView>>(emptyList()) }
+    var selectedThingItem by remember { mutableStateOf<CalendarSheetItem?>(null) }
 
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -227,7 +243,18 @@ val calendarContent: TabContent = @Composable {
                     if (sheet.type == CalendarSheetType.MONTH_HEADER) {
                         BuildCalendarMonthHeader(sheet = sheet)
                     } else {
-                        BuildCalendarDay(sheet = sheet)
+                        BuildCalendarDay(
+                            sheet = sheet,
+                            onItemClick = { clickedItem ->
+                                if (clickedItem.type == CalendarDayItemType.CUSTOM_THING) {
+                                    selectedThingItem = clickedItem
+                                } else {
+                                    courseDialogState.value = listOf(
+                                        clickedItem.toDetailWeekCourseView(actualWeek)
+                                    )
+                                }
+                            },
+                        )
                     }
                 }
             }
@@ -263,6 +290,18 @@ val calendarContent: TabContent = @Composable {
             practicalCourseList = practicalCourseList,
         ) {
             pagerViewModel.showPracticalCourseSheet.value = false
+        }
+
+        ShowCourseDetailSheet(
+            dialogState = courseDialogState,
+            multiAccountMode = multiAccountMode,
+        )
+
+        selectedThingItem?.let { thingItem ->
+            CalendarThingDetailSheet(
+                item = thingItem,
+                onDismiss = { selectedThingItem = null },
+            )
         }
     }
 }
@@ -398,7 +437,10 @@ fun BuildCalendarMonthHeader(sheet: CalendarSheet) {
 }
 
 @Composable
-fun BuildCalendarDay(sheet: CalendarSheet) {
+fun BuildCalendarDay(
+    sheet: CalendarSheet,
+    onItemClick: (CalendarSheetItem) -> Unit = {},
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -434,6 +476,7 @@ fun BuildCalendarDay(sheet: CalendarSheet) {
             sheet.items.forEach { item ->
                 val accent = CourseColorHelper.accentText(item.color)
                 Card(
+                    onClick = { onItemClick(item) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
                         containerColor = CourseColorHelper.softContainer(item.color, 0.94f),
@@ -479,6 +522,134 @@ fun BuildCalendarDay(sheet: CalendarSheet) {
                             )
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+private fun CalendarSheetItem.toDetailWeekCourseView(actualWeek: Int): WeekCourseView {
+    val matched = courseDetail
+    if (matched != null) {
+        val mergedExtra = buildList {
+            if (subtitle.isNotBlank() && matched.extraData.none { it.contains(subtitle) }) {
+                add("所属课程：$subtitle")
+            }
+            addAll(matched.extraData)
+        }
+        return matched.copy(extraData = mergedExtra).apply {
+            thisWeek = weekNum == actualWeek
+            backgroundColor = color
+        }
+    }
+    val timeRange = "${startTime.format(Formatter.TIME_NO_SECONDS)} - ${endTime.format(Formatter.TIME_NO_SECONDS)}"
+    val extra = buildList {
+        if (subtitle.isNotBlank()) add("所属课程：$subtitle")
+    }
+    return WeekCourseView(
+        courseName = title,
+        weekStr = "第${weekNum}周",
+        weekList = listOf(weekNum),
+        day = date.dayOfWeek,
+        startDayTime = 1,
+        endDayTime = 1,
+        startTime = startTime,
+        endTime = endTime,
+        courseDayTime = "${date.format(dateFormatter)} ${date.dayOfWeek.formatChina()}",
+        courseTime = timeRange,
+        location = location,
+        teacher = "",
+        extraData = extra,
+        accountTitle = "",
+    ).apply {
+        thisWeek = weekNum == actualWeek
+        backgroundColor = color
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CalendarThingDetailSheet(
+    item: CalendarSheetItem,
+    onDismiss: () -> Unit,
+) {
+    val accent = CourseColorHelper.accentText(item.color)
+    val detail = item.thingDetail
+    val timeText = detail?.timeText ?: buildString {
+        append(item.date.format(dateFormatter))
+        append("  ")
+        append(item.startTime.format(Formatter.TIME_NO_SECONDS))
+        append(" - ")
+        append(item.endTime.format(Formatter.TIME_NO_SECONDS))
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Surface(
+                shape = RoundedCornerShape(18.dp),
+                color = CourseColorHelper.softContainer(item.color, 0.96f),
+                border = BorderStroke(1.dp, accent.copy(alpha = 0.35f)),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = accent,
+                    ) {
+                        Text(
+                            text = if (detail?.saveAsCountDown == true) "倒计时日程" else "自定义事项",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        )
+                    }
+                    Text(
+                        text = item.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                DetailInfoRow(
+                    icon = Icons.Rounded.AccessTime,
+                    label = "日程时间",
+                    value = timeText,
+                )
+                val locationText = detail?.location?.ifBlank { item.location } ?: item.location
+                if (locationText.isNotBlank()) {
+                    DetailInfoRow(
+                        icon = Icons.Rounded.LocationOn,
+                        label = "地点",
+                        value = locationText,
+                        copyable = true,
+                    )
+                }
+                val remarkText = detail?.remark.orEmpty()
+                if (remarkText.isNotBlank()) {
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+                    )
+                    DetailInfoRow(
+                        icon = Icons.AutoMirrored.Rounded.Notes,
+                        label = "备注",
+                        value = remarkText,
+                        copyable = true,
+                    )
                 }
             }
         }

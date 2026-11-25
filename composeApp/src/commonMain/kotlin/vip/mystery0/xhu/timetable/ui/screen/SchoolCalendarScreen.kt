@@ -3,6 +3,8 @@ package vip.mystery0.xhu.timetable.ui.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,6 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.panpf.zoomimage.CoilZoomAsyncImage
@@ -118,10 +121,16 @@ fun SchoolCalendarScreen() {
             )
         },
     ) { paddingValues ->
+        val layoutDirection = LocalLayoutDirection.current
+        val bottomPadding = paddingValues.calculateBottomPadding()
         // 移除与双指缩放/拖拽冲突的空 PullToRefreshBox，释放完整画布视野
         Box(
             modifier = Modifier
-                .padding(paddingValues)
+                .padding(
+                    top = paddingValues.calculateTopPadding(),
+                    start = paddingValues.calculateStartPadding(layoutDirection),
+                    end = paddingValues.calculateEndPadding(layoutDirection),
+                )
                 .fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
@@ -129,11 +138,15 @@ fun SchoolCalendarScreen() {
                 CoilZoomAsyncImage(
                     model = schoolCalendarData.cacheFile,
                     contentDescription = "校历图片",
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = bottomPadding),
                 )
             } else if (!loading.loading) {
                 StateScreen(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = bottomPadding),
                     title = loading.errorMessage.ifBlank { "暂无校历数据" },
                     buttonText = "重新加载",
                     imageRes = painterResource(Res.drawable.state_no_data),

@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -40,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -104,9 +107,15 @@ fun <T : Any> BuildPaging(
     emptyState: @Composable LazyItemScope.() -> Unit = {},
     boxContent: @Composable BoxScope.() -> Unit = {},
 ) {
+    val layoutDirection = LocalLayoutDirection.current
+    val bottomPadding = paddingValues.calculateBottomPadding()
     Box(
         Modifier
-            .padding(paddingValues)
+            .padding(
+                top = paddingValues.calculateTopPadding(),
+                start = paddingValues.calculateStartPadding(layoutDirection),
+                end = paddingValues.calculateEndPadding(layoutDirection),
+            )
             .fillMaxSize(),
     ) {
         val pullToRefreshState = rememberPullToRefreshState()
@@ -132,7 +141,7 @@ fun <T : Any> BuildPaging(
             LazyColumn(
                 state = state,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 24.dp),
+                contentPadding = PaddingValues(bottom = 24.dp + bottomPadding),
             ) {
                 listHeader?.let {
                     stickyHeader { it() }
@@ -161,7 +170,13 @@ fun <T : Any> BuildPaging(
                 }
             }
         }
-        boxContent()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = bottomPadding),
+        ) {
+            boxContent()
+        }
     }
 }
 

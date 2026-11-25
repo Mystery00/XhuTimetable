@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -62,7 +61,10 @@ import vip.mystery0.xhu.timetable.base.appVersionCode
 import vip.mystery0.xhu.timetable.base.appVersionName
 import vip.mystery0.xhu.timetable.config.toast.showLongToast
 import vip.mystery0.xhu.timetable.config.toast.showShortToast
+import vip.mystery0.xhu.timetable.ui.theme.SetSystemAppearance
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
+import vip.mystery0.xhu.timetable.ui.theme.applyInitialImmersiveEdgeToEdge
+import vip.mystery0.xhu.timetable.ui.theme.isDarkMode
 
 class ErrorReportActivity : ComponentActivity() {
     companion object {
@@ -71,11 +73,12 @@ class ErrorReportActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        applyInitialImmersiveEdgeToEdge()
         super.onCreate(savedInstanceState)
         FileKit.manualFileKitCoreInitialization(this)
         setContent {
             XhuTimetableTheme {
+                SetSystemAppearance(isDark = isDarkMode())
                 BuildContent()
             }
         }

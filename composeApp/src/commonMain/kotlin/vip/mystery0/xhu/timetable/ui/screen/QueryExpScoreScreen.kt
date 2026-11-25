@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -90,9 +93,15 @@ fun QueryExpScoreScreen() {
             )
         },
     ) { paddingValues ->
+        val layoutDirection = LocalLayoutDirection.current
+        val bottomPadding = paddingValues.calculateBottomPadding()
         Box(
             modifier = Modifier
-                .padding(paddingValues)
+                .padding(
+                    top = paddingValues.calculateTopPadding(),
+                    start = paddingValues.calculateStartPadding(layoutDirection),
+                    end = paddingValues.calculateEndPadding(layoutDirection),
+                )
                 .fillMaxSize(),
         ) {
             val pullToRefreshState = rememberPullToRefreshState()
@@ -111,7 +120,7 @@ fun QueryExpScoreScreen() {
                 val scoreList = expScoreListState.scoreList
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 24.dp),
+                    contentPadding = PaddingValues(bottom = 24.dp + bottomPadding),
                 ) {
                     stickyHeader(key = "exp_filter_bar") {
                         vip.mystery0.xhu.timetable.ui.component.BuildSelectFilterBar(

@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -46,6 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -152,14 +155,21 @@ fun BackgroundScreen() {
             )
         }
     ) { paddingValues ->
+        val layoutDirection = LocalLayoutDirection.current
+        val bottomPadding = paddingValues.calculateBottomPadding()
         Box(
             modifier = Modifier
-                .padding(paddingValues)
+                .padding(
+                    top = paddingValues.calculateTopPadding(),
+                    start = paddingValues.calculateStartPadding(layoutDirection),
+                    end = paddingValues.calculateEndPadding(layoutDirection),
+                )
                 .fillMaxSize()
         ) {
             val pullToRefreshState = rememberPullToRefreshState()
             if (backgroundListState.backgroundList.isEmpty() && backgroundListState.errorMessage.isNotBlank()) {
                 StateScreen(
+                    modifier = Modifier.padding(bottom = bottomPadding),
                     title = backgroundListState.errorMessage,
                     buttonText = "重新加载",
                     imageRes = painterResource(Res.drawable.state_no_data),
@@ -168,7 +178,12 @@ fun BackgroundScreen() {
             } else {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
-                    contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 88.dp),
+                    contentPadding = PaddingValues(
+                        start = 12.dp,
+                        end = 12.dp,
+                        top = 8.dp,
+                        bottom = 88.dp + bottomPadding,
+                    ),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier

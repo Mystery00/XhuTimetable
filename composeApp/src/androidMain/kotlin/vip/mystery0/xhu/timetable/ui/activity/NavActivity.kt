@@ -6,10 +6,10 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.dialogs.init
 import vip.mystery0.xhu.timetable.App
+import vip.mystery0.xhu.timetable.ui.theme.applyInitialImmersiveEdgeToEdge
 import vip.mystery0.xhu.timetable.ui.navigation.Nav
 import vip.mystery0.xhu.timetable.ui.navigation.RouteInit
 import vip.mystery0.xhu.timetable.ui.navigation.RouteLogin
@@ -33,7 +33,7 @@ class NavActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        applyInitialImmersiveEdgeToEdge()
         super.onCreate(savedInstanceState)
         FileKit.init(this)
         val initRoute = intent.getStringExtra(EXTRA_INIT_ROUTE)

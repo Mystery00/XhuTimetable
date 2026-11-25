@@ -7,19 +7,19 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewTreeObserver
 import androidx.activity.ComponentActivity
-import androidx.activity.enableEdgeToEdge
 import androidx.core.animation.doOnEnd
 import androidx.core.content.pm.ShortcutManagerCompat
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.ui.activity.NavActivity.Companion.jumpToNav
+import vip.mystery0.xhu.timetable.ui.theme.applyInitialImmersiveEdgeToEdge
 import vip.mystery0.xhu.timetable.viewmodel.StarterViewModel
 
 class StartActivity : ComponentActivity(), KoinComponent {
     private val viewModel by viewModel<StarterViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        applyInitialImmersiveEdgeToEdge()
         super.onCreate(savedInstanceState)
         keepSplashScreenLonger()
         customizeSplashScreenExit()

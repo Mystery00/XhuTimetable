@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,6 +50,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -149,11 +152,17 @@ fun CustomUiScreen() {
         },
     ) { paddingValues ->
         val userBg = remember { GlobalConfigStore.backgroundImage }
+        val layoutDirection = LocalLayoutDirection.current
+        val bottomPadding = paddingValues.calculateBottomPadding()
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(
+                    top = paddingValues.calculateTopPadding(),
+                    start = paddingValues.calculateStartPadding(layoutDirection),
+                    end = paddingValues.calculateEndPadding(layoutDirection),
+                ),
         ) {
             // 顶部实时预览区（可切换周课表 / 今日卡片，背景使用用户真实背景）
             Surface(
@@ -302,7 +311,7 @@ fun CustomUiScreen() {
                     .fillMaxWidth()
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
-                    .padding(bottom = 24.dp),
+                    .padding(bottom = 24.dp + bottomPadding),
             ) {
                 XhuSettingsGroup(title = { Text("今日课程页面") }) {
                     val todayBackgroundAlpha by viewModel.todayBackgroundAlpha.collectAsState()

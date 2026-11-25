@@ -1,10 +1,20 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -33,6 +43,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
@@ -55,6 +66,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -68,9 +80,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -96,6 +110,7 @@ import vip.mystery0.xhu.timetable.utils.formatChina
 import vip.mystery0.xhu.timetable.utils.now
 import vip.mystery0.xhu.timetable.utils.pad2
 import vip.mystery0.xhu.timetable.viewmodel.CourseSheet
+import vip.mystery0.xhu.timetable.viewmodel.DEFAULT_CLASS_TIME_SLOTS
 import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
 import vip.mystery0.xhu.timetable.viewmodel.PagerMainViewModel
 import vip.mystery0.xhu.timetable.viewmodel.WeekView
@@ -104,12 +119,7 @@ import xhutimetable.composeapp.generated.resources.state_no_course_data
 import kotlin.math.min
 
 private const val TOTAL_WEEKS = 20
-
-private val CLASS_START_TIMES = listOf(
-    "08:30", "09:20", "10:15", "11:05",
-    "14:00", "14:50", "15:45", "16:35",
-    "19:00", "19:50", "20:40",
-)
+private val TIME_COLUMN_WIDTH = 38.dp
 
 val weekCourseTitleBar: TabTitle = @Composable {
     val viewModel = koinViewModel<MainViewModel>()
@@ -117,11 +127,6 @@ val weekCourseTitleBar: TabTitle = @Composable {
     val week by viewModel.week.collectAsState()
     val actualWeek by viewModel.actualCurrentWeek.collectAsState()
 
-    val title = when {
-        week <= 0 -> "尚未开学"
-        week > TOTAL_WEEKS -> "学期已结束"
-        else -> "第${week}周"
-    }
     val isNotActualWeek = actualWeek in 1..TOTAL_WEEKS && week != actualWeek
 
     Surface(
@@ -130,7 +135,9 @@ val weekCourseTitleBar: TabTitle = @Composable {
         color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.72f),
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
+            modifier = Modifier
+                .animateContentSize(animationSpec = tween(220, easing = FastOutSlowInEasing))
+                .padding(horizontal = 12.dp, vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
@@ -139,12 +146,35 @@ val weekCourseTitleBar: TabTitle = @Composable {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
+                    AnimatedContent(
+                        targetState = week,
+                        transitionSpec = {
+                            val forward = targetState > initialState
+                            val enter = slideInVertically(
+                                animationSpec = tween(240, easing = FastOutSlowInEasing),
+                                initialOffsetY = { if (forward) it / 2 else -it / 2 },
+                            ) + fadeIn(animationSpec = tween(200, easing = FastOutSlowInEasing))
+                            val exit = slideOutVertically(
+                                animationSpec = tween(200, easing = FastOutSlowInEasing),
+                                targetOffsetY = { if (forward) -it / 2 else it / 2 },
+                            ) + fadeOut(animationSpec = tween(160, easing = FastOutSlowInEasing))
+                            (enter togetherWith exit).using(SizeTransform(clip = true))
+                        },
+                        label = "weekTitleTransition",
+                    ) { targetWeek ->
+                        val title = when {
+                            targetWeek <= 0 -> "尚未开学"
+                            targetWeek > TOTAL_WEEKS -> "学期已结束"
+                            else -> "第${targetWeek}周"
+                        }
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                        )
+                    }
                     Icon(
                         imageVector = Icons.Rounded.KeyboardArrowDown,
                         contentDescription = "切换周次",
@@ -152,7 +182,13 @@ val weekCourseTitleBar: TabTitle = @Composable {
                         modifier = Modifier.size(18.dp),
                     )
                 }
-                if (isNotActualWeek) {
+                AnimatedVisibility(
+                    visible = isNotActualWeek,
+                    enter = expandVertically(tween(200, easing = FastOutSlowInEasing)) +
+                        fadeIn(tween(180, easing = FastOutSlowInEasing)),
+                    exit = shrinkVertically(tween(180, easing = FastOutSlowInEasing)) +
+                        fadeOut(tween(140, easing = FastOutSlowInEasing)),
+                ) {
                     Text(
                         text = "非本周 · 当前第${actualWeek}周",
                         style = MaterialTheme.typography.labelSmall,
@@ -199,6 +235,7 @@ val weekCourseContent: TabContent = @Composable {
     val termStartDate by viewModel.termStartDate.collectAsState()
     val allWeekTables by viewModel.allWeekTables.collectAsState()
     val fallbackTableCourse by viewModel.tableCourse.collectAsState()
+    val classTimeSlots by viewModel.classTimeSlots.collectAsState()
     val customUi by viewModel.customUi.collectAsState()
     val multiAccountMode by viewModel.multiAccountMode.collectAsState()
     val showWeekPickerSheet by pagerViewModel.showWeekPickerSheet.collectAsState()
@@ -217,12 +254,12 @@ val weekCourseContent: TabContent = @Composable {
         }
     }
 
-    // 手势左右滑动翻周停稳后，同步通知 ViewModel 更新顶栏周次与状态
+    // 手势左右滑动翻周过半即实时更新顶栏周次与动画
     LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.settledPage }
+        snapshotFlow { pagerState.currentPage }
             .distinctUntilChanged()
-            .collect { settled ->
-                val targetWeek = settled + 1
+            .collect { page ->
+                val targetWeek = page + 1
                 if (viewModel.week.value != targetWeek) {
                     viewModel.changeCurrentWeek(targetWeek)
                 }
@@ -243,6 +280,7 @@ val weekCourseContent: TabContent = @Composable {
             WeekPageGrid(
                 firstDay = pageFirstDay,
                 tableCourse = pageTable,
+                classTimeSlots = classTimeSlots,
                 customUi = customUi,
                 onCourseClick = { courses ->
                     courseDialogState.value = courses
@@ -277,6 +315,7 @@ val weekCourseContent: TabContent = @Composable {
 private fun WeekPageGrid(
     firstDay: LocalDate,
     tableCourse: List<List<CourseSheet>>,
+    classTimeSlots: List<Pair<String, String>>,
     customUi: CustomUi,
     onCourseClick: (List<WeekCourseView>) -> Unit,
 ) {
@@ -298,7 +337,7 @@ private fun WeekPageGrid(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(
-                    modifier = Modifier.weight(0.42f),
+                    modifier = Modifier.width(TIME_COLUMN_WIDTH),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
@@ -341,19 +380,24 @@ private fun WeekPageGrid(
                     .verticalScroll(scrollState)
                     .padding(bottom = 12.dp),
             ) {
-                // 左侧节次与开始时间列
+                // 左侧固定宽度节次与起止时间列，避免窄屏或系统字体放大导致时间截断
                 Column(
                     modifier = Modifier
-                        .weight(0.42f)
+                        .width(TIME_COLUMN_WIDTH)
                         .background(
                             MaterialTheme.colorScheme.surface.copy(alpha = if (isDark) 0.52f else 0.65f)
                         )
                 ) {
                     for (time in 1..11) {
+                        val slot = classTimeSlots.getOrElse(time - 1) {
+                            DEFAULT_CLASS_TIME_SLOTS.getOrElse(time - 1) { "" to "" }
+                        }
                         BuildTimeItem(
                             time = time,
-                            startTimeLabel = CLASS_START_TIMES.getOrElse(time - 1) { "" },
+                            startTimeLabel = slot.first,
+                            endTimeLabel = slot.second,
                             itemHeight = customUi.weekItemHeight.dp,
+                            showSectionDivider = time == 4 || time == 8,
                         )
                     }
                 }
@@ -661,28 +705,89 @@ private fun RowScope.BuildDateItem(
 private fun BuildTimeItem(
     time: Int,
     startTimeLabel: String,
+    endTimeLabel: String,
     itemHeight: Dp,
+    showSectionDivider: Boolean = false,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(itemHeight),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = time.toString(),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface,
+    val currentDensity = LocalDensity.current
+    // 限制侧栏时间文字最大缩放，防止系统超大字号下时间被裁切
+    val cappedDensity = remember(currentDensity) {
+        Density(
+            density = currentDensity.density,
+            fontScale = currentDensity.fontScale.coerceAtMost(1.05f),
         )
-        if (startTimeLabel.isNotEmpty() && itemHeight >= 48.dp) {
-            Text(
-                text = startTimeLabel,
-                fontSize = 8.sp,
-                lineHeight = 9.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                maxLines = 1,
+    }
+
+    CompositionLocalProvider(LocalDensity provides cappedDensity) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(itemHeight),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 1.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterVertically),
+            ) {
+                Text(
+                    text = time.toString(),
+                    fontSize = 11.sp,
+                    lineHeight = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    softWrap = false,
+                )
+                if (startTimeLabel.isNotEmpty()) {
+                    Text(
+                        text = startTimeLabel,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 8.5.sp,
+                            lineHeight = 10.sp,
+                            letterSpacing = (-0.3).sp,
+                            fontWeight = FontWeight.Medium,
+                            fontFeatureSettings = "tnum",
+                        ),
+                        autoSize = TextAutoSize.StepBased(
+                            minFontSize = 6.sp,
+                            maxFontSize = 8.5.sp,
+                            stepSize = 0.5.sp,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.88f),
+                        maxLines = 1,
+                        softWrap = false,
+                    )
+                }
+                if (endTimeLabel.isNotEmpty()) {
+                    Text(
+                        text = endTimeLabel,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 8.5.sp,
+                            lineHeight = 10.sp,
+                            letterSpacing = (-0.3).sp,
+                            fontFeatureSettings = "tnum",
+                        ),
+                        autoSize = TextAutoSize.StepBased(
+                            minFontSize = 6.sp,
+                            maxFontSize = 8.5.sp,
+                            stepSize = 0.5.sp,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f),
+                        maxLines = 1,
+                        softWrap = false,
+                    )
+                }
+            }
+            HorizontalDivider(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = if (showSectionDivider) 3.dp else 6.dp),
+                thickness = if (showSectionDivider) 0.8.dp else 0.5.dp,
+                color = MaterialTheme.colorScheme.outlineVariant.copy(
+                    alpha = if (showSectionDivider) 0.45f else 0.18f
+                ),
             )
         }
     }
@@ -690,7 +795,7 @@ private fun BuildTimeItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ShowCourseDetailSheet(
+internal fun ShowCourseDetailSheet(
     dialogState: MutableState<List<WeekCourseView>>,
     multiAccountMode: Boolean,
 ) {

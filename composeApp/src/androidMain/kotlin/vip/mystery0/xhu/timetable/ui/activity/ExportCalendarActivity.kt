@@ -4,7 +4,6 @@ import android.Manifest
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +12,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -64,6 +65,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -84,9 +86,12 @@ import vip.mystery0.xhu.timetable.ui.component.dialog.XhuConfirmDialog
 import vip.mystery0.xhu.timetable.ui.component.dialog.XhuSingleSelectDialog
 import vip.mystery0.xhu.timetable.ui.component.dialog.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.screen.FilterSelectorRow
+import vip.mystery0.xhu.timetable.ui.theme.SetSystemAppearance
 import vip.mystery0.xhu.timetable.ui.theme.XhuColor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
+import vip.mystery0.xhu.timetable.ui.theme.applyInitialImmersiveEdgeToEdge
+import vip.mystery0.xhu.timetable.ui.theme.isDarkMode
 import vip.mystery0.xhu.timetable.viewmodel.ExportCalendarViewModel
 import xhutimetable.composeapp.generated.resources.Res
 import xhutimetable.composeapp.generated.resources.state_no_data
@@ -96,11 +101,12 @@ class ExportCalendarActivity : ComponentActivity() {
     private val viewModel: ExportCalendarViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        applyInitialImmersiveEdgeToEdge()
         super.onCreate(savedInstanceState)
         FileKit.init(this)
         setContent {
             XhuTimetableTheme {
+                SetSystemAppearance(isDark = isDarkMode())
                 BuildContent()
             }
         }
@@ -157,10 +163,16 @@ class ExportCalendarActivity : ComponentActivity() {
         ) { paddingValues ->
             val calendarAccountListState by viewModel.calendarAccountListState.collectAsState()
             val pullToRefreshState = rememberPullToRefreshState()
+            val layoutDirection = LocalLayoutDirection.current
+            val bottomPadding = paddingValues.calculateBottomPadding()
 
             Box(
                 modifier = Modifier
-                    .padding(paddingValues)
+                    .padding(
+                        top = paddingValues.calculateTopPadding(),
+                        start = paddingValues.calculateStartPadding(layoutDirection),
+                        end = paddingValues.calculateEndPadding(layoutDirection),
+                    )
                     .fillMaxSize(),
             ) {
                 if (calendarPermissionState.allPermissionsGranted) {
@@ -179,6 +191,7 @@ class ExportCalendarActivity : ComponentActivity() {
                         val list = calendarAccountListState.list
                         if (list.isEmpty() && !calendarAccountListState.loading) {
                             StateScreen(
+                                modifier = Modifier.padding(bottom = bottomPadding),
                                 title = "暂无已导出的日历账户",
                                 subtitle = "点击右下角 + 按钮将本学期课程导出至系统日历",
                                 imageRes = painterResource(Res.drawable.state_no_data),
@@ -186,7 +199,12 @@ class ExportCalendarActivity : ComponentActivity() {
                         } else {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                                contentPadding = PaddingValues(
+                                    start = 16.dp,
+                                    end = 16.dp,
+                                    top = 10.dp,
+                                    bottom = 88.dp + bottomPadding,
+                                ),
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 items(list, key = { it.accountId }) { item ->
@@ -204,7 +222,7 @@ class ExportCalendarActivity : ComponentActivity() {
                     FloatingActionButton(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(20.dp),
+                            .padding(end = 20.dp, bottom = 20.dp + bottomPadding),
                         onClick = {
                             if (!calendarAccountListState.loading) {
                                 openBottomSheet.value = true
@@ -219,6 +237,7 @@ class ExportCalendarActivity : ComponentActivity() {
                     ExportBottomSheet(openBottomSheet, scope)
                 } else {
                     StateScreen(
+                        modifier = Modifier.padding(bottom = bottomPadding),
                         title = "需要日历读写权限",
                         subtitle = "将课程导出到系统日历功能需要向${appName()}授予“读取/写入日历”权限。",
                         buttonText = "前往授权",

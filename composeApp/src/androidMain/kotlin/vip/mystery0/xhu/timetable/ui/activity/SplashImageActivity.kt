@@ -4,10 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import org.koin.core.component.KoinComponent
 import vip.mystery0.xhu.timetable.ui.screen.SplashImageScreen
+import vip.mystery0.xhu.timetable.ui.theme.SetSystemAppearance
 import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
+import vip.mystery0.xhu.timetable.ui.theme.applyInitialImmersiveEdgeToEdge
+import vip.mystery0.xhu.timetable.ui.theme.isDarkMode
 
 class SplashImageActivity : ComponentActivity(), KoinComponent {
     companion object {
@@ -25,13 +27,14 @@ class SplashImageActivity : ComponentActivity(), KoinComponent {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        applyInitialImmersiveEdgeToEdge()
         super.onCreate(savedInstanceState)
         super.onNewIntent(intent)
         val splashFilePath = intent.getStringExtra(INTENT_SPLASH_FILE_PATH)
         val splashId = intent.getLongExtra(INTENT_SPLASH_ID, -1)
         setContent {
             XhuTimetableTheme {
+                SetSystemAppearance(isDark = isDarkMode())
                 SplashImageScreen(splashFilePath, splashId) {
                     startActivity(Intent(this, NavActivity::class.java))
                     finish()
