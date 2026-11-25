@@ -13,6 +13,7 @@ import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.model.request.CustomThingRequest
 import vip.mystery0.xhu.timetable.model.response.CustomThingResponse
+import vip.mystery0.xhu.timetable.model.transfer.PageResult
 
 object CustomThingRepo : BaseDataRepo {
     private val customThingApi: CustomThingApi by inject()
@@ -29,15 +30,15 @@ object CustomThingRepo : BaseDataRepo {
         Pager(
             config = globalPagingConfig,
             pagingSourceFactory = {
-                buildPageSource { index, size ->
-                    checkForceLoadFromCloud(true)
-
-                    user.withAutoLoginOnce {
-                        customThingApi.customThingList(it, index, size)
-                    }
-                }
+                buildPageSource { index, size -> getCustomThingPage(user, index, size) }
             }
         ).flow
+
+    suspend fun getCustomThingPage(user: User, index: Int, size: Int):
+        PageResult<CustomThingResponse> {
+        checkForceLoadFromCloud(true)
+        return user.withAutoLoginOnce { customThingApi.customThingList(it, index, size) }
+    }
 
     suspend fun createCustomThing(
         user: User,

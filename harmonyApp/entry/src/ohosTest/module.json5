@@ -1,0 +1,21 @@
+{
+  "module": {
+    "name": "entry_test",
+    "type": "feature",
+    "deviceTypes": ["phone", "tablet"],
+    "deliveryWithInstall": true,
+    "installationFree": false,
+    "mainElement": "TestFixtureAbility",
+    "pages": "$profile:fixture_pages",
+    "abilities": [
+      {
+        "name": "TestFixtureAbility",
+        "srcEntry": "./ets/fixture/TestFixtureAbility.ets",
+        "exported": true,
+        "startWindowIcon": "$media:app_icon",
+        "startWindowBackground": "$color:start_window_background",
+        "launchType": "singleton"
+      }
+    ]
+  }
+}

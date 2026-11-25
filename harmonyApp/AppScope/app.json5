@@ -1,0 +1,10 @@
+{
+  "app": {
+    "bundleName": "vip.mystery0.xhu.timetable.preview",
+    "vendor": "Mystery0",
+    "versionCode": 866,
+    "versionName": "1.6.7.d866.a67f1df",
+    "icon": "$media:app_icon",
+    "label": "$string:app_name"
+  }
+}

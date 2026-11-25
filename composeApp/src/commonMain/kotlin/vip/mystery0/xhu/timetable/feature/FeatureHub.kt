@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.feature
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.utils.asLocalDateTime
 import kotlin.time.Clock
@@ -13,6 +14,7 @@ import kotlin.time.Clock
 object FeatureHub {
     private val logger = Logger.withTag("FeatureHub")
     private val repository = InMemoryFeatureRepository()
+    val features: StateFlow<Map<String, Feature>> = repository.features
     private lateinit var client: FeatureHubClient
     private lateinit var context: FeatureHubContext
     private var isInitialized = false

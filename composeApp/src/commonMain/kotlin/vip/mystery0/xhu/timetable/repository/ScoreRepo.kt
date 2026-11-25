@@ -14,6 +14,7 @@ import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.model.response.ExperimentScoreResponse
 import vip.mystery0.xhu.timetable.model.response.ScoreGpaResponse
 import vip.mystery0.xhu.timetable.model.response.ScoreResponse
+import vip.mystery0.xhu.timetable.model.transfer.PageResult
 
 object ScoreRepo : BaseDataRepo {
     private val scoreApi: ScoreApi by inject()
@@ -28,15 +29,15 @@ object ScoreRepo : BaseDataRepo {
         Pager(
             config = globalPagingConfig,
             pagingSourceFactory = {
-                buildPageSource { index, size ->
-                    checkForceLoadFromCloud(true)
-
-                    user.withAutoLoginOnce {
-                        scoreApi.scoreList(it, year, term, index, size)
-                    }
-                }
+                buildPageSource { index, size -> getScorePage(user, year, term, index, size) }
             }
         ).flow
+
+    suspend fun getScorePage(user: User, year: Int, term: Int, index: Int, size: Int):
+        PageResult<ScoreResponse> {
+        checkForceLoadFromCloud(true)
+        return user.withAutoLoginOnce { scoreApi.scoreList(it, year, term, index, size) }
+    }
 
     suspend fun fetchExpScoreList(user: User, year: Int, term: Int): List<ExperimentScoreResponse> {
         checkForceLoadFromCloud(true)

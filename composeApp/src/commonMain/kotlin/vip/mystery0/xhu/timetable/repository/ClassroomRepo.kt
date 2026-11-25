@@ -12,6 +12,7 @@ import vip.mystery0.xhu.timetable.base.buildPageSource
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.model.request.ClassroomRequest
 import vip.mystery0.xhu.timetable.model.response.ClassroomResponse
+import vip.mystery0.xhu.timetable.model.transfer.PageResult
 
 object ClassroomRepo : BaseDataRepo {
     private val classroomApi: ClassroomApi by inject()
@@ -26,13 +27,13 @@ object ClassroomRepo : BaseDataRepo {
         Pager(
             config = globalPagingConfig,
             pagingSourceFactory = {
-                buildPageSource { index, size ->
-                    checkForceLoadFromCloud(true)
-
-                    mainUser().withAutoLoginOnce {
-                        classroomApi.getFreeList(it, request, index, size)
-                    }
-                }
+                buildPageSource { index, size -> getClassroomPage(request, index, size) }
             }
         ).flow
+
+    suspend fun getClassroomPage(request: ClassroomRequest, index: Int, size: Int):
+        PageResult<ClassroomResponse> {
+        checkForceLoadFromCloud(true)
+        return mainUser().withAutoLoginOnce { classroomApi.getFreeList(it, request, index, size) }
+    }
 }

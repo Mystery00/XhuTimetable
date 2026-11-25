@@ -60,18 +60,10 @@ class CourseRoomViewModel : PagingComposeViewModel<ClassroomSearchParam, Classro
     private suspend fun applyTodayDefault() {
         val currentWeek = WidgetRepo.calculateWeek().coerceIn(1, 20)
         val todayDay = LocalDate.now().dayOfWeek.isoDayNumber
-        val defaultPeriods = suggestCurrentPeriods(LocalTime.now())
+        val defaultPeriods = suggestClassroomPeriods(LocalTime.now())
         weekSelect.multiSetSelected(listOf(currentWeek))
         daySelect.multiSetSelected(listOf(todayDay))
         timeSelect.multiSetSelected(defaultPeriods)
-    }
-
-    private fun suggestCurrentPeriods(now: LocalTime): List<Int> = when {
-        now < LocalTime(10, 5) -> listOf(1, 2)
-        now < LocalTime(12, 0) -> listOf(3, 4)
-        now < LocalTime(15, 35) -> listOf(5, 6)
-        now < LocalTime(17, 30) -> listOf(7, 8)
-        else -> listOf(9, 10)
     }
 
     fun changeArea(area: String) {
@@ -134,6 +126,14 @@ class CourseRoomViewModel : PagingComposeViewModel<ClassroomSearchParam, Classro
         }
         return true
     }
+}
+
+fun suggestClassroomPeriods(now: LocalTime): List<Int> = when {
+    now < LocalTime(10, 5) -> listOf(1, 2)
+    now < LocalTime(12, 0) -> listOf(3, 4)
+    now < LocalTime(15, 35) -> listOf(5, 6)
+    now < LocalTime(17, 30) -> listOf(7, 8)
+    else -> listOf(9, 10)
 }
 
 @Immutable

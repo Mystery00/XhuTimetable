@@ -13,6 +13,8 @@
 - 项目定位：面向西华大学学生的课程表应用。
 - 技术栈：Kotlin Multiplatform、Compose Multiplatform、Android Application、iOS Framework。
 - 共享模块：`composeApp`；Android 应用模块：`androidApp`。
+- 鸿蒙宿主：`harmonyApp/entry`，使用 ArkTS/ArkUI 原生页面，通过 N-API 调用共享 Kotlin 业务；不使用 Compose 页面容器。
+- `harmonyApp/kotlin` 使用独立的鸿蒙适配工具链，从 `composeApp/src/commonMain` 同步业务源码；不要直接修改其 `build/generated` 内容，也不要为鸿蒙构建升级 Android/iOS 的依赖版本。
 - 包名：`vip.mystery0.xhu.timetable`。
 - 构建系统：Gradle Kotlin DSL，使用版本目录 `gradle/libs.versions.toml`。
 - Java/Kotlin JVM 目标：JDK 21。
@@ -36,6 +38,7 @@
 - 不要提交本地签名文件、密钥、`local.properties`、构建产物或 IDE 临时状态。
 - 不要改动无关文件；如果工作区已有用户变更，保留并围绕它们继续工作。
 - UI 改动应遵循现有 Material 3 / Compose Multiplatform 风格，避免引入新的设计体系。
+- 鸿蒙保持 ArkTS/ArkUI 原生实现，但布局、内容顺序、入口位置及交互以当前 Android 源码和实际运行效果为基准；仅适配必要的平台差异，不自行重新组织页面或简化操作流程。
 - 不要用阻塞式实现替代已有协程、Flow、Paging 或 Compose state 模式。
 
 ## 架构概览
@@ -178,6 +181,19 @@ Screen (Composable) <-> ViewModel (extends ComposeViewModel)
 ./gradlew assembleStandardRelease
 ./gradlew assembleStoreRelease
 ```
+
+鸿蒙构建（Windows PowerShell；`$DevEcoHome` 和 `$HarmonyCache` 使用本机安装与缓存目录）：
+
+```powershell
+.\harmonyApp\build-preview.ps1 -DevEcoHome $DevEcoHome -CacheDirectory $HarmonyCache -Architecture x64
+.\harmonyApp\build-preview.ps1 -DevEcoHome $DevEcoHome -CacheDirectory $HarmonyCache -Architecture arm64
+.\harmonyApp\build-preview.ps1 -DevEcoHome $DevEcoHome -CacheDirectory $HarmonyCache -Architecture x64 -SkipKotlin -Tests
+```
+
+- `x64` 对应模拟器，`arm64` 对应真机；开发包生成在 `harmonyApp/entry/build/<product>/outputs/`，真机签名由本机 DevEco 配置，不提交证书。
+- 只改 ArkTS 时可加 `-SkipKotlin`，该选项仍会同步当前架构的图片和许可证；改共享或鸿蒙 Kotlin 时不可跳过 Kotlin 编译。
+- 测试包只在 `ohosTest` 中使用离线数据驱动真实组件，不向线上提交课程、事项或反馈。安装测试包后，使用 `hdc shell aa test -b vip.mystery0.xhu.timetable.preview -m entry_test -s unittest /ets/testrunner/FixtureTestRunner -s timeout 60000` 运行。
+- 验证模拟器测试时必须确认输出中的 `Tests run`、`Failure`、`Error`、`Pass`，不能仅依赖 `hdc` 的退出码；测试执行器在 `onRun` 后加载 UITest，以确保 `AbilityDelegator` 已建立。
 
 验证建议：
 

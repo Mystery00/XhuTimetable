@@ -18,6 +18,7 @@ import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.model.response.ExamResponse
+import vip.mystery0.xhu.timetable.model.transfer.PageResult
 import vip.mystery0.xhu.timetable.utils.between
 import vip.mystery0.xhu.timetable.utils.betweenDays
 import vip.mystery0.xhu.timetable.utils.now
@@ -40,30 +41,19 @@ object ExamRepo : BaseDataRepo {
         Pager(
             config = globalPagingConfig,
             pagingSourceFactory = {
-                buildPageSource { index, size ->
-                    checkForceLoadFromCloud(true)
-
-                    val page = user.withAutoLoginOnce {
-                        examApi.examList(it, year, term, index, size)
-                    }
-                    val now = Clock.System.now()
-                    withContext(Dispatchers.Default) {
-                        page.suspendMap {
-                            mapExam(it, now)
-                        }.apply {
-                            items.sortedWith(object : Comparator<Exam> {
-                                override fun compare(a: Exam, b: Exam): Int {
-                                    if (a.examStatus == b.examStatus) {
-                                        return a.date.compareTo(b.date)
-                                    }
-                                    return a.examStatus.index.compareTo(b.examStatus.index)
-                                }
-                            })
-                        }
-                    }
-                }
+                buildPageSource { index, size -> getExamPage(user, year, term, index, size) }
             }
         ).flow
+
+    suspend fun getExamPage(user: User, year: Int, term: Int, index: Int, size: Int):
+        PageResult<Exam> {
+        checkForceLoadFromCloud(true)
+        val page = user.withAutoLoginOnce { examApi.examList(it, year, term, index, size) }
+        val now = Clock.System.now()
+        return withContext(Dispatchers.Default) {
+            page.suspendMap { mapExam(it, now) }
+        }
+    }
 
     private suspend fun mapExam(response: ExamResponse, now: Instant): Exam {
         val examStatus = when {

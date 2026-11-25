@@ -9,9 +9,11 @@ import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.CourseApi
 import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.base.buildPageSource
+import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.model.request.SchoolTimetableRequest
 import vip.mystery0.xhu.timetable.model.response.SchoolTimetableResponse
+import vip.mystery0.xhu.timetable.model.transfer.PageResult
 
 object CourseRepo : BaseDataRepo {
     private val courseApi: CourseApi by inject()
@@ -28,15 +30,15 @@ object CourseRepo : BaseDataRepo {
         Pager(
             config = globalPagingConfig,
             pagingSourceFactory = {
-                buildPageSource { index, size ->
-                    checkForceLoadFromCloud(true)
-
-                    mainUser().withAutoLoginOnce {
-                        courseApi.allCourseList(it, index, size, request)
-                    }
-                }
+                buildPageSource { index, size -> getAllCoursePage(request, index, size) }
             }
         ).flow
+
+    suspend fun getAllCoursePage(request: SchoolTimetableRequest, index: Int, size: Int, user: User? = null):
+        PageResult<SchoolTimetableResponse> {
+        checkForceLoadFromCloud(true)
+        return (user ?: mainUser()).withAutoLoginOnce { courseApi.allCourseList(it, index, size, request) }
+    }
 
     suspend fun loadCampusList(): Map<String, String> =
         mainUser().withAutoLoginOnce {

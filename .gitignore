@@ -39,3 +39,13 @@ androidApp/unused.txt
 /androidApp/store/release/
 androidApp/agconnect-services.json
 androidApp/src/debug/agconnect-services.json
+
+**/.hvigor/
+/harmonyApp/**/oh_modules/
+/harmonyApp/**/.cxx/
+/harmonyApp/**/.test/
+/harmonyApp/entry/libs/
+/harmonyApp/entry/src/main/cpp/include/
+/harmonyApp/entry/src/main/resources/rawfile/composeResources/
+/harmonyApp/entry/src/main/resources/rawfile/shared/
+/harmonyApp/AppScope/resources/base/media/app_icon.svg

@@ -13,6 +13,7 @@ import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.model.request.CustomCourseRequest
 import vip.mystery0.xhu.timetable.model.response.CustomCourseResponse
+import vip.mystery0.xhu.timetable.model.transfer.PageResult
 
 object CustomCourseRepo : BaseDataRepo {
     private val customCourseApi: CustomCourseApi by inject()
@@ -31,15 +32,15 @@ object CustomCourseRepo : BaseDataRepo {
         Pager(
             config = globalPagingConfig,
             pagingSourceFactory = {
-                buildPageSource { index, size ->
-                    checkForceLoadFromCloud(true)
-
-                    user.withAutoLoginOnce {
-                        customCourseApi.customCourseList(it, year, term, index, size)
-                    }
-                }
+                buildPageSource { index, size -> getCustomCoursePage(user, year, term, index, size) }
             }
         ).flow
+
+    suspend fun getCustomCoursePage(user: User, year: Int, term: Int, index: Int, size: Int):
+        PageResult<CustomCourseResponse> {
+        checkForceLoadFromCloud(true)
+        return user.withAutoLoginOnce { customCourseApi.customCourseList(it, year, term, index, size) }
+    }
 
     suspend fun createCustomCourse(
         user: User,

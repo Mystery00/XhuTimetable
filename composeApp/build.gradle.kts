@@ -60,6 +60,14 @@ kotlin {
     }
     
     sourceSets {
+        androidMain {
+            kotlin.srcDir("src/androidIosMain/kotlin")
+            kotlin.srcDir("src/platformMain/kotlin")
+        }
+        iosMain {
+            kotlin.srcDir("src/androidIosMain/kotlin")
+            kotlin.srcDir("src/platformMain/kotlin")
+        }
         commonTest.dependencies {
             implementation(kotlin("test"))
         }

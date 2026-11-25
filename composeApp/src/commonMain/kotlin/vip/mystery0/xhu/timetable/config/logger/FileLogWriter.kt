@@ -66,7 +66,10 @@ class FileLogWriter(
      * This method is called by Kermit for each log message.
      * It formats the message and sends it to a non-blocking channel for processing.
      */
+    override fun isLoggable(tag: String, severity: Severity): Boolean = fileHandler.enable()
+
     override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
+        if (!fileHandler.enable()) return
         val timestamp = Clock.System.now().asLocalDateTime().format(dateFormatter)
         val formattedMessage = "$timestamp ${severity.name.padEnd(7)} [$tag]: $message"
         val fullMessage = if (throwable != null) {

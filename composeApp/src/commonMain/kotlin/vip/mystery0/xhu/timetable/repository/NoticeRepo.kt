@@ -15,6 +15,7 @@ import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.response.NoticeResponse
+import vip.mystery0.xhu.timetable.model.transfer.PageResult
 
 object NoticeRepo : BaseDataRepo {
     private val noticeApi: NoticeApi by inject()
@@ -28,22 +29,21 @@ object NoticeRepo : BaseDataRepo {
     fun getNoticeListStream(): Flow<PagingData<NoticeResponse>> = Pager(
         config = globalPagingConfig,
         pagingSourceFactory = {
-            buildPageSource { index, size ->
-                checkForceLoadFromCloud(true)
-
-                val result = mainUser().withAutoLoginOnce {
-                    noticeApi.noticeList(it, index = index, size = size)
-                }
-                result.items.maxOfOrNull { it.noticeId }?.let {
-                    val last = getCacheStore { lastNoticeId }
-                    setCacheStore { lastNoticeId = maxOf(last, it) }
-                }
-                EventBus.post(EventType.UPDATE_NOTICE_CHECK)
-
-                result
-            }
+            buildPageSource { index, size -> getNoticePage(index, size) }
         }
     ).flow
+
+    suspend fun getNoticePage(index: Int, size: Int):
+        PageResult<NoticeResponse> {
+        checkForceLoadFromCloud(true)
+        val result = mainUser().withAutoLoginOnce { noticeApi.noticeList(it, index = index, size = size) }
+        result.items.maxOfOrNull { it.noticeId }?.let {
+            val last = getCacheStore { lastNoticeId }
+            setCacheStore { lastNoticeId = maxOf(last, it) }
+        }
+        EventBus.post(EventType.UPDATE_NOTICE_CHECK)
+        return result
+    }
 
     suspend fun checkNotice(): Boolean {
         if (!isOnline) {

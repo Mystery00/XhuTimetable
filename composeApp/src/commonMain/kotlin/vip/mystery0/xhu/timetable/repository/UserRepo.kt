@@ -1,13 +1,6 @@
 package vip.mystery0.xhu.timetable.repository
 
 import co.touchlab.kermit.Logger
-import dev.whyoleg.cryptography.CryptographyProvider
-import dev.whyoleg.cryptography.algorithms.AES
-import dev.whyoleg.cryptography.algorithms.EC
-import dev.whyoleg.cryptography.algorithms.ECDH
-import dev.whyoleg.cryptography.algorithms.HKDF
-import dev.whyoleg.cryptography.algorithms.SHA256
-import io.ktor.utils.io.core.toByteArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -18,7 +11,7 @@ import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.model.request.LoginRequest
 import vip.mystery0.xhu.timetable.model.request.SetCampusRequest
 import vip.mystery0.xhu.timetable.model.response.LoginResponse
-import kotlin.io.encoding.Base64
+import vip.mystery0.xhu.timetable.utils.encryptLoginPassword
 
 object UserRepo : BaseDataRepo {
     private val userApi: UserApi by inject()
@@ -30,33 +23,7 @@ object UserRepo : BaseDataRepo {
         Logger.d("doLogin: $username")
         val resp = withContext(Dispatchers.IO) { userApi.publicKey() }
         val (encryptPassword, clientPublicKey) = withContext(Dispatchers.Default) {
-            val clientKeyPair = CryptographyProvider.Default.get(ECDH)
-                .keyPairGenerator(EC.Curve.P521)
-                .generateKeyBlocking()
-            val serverPublicKey = CryptographyProvider.Default.get(ECDH)
-                .publicKeyDecoder(curve = EC.Curve.P521)
-                .decodeFromByteArrayBlocking(
-                    EC.PublicKey.Format.DER,
-                    Base64.decode(resp.publicKey)
-                )
-            val nonce = Base64.decode(resp.nonce)
-            val sharedSecret = clientKeyPair.privateKey.sharedSecretGenerator()
-                .generateSharedSecretToByteArrayBlocking(serverPublicKey)
-            val cipher = CryptographyProvider.Default.get(AES.GCM)
-                .keyDecoder()
-                .decodeFromByteArrayBlocking(
-                    AES.Key.Format.RAW, CryptographyProvider.Default.get(HKDF)
-                        .secretDerivation(SHA256, AES.Key.Size.B256, nonce)
-                        .deriveSecretToByteArrayBlocking(sharedSecret)
-                )
-                .cipher()
-            val encryptedPassword =
-                Base64.encode(cipher.encryptBlocking(password.toByteArray(), nonce))
-            val clientPublicKey =
-                Base64.encode(
-                    clientKeyPair.publicKey.encodeToByteArrayBlocking(EC.PublicKey.Format.DER)
-                )
-            encryptedPassword to clientPublicKey
+            encryptLoginPassword(password, resp.publicKey, resp.nonce)
         }
         val loginRequest = LoginRequest(username, encryptPassword, resp.publicKey, clientPublicKey)
         return withContext(Dispatchers.IO) {

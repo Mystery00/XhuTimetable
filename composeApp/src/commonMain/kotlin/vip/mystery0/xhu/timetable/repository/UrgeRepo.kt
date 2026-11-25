@@ -12,6 +12,7 @@ import vip.mystery0.xhu.timetable.base.BaseDataRepo
 import vip.mystery0.xhu.timetable.base.buildPageSource
 import vip.mystery0.xhu.timetable.config.store.UserStore.withAutoLoginOnce
 import vip.mystery0.xhu.timetable.model.response.UrgeItem
+import vip.mystery0.xhu.timetable.model.transfer.PageResult
 
 object UrgeRepo : BaseDataRepo {
     private val urgeApi: UrgeApi by inject()
@@ -27,17 +28,17 @@ object UrgeRepo : BaseDataRepo {
     fun getUrgeListStream(): Flow<PagingData<UrgeItem>> = Pager(
         config = globalPagingConfig,
         pagingSourceFactory = {
-            buildPageSource { index, size ->
-                checkForceLoadFromCloud(true)
-
-                val urge = mainUser().withAutoLoginOnce {
-                    urgeApi.getUrgeList(it, index = index, size = size)
-                }
-                remainCountFlow.emit(urge.remainCount)
-                urge.page
-            }
+            buildPageSource { index, size -> getUrgePage(index, size) }
         }
     ).flow
+
+    suspend fun getUrgePage(index: Int, size: Int):
+        PageResult<UrgeItem> {
+        checkForceLoadFromCloud(true)
+        val urge = mainUser().withAutoLoginOnce { urgeApi.getUrgeList(it, index = index, size = size) }
+        remainCountFlow.emit(urge.remainCount)
+        return urge.page
+    }
 
     suspend fun doUrge(urgeId: Long) {
         checkForceLoadFromCloud(true)
