@@ -5,7 +5,7 @@ kotlin = "2.4.20"
 ksp = "2.3.11"
 agconnect = "1.9.1.301"
 
-app-version = "1.6.7"
+app-version = "1.7.0"
 
 debugPushAppKey = "eec3dd99777142256f3d7584"
 releasePushAppKey = "c369f81f3fc3aa7b6f455686"
