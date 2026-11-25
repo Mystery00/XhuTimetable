@@ -192,7 +192,7 @@ Screen (Composable) <-> ViewModel (extends ComposeViewModel)
 
 - `x64` 对应模拟器，`arm64` 对应真机；开发包生成在 `harmonyApp/entry/build/<product>/outputs/`，真机签名由本机 DevEco 配置，不提交证书。
 - 只改 ArkTS 时可加 `-SkipKotlin`，该选项仍会同步当前架构的图片和许可证；改共享或鸿蒙 Kotlin 时不可跳过 Kotlin 编译。
-- 测试包只在 `ohosTest` 中使用离线数据驱动真实组件，不向线上提交课程、事项或反馈。安装测试包后，使用 `hdc shell aa test -b vip.mystery0.xhu.timetable.preview -m entry_test -s unittest /ets/testrunner/FixtureTestRunner -s timeout 60000` 运行。
+- 测试包只在 `ohosTest` 中使用离线数据驱动真实组件，不向线上提交课程、事项或反馈。安装测试包后，使用 `hdc shell aa test -b vip.mystery0.xhu.timetable.hw -m entry_test -s unittest /ets/testrunner/FixtureTestRunner -s timeout 60000` 运行。
 - 验证模拟器测试时必须确认输出中的 `Tests run`、`Failure`、`Error`、`Pass`，不能仅依赖 `hdc` 的退出码；测试执行器在 `onRun` 后加载 UITest，以确保 `AbilityDelegator` 已建立。
 
 验证建议：
