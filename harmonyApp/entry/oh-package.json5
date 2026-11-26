@@ -1,6 +1,6 @@
 {
   "name": "entry",
-  "version": "1.6.7",
+  "version": "1.7.0",
   "description": "西瓜课表鸿蒙宿主",
   "dependencies": {
     "libentry.so": "file:./src/main/cpp/types/libentry",

@@ -2,8 +2,9 @@
   "app": {
     "bundleName": "vip.mystery0.xhu.timetable.hw",
     "vendor": "Mystery0",
-    "versionCode": 866,
-    "versionName": "1.6.7.d866.a67f1df",
+    // 实际构建时由 harmonyApp/hvigorfile.ts 从主模块 gradle/libs.versions.toml 与 git 动态同步。
+    "versionCode": 1,
+    "versionName": "1.7.0",
     "icon": "$media:app_icon",
     "label": "$string:app_name"
   }
