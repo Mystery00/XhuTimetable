@@ -2,6 +2,7 @@ package vip.mystery0.xhu.timetable.viewmodel
 
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import vip.mystery0.xhu.timetable.base.PagingComposeViewModel
@@ -16,15 +17,18 @@ import vip.mystery0.xhu.timetable.module.desc
 import vip.mystery0.xhu.timetable.repository.CourseRepo
 import vip.mystery0.xhu.timetable.repository.CustomCourseRepo
 
-class SchoolTimetableViewModel :
+class SchoolTimetableViewModel(
+    val campusSelect: CampusSelectDataLoader = CampusSelectDataLoader(),
+    val collegeSelect: CollegeSelectDataLoader = CollegeSelectDataLoader(),
+    val majorSelect: MajorSelectDataLoader = MajorSelectDataLoader(),
+    private val errorHandlerFactory: ((Throwable) -> Unit) -> ((Throwable) -> Boolean) = ::networkErrorHandler,
+) :
     PagingComposeViewModel<SchoolTimetableRequest, SchoolTimetableResponse>(
         {
             CourseRepo.getAllCourseListStream(it)
         }
     ) {
-    val campusSelect = CampusSelectDataLoader()
-    val collegeSelect = CollegeSelectDataLoader()
-    val majorSelect = MajorSelectDataLoader()
+    private var majorLoadJob: Job? = null
 
     val init: Boolean
         get() = pageRequestFlow.value == null
@@ -33,7 +37,10 @@ class SchoolTimetableViewModel :
     val saveLoadingState: StateFlow<LoadingState> = _saveLoadingState
 
     fun init() {
-        viewModelScope.safeLaunch {
+        viewModelScope.safeLaunch(onException = errorHandlerFactory { throwable ->
+            logger.w("init school timetable selectors failed", throwable)
+            toastMessage(throwable.desc())
+        }) {
             campusSelect.init()
             collegeSelect.init()
             majorSelect.init()
@@ -97,7 +104,11 @@ class SchoolTimetableViewModel :
     }
 
     fun selectCollege(college: String) {
-        viewModelScope.safeLaunch {
+        majorLoadJob?.cancel()
+        majorLoadJob = viewModelScope.safeLaunch(onException = errorHandlerFactory { throwable ->
+            logger.w("load major list failed", throwable)
+            toastMessage(throwable.desc())
+        }) {
             collegeSelect.setSelected(college)
             majorSelect.updateCollegeId(college)
         }
@@ -123,9 +134,11 @@ data class CampusSelect(
     override val selected: Boolean,
 ) : Selectable
 
-class CampusSelectDataLoader : SelectDataLoader<CampusSelect, String>() {
+class CampusSelectDataLoader(
+    private val loader: suspend () -> Map<String, String> = CourseRepo::loadCampusList,
+) : SelectDataLoader<CampusSelect, String>() {
     override suspend fun initSelect(): List<CampusSelect> {
-        val map = CourseRepo.loadCampusList()
+        val map = loader()
         return map.map { (key, value) ->
             CampusSelect(value, key, false)
         }
@@ -146,9 +159,11 @@ data class CollegeSelect(
     override val selected: Boolean,
 ) : Selectable
 
-class CollegeSelectDataLoader : SelectDataLoader<CollegeSelect, String>() {
+class CollegeSelectDataLoader(
+    private val loader: suspend () -> Map<String, String> = CourseRepo::loadCollegeList,
+) : SelectDataLoader<CollegeSelect, String>() {
     override suspend fun initSelect(): List<CollegeSelect> {
-        val map = CourseRepo.loadCollegeList()
+        val map = loader()
         return map.map { (key, value) ->
             CollegeSelect(value, key, false)
         }
@@ -169,12 +184,15 @@ data class MajorSelect(
     override val selected: Boolean,
 ) : Selectable
 
-class MajorSelectDataLoader : SelectDataLoader<MajorSelect, String>() {
+class MajorSelectDataLoader(
+    private val loader: suspend (String) -> Map<String, String> = CourseRepo::loadMajorList,
+) : SelectDataLoader<MajorSelect, String>() {
     private var collegeId: String? = null
 
     override suspend fun initSelect(): List<MajorSelect> {
-        if (collegeId.isNullOrBlank()) return emptyList()
-        val map = CourseRepo.loadMajorList(collegeId!!)
+        val currentCollegeId = collegeId
+        if (currentCollegeId.isNullOrBlank()) return emptyList()
+        val map = loader(currentCollegeId)
         return map.map { (key, value) ->
             MajorSelect(value, key, false)
         }
@@ -189,6 +207,7 @@ class MajorSelectDataLoader : SelectDataLoader<MajorSelect, String>() {
 
     suspend fun updateCollegeId(collegeId: String) {
         this.collegeId = collegeId
+        select.value = emptyList()
         init()
     }
 }

@@ -330,7 +330,11 @@ private fun SchoolTimetableFilterSheet(
                     FilterSelectorRow(
                         icon = Icons.Rounded.School,
                         label = "查询专业",
-                        value = major?.title ?: if (majorSelect.isEmpty()) "请先选学院" else "全部专业",
+                        value = major?.title ?: when {
+                            college == null -> "请先选学院"
+                            majorSelect.isEmpty() -> "暂无可选专业"
+                            else -> "全部专业"
+                        },
                         highlighted = major != null,
                         onClick = {
                             if (majorSelect.isNotEmpty()) majorDialogState.show()

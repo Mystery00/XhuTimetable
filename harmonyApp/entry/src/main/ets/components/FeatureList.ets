@@ -254,7 +254,8 @@ export struct FeatureList {
   }
 
   private async changeCollege(value: string): Promise<void> {
-    this.college = value; this.major = ''; this.majors = [];
+    this.college = value; this.major = ''; this.majors = []; this.error = '';
+    if (value.length === 0) return;
     const current = this.epoch;
     const request: TimetableOptionsRequest = { kind: 'timetable', college: value };
     try {
@@ -567,7 +568,7 @@ export struct FeatureList {
               this.choose('选择学院', this.allOptions(this.colleges, '全部学院'), [this.college], false, (values: string[]) => { this.changeCollege(values[0]); }),
               () => true, COLLEGE_ICON, () => this.college.length > 0)
             Divider().margin({ left: 52 }).color($r('app.color.outline')).opacity(0.4)
-            this.selector('查询专业', () => this.optionLabel(this.majors, this.major, this.majors.length === 0 ? '请先选学院' : '全部专业'), () =>
+            this.selector('查询专业', () => this.optionLabel(this.majors, this.major, this.college.length === 0 ? '请先选学院' : (this.majors.length === 0 ? '暂无可选专业' : '全部专业')), () =>
               this.choose('选择专业', this.allOptions(this.majors, '全部专业'), [this.major], false, (values: string[]) => { this.major = values[0]; }),
               () => this.majors.length > 0, MAJOR_ICON, () => this.major.length > 0)
           }.width('100%').backgroundColor($r('app.color.card')).borderRadius(18).border({ width: 0.5, color: $r('app.color.outline') })
