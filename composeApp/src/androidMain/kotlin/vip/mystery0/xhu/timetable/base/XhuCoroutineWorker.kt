@@ -78,7 +78,7 @@ class SettableFuture<V> internal constructor() : AbstractFuture<V>() {
 inline fun <reified W : XhuCoroutineWorker> WorkManager.startUniqueWork(inputData: Data) {
     enqueueUniqueWork(
         W::class.java.name,
-        ExistingWorkPolicy.KEEP,
+        ExistingWorkPolicy.REPLACE,
         OneTimeWorkRequestBuilder<W>()
             .setInputData(inputData)
             .build()

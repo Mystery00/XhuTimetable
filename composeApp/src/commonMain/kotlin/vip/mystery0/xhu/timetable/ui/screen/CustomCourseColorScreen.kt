@@ -57,6 +57,7 @@ import vip.mystery0.xhu.timetable.base.HandleBackPress
 import vip.mystery0.xhu.timetable.config.Customisable
 import vip.mystery0.xhu.timetable.ui.component.StateScreen
 import vip.mystery0.xhu.timetable.ui.component.dialog.XhuColorPickerDialog
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuConfirmDialog
 import vip.mystery0.xhu.timetable.ui.component.dialog.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.navigation.LocalNavController
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
@@ -73,9 +74,11 @@ fun CustomCourseColorScreen() {
     val list by viewModel.listState.collectAsState()
 
     val colorDialogState = rememberXhuDialogState()
+    val resetColorConfirmState = rememberXhuDialogState()
 
     var editingCourseName by remember { mutableStateOf("") }
     var editingCourseColor by remember { mutableStateOf(ColorPool.safeGet(0)) }
+    var pendingResetCourseName by remember { mutableStateOf("") }
     var showSearchView by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
 
@@ -214,7 +217,8 @@ fun CustomCourseColorScreen() {
                             colorDialogState.show()
                         },
                         onResetClick = {
-                            viewModel.updateColor(item.first, null)
+                            pendingResetCourseName = item.first
+                            resetColorConfirmState.show()
                         },
                     )
                 }
@@ -232,6 +236,19 @@ fun CustomCourseColorScreen() {
         },
         onSelectColor = { newColor ->
             viewModel.updateColor(editingCourseName, newColor)
+        },
+    )
+
+    XhuConfirmDialog(
+        state = resetColorConfirmState,
+        title = "恢复默认颜色",
+        message = "确认将课程「$pendingResetCourseName」的自定义颜色恢复为默认配色吗？",
+        confirmText = "恢复默认",
+        onConfirm = {
+            if (pendingResetCourseName.isNotBlank()) {
+                viewModel.updateColor(pendingResetCourseName, null)
+                pendingResetCourseName = ""
+            }
         },
     )
 }

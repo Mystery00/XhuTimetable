@@ -54,13 +54,14 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
         const val ARG_VERSION_ID = "versionId"
         const val ARG_VERSION_NAME = "versionName"
         const val ARG_VERSION_CODE = "versionCode"
+        const val ARG_FILE_SIZE = "fileSize"
     }
 
     private val fileClient: HttpClient by inject(named(HTTP_CLIENT_FILE))
 
     private var lastUpdateProgressTime = 0L
 
-    private val observerId = addDownloadObserver(patchObserver = false) {
+    private val observerId = addDownloadObserver(patchObserver = true) {
         val now = SystemClock.uptimeMillis()
         if (now - lastUpdateProgressTime > 100) {
             updateProgress(it).notify()
@@ -69,9 +70,11 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
     }
 
     override suspend fun doWork(): Result {
-        val versionId = inputData.getString(ARG_VERSION_ID)?.toLong() ?: return Result.failure()
+        val versionId = inputData.getString(ARG_VERSION_ID)?.toLongOrNull() ?: return Result.failure()
         val versionName = inputData.getString(ARG_VERSION_NAME) ?: return Result.failure()
-        val versionCode = inputData.getInt(ARG_VERSION_CODE, 0)
+        val versionCode = inputData.getString(ARG_VERSION_CODE)?.toIntOrNull()
+            ?: inputData.getInt(ARG_VERSION_CODE, 0)
+        val expectedFileSize = inputData.getLong(ARG_FILE_SIZE, 0L)
         startForeground(versionName)
         val file = withContext(Dispatchers.IO) {
             val dir = PlatformFile(externalCacheDownloadDir, "patch")
@@ -87,10 +90,11 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
         getDownloadUrl(versionName).notify()
 
         //获取下载地址
-        updateStatus(status = "正在获取下载地址...", patch = true, progress = 0)
+        updateStatus(status = "正在获取下载地址...", patch = true, progress = 0, indeterminate = true)
         val versionUrl = StartRepo.getVersionUrl(versionId)
 
         Log.i(TAG, "save patch to ${file.absolutePath()}")
+        updateStatus(status = "开始下载增量包...", patch = true, progress = 0, indeterminate = true)
         withContext(Dispatchers.IO) {
             fileClient.downloadFileTo(
                 saveFile = file,
@@ -98,33 +102,54 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
                     url(versionUrl.patchUrl)
                 },
                 progress = { progress ->
+                    val total = if (progress.total > 0L) progress.total else expectedFileSize
+                    val percent = if (total > 0L) {
+                        (progress.received * 100L / total).toInt().coerceIn(0, 100)
+                    } else {
+                        0
+                    }
+                    val statusText = if (total > 0L) {
+                        "已下载 ${progress.received.formatFileSize()} / ${total.formatFileSize()}"
+                    } else {
+                        "已下载 ${progress.received.formatFileSize()}"
+                    }
                     val state = DownloadUpdateState(
                         downloading = true,
+                        indeterminate = total <= 0L,
                         downloaded = progress.received,
-                        totalSize = progress.total,
+                        totalSize = total,
                         patch = true,
-                        progress = progress.progress.toInt(),
-                        status = "${progress.progress.toInt()}%",
+                        progress = percent,
+                        status = statusText,
                     )
                     updateObserverProgress(state)
                 }
             )
         }
-        updateStatus(status = "文件检查中...", patch = true, progress = 100)
+        updateStatus(status = "正在校验增量包...", patch = true, progress = 100, indeterminate = true)
         md5Checking().notify()
         //检查md5
         val md5 = withContext(Dispatchers.Default) {
             file.md5()
         }
-        updateStatus(status = "文件处理中...", patch = true, progress = 100)
+        updateStatus(status = "文件处理中...", patch = true, progress = 100, indeterminate = true)
         if (!md5.equals(versionUrl.patchMd5, ignoreCase = true)) {
             throw DownloadError.MD5CheckFailed()
         }
         //md5校验通过，合并安装包
         patching().notify()
-        updateStatus(status = "正在合并安装包...", patch = true, progress = 100)
-        val apkDir = PlatformFile(externalCacheDownloadDir, "apk")
-        val apkFile = PlatformFile(apkDir, "${versionName}-${versionCode}.apk")
+        updateStatus(status = "正在合并安装包...", patch = true, progress = 100, indeterminate = true)
+        val apkFile = withContext(Dispatchers.IO) {
+            val apkDir = PlatformFile(externalCacheDownloadDir, "apk")
+            if (!apkDir.exists()) {
+                apkDir.createDirectories(true)
+            }
+            val target = PlatformFile(apkDir, "${versionName}-${versionCode}.apk")
+            if (target.exists()) {
+                target.delete()
+            }
+            target
+        }
         try {
             BsPatch.patch(
                 applicationContext.applicationInfo.sourceDir,
@@ -138,29 +163,48 @@ class DownloadPatchWork(private val appContext: Context, workerParams: WorkerPar
         val installIntent = Intent(Intent.ACTION_VIEW)
         installIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         installIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-        val uri = FileProvider.getUriForFile(appContext, packageName(),  File(apkFile.absolutePath()))
+        val uri = FileProvider.getUriForFile(
+            appContext,
+            "${packageName()}.fileprovider",
+            File(apkFile.absolutePath())
+        )
         installIntent.setDataAndType(uri, "application/vnd.android.package-archive")
-        updateStatus(status = "安装中...", patch = true, progress = 100)
+        updateStatus(
+            status = "合并完成，正在启动安装...",
+            patch = true,
+            progress = 100,
+            downloading = false,
+            indeterminate = false,
+        )
         appContext.startActivity(installIntent)
         return Result.success()
     }
 
     override fun whenError(t: Throwable) {
         super.whenError(t)
-        val notification = when (t) {
-            is DownloadError.MD5CheckFailed -> md5Failed()
-            is DownloadError.PatchFailed -> patchFailed()
+        val (statusText, notification) = when (t) {
+            is DownloadError.MD5CheckFailed -> "MD5 校验失败，请重新下载" to md5Failed()
+            is DownloadError.PatchFailed -> "安装包合成失败，请尝试下载完整 APK" to patchFailed()
             else -> {
                 Log.w(TAG, "download patch failed", t)
-                downloadFailed()
+                val msg = t.message?.takeIf { it.isNotBlank() }?.let { "下载失败：$it" } ?: "下载失败，请稍后重试"
+                msg to downloadFailed()
             }
         }
+        updateStatus(
+            status = statusText,
+            patch = true,
+            progress = 0,
+            downloading = false,
+            indeterminate = false,
+            failed = true,
+        )
         notification.notify()
     }
 
     override fun onStopped() {
         super.onStopped()
-        removeDownloadObserver(patchObserver = false, observerId)
+        removeDownloadObserver(patchObserver = true, observerId)
     }
 
     private val notificationBuilder: NotificationCompat.Builder

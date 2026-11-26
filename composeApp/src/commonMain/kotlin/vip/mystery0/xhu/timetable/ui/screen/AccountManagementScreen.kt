@@ -148,6 +148,7 @@ fun AccountManagementScreen() {
     val todayTemplateDialog = rememberXhuDialogState()
     val weekTemplateDialog = rememberXhuDialogState()
     val logoutConfirmDialog = rememberXhuDialogState()
+    val resetAvatarConfirmDialog = rememberXhuDialogState()
     var pendingLogoutUser by remember { mutableStateOf<UserItem?>(null) }
 
     val mainUser = loggedUserList.firstOrNull { it.main } ?: loggedUserList.firstOrNull()
@@ -437,13 +438,23 @@ fun AccountManagementScreen() {
                 pickerLauncher.launch()
             },
             onResetDefault = {
-                viewModel.resetCustomAvatar()
-                showToast("已恢复默认头像")
-                showAvatarSheet = false
+                resetAvatarConfirmDialog.show()
             },
             onDismiss = { showAvatarSheet = false },
         )
     }
+
+    XhuConfirmDialog(
+        state = resetAvatarConfirmDialog,
+        title = "恢复默认头像",
+        message = "确认清除当前自定义头像并恢复为按账号自动匹配的默认头像吗？",
+        confirmText = "恢复默认",
+        onConfirm = {
+            viewModel.resetCustomAvatar()
+            showToast("已恢复默认头像")
+            showAvatarSheet = false
+        },
+    )
 
     val cropState = imageCropper.cropState
     if (cropState != null) {

@@ -54,6 +54,7 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
         const val ARG_VERSION_NAME = "versionName"
         const val ARG_VERSION_CODE = "versionCode"
         const val ARG_VERSION_CHECK_MD5 = "versionCheckMd5"
+        const val ARG_FILE_SIZE = "fileSize"
     }
 
     private val fileClient: HttpClient by inject(named(HTTP_CLIENT_FILE))
@@ -69,11 +70,13 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
     }
 
     override suspend fun doWork(): Result {
-        val versionId = inputData.getString(ARG_VERSION_ID)?.toLong() ?: return Result.failure()
+        val versionId = inputData.getString(ARG_VERSION_ID)?.toLongOrNull() ?: return Result.failure()
         val versionName = inputData.getString(ARG_VERSION_NAME) ?: return Result.failure()
-        val versionCode = inputData.getInt(ARG_VERSION_CODE, 0)
+        val versionCode = inputData.getString(ARG_VERSION_CODE)?.toIntOrNull()
+            ?: inputData.getInt(ARG_VERSION_CODE, 0)
         val versionCheckMd5 =
             inputData.getString(ARG_VERSION_CHECK_MD5)?.toBoolean() ?: return Result.failure()
+        val expectedFileSize = inputData.getLong(ARG_FILE_SIZE, 0L)
         startDownload(versionName).notify()
         val file = withContext(Dispatchers.IO) {
             val dir = PlatformFile(externalCacheDownloadDir, "apk")
@@ -89,10 +92,11 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
         getDownloadUrl(versionName).notify()
 
         //获取下载地址
-        updateStatus(status = "正在获取下载地址...", patch = false, progress = 0)
+        updateStatus(status = "正在获取下载地址...", patch = false, progress = 0, indeterminate = true)
         val versionUrl = StartRepo.getVersionUrl(versionId)
 
         Log.i(TAG, "save apk to ${file.absolutePath()}")
+        updateStatus(status = "开始下载安装包...", patch = false, progress = 0, indeterminate = true)
         withContext(Dispatchers.IO) {
             fileClient.downloadFileTo(
                 saveFile = file,
@@ -100,25 +104,37 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
                     url(versionUrl.apkUrl)
                 },
                 progress = { progress ->
+                    val total = if (progress.total > 0L) progress.total else expectedFileSize
+                    val percent = if (total > 0L) {
+                        (progress.received * 100L / total).toInt().coerceIn(0, 100)
+                    } else {
+                        0
+                    }
+                    val statusText = if (total > 0L) {
+                        "已下载 ${progress.received.formatFileSize()} / ${total.formatFileSize()}"
+                    } else {
+                        "已下载 ${progress.received.formatFileSize()}"
+                    }
                     val state = DownloadUpdateState(
                         downloading = true,
+                        indeterminate = total <= 0L,
                         downloaded = progress.received,
-                        totalSize = progress.total,
+                        totalSize = total,
                         patch = false,
-                        progress = progress.progress.toInt(),
-                        status = "${progress.progress.toInt()}%",
+                        progress = percent,
+                        status = statusText,
                     )
                     updateObserverProgress(state)
                 }
             )
         }
-        updateStatus(status = "文件检查中...", patch = false, progress = 100)
+        updateStatus(status = "正在校验安装包...", patch = false, progress = 100, indeterminate = true)
         md5Checking().notify()
         //检查md5
         val md5 = withContext(Dispatchers.Default) {
             file.md5()
         }
-        updateStatus(status = "文件处理中...", patch = false, progress = 100)
+        updateStatus(status = "文件处理中...", patch = false, progress = 100, indeterminate = true)
         if (versionCheckMd5 && !md5.equals(versionUrl.apkMd5, ignoreCase = true)) {
             throw DownloadError.MD5CheckFailed()
         }
@@ -132,20 +148,35 @@ class DownloadApkWork(private val appContext: Context, workerParams: WorkerParam
             File(file.absolutePath())
         )
         installIntent.setDataAndType(uri, "application/vnd.android.package-archive")
-        updateStatus(status = "安装中...", patch = false, progress = 100)
+        updateStatus(
+            status = "下载完成，正在启动安装...",
+            patch = false,
+            progress = 100,
+            downloading = false,
+            indeterminate = false,
+        )
         appContext.startActivity(installIntent)
         return Result.success()
     }
 
     override fun whenError(t: Throwable) {
         super.whenError(t)
-        val notification = when (t) {
-            is DownloadError.MD5CheckFailed -> md5Failed()
+        val (statusText, notification) = when (t) {
+            is DownloadError.MD5CheckFailed -> "MD5 校验失败，请重新下载" to md5Failed()
             else -> {
                 Log.w(TAG, "download apk failed", t)
-                downloadFailed()
+                val msg = t.message?.takeIf { it.isNotBlank() }?.let { "下载失败：$it" } ?: "下载失败，请稍后重试"
+                msg to downloadFailed()
             }
         }
+        updateStatus(
+            status = statusText,
+            patch = false,
+            progress = 0,
+            downloading = false,
+            indeterminate = false,
+            failed = true,
+        )
         notification.notify()
     }
 

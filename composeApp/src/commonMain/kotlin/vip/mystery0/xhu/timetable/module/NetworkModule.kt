@@ -2,7 +2,7 @@ package vip.mystery0.xhu.timetable.module
 
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.github.vinceglb.filekit.PlatformFile
-import io.github.vinceglb.filekit.write
+import io.github.vinceglb.filekit.sink
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngineConfig
@@ -18,12 +18,11 @@ import io.ktor.client.request.prepareGet
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentLength
+import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.core.remaining
-import io.ktor.utils.io.exhausted
-import io.ktor.utils.io.readRemaining
-import kotlinx.io.readByteArray
+import io.ktor.utils.io.readAvailable
+import kotlinx.io.buffered
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -155,17 +154,35 @@ suspend fun HttpClient.downloadFileTo(
     progress: ((FileDownloadProgressState) -> Unit)? = null
 ) {
     prepareGet(builder).execute { resp ->
+        if (!resp.status.isSuccess()) {
+            throw RuntimeException("下载失败 (HTTP ${resp.status.value})")
+        }
         val channel: ByteReadChannel = resp.body()
+        val total = resp.contentLength() ?: 0L
         var count = 0L
-        while (!channel.exhausted()) {
-            val chunk = channel.readRemaining()
-            count += chunk.remaining
-            saveFile.write(chunk.readByteArray())
-            progress?.let {
-                val total = resp.contentLength() ?: 1L
-                val progress = count * 100 / total.toFloat()
-                it(FileDownloadProgressState(count, total, progress))
+        val buffer = ByteArray(16 * 1024)
+        saveFile.sink(append = false).buffered().use { sink ->
+            while (true) {
+                val bytesRead = channel.readAvailable(buffer)
+                if (bytesRead == -1) break
+                if (bytesRead > 0) {
+                    sink.write(buffer, 0, bytesRead)
+                    count += bytesRead
+                    progress?.let {
+                        val percent = if (total > 0L) {
+                            (count * 100F / total.toFloat()).coerceIn(0F, 100F)
+                        } else {
+                            0F
+                        }
+                        it(FileDownloadProgressState(count, total, percent))
+                    }
+                }
             }
+            sink.flush()
+        }
+        progress?.let {
+            val finalTotal = if (total > 0L) total else count
+            it(FileDownloadProgressState(count, finalTotal, 100F))
         }
     }
 }

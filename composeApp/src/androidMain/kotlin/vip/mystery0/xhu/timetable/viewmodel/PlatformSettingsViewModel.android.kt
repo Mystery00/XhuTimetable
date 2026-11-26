@@ -80,6 +80,7 @@ actual class PlatformSettingsViewModel : ComposeViewModel() {
                         DownloadApkWork.ARG_VERSION_CHECK_MD5,
                         newVersion.checkMd5.toString()
                     )
+                    .putLong(DownloadApkWork.ARG_FILE_SIZE, newVersion.apkSize)
                     .build()
             )
         }
@@ -96,6 +97,7 @@ actual class PlatformSettingsViewModel : ComposeViewModel() {
                         DownloadPatchWork.ARG_VERSION_CODE,
                         newVersion.versionCode.toString()
                     )
+                    .putLong(DownloadPatchWork.ARG_FILE_SIZE, newVersion.patchSize)
                     .build()
             )
         }

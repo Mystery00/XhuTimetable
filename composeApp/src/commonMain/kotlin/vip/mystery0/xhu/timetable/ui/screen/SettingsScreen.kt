@@ -54,6 +54,7 @@ import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.module.PRIVACY_URL
 import vip.mystery0.xhu.timetable.platform
+import vip.mystery0.xhu.timetable.ui.component.dialog.XhuConfirmDialog
 import vip.mystery0.xhu.timetable.ui.component.dialog.XhuSingleSelectDialog
 import vip.mystery0.xhu.timetable.ui.component.dialog.rememberXhuDialogState
 import vip.mystery0.xhu.timetable.ui.component.preference.ConfigSettingsCheckbox
@@ -84,6 +85,9 @@ fun SettingsScreen() {
     val nightMode by viewModel.nightMode.collectAsState()
     val scope = rememberCoroutineScope()
     val nightModeDialog = rememberXhuDialogState()
+    val resetSplashBgDialog = rememberXhuDialogState()
+    val resetPoemsTokenDialog = rememberXhuDialogState()
+    val revokePrivacyDialog = rememberXhuDialogState()
 
     LaunchedEffect(Unit) {
         viewModel.init()
@@ -207,14 +211,7 @@ fun SettingsScreen() {
                     },
                     title = { Text("重置启动图隐藏与背景缓存") },
                     subtitle = { Text("恢复启动图展示，或清除异常背景图") },
-                    onClick = {
-                        scope.safeLaunch {
-                            setCacheStore { hideSplashBefore = LocalDate.MIN }
-                            setConfigStore { backgroundImage = null }
-                            EventBus.post(EventType.CHANGE_MAIN_BACKGROUND)
-                        }
-                        showToast("已重置启动图与背景设置")
-                    }
+                    onClick = { resetSplashBgDialog.show() }
                 )
             }
 
@@ -261,10 +258,7 @@ fun SettingsScreen() {
                     },
                     title = { Text("重置诗词 Token") },
                     subtitle = { Text("若长期无法显示今日诗词，点击重置缓存凭证") },
-                    onClick = {
-                        scope.safeLaunch { viewModel.resetPoemsToken() }
-                        showToast("重置成功，重启应用后生效")
-                    }
+                    onClick = { resetPoemsTokenDialog.show() }
                 )
             }
 
@@ -281,12 +275,7 @@ fun SettingsScreen() {
                     title = { Text("版本与更新日志") },
                     subtitle = { Text("当前版本：${appVersionName()} (${appVersionCode()})") },
                     onClick = {
-                        if (viewModel.clickVersion(3000L)) {
-                            viewModel.enableDebugMode()
-                            showToast("开发者模式已启用！")
-                        } else {
-                            uriHandler.openUri("https://blog.mystery0.vip/docs/xgkb/changelog")
-                        }
+                        uriHandler.openUri("https://blog.mystery0.vip/docs/xgkb/changelog")
                     }
                 )
                 UpdateSettings()
@@ -459,10 +448,7 @@ fun SettingsScreen() {
                         )
                     },
                     title = { Text("撤销隐私授权") },
-                    onClick = {
-                        scope.safeLaunch { setCacheStore { allowPrivacy = false } }
-                        showToast("已撤销隐私授权")
-                    },
+                    onClick = { revokePrivacyDialog.show() },
                 )
                 XhuSettingsMenuLink(
                     title = { Text("测试崩溃") },
@@ -484,6 +470,44 @@ fun SettingsScreen() {
         selectedIndex = nightModeList.indexOf(nightMode).coerceAtLeast(0),
         itemLabel = { it.title },
         onSelect = { _, select -> viewModel.updateNightMode(select) },
+    )
+
+    XhuConfirmDialog(
+        state = resetSplashBgDialog,
+        title = "重置启动图隐藏与背景缓存",
+        message = "确认恢复启动图展示，并清除当前已设置的自定义课表背景图吗？",
+        confirmText = "确认重置",
+        onConfirm = {
+            scope.safeLaunch {
+                setCacheStore { hideSplashBefore = LocalDate.MIN }
+                setConfigStore { backgroundImage = null }
+                EventBus.post(EventType.CHANGE_MAIN_BACKGROUND)
+            }
+            showToast("已重置启动图与背景设置")
+        },
+    )
+
+    XhuConfirmDialog(
+        state = resetPoemsTokenDialog,
+        title = "重置诗词 Token",
+        message = "确认清除当前今日诗词的本地缓存凭证吗？重置后需重启应用生效。",
+        confirmText = "确认重置",
+        onConfirm = {
+            scope.safeLaunch { viewModel.resetPoemsToken() }
+            showToast("重置成功，重启应用后生效")
+        },
+    )
+
+    XhuConfirmDialog(
+        state = revokePrivacyDialog,
+        title = "撤销隐私授权",
+        message = "确认撤销当前隐私政策授权吗？下次启动应用时将重新请求授权。",
+        confirmText = "确认撤销",
+        isDestructive = true,
+        onConfirm = {
+            scope.safeLaunch { setCacheStore { allowPrivacy = false } }
+            showToast("已撤销隐私授权")
+        },
     )
 
     HandleErrorMessage(flow = viewModel.errorMessage)
