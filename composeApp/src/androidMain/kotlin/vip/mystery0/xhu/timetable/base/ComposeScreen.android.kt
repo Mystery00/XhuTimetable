@@ -4,6 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 
 @Composable
-actual fun HandleBackPress(backPressed: () -> Unit) {
-    BackHandler(onBack = backPressed)
+actual fun HandleBackPress(enabled: Boolean, backPressed: () -> Unit) {
+    BackHandler(enabled = enabled, onBack = backPressed)
 }

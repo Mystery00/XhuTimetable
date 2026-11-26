@@ -120,7 +120,7 @@ fun CustomCourseColorScreen() {
         }
     }
 
-    HandleBackPress(backPressed = ::back)
+    HandleBackPress(enabled = showSearchView, backPressed = ::back)
     LaunchedEffect(Unit) {
         viewModel.init()
     }

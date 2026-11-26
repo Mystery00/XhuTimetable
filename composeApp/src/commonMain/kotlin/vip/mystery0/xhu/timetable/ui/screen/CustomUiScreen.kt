@@ -103,7 +103,7 @@ fun CustomUiScreen() {
         }
     }
 
-    HandleBackPress(backPressed = ::handleBack)
+    HandleBackPress(enabled = hasUnsavedChanges, backPressed = ::handleBack)
 
     LaunchedEffect(Unit) {
         viewModel.init()

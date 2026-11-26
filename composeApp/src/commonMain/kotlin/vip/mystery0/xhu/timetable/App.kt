@@ -27,6 +27,7 @@ import vip.mystery0.xhu.timetable.ui.theme.XhuTimetableTheme
 import vip.mystery0.xhu.timetable.ui.theme.isDarkMode
 
 private const val NAV_ANIM_DURATION = 260
+private const val SWIPE_EDGE_RIGHT = 1
 
 @Composable
 fun App(startRoute: Nav) {
@@ -91,6 +92,34 @@ fun App(startRoute: Nav) {
                 popExitTransition = {
                     slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.End,
+                        animationSpec = tween(NAV_ANIM_DURATION, easing = FastOutSlowInEasing),
+                        targetOffset = { it / 8 },
+                    ) + fadeOut(
+                        animationSpec = tween(NAV_ANIM_DURATION, easing = FastOutSlowInEasing)
+                    )
+                },
+                predictivePopEnterTransition = { swipeEdge ->
+                    val direction = if (swipeEdge == SWIPE_EDGE_RIGHT) {
+                        AnimatedContentTransitionScope.SlideDirection.Start
+                    } else {
+                        AnimatedContentTransitionScope.SlideDirection.End
+                    }
+                    slideIntoContainer(
+                        direction,
+                        animationSpec = tween(NAV_ANIM_DURATION, easing = FastOutSlowInEasing),
+                        initialOffset = { it / 12 },
+                    ) + fadeIn(
+                        animationSpec = tween(NAV_ANIM_DURATION, easing = FastOutSlowInEasing)
+                    )
+                },
+                predictivePopExitTransition = { swipeEdge ->
+                    val direction = if (swipeEdge == SWIPE_EDGE_RIGHT) {
+                        AnimatedContentTransitionScope.SlideDirection.Start
+                    } else {
+                        AnimatedContentTransitionScope.SlideDirection.End
+                    }
+                    slideOutOfContainer(
+                        direction,
                         animationSpec = tween(NAV_ANIM_DURATION, easing = FastOutSlowInEasing),
                         targetOffset = { it / 8 },
                     ) + fadeOut(
