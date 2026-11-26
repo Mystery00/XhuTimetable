@@ -24,9 +24,12 @@ export function fixtureBootstrap(users: UserSummary[]): BootstrapState {
         { key: 'QUERY_TIMETABLE', title: '全校课表', icon: 'ic_school_timetable', route: 'timetable', link: '', hint: '', action: 'route', unread: false }
       ],
       [
-        { key: 'ACCOUNT_MANAGE', title: '账号管理', icon: 'ic_account_settings', route: 'accounts', link: '', hint: '', action: 'route', unread: false },
+        { key: 'ACCOUNT_MANAGE', title: '账号管理', icon: 'ic_account_settings', route: 'accounts', link: '', hint: '', action: 'route', unread: false,
+          iconUrl: 'resource://RAWFILE/missing_menu.svg' },
         { key: 'CLASS_SETTING', title: '课程设置', icon: 'ic_class_settings', route: 'classSettings', link: '', hint: '', action: 'route', unread: false },
-        { key: 'SETTINGS', title: '软件设置', icon: 'ic_settings', route: 'settings', link: '', hint: '', action: 'route', unread: false }
+        { key: 'SETTINGS', title: '软件设置', icon: 'ic_settings', route: 'settings', link: '', hint: '', action: 'route', unread: false,
+          // 用本地 URL 模拟接口指定的 SVG，GitHub 原色与软件设置的蓝色齿轮可区分。
+          iconUrl: 'resource://RAWFILE/shared/ic_github.svg' }
       ]
     ] };
 }

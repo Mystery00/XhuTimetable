@@ -227,11 +227,11 @@ async function checkCourseColorRow(driver: Driver, name: string, custom: boolean
   await textInCard(driver, 'course-color-row-' + name, '已自定义', custom);
 }
 
-async function checkRowSwatch(name: string, expectedColor: string): Promise<void> {
+async function checkRowSwatch(rowId: string, expectedColor: string): Promise<void> {
   const ability = await abilityDelegatorRegistry.getAbilityDelegator().getCurrentTopAbility();
   const fixtureWindow = await window.getLastWindow(ability.context);
   const snapshot = await fixtureWindow.getUIContext().getComponentSnapshot()
-    .get('course-color-row-' + name, { waitUntilRenderFinished: true });
+    .get(rowId, { waitUntilRenderFinished: true });
   try {
     const info = await snapshot.getImageInfo();
     const width = info.size.width;
@@ -249,7 +249,7 @@ async function checkRowSwatch(name: string, expectedColor: string): Promise<void
       if (run >= 8) return;
     }
     const x = Math.round(width * 0.085) * 4;
-    throw new Error(name + ' 预期色块 ' + expectedColor + '，像素格式 ' + info.pixelFormat + '，原始采样 ' + bytes.slice(x, x + 4).join(','));
+    throw new Error(rowId + ' 预期色块 ' + expectedColor + '，像素格式 ' + info.pixelFormat + '，原始采样 ' + bytes.slice(x, x + 4).join(','));
   } finally {
     await snapshot.release();
   }
@@ -257,7 +257,7 @@ async function checkRowSwatch(name: string, expectedColor: string): Promise<void
 
 async function openCourseColor(driver: Driver, name: string, expectedColor: string): Promise<void> {
   await onScreen(driver, ON.id('course-color-row-' + name), '定位待编辑的课程');
-  await checkRowSwatch(name, expectedColor);
+  await checkRowSwatch('course-color-row-' + name, expectedColor);
   await clickTarget(driver, ON.id('course-color-row-' + name), '编辑课程颜色 ' + name);
   await onScreen(driver, ON.text('精选色板'), '打开选色弹窗');
   await onScreen(driver, ON.type('Text').text(expectedColor), '核对 ' + name + ' 的当前色');
@@ -541,6 +541,13 @@ export default function nativeUiTest(): void {
       await visible(driver, ON.text('本学期暂无实践课程安排'));
       await back(driver);
       await absent(driver, ON.text('本学期暂无实践课程安排'));
+    });
+
+    it('profileMenuUsesServerSvg', 0, async () => {
+      const driver = await openFixture('profile');
+      await onScreen(driver, ON.id('profile-menu-SETTINGS'), '显示软件设置菜单');
+      await checkRowSwatch('profile-menu-SETTINGS', '#191717');
+      await checkRowSwatch('profile-menu-ACCOUNT_MANAGE', '#2c5ccb');
     });
 
     it('两条实践课程用短弹层展示，冲突详情可横滑，选周可点到末行', 0, async () => {

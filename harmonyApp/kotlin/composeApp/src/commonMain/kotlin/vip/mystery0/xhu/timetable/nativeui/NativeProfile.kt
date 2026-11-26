@@ -42,6 +42,7 @@ fun profileMenus(groups: List<List<Menu>>, noticeUnread: Boolean, feedbackUnread
             put("key", key)
             put("title", menu.title)
             put("icon", icon)
+            menu.icon?.takeIf { it.isNotBlank() }?.let { put("iconUrl", it) }
             put("route", route)
             put("link", menu.link)
             put("hint", menu.hint)

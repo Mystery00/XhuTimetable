@@ -108,6 +108,7 @@ koin-android = { module = "io.insert-koin:koin-android" }
 
 coil-bom = { module = "io.coil-kt.coil3:coil-bom", version.ref = "coil-bom" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose" }
+coil-svg = { module = "io.coil-kt.coil3:coil-svg" }
 coil-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3" }
 coil-cache-control = { module = "io.coil-kt.coil3:coil-network-cache-control" }
 

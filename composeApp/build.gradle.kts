@@ -133,6 +133,7 @@ kotlin {
             //coil
             implementation(project.dependencies.platform(libs.coil.bom))
             implementation(libs.coil.compose)
+            implementation(libs.coil.svg)
             implementation(libs.coil.ktor3)
             implementation(libs.coil.cache.control)
             //kermit

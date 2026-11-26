@@ -11,6 +11,7 @@ data class MenuResponse(
     var group: Int,
     var hint: String,
     var link: String,
+    val icon: String? = null,
 ) {
     fun toMenu(): Menu =
         Menu(
@@ -20,5 +21,6 @@ data class MenuResponse(
             group = group,
             hint = hint,
             link = link,
+            icon = icon,
         )
 }

@@ -47,12 +47,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.LocalPlatformContext
+import coil3.compose.rememberAsyncImagePainter
+import coil3.request.ImageRequest
+import coil3.svg.SvgDecoder
 import kotlinx.coroutines.Dispatchers
 import org.koin.compose.viewmodel.koinViewModel
 import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
@@ -280,7 +284,7 @@ val profileCourseContent: TabContent = @Composable {
                         ) {
                             rowItems.forEach { (menu, item) ->
                                 QuickToolCell(
-                                    painter = item.icon(),
+                                    painter = menuIconPainter(menu.icon, item.icon()),
                                     title = menu.title,
                                     modifier = Modifier.weight(1f),
                                     onClick = {
@@ -313,7 +317,7 @@ val profileCourseContent: TabContent = @Composable {
                             else -> false
                         }
                         BuildProfileItem(
-                            painter = item.icon(),
+                            painter = menuIconPainter(menu.icon, item.icon()),
                             title = menu.title,
                             showBadge = showBadge,
                             click = {
@@ -367,6 +371,21 @@ private fun ProfileInfoGrid(items: List<Pair<String, String>>) {
             }
         }
     }
+}
+
+@Composable
+private fun menuIconPainter(url: String?, localIcon: Painter): Painter {
+    if (url.isNullOrBlank()) return localIcon
+    val context = LocalPlatformContext.current
+    val pixels = with(LocalDensity.current) { 24.dp.roundToPx() }
+    val request = remember(context, url, pixels) {
+        ImageRequest.Builder(context)
+            .data(url)
+            .size(pixels)
+            .decoderFactory(SvgDecoder.Factory())
+            .build()
+    }
+    return rememberAsyncImagePainter(request, placeholder = localIcon, error = localIcon)
 }
 
 @Composable

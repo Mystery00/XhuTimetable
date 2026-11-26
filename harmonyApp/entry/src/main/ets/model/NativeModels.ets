@@ -17,6 +17,7 @@ export interface ProfileMenu {
   key: string;
   title: string;
   icon: string;
+  iconUrl?: string;
   route: string;
   link: string;
   hint: string;

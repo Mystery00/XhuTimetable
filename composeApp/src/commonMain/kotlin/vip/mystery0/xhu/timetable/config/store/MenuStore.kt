@@ -58,4 +58,5 @@ data class Menu(
     var hint: String,
     //跳转链接
     var link: String,
+    val icon: String? = null,
 )

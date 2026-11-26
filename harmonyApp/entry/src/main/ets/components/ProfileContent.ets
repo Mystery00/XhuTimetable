@@ -54,13 +54,21 @@ export struct ProfileContent {
     return rows;
   }
 
+  private localMenuIcon(menu: ProfileMenu): Resource {
+    const suffix = this.dark && !menu.icon.startsWith('ic_action_') ? '_night.svg' : '.svg';
+    return $rawfile('shared/' + (menu.icon || 'ic_unknown_menu') + suffix);
+  }
+
   @Builder
   private menuIcon(menu: ProfileMenu) {
-    if (menu.icon.startsWith('ic_action_')) {
+    if (menu.iconUrl) {
+      Image(menu.iconUrl).alt(this.localMenuIcon(menu)).width(24).height(24)
+        .objectFit(ImageFit.Contain).accessibilityLevel('no')
+    } else if (menu.icon.startsWith('ic_action_')) {
       Image($rawfile('shared/' + menu.icon + '.svg')).width(24).height(24)
         .fillColor($r('app.color.text_primary')).accessibilityLevel('no')
     } else {
-      Image($rawfile('shared/' + (menu.icon || 'ic_unknown_menu') + (this.dark ? '_night' : '') + '.svg'))
+      Image(this.localMenuIcon(menu))
         .width(24).height(24).objectFit(ImageFit.Contain).accessibilityLevel('no')
     }
   }
