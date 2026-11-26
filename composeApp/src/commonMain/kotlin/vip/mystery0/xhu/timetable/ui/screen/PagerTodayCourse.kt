@@ -1,15 +1,12 @@
 package vip.mystery0.xhu.timetable.ui.screen
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -50,7 +47,6 @@ import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -122,26 +118,22 @@ import xhutimetable.composeapp.generated.resources.state_no_course_data
 
 val todayCourseTitleBar: TabTitle = @Composable {
     val viewModel = koinViewModel<MainViewModel>()
-    val showTomorrow by viewModel.showTomorrowCourse.collectAsState()
-    val isCustomDate by viewModel.isTodayDateCustomSelected.collectAsState()
+    val headerDateText by viewModel.selectedTodayHeaderText.collectAsState()
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    AnimatedContent(
+        targetState = headerDateText.ifBlank { "今日课程" },
+        transitionSpec = {
+            fadeIn(tween(160, easing = FastOutSlowInEasing)) togetherWith
+                fadeOut(tween(120, easing = FastOutSlowInEasing))
+        },
+        label = "todayTopBarDateTitle",
+    ) { text ->
         Text(
-            text = when {
-                isCustomDate -> "日程预览"
-                showTomorrow -> "明日课程"
-                else -> "今日课程"
-            },
+            text = text,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
         )
-        if (showTomorrow && !isCustomDate) {
-            Text(
-                text = "已自动切换至明日课表",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary,
-            )
-        }
     }
 }
 
@@ -149,24 +141,7 @@ val todayCourseActions: TabAction = @Composable {
     val viewModel = koinViewModel<MainViewModel>()
     val pagerViewModel = koinViewModel<PagerMainViewModel>()
     val loading by viewModel.loading.collectAsState()
-    val isCustomDate by viewModel.isTodayDateCustomSelected.collectAsState()
 
-    AnimatedVisibility(
-        visible = isCustomDate,
-        enter = fadeIn() + scaleIn(),
-        exit = fadeOut() + scaleOut(),
-    ) {
-        IconButton(
-            onClick = { viewModel.resetTodayDateToDefault() },
-            modifier = Modifier.fillMaxHeight(),
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.Today,
-                contentDescription = "回到今天",
-                tint = MaterialTheme.colorScheme.primary,
-            )
-        }
-    }
     if (loading) {
         LoadingButton(
             loadingValue = LoadingValue.Loading,
@@ -203,11 +178,8 @@ val todayCourseContent: TabContent = @Composable {
     val loading by viewModel.loading.collectAsState()
 
     val selectedDate by viewModel.selectedTodayDate.collectAsState()
-    val headerDateText by viewModel.selectedTodayHeaderText.collectAsState()
-    val yearTermLabel by viewModel.currentYearTermLabel.collectAsState()
     val weekDays by viewModel.todayWeekDays.collectAsState()
     val isCustomDate by viewModel.isTodayDateCustomSelected.collectAsState()
-    val showTomorrow by viewModel.showTomorrowCourse.collectAsState()
 
     val pullToRefreshState = rememberPullToRefreshState()
 
@@ -232,18 +204,15 @@ val todayCourseContent: TabContent = @Composable {
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                // 顶部超课风格日期头 + 7天周历切换条
-                item(key = "today_week_header") {
-                    TodayWeekStripHeader(
-                        dateHeaderText = headerDateText,
-                        yearTermLabel = yearTermLabel,
-                        weekDays = weekDays,
-                        showBackToToday = isCustomDate,
-                        showTomorrowBadge = showTomorrow && !isCustomDate,
-                        alpha = customUi.todayBackgroundAlpha,
-                        onSelectDate = { date -> viewModel.selectTodayDate(date) },
-                        onResetToday = { viewModel.resetTodayDateToDefault() },
-                    )
+                // 顶部 7 天周历选择条（固定高度，仅保留 7 个星期框，切换无抖动）
+                if (weekDays.isNotEmpty()) {
+                    item(key = "today_week_header") {
+                        TodayWeekStripHeader(
+                            weekDays = weekDays,
+                            alpha = customUi.todayBackgroundAlpha,
+                            onSelectDate = { date -> viewModel.selectTodayDate(date) },
+                        )
+                    }
                 }
 
                 // 节假日横幅
@@ -350,14 +319,9 @@ val todayCourseContent: TabContent = @Composable {
 
 @Composable
 private fun TodayWeekStripHeader(
-    dateHeaderText: String,
-    yearTermLabel: String,
     weekDays: List<TodayWeekDayItem>,
-    showBackToToday: Boolean,
-    showTomorrowBadge: Boolean,
     alpha: Float,
     onSelectDate: (kotlinx.datetime.LocalDate) -> Unit,
-    onResetToday: () -> Unit,
 ) {
     val isDark = isDarkMode()
     val containerColor = MaterialTheme.colorScheme.surface.copy(
@@ -370,94 +334,18 @@ private fun TodayWeekStripHeader(
         color = containerColor,
         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = 10.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            // 第一行：11月25日 第12周 | 周三  2026-2027 第1学期
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Row(
+            weekDays.forEach { dayItem ->
+                WeekDayPillItem(
+                    item = dayItem,
                     modifier = Modifier.weight(1f),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    AnimatedContent(
-                        targetState = dateHeaderText.ifBlank { "今日课程" },
-                        transitionSpec = {
-                            fadeIn(tween(180)) togetherWith fadeOut(tween(140))
-                        },
-                        label = "todayHeaderDateText",
-                    ) { text ->
-                        Text(
-                            text = text,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                        )
-                    }
-                    if (yearTermLabel.isNotBlank()) {
-                        Text(
-                            text = yearTermLabel,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                }
-                if (showBackToToday) {
-                    Surface(
-                        onClick = onResetToday,
-                        shape = RoundedCornerShape(10.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                    ) {
-                        Text(
-                            text = "回今天",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                        )
-                    }
-                } else if (showTomorrowBadge) {
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                    ) {
-                        Text(
-                            text = "明日",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                        )
-                    }
-                }
-            }
-
-            // 第二行：Mon 23 ~ Sun 29 胶囊日期选择条
-            if (weekDays.isNotEmpty()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    weekDays.forEach { dayItem ->
-                        WeekDayPillItem(
-                            item = dayItem,
-                            modifier = Modifier.weight(1f),
-                            onClick = { onSelectDate(dayItem.date) },
-                        )
-                    }
-                }
+                    onClick = { onSelectDate(dayItem.date) },
+                )
             }
         }
     }

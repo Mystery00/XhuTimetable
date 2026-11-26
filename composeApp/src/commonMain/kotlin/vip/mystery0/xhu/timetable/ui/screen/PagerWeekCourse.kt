@@ -3,15 +3,12 @@ package vip.mystery0.xhu.timetable.ui.screen
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -35,6 +32,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -74,6 +72,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -136,66 +135,67 @@ val weekCourseTitleBar: TabTitle = @Composable {
     ) {
         Row(
             modifier = Modifier
-                .animateContentSize(animationSpec = tween(220, easing = FastOutSlowInEasing))
-                .padding(horizontal = 12.dp, vertical = 5.dp),
+                .widthIn(min = 104.dp)
+                .padding(horizontal = 14.dp, vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.Center,
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    AnimatedContent(
-                        targetState = week,
-                        transitionSpec = {
-                            val forward = targetState > initialState
-                            val enter = slideInVertically(
-                                animationSpec = tween(240, easing = FastOutSlowInEasing),
-                                initialOffsetY = { if (forward) it / 2 else -it / 2 },
-                            ) + fadeIn(animationSpec = tween(200, easing = FastOutSlowInEasing))
-                            val exit = slideOutVertically(
-                                animationSpec = tween(200, easing = FastOutSlowInEasing),
-                                targetOffsetY = { if (forward) -it / 2 else it / 2 },
-                            ) + fadeOut(animationSpec = tween(160, easing = FastOutSlowInEasing))
-                            (enter togetherWith exit).using(SizeTransform(clip = true))
-                        },
-                        label = "weekTitleTransition",
-                    ) { targetWeek ->
-                        val title = when {
-                            targetWeek <= 0 -> "尚未开学"
-                            targetWeek > TOTAL_WEEKS -> "学期已结束"
-                            else -> "第${targetWeek}周"
+            AnimatedContent(
+                targetState = week to isNotActualWeek,
+                contentAlignment = Alignment.Center,
+                transitionSpec = {
+                    val forward = targetState.first >= initialState.first
+                    val enter = slideInVertically(
+                        animationSpec = tween(220, easing = FastOutSlowInEasing),
+                        initialOffsetY = { if (forward) it / 3 else -it / 3 },
+                    ) + fadeIn(animationSpec = tween(200, easing = FastOutSlowInEasing))
+                    val exit = slideOutVertically(
+                        animationSpec = tween(180, easing = FastOutSlowInEasing),
+                        targetOffsetY = { if (forward) -it / 3 else it / 3 },
+                    ) + fadeOut(animationSpec = tween(150, easing = FastOutSlowInEasing))
+                    (enter togetherWith exit).using(
+                        SizeTransform(clip = true) { _, _ ->
+                            tween(220, easing = FastOutSlowInEasing)
                         }
+                    )
+                },
+                label = "weekTitleTransition",
+            ) { (targetWeek, showNotCurrent) ->
+                val title = when {
+                    targetWeek <= 0 -> "尚未开学"
+                    targetWeek > TOTAL_WEEKS -> "学期已结束"
+                    else -> "第${targetWeek}周"
+                }
+                Column(
+                    modifier = Modifier.widthIn(min = 60.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                    )
+                    if (showNotCurrent) {
                         Text(
-                            text = title,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            text = "非本周",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            textAlign = TextAlign.Center,
                             maxLines = 1,
                         )
                     }
-                    Icon(
-                        imageVector = Icons.Rounded.KeyboardArrowDown,
-                        contentDescription = "切换周次",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp),
-                    )
-                }
-                AnimatedVisibility(
-                    visible = isNotActualWeek,
-                    enter = expandVertically(tween(200, easing = FastOutSlowInEasing)) +
-                        fadeIn(tween(180, easing = FastOutSlowInEasing)),
-                    exit = shrinkVertically(tween(180, easing = FastOutSlowInEasing)) +
-                        fadeOut(tween(140, easing = FastOutSlowInEasing)),
-                ) {
-                    Text(
-                        text = "非本周 · 当前第${actualWeek}周",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
                 }
             }
+            Spacer(modifier = Modifier.width(2.dp))
+            Icon(
+                imageVector = Icons.Rounded.KeyboardArrowDown,
+                contentDescription = "切换周次",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp),
+            )
         }
     }
 }
@@ -241,24 +241,33 @@ val weekCourseContent: TabContent = @Composable {
     val showWeekPickerSheet by pagerViewModel.showWeekPickerSheet.collectAsState()
 
     val courseDialogState = remember { mutableStateOf<List<WeekCourseView>>(emptyList()) }
-    val scope = rememberCoroutineScope()
 
     val initialPage = (currentWeek - 1).coerceIn(0, TOTAL_WEEKS - 1)
     val pagerState = rememberPagerState(initialPage = initialPage) { TOTAL_WEEKS }
+    // 标记程序触发的跨周平滑跳转，避免途经页反向覆盖目标周次导致跳转中断
+    var programmaticTargetPage by remember { mutableStateOf<Int?>(null) }
 
     // 外部点击周次选择/回本周时，平滑滚动 Pager 到目标周
     LaunchedEffect(currentWeek) {
         val targetPage = (currentWeek - 1).coerceIn(0, TOTAL_WEEKS - 1)
-        if (pagerState.currentPage != targetPage && !pagerState.isScrollInProgress) {
-            pagerState.animateScrollToPage(targetPage)
+        if (pagerState.currentPage != targetPage) {
+            programmaticTargetPage = targetPage
+            try {
+                pagerState.animateScrollToPage(targetPage)
+            } finally {
+                if (programmaticTargetPage == targetPage) {
+                    programmaticTargetPage = null
+                }
+            }
         }
     }
 
-    // 手势左右滑动翻周过半即实时更新顶栏周次与动画
+    // 手势左右滑动翻周过半即实时更新顶栏周次与动画（忽略程序跳转的途经页）
     LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }
+        snapshotFlow { pagerState.currentPage to programmaticTargetPage }
             .distinctUntilChanged()
-            .collect { page ->
+            .collect { (page, target) ->
+                if (target != null) return@collect
                 val targetWeek = page + 1
                 if (viewModel.week.value != targetWeek) {
                     viewModel.changeCurrentWeek(targetWeek)
@@ -302,9 +311,6 @@ val weekCourseContent: TabContent = @Composable {
                 onWeekSelect = { targetWeek ->
                     pagerViewModel.showWeekPickerSheet.value = false
                     viewModel.changeCurrentWeek(targetWeek)
-                    scope.launch {
-                        pagerState.animateScrollToPage((targetWeek - 1).coerceIn(0, TOTAL_WEEKS - 1))
-                    }
                 },
             )
         }
