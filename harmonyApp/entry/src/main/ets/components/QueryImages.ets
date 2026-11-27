@@ -1,3 +1,4 @@
+import { iconTint } from './IconTint';
 import { DisplayItem } from '../model/NativeModels';
 import { localImage, withOpacity } from './AppComponents';
 import { FeatureError } from './FeatureControls';
@@ -6,6 +7,7 @@ import { FeatureError } from './FeatureControls';
 export struct BackgroundGallery {
   @Prop items: DisplayItem[] = [];
   @Prop busy: boolean = false;
+  @Prop navigationInset: number = 0;
   onSelect: (item: DisplayItem) => void = () => {};
 
   build() {
@@ -17,7 +19,7 @@ export struct BackgroundGallery {
             if (item.selected) {
               Stack() {
                 Circle().width(36).height(36).fill($r('app.color.primary'))
-                Image($rawfile('shared/ic_action_done.svg')).width(20).height(20).fillColor($r('app.color.on_primary'))
+                Image($rawfile('shared/ic_action_done.svg')).width(20).height(20).colorFilter(iconTint($r('app.color.on_primary')))
               }.width('100%').height('100%').backgroundColor('#40000000')
             }
           }.width('100%').aspectRatio(9 / 16).borderRadius(16).clip(true)
@@ -27,7 +29,7 @@ export struct BackgroundGallery {
         }
       }, (item: DisplayItem) => item.id + ':' + item.image + ':' + (item.selected ? 'selected' : 'normal'))
       // 末行间距 10vp 加上占位 78vp，给浮动按钮留出随内容滚动的 88vp。
-      GridItem() { Row().height(78) }.columnStart(0).columnEnd(2).accessibilityLevel('no')
+      GridItem() { Row().height(78 + this.navigationInset) }.columnStart(0).columnEnd(2).accessibilityLevel('no')
     }.columnsTemplate('1fr 1fr 1fr').columnsGap(10).rowsGap(10).width('100%').height('100%')
       .padding({ left: 12, right: 12, top: 8 }).scrollBar(BarState.Auto)
   }

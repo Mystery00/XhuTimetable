@@ -92,6 +92,7 @@ export struct HomeCalendar {
   @State private targetIndex: number = 0;
   @State private firstIndex: number = 0;
   onTitle: (title: string) => void = () => {};
+  onSelect: (item: DisplayItem) => void = () => {};
   private scroller: Scroller = new Scroller();
   private source: HomeCalendarSource = new HomeCalendarSource();
   private hasAutoScrolled: boolean = false;
@@ -190,6 +191,7 @@ export struct HomeCalendar {
       Column({ space: 6 }) {
         ForEach(day.items, (item: DisplayItem) => {
           HomeCalendarCard({ item: item })
+            .onClick(() => { this.onSelect(item); })
         }, (item: DisplayItem, index: number) => item.id + ':' + index + ':' + JSON.stringify(item))
       }.layoutWeight(1).padding({ right: 16 })
     }.width('100%').padding({ top: 8, bottom: 8 }).alignItems(VerticalAlign.Top)

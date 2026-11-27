@@ -1,6 +1,6 @@
 import { DisplayItem } from '../model/NativeModels';
 import { courseAccent, withOpacity } from './HomeStyle';
-import { HomeAccountBadge, homeCourseStatus, HomeIcon, HomeStatusBadge } from './HomeWidgets';
+import { HomeAccountBadge, homeCourseStatus, HomeStatusBadge } from './HomeWidgets';
 
 export { createEmptyHomeState, courseAccent, courseSoftContainer, isNonCurrentCourseColor,
   readableCourseText, weekCellContainer, withOpacity } from './HomeStyle';
@@ -98,65 +98,79 @@ export struct ScheduleCard {
     return this.showStatus ? homeCourseStatus(this.item.status) : '';
   }
 
+  private inClass(): boolean {
+    return this.cardStatus() === '开课中';
+  }
+
+  private isNext(): boolean {
+    return this.showStatus && this.item.nextCourse === true && !this.inClass();
+  }
+
+  private nextColor(): string {
+    return this.dark ? '#4F7B16' : '#AEEA4F';
+  }
+
+  @Builder
+  private timeColumn() {
+    Column({ space: 3 }) {
+      Text(this.item.time).fontSize(12).lineHeight(14).fontWeight(FontWeight.Bold).maxLines(1)
+        .fontColor($r('app.color.text_primary'))
+      Text(this.item.startTime ?? '').fontSize(11).lineHeight(13).fontWeight(FontWeight.Medium)
+        .fontColor($r('app.color.text_secondary'))
+      Text(this.item.endTime ?? '').fontSize(11).lineHeight(13)
+        .fontColor(withOpacity($r('app.color.text_secondary'), 0.78))
+    }.width(58).padding({ top: 8, bottom: 8, left: 4, right: 4 }).borderRadius(12)
+      .backgroundColor(withOpacity($r('app.color.surface'), Math.max(0.45, Math.min(0.86, this.cardOpacity * (this.dark ? 0.56 : 0.72)))))
+  }
+
   build() {
-    Stack({ alignContent: Alignment.TopStart }) {
-      Row({ space: 12 }) {
-        Column({ space: 3 }) {
-          HomeIcon({ name: 'watermelon', iconSize:16, tint: this.accent() })
-          Text(this.item.startTime ?? '').fontSize(14).lineHeight(17.92).fontWeight(600)
-            .fontColor($r('app.color.text_primary')).maxLines(1)
-          Text(this.item.endTime ?? '').fontSize(11).lineHeight(13.75)
-            .fontColor($r('app.color.text_secondary')).maxLines(1)
-        }.width(46)
-        Column() {}.width(4)
-        Column({ space: 5 }) {
-          Row({ space: 8 }) {
-            Text(this.item.title).fontSize(16).lineHeight(21.12).fontWeight(600)
-              .fontColor($r('app.color.text_primary')).layoutWeight(1).maxLines(2)
-              .textOverflow({ overflow: TextOverflow.Ellipsis })
-            if (this.item.time.length > 0) {
-              Text(this.item.time).fontSize(11).lineHeight(13.75).fontWeight(FontWeight.Medium)
-                .fontColor($r('app.color.text_secondary')).maxLines(1)
-                .padding({ left: 7, right: 7, top: 3, bottom: 3 }).borderRadius(8)
-                .backgroundColor(withOpacity($r('app.color.container_highest'), 0.85))
+    Row({ space: 8 }) {
+      this.timeColumn()
+      Column() {}.width(1).height(Math.max(0, this.contentHeight - 16))
+        .backgroundColor(this.inClass() ? withOpacity(this.accent(), 0.55) : this.isNext() ? withOpacity(this.nextColor(), 0.85) : withOpacity($r('app.color.outline'), 0.45))
+      Column() {
+        Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Stretch }) {
+          Column() {}.width(3.5).borderRadius(4).backgroundColor(this.accent()).margin({ top: 2, bottom: 2, right: 10 })
+          Column({ space: 5 }) {
+            Row({ space: 8 }) {
+              Text(this.item.title).fontSize(16).lineHeight(21.12).fontWeight(FontWeight.Bold)
+                .fontColor($r('app.color.text_primary')).layoutWeight(1).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+              if (this.multiAccount && this.item.badge.length > 0) {
+                HomeAccountBadge({ text: this.item.badge })
+              } else if (this.cardStatus() === '已结束') {
+                HomeStatusBadge({ status: this.item.status })
+              }
+            }.width('100%').alignItems(VerticalAlign.Top)
+            if (this.item.location.length > 0) {
+              Text('上课地点：' + this.item.location).fontSize(12).lineHeight(16.56).fontColor($r('app.color.text_secondary'))
+                .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
             }
-          }.width('100%').alignItems(VerticalAlign.Top)
-          if (this.item.location.length > 0) {
-            Row({ space: 5 }) {
-              HomeIcon({ name: 'location', iconSize:14 })
-              Text(this.item.location).fontSize(12).lineHeight(16.56).fontColor($r('app.color.text_secondary'))
-                .layoutWeight(1).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
-            }.width('100%')
-          }
-          Row({ space: 8 }) {
             if (this.item.subtitle.length > 0) {
-              Row({ space: 5 }) {
-                HomeIcon({ name: 'person', iconSize:14 })
-                Text(this.item.subtitle).fontSize(12).lineHeight(16.56).fontColor($r('app.color.text_secondary'))
-                  .layoutWeight(1).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
-              }.layoutWeight(1)
-            } else {
-              Blank().layoutWeight(1)
+              Text('上课老师：' + this.item.subtitle).fontSize(12).lineHeight(16.56).fontColor($r('app.color.text_secondary'))
+                .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
             }
-            if (this.multiAccount && this.item.badge.length > 0) {
-              HomeAccountBadge({ text: this.item.badge })
-            }
-            if (this.cardStatus().length > 0) {
+            if (this.multiAccount && this.cardStatus() === '已结束') {
               HomeStatusBadge({ status: this.item.status })
             }
-          }.width('100%')
-        }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-      }.width('100%').padding(14).opacity(this.cardStatus() === '已结束' ? 0.72 : 1)
+          }.flexGrow(1).flexBasis(0).alignItems(HorizontalAlign.Start)
+        }.width('100%').padding({ left: 14, right: 16, top: 14, bottom: this.inClass() || this.isNext() ? 10 : 14 })
+        if (this.inClass() || this.isNext()) {
+          Row({ space: 5 }) {
+            if (this.inClass()) {
+              Circle().width(6).height(6).fill(this.dark ? '#FFB74D' : '#E65100')
+            }
+            Text(this.inClass() ? '上课中' : '下一节课').fontSize(11).lineHeight(14).fontWeight(FontWeight.Bold)
+              .fontColor(this.inClass() ? (this.dark ? '#FFB74D' : '#E65100') : (this.dark ? '#E9FFB8' : '#1A3300'))
+          }.padding({ left: 12, right: 12, top: 5, bottom: 5 }).borderRadius({ topRight: 12, bottomLeft: 18 })
+            .backgroundColor(this.inClass() ? (this.dark ? '#42290A' : '#FFF0DB') : this.nextColor())
+        }
+      }.layoutWeight(1).alignItems(HorizontalAlign.Start).borderRadius(18).clip(true)
+        .backgroundColor(withOpacity($r('app.color.card'), this.cardOpacity))
+        .border({ width: this.inClass() ? 1.2 : this.isNext() ? 1 : 0.5, color: this.inClass() ? withOpacity(this.accent(), 0.65) :
+          this.isNext() ? withOpacity(this.nextColor(), this.dark ? 0.75 : 0.95) : withOpacity($r('app.color.outline'), 0.35) })
         .onAreaChange((_oldArea: Area, area: Area) => { this.contentHeight = Number(area.height); })
-      // ArkUI 用实际布局高度实现 Compose IntrinsicSize.Min 的随内容色条。
-      Column() {}.width(4).height(Math.max(0, this.contentHeight - 28)).borderRadius(4)
-        .backgroundColor(this.accent()).position({ x: 72, y: 14 }).hitTestBehavior(HitTestMode.None)
-        .opacity(this.cardStatus() === '已结束' ? 0.72 : 1)
-    }.width('100%').borderRadius(18).backgroundColor(withOpacity($r('app.color.card'), this.cardOpacity))
-      .border({ width: this.cardStatus() === '开课中' ? 1.2 : 0.5,
-        color: this.cardStatus() === '开课中' ? withOpacity(this.accent(), 0.65) : withOpacity($r('app.color.outline'), 0.35) })
-      .onClick(this.onSelect).accessibilityGroup(true)
-      .accessibilityText(this.item.title + '，' + (this.item.startTime ?? '') + '至' + (this.item.endTime ?? '') + '，' + this.item.time + '，' + this.item.location)
+        .onClick(this.onSelect)
+    }.width('100%').opacity(this.cardStatus() === '已结束' ? 0.68 : 1)
   }
 }
 

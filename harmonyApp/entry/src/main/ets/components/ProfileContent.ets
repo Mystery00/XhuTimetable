@@ -1,3 +1,4 @@
+import { iconTint } from './IconTint';
 import { ProfileMenu, UserSummary } from '../model/NativeModels';
 import { localImage, withOpacity } from './AppComponents';
 import { ProfileUiIcon } from './ProfileUiControls';
@@ -16,7 +17,6 @@ export struct ProfileContent {
   onNavigate: (route: string) => void = () => {};
   onMenu: (menu: ProfileMenu) => void = () => {};
   @State private expanded: boolean = false;
-  @StorageProp('harmonyDark') private dark: boolean = false;
   private quickKeys: string[] = ['QUERY_EXAM', 'QUERY_SCORE', 'EXP_SCORE', 'QUERY_FREE_ROOM', 'QUERY_TIMETABLE'];
 
   private user(): UserSummary | undefined {
@@ -55,8 +55,7 @@ export struct ProfileContent {
   }
 
   private localMenuIcon(menu: ProfileMenu): Resource {
-    const suffix = this.dark && !menu.icon.startsWith('ic_action_') ? '_night.svg' : '.svg';
-    return $rawfile('shared/' + (menu.icon || 'ic_unknown_menu') + suffix);
+    return $rawfile('shared/' + (menu.icon || 'ic_unknown_menu') + '.svg');
   }
 
   @Builder
@@ -66,7 +65,7 @@ export struct ProfileContent {
         .objectFit(ImageFit.Contain).accessibilityLevel('no')
     } else if (menu.icon.startsWith('ic_action_')) {
       Image($rawfile('shared/' + menu.icon + '.svg')).width(24).height(24)
-        .fillColor($r('app.color.text_primary')).accessibilityLevel('no')
+        .colorFilter(iconTint($r('app.color.text_primary'))).accessibilityLevel('no')
     } else {
       Image(this.localMenuIcon(menu))
         .width(24).height(24).objectFit(ImageFit.Contain).accessibilityLevel('no')
@@ -137,7 +136,7 @@ export struct ProfileContent {
                 Blank()
                 Button({ type: ButtonType.Normal }) {
                   Row({ space: 4 }) {
-                    Image($rawfile('shared/ic_action_multi_user.svg')).width(16).height(16).fillColor($r('app.color.primary'))
+                    Image($rawfile('shared/ic_action_multi_user.svg')).width(16).height(16).colorFilter(iconTint($r('app.color.primary')))
                     Text('切换或管理账号').fontSize(14).fontColor($r('app.color.primary'))
                   }
                 }.height(40).backgroundColor(Color.Transparent).id('profile-manage-accounts')

@@ -1,5 +1,6 @@
 import { DisplayItem, ListResult } from '../model/NativeModels';
 import { NativeClient } from '../platform/NativeClient';
+import { dialogWidth } from './DialogLayout';
 import { withOpacity } from './AppComponents';
 import { FeatureColorDialog, FeatureEmpty, FeatureError, FeatureIcon, featureError, featureTitle } from './FeatureControls';
 
@@ -17,6 +18,7 @@ interface CourseColorChange {
 @Component
 export struct CourseColorContent {
   client: NativeClient | undefined = undefined;
+  @Prop navigationInset: number = 0;
   onBack: () => void = () => {};
   registerBackHandler: (handler: (() => boolean) | undefined) => void = () => {};
   @State private courses: DisplayItem[] = [];
@@ -83,8 +85,17 @@ export struct CourseColorContent {
     this.dialog.open();
   }
 
+  private confirmReset(course: DisplayItem): void {
+    this.getUIContext().showAlertDialog({
+      width: dialogWidth(this.getUIContext()), alignment: DialogAlignment.Center,
+      title: '恢复默认颜色', message: '确认将课程「' + course.title + '」的自定义颜色恢复为默认配色吗？',
+      primaryButton: { value: '取消', action: () => {} },
+      secondaryButton: { value: '恢复默认', action: () => this.update(course.id) }
+    });
+  }
+
   private async update(id: string, color?: string): Promise<void> {
-    if (this.saving) return;
+    if (this.saving || !this.active) return;
     this.saving = true;
     this.error = '';
     try {
@@ -146,7 +157,7 @@ export struct CourseColorContent {
       if (course.selected) {
         Button({ type: ButtonType.Circle }) { FeatureIcon({ name: 'restore', tint: $r('app.color.text_secondary') }).scale({ x: 0.84, y: 0.84 }) }
           .width(36).height(36).margin({ right: 14 }).backgroundColor(Color.Transparent)
-          .id('course-color-reset-' + course.id).accessibilityText('恢复默认颜色').onClick(() => this.update(course.id))
+          .id('course-color-reset-' + course.id).accessibilityText('恢复默认颜色').onClick(() => this.confirmReset(course))
       }
     }.width('100%').borderRadius(16).backgroundColor($r('app.color.card')).clip(true).enabled(!this.saving)
       .border({ width: 0.5, color: withOpacity($r('app.color.outline'), 0.4) })
@@ -162,7 +173,7 @@ export struct CourseColorContent {
           ForEach(this.courses, (course: DisplayItem) => {
             ListItem() { this.courseRow(course) }
           }, (course: DisplayItem) => JSON.stringify([course.id, course.color, course.selected ? 'custom' : 'default']))
-        }.layoutWeight(1).width('100%').padding({ left: 16, right: 16 }).contentStartOffset(10).contentEndOffset(10)
+        }.layoutWeight(1).width('100%').padding({ left: 16, right: 16 }).contentStartOffset(10).contentEndOffset(10 + this.navigationInset)
       } else {
         Column() {
           if (this.loading) { LoadingProgress().width(32).height(32).color($r('app.color.primary')) }

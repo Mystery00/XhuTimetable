@@ -40,7 +40,7 @@ object NativeCore : KoinComponent {
     private var scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var generation = 0
     private var running = false
-    private var runtimeStarted = false
+    private var runtimeScope: CoroutineScope? = null
     private var mainModel: MainViewModel? = null
     private var homeDate: LocalDate? = null
     private var loginModel: LoginViewModel? = null
@@ -171,6 +171,10 @@ object NativeCore : KoinComponent {
                 home().refreshCloudDataToState()
                 JsonNull
             }
+            "todayDate" -> {
+                home().selectTodayDate(LocalDate.parse(params.text("date")))
+                JsonNull
+            }
             "week" -> {
                 val week = params.number("week")
                 require(week in 1..20) { "请选择第1至20周" }
@@ -212,6 +216,12 @@ object NativeCore : KoinComponent {
             "setSetting" -> {
                 val key = params.text("key")
                 NativeSettings.set(key, params.text("value"))
+                if (key == "debugMode") return JsonNull
+                if (key == "revokePrivacy") {
+                    stopRuntime()
+                    changed()
+                    return JsonNull
+                }
                 if (key in setOf("disablePoems", "showPoemsTranslate", "resetPoemsToken")) mainModel?.reloadPoems()
                 reloadHome()
                 if (key in setOf("yearTerm", "campus", "multiAccountMode", "showCustomCourseOnWeek", "showCustomThing")) {
@@ -271,11 +281,12 @@ object NativeCore : KoinComponent {
     }
 
     private suspend fun startRuntime() {
-        if (runtimeStarted) return
-        runtimeStarted = true
+        if (runtimeScope != null) return
+        val runtime = CoroutineScope(scope.coroutineContext + SupervisorJob(scope.coroutineContext[Job]))
+        runtimeScope = runtime
         initFeature()
         var poemsEnabled = AppFeature.JRSC.isEnabled()
-        scope.launch {
+        runtime.launch {
             FeatureHub.features.drop(1).collect {
                 val enabled = AppFeature.JRSC.isEnabled()
                 if (enabled != poemsEnabled) {
@@ -285,9 +296,9 @@ object NativeCore : KoinComponent {
                 changed()
             }
         }
-        FeatureHub.start(scope)
+        FeatureHub.start(runtime)
         ArkTsBridge.call("setColorMode", getConfigStore { nightMode.name })
-        scope.launch {
+        runtime.launch {
             try {
                 StartRepo.init()
             } catch (cancelled: CancellationException) {
@@ -367,7 +378,8 @@ object NativeCore : KoinComponent {
             homeDate = LocalDate.now()
             homeObserver = scope.launch {
                 val flows: List<Flow<*>> = listOf(
-                    model.todayTitle, model.week, model.actualCurrentWeek, model.todayCourse,
+                    model.selectedTodayHeaderText, model.todayWeekDays, model.isTodayDateCustomSelected,
+                    model.classTimeSlots, model.week, model.actualCurrentWeek, model.todayCourse,
                     model.todayThing, model.allWeekTables, model.calendarList, model.practicalCourseList,
                     model.loading, model.errorMessage, model.poems, model.holiday, model.emptyUser,
                     model.enableCalendarView, model.multiAccountMode, model.showTomorrowCourse,
@@ -410,17 +422,22 @@ object NativeCore : KoinComponent {
 
     private fun changed() { changes.tryEmit(Unit) }
 
-    fun dispose() {
-        running = false
-        generation++
+    private fun stopRuntime() {
+        runtimeScope?.cancel()
+        runtimeScope = null
         resetHome()
         loginModel?.viewModelScope?.cancel()
         loginModel = null
-        scope.cancel()
         invalidateNativeFeedback()
-        requests.clear()
         NativeQueries.dispose()
-        runtimeStarted = false
+    }
+
+    fun dispose() {
+        running = false
+        generation++
+        stopRuntime()
+        scope.cancel()
+        requests.clear()
     }
 
     private fun errorResponse(id: String, message: String): JsonObject = buildJsonObject {

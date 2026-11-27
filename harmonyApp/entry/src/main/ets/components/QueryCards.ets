@@ -1,3 +1,4 @@
+import { iconTint } from './IconTint';
 import { DetailField, DisplayItem } from '../model/NativeModels';
 import { detailValue } from './FeatureContracts';
 import { dialogWidth } from './DialogLayout';
@@ -170,7 +171,7 @@ export struct ExamCard {
   @Builder
   private meta(icon: string, text: string) {
     Row({ space: 5 }) {
-      Image($rawfile('shared/' + icon + '.svg')).width(14).height(14).fillColor($r('app.color.text_secondary'))
+      Image($rawfile('shared/' + icon + '.svg')).width(14).height(14).colorFilter(iconTint($r('app.color.text_secondary')))
       Text(text).fontSize(12).fontColor($r('app.color.text_secondary')).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).layoutWeight(1)
     }.width('100%')
   }

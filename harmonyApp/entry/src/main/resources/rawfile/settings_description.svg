@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+<!-- Adapted from AndroidX Material Icons. Copyright 2024 The Android Open Source Project. SPDX-License-Identifier: Apache-2.0 -->
+  <path fill="#000" d="M14.59 2.59 c-0.38 -0.38 -0.89 -0.59 -1.42 -0.59 L6 2 c-1.1 0 -2 0.9 -2 2 v16 c0 1.1 0.89 2 1.99 2 L18 22 c1.1 0 2 -0.9 2 -2 L20 8.83 c0 -0.53 -0.21 -1.04 -0.59 -1.41 l-4.82 -4.83 Z M15 18 L9 18 c-0.55 0 -1 -0.45 -1 -1 s0.45 -1 1 -1 h6 c0.55 0 1 0.45 1 1 s-0.45 1 -1 1 Z M15 14 L9 14 c-0.55 0 -1 -0.45 -1 -1 s0.45 -1 1 -1 h6 c0.55 0 1 0.45 1 1 s-0.45 1 -1 1 Z M13 8 L13 3.5 L18.5 9 L14 9 c-0.55 0 -1 -0.45 -1 -1 Z"/>
+</svg>

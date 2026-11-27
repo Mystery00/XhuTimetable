@@ -1,4 +1,5 @@
-import { DisplayItem, WeekCell, WeekOverview, WeekPage } from '../model/NativeModels';
+import { iconTint } from './IconTint';
+import { DisplayItem, WeekCell, WeekOverview, WeekPage, WeekTimeSlot } from '../model/NativeModels';
 import { isNonCurrentCourseColor, NativeEmpty, readableCourseText, weekCellContainer, withOpacity } from './AppComponents';
 import { HomeIcon } from './HomeWidgets';
 
@@ -11,9 +12,87 @@ function weekDate(value: string): Date {
   return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 12);
 }
 
+const TIME_COLUMN_WIDTH: number = 38;
+
+@Component
+struct WeekTitleLabel {
+  @Prop week: number = 1;
+  @Prop badge: boolean = false;
+
+  build() {
+    Column() {
+      Text(this.week <= 0 ? '尚未开学' : this.week > 20 ? '学期已结束' : '第' + this.week + '周')
+        .fontSize(16).lineHeight('21fp').fontWeight(600).fontColor($r('app.color.text_primary')).maxLines(1)
+      if (this.badge) {
+        Text('非本周').fontSize(11).lineHeight('14fp').fontColor($r('app.color.primary')).maxLines(1)
+      }
+    }.constraintSize({ minWidth: 60 })
+  }
+}
+
+@Component
+export struct HomeWeekTitle {
+  @Prop @Watch('updateTitle') week: number = 1;
+  @Prop @Watch('updateTitle') actualWeek: number = 1;
+  onPick: () => void = () => {};
+  @State private shownWeek: number = 1;
+  @State private showBadge: boolean = false;
+  @State private oldWeek: number = 1;
+  @State private oldBadge: boolean = false;
+  @State private progress: number = 1;
+
+  aboutToAppear(): void {
+    this.shownWeek = this.oldWeek = this.week;
+    this.showBadge = this.oldBadge = this.isNotCurrent();
+  }
+
+  private isNotCurrent(): boolean {
+    return this.actualWeek >= 1 && this.actualWeek <= 20 && this.week !== this.actualWeek;
+  }
+
+  private updateTitle(): void {
+    const badge = this.isNotCurrent();
+    if (this.shownWeek === this.week && this.showBadge === badge) return;
+    this.oldWeek = this.shownWeek;
+    this.oldBadge = this.showBadge;
+    this.shownWeek = this.week;
+    this.showBadge = badge;
+    this.progress = 0;
+    const week = this.week;
+    this.getUIContext().animateTo({ duration: 220, curve: Curve.FastOutSlowIn, onFinish: () => {
+      if (this.shownWeek === week && this.showBadge === badge) {
+        this.oldWeek = this.shownWeek;
+        this.oldBadge = this.showBadge;
+      }
+    } }, () => { this.progress = 1; });
+  }
+
+  build() {
+    Row({ space: 2 }) {
+      Stack() {
+        if (this.oldWeek !== this.shownWeek || this.oldBadge !== this.showBadge) {
+          WeekTitleLabel({ week: this.oldWeek, badge: this.oldBadge })
+            .opacity(1 - this.progress).accessibilityLevel('no-hide-descendants')
+            .translate({ y: (this.shownWeek >= this.oldWeek ? -1 : 1) * this.progress * (this.oldBadge ? 12 : 7) })
+        }
+        WeekTitleLabel({ week: this.shownWeek, badge: this.showBadge })
+          .opacity(this.progress)
+          .translate({ y: (this.shownWeek >= this.oldWeek ? 1 : -1) * (1 - this.progress) * (this.showBadge ? 12 : 7) })
+      }.height((21 + 14 * ((this.oldBadge ? 1 - this.progress : 0) + (this.showBadge ? this.progress : 0))) + 'fp')
+        .clip(true)
+      Image($rawfile('toolbar_chevron.svg')).width(18).height(18)
+        .colorFilter(iconTint($r('app.color.text_secondary'))).accessibilityLevel('no')
+    }.constraintSize({ minWidth: 104 }).justifyContent(FlexAlign.Center)
+      .padding({ left: 14, right: 14, top: 5, bottom: 5 }).borderRadius(14)
+      .backgroundColor(withOpacity($r('app.color.container_high'), 0.72)).id('main-week-picker')
+      .onClick(this.onPick).accessibilityText('切换周次')
+  }
+}
+
 @Component
 struct HomeWeekGrid {
   @Prop page: WeekPage = { week: 1, date: '', cells: [] };
+  @Prop classTimeSlots: WeekTimeSlot[] = [];
   @Prop cellHeight: number = 70;
   @Prop cellRadius: number = 4;
   @Prop textSize: number = 10;
@@ -23,7 +102,6 @@ struct HomeWeekGrid {
   private days: number[] = [1, 2, 3, 4, 5, 6, 7];
   private periods: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
   private names: string[] = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-  private startTimes: string[] = ['08:30', '09:20', '10:15', '11:05', '14:00', '14:50', '15:45', '16:35', '19:00', '19:50', '20:40'];
 
   private date(day: number): Date {
     const date = weekDate(this.page.date);
@@ -51,6 +129,32 @@ struct HomeWeekGrid {
 
   private foreground(cell: WeekCell): ResourceColor {
     return isNonCurrentCourseColor(cell.color) ? $r('app.color.text_secondary') : readableCourseText(this.cellContainerColor(cell));
+  }
+
+  @Builder
+  private timeLabel(value: string, start: boolean) {
+    Text(value).minFontSize(6).maxFontSize(8.5).maxFontScale(1.05).lineHeight(10).maxLines(1)
+      .fontWeight(FontWeight.Medium).fontFeature('"tnum" 1').letterSpacing(-0.3)
+      .fontColor(withOpacity($r('app.color.text_secondary'), start ? 0.88 : 0.65))
+  }
+
+  @Builder
+  private timeCell(period: number) {
+    Stack({ alignContent: Alignment.Bottom }) {
+      Column({ space: 1 }) {
+        Text(period.toString()).fontSize(11).maxFontScale(1.05).lineHeight(13).fontWeight(FontWeight.Bold)
+          .maxLines(1).fontColor($r('app.color.text_primary'))
+        if (this.classTimeSlots[period - 1]?.start) {
+          this.timeLabel(this.classTimeSlots[period - 1].start, true)
+        }
+        if (this.classTimeSlots[period - 1]?.end) {
+          this.timeLabel(this.classTimeSlots[period - 1].end, false)
+        }
+      }.width('100%').height('100%').padding({ left: 1, right: 1 }).justifyContent(FlexAlign.Center)
+      Divider().width(TIME_COLUMN_WIDTH - (period === 4 || period === 8 ? 6 : 12))
+        .strokeWidth(period === 4 || period === 8 ? 0.8 : 0.5)
+        .color(withOpacity($r('app.color.outline'), period === 4 || period === 8 ? 0.45 : 0.18))
+    }.height(this.cellHeight).width('100%')
   }
 
   @Builder
@@ -84,7 +188,7 @@ struct HomeWeekGrid {
           Text(twoDigits(weekDate(this.page.date).getMonth() + 1)).fontSize(12).lineHeight(15)
             .fontWeight(FontWeight.Bold).fontColor($r('app.color.primary'))
           Text('月').fontSize(9).lineHeight(13.75).fontColor($r('app.color.text_secondary'))
-        }.layoutWeight(0.42)
+        }.width(TIME_COLUMN_WIDTH)
         ForEach(this.days, (day: number) => {
           Column({ space: 2 }) {
             Text(this.names[this.date(day).getDay()]).fontSize(10).lineHeight(13.75)
@@ -104,16 +208,9 @@ struct HomeWeekGrid {
           Row() {
             Column() {
               ForEach(this.periods, (period: number) => {
-                Column() {
-                  Text(period.toString()).fontSize(11).lineHeight(13.75).fontWeight(600)
-                    .fontColor($r('app.color.text_primary'))
-                  if (this.cellHeight >= 48) {
-                    Text(this.startTimes[period - 1]).fontSize(8).lineHeight(9).maxLines(1)
-                      .fontColor(withOpacity($r('app.color.text_secondary'), 0.8))
-                  }
-                }.height(this.cellHeight).width('100%').justifyContent(FlexAlign.Center)
+                this.timeCell(period)
               }, (period: number) => period.toString())
-            }.layoutWeight(0.42).backgroundColor(withOpacity($r('app.color.surface'), this.dark ? 0.52 : 0.65))
+            }.width(TIME_COLUMN_WIDTH).backgroundColor(withOpacity($r('app.color.surface'), this.dark ? 0.52 : 0.65))
             ForEach(this.days, (day: number) => {
               Stack({ alignContent: Alignment.TopStart }) {
                 ForEach(this.dayCells(day), (cell: WeekCell) => {
@@ -135,7 +232,8 @@ struct HomeWeekGrid {
 @Component
 export struct HomeWeek {
   @Prop pages: WeekPage[] = [];
-  @Prop selectedWeek: number = 1;
+  @Prop @Watch('onSelectedWeekChanged') selectedWeek: number = 1;
+  @Prop classTimeSlots: WeekTimeSlot[] = [];
   @Prop cellHeight: number = 70;
   @Prop cellRadius: number = 4;
   @Prop textSize: number = 10;
@@ -144,22 +242,65 @@ export struct HomeWeek {
   onSelect: (items: DisplayItem[]) => void = () => {};
   onRefresh: () => void = () => {};
 
-  private selectedIndex(): number {
-    return Math.max(0, this.pages.findIndex((page: WeekPage) => page.week === this.selectedWeek));
+  private pager: SwiperController = new SwiperController();
+  private initialIndex: number = 0;
+  private reportedIndex: number = 0;
+  private targetIndex: number = -1;
+  private pagerWidth: number = 0;
+
+  aboutToAppear(): void {
+    this.initialIndex = this.weekIndex();
+    this.reportedIndex = this.initialIndex;
+  }
+
+  private weekIndex(): number {
+    const week = Math.max(1, Math.min(20, this.selectedWeek));
+    return this.pages.length === 0 ? week - 1 : Math.max(0, this.pages.findIndex((page: WeekPage) => page.week === week));
+  }
+
+  private onSelectedWeekChanged(): void {
+    const index = this.weekIndex();
+    if (index === this.reportedIndex) return;
+    this.reportedIndex = index;
+    if (this.pages.length === 0 || this.pagerWidth === 0) {
+      this.initialIndex = index;
+      return;
+    }
+    this.targetIndex = index;
+    this.pager.changeIndex(index, true);
+  }
+
+  private reportPage(index: number): void {
+    if (index === this.reportedIndex || this.pages[index] === undefined) return;
+    this.reportedIndex = index;
+    this.onWeek(this.pages[index].week);
   }
 
   build() {
     Column() {
       if (this.pages.length > 0) {
-        Swiper() {
+        Swiper(this.pager) {
           ForEach(this.pages, (page: WeekPage) => {
-            HomeWeekGrid({ page: page, cellHeight: this.cellHeight, cellRadius: this.cellRadius,
+            HomeWeekGrid({ page: page, classTimeSlots: this.classTimeSlots, cellHeight: this.cellHeight, cellRadius: this.cellRadius,
               textSize: this.textSize, cellOpacity: this.cellOpacity, onSelect: this.onSelect })
           }, (page: WeekPage) => page.week + ':' + JSON.stringify(page))
-        }.index(this.selectedIndex()).loop(false).indicator(false).cachedCount(1).duration(240)
-          .width('100%').height('100%').onChange((index: number) => {
-            const page = this.pages[index];
-            if (page !== undefined && page.week !== this.selectedWeek) this.onWeek(page.week);
+        }.index(this.initialIndex).loop(false).indicator(false).cachedCount(1).duration(240)
+          .width('100%').height('100%').onAreaChange((_old: Area, area: Area) => { this.pagerWidth = Number(area.width); })
+          .onGestureSwipe((index: number, event: SwiperAnimationEvent) => {
+            if (this.pagerWidth <= 0) return;
+            // 仅手势过半时先更新标题；反向拖回时恢复原周，不打断手指下的滑动。
+            this.targetIndex = -1;
+            const next = index + (Math.abs(event.currentOffset) > this.pagerWidth / 2 ? (event.currentOffset < 0 ? 1 : -1) : 0);
+            this.reportPage(next);
+          })
+          .onChange((index: number) => {
+            if (this.targetIndex < 0) this.reportPage(index);
+          })
+          .onAnimationEnd((index: number) => {
+            // 选周与回本周共用一次平滑跳转，忽略途中或被后一次跳转取代的页。
+            if (this.targetIndex >= 0 && this.targetIndex !== index) return;
+            this.targetIndex = -1;
+            this.reportPage(index);
           })
       } else {
         NativeEmpty({ title: '还没有课表数据', subtitle: '联网刷新后，课表也可以离线查看',
@@ -230,23 +371,23 @@ export struct HomeWeekPicker {
   }
 
   build() {
-    Scroll() {
-      Column({ space: 8 }) {
-        Row({ space: 4 }) {
-          Column() {
-            Text('切换教学周').fontSize(16).lineHeight(21.12).fontWeight(FontWeight.Bold).fontColor($r('app.color.text_primary'))
-            Text('点阵表示周一至周五各时段排课密度').fontSize(12).lineHeight(16.56).fontColor($r('app.color.text_secondary'))
-          }.layoutWeight(1).alignItems(HorizontalAlign.Start)
-          if (this.actualWeek >= 1 && this.actualWeek <= 20) {
-            Button({ type: ButtonType.Normal }) {
-              Row({ space: 4 }) {
-                HomeIcon({ name: 'today', iconSize:16, tint: $r('app.color.primary') })
-                Text('回到第' + this.actualWeek + '周').fontSize(14).lineHeight(17.92).fontColor($r('app.color.primary'))
-              }
-            }.backgroundColor(Color.Transparent).padding({ left: 4, right: 4 }).height(40)
-              .onClick(() => { this.onSelect(this.actualWeek); })
-          }
-        }.width('100%').padding(4)
+    Column({ space: 8 }) {
+      Row({ space: 4 }) {
+        Column() {
+          Text('切换教学周').fontSize(16).lineHeight(21.12).fontWeight(FontWeight.Bold).fontColor($r('app.color.text_primary'))
+          Text('点阵表示周一至周五各时段排课密度').fontSize(12).lineHeight(16.56).fontColor($r('app.color.text_secondary'))
+        }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+        if (this.actualWeek >= 1 && this.actualWeek <= 20) {
+          Button({ type: ButtonType.Normal }) {
+            Row({ space: 4 }) {
+              HomeIcon({ name: 'today', iconSize: 16, tint: $r('app.color.primary') })
+              Text('回到第' + this.actualWeek + '周').fontSize(14).lineHeight(17.92).fontColor($r('app.color.primary'))
+            }
+          }.backgroundColor(Color.Transparent).padding({ left: 4, right: 4 }).height(40)
+            .onClick(() => { this.onSelect(this.actualWeek); })
+        }
+      }.width('100%').padding(4)
+      Scroll() {
         Column({ space: 6 }) {
           ForEach(this.rows, (row: number) => {
             Row({ space: 6 }) {
@@ -256,7 +397,7 @@ export struct HomeWeekPicker {
             }.width('100%')
           }, (row: number) => row.toString())
         }.width('100%')
-      }.width('100%').padding({ left: 16, right: 16, bottom: 24 })
-    }.width('100%').scrollBar(BarState.Off)
+      }.width('100%').scrollBar(BarState.Off).flexShrink(1)
+    }.width('100%').padding({ left: 16, right: 16, bottom: 24 })
   }
 }

@@ -1,3 +1,4 @@
+import { iconTint } from './IconTint';
 import { SelectOption } from '../model/NativeModels';
 import { DIALOG_CARD_WIDTH } from './DialogLayout';
 import { readableCourseText, withOpacity } from './AppComponents';
@@ -67,7 +68,7 @@ export struct FeatureIcon {
       } else if (this.name === 'delete') {
         this.vectorPath('M4 6 H20 M9 6 V3 H15 V6 M6 6 L7 21 H17 L18 6 M10 10 V17 M14 10 V17', 1.8)
       } else {
-        Image($rawfile('shared/' + this.name + '.svg')).width(22).height(22).fillColor(this.tint)
+        Image($rawfile('shared/' + this.name + '.svg')).width(22).height(22).colorFilter(iconTint(this.tint))
       }
     }.width(24).height(24)
   }
@@ -331,7 +332,7 @@ export struct FeatureColorDialog {
               Stack() {
                 Circle().width('100%').height('100%').fill(color).stroke(this.value === color ? $r('app.color.text_primary') : $r('app.color.outline'))
                   .strokeWidth(this.value === color ? 2.5 : 1)
-                if (this.value === color) { Image($rawfile('shared/ic_action_done.svg')).width(18).height(18).fillColor(readableCourseText(color)) }
+                if (this.value === color) { Image($rawfile('shared/ic_action_done.svg')).width(18).height(18).colorFilter(iconTint(readableCourseText(color))) }
               }.width('100%').aspectRatio(1).id('color-swatch-' + color).accessibilityText(color)
                 .accessibilitySelected(this.value === color).onClick(() => { this.value = color; })
             }

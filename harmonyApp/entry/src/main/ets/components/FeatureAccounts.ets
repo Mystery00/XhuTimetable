@@ -1,3 +1,4 @@
+import { iconTint } from './IconTint';
 import { BootstrapState, UserSummary } from '../model/NativeModels';
 import { NativeClient } from '../platform/NativeClient';
 import { FeatureAccountRequest, FeatureAvatarRequest, FeatureSettingRequest } from './FeatureContracts';
@@ -15,6 +16,7 @@ interface AvatarChoice {
 @Component
 export struct FeatureAccounts {
   client: NativeClient | undefined = undefined;
+  @Prop navigationInset: number = 0;
   onBack: () => void = () => {};
   onNavigate: (route: string) => void = () => {};
   onChanged: () => void = () => {};
@@ -73,7 +75,11 @@ export struct FeatureAccounts {
     const request: FeatureAvatarRequest = { mode: mode, value: value };
     try {
       await this.client!.request('avatar', request);
-      if (this.active) { this.onChanged(); await this.load(); }
+      if (this.active) {
+        if (mode === 'reset') this.getUIContext().getPromptAction().showToast({ message: '已恢复默认头像' });
+        this.onChanged();
+        await this.load();
+      }
     } catch (error) {
       if (this.active) this.error = featureError(error as Error);
     } finally {
@@ -126,6 +132,15 @@ export struct FeatureAccounts {
       customStyle: true, autoCancel: true
     });
     this.dialog.open();
+  }
+
+  private confirmAvatarReset(): void {
+    this.getUIContext().showAlertDialog({
+      width: dialogWidth(this.getUIContext()), alignment: DialogAlignment.Center,
+      title: '恢复默认头像', message: '确认清除当前自定义头像并恢复为按账号自动匹配的默认头像吗？',
+      primaryButton: { value: '取消', action: () => {} },
+      secondaryButton: { value: '恢复默认', action: () => this.changeAvatar('reset', '') }
+    });
   }
 
   private confirmLogout(user: UserSummary): void {
@@ -218,7 +233,7 @@ export struct FeatureAccounts {
         if (this.customAvatar.length > 0) {
           Button('恢复默认', { type: ButtonType.Normal }).height(48).borderRadius(14).fontSize(14)
             .backgroundColor(Color.Transparent).fontColor($r('app.color.primary')).border({ width: 1, color: $r('app.color.outline') })
-            .id('account-avatar-reset').onClick(() => this.changeAvatar('reset', ''))
+            .id('account-avatar-reset').onClick(() => this.confirmAvatarReset())
         }
       }.width('100%')
     }.width('100%').padding({ left: 20, right: 20, bottom: 28 })
@@ -309,7 +324,7 @@ export struct FeatureAccounts {
               this.groupTitle('多账号显示')
               Column() {
                 Row({ space: 16 }) {
-                  Image($rawfile('shared/ic_action_multi_user.svg')).width(24).height(24).fillColor($r('app.color.text_primary'))
+                  Image($rawfile('shared/ic_action_multi_user.svg')).width(24).height(24).colorFilter(iconTint($r('app.color.text_primary')))
                   Column({ space: 4 }) {
                     Text('多账号模式').fontSize(16).fontColor($r('app.color.text_primary'))
                     Text('同时展示所有已登录账号的课程安排').fontSize(12).fontColor($r('app.color.text_secondary'))
@@ -340,13 +355,13 @@ export struct FeatureAccounts {
           if (this.users.length === 0 && !this.loading && this.error.length === 0) {
             ListItem() { FeatureEmpty({ title: '还没有登录账号', description: '登录教务账号后同步你的课程' }) }
           }
-        }.width('100%').height('100%').padding({ left: 16, right: 16 }).contentStartOffset(6).contentEndOffset(88)
+        }.width('100%').height('100%').padding({ left: 16, right: 16 }).contentStartOffset(6).contentEndOffset(88 + this.navigationInset)
         Button({ type: ButtonType.Normal }) {
           Row({ space: 12 }) {
             ProfileUiIcon({ kind: 'add', tint: $r('app.color.on_primary_container') })
             Text('登录其他账号').fontSize(14).fontWeight(600).fontColor($r('app.color.on_primary_container'))
           }.padding({ left: 20, right: 20 })
-        }.height(56).borderRadius(16).backgroundColor($r('app.color.primary_container')).margin({ bottom: 16 })
+        }.height(56).borderRadius(16).backgroundColor($r('app.color.primary_container')).margin({ bottom: 16 + this.navigationInset })
           .shadow({ radius: 6, color: '#18000000', offsetY: 3 }).enabled(!this.busy).id('account-add')
           .onClick(() => this.onNavigate('addAccount'))
       }.layoutWeight(1).width('100%')

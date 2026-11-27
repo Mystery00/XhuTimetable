@@ -22,6 +22,7 @@ import vip.mystery0.xhu.timetable.model.response.CustomThingResponse
 import vip.mystery0.xhu.timetable.model.response.SchoolTimetableResponse
 import vip.mystery0.xhu.timetable.model.ws.MessageType
 import vip.mystery0.xhu.timetable.model.ws.Status
+import vip.mystery0.xhu.timetable.module.desc
 import vip.mystery0.xhu.timetable.repository.*
 import vip.mystery0.xhu.timetable.ui.theme.ColorPool
 import vip.mystery0.xhu.timetable.utils.asLocalDateTime
@@ -49,12 +50,26 @@ object NativeQueries {
     suspend fun options(params: JsonObject): JsonElement {
         val kind = params.text("kind")
         val user = if (kind == "timetable") timetableMainUser() else selectedUser(params)
-        val yearLoader = YearSelectDataLoader()
-        val yearItems = yearLoader.initSelect()
-        val campuses = if (kind == "timetable") CourseRepo.loadCampusList() else emptyMap()
-        val colleges = if (kind == "timetable") CourseRepo.loadCollegeList() else emptyMap()
         val college = params.text("college")
-        val majors = if (kind == "timetable" && college.isNotBlank()) CourseRepo.loadMajorList(college) else emptyMap()
+        if (kind == "timetable" && college.isNotBlank()) {
+            val majors = CourseRepo.loadMajorList(college)
+            return buildJsonObject { put("majors", JsonArray(majors.map { (label, value) -> option(value, label) })) }
+        }
+        val yearItems = YearSelectDataLoader().initSelect()
+        val selectorErrors = mutableListOf<String>()
+        suspend fun selector(label: String, load: suspend () -> Map<String, String>): Map<String, String> {
+            if (kind != "timetable") return emptyMap()
+            return try {
+                load()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                selectorErrors += "${label}加载失败：${error.desc()}"
+                emptyMap()
+            }
+        }
+        val campuses = selector("校区", CourseRepo::loadCampusList)
+        val colleges = selector("学院", CourseRepo::loadCollegeList)
         return buildJsonObject {
             put("year", params.number("year", getConfigStore { nowYear }))
             put("term", params.number("term", getConfigStore { nowTerm }))
@@ -64,7 +79,8 @@ object NativeQueries {
             put("campus", params.text("campus"))
             put("campuses", JsonArray(campuses.map { (label, value) -> option(value, label) }))
             put("colleges", JsonArray(colleges.map { (label, value) -> option(value, label) }))
-            put("majors", JsonArray(majors.map { (label, value) -> option(value, label) }))
+            put("majors", JsonArray(emptyList()))
+            if (selectorErrors.isNotEmpty()) put("selectorError", selectorErrors.joinToString("\n").take(500))
             put("buildings", JsonArray(AreaSelectDataLoader().initSelect().map { option(it.value, it.title) }))
             put("week", WidgetRepo.calculateWeek().coerceIn(1, 20))
             put("day", LocalDate.now().dayOfWeek.isoDayNumber)

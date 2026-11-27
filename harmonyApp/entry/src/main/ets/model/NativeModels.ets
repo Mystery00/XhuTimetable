@@ -82,6 +82,7 @@ export interface DisplayItem {
   fields?: DetailField[];
   children?: DisplayItem[];
   selected?: boolean;
+  nextCourse?: boolean;
 }
 
 export interface WeekCell {
@@ -92,6 +93,11 @@ export interface WeekCell {
   color: string;
   textColor: string;
   courses: DisplayItem[];
+}
+
+export interface WeekTimeSlot {
+  start: string;
+  end: string;
 }
 
 export interface WeekPage {
@@ -130,8 +136,19 @@ export interface WeekOverview {
   cells: boolean[][];
 }
 
+export interface TodayWeekDay {
+  date: string;
+  weekShort: string;
+  dayNumber: string;
+  isToday: boolean;
+  isSelected: boolean;
+  hasCourse: boolean;
+}
+
 export interface HomeState {
   title: string;
+  weekDays?: TodayWeekDay[];
+  customDate?: boolean;
   week: number;
   actualWeek: number;
   calendarEnabled: boolean;
@@ -154,6 +171,7 @@ export interface HomeState {
   todayOpacity: number;
   today: DisplayItem[];
   things: DisplayItem[];
+  classTimeSlots?: WeekTimeSlot[];
   weeks: WeekPage[];
   calendar: CalendarWeek[];
   weekOverview?: WeekOverview[];
@@ -176,6 +194,7 @@ export interface AcademicOptions {
   buildings: SelectOption[];
   colleges: SelectOption[];
   majors: SelectOption[];
+  selectorError?: string;
   week: number;
   day: number;
   periods: number[];

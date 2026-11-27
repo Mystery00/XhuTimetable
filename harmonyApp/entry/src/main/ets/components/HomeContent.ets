@@ -12,25 +12,24 @@ export function emptyHomeState(): HomeState {
 
 @Component
 export struct HomeContent {
-  @Prop @Watch('onHomeChanged') home: HomeState = emptyHomeState();
+  @Prop home: HomeState = emptyHomeState();
+  @Prop displayedWeek: number | undefined = undefined;
   @Prop tab: string = 'today';
   onNavigate: (route: string) => void = () => {};
   onRefresh: () => void = () => {};
+  onDate: (date: string) => void = () => {};
   onWeek: (week: number) => void = () => {};
   registerBackHandler: (handler: (() => boolean) | undefined) => void = () => {};
   registerActions: (handler: ((action: string) => void) | undefined) => void = () => {};
   onCalendarTitle: (title: string) => void = () => {};
   onCopy: (text: string) => void = () => {};
-  @State private selectedWeek: number = 1;
   @State private todayRequest: number = 0;
   @State private sheetVisible: boolean = false;
   @State private sheetKind: string = 'course';
   @State private detailItems: DisplayItem[] = [];
   @State private detailMode: string = 'today';
-  private lastServerWeek: number = -1;
 
   aboutToAppear(): void {
-    this.onHomeChanged();
     this.registerActions((action: string) => { this.handleAction(action); });
     this.registerBackHandler(() => {
       if (!this.sheetVisible) return false;
@@ -44,17 +43,10 @@ export struct HomeContent {
     this.registerBackHandler(undefined);
   }
 
-  private onHomeChanged(): void {
-    if (this.home.week !== this.lastServerWeek) {
-      this.selectedWeek = Math.max(1, Math.min(20, this.home.week));
-      this.lastServerWeek = this.home.week;
-    }
-  }
-
   private handleAction(action: string): void {
     if (action === 'today') {
       if (this.tab === 'week') {
-        if (this.home.actualWeek >= 1 && this.home.actualWeek <= 20) this.changeWeek(this.home.actualWeek);
+        if (this.home.actualWeek >= 1 && this.home.actualWeek <= 20) this.onWeek(this.home.actualWeek);
       } else {
         this.todayRequest++;
       }
@@ -62,11 +54,6 @@ export struct HomeContent {
       this.sheetKind = action;
       this.sheetVisible = true;
     }
-  }
-
-  private changeWeek(week: number): void {
-    this.selectedWeek = Math.max(1, Math.min(20, week));
-    this.onWeek(this.selectedWeek);
   }
 
   private showCourses(items: DisplayItem[], mode: string): void {
@@ -90,10 +77,10 @@ export struct HomeContent {
         this.onNavigate(route);
       } })
     } else if (this.sheetKind === 'week') {
-      HomeWeekPicker({ overview: this.home.weekOverview ?? [], selectedWeek: this.selectedWeek,
+      HomeWeekPicker({ overview: this.home.weekOverview ?? [], selectedWeek: this.displayedWeek ?? this.home.week,
         actualWeek: this.home.actualWeek, onSelect: (week: number) => {
           this.sheetVisible = false;
-          this.changeWeek(week);
+          this.onWeek(week);
         } })
     } else if (this.sheetKind === 'practical') {
       HomePracticalSheet({ items: this.home.practical })
@@ -109,18 +96,20 @@ export struct HomeContent {
   build() {
     Stack() {
       if (this.tab === 'today') {
-        HomeToday({ home: this.home, onRefresh: this.onRefresh,
+        HomeToday({ home: this.home, onRefresh: this.onRefresh, onDate: this.onDate,
           onCourse: (items: DisplayItem[]) => { this.showCourses(items, 'today'); },
           onPoem: () => { this.sheetKind = 'poem'; this.sheetVisible = true; } })
       } else if (this.tab === 'week') {
-        HomeWeek({ pages: this.home.weeks, selectedWeek: this.selectedWeek,
-          cellHeight: this.home.cellHeight, cellRadius: this.home.cellRadius,
+        HomeWeek({ pages: this.home.weeks, selectedWeek: this.displayedWeek ?? this.home.week,
+          classTimeSlots: this.home.classTimeSlots ?? [], cellHeight: this.home.cellHeight, cellRadius: this.home.cellRadius,
           textSize: this.home.textSize, cellOpacity: this.home.cellOpacity,
-          onWeek: (week: number) => { this.changeWeek(week); }, onRefresh: this.onRefresh,
+          onWeek: (week: number) => { this.onWeek(week); }, onRefresh: this.onRefresh,
           onSelect: (items: DisplayItem[]) => { this.showCourses(items, 'week'); } })
       } else {
         HomeCalendar({ weeks: this.home.calendar, todayRequest: this.todayRequest,
-          onTitle: this.onCalendarTitle })
+          onTitle: this.onCalendarTitle, onSelect: (item: DisplayItem) => {
+            this.showCourses(item.children ?? [], item.value === 'CUSTOM_THING' ? 'calendarThing' : 'week');
+          } })
       }
     }.width('100%').height('100%').backgroundColor(Color.Transparent)
       .bindSheet($$this.sheetVisible, this.sheetContent(), bottomSheetOptions())

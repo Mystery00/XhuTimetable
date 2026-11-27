@@ -6,6 +6,21 @@ import { SettingDateDialog, SettingTimeDialog } from './DateTimeDialogs';
 import { ProfilePageHeader } from './ProfileUiControls';
 import { dialogWidth } from './DialogLayout';
 import { withOpacity } from './AppComponents';
+import { iconTint } from './IconTint';
+
+const roundedSettingIcons: Record<string, string> = {
+  'showTomorrowCourseTime': 'settings_auto_mode.svg',
+  'showPoemsTranslate': 'settings_translate.svg',
+  'resetPoemsToken': 'settings_refresh.svg',
+  'version': 'settings_info.svg',
+  'website': 'settings_language.svg',
+  'privacy': 'settings_policy.svg',
+  'filing': 'settings_verified_user.svg',
+  'licenses': 'settings_description.svg',
+  'pushId': 'settings_notifications_none.svg',
+  'diagnostics': 'settings_bug_report.svg',
+  'revokePrivacy': 'settings_restart_alt.svg'
+};
 
 interface SettingGroup {
   title: string;
@@ -15,6 +30,7 @@ interface SettingGroup {
 @Component
 export struct FeatureSettings {
   client: NativeClient | undefined = undefined;
+  @Prop navigationInset: number = 0;
   @Prop @Watch('routeChanged') route: string = 'settings';
   onBack: () => void = () => {};
   onChanged: () => void = () => {};
@@ -63,6 +79,7 @@ export struct FeatureSettings {
       if (!this.active || current !== this.epoch) return;
       if (successMessage) this.getUIContext().getPromptAction().showToast({ message: successMessage });
       this.onChanged();
+      if (key === 'revokePrivacy') return;
       this.busyKey = '';
       await this.load();
     } catch (error) {
@@ -106,15 +123,28 @@ export struct FeatureSettings {
     if (item.type === 'navigate' || item.type === 'switchNavigation') { this.navigate(item); return; }
     if (item.type === 'toggle') { this.update(item.key, (item.value !== 'true').toString()); return; }
     if (item.type === 'action') {
-      if (item.key === 'resetBackground' || item.key === 'resetPoemsToken') {
-        this.update(item.key, item.value, item.key === 'resetBackground' ? '已重置启动图与背景设置' : '重置成功，重启应用后生效');
-        return;
+      let message = item.summary || '确定执行此操作吗？';
+      let confirm = '确定';
+      let success = '';
+      if (item.key === 'resetBackground') {
+        message = '确认恢复启动图展示，并清除当前已设置的自定义课表背景图吗？';
+        confirm = '确认重置';
+        success = '已重置启动图与背景设置';
+      } else if (item.key === 'resetPoemsToken') {
+        message = '确认清除当前今日诗词的本地缓存凭证吗？重置后需重启应用生效。';
+        confirm = '确认重置';
+        success = '重置成功，重启应用后生效';
+      } else if (item.key === 'revokePrivacy') {
+        message = '确认撤销当前隐私政策授权吗？撤销后将返回隐私政策页，重新同意后可继续使用。';
+        confirm = '确认撤销';
+        success = '已撤销隐私授权';
       }
       this.getUIContext().showAlertDialog({
         width: dialogWidth(this.getUIContext()), alignment: DialogAlignment.Center,
-        title: item.title, message: item.summary || '确定执行此操作吗？',
+        title: item.title, message: message,
         primaryButton: { value: '取消', action: () => {} },
-        secondaryButton: { value: '确定', action: () => this.update(item.key, item.value) }
+        secondaryButton: { value: confirm, fontColor: item.key === 'revokePrivacy' ? $r('app.color.danger') : $r('app.color.primary'),
+          action: () => this.update(item.key, item.value, success) }
       });
       return;
     }
@@ -144,8 +174,8 @@ export struct FeatureSettings {
   private settingRow(item: SettingItem) {
     Row({ space: 16 }) {
       Row({ space: 16 }) {
-        Image($rawfile('shared/' + (item.icon || 'ic_settings') + '.svg')).width(24).height(24)
-          .fillColor($r('app.color.text_primary')).accessibilityLevel('no')
+        Image($rawfile(roundedSettingIcons[item.key] ?? ('shared/' + (item.icon || 'ic_settings') + '.svg')))
+          .width(24).height(24).colorFilter(iconTint($r('app.color.text_primary'))).accessibilityLevel('no')
         Column({ space: 4 }) {
           Text(item.title).fontSize(16).fontColor($r('app.color.text_primary')).width('100%')
           if (this.summary(item).length > 0) {
@@ -200,7 +230,7 @@ export struct FeatureSettings {
           ListItem() { Row() { LoadingProgress().width(40).height(40).color($r('app.color.primary')) }
             .height(180).width('100%').justifyContent(FlexAlign.Center) }
         }
-      }.layoutWeight(1).width('100%').contentEndOffset(24).scrollBar(BarState.Auto)
+      }.layoutWeight(1).width('100%').contentEndOffset(24 + this.navigationInset).scrollBar(BarState.Auto)
     }.width('100%').height('100%').backgroundColor($r('app.color.background'))
   }
 }

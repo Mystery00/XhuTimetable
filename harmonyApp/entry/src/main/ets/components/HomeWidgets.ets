@@ -1,3 +1,5 @@
+import { iconTint } from './IconTint';
+
 @Component
 export struct HomeIcon {
   @Prop name: string = 'clock';
@@ -12,7 +14,7 @@ export struct HomeIcon {
 
   build() {
     Image(this.source()).width(this.iconSize).height(this.iconSize).objectFit(ImageFit.Contain)
-      .fillColor(this.tint).accessibilityLevel('no')
+      .colorFilter(iconTint(this.tint)).accessibilityLevel('no')
   }
 }
 

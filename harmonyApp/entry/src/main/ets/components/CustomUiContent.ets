@@ -59,6 +59,7 @@ function appearanceSamples(): DisplayItem[] {
 @Component
 export struct CustomUiContent {
   client: NativeClient | undefined = undefined;
+  @Prop navigationInset: number = 0;
   onBack: () => void = () => {};
   onChanged: () => void = () => {};
   registerBackHandler: (handler: (() => boolean) | undefined) => void = () => {};
@@ -101,7 +102,11 @@ export struct CustomUiContent {
 
   aboutToAppear(): void {
     this.active = true;
-    this.registerBackHandler(() => { this.back(); return true; });
+    this.registerBackHandler(() => {
+      if (!this.dirty && !this.busy) return false;
+      this.back();
+      return true;
+    });
     this.load();
     this.loadPreview();
   }
@@ -500,7 +505,7 @@ export struct CustomUiContent {
             }.width('100%').backgroundColor($r('app.color.card')).borderRadius(20)
               .border({ width: 0.5, color: withOpacity($r('app.color.outline'), 0.35) })
           }.width('100%').padding({ left: 16, right: 16, top: 6, bottom: 6 })
-        }.width('100%').padding({ bottom: 24 })
+        }.width('100%').padding({ bottom: 24 + this.navigationInset })
       }.layoutWeight(1).width('100%').scrollBar(BarState.Auto).id('custom-ui-scroll')
     }.width('100%').height('100%').backgroundColor($r('app.color.background'))
   }

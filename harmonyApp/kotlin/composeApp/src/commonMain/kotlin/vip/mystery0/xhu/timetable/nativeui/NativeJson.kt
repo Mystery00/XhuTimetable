@@ -36,6 +36,7 @@ fun displayItem(
     actions: JsonArray = JsonArray(emptyList()),
     startTime: String = "", endTime: String = "", date: String = "",
     fields: List<JsonObject> = emptyList(), children: List<JsonObject> = emptyList(), selected: Boolean = false,
+    nextCourse: Boolean = false,
 ): JsonObject = buildJsonObject {
     put("id", id)
     put("title", title)
@@ -56,6 +57,7 @@ fun displayItem(
     put("fields", JsonArray(fields))
     put("children", JsonArray(children))
     put("selected", selected)
+    if (nextCourse) put("nextCourse", true)
 }
 
 fun detailField(key: String, label: String, value: String): JsonObject = buildJsonObject {

@@ -14,6 +14,7 @@ import { FeatureError, FeatureHeader } from './FeatureControls';
 @Component
 export struct FeaturePage {
   client: NativeClient | undefined = undefined;
+  @Prop navigationInset: number = 0;
   @Prop @Watch('routeChanged') route: string = '';
   onBack: () => void = () => {};
   onNavigate: (route: string) => void = () => {};
@@ -72,23 +73,23 @@ export struct FeaturePage {
   build() {
     Column() {
       if (this.route === 'customUi') {
-        CustomUiContent({ client: this.client, onBack: () => this.onBack(), onChanged: () => this.onChanged(),
+        CustomUiContent({ client: this.client, navigationInset: this.navigationInset, onBack: () => this.onBack(), onChanged: () => this.onChanged(),
           registerBackHandler: (handler: (() => boolean) | undefined) => { this.childBackHandler = handler; } })
       } else if (this.route === 'settings' || this.route === 'classSettings') {
-        FeatureSettings({ client: this.client, route: this.route, onNavigate: (route: string) => this.onNavigate(route),
+        FeatureSettings({ client: this.client, navigationInset: this.navigationInset, route: this.route, onNavigate: (route: string) => this.onNavigate(route),
           onBack: () => this.onBack(), onChanged: () => this.onChanged() })
       } else if (this.route === 'courseColors') {
-        CourseColorContent({ client: this.client, onBack: () => this.onBack(),
+        CourseColorContent({ client: this.client, navigationInset: this.navigationInset, onBack: () => this.onBack(),
           registerBackHandler: (handler: (() => boolean) | undefined) => { this.childBackHandler = handler; } })
       } else if (this.route === 'feedback') {
         FeedbackContent({ client: this.client, onBack: () => this.onBack() })
       } else if (this.route === 'accounts') {
-        FeatureAccounts({ client: this.client, onBack: () => this.onBack(),
+        FeatureAccounts({ client: this.client, navigationInset: this.navigationInset, onBack: () => this.onBack(),
           onNavigate: (route: string) => this.onNavigate(route), onChanged: () => this.onChanged() })
       } else if (this.route === 'about') {
-        FeatureAbout({ client: this.client, onBack: () => this.onBack(), onNavigate: (route: string) => this.onNavigate(route) })
+        FeatureAbout({ client: this.client, navigationInset: this.navigationInset, onBack: () => this.onBack(), onNavigate: (route: string) => this.onNavigate(route) })
       } else if (this.queryRoute()) {
-        FeatureList({ client: this.client, route: this.route, refreshTrigger: this.refreshTrigger,
+        FeatureList({ client: this.client, navigationInset: this.navigationInset, route: this.route, refreshTrigger: this.refreshTrigger,
           onBack: () => this.onBack(), onNavigate: (route: string) => this.onNavigate(route),
           onChanged: () => this.onChanged(), onEdit: (request: FeatureEditorRequest) => this.openEditor(request) })
       } else {

@@ -1,3 +1,4 @@
+import { iconTint } from './IconTint';
 import { DisplayItem, ListResult } from '../model/NativeModels';
 import { NativeClient } from '../platform/NativeClient';
 import { FeedbackStatus, FeatureTextRequest, FeatureUrlRequest } from './FeatureContracts';
@@ -328,7 +329,7 @@ export struct FeedbackContent {
         Button({ type: ButtonType.Circle }) {
           if (this.sending) { LoadingProgress().width(19).height(19).color($r('app.color.on_primary')) }
           else { Image($rawfile('shared/ic_action_send.svg')).width(19).height(19)
-            .fillColor(this.canSend() ? $r('app.color.on_primary') : $r('app.color.text_secondary')) }
+            .colorFilter(iconTint(this.canSend() ? $r('app.color.on_primary') : $r('app.color.text_secondary'))) }
         }.id('feedback-send').width(42).height(42).padding(0).accessibilityText('发送').focusOnTouch(false)
           .backgroundColor(this.canSend() || this.sending ? $r('app.color.primary') : $r('app.color.container_highest'))
           .enabled(this.canSend()).onClick(() => this.send())

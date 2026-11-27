@@ -1,7 +1,7 @@
 import { bundleManager } from '@kit.AbilityKit';
 import { DisplayItem, ListResult } from '../model/NativeModels';
 import { NativeClient } from '../platform/NativeClient';
-import { FeatureUrlRequest } from './FeatureContracts';
+import { FeatureSettingRequest, FeatureUrlRequest } from './FeatureContracts';
 import { FeatureError, featureError } from './FeatureControls';
 import { ProfilePageHeader } from './ProfileUiControls';
 import { DIALOG_CARD_WIDTH } from './DialogLayout';
@@ -42,6 +42,7 @@ struct LicenseDetailsDialog {
 @Component
 export struct FeatureAbout {
   client: NativeClient | undefined = undefined;
+  @Prop navigationInset: number = 0;
   onBack: () => void = () => {};
   onNavigate: (route: string) => void = () => {};
   @State private version: string = '';
@@ -50,6 +51,8 @@ export struct FeatureAbout {
   @State private error: string = '';
   @State private loading: boolean = false;
   @State private hasMore: boolean = false;
+  private versionTaps: number[] = [];
+  private enablingDebug: boolean = false;
   private page: number = 0;
   private active: boolean = false;
   private epoch: number = 0;
@@ -57,6 +60,23 @@ export struct FeatureAbout {
 
   aboutToAppear(): void { this.active = true; this.loadVersion(); this.load(); }
   aboutToDisappear(): void { this.active = false; this.epoch++; this.dialog?.close(); }
+
+  private async tapVersion(): Promise<void> {
+    if (this.enablingDebug) return;
+    const now = Date.now();
+    this.versionTaps = this.versionTaps.filter((tap: number) => tap >= now - 3000 && tap <= now);
+    this.versionTaps.push(now);
+    if (this.versionTaps.length < 5) return;
+    this.versionTaps = [];
+    this.enablingDebug = true;
+    const request: FeatureSettingRequest = { key: 'debugMode', value: 'true' };
+    try {
+      await this.client!.request('setSetting', request);
+      if (this.active) this.getUIContext().getPromptAction().showToast({ message: '开发者模式已启用！' });
+    } catch (error) {
+      if (this.active) this.getUIContext().getPromptAction().showToast({ message: featureError(error as Error) });
+    } finally { this.enablingDebug = false; }
+  }
 
   private loadVersion(): void {
     try {
@@ -115,6 +135,7 @@ export struct FeatureAbout {
               FeatureError({ message: this.versionError, onRetry: () => this.loadVersion() })
             } else {
               Text(this.version).fontSize(16).fontColor($r('app.color.text_primary'))
+                .padding({ left: 16, right: 16, top: 6, bottom: 6 }).id('about-version').onClick(() => this.tapVersion())
             }
           }.width('100%').padding({ top: 32, bottom: 32 })
         }
@@ -141,7 +162,7 @@ export struct FeatureAbout {
               .fontColor($r('app.color.text_secondary'))
           }
         }
-      }.layoutWeight(1).width('100%').contentEndOffset(24).scrollBar(BarState.Auto)
+      }.layoutWeight(1).width('100%').contentEndOffset(24 + this.navigationInset).scrollBar(BarState.Auto)
         .onReachEnd(() => { if (this.hasMore && this.error.length === 0) this.load(); })
     }.width('100%').height('100%').backgroundColor($r('app.color.background'))
   }

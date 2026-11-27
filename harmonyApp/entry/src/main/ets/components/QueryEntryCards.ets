@@ -1,3 +1,4 @@
+import { iconTint } from './IconTint';
 import { DisplayItem, ItemAction } from '../model/NativeModels';
 import { detailValue } from './FeatureContracts';
 import { courseAccent, emptyDisplayItem, withOpacity } from './AppComponents';
@@ -8,7 +9,7 @@ export struct EntryMeta {
   @Prop text: string = '';
   build() {
     Row({ space: 8 }) {
-      Image($rawfile('shared/' + this.icon + '.svg')).width(15).height(15).fillColor($r('app.color.primary'))
+      Image($rawfile('shared/' + this.icon + '.svg')).width(15).height(15).colorFilter(iconTint($r('app.color.primary')))
       Text(this.text).fontSize(12).fontColor($r('app.color.text_primary')).layoutWeight(1)
         .maxLines(3).textOverflow({ overflow: TextOverflow.Ellipsis })
     }.width('100%')
@@ -195,7 +196,7 @@ export struct NoticeCard {
               Button({ type: ButtonType.Normal }) {
                 Row({ space: 4 }) {
                   if (action.type === 'COPY') {
-                    Image($rawfile('home_copy.svg')).width(16).height(16).fillColor($r('app.color.on_secondary_container'))
+                    Image($rawfile('home_copy.svg')).width(16).height(16).colorFilter(iconTint($r('app.color.on_secondary_container')))
                   } else {
                     Shape() {
                       Path().commands('M19 4H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4v-2H5V8h14v10h-4v2h4c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM12 10l-4 4h3v6h2v-6h3z').fill($r('app.color.on_secondary_container'))

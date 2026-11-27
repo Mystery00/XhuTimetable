@@ -1,3 +1,4 @@
+import { iconTint } from './IconTint';
 import { inputMethod } from '@kit.IMEKit';
 import { EditorField, EditorState, SelectOption } from '../model/NativeModels';
 import { NativeClient } from '../platform/NativeClient';
@@ -392,7 +393,7 @@ export struct FeatureEditor {
               Circle().width(34).height(34).fill(color)
                 .stroke(this.value('color').slice(-6).toUpperCase() === color.slice(-6) ? $r('app.color.text_primary') : Color.Transparent).strokeWidth(2)
               if (this.value('color').slice(-6).toUpperCase() === color.slice(-6)) {
-                Image($rawfile('shared/ic_action_done.svg')).width(16).height(16).fillColor(readableCourseText(color))
+                Image($rawfile('shared/ic_action_done.svg')).width(16).height(16).colorFilter(iconTint(readableCourseText(color)))
               }
             }.width(34).height(34).accessibilityText(color).onClick(() => this.setValue('color', color))
           }, (color: string) => color)

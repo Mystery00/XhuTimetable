@@ -123,6 +123,7 @@ export struct HomeCourseSheet {
     // fields 承载周次、节次、附加信息；教师、地点和独立起止时间仍来自各自字段。
     // 不拆分 detail/time 等展示字符串，也不让扩展字段覆盖掉基础详情。
     const supplied = item.fields ?? [];
+    if (this.mode === 'calendarThing') return supplied;
     const fields: DetailField[] = [];
     const teacher: DetailField = supplied.find((field: DetailField) => field.key === 'teacher') ??
       { key: 'teacher', label: '任课教师', value: item.subtitle };
@@ -136,6 +137,8 @@ export struct HomeCourseSheet {
       { key: 'time', label: '上课时间', value: timeValue };
     if (this.mode === 'today') {
       fields.push(time, location, teacher);
+      const weeks = supplied.find((field: DetailField) => field.key === 'weeks');
+      if (weeks !== undefined) fields.push(weeks);
     } else {
       fields.push(teacher, location);
       supplied.filter((field: DetailField) => field.key === 'week' || field.key === 'weeks')
@@ -151,12 +154,17 @@ export struct HomeCourseSheet {
     if (field.key === 'teacher') return 'person';
     if (field.key === 'location') return 'location';
     if (field.key === 'time') return 'clock';
+    if (field.key === 'remark') return 'note';
     if (field.key === 'week' || field.key === 'weeks' || field.key === 'date') return 'today';
     return 'info';
   }
 
+  private isExtra(field: DetailField): boolean {
+    return field.key.startsWith('extra') || field.label === '附加信息';
+  }
+
   private copyable(field: DetailField): boolean {
-    return field.key === 'location' || field.key.startsWith('extra') || field.label === '上课地点' || field.label === '附加信息';
+    return field.key === 'location' || field.key === 'remark' || field.label === '上课地点' || this.isExtra(field);
   }
 
   @Builder
@@ -182,7 +190,7 @@ export struct HomeCourseSheet {
   private weekHeader(item: DisplayItem) {
     Column({ space: 8 }) {
       Row({ space: 8 }) {
-        Text(item.status === '非本周' ? '非本周' : '本周课程').fontSize(11).lineHeight(13.75)
+        Text(item.status || '本周课程').fontSize(11).lineHeight(13.75)
           .fontWeight(600).fontColor(item.status === '非本周' ? $r('app.color.text_secondary') : Color.White)
           .padding({ left: 8, right: 8, top: 3, bottom: 3 }).borderRadius(8)
           .backgroundColor(item.status === '非本周' ? $r('app.color.container_highest') : this.accent(item))
@@ -208,15 +216,14 @@ export struct HomeCourseSheet {
       }
       Column({ space: this.mode === 'today' ? 14 : 8 }) {
         ForEach(this.fields(item), (field: DetailField, index: number) => {
-          if ((field.key.startsWith('extra') || field.label === '附加信息') &&
-            (index === 0 || !(this.fields(item)[index - 1].key.startsWith('extra') || this.fields(item)[index - 1].label === '附加信息'))) {
+          if (field.key === 'remark' || (this.isExtra(field) && (index === 0 || !this.isExtra(this.fields(item)[index - 1])))) {
             Divider().color(withOpacity($r('app.color.outline'), 0.45))
           }
           HomeDetailRow({ icon: this.fieldIcon(field), label: field.label, value: field.value,
             copyable: this.copyable(field), onCopy: this.onCopy })
         }, (field: DetailField, index: number) => field.key + ':' + index)
       }.width('100%')
-    }.width('100%').padding({ left: 20, right: 20, bottom: this.mode === 'today' ? 32 : 28 })
+    }.width('100%').padding({ left: 20, right: 20, bottom: this.mode === 'week' ? 28 : 32 })
   }
 
   build() {

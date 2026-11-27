@@ -1,9 +1,11 @@
+import { iconTint } from '../components/IconTint';
 import { common, ConfigurationConstant } from '@kit.AbilityKit';
 import { ColorMetrics, KeyboardAvoidMode, window } from '@kit.ArkUI';
 import { inputMethod } from '@kit.IMEKit';
 import { BootstrapState, HomeState, ProfileMenu } from '../model/NativeModels';
 import { NativeClient } from '../platform/NativeClient';
 import { HomeContent, emptyHomeState } from '../components/HomeContent';
+import { HomeWeekTitle } from '../components/HomeWeek';
 import { LoginContent } from '../components/LoginContent';
 import { StartupContent } from '../components/StartupContent';
 import { ProfileContent } from '../components/ProfileContent';
@@ -19,6 +21,10 @@ interface PrivacyDecisionRequest {
 
 interface TermStartDecisionRequest {
   sync: boolean;
+}
+
+interface TodayDateRequest {
+  date: string;
 }
 
 interface WeekRequest {
@@ -86,7 +92,8 @@ struct Index {
   private homeActions: ((action: string) => void) | undefined = undefined;
   @State private calendarTitle: string = '';
   @State private displayedWeek: number = 1;
-  private lastHomeWeek: number = -1;
+  private pendingWeek: number | undefined = undefined;
+  private weekRevision: number = 0;
   @State private systemTop: number = 0;
   @StorageLink('harmonyNavigationInset') private systemBottom: number = 0;
   private onAvoidAreaChanged = (_event: window.AvoidAreaOptions): void => { this.updateInsets(); };
@@ -108,6 +115,12 @@ struct Index {
 
   private statusBackground(): ResourceColor {
     return this.hasMainBackground() ? withOpacity($r('app.color.surface'), this.dark ? 0.78 : 0.86) : $r('app.color.background');
+  }
+
+  private featureNavigationInset(): number {
+    if (!this.ready || !this.app.privacy || !this.app.loggedIn) return 0;
+    return ['settings', 'classSettings', 'about', 'accounts', 'courseColors', 'customUi', 'backgrounds', 'expScores']
+      .includes(this.route()) ? this.systemBottom : 0;
   }
 
   private navigationBackground(): ResourceColor {
@@ -261,15 +274,18 @@ struct Index {
       this.applyNightMode(app.nightMode);
       this.app = app;
       if (app.privacy && app.loggedIn) {
+        const weekRevision = this.weekRevision;
         const home = JSON.parse(await client.request('home')) as HomeState;
         if (this.disposed || generation !== this.generation) return;
         this.home = home;
-        if (this.lastHomeWeek !== home.week) {
+        // 异步快照可能来自上一次选周；标题和课表均以最近一次选择为准。
+        if (weekRevision === this.weekRevision && (this.pendingWeek === undefined || this.pendingWeek === home.week)) {
           this.displayedWeek = home.week;
-          this.lastHomeWeek = home.week;
+          this.pendingWeek = undefined;
         }
         if (!home.calendarEnabled && this.selectedTab === 'calendar') this.selectedTab = 'today';
       } else {
+        this.pendingWeek = undefined;
         this.home = emptyHomeState();
         this.routes = [];
       }
@@ -374,14 +390,20 @@ struct Index {
   }
 
   private async changeWeek(week: number): Promise<void> {
+    if (week === this.displayedWeek || this.client === undefined) return;
+    const revision = ++this.weekRevision;
     this.displayedWeek = week;
-    if (this.client === undefined) return;
+    this.pendingWeek = week;
     try {
       const request: WeekRequest = { week: week };
       await this.client.request('week', request);
       this.scheduleReload();
     } catch (error) {
-      if (!this.disposed) this.error = (error as Error).message;
+      if (!this.disposed && revision === this.weekRevision && this.pendingWeek === week) {
+        this.pendingWeek = undefined;
+        this.displayedWeek = this.home.week;
+        this.error = (error as Error).message;
+      }
     }
   }
 
@@ -418,7 +440,6 @@ struct Index {
 
   private title(): string {
     if (this.selectedTab === 'today') return this.home.title || '今日课程';
-    if (this.selectedTab === 'week') return this.displayedWeek <= 0 ? '尚未开学' : this.displayedWeek > 20 ? '学期已结束' : '第' + this.displayedWeek + '周';
     if (this.selectedTab === 'calendar') return this.calendarTitle || (this.home.week <= 0 ? '月历日程' : this.home.week > 20 ? '学期已结束' : '第' + this.home.week + '周');
     return '我的';
   }
@@ -479,28 +500,19 @@ struct Index {
   @Builder
   private mainTitle() {
     if (this.selectedTab === 'week') {
-      Column({ space: 0 }) {
-        Row({ space: 2 }) {
-          Text(this.title()).fontSize(16).lineHeight(21.12).fontWeight(600)
-            .fontColor($r('app.color.text_primary'))
-          Image($rawfile('toolbar_chevron.svg')).width(18).height(18)
-            .fillColor($r('app.color.text_secondary')).accessibilityLevel('no')
-        }
-        if (this.home.actualWeek >= 1 && this.home.actualWeek <= 20 && this.displayedWeek !== this.home.actualWeek) {
-          Text('非本周 · 当前第' + this.home.actualWeek + '周').fontSize(11).lineHeight(13.75)
-            .fontColor($r('app.color.primary'))
-        }
-      }.padding({ left: 12, right: 12, top: 5, bottom: 5 }).borderRadius(14)
-        .backgroundColor(withOpacity($r('app.color.container_high'), 0.72)).id('main-week-picker')
-        .onClick(() => this.homeActions?.('week')).accessibilityText('切换周次')
-    } else {
-      Column() {
-        Text(this.title()).fontSize(16).lineHeight(21.12).fontWeight(600)
-          .fontColor($r('app.color.text_primary')).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
-        if (this.selectedTab === 'today' && this.home.showTomorrow) {
-          Text('已自动切换至明日课表').fontSize(11).lineHeight(13.75).fontColor($r('app.color.primary'))
-        }
+      HomeWeekTitle({ week: this.displayedWeek, actualWeek: this.home.actualWeek,
+        onPick: () => { this.homeActions?.('week'); } })
+    } else if (this.selectedTab === 'today') {
+      Stack() {
+        ForEach([this.title()], (title: string) => {
+          Text(title).fontSize(16).lineHeight(21.12).fontWeight(600)
+            .fontColor($r('app.color.text_primary')).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
+            .transition(TransitionEffect.OPACITY.animation({ duration: 160, curve: Curve.FastOutSlowIn }))
+        }, (title: string) => title)
       }.constraintSize({ maxWidth: '65%' })
+    } else {
+      Text(this.title()).fontSize(16).lineHeight(21.12).fontWeight(600).fontColor($r('app.color.text_primary'))
+        .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).constraintSize({ maxWidth: '65%' })
     }
   }
 
@@ -516,7 +528,7 @@ struct Index {
               .width(48).height(64).justifyContent(FlexAlign.Center)
           }
           Button({ type: ButtonType.Circle }) {
-            Image($rawfile('toolbar_add.svg')).width(24).height(24).fillColor($r('app.color.text_secondary'))
+            Image($rawfile('toolbar_add.svg')).width(24).height(24).colorFilter(iconTint($r('app.color.text_secondary')))
           }.width(48).height(48).backgroundColor(Color.Transparent).id('main-add')
             .accessibilityText('添加自定义课程或事项').onClick(() => this.homeActions?.('add'))
         } else if (this.selectedTab === 'week' || this.selectedTab === 'calendar') {
@@ -524,12 +536,14 @@ struct Index {
             Button({ type: ButtonType.Circle }) {
               HomeIcon({ name: 'today', iconSize: 24, tint: $r('app.color.primary') })
             }.width(48).height(48).backgroundColor(Color.Transparent).id('main-current-week')
+              .transition(TransitionEffect.OPACITY.combine(TransitionEffect.scale({ x: 0.8, y: 0.8 }))
+                .animation({ duration: 180, curve: Curve.FastOutSlowIn }))
               .accessibilityText('回到本周').onClick(() => this.homeActions?.('today'))
           }
           if (this.selectedTab === 'calendar') {
             Button({ type: ButtonType.Circle }) {
               Stack({ alignContent: Alignment.TopEnd }) {
-                Image($rawfile('shared/ic_practical_course.svg')).width(24).height(24).fillColor($r('app.color.text_primary'))
+                Image($rawfile('shared/ic_practical_course.svg')).width(24).height(24).colorFilter(iconTint($r('app.color.text_primary')))
                 if (this.home.practical.length > 0) {
                   Text(this.home.practical.length.toString()).fontSize(11).fontColor($r('app.color.on_secondary_container'))
                     .backgroundColor($r('app.color.secondary_container')).padding({ left: 4, right: 4 })
@@ -543,7 +557,7 @@ struct Index {
             if (this.home.loading) {
               LoadingProgress().width(24).height(24).color($r('app.color.text_primary'))
             } else {
-              Image($rawfile('shared/ic_sync.svg')).width(24).height(24).fillColor($r('app.color.text_primary'))
+              Image($rawfile('shared/ic_sync.svg')).width(24).height(24).colorFilter(iconTint($r('app.color.text_primary')))
             }
           }.width(48).height(48).backgroundColor(Color.Transparent).enabled(!this.home.loading)
             .id('main-refresh').accessibilityText('刷新课表').onClick(() => this.refresh())
@@ -563,9 +577,13 @@ struct Index {
           menuGroups: this.app.menuGroups ?? [], onMenu: (menu: ProfileMenu) => this.openMenu(menu),
           onNavigate: (route: string) => this.navigate(route) }).layoutWeight(1)
       } else {
-        HomeContent({ home: this.home, tab: this.selectedTab,
+        HomeContent({ home: this.home, tab: this.selectedTab, displayedWeek: this.displayedWeek,
           onNavigate: (route: string) => this.navigate(route), onRefresh: () => this.refresh(),
           onWeek: (week: number) => this.changeWeek(week), onCopy: (text: string) => this.copyText(text),
+          onDate: (date: string) => {
+            const request: TodayDateRequest = { date: date };
+            this.client?.request('todayDate', request).catch((error: Error) => { this.error = error.message; });
+          },
           onCalendarTitle: (title: string) => { this.calendarTitle = title; },
           registerActions: (handler: ((action: string) => void) | undefined) => { this.homeActions = handler; },
           registerBackHandler: (handler: (() => boolean) | undefined) => { this.homeBackHandler = handler; }
@@ -608,7 +626,7 @@ struct Index {
           helpUrl: this.app.helpUrl, fromAccountManager: this.route() === 'addAccount', systemTop: this.systemTop,
           onLoggedIn: () => { this.loggedIn(); }, onBack: () => { this.goBack(); } })
       } else if (this.routes.length > 0 && this.client !== undefined) {
-        FeaturePage({ client: this.client, route: this.route(), onBack: () => { this.goBack(); },
+        FeaturePage({ client: this.client, route: this.route(), navigationInset: this.featureNavigationInset(), onBack: () => { this.goBack(); },
           onNavigate: (route: string) => { this.navigate(route); }, onChanged: () => { this.scheduleReload(); },
           registerBackHandler: (handler: (() => boolean) | undefined) => { this.featureBackHandler = handler; } })
       } else {
@@ -630,7 +648,7 @@ struct Index {
           Column() {}.width('100%').height(this.systemTop).backgroundColor(this.statusBackground())
         }
         this.currentPage()
-        Column() {}.width('100%').height(this.systemBottom).backgroundColor(this.navigationBackground())
+        Column() {}.width('100%').height(this.systemBottom - this.featureNavigationInset()).backgroundColor(this.navigationBackground())
       }.width('100%').height('100%')
     }.width('100%').height('100%').backgroundColor($r('app.color.background'))
   }

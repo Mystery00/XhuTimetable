@@ -171,6 +171,10 @@ val syncHarmonyResources by tasks.registering {
     outputs.dir(harmonyRoot.resolve("entry/src/main/resources/rawfile/shared"))
     outputs.file(harmonyRoot.resolve("AppScope/resources/base/media/app_icon.svg"))
     doLast {
+        // 两个目录只包含构建生成的资源，重新导出时同步移除源端已删除的 XML 和 SVG。
+        val rawResources = harmonyRoot.resolve("entry/src/main/resources/rawfile")
+        val nativeResources = rawResources.resolve("shared")
+        delete(rawResources.resolve("composeResources"), nativeResources)
         copy {
             from(libraryResources)
             into(harmonyRoot.resolve("entry/src/main/resources/rawfile"))
@@ -187,7 +191,6 @@ val syncHarmonyResources by tasks.registering {
         val factory = javax.xml.parsers.DocumentBuilderFactory.newInstance().apply {
             setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
         }
-        val nativeResources = harmonyRoot.resolve("entry/src/main/resources/rawfile/shared")
         nativeResources.mkdirs()
         copy {
             from(sharedResources.resolve("drawable"))

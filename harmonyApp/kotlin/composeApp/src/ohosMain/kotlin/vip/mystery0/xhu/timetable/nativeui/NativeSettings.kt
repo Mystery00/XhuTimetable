@@ -105,7 +105,10 @@ object NativeSettings : KoinComponent {
                     setting("licenses", "开源依赖项说明", "", "navigate", "", "关于与支持", icon = "ic_notice", route = "about"),
                     setting("pushId", "推送注册 ID", "", "action", "暂无", "关于与支持", icon = "ic_action_notify_course", enabled = false),
                     setting("diagnostics", "上报诊断日志", "", "action", "当前平台尚未启用文件诊断日志", "关于与支持", icon = "ic_feedback", enabled = false),
-                )
+                ) + if (debugMode) listOf(
+                    setting("debugMode", "启用开发者模式", "true", "toggle", "", "开发者选项"),
+                    setting("revokePrivacy", "撤销隐私授权", "", "action", "", "开发者选项"),
+                ) else emptyList()
             }
         }.toMutableList()
         if (kind == "classSettings") {
@@ -131,6 +134,11 @@ object NativeSettings : KoinComponent {
                 UserStore.mainUser().withAutoLoginOnce { UserRepo.updateUserCampus(it, value) }
                 return
             }
+            "revokePrivacy" -> {
+                check(getConfigStore { debugMode }) { "请先启用开发者模式" }
+                setCacheStore { allowPrivacy = false }
+                return
+            }
             "resetBackground" -> {
                 setCacheStore { hideSplashBefore = LocalDate.MIN }
                 setConfigStore { backgroundImage = null }
@@ -153,6 +161,7 @@ object NativeSettings : KoinComponent {
             when (key) {
                 "nightMode" -> nightMode = when (value) { "AUTO" -> NightMode.AUTO; "ON" -> NightMode.ON; "OFF" -> NightMode.OFF; else -> error("主题选项无效") }
                 "enableCalendarView" -> { check(!multiAccountMode) { "多账号模式下暂不支持日历视图" }; enableCalendarView = boolean() }
+                "debugMode" -> debugMode = boolean()
                 "disableBackgroundWhenNight" -> disableBackgroundWhenNight = boolean()
                 "showHoliday" -> showHoliday = boolean()
                 "showOldCourseWhenFailed" -> showOldCourseWhenFailed = boolean()

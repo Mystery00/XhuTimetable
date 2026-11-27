@@ -1,3 +1,4 @@
+import { iconTint } from './IconTint';
 import { AcademicOptions, DetailField, DisplayItem, ListResult, SelectOption, UserSummary, ItemAction } from '../model/NativeModels';
 import { NativeClient } from '../platform/NativeClient';
 import { FeatureEditorRequest, FeatureKindRequest, FeatureQueryRequest, FeatureSaveRequest,
@@ -17,11 +18,13 @@ const COLLEGE_ICON = 'M12 2L2 7v2h20V7zM4 11v7h3v-7zm6.5 0v7h3v-7zm6.5 0v7h3v-7z
 const MAJOR_ICON = 'M12 3L1 9l11 6 9-4.91V17h2V9zM5 13.18v4L12 21l7-3.82v-4L12 17z';
 
 interface TimetableOptionsRequest { kind: string; college: string; }
+interface TimetableMajorOptions { majors: SelectOption[]; }
 interface UrgeRequest { id: string; }
 
 @Component
 export struct FeatureList {
   client: NativeClient | undefined = undefined;
+  @Prop navigationInset: number = 0;
   @Prop @Watch('reloadRoute') route: string = '';
   @Prop @Watch('refreshAfterEdit') refreshTrigger: number = 0;
   onBack: () => void = () => {};
@@ -68,6 +71,7 @@ export struct FeatureList {
   private active: boolean = false;
   private epoch: number = 0;
   private dialog?: CustomDialogController;
+  private majorRequest: number = 0;
   private lastQuery?: FeatureQueryRequest;
   private failedQuery?: FeatureQueryRequest;
   private refreshQueued: boolean = false;
@@ -90,6 +94,7 @@ export struct FeatureList {
     this.actionBusy = false;
     this.optionsReady = false;
     this.searched = false;
+    this.majorRequest++;
     this.area = ''; this.college = ''; this.major = ''; this.courseName = ''; this.teacherName = '';
     this.calendarIndex = 0;
     this.calendarAttempt++;
@@ -121,6 +126,7 @@ export struct FeatureList {
         this.users = options.users; this.user = options.selectedUser;
         this.campus = options.campus; this.campuses = options.campuses; this.buildings = options.buildings;
         this.colleges = options.colleges; this.majors = options.majors;
+        if (options.selectorError) this.getUIContext().getPromptAction().showToast({ message: options.selectorError });
         this.weeks = [options.week]; this.days = [options.day]; this.periods = options.periods;
       }
       if (!this.active || current !== this.epoch) return;
@@ -254,14 +260,18 @@ export struct FeatureList {
   }
 
   private async changeCollege(value: string): Promise<void> {
-    this.college = value; this.major = ''; this.majors = []; this.error = '';
+    const current = ++this.majorRequest;
+    this.college = value; this.major = ''; this.majors = [];
     if (value.length === 0) return;
-    const current = this.epoch;
     const request: TimetableOptionsRequest = { kind: 'timetable', college: value };
     try {
-      const result = JSON.parse(await this.client!.request('options', request)) as AcademicOptions;
-      if (this.active && current === this.epoch && this.college === value) this.majors = result.majors;
-    } catch (error) { if (this.active && current === this.epoch) this.error = featureError(error as Error); }
+      const result = JSON.parse(await this.client!.request('options', request)) as TimetableMajorOptions;
+      if (this.active && current === this.majorRequest) this.majors = result.majors;
+    } catch (error) {
+      if (this.active && current === this.majorRequest) {
+        this.getUIContext().getPromptAction().showToast({ message: featureError(error as Error) });
+      }
+    }
   }
 
   private currentItem(id: string): DisplayItem { return this.items.find((item: DisplayItem) => item.id === id)!; }
@@ -584,7 +594,7 @@ export struct FeatureList {
         if (this.error.length > 0) { Text(this.error).fontSize(12).fontColor($r('app.color.danger')).width('100%') }
         Button({ type: ButtonType.Normal }) {
           Row({ space: 6 }) {
-            Image($rawfile('shared/ic_action_search.svg')).width(18).height(18).fillColor($r('app.color.on_primary')).accessibilityLevel('no')
+            Image($rawfile('shared/ic_action_search.svg')).width(18).height(18).colorFilter(iconTint($r('app.color.on_primary'))).accessibilityLevel('no')
             Text(this.loading ? '查询中…' : (this.route === 'rooms' ? '开始查询' : '查询课程'))
               .fontSize(14).fontWeight(600).fontColor($r('app.color.on_primary'))
           }
@@ -717,7 +727,7 @@ export struct FeatureList {
               .fontSize(12).fontColor($r('app.color.text_secondary')).opacity(0.7).padding(20).width('100%').textAlign(TextAlign.Center)
           }
         }
-      }.width('100%').height('100%').sticky(StickyStyle.Header).contentEndOffset(this.customPage() ? 88 : 24)
+      }.width('100%').height('100%').sticky(StickyStyle.Header).contentEndOffset((this.customPage() ? 88 : 24) + this.navigationInset)
         .onDidScroll((offset: number, state: ScrollState) => {
           if (this.customPage() && state !== ScrollState.Idle && offset !== 0) {
             this.customFabVisible = offset < 0 || this.listScroller.currentOffset().yOffset <= 0;
@@ -747,7 +757,7 @@ export struct FeatureList {
               Button('重新加载').fontColor($r('app.color.primary')).backgroundColor(Color.Transparent).onClick(() => this.load(true))
             } else if (this.items.length > 0) {
               if (this.route === 'backgrounds') {
-                BackgroundGallery({ items: this.items, busy: this.actionBusy, onSelect: (item: DisplayItem) => this.selectBackground(item) }).layoutWeight(1)
+                BackgroundGallery({ items: this.items, navigationInset: this.navigationInset, busy: this.actionBusy, onSelect: (item: DisplayItem) => this.selectBackground(item) }).layoutWeight(1)
               } else {
                 // 换校区或重试时重建图片节点；旧节点的回调始终携带原始请求序号。
                 ForEach([this.calendarAttempt], (attempt: number) => {
@@ -775,7 +785,7 @@ export struct FeatureList {
               Text('相册选取').fontSize(14).fontWeight(FontWeight.Medium).fontColor($r('app.color.on_primary_container'))
             }
           }.height(56).padding({ left: 16, right: 20 }).backgroundColor($r('app.color.primary_container')).borderRadius(16)
-            .shadow({ radius: 6, color: '#26000000', offsetY: 3 }).margin(16).accessibilityText('相册选取')
+            .shadow({ radius: 6, color: '#26000000', offsetY: 3 }).margin({ right: 16, bottom: 16 + this.navigationInset }).accessibilityText('相册选取')
             .enabled(!this.actionBusy).onClick(() => this.pickBackground())
         }
       }.layoutWeight(1).width('100%')
