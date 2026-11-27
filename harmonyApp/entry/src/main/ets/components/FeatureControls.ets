@@ -24,6 +24,7 @@ export function featureTitle(route: string): string {
     case 'accounts': return '账号管理';
     case 'about': return '关于西瓜课表';
     case 'licenses': return '开源许可';
+    case 'sponsors': return '赞助鸣谢';
     default: return '页面';
   }
 }

@@ -138,7 +138,7 @@ object NativeCore : KoinComponent {
             "copyText" -> { ArkTsBridge.call("copyText", params.text("text")); return JsonNull }
             "share" -> { ArkTsBridge.call("shareText", params.text("text")); return JsonNull }
             "feedbackClose" -> { closeNativeFeedback(); return JsonNull }
-            "query" -> if (params.text("kind") == "licenses") return NativeQueries.query(params)
+            "query" -> if (params.text("kind") in setOf("licenses", "sponsors")) return NativeQueries.query(params)
             "termStartDecision" -> {
                 if (params.flag("sync")) {
                     setConfigStore { customTermStartDate = Customisable.clearCustom(LocalDate.MIN) }

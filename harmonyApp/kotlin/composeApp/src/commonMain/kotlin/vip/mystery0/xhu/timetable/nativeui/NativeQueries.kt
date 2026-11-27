@@ -10,6 +10,7 @@ import kotlinx.datetime.isoDayNumber
 import kotlinx.serialization.json.*
 import vip.mystery0.xhu.timetable.base.YearSelectDataLoader
 import vip.mystery0.xhu.timetable.config.store.EventBus
+import vip.mystery0.xhu.timetable.config.store.MenuStore
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
@@ -94,6 +95,7 @@ object NativeQueries {
         val index = page - 1
         val kind = params.text("kind")
         if (kind == "licenses") return licenses(page)
+        if (kind == "sponsors") return sponsors()
         val user = if (kind == "timetable") timetableMainUser() else selectedUser(params)
         val year = params.number("year", getConfigStore { nowYear })
         val term = params.number("term", getConfigStore { nowTerm })
@@ -338,6 +340,26 @@ object NativeQueries {
 
     fun dispose() {
         timetableCache = null
+    }
+
+    private suspend fun sponsors(): JsonObject {
+        val list = StartRepo.loadSponsorList()
+        val link = MenuStore.findMenuByKey("sponsor")?.link.orEmpty()
+        return buildJsonObject {
+            put("title", "赞助鸣谢")
+            put("link", link)
+            put("count", list.size)
+            put("items", JsonArray(list.mapIndexed { index, sponsor ->
+                buildJsonObject {
+                    put("id", "${sponsor.name}:${sponsor.first.toEpochMilliseconds()}:$index")
+                    put("name", sponsor.name)
+                    put("avatar", sponsor.avatar)
+                    put("dateText", sponsor.formatDateText())
+                    put("amount", sponsor.formattedAmount())
+                    put("color", ColorPool.hash(sponsor.name.ifBlank { "sponsor" }).nativeHex())
+                }
+            }))
+        }
     }
 
     private suspend fun feedback(page: Int, beforeId: String): JsonObject {

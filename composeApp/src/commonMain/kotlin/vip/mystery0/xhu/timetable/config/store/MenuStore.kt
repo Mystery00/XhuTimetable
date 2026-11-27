@@ -32,6 +32,9 @@ object MenuStore {
         return menuGroup.keys.sorted().map { menuGroup[it]!! }
     }
 
+    suspend fun findMenuByKey(key: String): Menu? =
+        loadAllMenu().flatten().firstOrNull { it.key.equals(key, ignoreCase = true) }
+
     suspend fun updateList(list: List<Menu>) {
         Store.MenuStore.removeAll()
         val menuList = list.map { it.key }.sorted().toSet()

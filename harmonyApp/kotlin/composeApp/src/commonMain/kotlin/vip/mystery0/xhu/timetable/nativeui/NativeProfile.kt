@@ -18,6 +18,7 @@ fun profileMenus(groups: List<List<Menu>>, noticeUnread: Boolean, feedbackUnread
             "NOTICE" -> "notices"
             "FEEDBACK" -> "feedback"
             "URGE" -> "urge"
+            "SPONSOR" -> "sponsors"
             else -> ""
         }
         val icon = when (key) {

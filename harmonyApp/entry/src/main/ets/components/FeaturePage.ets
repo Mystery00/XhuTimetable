@@ -9,6 +9,7 @@ import { FeatureList } from './FeatureList';
 import { FeatureSettings } from './FeatureSettings';
 import { CustomUiContent } from './CustomUiContent';
 import { FeedbackContent } from './FeedbackContent';
+import { SponsorContent } from './SponsorContent';
 import { FeatureError, FeatureHeader } from './FeatureControls';
 
 @Component
@@ -88,6 +89,8 @@ export struct FeaturePage {
           onNavigate: (route: string) => this.onNavigate(route), onChanged: () => this.onChanged() })
       } else if (this.route === 'about') {
         FeatureAbout({ client: this.client, navigationInset: this.navigationInset, onBack: () => this.onBack(), onNavigate: (route: string) => this.onNavigate(route) })
+      } else if (this.route === 'sponsors') {
+        SponsorContent({ client: this.client, navigationInset: this.navigationInset, onBack: () => this.onBack() })
       } else if (this.queryRoute()) {
         FeatureList({ client: this.client, navigationInset: this.navigationInset, route: this.route, refreshTrigger: this.refreshTrigger,
           onBack: () => this.onBack(), onNavigate: (route: string) => this.onNavigate(route),

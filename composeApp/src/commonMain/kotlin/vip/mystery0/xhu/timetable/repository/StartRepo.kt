@@ -30,6 +30,7 @@ import vip.mystery0.xhu.timetable.model.TermStartChangeAlert
 import vip.mystery0.xhu.timetable.model.TermStartChangeDetector
 import vip.mystery0.xhu.timetable.model.request.ClientInitRequest
 import vip.mystery0.xhu.timetable.model.response.ClientVersion
+import vip.mystery0.xhu.timetable.model.response.SponsorResponse
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
 import vip.mystery0.xhu.timetable.model.response.VersionUrl
 import kotlin.coroutines.EmptyCoroutineContext
@@ -156,6 +157,15 @@ object StartRepo : BaseDataRepo {
         withContext(Dispatchers.IO) {
             commonApi.getVersionUrl(versionId)
         }
+
+    suspend fun loadSponsorList(): List<SponsorResponse> {
+        if (!isOnline) {
+            error("网络未连接，请检查网络后重试")
+        }
+        return withContext(Dispatchers.IO) {
+            commonApi.getSponsorList()
+        }
+    }
 
     suspend fun loadTeamMemberList(): List<TeamMemberResponse> {
         if (!isOnline) {

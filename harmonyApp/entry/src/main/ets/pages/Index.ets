@@ -119,7 +119,7 @@ struct Index {
 
   private featureNavigationInset(): number {
     if (!this.ready || !this.app.privacy || !this.app.loggedIn) return 0;
-    return ['settings', 'classSettings', 'about', 'accounts', 'courseColors', 'customUi', 'backgrounds', 'expScores']
+    return ['settings', 'classSettings', 'about', 'accounts', 'courseColors', 'customUi', 'backgrounds', 'expScores', 'sponsors']
       .includes(this.route()) ? this.systemBottom : 0;
   }
 

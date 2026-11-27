@@ -15,6 +15,7 @@ import vip.mystery0.xhu.timetable.ui.navigation.RouteQueryExpScore
 import vip.mystery0.xhu.timetable.ui.navigation.RouteQueryScore
 import vip.mystery0.xhu.timetable.ui.navigation.RouteSchoolTimetable
 import vip.mystery0.xhu.timetable.ui.navigation.RouteSettings
+import vip.mystery0.xhu.timetable.ui.navigation.RouteSponsor
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 
 enum class MenuItem(
@@ -82,6 +83,10 @@ enum class MenuItem(
     JOIN_GROUP(
         { XhuIcons.Profile.joinGroup },
         { toCustomTabs(it.link) },
+    ),
+    SPONSOR(
+        { XhuIcons.Profile.unknownMenu },
+        { navigateTo(RouteSponsor(link = it.link)) },
     ),
     EMPTY(
         { XhuIcons.Profile.unknownMenu },

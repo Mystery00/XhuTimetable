@@ -24,6 +24,7 @@ import vip.mystery0.xhu.timetable.viewmodel.SchoolTimetableViewModel
 import vip.mystery0.xhu.timetable.viewmodel.ScoreViewModel
 import vip.mystery0.xhu.timetable.viewmodel.SettingsViewModel
 import vip.mystery0.xhu.timetable.viewmodel.SplashImageViewModel
+import vip.mystery0.xhu.timetable.viewmodel.SponsorViewModel
 import vip.mystery0.xhu.timetable.viewmodel.StarterViewModel
 import vip.mystery0.xhu.timetable.viewmodel.UrgeViewModel
 
@@ -50,6 +51,7 @@ val viewModelModule = module {
     viewModel { ScoreViewModel() }
     viewModel { SettingsViewModel() }
     viewModel { SplashImageViewModel() }
+    viewModel { SponsorViewModel() }
     viewModel { StarterViewModel() }
     viewModel { UrgeViewModel() }
     viewModel { SchoolTimetableViewModel() }

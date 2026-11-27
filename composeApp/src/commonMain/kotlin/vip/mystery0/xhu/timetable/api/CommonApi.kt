@@ -7,6 +7,7 @@ import de.jensklingenberg.ktorfit.http.Query
 import io.ktor.client.statement.HttpResponse
 import vip.mystery0.xhu.timetable.model.request.ClientInitRequest
 import vip.mystery0.xhu.timetable.model.response.ClientInitResponse
+import vip.mystery0.xhu.timetable.model.response.SponsorResponse
 import vip.mystery0.xhu.timetable.model.response.TeamMemberResponse
 import vip.mystery0.xhu.timetable.model.response.VersionUrl
 
@@ -27,4 +28,7 @@ interface CommonApi {
 
     @GET("api/rest/external/common/team")
     suspend fun getTeamMemberList(): List<TeamMemberResponse>
+
+    @GET("api/rest/web/sponsor")
+    suspend fun getSponsorList(): List<SponsorResponse>
 }
