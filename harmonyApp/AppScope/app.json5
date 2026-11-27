@@ -5,7 +5,7 @@
     // 实际构建时由 harmonyApp/hvigorfile.ts 从主模块 gradle/libs.versions.toml 与 git 动态同步。
     "versionCode": 1,
     "versionName": "1.7.0",
-    "icon": "$media:app_icon",
+    "icon": "$media:layered_image",
     "label": "$string:app_name"
   }
 }

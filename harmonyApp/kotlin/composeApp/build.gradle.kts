@@ -169,7 +169,6 @@ val syncHarmonyResources by tasks.registering {
     inputs.dir(sharedResources)
     outputs.dir(harmonyRoot.resolve("entry/src/main/resources/rawfile/composeResources"))
     outputs.dir(harmonyRoot.resolve("entry/src/main/resources/rawfile/shared"))
-    outputs.file(harmonyRoot.resolve("AppScope/resources/base/media/app_icon.svg"))
     doLast {
         // 两个目录只包含构建生成的资源，重新导出时同步移除源端已删除的 XML 和 SVG。
         val rawResources = harmonyRoot.resolve("entry/src/main/resources/rawfile")
@@ -242,13 +241,6 @@ val syncHarmonyResources by tasks.registering {
                     "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"$width\" height=\"$height\" viewBox=\"0 0 $width $height\">$content</svg>"
                 )
             }
-        }
-        val appIcon = nativeResources.resolve("ic_app_icon_o.svg").readText().replace(
-            "viewBox=\"0 0 180 180\">", "viewBox=\"0 0 180 180\"><rect width=\"180\" height=\"180\" rx=\"40\" fill=\"#F7F9FF\"/>"
-        )
-        harmonyRoot.resolve("AppScope/resources/base/media/app_icon.svg").apply {
-            parentFile.mkdirs()
-            writeText(appIcon)
         }
     }
 }
