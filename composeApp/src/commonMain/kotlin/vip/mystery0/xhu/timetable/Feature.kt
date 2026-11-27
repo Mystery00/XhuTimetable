@@ -16,7 +16,7 @@ expect fun sdkKey(): String
 expect fun platform(): Platform
 
 enum class Platform {
-    ANDROID, IOS, HARMONY,
+    ANDROID, IOS, HARMONYOS,
 }
 
 fun initFeature() {

@@ -6,5 +6,5 @@ import vip.mystery0.xhu.timetable.model.response.MenuResponse
 
 interface MenuApi {
     @GET("api/rest/external/menu/list")
-    suspend fun list(@Query("platform") platform: String = "ANDROID"): List<MenuResponse>
+    suspend fun list(@Query("platform") platform: String): List<MenuResponse>
 }

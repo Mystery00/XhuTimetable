@@ -10,7 +10,7 @@ interface NoticeApi {
     @GET("api/rest/external/notice/list")
     suspend fun noticeList(
         @Header("sessionToken") token: String,
-        @Query("platform") platform: String = "ANDROID",
+        @Query("platform") platform: String,
         @Query("index") index: Int,
         @Query("size") size: Int,
         @Query("showActions") showActions: Boolean = true,
@@ -20,6 +20,6 @@ interface NoticeApi {
     suspend fun checkNotice(
         @Header("sessionToken") token: String,
         @Query("lastNoticeId") lastNoticeId: Int,
-        @Query("platform") platform: String = "ANDROID",
+        @Query("platform") platform: String,
     ): Boolean
 }

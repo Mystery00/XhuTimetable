@@ -16,6 +16,7 @@ import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.response.NoticeResponse
 import vip.mystery0.xhu.timetable.model.transfer.PageResult
+import vip.mystery0.xhu.timetable.platform
 
 object NoticeRepo : BaseDataRepo {
     private val noticeApi: NoticeApi by inject()
@@ -36,7 +37,9 @@ object NoticeRepo : BaseDataRepo {
     suspend fun getNoticePage(index: Int, size: Int):
         PageResult<NoticeResponse> {
         checkForceLoadFromCloud(true)
-        val result = mainUser().withAutoLoginOnce { noticeApi.noticeList(it, index = index, size = size) }
+        val result = mainUser().withAutoLoginOnce {
+            noticeApi.noticeList(it, platform = platform().name, index = index, size = size)
+        }
         result.items.maxOfOrNull { it.noticeId }?.let {
             val last = getCacheStore { lastNoticeId }
             setCacheStore { lastNoticeId = maxOf(last, it) }
@@ -52,7 +55,7 @@ object NoticeRepo : BaseDataRepo {
 
         val lastNoticeId = getCacheStore { lastNoticeId }
         return mainUser().withAutoLoginOnce {
-            noticeApi.checkNotice(it, lastNoticeId)
+            noticeApi.checkNotice(it, lastNoticeId, platform = platform().name)
         }
     }
 }

@@ -25,6 +25,7 @@ import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.config.store.setConfigStore
 import vip.mystery0.xhu.timetable.enableUpdateCheck
+import vip.mystery0.xhu.timetable.platform
 import vip.mystery0.xhu.timetable.model.TermStartChangeAlert
 import vip.mystery0.xhu.timetable.model.TermStartChangeDetector
 import vip.mystery0.xhu.timetable.model.request.ClientInitRequest
@@ -112,7 +113,7 @@ object StartRepo : BaseDataRepo {
     }
 
     suspend fun initMenu() {
-        val menuList = menuApi.list()
+        val menuList = menuApi.list(platform().name)
         MenuStore.updateList(menuList.map { it.toMenu() })
     }
 

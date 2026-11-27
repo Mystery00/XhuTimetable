@@ -12,7 +12,7 @@ private val installationId by lazy {
     }
 }
 
-actual fun publicDeviceId(): String = installationId
+actual fun publicDeviceId(): String = "hmos-$installationId"
 actual fun appName(): String = "西瓜课表"
 actual fun packageName(): String = OhosPlatform.info.bundleName
 actual fun appVersionName(): String = OhosPlatform.info.versionName
