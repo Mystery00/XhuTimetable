@@ -28,13 +28,22 @@ on:
 
 jobs:
   build-harmony:
-    runs-on: ubuntu-latest
+    # 鸿蒙 Kotlin/Native 预编译 LLVM (ld.lld) 依赖 libxml2.so.2，固定使用 Ubuntu 24.04 LTS。
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+
+      - name: 确保系统运行库就绪 (libxml2.so.2)
+        run: |
+          set -euo pipefail
+          if ! ldconfig -p | grep -q 'libxml2\.so\.2'; then
+            sudo apt-get update
+            sudo apt-get install -y libxml2
+          fi
 
       - name: 设置 JDK 21
         uses: actions/setup-java@v6
@@ -67,6 +76,14 @@ jobs:
           echo "DEVECO_SDK_HOME=$HOS_SDK_HOME" >> "$GITHUB_ENV"
           echo "OHOS_SDK_HOME=$HOS_SDK_HOME/default/openharmony" >> "$GITHUB_ENV"
 
+      - name: 缓存 Kotlin/Native 工具链 (~/.konan)
+        uses: actions/cache@v6
+        with:
+          path: ~/.konan
+          key: harmony-konan-${{ runner.os }}-${{ hashFiles('harmonyApp/kotlin/gradle/libs.versions.toml') }}
+          restore-keys: |
+            harmony-konan-${{ runner.os }}-
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
@@ -82,7 +99,16 @@ jobs:
           chmod +x ./gradlew
           ./gradlew -PharmonyArch=arm64 :loggerChecks:test :composeApp:publishReleaseOhosArm64 --console=plain
 
-      - name: 解密鸿蒙发布签名证书
+      - name: 安装鸿蒙依赖并构建未签名 Release .app
+        working-directory: harmonyApp
+        run: |
+          set -euo pipefail
+          ohpm install --all
+          hvigorw clean --no-daemon
+          hvigorw assembleApp --mode project -p product=default -p buildMode=release --no-daemon
+
+      - name: 签名并校验 Release .app 产物
+        id: artifact
         env:
           HARMONY_SIGN_P12_BASE64: ${{ secrets.HARMONY_SIGN_P12_BASE64 }}
           HARMONY_SIGN_CER_BASE64: ${{ secrets.HARMONY_SIGN_CER_BASE64 }}
@@ -103,38 +129,43 @@ jobs:
           printf '%s' "$HARMONY_SIGN_P12_BASE64" | base64 --decode > "$SIGN_DIR/release.p12"
           printf '%s' "$HARMONY_SIGN_CER_BASE64" | base64 --decode > "$SIGN_DIR/release.cer"
           printf '%s' "$HARMONY_SIGN_P7B_BASE64" | base64 --decode > "$SIGN_DIR/release.p7b"
-          echo "HARMONY_SIGN_STORE_FILE=$SIGN_DIR/release.p12" >> "$GITHUB_ENV"
-          echo "HARMONY_SIGN_CERT_PATH=$SIGN_DIR/release.cer" >> "$GITHUB_ENV"
-          echo "HARMONY_SIGN_PROFILE_PATH=$SIGN_DIR/release.p7b" >> "$GITHUB_ENV"
 
-      - name: 安装鸿蒙依赖并构建 Release .app
-        working-directory: harmonyApp
-        env:
-          HARMONY_SIGN_KEY_ALIAS: ${{ secrets.HARMONY_SIGN_KEY_ALIAS }}
-          HARMONY_SIGN_STORE_PASSWORD: ${{ secrets.HARMONY_SIGN_STORE_PASSWORD }}
-          HARMONY_SIGN_KEY_PASSWORD: ${{ secrets.HARMONY_SIGN_KEY_PASSWORD }}
-        run: |
-          set -euo pipefail
-          ohpm install --all
-          hvigorw clean --no-daemon
-          hvigorw assembleApp --mode project -p product=default -p buildMode=release --no-daemon
-
-      - name: 收集并校验 .app 产物
-        id: artifact
-        run: |
-          set -euo pipefail
-          APP_FILE=$(find harmonyApp/build/outputs/default -maxdepth 2 -type f -name '*-signed.app' | head -n 1)
-          if [ -z "$APP_FILE" ]; then
-            APP_FILE=$(find harmonyApp/build/outputs/default -maxdepth 2 -type f -name '*.app' | head -n 1)
+          UNSIGNED_APP=$(find harmonyApp/build/outputs/default -maxdepth 2 -type f -name '*-unsigned.app' | head -n 1)
+          if [ -z "$UNSIGNED_APP" ]; then
+            UNSIGNED_APP=$(find harmonyApp/build/outputs/default -maxdepth 2 -type f -name '*.app' | head -n 1)
           fi
-          if [ -z "$APP_FILE" ]; then
+          if [ -z "$UNSIGNED_APP" ]; then
             echo "::error::未找到编译生成的 .app 文件"
             find harmonyApp/build -maxdepth 4 -type f || true
             exit 1
           fi
+
+          SIGN_TOOL="$OHOS_SDK_HOME/toolchains/lib/hap-sign-tool.jar"
+          if [ ! -f "$SIGN_TOOL" ]; then
+            echo "::error::未找到 hap-sign-tool.jar: $SIGN_TOOL"
+            exit 1
+          fi
+
           OUT_NAME="XhuTimetable-${{ steps.version.outputs.versionName }}-${{ steps.version.outputs.versionCode }}-harmony-release.app"
           OUT_PATH="$RUNNER_TEMP/$OUT_NAME"
-          cp "$APP_FILE" "$OUT_PATH"
+
+          java -jar "$SIGN_TOOL" sign-app \
+            -mode localSign \
+            -keystoreFile "$SIGN_DIR/release.p12" \
+            -keystorePwd "$HARMONY_SIGN_STORE_PASSWORD" \
+            -keyAlias "$HARMONY_SIGN_KEY_ALIAS" \
+            -keyPwd "$HARMONY_SIGN_KEY_PASSWORD" \
+            -signAlg SHA256withECDSA \
+            -profileFile "$SIGN_DIR/release.p7b" \
+            -appCertFile "$SIGN_DIR/release.cer" \
+            -inFile "$UNSIGNED_APP" \
+            -outFile "$OUT_PATH"
+
+          java -jar "$SIGN_TOOL" verify-app \
+            -inFile "$OUT_PATH" \
+            -outCertChain "$SIGN_DIR/verified-cert.cer" \
+            -outProfile "$SIGN_DIR/verified-profile.p7b"
+
           SHA256=$(sha256sum "$OUT_PATH" | cut -d' ' -f1)
           echo "filePath=$OUT_PATH" >> "$GITHUB_OUTPUT"
           echo "fileName=$OUT_NAME" >> "$GITHUB_OUTPUT"

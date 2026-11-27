@@ -32,60 +32,12 @@ function resolveMainModuleVersion(repoRoot: string): {
   };
 }
 
-function applyEnvReleaseSigning(appContext: OhosAppContext): void {
-  const storeFile = (process.env.HARMONY_SIGN_STORE_FILE ?? '').trim();
-  const certpath = (process.env.HARMONY_SIGN_CERT_PATH ?? '').trim();
-  const profile = (process.env.HARMONY_SIGN_PROFILE_PATH ?? '').trim();
-  const keyAlias = (process.env.HARMONY_SIGN_KEY_ALIAS ?? '').trim();
-  const storePassword = (process.env.HARMONY_SIGN_STORE_PASSWORD ?? '').trim();
-  const keyPassword = (process.env.HARMONY_SIGN_KEY_PASSWORD ?? '').trim();
-  const signAlg = (process.env.HARMONY_SIGN_ALG ?? 'SHA256withECDSA').trim();
-
-  const provided = [storeFile, certpath, profile, keyAlias, storePassword, keyPassword].filter(Boolean);
-  if (provided.length === 0) {
-    return;
-  }
-  if (provided.length !== 6) {
-    throw new Error(
-      '检测到部分鸿蒙签名环境变量，但未配置完整；需要同时提供 HARMONY_SIGN_STORE_FILE、' +
-      'HARMONY_SIGN_CERT_PATH、HARMONY_SIGN_PROFILE_PATH、HARMONY_SIGN_KEY_ALIAS、' +
-      'HARMONY_SIGN_STORE_PASSWORD、HARMONY_SIGN_KEY_PASSWORD',
-    );
-  }
-
-  const buildProfileOpt = appContext.getBuildProfileOpt();
-  const signingConfigs = Array.isArray(buildProfileOpt.app.signingConfigs)
-    ? buildProfileOpt.app.signingConfigs.filter((item: { name?: string }) => item?.name !== 'release')
-    : [];
-  signingConfigs.push({
-    name: 'release',
-    type: 'HarmonyOS',
-    material: {
-      certpath,
-      storePassword,
-      keyAlias,
-      keyPassword,
-      profile,
-      signAlg,
-      storeFile,
-    },
-  });
-  buildProfileOpt.app.signingConfigs = signingConfigs;
-
-  if (Array.isArray(buildProfileOpt.app.products)) {
-    for (const product of buildProfileOpt.app.products) {
-      if (product?.name === 'default') {
-        product.signingConfig = 'release';
-      }
-    }
-  }
-  appContext.setBuildProfileOpt(buildProfileOpt);
-}
-
-// 构建时从主模块 gradle/libs.versions.toml 与 git 同步版本号，并在 CI/Release 环境变量存在时动态注入签名。
-function syncMainModuleAndSigningPlugin(): HvigorPlugin {
+// 构建时从主模块 gradle/libs.versions.toml 与 git 同步版本号。
+// 发布签名在 CI 中通过 HarmonyOS SDK 官方 hap-sign-tool.jar 对构建出的 .app 直接签名，
+// 本地真机调试仍沿用 DevEco Studio 的签名配置。
+function syncMainModuleVersionPlugin(): HvigorPlugin {
   return {
-    pluginId: 'syncMainModuleAndSigningPlugin',
+    pluginId: 'syncMainModuleVersionPlugin',
     apply(node: HvigorNode): void {
       node.afterNodeEvaluate((currentNode: HvigorNode) => {
         const appContext = currentNode.getContext(OhosPluginId.OHOS_APP_PLUGIN) as OhosAppContext | undefined;
@@ -98,7 +50,6 @@ function syncMainModuleAndSigningPlugin(): HvigorPlugin {
         appJsonOpt.app.versionCode = versionCode;
         appJsonOpt.app.versionName = versionName;
         appContext.setAppJsonOpt(appJsonOpt);
-        applyEnvReleaseSigning(appContext);
       });
     },
   };
@@ -106,5 +57,5 @@ function syncMainModuleAndSigningPlugin(): HvigorPlugin {
 
 export default {
   system: appTasks,
-  plugins: [syncMainModuleAndSigningPlugin()],
+  plugins: [syncMainModuleVersionPlugin()],
 };
