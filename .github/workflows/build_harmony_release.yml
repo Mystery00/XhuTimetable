@@ -1,0 +1,178 @@
+name: Build HarmonyOS Release
+on:
+  workflow_dispatch:
+    inputs:
+      createRelease:
+        description: '发布 .app 产物到 GitHub Release'
+        required: true
+        default: true
+        type: boolean
+      prerelease:
+        description: '标记为 GitHub Prerelease'
+        required: true
+        default: false
+        type: boolean
+      uploadToAgc:
+        description: '自动上传 .app 到华为 AppGallery Connect（需配置 AGC_* Secrets）'
+        required: true
+        default: false
+        type: boolean
+      agcReleaseType:
+        description: 'AGC 发布类型（1=正式版本，3=开放式测试）'
+        required: true
+        default: '1'
+        type: choice
+        options:
+          - '1'
+          - '3'
+
+jobs:
+  build-harmony:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: 设置 JDK 21
+        uses: actions/setup-java@v6
+        with:
+          java-version: 21
+          distribution: 'temurin'
+
+      - name: 解析版本号
+        id: version
+        run: |
+          set -euo pipefail
+          versionName=$(sed -nE 's/^[[:space:]]*app-version[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' gradle/libs.versions.toml | head -n 1)
+          versionCode=$(git rev-list HEAD --count)
+          if [ -z "$versionName" ]; then
+            echo "无法从 gradle/libs.versions.toml 解析 app-version"
+            exit 1
+          fi
+          echo "versionName=$versionName" >> "$GITHUB_OUTPUT"
+          echo "versionCode=$versionCode" >> "$GITHUB_OUTPUT"
+          echo "构建鸿蒙版本: $versionName ($versionCode)"
+
+      - name: 安装鸿蒙 Command Line Tools (26.0.0.821)
+        uses: ErBWs/setup-ohos@v2.0.0
+        with:
+          version: '26.0.0.821'
+          cache: true
+
+      - name: 配置鸿蒙 SDK 环境变量
+        run: |
+          echo "DEVECO_SDK_HOME=$HOS_SDK_HOME" >> "$GITHUB_ENV"
+          echo "OHOS_SDK_HOME=$HOS_SDK_HOME/default/openharmony" >> "$GITHUB_ENV"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-provider: basic
+
+      - name: 编译共享 Kotlin 原生库 (ohosArm64 Release)
+        working-directory: harmonyApp/kotlin
+        env:
+          GITHUB_USERNAME: ${{ secrets.NEXUS_USER }}
+          GITHUB_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew -PharmonyArch=arm64 :loggerChecks:test :composeApp:publishReleaseOhosArm64 --console=plain
+
+      - name: 解密鸿蒙发布签名证书
+        env:
+          HARMONY_SIGN_P12_BASE64: ${{ secrets.HARMONY_SIGN_P12_BASE64 }}
+          HARMONY_SIGN_CER_BASE64: ${{ secrets.HARMONY_SIGN_CER_BASE64 }}
+          HARMONY_SIGN_P7B_BASE64: ${{ secrets.HARMONY_SIGN_P7B_BASE64 }}
+          HARMONY_SIGN_KEY_ALIAS: ${{ secrets.HARMONY_SIGN_KEY_ALIAS }}
+          HARMONY_SIGN_STORE_PASSWORD: ${{ secrets.HARMONY_SIGN_STORE_PASSWORD }}
+          HARMONY_SIGN_KEY_PASSWORD: ${{ secrets.HARMONY_SIGN_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          SIGN_DIR="$RUNNER_TEMP/harmony-signing"
+          mkdir -p "$SIGN_DIR"
+          for name in HARMONY_SIGN_P12_BASE64 HARMONY_SIGN_CER_BASE64 HARMONY_SIGN_P7B_BASE64 HARMONY_SIGN_KEY_ALIAS HARMONY_SIGN_STORE_PASSWORD HARMONY_SIGN_KEY_PASSWORD; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::缺少鸿蒙发布签名 Secret: $name"
+              exit 1
+            fi
+          done
+          printf '%s' "$HARMONY_SIGN_P12_BASE64" | base64 --decode > "$SIGN_DIR/release.p12"
+          printf '%s' "$HARMONY_SIGN_CER_BASE64" | base64 --decode > "$SIGN_DIR/release.cer"
+          printf '%s' "$HARMONY_SIGN_P7B_BASE64" | base64 --decode > "$SIGN_DIR/release.p7b"
+          echo "HARMONY_SIGN_STORE_FILE=$SIGN_DIR/release.p12" >> "$GITHUB_ENV"
+          echo "HARMONY_SIGN_CERT_PATH=$SIGN_DIR/release.cer" >> "$GITHUB_ENV"
+          echo "HARMONY_SIGN_PROFILE_PATH=$SIGN_DIR/release.p7b" >> "$GITHUB_ENV"
+
+      - name: 安装鸿蒙依赖并构建 Release .app
+        working-directory: harmonyApp
+        env:
+          HARMONY_SIGN_KEY_ALIAS: ${{ secrets.HARMONY_SIGN_KEY_ALIAS }}
+          HARMONY_SIGN_STORE_PASSWORD: ${{ secrets.HARMONY_SIGN_STORE_PASSWORD }}
+          HARMONY_SIGN_KEY_PASSWORD: ${{ secrets.HARMONY_SIGN_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          ohpm install --all
+          hvigorw clean --no-daemon
+          hvigorw assembleApp --mode project -p product=default -p buildMode=release --no-daemon
+
+      - name: 收集并校验 .app 产物
+        id: artifact
+        run: |
+          set -euo pipefail
+          APP_FILE=$(find harmonyApp/build/outputs/default -maxdepth 2 -type f -name '*-signed.app' | head -n 1)
+          if [ -z "$APP_FILE" ]; then
+            APP_FILE=$(find harmonyApp/build/outputs/default -maxdepth 2 -type f -name '*.app' | head -n 1)
+          fi
+          if [ -z "$APP_FILE" ]; then
+            echo "::error::未找到编译生成的 .app 文件"
+            find harmonyApp/build -maxdepth 4 -type f || true
+            exit 1
+          fi
+          OUT_NAME="XhuTimetable-${{ steps.version.outputs.versionName }}-${{ steps.version.outputs.versionCode }}-harmony-release.app"
+          OUT_PATH="$RUNNER_TEMP/$OUT_NAME"
+          cp "$APP_FILE" "$OUT_PATH"
+          SHA256=$(sha256sum "$OUT_PATH" | cut -d' ' -f1)
+          echo "filePath=$OUT_PATH" >> "$GITHUB_OUTPUT"
+          echo "fileName=$OUT_NAME" >> "$GITHUB_OUTPUT"
+          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
+          {
+            echo "### 鸿蒙 Release 构建产物"
+            echo "- 版本号: \`${{ steps.version.outputs.versionName }} (${{ steps.version.outputs.versionCode }})\`"
+            echo "- 文件名: \`$OUT_NAME\`"
+            echo "- SHA-256: \`$SHA256\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 上传 Workflow Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: harmony-release-app-${{ steps.version.outputs.versionName }}-${{ steps.version.outputs.versionCode }}
+          path: ${{ steps.artifact.outputs.filePath }}
+
+      - name: 上传到华为 AppGallery Connect
+        if: inputs.uploadToAgc
+        env:
+          AGC_CLIENT_ID: ${{ secrets.AGC_CLIENT_ID }}
+          AGC_CLIENT_SECRET: ${{ secrets.AGC_CLIENT_SECRET }}
+          AGC_APP_ID: ${{ secrets.AGC_APP_ID }}
+        run: |
+          set -euo pipefail
+          python3 harmonyApp/scripts/upload_agc.py \
+            --file "${{ steps.artifact.outputs.filePath }}" \
+            --release-type "${{ inputs.agcReleaseType }}"
+
+      - name: 发布到 GitHub Release
+        if: inputs.createRelease
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: harmony-${{ steps.version.outputs.versionName }}-${{ steps.version.outputs.versionCode }}
+          name: HarmonyOS ${{ steps.version.outputs.versionName }} (${{ steps.version.outputs.versionCode }})
+          prerelease: ${{ inputs.prerelease }}
+          body: |
+            西瓜课表鸿蒙版正式发布包（`.app`）。
+            - 版本号：`${{ steps.version.outputs.versionName }}` (`${{ steps.version.outputs.versionCode }}`)
+            - SHA-256：`${{ steps.artifact.outputs.sha256 }}`
+          files: ${{ steps.artifact.outputs.filePath }}

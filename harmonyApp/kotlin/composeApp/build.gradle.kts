@@ -246,16 +246,18 @@ val syncHarmonyResources by tasks.registering {
 }
 
 listOf(ohosTaskSuffix to if (architecture == "x64") "x86_64" else "arm64-v8a").forEach { (target, abi) ->
-    tasks.register<Copy>("publishDebug$target") {
-        dependsOn("linkDebugShared$target", syncHarmonyResources)
-        from(layout.buildDirectory.dir("bin/${target.replaceFirstChar { it.lowercase() }}/debugShared")) {
-            include("libkn.so")
-            into("libs/$abi")
+    listOf("Debug" to "debugShared", "Release" to "releaseShared").forEach { (variant, binDirName) ->
+        tasks.register<Copy>("publish$variant$target") {
+            dependsOn("link${variant}Shared$target", syncHarmonyResources)
+            from(layout.buildDirectory.dir("bin/${target.replaceFirstChar { it.lowercase() }}/$binDirName")) {
+                include("libkn.so")
+                into("libs/$abi")
+            }
+            from(layout.buildDirectory.dir("bin/${target.replaceFirstChar { it.lowercase() }}/$binDirName")) {
+                include("libkn_api.h")
+                into("src/main/cpp/include/$abi")
+            }
+            into(harmonyRoot.resolve("entry"))
         }
-        from(layout.buildDirectory.dir("bin/${target.replaceFirstChar { it.lowercase() }}/debugShared")) {
-            include("libkn_api.h")
-            into("src/main/cpp/include/$abi")
-        }
-        into(harmonyRoot.resolve("entry"))
     }
 }

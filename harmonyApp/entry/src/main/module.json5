@@ -3,7 +3,7 @@
     "name": "entry",
     "type": "entry",
     "mainElement": "EntryAbility",
-    "deviceTypes": ["phone", "tablet"],
+    "deviceTypes": ["phone"],
     "deliveryWithInstall": true,
     "installationFree": false,
     "pages": "$profile:main_pages",
