@@ -862,6 +862,8 @@ internal fun ShowCourseDetailSheet(
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxWidth(),
+                // 禁用 Android 12+ 默认 EdgeEffect 拉伸回弹，避免切页吸附完成后残余速度触发左/右边缘抖动
+                overscrollEffect = null,
             ) { page ->
                 val course = showList[page]
                 val accent = CourseColorHelper.accentText(course.backgroundColor)
