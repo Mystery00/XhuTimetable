@@ -38,6 +38,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -833,8 +835,14 @@ internal fun ShowCourseDetailSheet(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     showList.forEachIndexed { idx, course ->
+                        val requester = remember { BringIntoViewRequester() }
+                        val selected = pagerState.currentPage == idx
+                        if (selected) {
+                            LaunchedEffect(requester) { requester.bringIntoView() }
+                        }
                         FilterChip(
-                            selected = pagerState.currentPage == idx,
+                            modifier = Modifier.bringIntoViewRequester(requester),
+                            selected = selected,
                             onClick = {
                                 scope.launch { pagerState.animateScrollToPage(idx) }
                             },
