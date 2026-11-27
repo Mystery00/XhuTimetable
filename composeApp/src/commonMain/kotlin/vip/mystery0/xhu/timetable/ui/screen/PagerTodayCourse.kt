@@ -237,26 +237,16 @@ val todayCourseContent: TabContent = @Composable {
                 }
 
                 // 自定义事项与倒计时
-                if (todayThingList.isNotEmpty()) {
-                    item(key = "thing_section_label") {
-                        SectionHeaderLabel(text = "日程与倒计时")
-                    }
-                    items(todayThingList) { thing ->
-                        DrawThingCard(
-                            customUi = customUi,
-                            thing = thing,
-                            multiAccountMode = multiAccountMode,
-                        )
-                    }
+                items(todayThingList) { thing ->
+                    DrawThingCard(
+                        customUi = customUi,
+                        thing = thing,
+                        multiAccountMode = multiAccountMode,
+                    )
                 }
 
                 // 当日课程时间轴列表
                 if (todayCourseList.isNotEmpty()) {
-                    if (todayThingList.isNotEmpty()) {
-                        item(key = "course_section_label") {
-                            SectionHeaderLabel(text = "课程安排")
-                        }
-                    }
                     items(
                         items = todayCourseList,
                         key = { "${selectedDate}_${it.courseName}_${it.timeString}_${it.accountTitle}_${it.location}" },
@@ -454,23 +444,6 @@ private fun WeekDayPillItem(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun SectionHeaderLabel(text: String) {
-    Surface(
-        shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
-        modifier = Modifier.padding(top = 2.dp),
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
-        )
     }
 }
 

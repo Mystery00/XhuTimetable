@@ -1,5 +1,3 @@
-import { withOpacity } from './HomeStyle';
-
 @Component
 export struct HomeIcon {
   @Prop name: string = 'clock';
@@ -62,18 +60,6 @@ export struct HomeStatusBadge {
       Text(homeCourseStatus(this.status)).fontSize(11).lineHeight(13.75).fontWeight(600)
         .fontColor(this.foreground()).maxLines(1)
     }.padding({ left: 8, right: 8, top: 3, bottom: 3 }).borderRadius(8).backgroundColor(this.statusContainerColor())
-  }
-}
-
-@Component
-export struct HomeSectionLabel {
-  @Prop text: string = '';
-
-  build() {
-    Text(this.text).fontSize(12).lineHeight(15).fontWeight(600)
-      .fontColor(withOpacity($r('app.color.text_primary'), 0.85))
-      .padding({ left: 10, right: 10, top: 3, bottom: 3 }).borderRadius(8)
-      .backgroundColor(withOpacity($r('app.color.surface'), 0.72)).margin({ top: 4 })
   }
 }
 

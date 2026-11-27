@@ -1,6 +1,6 @@
 import { DisplayItem, HomeState } from '../model/NativeModels';
 import { courseAccent, courseSoftContainer, createEmptyHomeState, emptyDisplayItem, NativeEmpty, ScheduleCard, withOpacity } from './AppComponents';
-import { HomeAccountBadge, HomeIcon, HomeSectionLabel } from './HomeWidgets';
+import { HomeAccountBadge, HomeIcon } from './HomeWidgets';
 
 @Component
 struct HomeTodayThing {
@@ -167,16 +167,10 @@ export struct HomeToday {
                 .backgroundColor(courseSoftContainer(this.home.holidayColor || $r('app.color.primary'), this.dark, this.home.todayOpacity))
                 .border({ width: 0.8, color: withOpacity(this.holidayAccent(), 0.35) })
             }
-            if (this.home.things.length > 0) {
-              HomeSectionLabel({ text: '日程与倒计时' })
-              ForEach(this.home.things, (item: DisplayItem) => {
-                HomeTodayThing({ item: item, alpha: this.home.todayOpacity, multiAccount: this.home.multiAccount })
-              }, (item: DisplayItem, index: number) => item.id + ':' + index + ':' + JSON.stringify(item))
-            }
+            ForEach(this.home.things, (item: DisplayItem) => {
+              HomeTodayThing({ item: item, alpha: this.home.todayOpacity, multiAccount: this.home.multiAccount })
+            }, (item: DisplayItem, index: number) => item.id + ':' + index + ':' + JSON.stringify(item))
             if (this.home.today.length > 0) {
-              if (this.home.things.length > 0) {
-                HomeSectionLabel({ text: '课程安排' })
-              }
               ForEach(this.home.today, (item: DisplayItem) => {
                 ScheduleCard({ item: item, cardOpacity: this.home.todayOpacity, multiAccount: this.home.multiAccount,
                   showStatus: this.home.showStatus ?? true, onSelect: () => { this.onCourse([item]); } })
