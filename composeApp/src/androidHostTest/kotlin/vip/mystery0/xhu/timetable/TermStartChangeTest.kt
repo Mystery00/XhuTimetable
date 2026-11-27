@@ -1,5 +1,6 @@
 package vip.mystery0.xhu.timetable
 
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format
 import kotlinx.serialization.json.Json
@@ -7,6 +8,7 @@ import vip.mystery0.xhu.timetable.config.Customisable
 import vip.mystery0.xhu.timetable.model.TermStartChangeAlert
 import vip.mystery0.xhu.timetable.model.TermStartChangeDetector
 import vip.mystery0.xhu.timetable.utils.MIN
+import vip.mystery0.xhu.timetable.utils.atStartWeek
 import vip.mystery0.xhu.timetable.utils.dateFormatter
 import vip.mystery0.xhu.timetable.utils.formatWeekString
 import vip.mystery0.xhu.timetable.viewmodel.ReadyState
@@ -282,5 +284,22 @@ class TermStartChangeTest {
         val after = WidgetRefreshSignal.changes.value
         assertEquals(before + 1, after.revision)
         assertEquals(after.revision, after.invalidatedAt, "带 invalidate 的请求必须更新 invalidatedAt 为当前 revision")
+    }
+
+    @Test
+    fun testTermStartDateAlwaysNormalizesToMonday() {
+        // 14. 同一周周一至周日都应归一化到该周周一（2026-09-07 为周一）
+        val expectedMonday = LocalDate(2026, 9, 7)
+        for (day in 7..13) {
+            val normalized = LocalDate(2026, 9, day).atStartWeek()
+            assertEquals(expectedMonday, normalized, "2026-09-$day 应归一化到 $expectedMonday")
+            assertEquals(DayOfWeek.MONDAY, normalized.dayOfWeek)
+        }
+
+        // 跨月边界：2026-09-02（周三）所在周的周一为 2026-08-31
+        assertEquals(LocalDate(2026, 8, 31), LocalDate(2026, 9, 2).atStartWeek())
+
+        // 跨年边界：2026-01-01（周四）所在周的周一为 2025-12-29
+        assertEquals(LocalDate(2025, 12, 29), LocalDate(2026, 1, 1).atStartWeek())
     }
 }

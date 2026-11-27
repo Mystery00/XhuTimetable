@@ -53,6 +53,7 @@ import vip.mystery0.xhu.timetable.ui.navigation.RouteSchoolCalendar
 import vip.mystery0.xhu.timetable.ui.navigation.navigateAndSave
 import vip.mystery0.xhu.timetable.ui.theme.XhuIcons
 import vip.mystery0.xhu.timetable.utils.MIN
+import vip.mystery0.xhu.timetable.utils.atStartWeek
 import vip.mystery0.xhu.timetable.utils.dateFormatter
 import vip.mystery0.xhu.timetable.utils.timeFormatter
 import vip.mystery0.xhu.timetable.viewmodel.ClassSettingsViewModel
@@ -362,7 +363,13 @@ fun ClassSettingsScreen() {
         onExtraButtonClick = {
             viewModel.updateTermStartTime(false, LocalDate.MIN)
         },
-        onSelectDate = { viewModel.updateTermStartTime(true, it) },
+        onSelectDate = { selected ->
+            val monday = selected.atStartWeek()
+            viewModel.updateTermStartTime(true, monday)
+            if (monday != selected) {
+                showToast("已自动调整为所在周周一：${monday.format(dateFormatter)}")
+            }
+        },
     )
 
     // 自研校区单选对话框

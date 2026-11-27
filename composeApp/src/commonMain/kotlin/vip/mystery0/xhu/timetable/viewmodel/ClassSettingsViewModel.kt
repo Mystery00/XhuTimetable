@@ -24,6 +24,7 @@ import vip.mystery0.xhu.timetable.module.desc
 import vip.mystery0.xhu.timetable.repository.StartRepo
 import vip.mystery0.xhu.timetable.repository.UserRepo
 import vip.mystery0.xhu.timetable.utils.MIN
+import vip.mystery0.xhu.timetable.utils.atStartWeek
 import vip.mystery0.xhu.timetable.utils.now
 import vip.mystery0.xhu.timetable.widget.WidgetRefreshSignal
 
@@ -128,9 +129,10 @@ class ClassSettingsViewModel : ComposeViewModel() {
 
     fun updateTermStartTime(custom: Boolean, date: LocalDate) {
         viewModelScope.safeLaunch {
+            val normalizedDate = if (custom) date.atStartWeek() else date
             setConfigStore {
                 customTermStartDate =
-                    if (custom) Customisable.custom(date) else Customisable.clearCustom(LocalDate.MIN)
+                    if (custom) Customisable.custom(normalizedDate) else Customisable.clearCustom(LocalDate.MIN)
             }
             StartRepo.pendingTermStartChangeAlert = null
             _currentTermStartTime.value = getConfigStore { customTermStartDate }

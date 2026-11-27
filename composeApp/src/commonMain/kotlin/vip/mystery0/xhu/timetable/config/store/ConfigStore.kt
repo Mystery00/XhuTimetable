@@ -18,6 +18,7 @@ import vip.mystery0.xhu.timetable.model.CustomUi
 import vip.mystery0.xhu.timetable.model.entity.VersionChannel
 import vip.mystery0.xhu.timetable.ui.theme.NightMode
 import vip.mystery0.xhu.timetable.utils.MIN
+import vip.mystery0.xhu.timetable.utils.atStartWeek
 
 object Formatter {
     val ZONE_CHINA: TimeZone = TimeZone.of("Asia/Shanghai")
@@ -71,18 +72,20 @@ class ConfigStore internal constructor() {
                 return
             }
             val key = value.mapKey(termStartDateKey)
-            val saveValue = value.data.format(Formatter.DATE)
+            // 自定义开学时间始终归一化为所在周的周一，避免课表日期与星期错位
+            val saveDate = if (value.custom) value.data.atStartWeek() else value.data
+            val saveValue = saveDate.format(Formatter.DATE)
             Store.ConfigStore.setConfiguration(key, saveValue)
         }
         get() {
             val customValue =
                 Store.ConfigStore.getConfiguration(Customisable.customKey(termStartDateKey), "")
             if (customValue.isNotBlank()) {
-                return Customisable(LocalDate.parse(customValue, Formatter.DATE), true)
+                return Customisable(LocalDate.parse(customValue, Formatter.DATE).atStartWeek(), true)
             }
             val value = Store.ConfigStore.getConfiguration(termStartDateKey, "")
             if (value.isNotBlank()) {
-                return Customisable(LocalDate.parse(value, Formatter.DATE), false)
+                return Customisable(LocalDate.parse(value, Formatter.DATE).atStartWeek(), false)
             }
             // 默认值
             return Customisable(LocalDate(2026, 9, 7), false)
