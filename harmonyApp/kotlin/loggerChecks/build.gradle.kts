@@ -6,9 +6,8 @@ kotlin {
     jvmToolchain(21)
     compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }
     sourceSets.named("main") {
-        kotlin.srcDir(rootProject.file("../../composeApp/src/commonMain/kotlin"))
         kotlin.srcDir(rootProject.file("composeApp/src/commonMain/kotlin"))
-        kotlin.include("**/FileLogWriter.kt", "**/*Stubs.kt", "**/NativeProtocol.kt")
+        kotlin.include("**/NativeProtocol.kt")
     }
 }
 
