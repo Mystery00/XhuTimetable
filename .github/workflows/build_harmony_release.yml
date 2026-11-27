@@ -76,13 +76,35 @@ jobs:
           echo "DEVECO_SDK_HOME=$HOS_SDK_HOME" >> "$GITHUB_ENV"
           echo "OHOS_SDK_HOME=$HOS_SDK_HOME/default/openharmony" >> "$GITHUB_ENV"
 
-      - name: 缓存 Kotlin/Native 工具链 (~/.konan)
+      - name: 缓存 Kotlin/Native 与 ohpm 依赖
         uses: actions/cache@v6
         with:
-          path: ~/.konan
-          key: harmony-konan-${{ runner.os }}-${{ hashFiles('harmonyApp/kotlin/gradle/libs.versions.toml') }}
+          path: |
+            ~/.konan
+            ~/.ohpm/cache
+          key: harmony-toolchains-${{ runner.os }}-${{ hashFiles('harmonyApp/kotlin/gradle/libs.versions.toml', 'harmonyApp/oh-package.json5', 'harmonyApp/entry/oh-package.json5') }}
           restore-keys: |
-            harmony-konan-${{ runner.os }}-
+            harmony-toolchains-${{ runner.os }}-
+          save-always: true
+
+      - name: 安装鸿蒙 ohpm 依赖
+        working-directory: harmonyApp
+        run: |
+          set -euo pipefail
+          ohpm config set retry_times 5
+          ohpm config set retry_interval 3000
+          ohpm config set fetch_timeout 120000
+          for registry in "https://repo.harmonyos.com/ohpm/" "https://ohpm.openharmony.cn/ohpm/"; do
+            echo "尝试使用 ohpm 镜像源安装依赖: $registry"
+            ohpm config set registry "$registry"
+            if ohpm install --all; then
+              exit 0
+            fi
+            echo "镜像源 $registry 安装失败，稍后切换重试..."
+            sleep 5
+          done
+          echo "::error::所有 ohpm 镜像源均安装失败"
+          exit 1
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
@@ -99,11 +121,10 @@ jobs:
           chmod +x ./gradlew
           ./gradlew -PharmonyArch=arm64 :loggerChecks:test :composeApp:publishReleaseOhosArm64 --console=plain
 
-      - name: 安装鸿蒙依赖并构建未签名 Release .app
+      - name: 构建未签名 Release .app
         working-directory: harmonyApp
         run: |
           set -euo pipefail
-          ohpm install --all
           hvigorw clean --no-daemon
           hvigorw assembleApp --mode project -p product=default -p buildMode=release --no-daemon
 
