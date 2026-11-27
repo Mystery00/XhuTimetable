@@ -1,0 +1,36 @@
+{
+  "string": [
+    {
+      "name": "entry_form_ability_label",
+      "value": "西瓜课表服务卡片"
+    },
+    {
+      "name": "entry_form_ability_desc",
+      "value": "提供下一节课、今日课程与本周课表桌面小部件"
+    },
+    {
+      "name": "widget_next_course_name",
+      "value": "下一节课"
+    },
+    {
+      "name": "widget_next_course_desc",
+      "value": "聚焦展示当前或下一节课程时间与教室"
+    },
+    {
+      "name": "widget_today_course_name",
+      "value": "今日课程"
+    },
+    {
+      "name": "widget_today_course_desc",
+      "value": "查看今日剩余课程与自定义事项安排"
+    },
+    {
+      "name": "widget_week_course_name",
+      "value": "本周课表"
+    },
+    {
+      "name": "widget_week_course_desc",
+      "value": "按周次一览本周课程网格与今日日期"
+    }
+  ]
+}

@@ -35,6 +35,10 @@ import vip.mystery0.xhu.timetable.utils.md5
 import vip.mystery0.xhu.timetable.viewmodel.LoginViewModel
 import vip.mystery0.xhu.timetable.viewmodel.MainViewModel
 import vip.mystery0.xhu.timetable.viewmodel.PagerProfileViewModel
+import vip.mystery0.xhu.timetable.widget.WidgetRefreshSignal
+import vip.mystery0.xhu.timetable.widget.WidgetSnapshot
+import vip.mystery0.xhu.timetable.widget.WidgetSnapshotRepo
+import kotlin.time.Clock
 
 object NativeCore : KoinComponent {
     private var scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -50,6 +54,7 @@ object NativeCore : KoinComponent {
     private val requests = mutableMapOf<String, Job>()
     private val loginMutex = Mutex()
     private val changes = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    private val widgetSyncRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     @OptIn(FlowPreview::class)
     fun start() {
@@ -59,6 +64,16 @@ object NativeCore : KoinComponent {
         scope.launch {
             changes.debounce(80).collect {
                 ArkTsBridge.call("nativeMessage", "{\"id\":\"\",\"action\":\"changed\"}")
+            }
+        }
+        scope.launch {
+            widgetSyncRequests.debounce(250).collect {
+                syncWidgetsNow()
+            }
+        }
+        scope.launch {
+            WidgetRefreshSignal.changes.drop(1).collect {
+                scheduleWidgetSync()
             }
         }
         scope.launch {
@@ -247,6 +262,7 @@ object NativeCore : KoinComponent {
     private suspend fun bootstrap(): JsonObject {
         val privacy = getCacheStore { allowPrivacy }
         if (privacy) startRuntime()
+        scheduleWidgetSync()
         val user = if (privacy) UserStore.getMainUser() else null
         val avatar = getConfigStore { customAvatar }.ifBlank {
             val suffix = (user?.info?.name.orEmpty().md5().take(2).toInt(16) % 4) + 1
@@ -420,7 +436,31 @@ object NativeCore : KoinComponent {
         profileModel = null
     }
 
-    private fun changed() { changes.tryEmit(Unit) }
+    private fun changed() {
+        changes.tryEmit(Unit)
+        scheduleWidgetSync()
+    }
+
+    private fun scheduleWidgetSync() {
+        widgetSyncRequests.tryEmit(Unit)
+    }
+
+    private suspend fun syncWidgetsNow() {
+        if (!running) return
+        try {
+            val privacy = getCacheStore { allowPrivacy }
+            val snapshot = if (!privacy) {
+                WidgetSnapshot.empty("loggedOut", Clock.System.now().toEpochMilliseconds())
+            } else {
+                WidgetSnapshotRepo.generate()
+            }
+            ArkTsBridge.call("syncWidgetSnapshot", snapshot.encode())
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            // 小组件同步失败不应阻断主流程。
+        }
+    }
 
     private fun stopRuntime() {
         runtimeScope?.cancel()

@@ -8,6 +8,7 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import { systemShare } from '@kit.ShareKit';
 import { photoAccessHelper } from '@kit.MediaLibraryKit';
 import { encryptLoginPassword as encryptPassword } from './LoginEncryption';
+import { saveSnapshotAndRefreshAll } from '../widget/WidgetStore';
 
 interface AppInfo {
   bundleName: string;
@@ -103,6 +104,13 @@ export class OhosServices {
   async nativeMessage(message: string): Promise<string> {
     if (!this.disposed) {
       this.messageHandler?.(message);
+    }
+    return '';
+  }
+
+  async syncWidgetSnapshot(snapshotJson: string): Promise<string> {
+    if (!this.disposed) {
+      await saveSnapshotAndRefreshAll(this.context, snapshotJson);
     }
     return '';
   }
