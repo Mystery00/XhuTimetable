@@ -1,14 +1,11 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform) apply false
-    alias(libs.plugins.composeCompiler) apply false
-    alias(libs.plugins.composeMultiplatform) apply false
     alias(libs.plugins.kotlinSerialization) apply false
 }
 
 val simulator = providers.gradleProperty("harmonyArch").orElse("arm64").get() == "x64"
 val simulatorVersions = mapOf(
     "io.insert-koin" to libs.versions.simulatorKoin.get(),
-    "io.coil-kt.coil3" to libs.versions.simulatorCoil.get(),
     "app.cash.paging" to libs.versions.simulatorPaging.get(),
     "org.kotlincrypto.core" to libs.versions.simulatorCryptoCore.get(),
     "org.kotlincrypto.bitops" to libs.versions.simulatorBitops.get(),
@@ -22,9 +19,6 @@ val simulatorCryptoError = libs.versions.simulatorCryptoError.get()
 subprojects {
     val nativeProject = name != "loggerChecks"
     configurations.configureEach {
-        // Skia 产物已包含 API，Coil 的独立 API 产物会造成重复 KLIB。
-        exclude(group = "org.jetbrains.skiko", module = "skiko-ohosarm64-api")
-        exclude(group = "org.jetbrains.skiko", module = "skiko-ohosx64-api")
         if (simulator && nativeProject) {
             resolutionStrategy.eachDependency {
                 val version = when {

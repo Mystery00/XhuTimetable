@@ -115,7 +115,8 @@ XhuTimetable/
 .\harmonyApp\build-preview.ps1 -DevEcoHome $DevEcoHome -CacheDirectory $HarmonyCache -Architecture x64 -SkipKotlin
 ```
 
-- **CI 正式包构建**：仓库已内置 [build_harmony_release.yml](.github/workflows/build_harmony_release.yml)，支持手动触发编译 `ohosArm64` Release 原生库、通过 `hvigorw assembleApp` 打包 `.app`、调用 HarmonyOS SDK `hap-sign-tool.jar` 完成正式签名与验签，并可选发布至 GitHub Release 或华为 AppGallery Connect。
+- **CI
+  正式包构建**：仓库已内置 [build_harmony_release.yml](.github/workflows/build_harmony_release.yml)，支持手动触发编译 `ohosArm64` Release 原生库、通过 `hvigorw assembleApp` 打包 `.app`、调用 HarmonyOS SDK `hap-sign-tool.jar` 完成正式签名与验签，并直接通过华为 AppGallery Connect Publishing API 上传至 AGC 草稿版本（同时保留 Workflow Artifact 备查）。
 
 ---
 

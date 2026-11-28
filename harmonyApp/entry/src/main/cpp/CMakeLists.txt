@@ -12,14 +12,11 @@ else()
 endif()
 
 set(MODULE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../..")
-list(APPEND CMAKE_PREFIX_PATH "${MODULE_ROOT}/oh_modules/@cpf-kmp-cmp/compose")
-find_package(compose REQUIRED CONFIG)
 
 add_library(entry SHARED napi_init.cpp)
 target_include_directories(entry PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/${KOTLIN_ABI}")
 target_link_libraries(entry PUBLIC
     "${MODULE_ROOT}/libs/${KOTLIN_ABI}/libkn.so"
-    compose::skikobridge
     libace_napi.z.so
     libhilog_ndk.z.so
     librawfile.z.so

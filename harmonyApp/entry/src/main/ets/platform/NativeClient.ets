@@ -127,7 +127,12 @@ export class NativeClient {
   constructor(context: common.UIAbilityContext) {
     this.context = context;
     this.services = new OhosServices(context);
-    this.requests = new NativeRequests((request: string) => nativeApi.dispatch(request));
+    this.requests = new NativeRequests((request: string) => {
+      if (!nativeApi) {
+        throw new Error('原生业务模块未加载');
+      }
+      nativeApi.dispatch(request);
+    });
     this.requests.onStateChanged = () => this.onStateChanged?.();
   }
 
@@ -138,12 +143,20 @@ export class NativeClient {
     if (this.started) {
       return;
     }
+    if (!nativeApi) {
+      this.dispose();
+      throw new Error('原生业务模块加载失败，请重新打开或联系开发者');
+    }
     this.services.setMessageHandler((message: string) => this.requests.receive(message));
     try {
       const appInfo = this.services.getAppInfo();
-      this.started = true;
       nativeApi.initializeCore(this.context.filesDir, this.context.cacheDir, appInfo, this.services);
-      this.services.observeNetwork((connected: boolean) => nativeApi.updateNetworkState(connected));
+      this.started = true;
+      this.services.observeNetwork((connected: boolean) => {
+        if (nativeApi) {
+          nativeApi.updateNetworkState(connected);
+        }
+      });
     } catch {
       this.dispose();
       throw new Error('应用初始化失败，请重新打开');
@@ -173,7 +186,7 @@ export class NativeClient {
     this.requests.dispose();
     this.services.setMessageHandler(undefined);
     try {
-      if (this.started) {
+      if (this.started && nativeApi) {
         nativeApi.disposeCore();
       }
     } finally {

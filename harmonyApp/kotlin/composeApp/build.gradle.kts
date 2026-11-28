@@ -1,7 +1,5 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.aboutLibraries)
@@ -22,7 +20,8 @@ val prepareSharedSources by tasks.registering(Sync::class) {
     exclude(
         "**/Helper.kt", "**/App.kt", "**/base/ComposeScreen.kt", "**/model/event/MenuNavigator.kt",
         "**/ui/screen/**", "**/ui/pager/**", "**/ui/component/**", "**/ui/navigation/**",
-        "**/ui/theme/SystemAppearance.kt",
+        "**/ui/theme/Builder.kt", "**/ui/theme/Color.kt", "**/ui/theme/Font.kt",
+        "**/ui/theme/Icon.kt", "**/ui/theme/SystemAppearance.kt", "**/ui/theme/Theme.kt",
     )
     into(layout.buildDirectory.dir("generated/sharedSources"))
     filteringCharset = "UTF-8"
@@ -30,12 +29,6 @@ val prepareSharedSources by tasks.registering(Sync::class) {
     inputs.file(buildFile)
     inputs.property("roomApi", libs.versions.room.get())
     filter { line: String -> line.replace("import androidx.room.", "import androidx.room3.") }
-    filesMatching("**/ui/theme/Theme.kt") {
-        filter { line: String ->
-            if (line == "import androidx.compose.material3.MaterialExpressiveTheme") ""
-            else line.replace("MaterialExpressiveTheme(", "MaterialTheme(")
-        }
-    }
     filesMatching("**/module/DatabaseModule.kt") {
         filter { line: String -> line.replace("override fun migrate(", "override suspend fun migrate(") }
     }
@@ -60,14 +53,11 @@ kotlin {
         optIn.add("kotlin.time.ExperimentalTime")
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
         optIn.add("kotlinx.cinterop.ExperimentalForeignApi")
-        optIn.add("androidx.compose.material3.ExperimentalMaterial3Api")
-        optIn.add("androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
         freeCompilerArgs.add("-Xexpect-actual-classes")
     }
     listOf(if (architecture == "x64") ohosX64() else ohosArm64()).forEach { target ->
         target.binaries.sharedLib {
             baseName = "kn"
-            export(libs.compose.export)
             linkerOpts("-lz")
         }
     }
@@ -81,39 +71,25 @@ kotlin {
             implementation(libs.serialization)
             implementation(libs.datetime)
             implementation(libs.atomicfu)
-            implementation(libs.lifecycle)
             implementation(libs.viewmodel)
-            implementation(libs.navigation)
             implementation(libs.koin.core)
-            implementation(libs.koin.compose)
             implementation(libs.koin.viewmodel)
-            implementation(libs.koin.navigation)
-            implementation(libs.coil.compose)
-            implementation(libs.coil.ktor)
             implementation(libs.kermit)
             implementation(libs.hash.md)
             implementation(libs.hash.sha1)
             implementation(libs.hash.sha2)
             implementation(libs.paging.common)
-            implementation(libs.paging.compose)
             implementation(libs.room)
             implementation(libs.ktor.core)
             implementation(libs.ktor.websockets)
             implementation(libs.ktor.negotiation)
             implementation(libs.ktor.json)
-
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
             implementation(libs.coroutines)
         }
         val ohosMain by creating {
             kotlin.srcDir(prepareFeatureClient.map { it.destinationDir })
             dependsOn(commonMain.get())
             dependencies {
-                api(libs.compose.export)
                 implementation(libs.sqlite)
             }
         }
@@ -135,16 +111,6 @@ ksp {
     arg("room.generateKotlin", "true")
 }
 
-compose.resources {
-    packageOfResClass = "xhutimetable.composeapp.generated.resources"
-    customDirectory(
-        sourceSetName = "commonMain",
-        directoryProvider = provider {
-            layout.projectDirectory.dir("../../../composeApp/src/commonMain/composeResources")
-        },
-    )
-}
-
 val licenseJson = layout.buildDirectory.file("generated/licenses/aboutlibraries.json")
 aboutLibraries {
     offlineMode = true
@@ -162,10 +128,8 @@ aboutLibraries {
 val harmonyRoot = rootProject.file("..")
 val sharedResources = rootProject.file("../../composeApp/src/commonMain/composeResources")
 val syncHarmonyResources by tasks.registering {
-    dependsOn(":portedLibraries:collectLibraryResources", "exportLibraryDefinitions")
+    dependsOn("exportLibraryDefinitions")
     inputs.file(licenseJson)
-    val libraryResources = project(":portedLibraries").layout.buildDirectory.dir("composeResources")
-    inputs.dir(libraryResources)
     inputs.dir(sharedResources)
     outputs.dir(harmonyRoot.resolve("entry/src/main/resources/rawfile/composeResources"))
     outputs.dir(harmonyRoot.resolve("entry/src/main/resources/rawfile/shared"))
@@ -174,15 +138,6 @@ val syncHarmonyResources by tasks.registering {
         val rawResources = harmonyRoot.resolve("entry/src/main/resources/rawfile")
         val nativeResources = rawResources.resolve("shared")
         delete(rawResources.resolve("composeResources"), nativeResources)
-        copy {
-            from(libraryResources)
-            into(harmonyRoot.resolve("entry/src/main/resources/rawfile"))
-        }
-        copy {
-            from(sharedResources)
-            exclude("files/aboutlibraries.json")
-            into(harmonyRoot.resolve("entry/src/main/resources/rawfile/composeResources/xhutimetable.composeapp.generated.resources"))
-        }
         copy {
             from(licenseJson)
             into(harmonyRoot.resolve("entry/src/main/resources/rawfile/composeResources/xhutimetable.composeapp.generated.resources/files"))
