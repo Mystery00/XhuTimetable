@@ -174,6 +174,7 @@ object NativeCore : KoinComponent {
                     homeDate = today
                     reloadHome()
                 }
+                profileModel?.checkAllUnread()
                 JsonNull
             }
             "clearHomeMessage" -> {
@@ -411,8 +412,7 @@ object NativeCore : KoinComponent {
             merge(model.menu.drop(1).map { Unit }, model.hasUnReadNotice.drop(1).map { Unit },
                 model.hasUnReadFeedback.drop(1).map { Unit }).collect { changed() }
         }
-        model.checkUnReadNotice()
-        model.checkUnReadFeedback()
+        model.checkAllUnread()
     }
 
     private fun reloadHome() {

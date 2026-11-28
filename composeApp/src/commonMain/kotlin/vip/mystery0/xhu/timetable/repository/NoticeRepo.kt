@@ -4,6 +4,7 @@ import androidx.annotation.AnyThread
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import org.koin.core.component.inject
 import vip.mystery0.xhu.timetable.api.NoticeApi
@@ -19,6 +20,7 @@ import vip.mystery0.xhu.timetable.model.transfer.PageResult
 import vip.mystery0.xhu.timetable.platform
 
 object NoticeRepo : BaseDataRepo {
+    private val logger = Logger.withTag("NoticeRepo")
     private val noticeApi: NoticeApi by inject()
 
     private val globalPagingConfig: PagingConfig
@@ -54,8 +56,10 @@ object NoticeRepo : BaseDataRepo {
         }
 
         val lastNoticeId = getCacheStore { lastNoticeId }
-        return mainUser().withAutoLoginOnce {
+        val result = mainUser().withAutoLoginOnce {
             noticeApi.checkNotice(it, lastNoticeId, platform = platform().name)
         }
+        logger.d("checkNotice: lastNoticeId=$lastNoticeId, platform=${platform().name} -> $result")
+        return result
     }
 }

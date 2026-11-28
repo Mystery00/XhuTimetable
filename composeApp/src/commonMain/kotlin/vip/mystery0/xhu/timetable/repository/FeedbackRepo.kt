@@ -127,8 +127,10 @@ object FeedbackRepo : BaseDataRepo {
         }
 
         val firstId = getCacheStore { firstFeedbackMessageId }
-        return mainUser().withAutoLoginOnce {
+        val result = mainUser().withAutoLoginOnce {
             feedbackApi.checkMessage(it, firstId)
         }.newResult
+        logger.d("checkUnReadFeedback: firstId=$firstId -> $result")
+        return result
     }
 }

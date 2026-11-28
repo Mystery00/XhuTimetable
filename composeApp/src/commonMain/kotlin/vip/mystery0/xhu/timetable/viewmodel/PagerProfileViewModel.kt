@@ -34,11 +34,19 @@ class PagerProfileViewModel : ComposeViewModel() {
         }
     }
 
+    fun checkAllUnread() {
+        checkUnReadNotice()
+        checkUnReadFeedback()
+    }
+
     fun checkUnReadNotice() {
         viewModelScope.safeLaunch(onException = networkErrorHandler {
             logger.w("check unread notice failed", it)
         }) {
-            if (!UserStore.isLogin()) return@safeLaunch
+            if (!UserStore.isLogin()) {
+                _hasUnReadNotice.value = false
+                return@safeLaunch
+            }
             _hasUnReadNotice.value = NoticeRepo.checkNotice()
         }
     }
@@ -47,7 +55,10 @@ class PagerProfileViewModel : ComposeViewModel() {
         viewModelScope.safeLaunch(onException = networkErrorHandler {
             logger.w("check unread feedback failed", it)
         }) {
-            if (!UserStore.isLogin()) return@safeLaunch
+            if (!UserStore.isLogin()) {
+                _hasUnReadFeedback.value = false
+                return@safeLaunch
+            }
             _hasUnReadFeedback.value = FeedbackRepo.checkUnReadFeedback()
         }
     }

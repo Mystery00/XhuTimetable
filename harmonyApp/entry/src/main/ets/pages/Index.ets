@@ -426,6 +426,10 @@ struct Index {
     this.scheduleReload();
   }
 
+  private hasProfileUnread(): boolean {
+    return (this.app.menuGroups ?? []).some((group: ProfileMenu[]) => group.some((menu: ProfileMenu) => menu.unread));
+  }
+
   private tabs(): MainTab[] {
     const tabs: MainTab[] = [
       { id: 'today', label: this.home.showTomorrow ? '明日' : '今日', icon: 'ic_today_course_unchecked', selectedIcon: 'ic_today_course' },
@@ -593,8 +597,13 @@ struct Index {
         ForEach(this.tabs(), (tab: MainTab) => {
           Column({ space: 4 }) {
             Stack() {
-              Image($rawfile('shared/' + (this.selectedTab === tab.id ? tab.selectedIcon : tab.icon) + (this.dark ? '_night' : '') + '.svg'))
-                .width(24).height(24).objectFit(ImageFit.Contain).accessibilityLevel('no')
+              Stack({ alignContent: Alignment.TopEnd }) {
+                Image($rawfile('shared/' + (this.selectedTab === tab.id ? tab.selectedIcon : tab.icon) + (this.dark ? '_night' : '') + '.svg'))
+                  .width(24).height(24).objectFit(ImageFit.Contain).accessibilityLevel('no')
+                if (tab.id === 'profile' && this.hasProfileUnread()) {
+                  Circle().width(8).height(8).fill($r('app.color.danger')).translate({ x: 3, y: -2 })
+                }
+              }.width(24).height(24)
             }.width(64).height(32).borderRadius(16)
               .backgroundColor(this.selectedTab === tab.id ? $r('app.color.secondary_container') : Color.Transparent)
             Text(tab.label).fontSize(12).lineHeight(15.36)
@@ -602,7 +611,7 @@ struct Index {
               .fontColor(this.selectedTab === tab.id ? $r('app.color.primary') : $r('app.color.text_secondary'))
           }.layoutWeight(1).height(80).justifyContent(FlexAlign.Center).id('main-tab-' + tab.id)
             .onClick(() => { this.selectedTab = tab.id; }).accessibilityGroup(true)
-            .accessibilityText(tab.label + (this.selectedTab === tab.id ? '，已选中' : ''))
+            .accessibilityText(tab.label + (tab.id === 'profile' && this.hasProfileUnread() ? '，有未读消息' : '') + (this.selectedTab === tab.id ? '，已选中' : ''))
         }, (tab: MainTab) => tab.id)
       }.width('100%').height(80)
         .backgroundColor(this.hasMainBackground() ? withOpacity($r('app.color.container'), this.dark ? 0.88 : 0.92) : $r('app.color.container'))

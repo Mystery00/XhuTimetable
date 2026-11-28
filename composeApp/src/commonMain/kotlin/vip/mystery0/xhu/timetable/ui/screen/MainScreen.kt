@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +40,8 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import co.touchlab.kermit.Logger
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.DrawableResource
@@ -63,6 +67,7 @@ import vip.mystery0.xhu.timetable.viewmodel.PagerProfileViewModel
 @Composable
 fun MainScreen() {
     val viewModel = koinViewModel<MainViewModel>()
+    val profileViewModel = koinViewModel<PagerProfileViewModel>()
     val navController = LocalNavController.current
     val isDarkMode = isDarkMode()
 
@@ -70,6 +75,9 @@ fun MainScreen() {
     val backgroundImage by viewModel.backgroundImage.collectAsState()
     val backgroundImageBlur by viewModel.backgroundImageBlur.collectAsState()
     val showTomorrowCourse by viewModel.showTomorrowCourse.collectAsState()
+    val hasUnReadNotice by profileViewModel.hasUnReadNotice.collectAsState()
+    val hasUnReadFeedback by profileViewModel.hasUnReadFeedback.collectAsState()
+    val hasProfileBadge = hasUnReadNotice || hasUnReadFeedback
 
     val tabs = if (enableCalendarView) {
         Tab.entries
@@ -83,6 +91,10 @@ fun MainScreen() {
 
     LaunchedEffect(isDarkMode) {
         viewModel.loadBackground(isDarkMode)
+    }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        profileViewModel.checkAllUnread()
     }
 
     HandleEventBus()
@@ -177,6 +189,7 @@ fun MainScreen() {
                             showTomorrowCourse = showTomorrowCourse,
                             tab = tab,
                             icon = tab.icon,
+                            showBadge = tab == Tab.PROFILE && hasProfileBadge,
                         ) {
                             selectedTabIndex = index
                         }
@@ -215,6 +228,7 @@ private fun RowScope.DrawNavigationItem(
     showTomorrowCourse: Boolean,
     tab: Tab,
     icon: Pair<Pair<DrawableResource, DrawableResource>, Pair<DrawableResource, DrawableResource>>,
+    showBadge: Boolean = false,
     onSelect: () -> Unit = {},
 ) {
     val label = if (showTomorrowCourse) tab.otherLabel else tab.label
@@ -222,12 +236,22 @@ private fun RowScope.DrawNavigationItem(
     NavigationBarItem(
         selected = checked,
         icon = {
-            Icon(
-                painter = stateOf(checked = checked, pair = icon),
-                tint = Color.Unspecified,
-                modifier = Modifier.size(24.dp),
-                contentDescription = label,
-            )
+            BadgedBox(
+                badge = {
+                    if (showBadge) {
+                        Badge(
+                            containerColor = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                },
+            ) {
+                Icon(
+                    painter = stateOf(checked = checked, pair = icon),
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(24.dp),
+                    contentDescription = label,
+                )
+            }
         },
         label = {
             Text(
@@ -261,6 +285,9 @@ private fun HandleEventBus() {
                     EventType.CHANGE_MAIN_USER -> {
                         viewModel.checkMainUser()
                         viewModel.refreshCloudDataToState()
+                        if (eventType == EventType.CHANGE_MAIN_USER) {
+                            profileViewModel.checkAllUnread()
+                        }
                     }
 
                     EventType.CHANGE_CURRENT_YEAR_AND_TERM,
@@ -272,6 +299,7 @@ private fun HandleEventBus() {
 
                     EventType.MAIN_USER_LOGOUT -> {
                         viewModel.checkMainUser()
+                        profileViewModel.checkAllUnread()
                     }
 
                     EventType.CHANGE_TERM_START_TIME,

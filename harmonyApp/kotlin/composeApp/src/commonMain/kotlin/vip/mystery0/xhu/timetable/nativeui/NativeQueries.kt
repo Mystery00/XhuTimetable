@@ -13,6 +13,7 @@ import vip.mystery0.xhu.timetable.config.store.EventBus
 import vip.mystery0.xhu.timetable.config.store.MenuStore
 import vip.mystery0.xhu.timetable.config.store.User
 import vip.mystery0.xhu.timetable.config.store.UserStore
+import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.getConfigStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.model.event.EventType
@@ -368,7 +369,11 @@ object NativeQueries {
         val messages = FeedbackRepo.loadLastMessage(cursor, PAGE_SIZE)
         val next = messages.minOfOrNull { it.id }
         if (page == 1 && messages.isNotEmpty()) {
-            setCacheStore { firstFeedbackMessageId = messages.maxOf { it.id } }
+            val latest = messages.maxOf { it.id }
+            val previous = getCacheStore { firstFeedbackMessageId }
+            if (latest > previous) {
+                setCacheStore { firstFeedbackMessageId = latest }
+            }
             EventBus.post(EventType.UPDATE_FEEDBACK_CHECK)
         }
         return listResult("意见反馈", messages.sortedByDescending { it.id }.map {

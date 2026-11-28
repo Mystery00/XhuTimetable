@@ -13,6 +13,7 @@ import vip.mystery0.xhu.timetable.config.HINT_NETWORK
 import vip.mystery0.xhu.timetable.config.coroutine.safeLaunch
 import vip.mystery0.xhu.timetable.config.networkErrorHandler
 import vip.mystery0.xhu.timetable.config.store.EventBus
+import vip.mystery0.xhu.timetable.config.store.getCacheStore
 import vip.mystery0.xhu.timetable.config.store.setCacheStore
 import vip.mystery0.xhu.timetable.model.event.EventType
 import vip.mystery0.xhu.timetable.model.ws.AdminStatus
@@ -58,8 +59,12 @@ class FeedbackViewModel : ComposeViewModel() {
             val result = FeedbackRepo.loadLastMessage(lastId, size)
             messageState.loadMessage(result)
             if (result.isNotEmpty()) {
-                setCacheStore {
-                    firstFeedbackMessageId = result.maxOf { it.id }
+                val maxId = result.maxOf { it.id }
+                val last = getCacheStore { firstFeedbackMessageId }
+                if (maxId > last) {
+                    setCacheStore {
+                        firstFeedbackMessageId = maxId
+                    }
                 }
             }
             _loading.value = LoadingState()
@@ -113,6 +118,17 @@ class FeedbackViewModel : ComposeViewModel() {
         runCatching { webSocket?.close(CloseReason(1000, "关闭旧连接")) }
         val messageConsumer = { it: TextMessage ->
             messageState.addMessage(it)
+            if (it.id > 0L) {
+                viewModelScope.safeLaunch {
+                    val last = getCacheStore { firstFeedbackMessageId }
+                    if (it.id > last) {
+                        setCacheStore {
+                            firstFeedbackMessageId = it.id
+                        }
+                        EventBus.post(EventType.UPDATE_FEEDBACK_CHECK)
+                    }
+                }
+            }
         }
         val systemMessageConsumer = { it: Any ->
             if (it is AdminStatus) {
