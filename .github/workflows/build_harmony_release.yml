@@ -169,6 +169,8 @@ jobs:
 
           OUT_NAME="XhuTimetable-${{ steps.version.outputs.versionName }}-${{ steps.version.outputs.versionCode }}-harmony-release.app"
           OUT_PATH="$RUNNER_TEMP/$OUT_NAME"
+          RELEASE_ZIP_NAME="${OUT_NAME}.zip"
+          RELEASE_ZIP_PATH="$RUNNER_TEMP/$RELEASE_ZIP_NAME"
 
           java -jar "$SIGN_TOOL" sign-app \
             -mode localSign \
@@ -187,9 +189,13 @@ jobs:
             -outCertChain "$SIGN_DIR/verified-cert.cer" \
             -outProfile "$SIGN_DIR/verified-profile.p7b"
 
+          # GitHub Releases 拒绝直接上传 .app 后缀文件，打包为 .zip 供 Release 附件上传（AGC 与 Artifact 仍保留原始 .app）。
+          zip -j "$RELEASE_ZIP_PATH" "$OUT_PATH"
+
           SHA256=$(sha256sum "$OUT_PATH" | cut -d' ' -f1)
           echo "filePath=$OUT_PATH" >> "$GITHUB_OUTPUT"
           echo "fileName=$OUT_NAME" >> "$GITHUB_OUTPUT"
+          echo "releaseZipPath=$RELEASE_ZIP_PATH" >> "$GITHUB_OUTPUT"
           echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
           {
             echo "### 鸿蒙 Release 构建产物"
@@ -224,7 +230,7 @@ jobs:
           name: HarmonyOS ${{ steps.version.outputs.versionName }} (${{ steps.version.outputs.versionCode }})
           prerelease: ${{ inputs.prerelease }}
           body: |
-            西瓜课表鸿蒙版正式发布包（`.app`）。
+            西瓜课表鸿蒙版正式发布包（解压后得到已签名的 `.app` 文件）。
             - 版本号：`${{ steps.version.outputs.versionName }}` (`${{ steps.version.outputs.versionCode }}`)
-            - SHA-256：`${{ steps.artifact.outputs.sha256 }}`
-          files: ${{ steps.artifact.outputs.filePath }}
+            - `.app` SHA-256：`${{ steps.artifact.outputs.sha256 }}`
+          files: ${{ steps.artifact.outputs.releaseZipPath }}
